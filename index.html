@@ -1,86 +1,477 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>5TerreGo</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>5TerreGo</title>
 
-    .video-wrapper {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: Arial, sans-serif;
+  overscroll-behavior: none;
+  touch-action: none;
+}
 
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  </style>
+.video-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blur-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background 0.65s ease, backdrop-filter 0.65s ease, -webkit-backdrop-filter 0.65s ease;
+}
+
+.blur-layer.active {
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+  color: #fff;
+  width: min(92vw, 900px);
+  pointer-events: none;
+  transition: top 0.65s cubic-bezier(.2,.8,.2,1), left 0.65s cubic-bezier(.2,.8,.2,1), transform 0.65s cubic-bezier(.2,.8,.2,1), width 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar {
+  top: 20px;
+  left: 20px;
+  transform: translate(0, 0);
+  width: calc(100% - 40px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  text-align: left;
+}
+
+.overlay h1 {
+  margin: 0;
+  font-size: clamp(36px, 10vw, 100px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar h1 {
+  grid-column: 1;
+  font-size: clamp(18px, 4vw, 30px);
+  line-height: 1;
+}
+
+.blue { color: #2563eb; }
+.orange { color: #f97316; }
+
+.coming {
+  margin-top: 12px;
+  font-size: clamp(12px, 2.5vw, 18px);
+  letter-spacing: 0.3em;
+  opacity: 0.86;
+  font-weight: 600;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.overlay.topbar .coming {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.countdown {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 4vw, 24px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  transition: margin 0.65s cubic-bezier(.2,.8,.2,1), gap 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown {
+  grid-column: 3;
+  margin-top: 0;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.countdown div {
+  min-width: 54px;
+  text-align: center;
+  transition: min-width 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown div {
+  min-width: 38px;
+}
+
+.countdown span {
+  display: block;
+  font-size: clamp(22px, 5vw, 42px);
+  font-weight: 800;
+  line-height: 1;
+  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown span {
+  font-size: clamp(16px, 3vw, 24px);
+}
+
+.countdown small {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1), margin 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown small {
+  margin-top: 4px;
+  font-size: 8px;
+}
+
+.poster {
+  position: fixed;
+  top: 58%;
+  left: 50%;
+  width: min(90vw, 760px);
+  z-index: 2;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 38vh) scale(0.98);
+  transition: opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1);
+}
+
+.poster.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.headline {
+  margin: 0;
+  font-size: clamp(30px, 7vw, 64px);
+  font-weight: 850;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.tagline {
+  margin: 14px auto 0;
+  max-width: 680px;
+  font-size: clamp(14px, 3vw, 20px);
+  line-height: 1.45;
+  opacity: 0.86;
+}
+
+.swipe-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  color: rgba(255,255,255,0.72);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: hintPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+  50% { transform: translate(-50%, -8px); opacity: 0.95; }
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  animation: scan 6s linear infinite;
+  z-index: 3;
+}
+
+@keyframes scan {
+  from { transform: translateY(0); }
+  to { transform: translateY(20px); }
+}
+
+@media (max-width: 520px) {
+  .overlay h1 {
+    font-size: clamp(36px, 13vw, 64px);
+  }
+
+  .overlay.topbar {
+    top: 16px;
+    left: 14px;
+    width: calc(100% - 28px);
+  }
+
+  .overlay.topbar h1 {
+    font-size: 18px;
+  }
+
+  .countdown {
+    gap: 10px;
+  }
+
+  .countdown div {
+    min-width: 44px;
+  }
+
+  .overlay.topbar .countdown {
+    gap: 7px;
+  }
+
+  .overlay.topbar .countdown div {
+    min-width: 30px;
+  }
+
+  .overlay.topbar .countdown span {
+    font-size: 15px;
+  }
+
+  .overlay.topbar .countdown small {
+    font-size: 7px;
+  }
+
+  .poster {
+    top: 55%;
+  }
+}
+</style>
 </head>
+
 <body>
-  <div class="video-wrapper">
-    <video autoplay muted loop playsinline>
-      <source src="1234.mp4" type="video/mp4" />
-    </video>
+
+<div class="video-wrapper">
+  <video autoplay muted loop playsinline>
+    <source src="1234.mp4" type="video/mp4" />
+  </video>
+</div>
+
+<div class="blur-layer" id="blur"></div>
+
+<div class="overlay" id="hero">
+  <h1>
+    <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
+  </h1>
+  <div class="coming">COMING SOON</div>
+
+  <div class="countdown" aria-label="Countdown to June 1st">
+    <div><span id="d">00</span><small>Days</small></div>
+    <div><span id="h">00</span><small>Hours</small></div>
+    <div><span id="m">00</span><small>Min</small></div>
+    <div><span id="s">00</span><small>Sec</small></div>
   </div>
-  <div class="overlay">
-    <h1>
-      <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
-    </h1>
-  </div>
+</div>
 
-  <style>
-    .overlay {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 2;
-      pointer-events: none;
+<div class="poster" id="poster">
+  <h2 class="headline">Explore Cinque Terre Like Never Before</h2>
+  <p class="tagline">A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
+</div>
+
+<div class="swipe-hint" id="swipeHint">Swipe up</div>
+<div class="scanlines"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const targetDate = new Date('2026-06-01T00:00:00');
+
+  const elements = {
+    days: document.getElementById('d'),
+    hours: document.getElementById('h'),
+    minutes: document.getElementById('m'),
+    seconds: document.getElementById('s'),
+    poster: document.getElementById('poster'),
+    blur: document.getElementById('blur'),
+    hero: document.getElementById('hero'),
+    swipeHint: document.getElementById('swipeHint')
+  };
+
+  function assertRequiredElements() {
+    console.assert(elements.days, 'Missing countdown days element #d');
+    console.assert(elements.hours, 'Missing countdown hours element #h');
+    console.assert(elements.minutes, 'Missing countdown minutes element #m');
+    console.assert(elements.seconds, 'Missing countdown seconds element #s');
+    console.assert(elements.poster, 'Missing poster element #poster');
+    console.assert(elements.blur, 'Missing blur element #blur');
+    console.assert(elements.hero, 'Missing hero element #hero');
+    console.assert(elements.swipeHint, 'Missing swipe hint element #swipeHint');
+  }
+
+  function pad(value) {
+    return String(value).padStart(2, '0');
+  }
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (!elements.days || !elements.hours || !elements.minutes || !elements.seconds) {
+      return;
     }
 
-    .overlay h1 {
-      margin: 0;
-      font-size: clamp(36px, 10vw, 100px);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      font-family: Arial, sans-serif;
+    if (diff <= 0) {
+      elements.days.textContent = '00';
+      elements.hours.textContent = '00';
+      elements.minutes.textContent = '00';
+      elements.seconds.textContent = '00';
+      return;
     }
 
-    .blue {
-      color: #2563eb;
+    elements.days.textContent = pad(Math.floor(diff / 86400000));
+    elements.hours.textContent = pad(Math.floor((diff / 3600000) % 24));
+    elements.minutes.textContent = pad(Math.floor((diff / 60000) % 60));
+    elements.seconds.textContent = pad(Math.floor((diff / 1000) % 60));
+  }
+
+  let startY = 0;
+  let currentY = 0;
+  let isSecondSlideActive = false;
+
+  function setSecondSlide(active) {
+    if (!elements.poster || !elements.blur || !elements.hero) {
+      console.error('Cannot switch slide: required elements are missing.', elements);
+      return;
     }
 
-    .orange {
-      color: #f97316;
-    }
-  </style>
-  <audio id="bg-audio" src="audio.mp3" autoplay loop muted></audio>
+    isSecondSlideActive = Boolean(active);
+    elements.poster.classList.toggle('active', isSecondSlideActive);
+    elements.blur.classList.toggle('active', isSecondSlideActive);
+    elements.hero.classList.toggle('topbar', isSecondSlideActive);
 
-  <script>
-    // Unmute audio on first user interaction (required by most browsers)
-    const audio = document.getElementById('bg-audio');
-    const unlockAudio = () => {
-      if (!audio) return;
-      audio.muted = false;
-      audio.play().catch(()=>{});
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
-    };
-    window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
-  </script>
+    if (elements.swipeHint) {
+      elements.swipeHint.textContent = isSecondSlideActive ? '' : 'Swipe up';
+    }
+  }
+
+  function handleSwipeEnd(endY) {
+    const delta = startY - endY;
+    const threshold = 48;
+
+    if (delta > threshold && !isSecondSlideActive) {
+      setSecondSlide(true);
+    } else if (delta < -threshold && isSecondSlideActive) {
+      setSecondSlide(false);
+    }
+  }
+
+  function bindInteractions() {
+    window.addEventListener('touchstart', function (event) {
+      if (!event.touches || !event.touches.length) return;
+      startY = event.touches[0].clientY;
+      currentY = startY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function (event) {
+      if (!event.touches || !event.touches.length) return;
+      currentY = event.touches[0].clientY;
+      event.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchend', function (event) {
+      const endY = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY : currentY;
+      handleSwipeEnd(endY);
+    }, { passive: true });
+
+    window.addEventListener('wheel', function (event) {
+      if (event.deltaY > 35 && !isSecondSlideActive) {
+        setSecondSlide(true);
+      } else if (event.deltaY < -35 && isSecondSlideActive) {
+        setSecondSlide(false);
+      }
+    }, { passive: true });
+
+    window.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
+        setSecondSlide(true);
+      }
+
+      if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Escape') {
+        setSecondSlide(false);
+      }
+    });
+  }
+
+  function runBasicTests() {
+    assertRequiredElements();
+
+    if (!elements.poster || !elements.blur || !elements.hero) {
+      console.error('Tests skipped: required slide elements are missing.');
+      return;
+    }
+
+    const initialPosterState = elements.poster.classList.contains('active');
+
+    setSecondSlide(true);
+    console.assert(elements.poster.classList.contains('active'), 'Test failed: poster should become active');
+    console.assert(elements.blur.classList.contains('active'), 'Test failed: blur should become active');
+    console.assert(elements.hero.classList.contains('topbar'), 'Test failed: hero should become topbar');
+
+    setSecondSlide(false);
+    console.assert(!elements.poster.classList.contains('active'), 'Test failed: poster should become inactive');
+    console.assert(!elements.blur.classList.contains('active'), 'Test failed: blur should become inactive');
+    console.assert(!elements.hero.classList.contains('topbar'), 'Test failed: hero should leave topbar');
+
+    if (initialPosterState) {
+      setSecondSlide(true);
+    }
+  }
+
+  function init() {
+    assertRequiredElements();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    bindInteractions();
+    runBasicTests();
+    setSecondSlide(false);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
 </body>
 </html>
