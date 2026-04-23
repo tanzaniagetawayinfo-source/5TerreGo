@@ -67,5 +67,20 @@
       color: #f97316;
     }
   </style>
+  <audio id="bg-audio" src="audio.mp3" autoplay loop muted></audio>
+
+  <script>
+    // Unmute audio on first user interaction (required by most browsers)
+    const audio = document.getElementById('bg-audio');
+    const unlockAudio = () => {
+      if (!audio) return;
+      audio.muted = false;
+      audio.play().catch(()=>{});
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+  </script>
 </body>
 </html>
