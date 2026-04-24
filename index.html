@@ -301,6 +301,37 @@ html, body {
     font-size: 7px;
   }
 }
+
+/* === CORNER CARDS PREVIEW === */
+.corner-peek {
+  position: fixed;
+  bottom: -20px;
+  width: 140px;
+  height: 140px;
+  z-index: 5;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: transform 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.4s ease;
+  opacity: 0;
+}
+
+.corner-peek.left {
+  left: -40px;
+  transform: rotate(-25deg) translateY(60px);
+}
+
+.corner-peek.right {
+  right: -40px;
+  transform: rotate(25deg) translateY(60px);
+}
+
+.corner-peek.active {
+  opacity: 1;
+  transform: rotate(0deg) translateY(0);
+}
+
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -355,6 +386,9 @@ html, body {
 <video class="map-phone" id="mapPhone" autoplay muted loop playsinline preload="auto" webkit-playsinline>
   <source src="./map1.webm" type="video/webm" />
 </video>
+
+<div class="corner-peek left" id="peekLeft"></div>
+<div class="corner-peek right" id="peekRight"></div>
 
 <div class="swipe-hint" id="swipeHint">Swipe up</div>
 
@@ -420,6 +454,8 @@ html, body {
   }
 
   function setSlide(state) {
+    const peekLeft = document.getElementById('peekLeft');
+    const peekRight = document.getElementById('peekRight');
     const safeState = Math.max(0, Math.min(2, Number(state) || 0));
     slideState = safeState;
 
@@ -448,6 +484,13 @@ html, body {
 
     if (elements.swipeHint) {
       elements.swipeHint.textContent = safeState === 0 ? 'Swipe up' : '';
+    }
+
+    // show corner previews only on slide 2
+    if (peekLeft && peekRight) {
+      const show = safeState === 2;
+      peekLeft.classList.toggle('active', show);
+      peekRight.classList.toggle('active', show);
     }
   }
 
