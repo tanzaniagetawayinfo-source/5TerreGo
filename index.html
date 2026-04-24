@@ -42,6 +42,16 @@ html, body {
   transform: translateX(-50%) scale(0.9);
   filter: drop-shadow(0 34px 70px rgba(0,0,0,0.58));
   pointer-events: none;
+
+  /* GREEN SCREEN REMOVAL ATTEMPT */
+  background: #00ff00;
+  mix-blend-mode: multiply;
+
+  transition:
+    bottom 0.48s cubic-bezier(.14,.9,.18,1),
+    opacity 0.28s ease,
+    transform 0.48s cubic-bezier(.14,.9,.18,1);
+}
   /* REMOVED blend mode causing green issue */
   transition:
     bottom 0.48s cubic-bezier(.14,.9,.18,1),
@@ -333,8 +343,8 @@ html, body {
 <body>
 
 <div class="video-wrapper">
-  <video autoplay muted loop playsinline>
-    <source src="1234.mp4" type="video/mp4" />
+  <video autoplay muted loop playsinline preload="auto" webkit-playsinline>
+    <source src="./1234.mp4" type="video/mp4" />
   </video>
 </div>
 
@@ -359,8 +369,8 @@ html, body {
   <p class="tagline">A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
 </div>
 
-<video class="map-phone" id="mapPhone" autoplay muted loop playsinline>
-  <source src="map1.webm" type="video/webm" />
+<video class="map-phone" id="mapPhone" autoplay muted loop playsinline preload="auto" webkit-playsinline>
+  <source src="./map1.webm" type="video/webm" />
 </video>
 
 <div class="swipe-hint" id="swipeHint">Swipe up</div>
