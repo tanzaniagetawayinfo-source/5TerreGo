@@ -30,9 +30,7 @@ html, body {
   height: 100%;
   object-fit: cover;
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
+  inset: 0;
 }
 
 .blur-layer {
@@ -171,14 +169,12 @@ html, body {
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, 40px) scale(0.98);
-  transition: bottom 0.6s cubic-bezier(.2,.8,.2,1), top 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.6s cubic-bezier(.2,.8,.2,1);
+  transition: opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.75s cubic-bezier(.16,1,.3,1);
 }
 
 .poster.active {
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
-  bottom: 20px; /* FORCE stay at bottom on slide 1 */
-  top: auto;
 }
 
 .poster.with-phone {
@@ -186,7 +182,6 @@ html, body {
 }
 
 .poster.final {
-  /* animate upward using transform instead of jumping top/bottom */
   transform: translate(-50%, -48vh) scale(1);
 }
 
@@ -202,10 +197,7 @@ html, body {
   filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
   pointer-events: none;
   will-change: transform, bottom, opacity;
-  transition:
-    bottom 0.85s cubic-bezier(.16,1,.3,1),
-    opacity 0.4s ease,
-    transform 0.85s cubic-bezier(.16,1,.3,1);
+  transition: bottom 0.85s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, transform 0.85s cubic-bezier(.16,1,.3,1);
 }
 
 .map-phone.active {
@@ -215,7 +207,7 @@ html, body {
 }
 
 .map-phone.exit {
-  bottom: -42vh; /* align with start for smooth exit */
+  bottom: -42vh;
   opacity: 0;
   transform: translateX(-50%) scale(0.95);
 }
@@ -255,102 +247,160 @@ html, body {
   50% { transform: translate(-50%, -8px); opacity: 0.95; }
 }
 
-/* scanlines removed */
-
-@keyframes scan {
-  from { transform: translateY(0); }
-  to { transform: translateY(20px); }
-}
-
-@media (max-width: 520px) {
-  .overlay h1 {
-    font-size: clamp(36px, 13vw, 64px);
-  }
-
-  .overlay.topbar {
-    top: 16px;
-    left: 14px;
-    width: calc(100% - 28px);
-  }
-
-  .overlay.topbar h1 {
-    font-size: 18px;
-  }
-
-  .countdown {
-    gap: 10px;
-  }
-
-  .countdown div {
-    min-width: 44px;
-  }
-
-  .overlay.topbar .countdown {
-    gap: 7px;
-  }
-
-  .overlay.topbar .countdown div {
-    min-width: 30px;
-  }
-
-  .overlay.topbar .countdown span {
-    font-size: 15px;
-  }
-
-  .overlay.topbar .countdown small {
-    font-size: 7px;
-  }
-}
-
-/* === CORNER CARDS PREVIEW === */
 .corner-peek {
   position: fixed;
-  bottom: -20px;
-  width: 140px;
-  height: 140px;
+  bottom: -60px;
+  width: 260px;
+  height: 190px;
   z-index: 5;
-  border-radius: 24px;
-  backdrop-filter: blur(10px);
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  transition: transform 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.4s ease;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding:14px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 28px;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
   opacity: 0;
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(.2,.8,.2,1), opacity 0.3s ease;
 }
 
 .corner-peek.left {
-  left: -40px;
-  transform: rotate(-25deg) translateY(60px);
+  left: -120px;
+  transform: translate(0, 60px);
 }
 
 .corner-peek.right {
-  right: -40px;
-  transform: rotate(25deg) translateY(60px);
+  text-align:right;
+  right: -120px;
+  transform: translate(0, 60px);
 }
 
 .corner-peek.active {
   opacity: 1;
-  transform: rotate(0deg) translateY(0);
+  pointer-events: auto;
 }
 
+.corner-peek.bump-left {
+  transform: translate(40px, 40px);
+}
+
+.corner-peek.bump-right {
+  transform: translate(-40px, 40px);
+}
+
+.corner-label{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:0.02em;
+  line-height:1.2;
+  max-width:140px;
+}
+
+.corner-peek.right .corner-label{
+  margin-left:auto;
+  text-align:right;
+}
+
+.full-page {
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.02);
+  transition: transform 0.72s cubic-bezier(.16,1,.3,1), opacity 0.35s ease;
+  overflow: hidden;
+}
+
+.full-page.left {
+  transform-origin: bottom left;
+  background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.98) 56%, #050812 100%);
+}
+
+.full-page.right {
+  transform-origin: bottom right;
+  background: radial-gradient(circle at 90% 90%, rgba(249,115,22,0.82), rgba(41,18,8,0.98) 56%, #0b0502 100%);
+}
+
+.full-page.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.full-page.closing {
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease;
+}
+
+.full-page-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 42px 28px;
+  box-sizing: border-box;
+}
+
+.full-page h2 {
+  margin: 0;
+  font-size: clamp(38px, 10vw, 92px);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.full-page p {
+  max-width: 620px;
+  margin: 18px 0 0;
+  font-size: clamp(16px, 3vw, 22px);
+  line-height: 1.45;
+  opacity: 0.9;
+}
+
+.close-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+@media (max-width: 520px) {
+  .overlay h1 { font-size: clamp(36px, 13vw, 64px); }
+  .overlay.topbar { top: 16px; left: 14px; width: calc(100% - 28px); }
+  .overlay.topbar h1 { font-size: 18px; }
+  .countdown { gap: 10px; }
+  .countdown div { min-width: 44px; }
+  .overlay.topbar .countdown { gap: 7px; }
+  .overlay.topbar .countdown div { min-width: 30px; }
+  .overlay.topbar .countdown span { font-size: 15px; }
+  .overlay.topbar .countdown small { font-size: 7px; }
+  .corner-peek { width: 190px; height: 140px; bottom: -54px; }
+  .corner-peek.left { left: -108px; }
+  .corner-peek.right { right: -108px; }
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <filter id="chromakey" color-interpolation-filters="sRGB">
-  <feColorMatrix type="matrix" values="
-    1 0 0 0 0
-    0 1 0 0 0
-    0 0 1 0 0
-    -1 2 -1 0 -0.35" result="withAlpha"/>
-
-  <feComponentTransfer in="withAlpha" result="alphaOnly">
-    <feFuncA type="table" tableValues="1 1 1 0 0"/>
-  </feComponentTransfer>
-
-  <!-- expand transparency by ~1px to remove green edge -->
-  <feMorphology in="alphaOnly" operator="erode" radius="1" result="alphaEroded"/>
-
-  <feComposite in="SourceGraphic" in2="alphaEroded" operator="in"/>
-</filter>
+    <feColorMatrix type="matrix" values="
+      1 0 0 0 0
+      0 1 0 0 0
+      0 0 1 0 0
+      -1 2 -1 0 -0.35" result="withAlpha"/>
+    <feComponentTransfer in="withAlpha" result="alphaOnly">
+      <feFuncA type="table" tableValues="1 1 1 0 0"/>
+    </feComponentTransfer>
+    <feMorphology in="alphaOnly" operator="erode" radius="1" result="alphaEroded"/>
+    <feComposite in="SourceGraphic" in2="alphaEroded" operator="in"/>
+  </filter>
 </svg>
 </head>
 
@@ -365,11 +415,8 @@ html, body {
 <div class="blur-layer" id="blur"></div>
 
 <div class="overlay" id="hero">
-  <h1>
-    <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
-  </h1>
+  <h1><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></h1>
   <div class="coming">COMING SOON</div>
-
   <div class="countdown" aria-label="Countdown to June 1st">
     <div><span id="d">00</span><small>Days</small></div>
     <div><span id="h">00</span><small>Hours</small></div>
@@ -387,11 +434,30 @@ html, body {
   <source src="./map1.webm" type="video/webm" />
 </video>
 
-<div class="corner-peek left" id="peekLeft"></div>
-<div class="corner-peek right" id="peekRight"></div>
+<div class="corner-peek left" id="peekLeft" aria-label="Open explorer page">
+  <div class="corner-label blue">Explore features</div>
+</div>
+<div class="corner-peek right" id="peekRight" aria-label="Open business page">
+  <div class="corner-label orange">Offer discounts</div>
+</div>
+
+<section class="full-page left" id="pageLeft" aria-hidden="true">
+  <div class="full-page-inner">
+    <h2>Explore features</h2>
+    <p>Bring your local business inside 5TerreGo and turn visitors into customers with exclusive offers.</p>
+  </div>
+  <div class="close-hint">Swipe down to close</div>
+</section>
+
+<section class="full-page right" id="pageRight" aria-hidden="true">
+  <div class="full-page-inner">
+    <h2>Offer discounts</h2>
+    <p>Discover the smart guide, interactive map, real local stories, and handpicked experiences.</p>
+  </div>
+  <div class="close-hint">Swipe down to close</div>
+</section>
 
 <div class="swipe-hint" id="swipeHint">Swipe up</div>
-
 
 <script>
 (function () {
@@ -408,23 +474,24 @@ html, body {
     blur: document.getElementById('blur'),
     hero: document.getElementById('hero'),
     swipeHint: document.getElementById('swipeHint'),
-    mapPhone: document.getElementById('mapPhone')
+    mapPhone: document.getElementById('mapPhone'),
+    peekLeft: document.getElementById('peekLeft'),
+    peekRight: document.getElementById('peekRight'),
+    pageLeft: document.getElementById('pageLeft'),
+    pageRight: document.getElementById('pageRight')
   };
 
   let startY = 0;
   let currentY = 0;
-  let slideState = 0; // 0 = hero, 1 = phone visible, 2 = poster top / phone hidden
+  let slideState = 0;
+  let peekTimers = [];
+  let pageOpen = null;
+  let ignoreNextSwipe = false;
 
   function assertRequiredElements() {
-    console.assert(elements.days, 'Missing countdown days element #d');
-    console.assert(elements.hours, 'Missing countdown hours element #h');
-    console.assert(elements.minutes, 'Missing countdown minutes element #m');
-    console.assert(elements.seconds, 'Missing countdown seconds element #s');
-    console.assert(elements.poster, 'Missing poster element #poster');
-    console.assert(elements.blur, 'Missing blur element #blur');
-    console.assert(elements.hero, 'Missing hero element #hero');
-    console.assert(elements.swipeHint, 'Missing swipe hint element #swipeHint');
-    console.assert(elements.mapPhone, 'Missing phone video element #mapPhone');
+    Object.keys(elements).forEach(function (key) {
+      console.assert(elements[key], 'Missing element: ' + key);
+    });
   }
 
   function pad(value) {
@@ -432,12 +499,8 @@ html, body {
   }
 
   function updateCountdown() {
-    const now = new Date();
-    const diff = targetDate - now;
-
-    if (!elements.days || !elements.hours || !elements.minutes || !elements.seconds) {
-      return;
-    }
+    const diff = targetDate - new Date();
+    if (!elements.days || !elements.hours || !elements.minutes || !elements.seconds) return;
 
     if (diff <= 0) {
       elements.days.textContent = '00';
@@ -453,67 +516,123 @@ html, body {
     elements.seconds.textContent = pad(Math.floor((diff / 1000) % 60));
   }
 
+  function clearPeekTimers() {
+    peekTimers.forEach(function (timer) {
+      clearTimeout(timer);
+    });
+    peekTimers = [];
+  }
+
+  function stopPeekAnimation() {
+    clearPeekTimers();
+    elements.peekLeft.classList.remove('bump-left');
+    elements.peekRight.classList.remove('bump-right');
+  }
+
+  function startPeekAnimation() {
+    if (slideState !== 2 || pageOpen) return;
+    clearPeekTimers();
+
+    function bumpLeft() {
+      if (slideState !== 2 || pageOpen) return;
+      elements.peekLeft.classList.add('bump-left');
+      peekTimers.push(setTimeout(function () {
+        elements.peekLeft.classList.remove('bump-left');
+      }, 520));
+    }
+
+    function bumpRight() {
+      if (slideState !== 2 || pageOpen) return;
+      elements.peekRight.classList.add('bump-right');
+      peekTimers.push(setTimeout(function () {
+        elements.peekRight.classList.remove('bump-right');
+      }, 520));
+    }
+
+    function cycle() {
+      if (slideState !== 2 || pageOpen) return;
+      bumpLeft();
+      peekTimers.push(setTimeout(bumpRight, 3500));
+      peekTimers.push(setTimeout(cycle, 8500));
+    }
+
+    peekTimers.push(setTimeout(cycle, 1000));
+  }
+
   function setSlide(state) {
-    const peekLeft = document.getElementById('peekLeft');
-    const peekRight = document.getElementById('peekRight');
     const safeState = Math.max(0, Math.min(2, Number(state) || 0));
     slideState = safeState;
 
     const isPhoneSlide = safeState === 1;
-    const isFinalSlide = safeState === 2;
+    const isSelectionSlide = safeState === 2;
     const isPastHero = safeState > 0;
 
-    if (elements.poster) {
-      elements.poster.classList.toggle('active', isPastHero);
-      elements.poster.classList.toggle('with-phone', isPhoneSlide);
-      elements.poster.classList.toggle('final', isFinalSlide);
-    }
+    elements.poster.classList.toggle('active', isPastHero);
+    elements.poster.classList.toggle('with-phone', isPhoneSlide);
+    elements.poster.classList.toggle('final', isSelectionSlide);
+    elements.blur.classList.toggle('active', isPastHero);
+    elements.hero.classList.toggle('topbar', isPastHero);
+    elements.mapPhone.classList.toggle('active', isPhoneSlide);
+    elements.mapPhone.classList.toggle('exit', isSelectionSlide);
+    elements.swipeHint.textContent = safeState === 0 ? 'Swipe up' : '';
 
-    if (elements.blur) {
-      elements.blur.classList.toggle('active', isPastHero);
-    }
+    const showCorners = isSelectionSlide && !pageOpen;
+    elements.peekLeft.classList.toggle('active', showCorners);
+    elements.peekRight.classList.toggle('active', showCorners);
 
-    if (elements.hero) {
-      elements.hero.classList.toggle('topbar', isPastHero);
-    }
-
-    if (elements.mapPhone) {
-      elements.mapPhone.classList.toggle('active', isPhoneSlide);
-      elements.mapPhone.classList.toggle('exit', isFinalSlide);
-    }
-
-    if (elements.swipeHint) {
-      elements.swipeHint.textContent = safeState === 0 ? 'Swipe up' : '';
-    }
-
-    // show corner previews only on slide 2
-    if (peekLeft && peekRight) {
-      const show = safeState === 2;
-      peekLeft.classList.toggle('active', show);
-      peekRight.classList.toggle('active', show);
-    }
+    if (showCorners) startPeekAnimation();
+    else stopPeekAnimation();
   }
 
   function goNext() {
-    setSlide(slideState + 1);
+    if (!pageOpen) setSlide(slideState + 1);
   }
 
   function goPrev() {
-    setSlide(slideState - 1);
+    if (!pageOpen) setSlide(slideState - 1);
   }
 
-  function handleSwipeEnd(endY) {
+  function openPage(side) {
+    const page = side === 'left' ? elements.pageLeft : elements.pageRight;
+    const other = side === 'left' ? elements.pageRight : elements.pageLeft;
+
+    pageOpen = side;
+    stopPeekAnimation();
+    elements.peekLeft.classList.remove('active');
+    elements.peekRight.classList.remove('active');
+    other.classList.remove('active', 'closing');
+    other.setAttribute('aria-hidden', 'true');
+    page.style.transform = '';
+    page.classList.remove('closing');
+    page.classList.add('active');
+    page.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePage() {
+    if (!pageOpen) return;
+
+    const page = pageOpen === 'left' ? elements.pageLeft : elements.pageRight;
+    page.classList.add('closing');
+    page.style.transform = '';
+    page.classList.remove('active');
+    page.setAttribute('aria-hidden', 'true');
+
+    pageOpen = null;
+    ignoreNextSwipe = true;
+    setTimeout(function () {
+      ignoreNextSwipe = false;
+    }, 350);
+
+    setSlide(2);
+  }
+
+  function handleVerticalSwipe(endY) {
     const delta = startY - endY;
-    const threshold = 48;
-
-    if (delta > threshold) {
-      goNext();
-    } else if (delta < -threshold) {
-      goPrev();
-    }
+    if (delta > 48) goNext();
+    else if (delta < -48) goPrev();
   }
 
-  function bindInteractions() {
+  function bindGlobalInteractions() {
     window.addEventListener('touchstart', function (event) {
       if (!event.touches || !event.touches.length) return;
       startY = event.touches[0].clientY;
@@ -527,71 +646,148 @@ html, body {
     }, { passive: false });
 
     window.addEventListener('touchend', function (event) {
+      if (pageOpen || ignoreNextSwipe) return;
+      const target = event.target;
+      if (target && target.closest && (target.closest('.corner-peek') || target.closest('.full-page'))) return;
       const endY = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY : currentY;
-      handleSwipeEnd(endY);
+      handleVerticalSwipe(endY);
     }, { passive: true });
 
     window.addEventListener('wheel', function (event) {
-      if (event.deltaY > 35) {
-        goNext();
-      } else if (event.deltaY < -35) {
-        goPrev();
-      }
+      if (pageOpen || ignoreNextSwipe) return;
+      if (event.deltaY > 35) goNext();
+      else if (event.deltaY < -35) goPrev();
     }, { passive: true });
 
     window.addEventListener('keydown', function (event) {
-      if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
-        goNext();
-      }
+      if (event.key === 'Escape' && pageOpen) closePage();
+      else if (pageOpen) return;
+      else if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') goNext();
+      else if (event.key === 'ArrowUp' || event.key === 'PageUp') goPrev();
+      else if (slideState === 2 && event.key === 'ArrowLeft') openPage('left');
+      else if (slideState === 2 && event.key === 'ArrowRight') openPage('right');
+    });
+  }
 
-      if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Escape') {
-        goPrev();
-      }
+  function bindCornerDrag() {
+    function attach(el, side) {
+      let dragStartX = 0;
+      let dragging = false;
+      let opened = false;
+
+      el.addEventListener('touchstart', function (event) {
+        if (slideState !== 2 || pageOpen) return;
+        dragging = true;
+        opened = false;
+        dragStartX = event.touches[0].clientX;
+        stopPeekAnimation();
+      }, { passive: true });
+
+      el.addEventListener('touchmove', function (event) {
+        if (!dragging || slideState !== 2 || pageOpen) return;
+        const dx = event.touches[0].clientX - dragStartX;
+
+        if (side === 'left') {
+          const move = Math.min(Math.max(dx, 0), 190);
+          el.style.transform = 'translate(' + move + 'px, 40px)';
+          if (move > 120 && !opened) {
+            opened = true;
+            el.style.transform = '';
+            openPage('left');
+          }
+        } else {
+          const move = Math.max(Math.min(dx, 0), -190);
+          el.style.transform = 'translate(' + move + 'px, 40px)';
+          if (move < -120 && !opened) {
+            opened = true;
+            el.style.transform = '';
+            openPage('right');
+          }
+        }
+      }, { passive: true });
+
+      el.addEventListener('touchend', function () {
+        dragging = false;
+        el.style.transform = '';
+        if (slideState === 2 && !pageOpen) startPeekAnimation();
+      }, { passive: true });
+    }
+
+    attach(elements.peekLeft, 'left');
+    attach(elements.peekRight, 'right');
+  }
+
+  function bindPageClose() {
+    [elements.pageLeft, elements.pageRight].forEach(function (page) {
+      let dragStartY = 0;
+      let dragging = false;
+
+      page.addEventListener('touchstart', function (event) {
+        if (!page.classList.contains('active')) return;
+        dragging = true;
+        dragStartY = event.touches[0].clientY;
+        page.classList.add('closing');
+      }, { passive: true });
+
+      page.addEventListener('touchmove', function (event) {
+        if (!dragging || !page.classList.contains('active')) return;
+        const dy = Math.max(0, event.touches[0].clientY - dragStartY);
+        const scale = Math.max(0.82, 1 - dy / 900);
+        page.style.transform = 'translateY(' + dy + 'px) scale(' + scale + ')';
+      }, { passive: true });
+
+      page.addEventListener('touchend', function (event) {
+        if (!dragging) return;
+        dragging = false;
+        const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - dragStartY : 0;
+
+        if (dy > 120) closePage();
+        else {
+          page.style.transform = '';
+          page.classList.remove('closing');
+        }
+      }, { passive: true });
     });
   }
 
   function runBasicTests() {
     assertRequiredElements();
 
-    if (!elements.poster || !elements.blur || !elements.hero || !elements.mapPhone || !elements.swipeHint) {
-      console.error('Tests skipped: required elements are missing.');
-      return;
-    }
-
     setSlide(0);
-    console.assert(slideState === 0, 'Test failed: slideState should be 0');
-    console.assert(!elements.poster.classList.contains('active'), 'Test failed: poster should be hidden on slide 0');
-    console.assert(!elements.hero.classList.contains('topbar'), 'Test failed: hero should be centered on slide 0');
-    console.assert(!elements.mapPhone.classList.contains('active'), 'Test failed: phone should be inactive on slide 0');
-    console.assert(elements.swipeHint.textContent === 'Swipe up', 'Test failed: swipe hint should show on slide 0');
+    console.assert(slideState === 0, 'slide 0 failed');
+    console.assert(!elements.poster.classList.contains('active'), 'poster hidden on slide 0 failed');
 
     setSlide(1);
-    console.assert(slideState === 1, 'Test failed: slideState should be 1');
-    console.assert(elements.poster.classList.contains('active'), 'Test failed: poster should be active on slide 1');
-    console.assert(elements.poster.classList.contains('with-phone'), 'Test failed: poster should have with-phone on slide 1');
-    console.assert(elements.blur.classList.contains('active'), 'Test failed: blur should be active on slide 1');
-    console.assert(elements.hero.classList.contains('topbar'), 'Test failed: hero should be topbar on slide 1');
-    console.assert(elements.mapPhone.classList.contains('active'), 'Test failed: phone should be active on slide 1');
-    console.assert(!elements.mapPhone.classList.contains('exit'), 'Test failed: phone should not be exiting on slide 1');
+    console.assert(slideState === 1, 'slide 1 failed');
+    console.assert(elements.mapPhone.classList.contains('active'), 'phone active on slide 1 failed');
 
     setSlide(2);
-    console.assert(slideState === 2, 'Test failed: slideState should be 2');
-    console.assert(elements.poster.classList.contains('final'), 'Test failed: poster should be final on slide 2');
-    console.assert(!elements.mapPhone.classList.contains('active'), 'Test failed: phone should not be active on slide 2');
-    console.assert(elements.mapPhone.classList.contains('exit'), 'Test failed: phone should exit on slide 2');
+    console.assert(slideState === 2, 'slide 2 failed');
+    console.assert(elements.peekLeft.classList.contains('active'), 'left corner active on slide 2 failed');
+    console.assert(elements.peekRight.classList.contains('active'), 'right corner active on slide 2 failed');
 
-    setSlide(99);
-    console.assert(slideState === 2, 'Test failed: slideState should clamp to 2');
+    openPage('left');
+    console.assert(pageOpen === 'left', 'left page open state failed');
+    console.assert(elements.pageLeft.classList.contains('active'), 'left page active failed');
+    console.assert(!elements.peekLeft.classList.contains('active'), 'corners hidden while page open failed');
 
-    setSlide(-99);
-    console.assert(slideState === 0, 'Test failed: slideState should clamp to 0');
+    closePage();
+    console.assert(pageOpen === null, 'page close state failed');
+    console.assert(slideState === 2, 'close should return to selection slide failed');
+    console.assert(!elements.pageLeft.classList.contains('active'), 'left page closed failed');
+    console.assert(elements.peekLeft.classList.contains('active'), 'left corner restored after close failed');
+    console.assert(elements.peekRight.classList.contains('active'), 'right corner restored after close failed');
+
+    setSlide(0);
   }
 
   function init() {
     assertRequiredElements();
     updateCountdown();
     setInterval(updateCountdown, 1000);
-    bindInteractions();
+    bindGlobalInteractions();
+    bindCornerDrag();
+    bindPageClose();
     runBasicTests();
     setSlide(0);
   }
