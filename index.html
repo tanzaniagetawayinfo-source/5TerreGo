@@ -316,21 +316,20 @@ html, body {
 
 <svg width="0" height="0" style="position:absolute">
   <filter id="chromakey" color-interpolation-filters="sRGB">
-  <!-- keep RGB -->
+  <!-- isolate green channel -->
   <feColorMatrix type="matrix" values="
-    1 0 0 0 0
     0 1 0 0 0
-    0 0 1 0 0
-    0 0 0 1 0" result="rgb"/>
+    0 1 0 0 0
+    0 1 0 0 0
+    0 1 0 0 0" result="green"/>
 
-  <!-- alpha = 1 - green -->
-  <feColorMatrix in="rgb" type="matrix" values="
-    0 0 0 0 0
-    0 0 0 0 0
-    0 0 0 0 0
-    0 -1 0 1 0" result="alpha"/>
+  <!-- threshold: only remove pure green -->
+  <feComponentTransfer in="green" result="alpha">
+    <feFuncA type="table" tableValues="1 1 1 0 0"/>
+  </feComponentTransfer>
 
-  <feComposite in="rgb" in2="alpha" operator="in"/>
+  <!-- apply alpha to original -->
+  <feComposite in="SourceGraphic" in2="alpha" operator="in"/>
 </filter>
 </svg>
 </head>
