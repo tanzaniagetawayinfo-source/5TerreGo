@@ -38,22 +38,7 @@ html, body {
   z-index: 0;
 }
 
-.map-phone {
-  position: fixed;
-  left: 50%;
-  bottom: -42vh;
-  z-index: 6;
-  width: min(72vw, 360px);
-  height: auto;
-  opacity: 0;
-  transform: translateX(-50%) scale(0.9);
-  filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
-  pointer-events: none;
-  transition:
-    bottom 0.48s cubic-bezier(.14,.9,.18,1),
-    opacity 0.28s ease,
-    transform 0.48s cubic-bezier(.14,.9,.18,1);
-}
+
   /* REMOVED blend mode causing green issue */
   transition:
     bottom 0.48s cubic-bezier(.14,.9,.18,1),
@@ -211,12 +196,18 @@ html, body {
   position: fixed;
   left: 50%;
   bottom: -42vh;
-  z-index: 2; /* BELOW text */
+  z-index: 6;
   width: min(72vw, 360px);
   height: auto;
   opacity: 0;
   transform: translateX(-50%) scale(0.9);
-  filter: drop-shadow(0 34px 70px rgba(0,0,0,0.58));
+  filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
+  pointer-events: none;
+  transition:
+    bottom 0.48s cubic-bezier(.14,.9,.18,1),
+    opacity 0.28s ease,
+    transform 0.48s cubic-bezier(.14,.9,.18,1);
+}
   pointer-events: none;
   transition:
     bottom 0.48s cubic-bezier(.14,.9,.18,1),
