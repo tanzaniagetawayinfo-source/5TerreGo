@@ -159,7 +159,7 @@ video {
 
 .poster {
   position: fixed;
-  top: 58%;
+  bottom: 10%;
   left: 50%;
   width: min(90vw, 760px);
   z-index: 2;
@@ -167,13 +167,47 @@ video {
   text-align: center;
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, 38vh) scale(0.98);
+  transform: translate(-50%, 60px) scale(0.98);
   transition: opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1);
 }
 
 .poster.active {
   opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.poster.active {
+  opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+}
+
+.map-phone {
+  position: fixed;
+  left: 50%;
+  bottom: -42vh;
+  z-index: 4;
+  width: min(72vw, 360px);
+  height: auto;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.9);
+  filter: drop-shadow(0 34px 70px rgba(0,0,0,0.58));
+  pointer-events: none;
+  transition:
+    bottom 0.48s cubic-bezier(.14,.9,.18,1),
+    opacity 0.28s ease,
+    transform 0.48s cubic-bezier(.14,.9,.18,1);
+}
+
+.map-phone.active {
+  bottom: 39%;
+  opacity: 1;
+  transform: translateX(-50%) scale(1.06);
+}
+
+.poster.with-phone {
+  transform: translate(-50%, -38%) scale(0.92);
+  opacity: 0.62;
+  transition-delay: 0.08s;
 }
 
 .headline {
@@ -306,6 +340,10 @@ video {
   <p class="tagline">A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
 </div>
 
+<video class="map-phone" id="mapPhone" autoplay muted loop playsinline>
+  <source src="map.webm" type="video/webm" />
+</video>
+
 <div class="swipe-hint" id="swipeHint">Swipe up</div>
 <div class="scanlines"></div>
 
@@ -323,7 +361,8 @@ video {
     poster: document.getElementById('poster'),
     blur: document.getElementById('blur'),
     hero: document.getElementById('hero'),
-    swipeHint: document.getElementById('swipeHint')
+    swipeHint: document.getElementById('swipeHint'),
+    mapPhone: document.getElementById('mapPhone')
   };
 
   function assertRequiredElements() {
@@ -335,6 +374,7 @@ video {
     console.assert(elements.blur, 'Missing blur element #blur');
     console.assert(elements.hero, 'Missing hero element #hero');
     console.assert(elements.swipeHint, 'Missing swipe hint element #swipeHint');
+    console.assert(elements.mapPhone, 'Missing transparent phone video #mapPhone');
   }
 
   function pad(value) {
@@ -377,6 +417,14 @@ video {
     elements.poster.classList.toggle('active', isSecondSlideActive);
     elements.blur.classList.toggle('active', isSecondSlideActive);
     elements.hero.classList.toggle('topbar', isSecondSlideActive);
+    elements.poster.classList.toggle('with-phone', isSecondSlideActive);
+
+    if (elements.mapPhone) {
+      elements.mapPhone.classList.toggle('active', isSecondSlideActive);
+      if (isSecondSlideActive) {
+        elements.mapPhone.play().catch(function () {});
+      }
+    }
 
     if (elements.swipeHint) {
       elements.swipeHint.textContent = isSecondSlideActive ? '' : 'Swipe up';
@@ -445,11 +493,13 @@ video {
     console.assert(elements.poster.classList.contains('active'), 'Test failed: poster should become active');
     console.assert(elements.blur.classList.contains('active'), 'Test failed: blur should become active');
     console.assert(elements.hero.classList.contains('topbar'), 'Test failed: hero should become topbar');
+    console.assert(elements.mapPhone.classList.contains('active'), 'Test failed: phone video should become active');
 
     setSecondSlide(false);
     console.assert(!elements.poster.classList.contains('active'), 'Test failed: poster should become inactive');
     console.assert(!elements.blur.classList.contains('active'), 'Test failed: blur should become inactive');
     console.assert(!elements.hero.classList.contains('topbar'), 'Test failed: hero should leave topbar');
+    console.assert(!elements.mapPhone.classList.contains('active'), 'Test failed: phone video should become inactive');
 
     if (initialPosterState) {
       setSecondSlide(true);
