@@ -6,8 +6,6 @@
 <title>5TerreGo</title>
 
 <style>
-/* SVG CHROMA KEY FILTER */
-
 html, body {
   margin: 0;
   padding: 0;
@@ -24,7 +22,7 @@ html, body {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  z-index: 0; /* FIX: visible but behind UI */
+  z-index: 0;
 }
 
 .video-wrapper video {
@@ -37,18 +35,10 @@ html, body {
   z-index: 0;
 }
 
-
-  /* REMOVED blend mode causing green issue */
-  transition:
-    bottom 0.48s cubic-bezier(.14,.9,.18,1),
-    opacity 0.28s ease,
-    transform 0.48s cubic-bezier(.14,.9,.18,1);
-}
-
 .blur-layer {
   position: fixed;
   inset: 0;
-  z-index: 0; /* stays above video but under UI */
+  z-index: 1;
   pointer-events: none;
   background: rgba(0, 0, 0, 0);
   backdrop-filter: blur(0px);
@@ -172,7 +162,7 @@ html, body {
 
 .poster {
   position: fixed;
-  bottom: 20px; /* BELOW PHONE */
+  bottom: 20px;
   left: 50%;
   width: min(90vw, 760px);
   z-index: 3;
@@ -181,11 +171,23 @@ html, body {
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, 40px) scale(0.98);
-  transition: opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1);
+  transition: bottom 0.6s cubic-bezier(.2,.8,.2,1), top 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.6s cubic-bezier(.2,.8,.2,1);
 }
 
 .poster.active {
   opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  bottom: 20px; /* FORCE stay at bottom on slide 1 */
+  top: auto;
+}
+
+.poster.with-phone {
+  opacity: 1;
+}
+
+.poster.final {
+  bottom: auto;
+  top: 80px;
   transform: translate(-50%, 0) scale(1);
 }
 
@@ -207,15 +209,15 @@ html, body {
 }
 
 .map-phone.active {
-  bottom: 28%; /* LOWER phone without touching text */
+  bottom: 28%;
   opacity: 1;
   transform: translateX(-50%) scale(1.06);
 }
 
-.poster.with-phone {
-  transform: translate(-50%, -38%) scale(0.92);
-  opacity: 1; /* FULL WHITE */
-  transition-delay: 0.08s;
+.map-phone.exit {
+  bottom: -40vh;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.92);
 }
 
 .headline {
@@ -231,7 +233,7 @@ html, body {
   max-width: 680px;
   font-size: clamp(14px, 3vw, 20px);
   line-height: 1.45;
-  opacity: 1; /* FULL WHITE */
+  opacity: 1;
 }
 
 .swipe-hint {
@@ -314,24 +316,20 @@ html, body {
 }
 </style>
 
-<svg width="0" height="0" style="position:absolute">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <filter id="chromakey" color-interpolation-filters="sRGB">
-  <!-- Compute alpha from GREEN dominance only (no color shift) -->
-  <!-- A ≈ 2G - R - B - bias -->
-  <feColorMatrix type="matrix" values="
-    1 0 0 0 0
-    0 1 0 0 0
-    0 0 1 0 0
-    -1 2 -1 0 -0.35" result="withAlpha"/>
+    <feColorMatrix type="matrix" values="
+      1 0 0 0 0
+      0 1 0 0 0
+      0 0 1 0 0
+      -1 2 -1 0 -0.35" result="withAlpha"/>
 
-  <!-- Hard threshold: only near pure green becomes transparent -->
-  <feComponentTransfer in="withAlpha" result="alphaOnly">
-    <feFuncA type="table" tableValues="1 1 1 0 0"/>
-  </feComponentTransfer>
+    <feComponentTransfer in="withAlpha" result="alphaOnly">
+      <feFuncA type="table" tableValues="1 1 1 0 0"/>
+    </feComponentTransfer>
 
-  <!-- Apply computed alpha, keep original colors untouched -->
-  <feComposite in="SourceGraphic" in2="alphaOnly" operator="in"/>
-</filter>
+    <feComposite in="SourceGraphic" in2="alphaOnly" operator="in"/>
+  </filter>
 </svg>
 </head>
 
@@ -389,6 +387,10 @@ html, body {
     mapPhone: document.getElementById('mapPhone')
   };
 
+  let startY = 0;
+  let currentY = 0;
+  let slideState = 0; // 0 = hero, 1 = phone visible, 2 = poster top / phone hidden
+
   function assertRequiredElements() {
     console.assert(elements.days, 'Missing countdown days element #d');
     console.assert(elements.hours, 'Missing countdown hours element #h');
@@ -398,7 +400,7 @@ html, body {
     console.assert(elements.blur, 'Missing blur element #blur');
     console.assert(elements.hero, 'Missing hero element #hero');
     console.assert(elements.swipeHint, 'Missing swipe hint element #swipeHint');
-    console.assert(elements.mapPhone, 'Missing transparent phone video #mapPhone');
+    console.assert(elements.mapPhone, 'Missing phone video element #mapPhone');
   }
 
   function pad(value) {
@@ -427,42 +429,54 @@ html, body {
     elements.seconds.textContent = pad(Math.floor((diff / 1000) % 60));
   }
 
-  let startY = 0;
-  let currentY = 0;
-  let isSecondSlideActive = false;
+  function setSlide(state) {
+    const safeState = Math.max(0, Math.min(2, Number(state) || 0));
+    slideState = safeState;
 
-  function setSecondSlide(active) {
-    if (!elements.poster || !elements.blur || !elements.hero) {
-      console.error('Cannot switch slide: required elements are missing.', elements);
-      return;
+    const isPhoneSlide = safeState === 1;
+    const isFinalSlide = safeState === 2;
+    const isPastHero = safeState > 0;
+
+    if (elements.poster) {
+      elements.poster.classList.toggle('active', isPastHero);
+      elements.poster.classList.toggle('with-phone', isPhoneSlide);
+      elements.poster.classList.toggle('final', isFinalSlide);
     }
 
-    isSecondSlideActive = Boolean(active);
-    elements.poster.classList.toggle('active', isSecondSlideActive);
-    elements.blur.classList.toggle('active', isSecondSlideActive);
-    elements.hero.classList.toggle('topbar', isSecondSlideActive);
-    elements.poster.classList.toggle('with-phone', isSecondSlideActive);
+    if (elements.blur) {
+      elements.blur.classList.toggle('active', isPastHero);
+    }
+
+    if (elements.hero) {
+      elements.hero.classList.toggle('topbar', isPastHero);
+    }
 
     if (elements.mapPhone) {
-      elements.mapPhone.classList.toggle('active', isSecondSlideActive);
-      if (isSecondSlideActive) {
-        elements.mapPhone.play().catch(function () {});
-      }
+      elements.mapPhone.classList.toggle('active', isPhoneSlide);
+      elements.mapPhone.classList.toggle('exit', isFinalSlide);
     }
 
     if (elements.swipeHint) {
-      elements.swipeHint.textContent = isSecondSlideActive ? '' : 'Swipe up';
+      elements.swipeHint.textContent = safeState === 0 ? 'Swipe up' : '';
     }
+  }
+
+  function goNext() {
+    setSlide(slideState + 1);
+  }
+
+  function goPrev() {
+    setSlide(slideState - 1);
   }
 
   function handleSwipeEnd(endY) {
     const delta = startY - endY;
     const threshold = 48;
 
-    if (delta > threshold && !isSecondSlideActive) {
-      setSecondSlide(true);
-    } else if (delta < -threshold && isSecondSlideActive) {
-      setSecondSlide(false);
+    if (delta > threshold) {
+      goNext();
+    } else if (delta < -threshold) {
+      goPrev();
     }
   }
 
@@ -485,20 +499,20 @@ html, body {
     }, { passive: true });
 
     window.addEventListener('wheel', function (event) {
-      if (event.deltaY > 35 && !isSecondSlideActive) {
-        setSecondSlide(true);
-      } else if (event.deltaY < -35 && isSecondSlideActive) {
-        setSecondSlide(false);
+      if (event.deltaY > 35) {
+        goNext();
+      } else if (event.deltaY < -35) {
+        goPrev();
       }
     }, { passive: true });
 
     window.addEventListener('keydown', function (event) {
       if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') {
-        setSecondSlide(true);
+        goNext();
       }
 
       if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Escape') {
-        setSecondSlide(false);
+        goPrev();
       }
     });
   }
@@ -506,28 +520,38 @@ html, body {
   function runBasicTests() {
     assertRequiredElements();
 
-    if (!elements.poster || !elements.blur || !elements.hero) {
-      console.error('Tests skipped: required slide elements are missing.');
+    if (!elements.poster || !elements.blur || !elements.hero || !elements.mapPhone || !elements.swipeHint) {
+      console.error('Tests skipped: required elements are missing.');
       return;
     }
 
-    const initialPosterState = elements.poster.classList.contains('active');
+    setSlide(0);
+    console.assert(slideState === 0, 'Test failed: slideState should be 0');
+    console.assert(!elements.poster.classList.contains('active'), 'Test failed: poster should be hidden on slide 0');
+    console.assert(!elements.hero.classList.contains('topbar'), 'Test failed: hero should be centered on slide 0');
+    console.assert(!elements.mapPhone.classList.contains('active'), 'Test failed: phone should be inactive on slide 0');
+    console.assert(elements.swipeHint.textContent === 'Swipe up', 'Test failed: swipe hint should show on slide 0');
 
-    setSecondSlide(true);
-    console.assert(elements.poster.classList.contains('active'), 'Test failed: poster should become active');
-    console.assert(elements.blur.classList.contains('active'), 'Test failed: blur should become active');
-    console.assert(elements.hero.classList.contains('topbar'), 'Test failed: hero should become topbar');
-    console.assert(elements.mapPhone.classList.contains('active'), 'Test failed: phone video should become active');
+    setSlide(1);
+    console.assert(slideState === 1, 'Test failed: slideState should be 1');
+    console.assert(elements.poster.classList.contains('active'), 'Test failed: poster should be active on slide 1');
+    console.assert(elements.poster.classList.contains('with-phone'), 'Test failed: poster should have with-phone on slide 1');
+    console.assert(elements.blur.classList.contains('active'), 'Test failed: blur should be active on slide 1');
+    console.assert(elements.hero.classList.contains('topbar'), 'Test failed: hero should be topbar on slide 1');
+    console.assert(elements.mapPhone.classList.contains('active'), 'Test failed: phone should be active on slide 1');
+    console.assert(!elements.mapPhone.classList.contains('exit'), 'Test failed: phone should not be exiting on slide 1');
 
-    setSecondSlide(false);
-    console.assert(!elements.poster.classList.contains('active'), 'Test failed: poster should become inactive');
-    console.assert(!elements.blur.classList.contains('active'), 'Test failed: blur should become inactive');
-    console.assert(!elements.hero.classList.contains('topbar'), 'Test failed: hero should leave topbar');
-    console.assert(!elements.mapPhone.classList.contains('active'), 'Test failed: phone video should become inactive');
+    setSlide(2);
+    console.assert(slideState === 2, 'Test failed: slideState should be 2');
+    console.assert(elements.poster.classList.contains('final'), 'Test failed: poster should be final on slide 2');
+    console.assert(!elements.mapPhone.classList.contains('active'), 'Test failed: phone should not be active on slide 2');
+    console.assert(elements.mapPhone.classList.contains('exit'), 'Test failed: phone should exit on slide 2');
 
-    if (initialPosterState) {
-      setSecondSlide(true);
-    }
+    setSlide(99);
+    console.assert(slideState === 2, 'Test failed: slideState should clamp to 2');
+
+    setSlide(-99);
+    console.assert(slideState === 0, 'Test failed: slideState should clamp to 0');
   }
 
   function init() {
@@ -536,7 +560,7 @@ html, body {
     setInterval(updateCountdown, 1000);
     bindInteractions();
     runBasicTests();
-    setSecondSlide(false);
+    setSlide(0);
   }
 
   if (document.readyState === 'loading') {
