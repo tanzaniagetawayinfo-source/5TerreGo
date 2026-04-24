@@ -198,12 +198,10 @@ html, body {
   width: min(64vw, 300px);
   height: auto;
   opacity: 0;
-  transform: translateX(-50%) scale(1.04); /* slight zoom to hide green edge */
+  transform: translateX(-50%) scale(0.9);
   filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
   pointer-events: none;
   will-change: transform, bottom, opacity;
-  background: #000; /* mask residual green */
-  clip-path: inset(2px round 24px); /* trims green border */
   transition:
     bottom 0.85s cubic-bezier(.16,1,.3,1),
     opacity 0.4s ease,
@@ -307,18 +305,21 @@ html, body {
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <filter id="chromakey" color-interpolation-filters="sRGB">
-    <feColorMatrix type="matrix" values="
-      1 0 0 0 0
-      0 1 0 0 0
-      0 0 1 0 0
-      -1 2 -1 0 -0.35" result="withAlpha"/>
+  <feColorMatrix type="matrix" values="
+    1 0 0 0 0
+    0 1 0 0 0
+    0 0 1 0 0
+    -1 2 -1 0 -0.35" result="withAlpha"/>
 
-    <feComponentTransfer in="withAlpha" result="alphaOnly">
-      <feFuncA type="table" tableValues="1 1 1 0 0"/>
-    </feComponentTransfer>
+  <feComponentTransfer in="withAlpha" result="alphaOnly">
+    <feFuncA type="table" tableValues="1 1 1 0 0"/>
+  </feComponentTransfer>
 
-    <feComposite in="SourceGraphic" in2="alphaOnly" operator="in"/>
-  </filter>
+  <!-- expand transparency by ~1px to remove green edge -->
+  <feMorphology in="alphaOnly" operator="erode" radius="1" result="alphaEroded"/>
+
+  <feComposite in="SourceGraphic" in2="alphaEroded" operator="in"/>
+</filter>
 </svg>
 </head>
 
