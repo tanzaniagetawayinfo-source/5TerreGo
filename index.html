@@ -6,6 +6,8 @@
 <title>5TerreGo</title>
 
 <style>
+/* SVG CHROMA KEY FILTER */
+
 html, body {
   margin: 0;
   padding: 0;
@@ -40,12 +42,12 @@ html, body {
   position: fixed;
   left: 50%;
   bottom: -42vh;
-  z-index: 6; /* ABOVE EVERYTHING */
+  z-index: 6;
   width: min(72vw, 360px);
   height: auto;
   opacity: 0;
   transform: translateX(-50%) scale(0.9);
-  filter: drop-shadow(0 34px 70px rgba(0,0,0,0.58));
+  filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
   pointer-events: none;
   transition:
     bottom 0.48s cubic-bezier(.14,.9,.18,1),
@@ -329,6 +331,20 @@ html, body {
   }
 }
 </style>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="chromakey">
+    <!-- remove green channel -->
+    <feColorMatrix type="matrix" values="
+      1 0 0 0 0
+      0 0 0 0 0
+      0 0 1 0 0
+      0 0 0 1 0"/>
+    <feComponentTransfer>
+      <feFuncA type="table" tableValues="0 1"/>
+    </feComponentTransfer>
+  </filter>
+</svg>
 </head>
 
 <body>
