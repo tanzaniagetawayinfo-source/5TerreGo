@@ -82,11 +82,11 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  z-index: 3; /* BELOW PHONE */ /* ABOVE phone */ /* ensure above blur */
+  z-index: 3;
   color: #fff;
   width: min(92vw, 900px);
   pointer-events: none;
-  transition: top 0.65s cubic-bezier(.2,.8,.2,1), left 0.65s cubic-bezier(.2,.8,.2,1), transform 0.65s cubic-bezier(.2,.8,.2,1), width 0.65s cubic-bezier(.2,.8,.2,1);
+}
 }
 
 .overlay.topbar {
@@ -187,26 +187,22 @@ html, body {
 
 .poster {
   position: fixed;
-  bottom: 5%;
+  bottom: 20px; /* BELOW PHONE */
   left: 50%;
   width: min(90vw, 760px);
-  z-index: 3; /* above blur */
+  z-index: 3;
   color: #fff;
   text-align: center;
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, 60px) scale(0.98);
+  transform: translate(-50%, 40px) scale(0.98);
   transition: opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1);
+}
 }
 
 .poster.active {
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
-}
-
-.poster.active {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
 }
 
 .map-phone {
@@ -227,7 +223,7 @@ html, body {
 }
 
 .map-phone.active {
-  bottom: 22%; /* lowered so it is fully visible */
+  bottom: 38%; /* PHONE ABOVE TEXT */
   opacity: 1;
   transform: translateX(-50%) scale(1.06);
 }
@@ -330,10 +326,6 @@ html, body {
 
   .overlay.topbar .countdown small {
     font-size: 7px;
-  }
-
-  .poster {
-    top: 55%;
   }
 }
 </style>
