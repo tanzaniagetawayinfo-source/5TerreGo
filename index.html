@@ -22,7 +22,7 @@ html, body {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  z-index: 0;
+  z-index: -1; /* move video behind everything */
 }
 
 video {
@@ -34,7 +34,7 @@ video {
 .blur-layer {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 0; /* stays above video but under UI */
   pointer-events: none;
   background: rgba(0, 0, 0, 0);
   backdrop-filter: blur(0px);
@@ -54,7 +54,7 @@ video {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  z-index: 2;
+  z-index: 3; /* ensure above blur */
   color: #fff;
   width: min(92vw, 900px);
   pointer-events: none;
@@ -159,10 +159,10 @@ video {
 
 .poster {
   position: fixed;
-  bottom: 10%;
+  bottom: 5%;
   left: 50%;
   width: min(90vw, 760px);
-  z-index: 2;
+  z-index: 3; /* above blur */
   color: #fff;
   text-align: center;
   pointer-events: none;
@@ -185,7 +185,7 @@ video {
   position: fixed;
   left: 50%;
   bottom: -42vh;
-  z-index: 4;
+  z-index: 5; /* always on top */
   width: min(72vw, 360px);
   height: auto;
   opacity: 0;
@@ -200,7 +200,7 @@ video {
 }
 
 .map-phone.active {
-  bottom: 39%;
+  bottom: 22%; /* lowered so it is fully visible */
   opacity: 1;
   transform: translateX(-50%) scale(1.06);
 }
