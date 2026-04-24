@@ -22,31 +22,31 @@ html, body {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  z-index: -1; /* move video behind everything */
+  z-index: 0; /* FIX: visible but behind UI */
+}
 }
 
 .video-wrapper video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 
 .map-phone {
   position: fixed;
   left: 50%;
   bottom: -42vh;
-  z-index: 5; /* always on top */
+  z-index: 6; /* ABOVE EVERYTHING */
   width: min(72vw, 360px);
   height: auto;
   opacity: 0;
   transform: translateX(-50%) scale(0.9);
   filter: drop-shadow(0 34px 70px rgba(0,0,0,0.58));
   pointer-events: none;
-
-  /* GREEN SCREEN REMOVAL ATTEMPT */
-  background: #00ff00;
-  mix-blend-mode: multiply;
-
   transition:
     bottom 0.48s cubic-bezier(.14,.9,.18,1),
     opacity 0.28s ease,
@@ -82,7 +82,7 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  z-index: 3; /* ensure above blur */
+  z-index: 3; /* BELOW PHONE */ /* ABOVE phone */ /* ensure above blur */
   color: #fff;
   width: min(92vw, 900px);
   pointer-events: none;
@@ -213,14 +213,13 @@ html, body {
   position: fixed;
   left: 50%;
   bottom: -42vh;
-  z-index: 5; /* always on top */
+  z-index: 2; /* BELOW text */
   width: min(72vw, 360px);
   height: auto;
   opacity: 0;
   transform: translateX(-50%) scale(0.9);
   filter: drop-shadow(0 34px 70px rgba(0,0,0,0.58));
   pointer-events: none;
-  
   transition:
     bottom 0.48s cubic-bezier(.14,.9,.18,1),
     opacity 0.28s ease,
