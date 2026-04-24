@@ -255,20 +255,7 @@ html, body {
   50% { transform: translate(-50%, -8px); opacity: 0.95; }
 }
 
-.scanlines {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.03) 0px,
-    rgba(255,255,255,0.03) 1px,
-    transparent 2px,
-    transparent 4px
-  );
-  animation: scan 6s linear infinite;
-  z-index: 3;
-}
+/* scanlines removed */
 
 @keyframes scan {
   from { transform: translateY(0); }
@@ -367,7 +354,7 @@ html, body {
 </video>
 
 <div class="swipe-hint" id="swipeHint">Swipe up</div>
-<div class="scanlines"></div>
+
 
 <script>
 (function () {
