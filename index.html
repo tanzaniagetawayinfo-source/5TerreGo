@@ -316,22 +316,31 @@ html, body {
 
 <svg width="0" height="0" style="position:absolute">
   <filter id="chromakey" color-interpolation-filters="sRGB">
-  <!-- Compute alpha based on 'green dominance' -->
-  <!-- A = clamp(G - 0.5R - 0.5B - bias) -->
+  <!-- 1) Compute green dominance: A ≈ G - (R+B)/2 - bias -->
   <feColorMatrix type="matrix" values="
     1 0 0 0 0
     0 1 0 0 0
     0 0 1 0 0
-    -0.5 1 -0.5 0 -0.25" result="col"/>
+    -0.5 1 -0.5 0 -0.30" result="col"/>
 
-  <!-- Threshold alpha so only near-pure green is removed -->
+  <!-- 2) Hard threshold to kill pure green (no semi-transparency) -->
   <feComponentTransfer in="col" result="alpha">
-    <!-- tweak table for sharper cutoff -->
-    <feFuncA type="table" tableValues="1 1 1 0 0"/>
+    <!-- 0..~0.6 => keep, ~0.6..1 => cut to 0 -->
+    <feFuncA type="table" tableValues="1 1 1 1 0 0"/>
   </feComponentTransfer>
 
-  <!-- Apply computed alpha to original colors -->
-  <feComposite in="SourceGraphic" in2="alpha" operator="in"/>
+  <!-- 3) Erode alpha to remove green edge fringe -->
+  <feMorphology in="alpha" operator="erode" radius="1" result="alphaEroded"/>
+
+  <!-- 4) Apply alpha to original colors -->
+  <feComposite in="SourceGraphic" in2="alphaEroded" operator="in" result="cut"/>
+
+  <!-- 5) Despill: slightly reduce green on edges to avoid halo -->
+  <feColorMatrix in="cut" type="matrix" values="
+    1 0 0 0 0
+    -0.2 1 -0.2 0 0
+    0 0 1 0 0
+    0 0 0 1 0"/>
 </filter>
 </svg>
 </head>
