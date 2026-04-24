@@ -177,9 +177,7 @@ html, body {
   transform: translate(-50%, 0) scale(1);
 }
 
-.poster.with-phone {
-  opacity: 1;
-}
+.poster.with-phone { opacity: 1; }
 
 .poster.final {
   transform: translate(-50%, -48vh) scale(1);
@@ -249,19 +247,20 @@ html, body {
 
 .corner-peek {
   position: fixed;
-  bottom: -60px;
-  width: 260px;
-  height: 190px;
+  bottom: -220px;
+  width: 520px; /* narrower */
+  height: 560px; /* taller */ /* x2 */
   z-index: 5;
   background: rgba(255,255,255,0.08);
-  display:flex;
-  align-items:flex-start;
-  justify-content:flex-start;
-  padding:14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 18px;
+  box-sizing: border-box;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 28px;
+  border-radius: 18px;
   box-shadow: 0 28px 80px rgba(0,0,0,0.35);
   opacity: 0;
   pointer-events: none;
@@ -269,14 +268,14 @@ html, body {
 }
 
 .corner-peek.left {
-  left: -120px;
+  left: -260px;
   transform: translate(0, 60px);
 }
 
 .corner-peek.right {
-  text-align:right;
-  right: -120px;
+  right: -260px;
   transform: translate(0, 60px);
+  text-align: right;
 }
 
 .corner-peek.active {
@@ -284,25 +283,34 @@ html, body {
   pointer-events: auto;
 }
 
-.corner-peek.bump-left {
-  transform: translate(40px, 40px);
+.corner-peek.bump-left { transform: translate(40px, 40px); }
+.corner-peek.bump-right { transform: translate(-40px, 40px); }
+
+.corner-label {
+  position: absolute;
+  top: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  max-width: 160px;
+  pointer-events: none;
 }
 
-.corner-peek.bump-right {
-  transform: translate(-40px, 40px);
+/* posizionamento verso il centro */
+.corner-peek.left .corner-label {
+  right: 20px; /* angolo destro del blocco sinistro */
+  text-align: right;
 }
 
-.corner-label{
-  font-size:14px;
-  font-weight:700;
-  letter-spacing:0.02em;
-  line-height:1.2;
-  max-width:140px;
+.corner-peek.right .corner-label {
+  left: 20px; /* angolo sinistro del blocco destro */
+  text-align: left;
 }
 
-.corner-peek.right .corner-label{
-  margin-left:auto;
-  text-align:right;
+.corner-peek.right .corner-label {
+  margin-left: auto;
+  text-align: right;
 }
 
 .full-page {
@@ -313,7 +321,10 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transform: scale(0.02);
-  transition: transform 0.72s cubic-bezier(.16,1,.3,1), opacity 0.35s ease;
+  border-radius: 18px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition: transform 0.72s cubic-bezier(.16,1,.3,1), opacity 0.35s ease, border-radius 0.6s ease, backdrop-filter 0.6s ease, -webkit-backdrop-filter 0.6s ease;
   overflow: hidden;
 }
 
@@ -331,6 +342,9 @@ html, body {
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
+  border-radius: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 
 .full-page.closing {
@@ -382,9 +396,9 @@ html, body {
   .overlay.topbar .countdown div { min-width: 30px; }
   .overlay.topbar .countdown span { font-size: 15px; }
   .overlay.topbar .countdown small { font-size: 7px; }
-  .corner-peek { width: 190px; height: 140px; bottom: -54px; }
-  .corner-peek.left { left: -108px; }
-  .corner-peek.right { right: -108px; }
+  .corner-peek { width: 340px; height: 420px; bottom: -180px; }
+  .corner-peek.left { left: -200px; }
+  .corner-peek.right { right: -200px; }
 }
 </style>
 
@@ -435,24 +449,26 @@ html, body {
 </video>
 
 <div class="corner-peek left" id="peekLeft" aria-label="Open explorer page">
-  <div class="corner-label blue">Explore features</div>
+  <div class="corner-label blue">Explore feautures</div>
 </div>
 <div class="corner-peek right" id="peekRight" aria-label="Open business page">
-  <div class="corner-label orange">Offer discounts</div>
+  <div class="corner-label orange">Become partner</div>
 </div>
 
 <section class="full-page left" id="pageLeft" aria-hidden="true">
+  <div class="corner-label blue" style="position:absolute;top:20px;right:20px;">Explore feautures</div>
   <div class="full-page-inner">
     <h2>Explore features</h2>
-    <p>Bring your local business inside 5TerreGo and turn visitors into customers with exclusive offers.</p>
+    <p>Discover the smart guide, interactive map, real local stories, and handpicked experiences.</p>
   </div>
   <div class="close-hint">Swipe down to close</div>
 </section>
 
 <section class="full-page right" id="pageRight" aria-hidden="true">
+  <div class="corner-label orange" style="position:absolute;top:20px;left:20px;">Become partner</div>
   <div class="full-page-inner">
-    <h2>Offer discounts</h2>
-    <p>Discover the smart guide, interactive map, real local stories, and handpicked experiences.</p>
+    <h2>Become partner</h2>
+    <p>Bring your local business inside 5TerreGo and turn visitors into customers with exclusive offers.</p>
   </div>
   <div class="close-hint">Swipe down to close</div>
 </section>
@@ -481,6 +497,7 @@ html, body {
     pageRight: document.getElementById('pageRight')
   };
 
+  let startX = 0;
   let startY = 0;
   let currentY = 0;
   let slideState = 0;
@@ -636,13 +653,20 @@ html, body {
     window.addEventListener('touchstart', function (event) {
       if (!event.touches || !event.touches.length) return;
       startY = event.touches[0].clientY;
+      startX = event.touches[0].clientX;
       currentY = startY;
     }, { passive: true });
 
     window.addEventListener('touchmove', function (event) {
       if (!event.touches || !event.touches.length) return;
+
+      const dy = event.touches[0].clientY - startY;
+      const dx = event.touches[0].clientX - startX;
       currentY = event.touches[0].clientY;
-      event.preventDefault();
+
+      if (Math.abs(dy) > Math.abs(dx)) {
+        event.preventDefault();
+      }
     }, { passive: false });
 
     window.addEventListener('touchend', function (event) {
@@ -672,6 +696,7 @@ html, body {
   function bindCornerDrag() {
     function attach(el, side) {
       let dragStartX = 0;
+      let dragStartY = 0;
       let dragging = false;
       let opened = false;
 
@@ -680,25 +705,30 @@ html, body {
         dragging = true;
         opened = false;
         dragStartX = event.touches[0].clientX;
+        dragStartY = event.touches[0].clientY;
         stopPeekAnimation();
       }, { passive: true });
 
       el.addEventListener('touchmove', function (event) {
         if (!dragging || slideState !== 2 || pageOpen) return;
         const dx = event.touches[0].clientX - dragStartX;
+        const dy = dragStartY - event.touches[0].clientY;
+        const pull = Math.max(dy, Math.abs(dx));
 
         if (side === 'left') {
-          const move = Math.min(Math.max(dx, 0), 190);
-          el.style.transform = 'translate(' + move + 'px, 40px)';
-          if (move > 120 && !opened) {
+          const moveX = Math.min(Math.max(dx, 0), 190);
+          const moveY = Math.min(Math.max(dy, 0), 190);
+          el.style.transform = 'translate(' + moveX + 'px, ' + (40 - moveY * 0.35) + 'px)';
+          if (pull > 120 && !opened) {
             opened = true;
             el.style.transform = '';
             openPage('left');
           }
         } else {
-          const move = Math.max(Math.min(dx, 0), -190);
-          el.style.transform = 'translate(' + move + 'px, 40px)';
-          if (move < -120 && !opened) {
+          const moveX = Math.max(Math.min(dx, 0), -190);
+          const moveY = Math.min(Math.max(dy, 0), 190);
+          el.style.transform = 'translate(' + moveX + 'px, ' + (40 - moveY * 0.35) + 'px)';
+          if (pull > 120 && !opened) {
             opened = true;
             el.style.transform = '';
             openPage('right');
@@ -777,6 +807,11 @@ html, body {
     console.assert(!elements.pageLeft.classList.contains('active'), 'left page closed failed');
     console.assert(elements.peekLeft.classList.contains('active'), 'left corner restored after close failed');
     console.assert(elements.peekRight.classList.contains('active'), 'right corner restored after close failed');
+
+    const previousSlide = slideState;
+    openPage('right');
+    closePage();
+    console.assert(slideState === 2 && previousSlide === 2, 'right page close should keep selection slide failed');
 
     setSlide(0);
   }
