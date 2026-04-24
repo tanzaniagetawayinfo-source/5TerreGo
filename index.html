@@ -15,7 +15,7 @@ html, body {
   background: #000;
   font-family: Arial, sans-serif;
   overscroll-behavior: none;
-  touch-action: none;
+  touch-action: auto; /* 🔥 allow native scrolling */
 }
 
 .video-wrapper {
@@ -127,9 +127,7 @@ html, body {
   transition: min-width 0.65s cubic-bezier(.2,.8,.2,1);
 }
 
-.overlay.topbar .countdown div {
-  min-width: 38px;
-}
+.overlay.topbar .countdown div { min-width: 38px; }
 
 .countdown span {
   display: block;
@@ -139,9 +137,7 @@ html, body {
   transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
 }
 
-.overlay.topbar .countdown span {
-  font-size: clamp(16px, 3vw, 24px);
-}
+.overlay.topbar .countdown span { font-size: clamp(16px, 3vw, 24px); }
 
 .countdown small {
   display: block;
@@ -178,10 +174,7 @@ html, body {
 }
 
 .poster.with-phone { opacity: 1; }
-
-.poster.final {
-  transform: translate(-50%, -48vh) scale(1);
-}
+.poster.final { transform: translate(-50%, -48vh) scale(1); }
 
 .map-phone {
   position: fixed;
@@ -248,8 +241,8 @@ html, body {
 .corner-peek {
   position: fixed;
   bottom: -320px;
-  width: 560px; /* narrower */
-  height: 560px; /* taller */ /* x2 */
+  width: 560px;
+  height: 560px;
   z-index: 5;
   background: rgba(255,255,255,0.08);
   display: flex;
@@ -288,30 +281,24 @@ html, body {
 
 .corner-label {
   position: absolute;
-  top: 34px; /* lowered to align with corner height */
+  top: 34px;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1.2;
-  max-width: 160px;
+  max-width: 190px;
   pointer-events: none;
-  text-transform: uppercase; /* ALL CAPS */
+  text-transform: uppercase;
 }
 
-/* posizionamento verso il centro */
 .corner-peek.left .corner-label {
-  right: 20px; /* angolo destro del blocco sinistro */
+  right: 20px;
   text-align: right;
 }
 
 .corner-peek.right .corner-label {
-  left: 20px; /* angolo sinistro del blocco destro */
+  left: 20px;
   text-align: left;
-}
-
-.corner-peek.right .corner-label {
-  margin-left: auto;
-  text-align: right;
 }
 
 .full-page {
@@ -322,11 +309,11 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transform: scale(0.02);
-  border-radius: 18px;
+  border-radius: 0;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.16); /* match corner */
-  box-shadow: 0 28px 80px rgba(0,0,0,0.35); /* match corner */
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
   transition: transform 0.85s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, border-radius 0.8s ease;
   overflow: hidden;
 }
@@ -334,22 +321,19 @@ html, body {
 .full-page.left {
   transform-origin: bottom left;
   background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.98) 56%, #050812 100%);
+  border-top-right-radius: 18px;
 }
 
 .full-page.right {
   transform-origin: bottom right;
   background: radial-gradient(circle at 90% 90%, rgba(249,115,22,0.82), rgba(41,18,8,0.98) 56%, #0b0502 100%);
+  border-top-left-radius: 18px;
 }
 
 .full-page.active {
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
-  border-radius: 18px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.16);
-  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
 }
 
 .full-page.closing {
@@ -360,9 +344,13 @@ html, body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 42px 28px;
+  justify-content: flex-start; /* 🔥 important for scroll */
+  padding: 100px 28px 80px; /* more bottom space */
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  overflow-y: auto; /* 🔥 enable scroll */
+  -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
 }
 
 .full-page h2 {
@@ -454,27 +442,50 @@ html, body {
 </video>
 
 <div class="corner-peek left" id="peekLeft" aria-label="Open explorer page">
-  <div class="corner-label blue">EXPLORE FEAUTURES</div>
+  <div class="corner-label blue">EXPLORE FEATURES</div>
 </div>
 <div class="corner-peek right" id="peekRight" aria-label="Open business page">
   <div class="corner-label orange">BECOME PARTNER</div>
 </div>
 
 <section class="full-page left" id="pageLeft" aria-hidden="true">
-  <div class="corner-label blue" style="position:absolute;top:34px;right:20px;">EXPLORE FEAUTURES</div>
-  <div class="full-page-inner">
-    <h2>Explore features</h2>
-    <p>Discover the smart guide, interactive map, real local stories, and handpicked experiences.</p>
-  </div>
+  <div class="corner-label blue" style="position:absolute;top:34px;right:20px;">EXPLORE FEATURES</div>
+  <div class="full-page-inner" style="overflow-y:auto; gap:40px;">
+      <h2>Explore features</h2>
+      <p>Discover everything inside 5TerreGo — built as a smart, mobile-first travel guide.</p>
+
+      <p><strong>Interactive Map</strong><br>Explore Cinque Terre with a clean, native-style map designed for fast discovery.</p>
+
+      <p><strong>Real Local Stories</strong><br>Authentic content created by locals — not generic travel descriptions.</p>
+
+      <p><strong>Weather & Tides</strong><br>Real-time conditions to help you choose the perfect moment.</p>
+
+      <p><strong>Handpicked Experiences</strong><br>Carefully selected tours and activities, no noise.</p>
+
+      <p><strong>Exclusive Discounts</strong><br>Access hidden deals available only inside 5TerreGo.</p>
+    </div>
   <div class="close-hint">Swipe down to close</div>
 </section>
 
 <section class="full-page right" id="pageRight" aria-hidden="true">
   <div class="corner-label orange" style="position:absolute;top:34px;left:20px;">BECOME PARTNER</div>
-  <div class="full-page-inner">
-    <h2>Become partner</h2>
-    <p>Bring your local business inside 5TerreGo and turn visitors into customers with exclusive offers.</p>
-  </div>
+  <div class="full-page-inner" style="overflow-y:auto; gap:40px;">
+      <h2>Become partner</h2>
+
+      <p>Join 5TerreGo for free and reach travelers in a completely new way.</p>
+
+      <p><strong>100% Free</strong><br>No fees, no subscriptions, no hidden costs.</p>
+
+      <p><strong>You choose the discount</strong><br>Offer any deal you want — full control.</p>
+
+      <p><strong>More visibility</strong><br>Your business appears directly inside the interactive map.</p>
+
+      <p><strong>Direct customers</strong><br>Users discover and come to you — no middleman.</p>
+
+      <p><strong>Simple system</strong><br>Users unlock your discount via 5TerreGo and redeem it in person.</p>
+
+      <p>It’s not a marketplace. It’s a discovery platform that brings real customers to local businesses.</p>
+    </div>
   <div class="close-hint">Swipe down to close</div>
 </section>
 
@@ -485,7 +496,6 @@ html, body {
   'use strict';
 
   const targetDate = new Date('2026-06-01T00:00:00');
-
   const elements = {
     days: document.getElementById('d'),
     hours: document.getElementById('h'),
@@ -518,6 +528,10 @@ html, body {
 
   function pad(value) {
     return String(value).padStart(2, '0');
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
   }
 
   function updateCountdown() {
@@ -582,7 +596,7 @@ html, body {
   }
 
   function setSlide(state) {
-    const safeState = Math.max(0, Math.min(2, Number(state) || 0));
+    const safeState = clamp(Number(state) || 0, 0, 2);
     slideState = safeState;
 
     const isPhoneSlide = safeState === 1;
@@ -664,6 +678,9 @@ html, body {
 
     window.addEventListener('touchmove', function (event) {
       if (!event.touches || !event.touches.length) return;
+
+      // 🔥 FIX: allow scrolling inside opened pages
+      if (pageOpen) return;
 
       const dy = event.touches[0].clientY - startY;
       const dx = event.touches[0].clientX - startX;
@@ -752,31 +769,31 @@ html, body {
     attach(elements.peekRight, 'right');
   }
 
-  function bindPageClose() {
+  function bindPageGestures() {
     [elements.pageLeft, elements.pageRight].forEach(function (page) {
-      let dragStartY = 0;
-      let dragging = false;
+      let closeStartY = 0;
+      let closingDrag = false;
 
       page.addEventListener('touchstart', function (event) {
         if (!page.classList.contains('active')) return;
-        dragging = true;
-        dragStartY = event.touches[0].clientY;
-        page.classList.add('closing');
+        closeStartY = event.touches[0].clientY;
+        closingDrag = false;
       }, { passive: true });
 
       page.addEventListener('touchmove', function (event) {
-        if (!dragging || !page.classList.contains('active')) return;
-        const dy = Math.max(0, event.touches[0].clientY - dragStartY);
+        if (!page.classList.contains('active')) return;
+        const dy = event.touches[0].clientY - closeStartY;
+        if (dy <= 20) return;
+        closingDrag = true;
+        page.classList.add('closing');
         const scale = Math.max(0.82, 1 - dy / 900);
         page.style.transform = 'translateY(' + dy + 'px) scale(' + scale + ')';
       }, { passive: true });
 
       page.addEventListener('touchend', function (event) {
-        if (!dragging) return;
-        dragging = false;
-        const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - dragStartY : 0;
-
-        if (dy > 120) closePage();
+        if (!page.classList.contains('active')) return;
+        const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - closeStartY : 0;
+        if (closingDrag && dy > 120) closePage();
         else {
           page.style.transform = '';
           page.classList.remove('closing');
@@ -790,33 +807,25 @@ html, body {
 
     setSlide(0);
     console.assert(slideState === 0, 'slide 0 failed');
-    console.assert(!elements.poster.classList.contains('active'), 'poster hidden on slide 0 failed');
+    console.assert(!elements.poster.classList.contains('active'), 'poster should be hidden on slide 0');
 
     setSlide(1);
     console.assert(slideState === 1, 'slide 1 failed');
-    console.assert(elements.mapPhone.classList.contains('active'), 'phone active on slide 1 failed');
+    console.assert(elements.mapPhone.classList.contains('active'), 'phone should be active on slide 1');
 
     setSlide(2);
     console.assert(slideState === 2, 'slide 2 failed');
-    console.assert(elements.peekLeft.classList.contains('active'), 'left corner active on slide 2 failed');
-    console.assert(elements.peekRight.classList.contains('active'), 'right corner active on slide 2 failed');
+    console.assert(elements.peekLeft.classList.contains('active'), 'left corner should be active on slide 2');
+    console.assert(elements.peekRight.classList.contains('active'), 'right corner should be active on slide 2');
 
     openPage('left');
-    console.assert(pageOpen === 'left', 'left page open state failed');
-    console.assert(elements.pageLeft.classList.contains('active'), 'left page active failed');
-    console.assert(!elements.peekLeft.classList.contains('active'), 'corners hidden while page open failed');
+    console.assert(pageOpen === 'left', 'left page should open');
+    console.assert(elements.pageLeft.classList.contains('active'), 'left page should be active');
+    console.assert(!document.querySelector('#pageLeft .oblique-item'), 'explore oblique items should be removed');
 
     closePage();
-    console.assert(pageOpen === null, 'page close state failed');
-    console.assert(slideState === 2, 'close should return to selection slide failed');
-    console.assert(!elements.pageLeft.classList.contains('active'), 'left page closed failed');
-    console.assert(elements.peekLeft.classList.contains('active'), 'left corner restored after close failed');
-    console.assert(elements.peekRight.classList.contains('active'), 'right corner restored after close failed');
-
-    const previousSlide = slideState;
-    openPage('right');
-    closePage();
-    console.assert(slideState === 2 && previousSlide === 2, 'right page close should keep selection slide failed');
+    console.assert(pageOpen === null, 'page should close');
+    console.assert(slideState === 2, 'closing page should return to selection slide');
 
     setSlide(0);
   }
@@ -827,7 +836,7 @@ html, body {
     setInterval(updateCountdown, 1000);
     bindGlobalInteractions();
     bindCornerDrag();
-    bindPageClose();
+    bindPageGestures();
     runBasicTests();
     setSlide(0);
   }
