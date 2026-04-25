@@ -283,7 +283,7 @@ html, body {
 
 .corner-label {
   position: absolute;
-  top: 38px; /* moved up to fix too low */
+  top: 38px;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -294,13 +294,13 @@ html, body {
 }
 
 .corner-peek.left .corner-label {
-  right: 40px; /* push inward from edge */
+  right: 40px;
   text-align: right;
   color: #fff;
 }
 
 .corner-peek.right .corner-label {
-  left: 40px; /* push inward from edge */
+  left: 40px;
   text-align: left;
   color: #fff;
 }
@@ -351,8 +351,8 @@ html, body {
 .full-page.exiting-up {
   pointer-events: none;
   opacity: 0;
-  transform: translate3d(0, -115vh, 0) scale(1);
-  transition: transform 0.55s cubic-bezier(.16,1,.3,1), opacity 0.35s ease;
+  transform: translate3d(0, -130vh, 0);
+  transition: transform 0.45s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease;
 }
 
 .full-page-inner {
@@ -744,14 +744,11 @@ html, body {
   function handleVerticalSwipe(endY) {
     const delta = startY - endY;
 
-    // 👉 In corner picker screen:
-    // no scrolling, BUT allow swipe down to go back
     if (slideState === 2) {
-      if (delta < -20) goPrev(); // swipe down → back
+      if (delta < -20) goPrev();
       return;
     }
 
-    // normal behavior for other slides
     if (delta > 20) goNext();
     else if (delta < -20) goPrev();
   }
@@ -852,33 +849,23 @@ html, body {
     attach(elements.peekRight, 'right');
   }
 
-  // 📱 ANDROID GYRO 3D EFFECT (no permission required)
   function bindGyroAndroid() {
     if (!window.DeviceOrientationEvent) return;
-
-    // skip iOS (needs permission)
     if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
 
     window.addEventListener('deviceorientation', function(e) {
-      const gamma = e.gamma || 0; // left-right
-      const beta = e.beta || 0;   // front-back
-
-      const rotateX = beta * 0.03;
-      const rotateY = gamma * 0.03;
-
-      // 🎯 apply gyro only to map.mp4 / mapPhone video
+      const gamma = e.gamma || 0;
+      const beta = e.beta || 0;
 
       if (elements.videoEl) {
         const moveX = gamma * 0.3;
         const moveY = beta * 0.3;
-
         const rotX = beta * 0.05;
         const rotY = gamma * 0.05;
 
         elements.videoEl.style.transform =
           'translateX(-50%) translate3d(' + moveX + 'px,' + moveY + 'px,0) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.08)';
       }
-
     });
   }
 
@@ -887,16 +874,16 @@ html, body {
       let touchStartY = 0;
       let startPageY = 0;
       let closingDrag = false;
-      let bottomExitReady = false;
-      let bottomReachedOnce = false;
+      let bottomExitDrag = false;
+      let bottomExitDistance = 0;
 
       page.addEventListener('touchstart', function (event) {
         if (!page.classList.contains('active')) return;
         touchStartY = event.touches[0].clientY;
         startPageY = getPageY(page);
         closingDrag = false;
-        bottomExitReady = false;
-        bottomReachedOnce = isPageAtBottom(page); // 👈 reset logic
+        bottomExitDrag = false;
+        bottomExitDistance = 0;
         page.style.transform = '';
         page.classList.remove('closing', 'exiting-up');
       }, { passive: true });
@@ -908,30 +895,24 @@ html, body {
         const dy = event.touches[0].clientY - touchStartY;
         const swipingUp = dy < 0;
         const swipingDown = dy > 0;
+        const gestureStartedAtBottom = Math.abs(startPageY - getMinPageY(page)) < 2;
 
-        // 🔒 BOTTOM DRAG: move UP (first swipe just primes exit, no closing yet)
-        if (isPageAtBottom(page) && swipingUp) {
-          if (!bottomReachedOnce) {
-            bottomReachedOnce = true; // 👈 first contact with bottom
-            return;
-          }
-
+        // Dal fondo: solo un nuovo gesto partito già dal fondo può trascinare la box verso l'alto.
+        // Arrivare al fondo durante lo scroll non chiude la pagina.
+        if (gestureStartedAtBottom && swipingUp) {
+          bottomExitDrag = true;
           closingDrag = false;
           page.classList.remove('closing');
 
-          const progress = Math.min(Math.abs(dy), 140);
-          const moveY = -progress; // always go UP
-          const scale = 1 - progress / 900;
-
-          page.style.transform =
-            'translate3d(0,' + moveY + 'px,0) scale(' + scale + ')';
-
+          bottomExitDistance = Math.min(Math.abs(dy), window.innerHeight * 0.9);
+          page.style.transform = 'translate3d(0,' + (-bottomExitDistance) + 'px,0)';
           return;
         }
 
         if (isPageHeadVisible(page) && swipingDown && dy > 24) {
           closingDrag = true;
-          bottomExitReady = false;
+          bottomExitDrag = false;
+          bottomExitDistance = 0;
           page.classList.add('closing');
           const scale = Math.max(0.88, 1 - dy / 1200);
           page.style.transform = 'translate3d(0,' + dy + 'px,0) scale(' + scale + ')';
@@ -939,7 +920,8 @@ html, body {
         }
 
         closingDrag = false;
-        bottomExitReady = false;
+        bottomExitDrag = false;
+        bottomExitDistance = 0;
         page.style.transform = '';
         page.classList.remove('closing');
         setPageY(page, startPageY + dy);
@@ -949,33 +931,30 @@ html, body {
         if (!page.classList.contains('active')) return;
         const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - touchStartY : 0;
 
-        // 👉 chiusura perfetta dall'alto (già ok)
         if (closingDrag && dy > 120 && isPageHeadVisible(page)) {
           closePage();
           return;
         }
 
-        // 👉 uscita verso home dal basso (già ok)
-        // 🚫 REMOVE instant exit trigger from bottom
-        // (was causing jump from top to home in one swipe)
-
-
-        // 🔥 secondo swipe dal fondo → chiusura verso ALTO
-        if (isPageAtBottom(page) && dy < -80 && bottomReachedOnce) {
-          exitPageUpToHome();
-          bottomReachedOnce = false;
+        if (bottomExitDrag) {
+          if (bottomExitDistance > 90) {
+            exitPageUpToHome();
+          } else {
+            page.style.transform = '';
+            setPageY(page, getMinPageY(page));
+          }
+          bottomExitDrag = false;
+          bottomExitDistance = 0;
           return;
         }
 
-        // 🔧 FIX: snap corretto quando arrivi in basso
         if (isPageAtBottom(page)) {
-          setPageY(page, getMinPageY(page)); // forza posizione precisa
+          setPageY(page, getMinPageY(page));
           page.style.transform = '';
           page.classList.remove('closing');
           return;
         }
 
-        // 🔧 FIX: snap anche se sei quasi in basso
         const minY = getMinPageY(page);
         if (getPageY(page) < minY + 60) {
           setPageY(page, minY);
@@ -983,7 +962,6 @@ html, body {
           return;
         }
 
-        // fallback normale
         page.style.transform = '';
         page.classList.remove('closing');
       }, { passive: true });
@@ -1042,6 +1020,8 @@ html, body {
 
     closePage();
     setSlide(0);
+
+    console.assert(!document.documentElement.innerHTML.includes('bottomExitReady'), 'bottomExitReady reference should not exist');
   }
 
   function init() {
