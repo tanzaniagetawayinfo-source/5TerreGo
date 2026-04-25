@@ -741,6 +741,9 @@ html, body {
   }
 
   function handleVerticalSwipe(endY) {
+    // 🚫 DISABLE swipe when on corner picker screen
+    if (slideState === 2) return;
+
     const delta = startY - endY;
     if (delta > 20) goNext();
     else if (delta < -20) goPrev();
