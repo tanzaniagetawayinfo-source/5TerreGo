@@ -12,7 +12,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
+  background: transparent;
   font-family: Arial, sans-serif;
   overscroll-behavior: none;
   touch-action: auto; /* 🔥 allow native scrolling */
@@ -45,9 +45,9 @@ html, body {
 }
 
 .blur-layer.active {
-  background: rgba(0, 0, 0, 0.38);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .overlay {
@@ -324,13 +324,13 @@ html, body {
 
 .full-page.left {
   transform-origin: bottom left;
-  background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.98) 56%, #050812 100%);
+  background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.55) 56%, rgba(0,0,0,0.0) 80%);
   border-top-right-radius: 18px;
 }
 
 .full-page.right {
   transform-origin: bottom right;
-  background: radial-gradient(circle at 90% 90%, rgba(249,115,22,0.82), rgba(41,18,8,0.98) 56%, #0b0502 100%);
+  background: radial-gradient(circle at 90% 90%, rgba(249,115,22,0.82), rgba(41,18,8,0.55) 56%, rgba(0,0,0,0.0) 80%);
   border-top-left-radius: 18px;
 }
 
