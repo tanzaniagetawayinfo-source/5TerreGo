@@ -860,18 +860,15 @@ html, body {
       const rotateX = beta * 0.03;
       const rotateY = gamma * 0.03;
 
-      if (elements.mapPhone) {
-        elements.mapPhone.style.transform =
-          'translateX(-50%) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.06)';
-      }
+      // ❌ remove 3D from other elements (only video moves)
 
       if (elements.videoEl) {
-        const moveX = gamma * 0.4;
-        const moveY = beta * 0.4;
+        const moveX = gamma * 0.6;
+        const moveY = beta * 0.6;
 
-        // 🎯 muove SOLO il video (non lo sfondo intero)
+        // 🎯 ONLY 12.mp4 moves (true parallax)
         elements.videoEl.style.transform =
-          'translate(' + moveX + 'px,' + moveY + 'px) scale(1.08)';
+          'translate3d(' + moveX + 'px,' + moveY + 'px,0) scale(1.08)';
       }
 
     });
