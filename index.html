@@ -283,7 +283,7 @@ html, body {
 
 .corner-label {
   position: absolute;
-  top: 34px;
+  top: 38px; /* moved up to fix too low */
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -294,13 +294,13 @@ html, body {
 }
 
 .corner-peek.left .corner-label {
-  right: 20px;
+  right: 40px; /* push inward from edge */
   text-align: right;
   color: #fff;
 }
 
 .corner-peek.right .corner-label {
-  left: 20px;
+  left: 40px; /* push inward from edge */
   text-align: left;
   color: #fff;
 }
@@ -742,10 +742,16 @@ html, body {
   }
 
   function handleVerticalSwipe(endY) {
-    // 🚫 DISABLE swipe when on corner picker screen
-    if (slideState === 2) return;
-
     const delta = startY - endY;
+
+    // 👉 In corner picker screen:
+    // no scrolling, BUT allow swipe down to go back
+    if (slideState === 2) {
+      if (delta < -20) goPrev(); // swipe down → back
+      return;
+    }
+
+    // normal behavior for other slides
     if (delta > 20) goNext();
     else if (delta < -20) goPrev();
   }
