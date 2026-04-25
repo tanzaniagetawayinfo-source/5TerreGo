@@ -387,6 +387,27 @@ html, body {
   opacity: 0.7;
 }
 
+.partner-btn {
+  margin-top: 20px;
+  align-self: center;
+  padding: 14px 22px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(249,115,22,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partner-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 6px 18px rgba(249,115,22,0.3);
+}
+
 @media (max-width: 520px) {
   .overlay h1 { font-size: clamp(36px, 13vw, 64px); }
   .overlay.topbar { top: 16px; left: 14px; width: calc(100% - 28px); }
@@ -481,6 +502,7 @@ html, body {
     <p><strong>Direct customers</strong><br>Users discover and come to you — no middleman.</p>
     <p><strong>Simple system</strong><br>Users unlock your discount via 5TerreGo and redeem it in person.</p>
     <p>It’s not a marketplace. It’s a discovery platform that brings real customers to local businesses.</p>
+    <a href="mailto:5terrego.info@gmail.com" class="partner-btn">Become partner</a>
   </div>
   <div class="close-hint">Swipe down to close</div>
 </section>
