@@ -6,7 +6,6 @@
 <title>5TerreGo</title>
 
 <style>
-/* (unchanged CSS) */
 html, body {
   margin: 0;
   padding: 0;
@@ -18,20 +17,903 @@ html, body {
   overscroll-behavior: none;
   touch-action: auto;
 }
-/* ... CSS unchanged ... */
+
+.video-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+.blur-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background 0.65s ease, backdrop-filter 0.65s ease, -webkit-backdrop-filter 0.65s ease;
+}
+
+.blur-layer.active {
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 3;
+  color: #fff;
+  width: min(92vw, 900px);
+  pointer-events: none;
+}
+
+.overlay.topbar {
+  top: 20px;
+  left: 20px;
+  transform: translate(0, 0);
+  width: calc(100% - 40px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  text-align: left;
+}
+
+.overlay h1 {
+  margin: 0;
+  font-size: clamp(36px, 10vw, 100px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar h1 {
+  grid-column: 1;
+  font-size: clamp(18px, 4vw, 30px);
+  line-height: 1;
+}
+
+.blue { color: #2563eb; }
+.orange { color: #f97316; }
+
+.coming {
+  margin-top: 12px;
+  font-size: clamp(12px, 2.5vw, 18px);
+  letter-spacing: 0.3em;
+  opacity: 0.86;
+  font-weight: 600;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.overlay.topbar .coming {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.countdown {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 4vw, 24px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  transition: margin 0.65s cubic-bezier(.2,.8,.2,1), gap 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown {
+  grid-column: 3;
+  margin-top: 0;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.countdown div {
+  min-width: 54px;
+  text-align: center;
+  transition: min-width 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown div { min-width: 38px; }
+
+.countdown span {
+  display: block;
+  font-size: clamp(22px, 5vw, 42px);
+  font-weight: 800;
+  line-height: 1;
+  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown span { font-size: clamp(16px, 3vw, 24px); }
+
+.countdown small {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1), margin 0.65s cubic-bezier(.2,.8,.2,1);
+}
+
+.overlay.topbar .countdown small {
+  margin-top: 4px;
+  font-size: 8px;
+}
+
+.poster {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  width: min(90vw, 760px);
+  z-index: 3;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 40px) scale(0.98);
+  transition: opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.75s cubic-bezier(.16,1,.3,1);
+}
+
+.poster.active {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.poster.with-phone { opacity: 1; }
+.poster.final { transform: translate(-50%, -48vh) scale(1); }
+
+.map-phone {
+  position: fixed;
+  left: 50%;
+  bottom: -42vh;
+  z-index: 6;
+  width: min(64vw, 300px);
+  height: auto;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.9);
+  filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
+  pointer-events: none;
+  will-change: transform, bottom, opacity;
+  transition: bottom 0.85s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, transform 0.85s cubic-bezier(.16,1,.3,1);
+}
+
+.map-phone.active {
+  bottom: 28%;
+  opacity: 1;
+  transform: translateX(-50%) scale(1.06);
+}
+
+.map-phone.exit {
+  bottom: -42vh;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.95);
+}
+
+.headline {
+  margin: 0;
+  font-size: clamp(30px, 7vw, 64px);
+  font-weight: 850;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.tagline {
+  margin: 14px auto 0;
+  max-width: 680px;
+  font-size: clamp(14px, 3vw, 20px);
+  line-height: 1.45;
+  opacity: 1;
+}
+
+.swipe-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  color: rgba(255,255,255,0.72);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: hintPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+  50% { transform: translate(-50%, -8px); opacity: 0.95; }
+}
+
+.corner-peek {
+  position: fixed;
+  bottom: -320px;
+  width: 560px;
+  height: 560px;
+  z-index: 5;
+  background: rgba(255,255,255,0.08);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 18px;
+  box-sizing: border-box;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(.2,.8,.2,1), opacity 0.3s ease;
+}
+
+.corner-peek.left {
+  left: -260px;
+  transform: translate(0, 60px);
+  box-shadow: 20px 28px 80px rgba(37,99,235,0.45), 0 28px 80px rgba(0,0,0,0.35);
+}
+
+.corner-peek.right {
+  right: -260px;
+  transform: translate(0, 60px);
+  text-align: right;
+  box-shadow: -20px 28px 80px rgba(249,115,22,0.45), 0 28px 80px rgba(0,0,0,0.35);
+}
+
+.corner-peek.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.corner-peek.bump-left { transform: translate(40px, 40px); }
+.corner-peek.bump-right { transform: translate(-40px, 40px); }
+
+.corner-label {
+  position: absolute;
+  top: 34px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  max-width: 190px;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.corner-peek.left .corner-label {
+  right: 20px;
+  text-align: right;
+  color: #fff;
+}
+
+.corner-peek.right .corner-label {
+  left: 20px;
+  text-align: left;
+  color: #fff;
+}
+
+.full-page {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  top: 18px;
+  z-index: 7;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, var(--page-y, 0px), 0) scale(0.02);
+  border-radius: 28px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
+  transition: transform 0.85s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, border-radius 0.8s ease;
+  overflow: visible;
+  touch-action: none;
+  will-change: transform;
+}
+
+.full-page.left {
+  transform-origin: bottom left;
+  background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.55) 56%, rgba(0,0,0,0.0) 80%);
+  border-top-right-radius: 18px;
+}
+
+.full-page.right {
+  transform-origin: bottom right;
+  background: radial-gradient(circle at 90% 90%, rgba(249,115,22,0.82), rgba(41,18,8,0.55) 56%, rgba(0,0,0,0.0) 80%);
+  border-top-left-radius: 18px;
+}
+
+.full-page.active {
+  transform: translate3d(0, var(--page-y, 0px), 0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.full-page.closing {
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease;
+}
+
+.full-page-inner {
+  height: auto;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 34px;
+  padding: 82px 28px 96px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.full-page h2 {
+  margin: 0;
+  font-size: clamp(38px, 10vw, 92px);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.full-page p {
+  max-width: 620px;
+  margin: 0;
+  font-size: clamp(16px, 3vw, 22px);
+  line-height: 1.45;
+  opacity: 0.9;
+}
+
+.close-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.partner-btn {
+  margin-top: 20px;
+  align-self: center;
+  padding: 14px 22px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(249,115,22,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partner-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 6px 18px rgba(249,115,22,0.3);
+}
+
+@media (max-width: 520px) {
+  .overlay h1 { font-size: clamp(36px, 13vw, 64px); }
+  .overlay.topbar { top: 16px; left: 14px; width: calc(100% - 28px); }
+  .overlay.topbar h1 { font-size: 18px; }
+  .countdown { gap: 10px; }
+  .countdown div { min-width: 44px; }
+  .overlay.topbar .countdown { gap: 7px; }
+  .overlay.topbar .countdown div { min-width: 30px; }
+  .overlay.topbar .countdown span { font-size: 15px; }
+  .overlay.topbar .countdown small { font-size: 7px; }
+  .corner-peek { width: 370px; height: 420px; bottom: -260px; }
+  .corner-peek.left { left: -200px; }
+  .corner-peek.right { right: -200px; }
+}
 </style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="chromakey" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="
+      1 0 0 0 0
+      0 1 0 0 0
+      0 0 1 0 0
+      -1 2 -1 0 -0.35" result="withAlpha"/>
+    <feComponentTransfer in="withAlpha" result="alphaOnly">
+      <feFuncA type="table" tableValues="1 1 1 0 0"/>
+    </feComponentTransfer>
+    <feMorphology in="alphaOnly" operator="erode" radius="1" result="alphaEroded"/>
+    <feComposite in="SourceGraphic" in2="alphaEroded" operator="in"/>
+  </filter>
+</svg>
 </head>
 
 <body>
 
 <div class="video-wrapper">
   <video autoplay muted loop playsinline preload="auto" webkit-playsinline>
-    <!-- ✅ FIXED VIDEO NAME -->
     <source src="./123.mp4" type="video/mp4" />
   </video>
 </div>
 
-<!-- REST OF DOCUMENT UNCHANGED -->
+<div class="blur-layer" id="blur"></div>
+
+<div class="overlay" id="hero">
+  <h1><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></h1>
+  <div class="coming">COMING SOON</div>
+  <div class="countdown" aria-label="Countdown to June 1st">
+    <div><span id="d">00</span><small>Days</small></div>
+    <div><span id="h">00</span><small>Hours</small></div>
+    <div><span id="m">00</span><small>Min</small></div>
+    <div><span id="s">00</span><small>Sec</small></div>
+  </div>
+</div>
+
+<div class="poster" id="poster">
+  <h2 class="headline">Explore Cinque Terre Like Never Before</h2>
+  <p class="tagline">A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
+</div>
+
+<video class="map-phone" id="mapPhone" autoplay muted loop playsinline preload="auto" webkit-playsinline>
+  <source src="./map1.webm" type="video/webm" />
+</video>
+
+<div class="corner-peek left" id="peekLeft" aria-label="Open explorer page">
+  <div class="corner-label blue">EXPLORE FEATURES</div>
+</div>
+<div class="corner-peek right" id="peekRight" aria-label="Open business page">
+  <div class="corner-label orange">BECOME PARTNER</div>
+</div>
+
+<section class="full-page left" id="pageLeft" aria-hidden="true">
+  <div class="corner-label blue" style="position:absolute;top:34px;right:20px;">EXPLORE FEATURES</div>
+  <div class="full-page-inner">
+    <h2>Explore features</h2>
+    <p>Discover everything inside 5TerreGo — built as a smart, mobile-first travel guide.</p>
+    <p><strong>Interactive Map</strong><br>Explore Cinque Terre with a clean, native-style map designed for fast discovery.</p>
+    <p><strong>Real Local Stories</strong><br>Authentic content created by locals — not generic travel descriptions.</p>
+    <p><strong>Weather & Tides</strong><br>Real-time conditions to help you choose the perfect moment.</p>
+    <p><strong>Handpicked Experiences</strong><br>Carefully selected tours and activities, no noise.</p>
+    <p><strong>Exclusive Discounts</strong><br>Access hidden deals available only inside 5TerreGo.</p>
+  </div>
+  <div class="close-hint">Swipe down to close</div>
+</section>
+
+<section class="full-page right" id="pageRight" aria-hidden="true">
+  <div class="corner-label orange" style="position:absolute;top:34px;left:20px;">BECOME PARTNER</div>
+  <div class="full-page-inner">
+    <h2>Become partner</h2>
+    <p>Join 5TerreGo for free and reach travelers in a completely new way.</p>
+    <p><strong>100% Free</strong><br>No fees, no subscriptions, no hidden costs.</p>
+    <p><strong>You choose the discount</strong><br>Offer any deal you want — full control.</p>
+    <p><strong>More visibility</strong><br>Your business appears directly inside the interactive map.</p>
+    <p><strong>Direct customers</strong><br>Users discover and come to you — no middleman.</p>
+    <p><strong>Simple system</strong><br>Users unlock your discount via 5TerreGo and redeem it in person.</p>
+    <p>It’s not a marketplace. It’s a discovery platform that brings real customers to local businesses.</p>
+    <a href="mailto:5terrego.info@gmail.com" class="partner-btn">Become partner</a>
+  </div>
+  <div class="close-hint">Swipe down to close</div>
+</section>
+
+<div class="swipe-hint" id="swipeHint">Swipe up</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const targetDate = new Date('2026-06-01T00:00:00');
+  const elements = {
+    days: document.getElementById('d'),
+    hours: document.getElementById('h'),
+    minutes: document.getElementById('m'),
+    seconds: document.getElementById('s'),
+    poster: document.getElementById('poster'),
+    blur: document.getElementById('blur'),
+    hero: document.getElementById('hero'),
+    swipeHint: document.getElementById('swipeHint'),
+    mapPhone: document.getElementById('mapPhone'),
+    peekLeft: document.getElementById('peekLeft'),
+    peekRight: document.getElementById('peekRight'),
+    pageLeft: document.getElementById('pageLeft'),
+    pageRight: document.getElementById('pageRight')
+  };
+
+  let startX = 0;
+  let startY = 0;
+  let currentY = 0;
+  let slideState = 0;
+  let peekTimers = [];
+  let pageOpen = null;
+  let ignoreNextSwipe = false;
+
+  function assertRequiredElements() {
+    Object.keys(elements).forEach(function (key) {
+      console.assert(elements[key], 'Missing element: ' + key);
+    });
+  }
+
+  function pad(value) {
+    return String(value).padStart(2, '0');
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getMinPageY(page) {
+    const pageHeight = page.offsetHeight;
+    const visibleHeight = window.innerHeight - 36;
+    const extraHeight = pageHeight - visibleHeight;
+    return extraHeight > 0 ? -extraHeight : 0;
+  }
+
+  function getPageY(page) {
+    return Number(page.dataset.pageY || 0);
+  }
+
+  function setPageY(page, value) {
+    const nextY = clamp(value, getMinPageY(page), 0);
+    page.dataset.pageY = String(nextY);
+    page.style.setProperty('--page-y', nextY + 'px');
+    return nextY;
+  }
+
+  function isPageHeadVisible(page) {
+    return getPageY(page) >= -2;
+  }
+
+  function updateCountdown() {
+    const diff = targetDate - new Date();
+    if (!elements.days || !elements.hours || !elements.minutes || !elements.seconds) return;
+
+    if (diff <= 0) {
+      elements.days.textContent = '00';
+      elements.hours.textContent = '00';
+      elements.minutes.textContent = '00';
+      elements.seconds.textContent = '00';
+      return;
+    }
+
+    elements.days.textContent = pad(Math.floor(diff / 86400000));
+    elements.hours.textContent = pad(Math.floor((diff / 3600000) % 24));
+    elements.minutes.textContent = pad(Math.floor((diff / 60000) % 60));
+    elements.seconds.textContent = pad(Math.floor((diff / 1000) % 60));
+  }
+
+  function clearPeekTimers() {
+    peekTimers.forEach(function (timer) { clearTimeout(timer); });
+    peekTimers = [];
+  }
+
+  function stopPeekAnimation() {
+    clearPeekTimers();
+    elements.peekLeft.classList.remove('bump-left');
+    elements.peekRight.classList.remove('bump-right');
+  }
+
+  function startPeekAnimation() {
+    if (slideState !== 2 || pageOpen) return;
+    clearPeekTimers();
+
+    function bumpLeft() {
+      if (slideState !== 2 || pageOpen) return;
+      elements.peekLeft.classList.add('bump-left');
+      peekTimers.push(setTimeout(function () { elements.peekLeft.classList.remove('bump-left'); }, 520));
+    }
+
+    function bumpRight() {
+      if (slideState !== 2 || pageOpen) return;
+      elements.peekRight.classList.add('bump-right');
+      peekTimers.push(setTimeout(function () { elements.peekRight.classList.remove('bump-right'); }, 520));
+    }
+
+    function cycle() {
+      if (slideState !== 2 || pageOpen) return;
+      bumpLeft();
+      peekTimers.push(setTimeout(bumpRight, 3500));
+      peekTimers.push(setTimeout(cycle, 8500));
+    }
+
+    peekTimers.push(setTimeout(cycle, 1000));
+  }
+
+  function setSlide(state) {
+    slideState = clamp(Number(state) || 0, 0, 2);
+
+    const isPhoneSlide = slideState === 1;
+    const isSelectionSlide = slideState === 2;
+    const isPastHero = slideState > 0;
+
+    elements.poster.classList.toggle('active', isPastHero);
+    elements.poster.classList.toggle('with-phone', isPhoneSlide);
+    elements.poster.classList.toggle('final', isSelectionSlide);
+    elements.blur.classList.toggle('active', isPastHero);
+    elements.hero.classList.toggle('topbar', isPastHero);
+    elements.mapPhone.classList.toggle('active', isPhoneSlide);
+    elements.mapPhone.classList.toggle('exit', isSelectionSlide);
+    elements.swipeHint.textContent = slideState === 0 ? 'Swipe up' : '';
+
+    const showCorners = isSelectionSlide && !pageOpen;
+    elements.peekLeft.classList.toggle('active', showCorners);
+    elements.peekRight.classList.toggle('active', showCorners);
+
+    if (showCorners) startPeekAnimation();
+    else stopPeekAnimation();
+  }
+
+  function goNext() {
+    if (!pageOpen) setSlide(slideState + 1);
+  }
+
+  function goPrev() {
+    if (!pageOpen) setSlide(slideState - 1);
+  }
+
+  function openPage(side) {
+    const page = side === 'left' ? elements.pageLeft : elements.pageRight;
+    const other = side === 'left' ? elements.pageRight : elements.pageLeft;
+
+    pageOpen = side;
+    stopPeekAnimation();
+    elements.peekLeft.classList.remove('active');
+    elements.peekRight.classList.remove('active');
+
+    other.classList.remove('active', 'closing');
+    other.setAttribute('aria-hidden', 'true');
+    other.style.transform = '';
+    setPageY(other, 0);
+
+    page.style.transform = '';
+    page.classList.remove('closing');
+    setPageY(page, 0);
+    page.classList.add('active');
+    page.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePage() {
+    if (!pageOpen) return;
+
+    const page = pageOpen === 'left' ? elements.pageLeft : elements.pageRight;
+    page.classList.add('closing');
+    page.style.transform = '';
+    setPageY(page, 0);
+    page.classList.remove('active');
+    page.setAttribute('aria-hidden', 'true');
+
+    pageOpen = null;
+    ignoreNextSwipe = true;
+    setTimeout(function () { ignoreNextSwipe = false; }, 350);
+    setSlide(2);
+  }
+
+  function handleVerticalSwipe(endY) {
+    const delta = startY - endY;
+    if (delta > 48) goNext();
+    else if (delta < -48) goPrev();
+  }
+
+  function bindGlobalInteractions() {
+    window.addEventListener('touchstart', function (event) {
+      if (!event.touches || !event.touches.length) return;
+      startY = event.touches[0].clientY;
+      startX = event.touches[0].clientX;
+      currentY = startY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function (event) {
+      if (!event.touches || !event.touches.length || pageOpen) return;
+
+      const dy = event.touches[0].clientY - startY;
+      const dx = event.touches[0].clientX - startX;
+      currentY = event.touches[0].clientY;
+
+      if (Math.abs(dy) > Math.abs(dx)) event.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchend', function (event) {
+      if (pageOpen || ignoreNextSwipe) return;
+      const target = event.target;
+      if (target && target.closest && (target.closest('.corner-peek') || target.closest('.full-page'))) return;
+      const endY = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY : currentY;
+      handleVerticalSwipe(endY);
+    }, { passive: true });
+
+    window.addEventListener('wheel', function (event) {
+      if (pageOpen || ignoreNextSwipe) return;
+      if (event.deltaY > 35) goNext();
+      else if (event.deltaY < -35) goPrev();
+    }, { passive: true });
+
+    window.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && pageOpen) closePage();
+      else if (pageOpen) return;
+      else if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') goNext();
+      else if (event.key === 'ArrowUp' || event.key === 'PageUp') goPrev();
+      else if (slideState === 2 && event.key === 'ArrowLeft') openPage('left');
+      else if (slideState === 2 && event.key === 'ArrowRight') openPage('right');
+    });
+  }
+
+  function bindCornerDrag() {
+    function attach(el, side) {
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let dragging = false;
+      let opened = false;
+
+      el.addEventListener('touchstart', function (event) {
+        if (slideState !== 2 || pageOpen) return;
+        dragging = true;
+        opened = false;
+        dragStartX = event.touches[0].clientX;
+        dragStartY = event.touches[0].clientY;
+        stopPeekAnimation();
+      }, { passive: true });
+
+      el.addEventListener('touchmove', function (event) {
+        if (!dragging || slideState !== 2 || pageOpen) return;
+        const dx = event.touches[0].clientX - dragStartX;
+        const dy = dragStartY - event.touches[0].clientY;
+        const pull = Math.max(dy, Math.abs(dx));
+
+        if (side === 'left') {
+          const moveX = Math.min(Math.max(dx, 0), 190);
+          const moveY = Math.min(Math.max(dy, 0), 190);
+          el.style.transform = 'translate(' + moveX + 'px, ' + (40 - moveY * 0.35) + 'px)';
+          if (pull > 120 && !opened) {
+            opened = true;
+            el.style.transform = '';
+            openPage('left');
+          }
+        } else {
+          const moveX = Math.max(Math.min(dx, 0), -190);
+          const moveY = Math.min(Math.max(dy, 0), 190);
+          el.style.transform = 'translate(' + moveX + 'px, ' + (40 - moveY * 0.35) + 'px)';
+          if (pull > 120 && !opened) {
+            opened = true;
+            el.style.transform = '';
+            openPage('right');
+          }
+        }
+      }, { passive: true });
+
+      el.addEventListener('touchend', function () {
+        dragging = false;
+        el.style.transform = '';
+        if (slideState === 2 && !pageOpen) startPeekAnimation();
+      }, { passive: true });
+    }
+
+    attach(elements.peekLeft, 'left');
+    attach(elements.peekRight, 'right');
+  }
+
+  function bindPageGestures() {
+    [elements.pageLeft, elements.pageRight].forEach(function (page) {
+      let touchStartY = 0;
+      let startPageY = 0;
+      let closingDrag = false;
+
+      page.addEventListener('touchstart', function (event) {
+        if (!page.classList.contains('active')) return;
+        touchStartY = event.touches[0].clientY;
+        startPageY = getPageY(page);
+        closingDrag = false;
+        page.style.transform = '';
+        page.classList.remove('closing');
+      }, { passive: true });
+
+      page.addEventListener('touchmove', function (event) {
+        if (!page.classList.contains('active')) return;
+        event.preventDefault();
+
+        const dy = event.touches[0].clientY - touchStartY;
+
+        if (isPageHeadVisible(page) && dy > 24) {
+          closingDrag = true;
+          page.classList.add('closing');
+          const scale = Math.max(0.88, 1 - dy / 1200);
+          page.style.transform = 'translate3d(0,' + dy + 'px,0) scale(' + scale + ')';
+          return;
+        }
+
+        closingDrag = false;
+        page.style.transform = '';
+        page.classList.remove('closing');
+        setPageY(page, startPageY + dy);
+      }, { passive: false });
+
+      page.addEventListener('touchend', function (event) {
+        if (!page.classList.contains('active')) return;
+        const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - touchStartY : 0;
+
+        if (closingDrag && dy > 120 && isPageHeadVisible(page)) {
+          closePage();
+          return;
+        }
+
+        page.style.transform = '';
+        page.classList.remove('closing');
+      }, { passive: true });
+    });
+  }
+
+  function runBasicTests() {
+    assertRequiredElements();
+
+    console.assert(typeof setSlide === 'function', 'setSlide should exist');
+    console.assert(typeof openPage === 'function', 'openPage should exist');
+    console.assert(typeof closePage === 'function', 'closePage should exist');
+    console.assert(typeof getMinPageY === 'function', 'getMinPageY should exist');
+    console.assert(typeof setPageY === 'function', 'setPageY should exist');
+
+    setSlide(0);
+    console.assert(slideState === 0, 'slide 0 failed');
+    console.assert(!elements.poster.classList.contains('active'), 'poster should be hidden on slide 0');
+
+    setSlide(1);
+    console.assert(slideState === 1, 'slide 1 failed');
+    console.assert(elements.mapPhone.classList.contains('active'), 'phone should be active on slide 1');
+
+    setSlide(2);
+    console.assert(slideState === 2, 'slide 2 failed');
+    console.assert(elements.peekLeft.classList.contains('active'), 'left corner should be active on slide 2');
+    console.assert(elements.peekRight.classList.contains('active'), 'right corner should be active on slide 2');
+
+    openPage('left');
+    console.assert(pageOpen === 'left', 'left page should open');
+    console.assert(elements.pageLeft.classList.contains('active'), 'left page should be active');
+    console.assert(getComputedStyle(elements.pageLeft).overflow !== 'auto', 'page should not use internal scrolling');
+    console.assert(getPageY(elements.pageLeft) === 0, 'opened page should start at the top');
+
+    setPageY(elements.pageLeft, -99999);
+    console.assert(getPageY(elements.pageLeft) === getMinPageY(elements.pageLeft), 'page should clamp to minimum Y');
+    setPageY(elements.pageLeft, 99999);
+    console.assert(getPageY(elements.pageLeft) === 0, 'page should clamp to maximum Y');
+
+    closePage();
+    console.assert(pageOpen === null, 'page should close');
+    console.assert(slideState === 2, 'closing page should return to selection slide');
+
+    openPage('right');
+    console.assert(pageOpen === 'right', 'right page should open');
+    console.assert(elements.pageRight.classList.contains('active'), 'right page should be active');
+    console.assert(getPageY(elements.pageRight) === 0, 'right page should start at the top');
+
+    closePage();
+    setSlide(0);
+  }
+
+  function init() {
+    assertRequiredElements();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    bindGlobalInteractions();
+    bindCornerDrag();
+    bindPageGestures();
+    runBasicTests();
+    setSlide(0);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 
 </body>
 </html>
