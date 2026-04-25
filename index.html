@@ -867,8 +867,12 @@ html, body {
         const moveY = beta * 0.6;
 
         // 🎯 ONLY 12.mp4 moves (true parallax)
+        // 🎯 3D tilt (NO lateral movement, no background shift)
+        const rotX = beta * 0.05;
+        const rotY = gamma * 0.05;
+
         elements.videoEl.style.transform =
-          'translate3d(' + moveX + 'px,' + moveY + 'px,0) scale(1.08)';
+          'rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.08)';
       }
 
     });
