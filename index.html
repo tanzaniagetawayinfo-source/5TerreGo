@@ -534,7 +534,8 @@ html, body {
     peekLeft: document.getElementById('peekLeft'),
     peekRight: document.getElementById('peekRight'),
     pageLeft: document.getElementById('pageLeft'),
-    pageRight: document.getElementById('pageRight')
+    pageRight: document.getElementById('pageRight'),
+    videoEl: document.querySelector('.video-wrapper video')
   };
 
   let startX = 0;
@@ -845,6 +846,35 @@ html, body {
     attach(elements.peekRight, 'right');
   }
 
+  // 📱 ANDROID GYRO 3D EFFECT (no permission required)
+  function bindGyroAndroid() {
+    if (!window.DeviceOrientationEvent) return;
+
+    // skip iOS (needs permission)
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
+
+    window.addEventListener('deviceorientation', function(e) {
+      const gamma = e.gamma || 0; // left-right
+      const beta = e.beta || 0;   // front-back
+
+      const rotateX = beta * 0.03;
+      const rotateY = gamma * 0.03;
+
+      if (elements.mapPhone) {
+        elements.mapPhone.style.transform =
+          'translateX(-50%) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.06)';
+      }
+
+      if (elements.videoEl) {
+        const moveX = gamma * 0.5;
+        const moveY = beta * 0.5;
+        elements.videoEl.style.transform =
+          'translate(' + moveX + 'px,' + moveY + 'px) scale(1.05)';
+      }
+
+    });
+  }
+
   function bindPageGestures() {
     [elements.pageLeft, elements.pageRight].forEach(function (page) {
       let touchStartY = 0;
@@ -969,6 +999,7 @@ html, body {
   }
 
   function init() {
+    bindGyroAndroid();
     assertRequiredElements();
     updateCountdown();
     setInterval(updateCountdown, 1000);
