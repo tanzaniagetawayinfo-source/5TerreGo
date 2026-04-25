@@ -535,7 +535,7 @@ html, body {
     peekRight: document.getElementById('peekRight'),
     pageLeft: document.getElementById('pageLeft'),
     pageRight: document.getElementById('pageRight'),
-    videoEl: document.querySelector('.video-wrapper video')
+    videoEl: document.getElementById('mapPhone')
   };
 
   let startX = 0;
@@ -860,7 +860,7 @@ html, body {
       const rotateX = beta * 0.03;
       const rotateY = gamma * 0.03;
 
-      // ❌ remove 3D from other elements (only video moves)
+      // 🎯 apply gyro only to map.mp4 / mapPhone video
 
       if (elements.videoEl) {
         const moveX = gamma * 0.3;
