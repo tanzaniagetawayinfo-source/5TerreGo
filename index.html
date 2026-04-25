@@ -866,10 +866,12 @@ html, body {
       }
 
       if (elements.videoEl) {
-        const moveX = gamma * 0.5;
-        const moveY = beta * 0.5;
+        const moveX = gamma * 0.4;
+        const moveY = beta * 0.4;
+
+        // 🎯 muove SOLO il video (non lo sfondo intero)
         elements.videoEl.style.transform =
-          'translate(' + moveX + 'px,' + moveY + 'px) scale(1.05)';
+          'translate(' + moveX + 'px,' + moveY + 'px) scale(1.08)';
       }
 
     });
