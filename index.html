@@ -888,6 +888,7 @@ html, body {
       let startPageY = 0;
       let closingDrag = false;
       let bottomExitReady = false;
+      let bottomReachedOnce = false;
 
       page.addEventListener('touchstart', function (event) {
         if (!page.classList.contains('active')) return;
@@ -895,6 +896,7 @@ html, body {
         startPageY = getPageY(page);
         closingDrag = false;
         bottomExitReady = false;
+        bottomReachedOnce = isPageAtBottom(page); // 👈 reset logic
         page.style.transform = '';
         page.classList.remove('closing', 'exiting-up');
       }, { passive: true });
@@ -907,11 +909,23 @@ html, body {
         const swipingUp = dy < 0;
         const swipingDown = dy > 0;
 
+        // 🔒 BOTTOM DRAG: move UP (first swipe just primes exit, no closing yet)
         if (isPageAtBottom(page) && swipingUp) {
-          bottomExitReady = true;
+          if (!bottomReachedOnce) {
+            bottomReachedOnce = true; // 👈 first contact with bottom
+            return;
+          }
+
           closingDrag = false;
           page.classList.remove('closing');
-          page.style.transform = 'translate3d(0,' + dy + 'px,0) scale(1)';
+
+          const progress = Math.min(Math.abs(dy), 140);
+          const moveY = -progress; // always go UP
+          const scale = 1 - progress / 900;
+
+          page.style.transform =
+            'translate3d(0,' + moveY + 'px,0) scale(' + scale + ')';
+
           return;
         }
 
@@ -935,16 +949,41 @@ html, body {
         if (!page.classList.contains('active')) return;
         const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - touchStartY : 0;
 
+        // 👉 chiusura perfetta dall'alto (già ok)
         if (closingDrag && dy > 120 && isPageHeadVisible(page)) {
           closePage();
           return;
         }
 
-        if (bottomExitReady && dy < -80) {
+        // 👉 uscita verso home dal basso (già ok)
+        // 🚫 REMOVE instant exit trigger from bottom
+        // (was causing jump from top to home in one swipe)
+
+
+        // 🔥 secondo swipe dal fondo → chiusura verso ALTO
+        if (isPageAtBottom(page) && dy < -80 && bottomReachedOnce) {
           exitPageUpToHome();
+          bottomReachedOnce = false;
           return;
         }
 
+        // 🔧 FIX: snap corretto quando arrivi in basso
+        if (isPageAtBottom(page)) {
+          setPageY(page, getMinPageY(page)); // forza posizione precisa
+          page.style.transform = '';
+          page.classList.remove('closing');
+          return;
+        }
+
+        // 🔧 FIX: snap anche se sei quasi in basso
+        const minY = getMinPageY(page);
+        if (getPageY(page) < minY + 60) {
+          setPageY(page, minY);
+          page.style.transform = '';
+          return;
+        }
+
+        // fallback normale
         page.style.transform = '';
         page.classList.remove('closing');
       }, { passive: true });
