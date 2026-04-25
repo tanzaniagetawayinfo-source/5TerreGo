@@ -326,6 +326,10 @@ html, body {
   will-change: transform, opacity;
 }
 
+.full-page.dragging {
+  transition: none !important;
+}
+
 .full-page.left {
   transform-origin: bottom left;
   background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.55) 56%, rgba(0,0,0,0.0) 80%);
@@ -502,14 +506,29 @@ html, body {
   <div class="corner-label orange" style="position:absolute;top:34px;left:20px;">PARTNERSHIP</div>
   <div class="full-page-inner">
     <h2>PARTNERSHIP</h2>
-    <p>Join 5TerreGo for free and reach travelers in a completely new way.</p>
-    <p><strong>100% Free</strong><br>No fees, no subscriptions, no hidden costs.</p>
-    <p><strong>You choose the discount</strong><br>Offer any deal you want — full control.</p>
-    <p><strong>More visibility</strong><br>Your business appears directly inside the interactive map.</p>
-    <p><strong>Direct customers</strong><br>Users discover and come to you — no middleman.</p>
-    <p><strong>Simple system</strong><br>Users unlock your discount via 5TerreGo and redeem it in person.</p>
-    <p>It’s not a marketplace. It’s a discovery platform that brings real customers to local businesses.</p>
-    <a href="mailto:5terrego.info@gmail.com" class="partner-btn">PARTNERSHIP</a>
+
+    <p><strong>Join a free entrepreneurial network</strong><br>
+    Become part of a curated community of local businesses inside 5TerreGo.</p>
+
+    <p><strong>100% free</strong><br>
+    No fees, no subscriptions. Ever.</p>
+
+    <p><strong>How it works</strong><br>
+    Provide a list of authorized emails. Your staff simply opens the phone camera to scan and validate the user’s discount.</p>
+
+    <p><strong>Simple validation</strong><br>
+    When a 5TerreGo user arrives, validation takes seconds — no apps, no hardware.</p>
+
+    <p><strong>Controlled usage</strong><br>
+    Each user can redeem only one discount per day.</p>
+
+    <p><strong>Higher visibility</strong><br>
+    Partners are highlighted and become more relevant inside the interactive map.</p>
+
+    <p><strong>Direct customers</strong><br>
+    No intermediaries. Users discover you and come directly to your location.</p>
+
+    <a href="mailto:5terrego.info@gmail.com" class="partner-btn">JOIN PARTNERSHIP</a>
   </div>
   <div class="close-hint">Swipe down to close</div>
 </section>
@@ -690,13 +709,13 @@ html, body {
     elements.peekLeft.classList.remove('active');
     elements.peekRight.classList.remove('active');
 
-    other.classList.remove('active', 'closing', 'exiting-up');
+    other.classList.remove('active', 'closing', 'exiting-up', 'dragging');
     other.setAttribute('aria-hidden', 'true');
     other.style.transform = '';
     setPageY(other, 0);
 
     page.style.transform = '';
-    page.classList.remove('closing', 'exiting-up');
+    page.classList.remove('closing', 'exiting-up', 'dragging');
     setPageY(page, 0);
     page.classList.add('active');
     page.setAttribute('aria-hidden', 'false');
@@ -708,6 +727,7 @@ html, body {
 
     const page = pageOpen === 'left' ? elements.pageLeft : elements.pageRight;
     page.classList.add('closing');
+    page.classList.remove('dragging');
     page.style.transform = '';
     page.classList.remove('active', 'exiting-up');
     page.setAttribute('aria-hidden', 'true');
@@ -726,7 +746,7 @@ html, body {
     if (!pageOpen) return;
 
     const page = pageOpen === 'left' ? elements.pageLeft : elements.pageRight;
-    page.classList.remove('closing');
+    page.classList.remove('closing', 'dragging');
     page.classList.add('exiting-up');
     page.setAttribute('aria-hidden', 'true');
     pageOpen = null;
@@ -734,7 +754,7 @@ html, body {
     setSlide(0);
 
     setTimeout(function () {
-      page.classList.remove('active', 'exiting-up');
+      page.classList.remove('active', 'exiting-up', 'dragging');
       page.style.transform = '';
       setPageY(page, 0);
       ignoreNextSwipe = false;
@@ -886,6 +906,7 @@ html, body {
         bottomExitDistance = 0;
         page.style.transform = '';
         page.classList.remove('closing', 'exiting-up');
+        page.classList.add('dragging');
       }, { passive: true });
 
       page.addEventListener('touchmove', function (event) {
@@ -897,15 +918,12 @@ html, body {
         const swipingDown = dy > 0;
         const gestureStartedAtBottom = Math.abs(startPageY - getMinPageY(page)) < 2;
 
-        // Dal fondo: solo un nuovo gesto partito già dal fondo può trascinare la box verso l'alto.
-        // Arrivare al fondo durante lo scroll non chiude la pagina.
         if (gestureStartedAtBottom && swipingUp) {
           bottomExitDrag = true;
           closingDrag = false;
+          bottomExitDistance = Math.abs(dy);
           page.classList.remove('closing');
-
-          bottomExitDistance = Math.min(Math.abs(dy), window.innerHeight * 0.9);
-          page.style.transform = 'translate3d(0,' + (-bottomExitDistance) + 'px,0)';
+          page.style.transform = 'translate3d(0,' + dy + 'px,0)';
           return;
         }
 
@@ -929,7 +947,11 @@ html, body {
 
       page.addEventListener('touchend', function (event) {
         if (!page.classList.contains('active')) return;
-        const dy = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY - touchStartY : 0;
+        page.classList.remove('dragging');
+
+        const dy = event.changedTouches && event.changedTouches.length
+          ? event.changedTouches[0].clientY - touchStartY
+          : 0;
 
         if (closingDrag && dy > 120 && isPageHeadVisible(page)) {
           closePage();
@@ -937,7 +959,7 @@ html, body {
         }
 
         if (bottomExitDrag) {
-          if (bottomExitDistance > 90) {
+          if (bottomExitDistance > 90 || Math.abs(dy) > 90) {
             exitPageUpToHome();
           } else {
             page.style.transform = '';
@@ -1022,6 +1044,8 @@ html, body {
     setSlide(0);
 
     console.assert(!document.documentElement.innerHTML.includes('bottomExitReady'), 'bottomExitReady reference should not exist');
+    console.assert(!document.documentElement.innerHTML.includes('},\n          return;'), 'broken duplicated touchend fragment should not exist');
+    console.assert(document.querySelectorAll('.full-page.dragging').length === 0, 'no page should start as dragging');
   }
 
   function init() {
