@@ -51,7 +51,19 @@
 
     .page {
       width: 100%;
-      min-height: 100vh;
+      height: 100dvh; /* no extra scroll space */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pages-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100dvh;
+      will-change: transform;
+      transition: transform 0.6s ease;
     }
 
     .hero {
@@ -77,9 +89,13 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 1040px;
-      margin: 0 auto;
-      min-height: calc(100vh - 62px);
+      max-width: none; /* REMOVE BOX EFFECT */
+      margin: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -214,24 +230,32 @@
 
     section {
       height: 100dvh;
+      width: 100%;
       position: relative;
-      padding: 82px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0; /* remove outer gap so box can grow */
       overflow: hidden;
-    
+      overflow: hidden;
     }
 
     .section-inner {
-      height: 100%;
-      overflow-y: auto;
+      height: 92dvh; /* taller vertical rectangle */
+      width: 100%;
+      max-width: 460px; /* narrower = taller feel */
 
-      /* hide scrollbars */
+      border-radius: var(--radius-xl);
+      background: var(--glass);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+
+      overflow-y: auto;
       -ms-overflow-style: none;
       scrollbar-width: none;
 
-
-      width: 100%;
-      max-width: 1040px;
-      margin: 0 auto;
+      padding: 22px;
     }
 
     .section-header {
@@ -323,12 +347,12 @@
     }
 
     .partnership-panel {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
-      backdrop-filter: blur(24px);
-      padding: 30px;
-      box-shadow: var(--shadow);
+      border: none; /* avoid double box effect */
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0; /* let section-inner be the main box */
+      box-shadow: none;
     }
 
     .partner-layout {
@@ -394,10 +418,7 @@
     }
 
     footer {
-      padding: 34px 20px;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 13px;
+      display: none; /* keep pages full-height */
     }
 
     .footer-inner {
@@ -453,8 +474,27 @@
       }
 
       .hero-actions {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr; /* keep on same row on mobile */
       }
+
+      section {
+        padding: 68px 16px;
+      }
+
+      .partnership-panel {
+        padding: 20px;
+        border-radius: 28px;
+      }
+
+      .partner-item {
+        grid-template-columns: 36px 1fr;
+        padding: 16px;
+      }
+
+      .join-btn {
+        width: 100%;
+      }
+    }
 
       section {
         padding: 68px 16px;
@@ -497,10 +537,28 @@
       display: none;
     }
 
+
+
+    /* FIXED BACKGROUND VIDEO */
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.9; /* adjust if too strong */
+    }
+
 </style>
 </head>
 <body>
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="12.mp4" type="video/mp4">
+  </video>
   <main class="page">
+    <div class="pages-wrapper" id="pagesWrapper">
     <header class="hero" id="top">
       <div class="hero-inner">
         <nav class="topbar" aria-label="Main navigation">
@@ -637,6 +695,7 @@
         </div>
       </div>
     </section>
+    </div>
   </main>
 
   <footer>
@@ -668,8 +727,10 @@
     setInterval(updateCountdown, 1000);
   
 
-    // FULL PAGE SWIPE SYSTEM (edge-only + strict snap)
+    // TRUE PAGE SYSTEM (transform-based, no empty space)
+    const wrapper = document.getElementById('pagesWrapper');
     const sections = Array.from(document.querySelectorAll('.hero, section'));
+
     let currentIndex = 0;
     let startY = 0;
     let isAnimating = false;
@@ -695,22 +756,12 @@
       isAnimating = true;
       currentIndex = index;
 
-      window.scrollTo({
-        top: index * window.innerHeight,
-        behavior: 'smooth'
-      });
+      wrapper.style.transform = `translateY(-${index * 100}dvh)`;
 
       setTimeout(() => {
         isAnimating = false;
-      }, 700);
+      }, 600);
     }
-
-    // KEEP INDEX IN SYNC (fix overlap bug)
-    window.addEventListener('scroll', () => {
-      if (isAnimating) return;
-      const index = Math.round(window.scrollY / window.innerHeight);
-      currentIndex = index;
-    });
 
     window.addEventListener('touchstart', (e) => {
       startY = e.touches[0].clientY;
@@ -737,7 +788,6 @@
       }
     });
 
-    // DESKTOP WHEEL (edge only + prevent bleed)
     document.body.addEventListener('wheel', (e) => {
       if (isAnimating) return;
 
