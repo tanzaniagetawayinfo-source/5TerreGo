@@ -1,1063 +1,678 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>5TerreGo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5TerreGo.com | Coming Soon</title>
+  <style>
+    :root {
+      --bg: #070707;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.68);
+      --soft: rgba(255,255,255,0.12);
+      --glass: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.16);
+      --shadow: 0 24px 80px rgba(0,0,0,0.45);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+    }
 
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: transparent;
-  font-family: Arial, sans-serif;
-  overscroll-behavior: none;
-  touch-action: auto;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-body {
-  --gyro-ui: translate3d(0px, 0px, 0) rotateX(0deg) rotateY(0deg);
-  --gyro-phone: translate3d(0px, 0px, 0) rotateX(0deg) rotateY(0deg);
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-.video-wrapper {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
+    body {
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,0.18), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(120,170,255,0.16), transparent 26%),
+        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.08), transparent 32%),
+        var(--bg);
+      overflow-x: hidden;
+    }
 
-.video-wrapper video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-}
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-.blur-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: rgba(0, 0, 0, 0);
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
-  transition: background 0.65s ease, backdrop-filter 0.65s ease, -webkit-backdrop-filter 0.65s ease;
-}
+    .page {
+      width: 100%;
+      min-height: 100vh;
+    }
 
-.blur-layer.active {
-  background: rgba(0, 0, 0, 0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
+    .hero {
+      min-height: 100vh;
+      padding: 28px 20px 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
 
-.overlay {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) var(--gyro-ui);
-  text-align: center;
-  z-index: 3;
-  color: #fff;
-  width: min(92vw, 900px);
-  pointer-events: none;
-}
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.72));
+      pointer-events: none;
+    }
 
-.overlay.topbar {
-  top: 20px;
-  left: 20px;
-  transform: translate(0, 0) var(--gyro-ui);
-  width: calc(100% - 40px);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: start;
-  text-align: left;
-}
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1040px;
+      margin: 0 auto;
+      min-height: calc(100vh - 62px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-.overlay h1 {
-  margin: 0;
-  font-size: clamp(36px, 10vw, 100px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
-  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
-}
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
 
-.overlay.topbar h1 {
-  grid-column: 1;
-  font-size: clamp(18px, 4vw, 30px);
-  line-height: 1;
-}
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
 
-.blue { color: #2563eb; }
-.orange { color: #f97316; }
+    .status {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 9px 13px;
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+    }
 
-.coming {
-  margin-top: 12px;
-  font-size: clamp(12px, 2.5vw, 18px);
-  letter-spacing: 0.3em;
-  opacity: 0.86;
-  font-weight: 600;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
+    .hero-copy {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 80px 0 42px;
+    }
 
-.overlay.topbar .coming {
-  opacity: 0;
-  transform: translateY(-8px);
-}
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      max-width: 360px;
+      margin: 0 auto 32px;
+    }
 
-.countdown {
-  margin-top: 18px;
-  display: flex;
-  justify-content: center;
-  gap: clamp(12px, 4vw, 24px);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  transition: margin 0.65s cubic-bezier(.2,.8,.2,1), gap 0.65s cubic-bezier(.2,.8,.2,1);
-}
+    .timebox {
+      padding: 14px 8px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
 
-.overlay.topbar .countdown {
-  grid-column: 3;
-  margin-top: 0;
-  justify-content: flex-end;
-  gap: 10px;
-}
+    .timebox strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
 
-.countdown div {
-  min-width: 54px;
-  text-align: center;
-  transition: min-width 0.65s cubic-bezier(.2,.8,.2,1);
-}
+    .timebox span {
+      display: block;
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
 
-.overlay.topbar .countdown div { min-width: 38px; }
+    h1 {
+      font-size: clamp(42px, 8vw, 86px);
+      line-height: 0.94;
+      letter-spacing: -0.075em;
+      margin-bottom: 22px;
+    }
 
-.countdown span {
-  display: block;
-  font-size: clamp(22px, 5vw, 42px);
-  font-weight: 800;
-  line-height: 1;
-  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1);
-}
+    .hero-copy p {
+      max-width: 560px;
+      margin: 0 auto;
+      font-size: clamp(17px, 2.8vw, 22px);
+      line-height: 1.45;
+      color: var(--muted);
+      letter-spacing: -0.025em;
+    }
 
-.overlay.topbar .countdown span { font-size: clamp(16px, 3vw, 24px); }
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 460px;
+      margin: 36px auto 0;
+    }
 
-.countdown small {
-  display: block;
-  margin-top: 6px;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.65;
-  transition: font-size 0.65s cubic-bezier(.2,.8,.2,1), margin 0.65s cubic-bezier(.2,.8,.2,1);
-}
+    .btn {
+      min-height: 54px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(18px);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
 
-.overlay.topbar .countdown small {
-  margin-top: 4px;
-  font-size: 8px;
-}
+    .btn:active {
+      transform: scale(0.97);
+    }
 
-.poster {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  width: min(90vw, 760px);
-  z-index: 3;
-  color: #fff;
-  text-align: center;
-  pointer-events: none;
-  opacity: 0;
-  transform: translate(-50%, 40px) scale(0.98) var(--gyro-ui);
-  transition: opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.75s cubic-bezier(.16,1,.3,1);
-}
+    .btn.primary {
+      background: rgba(255,255,255,0.92);
+      color: #050505;
+    }
 
-.poster.active {
-  opacity: 1;
-  transform: translate(-50%, 0) scale(1) var(--gyro-ui);
-}
+    .scroll-hint {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding-bottom: 2px;
+    }
 
-.poster.with-phone { opacity: 1; }
-.poster.final { transform: translate(-50%, -48vh) scale(1) var(--gyro-ui); }
+    section {
+      position: relative;
+      padding: 82px 20px;
+    }
 
-.map-phone {
-  position: fixed;
-  left: 50%;
-  bottom: -42vh;
-  z-index: 6;
-  width: min(64vw, 300px);
-  height: auto;
-  opacity: 0;
-  transform: translateX(-50%) scale(0.9) var(--gyro-phone);
-  filter: url(#chromakey) drop-shadow(0 34px 70px rgba(0,0,0,0.58));
-  pointer-events: none;
-  will-change: transform, bottom, opacity;
-  transition: bottom 0.85s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, transform 0.85s cubic-bezier(.16,1,.3,1);
-}
+    .section-inner {
+      width: 100%;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
 
-.map-phone.active {
-  bottom: 28%;
-  opacity: 1;
-  transform: translateX(-50%) scale(1.06) var(--gyro-phone);
-}
+    .section-header {
+      margin-bottom: 32px;
+      max-width: 680px;
+    }
 
-.map-phone.exit {
-  bottom: -42vh;
-  opacity: 0;
-  transform: translateX(-50%) scale(0.95) var(--gyro-phone);
-}
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
 
-.headline {
-  margin: 0;
-  font-size: clamp(30px, 7vw, 64px);
-  font-weight: 850;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-}
+    h2 {
+      font-size: clamp(36px, 6vw, 66px);
+      line-height: 0.96;
+      letter-spacing: -0.07em;
+      margin-bottom: 18px;
+    }
 
-.tagline {
-  margin: 14px auto 0;
-  max-width: 680px;
-  font-size: clamp(14px, 3vw, 20px);
-  line-height: 1.45;
-  opacity: 1;
-}
+    .section-header p {
+      font-size: 18px;
+      line-height: 1.5;
+      color: var(--muted);
+      letter-spacing: -0.02em;
+    }
 
-.swipe-hint {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  color: rgba(255,255,255,0.72);
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  pointer-events: none;
-  animation: hintPulse 1.8s ease-in-out infinite;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
 
-@keyframes hintPulse {
-  0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
-  50% { transform: translate(-50%, -8px); opacity: 0.95; }
-}
+    .card {
+      min-height: 190px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--glass);
+      backdrop-filter: blur(22px);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transform: translateY(18px);
+      opacity: 0;
+      animation: rise 0.8s ease forwards;
+    }
 
-.corner-peek {
-  position: fixed;
-  bottom: -320px;
-  width: 560px;
-  height: 560px;
-  z-index: 5;
-  background: rgba(255,255,255,0.08);
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 18px;
-  box-sizing: border-box;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 18px;
-  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.5s cubic-bezier(.2,.8,.2,1), opacity 0.3s ease;
-}
+    .card:nth-child(2) { animation-delay: 0.08s; }
+    .card:nth-child(3) { animation-delay: 0.16s; }
+    .card:nth-child(4) { animation-delay: 0.24s; }
+    .card:nth-child(5) { animation-delay: 0.32s; }
+    .card:nth-child(6) { animation-delay: 0.40s; }
 
-.corner-peek.left {
-  left: -260px;
-  transform: translate(0, 60px) var(--gyro-ui);
-  box-shadow: 20px 28px 80px rgba(37,99,235,0.45), 0 28px 80px rgba(0,0,0,0.35);
-}
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid var(--border);
+      font-size: 20px;
+      margin-bottom: 24px;
+    }
 
-.corner-peek.right {
-  right: -260px;
-  transform: translate(0, 60px) var(--gyro-ui);
-  text-align: right;
-  box-shadow: -20px 28px 80px rgba(249,115,22,0.45), 0 28px 80px rgba(0,0,0,0.35);
-}
+    .card h3 {
+      font-size: 22px;
+      line-height: 1.05;
+      letter-spacing: -0.045em;
+      margin-bottom: 10px;
+    }
 
-.corner-peek.active {
-  opacity: 1;
-  pointer-events: auto;
-}
+    .card p {
+      font-size: 15px;
+      line-height: 1.42;
+      color: var(--muted);
+      letter-spacing: -0.015em;
+    }
 
-.corner-peek.left.bump-left { transform: translate(40px, 40px) var(--gyro-ui); }
-.corner-peek.right.bump-right { transform: translate(-40px, 40px) var(--gyro-ui); }
+    .partnership {
+      padding-bottom: 110px;
+    }
 
-.corner-label {
-  position: absolute;
-  top: 38px;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  line-height: 1.2;
-  max-width: 190px;
-  pointer-events: none;
-  text-transform: uppercase;
-}
+    .partnership-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+      backdrop-filter: blur(24px);
+      padding: 30px;
+      box-shadow: var(--shadow);
+    }
 
-.corner-peek.left .corner-label {
-  right: 40px;
-  text-align: right;
-  color: #fff;
-}
+    .partner-layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.2fr;
+      gap: 24px;
+      align-items: stretch;
+    }
 
-.corner-peek.right .corner-label {
-  left: 40px;
-  text-align: left;
-  color: #fff;
-}
+    .partner-main {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 420px;
+      padding: 6px;
+    }
 
-.full-page {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  top: 18px;
-  z-index: 7;
-  color: #fff;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate3d(0, var(--page-y, 0px), 0) scale(0.02) var(--gyro-ui);
-  border-radius: 28px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.16);
-  box-shadow: 0 28px 80px rgba(0,0,0,0.35);
-  transition: transform 0.85s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, border-radius 0.8s ease;
-  overflow: visible;
-  touch-action: none;
-  will-change: transform, opacity;
-}
+    .partner-main h2 {
+      margin-bottom: 20px;
+    }
 
-.full-page.dragging {
-  transition: none !important;
-}
+    .partner-main p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+    }
 
-.full-page.left {
-  transform-origin: bottom left;
-  background: radial-gradient(circle at 10% 90%, rgba(37,99,235,0.85), rgba(9,18,38,0.55) 56%, rgba(0,0,0,0.0) 80%);
-  border-top-right-radius: 18px;
-}
+    .partner-list {
+      display: grid;
+      gap: 12px;
+    }
 
-.full-page.right {
-  transform-origin: bottom right;
-  background: radial-gradient(circle at 90% 90%, rgba(249,115,22,0.82), rgba(41,18,8,0.55) 56%, rgba(0,0,0,0.0) 80%);
-  border-top-left-radius: 18px;
-}
+    .partner-item {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+    }
 
-.full-page.active {
-  transform: translate3d(0, var(--page-y, 0px), 0) scale(1) var(--gyro-ui);
-  opacity: 1;
-  pointer-events: auto;
-}
+    .partner-item strong {
+      display: block;
+      font-size: 17px;
+      letter-spacing: -0.025em;
+      margin-bottom: 5px;
+    }
 
-.full-page.closing {
-  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease;
-}
+    .partner-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.42;
+    }
 
-.full-page.exiting-up {
-  pointer-events: none;
-  opacity: 0;
-  transform: translate3d(0, -130vh, 0) var(--gyro-ui);
-  transition: transform 0.45s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease;
-}
+    .join-btn {
+      margin-top: 28px;
+      width: fit-content;
+      padding: 0 24px;
+    }
 
-.full-page-inner {
-  height: auto;
-  min-height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 34px;
-  padding: 82px 28px 96px;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-}
+    footer {
+      padding: 34px 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
 
-.full-page h2 {
-  margin: 0;
-  font-size: clamp(38px, 10vw, 92px);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-}
+    .footer-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
 
-.full-page p {
-  max-width: 620px;
-  margin: 0;
-  font-size: clamp(16px, 3vw, 22px);
-  line-height: 1.45;
-  opacity: 0.9;
-}
+    @keyframes rise {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
 
-.close-hint {
-  position: absolute;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
 
-.partner-btn {
-  margin-top: 20px;
-  align-self: center;
-  padding: 14px 22px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #f97316, #fb923c);
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  box-shadow: 0 10px 30px rgba(249,115,22,0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
+      .partner-layout {
+        grid-template-columns: 1fr;
+      }
 
-.partner-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 6px 18px rgba(249,115,22,0.3);
-}
+      .partner-main {
+        min-height: auto;
+      }
+    }
 
-@media (max-width: 520px) {
-  .overlay h1 { font-size: clamp(36px, 13vw, 64px); }
-  .overlay.topbar { top: 16px; left: 14px; width: calc(100% - 28px); }
-  .overlay.topbar h1 { font-size: 18px; }
-  .countdown { gap: 10px; }
-  .countdown div { min-width: 44px; }
-  .overlay.topbar .countdown { gap: 7px; }
-  .overlay.topbar .countdown div { min-width: 30px; }
-  .overlay.topbar .countdown span { font-size: 15px; }
-  .overlay.topbar .countdown small { font-size: 7px; }
-  .corner-peek { width: 370px; height: 420px; bottom: -260px; }
-  .corner-peek.left { left: -200px; }
-  .corner-peek.right { right: -200px; }
-}
+    @media (max-width: 560px) {
+      .hero {
+        padding: 22px 16px 28px;
+      }
+
+      .hero-copy {
+        padding-top: 74px;
+      }
+
+      .countdown {
+        gap: 7px;
+      }
+
+      .timebox {
+        padding: 12px 5px;
+        border-radius: 17px;
+      }
+
+      .timebox strong {
+        font-size: 19px;
+      }
+
+      .hero-actions {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 68px 16px;
+      }
+
+      .partnership-panel {
+        padding: 20px;
+        border-radius: 28px;
+      }
+
+      .partner-item {
+        grid-template-columns: 36px 1fr;
+        padding: 16px;
+      }
+
+      .join-btn {
+        width: 100%;
+      }
+    }
+  
+
+    /* SWIPE LOCK FIRST SCREEN */
+    body.locked {
+      overflow: hidden;
+    }
+
+    body.unlocked {
+      overflow: auto;
+    }
+
+    .hero.snap {
+      height: 100vh;
+    }
+
 </style>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <filter id="chromakey" color-interpolation-filters="sRGB">
-    <feColorMatrix type="matrix" values="
-      1 0 0 0 0
-      0 1 0 0 0
-      0 0 1 0 0
-      -1 2 -1 0 -0.35" result="withAlpha"/>
-    <feComponentTransfer in="withAlpha" result="alphaOnly">
-      <feFuncA type="table" tableValues="1 1 1 0 0"/>
-    </feComponentTransfer>
-    <feMorphology in="alphaOnly" operator="erode" radius="1" result="alphaEroded"/>
-    <feComposite in="SourceGraphic" in2="alphaEroded" operator="in"/>
-  </filter>
-</svg>
 </head>
-
 <body>
+  <main class="page">
+    <header class="hero" id="top">
+      <div class="hero-inner">
+        <nav class="topbar" aria-label="Main navigation">
+          <a class="brand" href="#top">5TerreGo.com</a>
+          <span class="status">Coming Soon</span>
+        </nav>
 
-<div class="video-wrapper">
-  <video autoplay muted loop playsinline preload="auto" webkit-playsinline>
-    <source src="./12.mp4" type="video/mp4" />
-  </video>
-</div>
+        <div class="hero-copy">
+          <div class="countdown" aria-label="Countdown">
+            <div class="timebox"><strong id="days">00</strong><span>Days</span></div>
+            <div class="timebox"><strong id="hours">00</strong><span>Hours</span></div>
+            <div class="timebox"><strong id="minutes">00</strong><span>Min</span></div>
+            <div class="timebox"><strong id="seconds">00</strong><span>Sec</span></div>
+          </div>
 
-<div class="blur-layer" id="blur"></div>
+          <h1>Explore Cinque Terre Like Never Before</h1>
+          <p>A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
 
-<div class="overlay" id="hero">
-  <h1><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></h1>
-  <div class="coming">COMING SOON</div>
-  <div class="countdown" aria-label="Countdown to June 1st">
-    <div><span id="d">00</span><small>Days</small></div>
-    <div><span id="h">00</span><small>Hours</small></div>
-    <div><span id="m">00</span><small>Min</small></div>
-    <div><span id="s">00</span><small>Sec</small></div>
-  </div>
-</div>
+          <div class="hero-actions">
+            <a class="btn primary" href="#features">Features</a>
+            <a class="btn" href="#partnership">Partnership</a>
+          </div>
+        </div>
 
-<div class="poster" id="poster">
-  <h2 class="headline">Explore Cinque Terre Like Never Before</h2>
-  <p class="tagline">A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
-</div>
+        <div class="scroll-hint">Swipe up</div>
+      </div>
+    </header>
 
-<video class="map-phone" id="mapPhone" autoplay muted loop playsinline preload="auto" webkit-playsinline>
-  <source src="./map1.webm" type="video/webm" />
-</video>
+    <section id="features" class="features">
+      <div class="section-inner">
+        <div class="section-header">
+          <span class="eyebrow">Features</span>
+          <h2>Everything travellers need, in one mobile guide.</h2>
+          <p>5TerreGo is built as a clean, fast and useful discovery layer for Cinque Terre: simple for tourists, valuable for local partners.</p>
+        </div>
 
-<div class="corner-peek left" id="peekLeft" aria-label="Open explorer page">
-  <div class="corner-label blue">FEATURES</div>
-</div>
-<div class="corner-peek right" id="peekRight" aria-label="Open business page">
-  <div class="corner-label orange">PARTNERSHIP</div>
-</div>
+        <div class="grid">
+          <article class="card">
+            <div>
+              <div class="icon">🗺️</div>
+              <h3>Interactive Map</h3>
+              <p>Explore Cinque Terre with a clean, native-style map designed for fast discovery.</p>
+            </div>
+          </article>
 
-<section class="full-page left" id="pageLeft" aria-hidden="true">
-  <div class="corner-label blue" style="position:absolute;top:34px;right:20px;">FEATURES</div>
-  <div class="full-page-inner">
-    <h2>FEATURES</h2>
-    <p>Discover everything inside 5TerreGo — built as a smart, mobile-first travel guide.</p>
-    <p><strong>Interactive Map</strong><br>Explore Cinque Terre with a clean, native-style map designed for fast discovery.</p>
-    <p><strong>Real Local Stories</strong><br>Authentic content created by locals — not generic travel descriptions.</p>
-    <p><strong>Weather & Tides</strong><br>Real-time conditions to help you choose the perfect moment.</p>
-    <p><strong>Handpicked Experiences</strong><br>Carefully selected tours and activities, no noise.</p>
-    <p><strong>Exclusive Discounts</strong><br>Access hidden deals available only inside 5TerreGo.</p>
-  </div>
-  <div class="close-hint">Swipe down to close</div>
-</section>
+          <article class="card">
+            <div>
+              <div class="icon">📍</div>
+              <h3>Real Local Stories</h3>
+              <p>Authentic content created around places, people and local experiences — not generic travel descriptions.</p>
+            </div>
+          </article>
 
-<section class="full-page right" id="pageRight" aria-hidden="true">
-  <div class="corner-label orange" style="position:absolute;top:34px;left:20px;">PARTNERSHIP</div>
-  <div class="full-page-inner">
-    <h2>PARTNERSHIP</h2>
-    <p><strong>Join a free entrepreneurial network</strong><br>Become part of a curated community of local businesses inside 5TerreGo.</p>
-    <p><strong>100% free</strong><br>No fees, no subscriptions. Ever.</p>
-    <p><strong>How it works</strong><br>Provide a list of authorized emails. Your staff simply opens the phone camera to scan and validate the user’s discount.</p>
-    <p><strong>Simple validation</strong><br>When a 5TerreGo user arrives, validation takes seconds — no apps, no hardware.</p>
-    <p><strong>Controlled usage</strong><br>Each user can redeem only one discount per day.</p>
-    <p><strong>Higher visibility</strong><br>Partners are highlighted and become more relevant inside the interactive map.</p>
-    <p><strong>Direct customers</strong><br>No intermediaries. Users discover you and come directly to your location.</p>
-    <a href="mailto:5terrego.info@gmail.com" class="partner-btn">JOIN PARTNERSHIP</a>
-  </div>
-  <div class="close-hint">Swipe down to close</div>
-</section>
+          <article class="card">
+            <div>
+              <div class="icon">🌤️</div>
+              <h3>Weather & Tides</h3>
+              <p>Useful live conditions to help travellers choose the right moment for beaches, walks and activities.</p>
+            </div>
+          </article>
 
-<div class="swipe-hint" id="swipeHint">Swipe up</div>
+          <article class="card">
+            <div>
+              <div class="icon">🎟️</div>
+              <h3>Handpicked Experiences</h3>
+              <p>Carefully selected tours and activities, presented without noise and unnecessary complexity.</p>
+            </div>
+          </article>
 
-<script>
-(function () {
-  'use strict';
+          <article class="card">
+            <div>
+              <div class="icon">🔥</div>
+              <h3>Exclusive Discounts</h3>
+              <p>Hidden deals available only through 5TerreGo, designed to bring users directly to local businesses.</p>
+            </div>
+          </article>
 
-  const targetDate = new Date('2026-06-01T00:00:00');
-  const elements = {
-    days: document.getElementById('d'),
-    hours: document.getElementById('h'),
-    minutes: document.getElementById('m'),
-    seconds: document.getElementById('s'),
-    poster: document.getElementById('poster'),
-    blur: document.getElementById('blur'),
-    hero: document.getElementById('hero'),
-    swipeHint: document.getElementById('swipeHint'),
-    mapPhone: document.getElementById('mapPhone'),
-    peekLeft: document.getElementById('peekLeft'),
-    peekRight: document.getElementById('peekRight'),
-    pageLeft: document.getElementById('pageLeft'),
-    pageRight: document.getElementById('pageRight')
-  };
+          <article class="card">
+            <div>
+              <div class="icon">⚡</div>
+              <h3>Fast Mobile UX</h3>
+              <p>A lightweight mobile-first interface designed for tourists already moving through the territory.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-  let startX = 0;
-  let startY = 0;
-  let currentY = 0;
-  let slideState = 0;
-  let peekTimers = [];
-  let pageOpen = null;
-  let ignoreNextSwipe = false;
+    <section id="partnership" class="partnership">
+      <div class="section-inner">
+        <div class="partnership-panel">
+          <div class="partner-layout">
+            <div class="partner-main">
+              <div>
+                <span class="eyebrow">Partnership</span>
+                <h2>Join a free entrepreneurial network.</h2>
+                <p>Become part of a curated community of local businesses inside 5TerreGo. Partners can offer a discount of their choice and gain visibility inside the interactive map.</p>
+              </div>
+              <a class="btn primary join-btn" href="mailto:info@5terrego.com?subject=5TerreGo%20Partnership">Join Partnership</a>
+            </div>
 
-  function assertRequiredElements() {
-    Object.keys(elements).forEach(function (key) {
-      console.assert(elements[key], 'Missing element: ' + key);
-    });
-  }
+            <div class="partner-list">
+              <div class="partner-item">
+                <div class="icon">€</div>
+                <div><strong>100% free</strong><span>No fees, no subscriptions. Partners join for free.</span></div>
+              </div>
 
-  function pad(value) {
-    return String(value).padStart(2, '0');
-  }
+              <div class="partner-item">
+                <div class="icon">📧</div>
+                <div><strong>Authorized emails</strong><span>You provide a list of staff emails allowed to validate discounts.</span></div>
+              </div>
 
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
+              <div class="partner-item">
+                <div class="icon">📷</div>
+                <div><strong>Simple validation</strong><span>Your staff opens the phone camera, scans the user QR code and validates the discount in seconds.</span></div>
+              </div>
 
-  function getMinPageY(page) {
-    const pageHeight = page.offsetHeight;
-    const visibleHeight = window.innerHeight - 36;
-    const extraHeight = pageHeight - visibleHeight;
-    return extraHeight > 0 ? -extraHeight : 0;
-  }
+              <div class="partner-item">
+                <div class="icon">🛡️</div>
+                <div><strong>Controlled usage</strong><span>Each user can redeem only one discount per day.</span></div>
+              </div>
 
-  function getPageY(page) {
-    return Number(page.dataset.pageY || 0);
-  }
+              <div class="partner-item">
+                <div class="icon">📈</div>
+                <div><strong>Higher visibility</strong><span>Partners become more relevant inside the map and discovery experience.</span></div>
+              </div>
 
-  function setPageY(page, value) {
-    const nextY = clamp(value, getMinPageY(page), 0);
-    page.dataset.pageY = String(nextY);
-    page.style.setProperty('--page-y', nextY + 'px');
-    return nextY;
-  }
+              <div class="partner-item">
+                <div class="icon">🤝</div>
+                <div><strong>Direct customers</strong><span>No intermediaries. Users discover you and come directly to your location.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  function isPageHeadVisible(page) {
-    return getPageY(page) >= -2;
-  }
+  <footer>
+    <div class="footer-inner">
+      <span>© 2026 5TerreGo.com</span>
+      <span>Free guide · Interactive map · Local deals</span>
+    </div>
+  </footer>
 
-  function isPageAtBottom(page) {
-    return Math.abs(getPageY(page) - getMinPageY(page)) < 2;
-  }
+  <script>
+    const launchDate = new Date('2026-06-01T00:00:00+02:00').getTime();
 
-  function updateCountdown() {
-    const diff = targetDate - new Date();
-    if (!elements.days || !elements.hours || !elements.minutes || !elements.seconds) return;
+    function updateCountdown() {
+      const now = Date.now();
+      const distance = Math.max(0, launchDate - now);
 
-    if (diff <= 0) {
-      elements.days.textContent = '00';
-      elements.hours.textContent = '00';
-      elements.minutes.textContent = '00';
-      elements.seconds.textContent = '00';
-      return;
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((distance / (1000 * 60)) % 60);
+      const seconds = Math.floor((distance / 1000) % 60);
+
+      document.getElementById('days').textContent = String(days).padStart(2, '0');
+      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
     }
 
-    elements.days.textContent = pad(Math.floor(diff / 86400000));
-    elements.hours.textContent = pad(Math.floor((diff / 3600000) % 24));
-    elements.minutes.textContent = pad(Math.floor((diff / 60000) % 60));
-    elements.seconds.textContent = pad(Math.floor((diff / 1000) % 60));
-  }
-
-  function clearPeekTimers() {
-    peekTimers.forEach(function (timer) {
-      clearTimeout(timer);
-    });
-    peekTimers = [];
-  }
-
-  function stopPeekAnimation() {
-    clearPeekTimers();
-    elements.peekLeft.classList.remove('bump-left');
-    elements.peekRight.classList.remove('bump-right');
-  }
-
-  function startPeekAnimation() {
-    if (slideState !== 2 || pageOpen) return;
-    clearPeekTimers();
-
-    function bumpLeft() {
-      if (slideState !== 2 || pageOpen) return;
-      elements.peekLeft.classList.add('bump-left');
-      peekTimers.push(setTimeout(function () {
-        elements.peekLeft.classList.remove('bump-left');
-      }, 520));
-    }
-
-    function bumpRight() {
-      if (slideState !== 2 || pageOpen) return;
-      elements.peekRight.classList.add('bump-right');
-      peekTimers.push(setTimeout(function () {
-        elements.peekRight.classList.remove('bump-right');
-      }, 520));
-    }
-
-    function cycle() {
-      if (slideState !== 2 || pageOpen) return;
-      bumpLeft();
-      peekTimers.push(setTimeout(bumpRight, 3500));
-      peekTimers.push(setTimeout(cycle, 8500));
-    }
-
-    peekTimers.push(setTimeout(cycle, 1000));
-  }
-
-  function setSlide(state) {
-    slideState = clamp(Number(state) || 0, 0, 2);
-
-    const isPhoneSlide = slideState === 1;
-    const isSelectionSlide = slideState === 2;
-    const isPastHero = slideState > 0;
-
-    elements.poster.classList.toggle('active', isPastHero);
-    elements.poster.classList.toggle('with-phone', isPhoneSlide);
-    elements.poster.classList.toggle('final', isSelectionSlide);
-    elements.blur.classList.toggle('active', isPastHero && !pageOpen);
-    elements.hero.classList.toggle('topbar', isPastHero);
-    elements.mapPhone.classList.toggle('active', isPhoneSlide);
-    elements.mapPhone.classList.toggle('exit', isSelectionSlide);
-    elements.swipeHint.textContent = slideState === 0 ? 'Swipe up' : '';
-
-    const showCorners = isSelectionSlide && !pageOpen;
-    elements.peekLeft.classList.toggle('active', showCorners);
-    elements.peekRight.classList.toggle('active', showCorners);
-
-    if (showCorners) startPeekAnimation();
-    else stopPeekAnimation();
-  }
-
-  function goNext() {
-    if (pageOpen) return;
-    setSlide((slideState + 1) % 3);
-  }
-
-  function goPrev() {
-    if (pageOpen) return;
-    setSlide((slideState - 1 + 3) % 3);
-  }
-
-  function openPage(side) {
-    const page = side === 'left' ? elements.pageLeft : elements.pageRight;
-    const other = side === 'left' ? elements.pageRight : elements.pageLeft;
-
-    pageOpen = side;
-    stopPeekAnimation();
-    elements.peekLeft.classList.remove('active');
-    elements.peekRight.classList.remove('active');
-
-    other.classList.remove('active', 'closing', 'exiting-up', 'dragging');
-    other.setAttribute('aria-hidden', 'true');
-    other.style.transform = '';
-    setPageY(other, 0);
-
-    page.style.transform = '';
-    page.classList.remove('closing', 'exiting-up', 'dragging');
-    setPageY(page, 0);
-    page.classList.add('active');
-    page.setAttribute('aria-hidden', 'false');
-    setSlide(slideState);
-  }
-
-  function closePage() {
-    if (!pageOpen) return;
-
-    const page = pageOpen === 'left' ? elements.pageLeft : elements.pageRight;
-    page.classList.add('closing');
-    page.classList.remove('dragging');
-    page.style.transform = '';
-    page.classList.remove('active', 'exiting-up');
-    page.setAttribute('aria-hidden', 'true');
-    setPageY(page, 0);
-
-    pageOpen = null;
-    ignoreNextSwipe = true;
-    setTimeout(function () {
-      ignoreNextSwipe = false;
-    }, 350);
-
-    setSlide(2);
-  }
-
-  function exitPageUpToHome() {
-    if (!pageOpen) return;
-
-    const page = pageOpen === 'left' ? elements.pageLeft : elements.pageRight;
-    page.classList.remove('closing', 'dragging');
-    page.classList.add('exiting-up');
-    page.setAttribute('aria-hidden', 'true');
-    pageOpen = null;
-    ignoreNextSwipe = true;
-    setSlide(0);
-
-    setTimeout(function () {
-      page.classList.remove('active', 'exiting-up', 'dragging');
-      page.style.transform = '';
-      setPageY(page, 0);
-      ignoreNextSwipe = false;
-    }, 560);
-  }
-
-  function handleVerticalSwipe(endY) {
-    const delta = startY - endY;
-
-    if (slideState === 2) {
-      if (delta < -20) goPrev();
-      return;
-    }
-
-    if (delta > 20) goNext();
-    else if (delta < -20) goPrev();
-  }
-
-  function bindGlobalInteractions() {
-    window.addEventListener('touchstart', function (event) {
-      if (!event.touches || !event.touches.length) return;
-      startY = event.touches[0].clientY;
-      startX = event.touches[0].clientX;
-      currentY = startY;
-    }, { passive: true });
-
-    window.addEventListener('touchmove', function (event) {
-      if (!event.touches || !event.touches.length || pageOpen) return;
-
-      const dy = event.touches[0].clientY - startY;
-      const dx = event.touches[0].clientX - startX;
-      currentY = event.touches[0].clientY;
-
-      if (Math.abs(dy) > Math.abs(dx)) event.preventDefault();
-    }, { passive: false });
-
-    window.addEventListener('touchend', function (event) {
-      if (pageOpen || ignoreNextSwipe) return;
-      const target = event.target;
-      if (target && target.closest && target.closest('.full-page')) return;
-      const endY = event.changedTouches && event.changedTouches.length ? event.changedTouches[0].clientY : currentY;
-      handleVerticalSwipe(endY);
-    }, { passive: true });
-
-    window.addEventListener('wheel', function (event) {
-      if (pageOpen || ignoreNextSwipe) return;
-      if (event.deltaY > 35) goNext();
-      else if (event.deltaY < -35) goPrev();
-    }, { passive: true });
-
-    window.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && pageOpen) closePage();
-      else if (pageOpen) return;
-      else if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === ' ') goNext();
-      else if (event.key === 'ArrowUp' || event.key === 'PageUp') goPrev();
-      else if (slideState === 2 && event.key === 'ArrowLeft') openPage('left');
-      else if (slideState === 2 && event.key === 'ArrowRight') openPage('right');
-    });
-  }
-
-  function bindCornerDrag() {
-    function attach(el, side) {
-      let dragStartX = 0;
-      let dragStartY = 0;
-      let dragging = false;
-      let opened = false;
-
-      el.addEventListener('touchstart', function (event) {
-        if (slideState !== 2 || pageOpen) return;
-        dragging = true;
-        opened = false;
-        dragStartX = event.touches[0].clientX;
-        dragStartY = event.touches[0].clientY;
-        stopPeekAnimation();
-      }, { passive: true });
-
-      el.addEventListener('touchmove', function (event) {
-        if (!dragging || slideState !== 2 || pageOpen) return;
-        const dx = event.touches[0].clientX - dragStartX;
-        const dy = dragStartY - event.touches[0].clientY;
-        const pull = Math.max(dy, Math.abs(dx));
-
-        if (side === 'left') {
-          const moveX = Math.min(Math.max(dx, 0), 190);
-          const moveY = Math.min(Math.max(dy, 0), 190);
-          el.style.transform = 'translate(' + moveX + 'px, ' + (40 - moveY * 0.35) + 'px) var(--gyro-ui)';
-          if (pull > 120 && !opened) {
-            opened = true;
-            el.style.transform = '';
-            openPage('left');
-          }
-        } else {
-          const moveX = Math.max(Math.min(dx, 0), -190);
-          const moveY = Math.min(Math.max(dy, 0), 190);
-          el.style.transform = 'translate(' + moveX + 'px, ' + (40 - moveY * 0.35) + 'px) var(--gyro-ui)';
-          if (pull > 120 && !opened) {
-            opened = true;
-            el.style.transform = '';
-            openPage('right');
-          }
-        }
-      }, { passive: true });
-
-      el.addEventListener('touchend', function () {
-        dragging = false;
-        el.style.transform = '';
-        if (slideState === 2 && !pageOpen) startPeekAnimation();
-      }, { passive: true });
-    }
-
-    attach(elements.peekLeft, 'left');
-    attach(elements.peekRight, 'right');
-  }
-
-  function bindGyroAndroid() {
-    if (!window.DeviceOrientationEvent) return;
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
-
-    window.addEventListener('deviceorientation', function (event) {
-      const gamma = clamp(event.gamma || 0, -35, 35);
-      const beta = clamp(event.beta || 0, -35, 35);
-
-      const uiMoveX = gamma * 0.28;
-      const uiMoveY = beta * 0.18;
-      const phoneMoveX = gamma * 0.45;
-      const phoneMoveY = beta * 0.30;
-      const rotX = beta * 0.025;
-      const rotY = gamma * -0.025;
-
-      document.body.style.setProperty('--gyro-ui', 'translate3d(' + uiMoveX + 'px,' + uiMoveY + 'px,0) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg)');
-      document.body.style.setProperty('--gyro-phone', 'translate3d(' + phoneMoveX + 'px,' + phoneMoveY + 'px,0) rotateX(' + (rotX * 1.4) + 'deg) rotateY(' + (rotY * 1.4) + 'deg)');
-    }, { passive: true });
-  }
-
-  function bindPageGestures() {
-    [elements.pageLeft, elements.pageRight].forEach(function (page) {
-      let touchStartY = 0;
-      let startPageY = 0;
-      let closingDrag = false;
-      let bottomExitDrag = false;
-      let bottomExitDistance = 0;
-
-      page.addEventListener('touchstart', function (event) {
-        if (!page.classList.contains('active')) return;
-        touchStartY = event.touches[0].clientY;
-        startPageY = getPageY(page);
-        closingDrag = false;
-        bottomExitDrag = false;
-        bottomExitDistance = 0;
-        page.style.transform = '';
-        page.classList.remove('closing', 'exiting-up');
-        page.classList.add('dragging');
-      }, { passive: true });
-
-      page.addEventListener('touchmove', function (event) {
-        if (!page.classList.contains('active')) return;
-        event.preventDefault();
-
-        const dy = event.touches[0].clientY - touchStartY;
-        const swipingUp = dy < 0;
-        const swipingDown = dy > 0;
-        const gestureStartedAtBottom = Math.abs(startPageY - getMinPageY(page)) < 2;
-
-        if (gestureStartedAtBottom && swipingUp) {
-          bottomExitDrag = true;
-          closingDrag = false;
-          bottomExitDistance = Math.abs(dy);
-          page.classList.remove('closing');
-          page.style.transform = 'translate3d(0,' + dy + 'px,0) var(--gyro-ui)';
-          return;
-        }
-
-        if (isPageHeadVisible(page) && swipingDown && dy > 24) {
-          closingDrag = true;
-          bottomExitDrag = false;
-          bottomExitDistance = 0;
-          page.classList.add('closing');
-          const scale = Math.max(0.88, 1 - dy / 1200);
-          page.style.transform = 'translate3d(0,' + dy + 'px,0) scale(' + scale + ') var(--gyro-ui)';
-          return;
-        }
-
-        closingDrag = false;
-        bottomExitDrag = false;
-        bottomExitDistance = 0;
-        page.style.transform = '';
-        page.classList.remove('closing');
-        setPageY(page, startPageY + dy);
-      }, { passive: false });
-
-      page.addEventListener('touchend', function (event) {
-        if (!page.classList.contains('active')) return;
-        page.classList.remove('dragging');
-
-        const dy = event.changedTouches && event.changedTouches.length
-          ? event.changedTouches[0].clientY - touchStartY
-          : 0;
-
-        if (closingDrag && dy > 120 && isPageHeadVisible(page)) {
-          closePage();
-          return;
-        }
-
-        if (bottomExitDrag) {
-          if (bottomExitDistance > 90 || Math.abs(dy) > 90) {
-            exitPageUpToHome();
-          } else {
-            page.style.transform = '';
-            setPageY(page, getMinPageY(page));
-          }
-          bottomExitDrag = false;
-          bottomExitDistance = 0;
-          return;
-        }
-
-        if (isPageAtBottom(page)) {
-          setPageY(page, getMinPageY(page));
-          page.style.transform = '';
-          page.classList.remove('closing');
-          return;
-        }
-
-        const minY = getMinPageY(page);
-        if (getPageY(page) < minY + 60) {
-          setPageY(page, minY);
-          page.style.transform = '';
-          return;
-        }
-
-        page.style.transform = '';
-        page.classList.remove('closing');
-      }, { passive: true });
-    });
-  }
-
-  function runBasicTests() {
-    assertRequiredElements();
-
-    console.assert(typeof setSlide === 'function', 'setSlide should exist');
-    console.assert(typeof openPage === 'function', 'openPage should exist');
-    console.assert(typeof closePage === 'function', 'closePage should exist');
-    console.assert(typeof exitPageUpToHome === 'function', 'exitPageUpToHome should exist');
-    console.assert(typeof getMinPageY === 'function', 'getMinPageY should exist');
-    console.assert(typeof setPageY === 'function', 'setPageY should exist');
-    console.assert(typeof bindGyroAndroid === 'function', 'bindGyroAndroid should exist');
-
-    setSlide(2);
-    goNext();
-    console.assert(slideState === 0, 'loop forward failed (2→0)');
-    goPrev();
-    console.assert(slideState === 2, 'loop backward failed (0→2)');
-
-    setSlide(0);
-    console.assert(slideState === 0, 'slide 0 failed');
-    console.assert(!elements.poster.classList.contains('active'), 'poster should be hidden on slide 0');
-
-    setSlide(1);
-    console.assert(slideState === 1, 'slide 1 failed');
-    console.assert(elements.mapPhone.classList.contains('active'), 'phone should be active on slide 1');
-
-    setSlide(2);
-    console.assert(slideState === 2, 'slide 2 failed');
-    console.assert(elements.peekLeft.classList.contains('active'), 'left corner should be active on slide 2');
-    console.assert(elements.peekRight.classList.contains('active'), 'right corner should be active on slide 2');
-
-    openPage('left');
-    console.assert(pageOpen === 'left', 'left page should open');
-    console.assert(elements.pageLeft.classList.contains('active'), 'left page should be active');
-    console.assert(getComputedStyle(elements.pageLeft).overflow !== 'auto', 'page should not use internal scrolling');
-    console.assert(getPageY(elements.pageLeft) === 0, 'opened page should start at the top');
-
-    setPageY(elements.pageLeft, -99999);
-    console.assert(getPageY(elements.pageLeft) === getMinPageY(elements.pageLeft), 'page should clamp to minimum Y');
-    console.assert(isPageAtBottom(elements.pageLeft), 'page should detect bottom');
-    setPageY(elements.pageLeft, 99999);
-    console.assert(getPageY(elements.pageLeft) === 0, 'page should clamp to maximum Y');
-
-    closePage();
-    console.assert(pageOpen === null, 'page should close');
-    console.assert(slideState === 2, 'closing page should return to selection slide');
-
-    openPage('right');
-    console.assert(pageOpen === 'right', 'right page should open');
-    console.assert(elements.pageRight.classList.contains('active'), 'right page should be active');
-    console.assert(getPageY(elements.pageRight) === 0, 'right page should start at the top');
-
-    closePage();
-    setSlide(0);
-
-    console.assert(!document.documentElement.innerHTML.includes('bottomExitReady'), 'bottomExitReady reference should not exist');
-    console.assert(!document.documentElement.innerHTML.includes('function(e) {'), 'old gyro function fragment should not exist');
-    console.assert(!document.documentElement.innerHTML.includes('  }\n    });\n  }\n\n  function bindPageGestures'), 'extra gyro braces should not exist');
-    console.assert(document.querySelectorAll('.full-page.dragging').length === 0, 'no page should start as dragging');
-  }
-
-  function init() {
-    bindGyroAndroid();
-    assertRequiredElements();
     updateCountdown();
     setInterval(updateCountdown, 1000);
-    bindGlobalInteractions();
-    bindCornerDrag();
-    bindPageGestures();
-    runBasicTests();
-    setSlide(0);
-  }
+  
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
+    // SWIPE LOGIC (full screen snap first, then normal scroll)
+    let startY = 0;
+    let isUnlocked = false;
+
+    const hero = document.querySelector('.hero');
+
+    document.body.classList.add('locked');
+
+    window.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isUnlocked) return;
+
+      const currentY = e.touches[0].clientY;
+      const diff = startY - currentY;
+
+      if (diff > 60) {
+        isUnlocked = true;
+        document.body.classList.remove('locked');
+        document.body.classList.add('unlocked');
+
+        window.scrollTo({
+          top: window.innerHeight,
+          behavior: 'smooth'
+        });
+      }
+    });
+
 </script>
-
 </body>
 </html>
