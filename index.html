@@ -123,11 +123,14 @@
     }
 
     .subtitle {
-      margin-top: 12px;
-      font-size: 16px;
-      letter-spacing: 0.08em;
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 14px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--muted);
+      font-family: "SF Mono", "Helvetica Neue", sans-serif; /* different feel */
+      order: -1; /* move above title without touching HTML */
     }
 
     .status {
@@ -171,6 +174,12 @@
       background: var(--glass);
       backdrop-filter: blur(18px);
       box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .timebox:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.18);
     }
 
     .timebox strong {
@@ -208,13 +217,14 @@
     .hero-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      max-width: 460px;
+      gap: 16px;
+      max-width: 560px; /* wider so buttons breathe */
       margin: 36px auto 0;
     }
 
     .btn {
-      min-height: 54px;
+      min-height: 64px; /* taller buttons */
+      padding: 0 18px; /* more horizontal space */
       border-radius: 999px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.12);
@@ -222,12 +232,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 15px; /* more readable */
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       backdrop-filter: blur(18px);
-      transition: transform 0.25s ease, background 0.25s ease;
+      transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
     .btn:active {
@@ -244,10 +259,12 @@
       z-index: 2;
       text-align: center;
       color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 0.12em;
+      font-size: 11px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      padding-bottom: 2px;
+      padding-bottom: 6px;
+      opacity: 0.7;
+      animation: pulse 2.2s ease-in-out infinite;
     }
 
     section {
@@ -312,7 +329,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr; /* force vertical stacking */
       gap: 14px;
     }
 
@@ -379,7 +396,7 @@
 
     .partner-layout {
       display: grid;
-      grid-template-columns: 0.95fr 1.2fr;
+      grid-template-columns: 1fr; /* stack vertically instead of side-by-side */
       gap: 24px;
       align-items: stretch;
     }
@@ -457,6 +474,12 @@
         transform: translateY(0);
         opacity: 1;
       }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-4px); }
+    }
     }
 
     @media (max-width: 820px) {
@@ -587,11 +610,11 @@
 
         <div class="hero-copy">
 
-          <div class="brand" style="font-size: clamp(48px,10vw,96px);">
+          <div class="brand" style="font-size: clamp(52px,10vw,96px); line-height:1;">
             <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
           </div>
 
-          <div class="subtitle">Explore Cinque Terre Like Never Before</div>
+          <div class="subtitle" style="opacity:0.85;">Explore Cinque Terre Like Never Before</div>
 
           <div class="countdown" aria-label="Countdown">
             <div class="timebox"><strong id="days">00</strong><span>Days</span></div>
@@ -600,7 +623,7 @@
             <div class="timebox"><strong id="seconds">00</strong><span>Sec</span></div>
           </div>
 
-          <div class="hero-actions">
+          <div class="hero-actions" style="margin-top:28px;">
             <a class="btn primary" href="#features">Features</a>
             <a class="btn" href="#partnership">Partnership</a>
           </div>
@@ -827,6 +850,21 @@
         }
       }
     }, { passive: true });
+
+
+    // FIX BUTTON NAVIGATION (anchor -> internal slider)
+    document.querySelectorAll('.hero-actions a').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const targetId = btn.getAttribute('href').replace('#','');
+        const targetIndex = sections.findIndex(s => s.id === targetId);
+
+        if (targetIndex !== -1) {
+          goToSection(targetIndex);
+        }
+      });
+    });
 
 </script>
 </body>
