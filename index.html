@@ -109,9 +109,25 @@
     }
 
     .brand {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
       letter-spacing: -0.04em;
+    }
+
+    .brand .blue {
+      color: #4da3ff;
+    }
+
+    .brand .orange {
+      color: #ff8c2f;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
     .status {
@@ -131,7 +147,13 @@
       max-width: 720px;
       margin: 0 auto;
       text-align: center;
-      padding: 80px 0 42px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      height: 100%;
+    
     }
 
     .countdown {
@@ -561,12 +583,16 @@
     <div class="pages-wrapper" id="pagesWrapper">
     <header class="hero" id="top">
       <div class="hero-inner">
-        <nav class="topbar" aria-label="Main navigation">
-          <a class="brand" href="#top">5TerreGo.com</a>
-          <span class="status">Coming Soon</span>
-        </nav>
+        
 
         <div class="hero-copy">
+
+          <div class="brand" style="font-size: clamp(48px,10vw,96px);">
+            <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
+          </div>
+
+          <div class="subtitle">Explore Cinque Terre Like Never Before</div>
+
           <div class="countdown" aria-label="Countdown">
             <div class="timebox"><strong id="days">00</strong><span>Days</span></div>
             <div class="timebox"><strong id="hours">00</strong><span>Hours</span></div>
@@ -574,13 +600,11 @@
             <div class="timebox"><strong id="seconds">00</strong><span>Sec</span></div>
           </div>
 
-          <h1>Explore Cinque Terre Like Never Before</h1>
-          <p>A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
-
           <div class="hero-actions">
             <a class="btn primary" href="#features">Features</a>
             <a class="btn" href="#partnership">Partnership</a>
           </div>
+
         </div>
 
         <div class="scroll-hint">Swipe up</div>
