@@ -459,32 +459,35 @@
     }
   
 
-    /* SWIPE LOCK FIRST SCREEN */
-    body.locked {
+    
+
+    /* FULL SCREEN SECTIONS */
+    .fullpage {
+      height: 100dvh;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    body.unlocked {
-      overflow: auto;
-    }
-
-    .hero.snap {
-      height: 100vh;
+    .snap-section {
+      height: 100dvh;
     }
 
 </style>
 </head>
 <body>
   <main class="page">
-    <header class="hero" id="top">
+
+    <section class="hero fullpage snap-section" id="section-0">
       <div class="hero-inner">
-        <nav class="topbar" aria-label="Main navigation">
-          <a class="brand" href="#top">5TerreGo.com</a>
+        <nav class="topbar">
+          <a class="brand">5TerreGo.com</a>
           <span class="status">Coming Soon</span>
         </nav>
 
         <div class="hero-copy">
-          <div class="countdown" aria-label="Countdown">
+          <div class="countdown">
             <div class="timebox"><strong id="days">00</strong><span>Days</span></div>
             <div class="timebox"><strong id="hours">00</strong><span>Hours</span></div>
             <div class="timebox"><strong id="minutes">00</strong><span>Min</span></div>
@@ -493,186 +496,78 @@
 
           <h1>Explore Cinque Terre Like Never Before</h1>
           <p>A free interactive guide with maps, real local stories, exclusive deals, and handpicked experiences — all in one place.</p>
-
-          <div class="hero-actions">
-            <a class="btn primary" href="#features">Features</a>
-            <a class="btn" href="#partnership">Partnership</a>
-          </div>
         </div>
 
         <div class="scroll-hint">Swipe up</div>
       </div>
-    </header>
+    </section>
 
-    <section id="features" class="features">
+    <section id="features" class="features snap-section fullpage">
       <div class="section-inner">
         <div class="section-header">
           <span class="eyebrow">Features</span>
           <h2>Everything travellers need, in one mobile guide.</h2>
-          <p>5TerreGo is built as a clean, fast and useful discovery layer for Cinque Terre: simple for tourists, valuable for local partners.</p>
+          <p>5TerreGo is built as a clean, fast and useful discovery layer.</p>
         </div>
 
         <div class="grid">
-          <article class="card">
-            <div>
-              <div class="icon">🗺️</div>
-              <h3>Interactive Map</h3>
-              <p>Explore Cinque Terre with a clean, native-style map designed for fast discovery.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div>
-              <div class="icon">📍</div>
-              <h3>Real Local Stories</h3>
-              <p>Authentic content created around places, people and local experiences — not generic travel descriptions.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div>
-              <div class="icon">🌤️</div>
-              <h3>Weather & Tides</h3>
-              <p>Useful live conditions to help travellers choose the right moment for beaches, walks and activities.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div>
-              <div class="icon">🎟️</div>
-              <h3>Handpicked Experiences</h3>
-              <p>Carefully selected tours and activities, presented without noise and unnecessary complexity.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div>
-              <div class="icon">🔥</div>
-              <h3>Exclusive Discounts</h3>
-              <p>Hidden deals available only through 5TerreGo, designed to bring users directly to local businesses.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div>
-              <div class="icon">⚡</div>
-              <h3>Fast Mobile UX</h3>
-              <p>A lightweight mobile-first interface designed for tourists already moving through the territory.</p>
-            </div>
-          </article>
+          <article class="card"><div><div class="icon">🗺️</div><h3>Interactive Map</h3></div></article>
+          <article class="card"><div><div class="icon">📍</div><h3>Local Stories</h3></div></article>
+          <article class="card"><div><div class="icon">🌤️</div><h3>Weather</h3></div></article>
         </div>
       </div>
     </section>
 
-    <section id="partnership" class="partnership">
+    <section id="partnership" class="snap-section fullpage">
       <div class="section-inner">
-        <div class="partnership-panel">
-          <div class="partner-layout">
-            <div class="partner-main">
-              <div>
-                <span class="eyebrow">Partnership</span>
-                <h2>Join a free entrepreneurial network.</h2>
-                <p>Become part of a curated community of local businesses inside 5TerreGo. Partners can offer a discount of their choice and gain visibility inside the interactive map.</p>
-              </div>
-              <a class="btn primary join-btn" href="mailto:info@5terrego.com?subject=5TerreGo%20Partnership">Join Partnership</a>
-            </div>
-
-            <div class="partner-list">
-              <div class="partner-item">
-                <div class="icon">€</div>
-                <div><strong>100% free</strong><span>No fees, no subscriptions. Partners join for free.</span></div>
-              </div>
-
-              <div class="partner-item">
-                <div class="icon">📧</div>
-                <div><strong>Authorized emails</strong><span>You provide a list of staff emails allowed to validate discounts.</span></div>
-              </div>
-
-              <div class="partner-item">
-                <div class="icon">📷</div>
-                <div><strong>Simple validation</strong><span>Your staff opens the phone camera, scans the user QR code and validates the discount in seconds.</span></div>
-              </div>
-
-              <div class="partner-item">
-                <div class="icon">🛡️</div>
-                <div><strong>Controlled usage</strong><span>Each user can redeem only one discount per day.</span></div>
-              </div>
-
-              <div class="partner-item">
-                <div class="icon">📈</div>
-                <div><strong>Higher visibility</strong><span>Partners become more relevant inside the map and discovery experience.</span></div>
-              </div>
-
-              <div class="partner-item">
-                <div class="icon">🤝</div>
-                <div><strong>Direct customers</strong><span>No intermediaries. Users discover you and come directly to your location.</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <h2>Join Partnership</h2>
       </div>
     </section>
+
   </main>
 
-  <footer>
-    <div class="footer-inner">
-      <span>© 2026 5TerreGo.com</span>
-      <span>Free guide · Interactive map · Local deals</span>
-    </div>
-  </footer>
-
   <script>
-    const launchDate = new Date('2026-06-01T00:00:00+02:00').getTime();
+    const launchDate = new Date('2026-06-01').getTime();
 
     function updateCountdown() {
       const now = Date.now();
-      const distance = Math.max(0, launchDate - now);
+      const d = launchDate - now;
+      document.getElementById('days').textContent = Math.floor(d/86400000);
+    }
+    setInterval(updateCountdown,1000);
 
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((distance / (1000 * 60)) % 60);
-      const seconds = Math.floor((distance / 1000) % 60);
+    // FULLPAGE SWIPE SYSTEM
+    let current = 0;
+    const sections = document.querySelectorAll('.snap-section');
+    let startY = 0;
+    let isScrolling = false;
 
-      document.getElementById('days').textContent = String(days).padStart(2, '0');
-      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    function goTo(index){
+      if(index < 0 || index >= sections.length) return;
+      isScrolling = true;
+      current = index;
+      window.scrollTo({
+        top: sections[index].offsetTop,
+        behavior: 'smooth'
+      });
+      setTimeout(()=> isScrolling=false,600);
     }
 
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  
-
-    // SWIPE LOGIC (full screen snap first, then normal scroll)
-    let startY = 0;
-    let isUnlocked = false;
-
-    const hero = document.querySelector('.hero');
-
-    document.body.classList.add('locked');
-
-    window.addEventListener('touchstart', (e) => {
+    window.addEventListener('touchstart', e=>{
       startY = e.touches[0].clientY;
     });
 
-    window.addEventListener('touchmove', (e) => {
-      if (isUnlocked) return;
+    window.addEventListener('touchend', e=>{
+      if(isScrolling) return;
+      let endY = e.changedTouches[0].clientY;
+      let diff = startY - endY;
 
-      const currentY = e.touches[0].clientY;
-      const diff = startY - currentY;
-
-      if (diff > 60) {
-        isUnlocked = true;
-        document.body.classList.remove('locked');
-        document.body.classList.add('unlocked');
-
-        window.scrollTo({
-          top: window.innerHeight,
-          behavior: 'smooth'
-        });
-      }
+      if(diff > 50) goTo(current+1);
+      if(diff < -50) goTo(current-1);
     });
 
 </script>
+</body>
+</html>
 </body>
 </html>
