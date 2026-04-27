@@ -378,7 +378,13 @@ button{
 
   function setupEvents(){
     closeBtn.addEventListener('click', function(){
-      overlay.style.display = 'none';
+      // se è stato aperto come pagina → torna indietro
+      if(window.history.length > 1){
+        window.history.back();
+      } else {
+        // fallback → vai alla mappa
+        window.location.href = '/map.html';
+      }
     });
     actionBtn.addEventListener('click', handleAuth);
     toggle.addEventListener('click', function(){
