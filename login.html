@@ -233,7 +233,7 @@ button{
   const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   // NON usare path relativo → rompe la sessione tra domini
-  const REDIRECT_PATH = 'https://www.tuosito.com/map.html';
+  const REDIRECT_PATH = 'https://www.5terrego.com/map.html';
 
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,{
     auth:{
@@ -266,7 +266,7 @@ button{
   // così la session viene condivisa tra tutte le pagine
   function getRedirectUrl(){
     // FORZA dominio unico (www)
-    return 'https://www.tuosito.com/map.html';
+    return 'https://www.5terrego.com/map.html';
   }
 
   function setStatus(message){
@@ -399,7 +399,7 @@ button{
         window.history.back();
       } else {
         // fallback → vai alla mappa
-        window.location.href = '/map.html';
+        window.location.href = 'https://www.5terrego.com/map.html';
       }
     });
     actionBtn.addEventListener('click', handleAuth);
