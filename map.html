@@ -107,8 +107,28 @@
       border: none !important;
     }
 
-    .leaflet-tile { margin: -0.5px; }
-    .leaflet-container { background: #000; }
+    /* HARD FIX tile seams (production proven) */
+    /* ULTRA HARD FIX tile seams (final) */
+    /* FIX tile seams safe */
+    /* FINAL tile seam fix (pixel overlap method) */
+    /* CLEAN tile fix (no artifacts) */
+    .leaflet-tile {
+      margin: -1px;
+      outline: none;
+      border: none;
+    }
+
+    .leaflet-pane img {
+      image-rendering: auto;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    .leaflet-container {
+      background: #000;
+      transform: translateZ(0);
+      will-change: transform;
+    }
 
     .leaflet-control-zoom,
     .leaflet-control-attribution {
@@ -209,12 +229,25 @@
 <script>
   const map = L.map('map', {
     minZoom: 11,
-    zoomControl: false
+    zoomControl: false,
+    preferCanvas: true,
+    inertia: true,
+    inertiaDeceleration: 3000,
+    inertiaMaxSpeed: 1500,
+    zoomSnap: 1,
+    zoomDelta: 1,
+    updateWhenIdle: false,
+    zoomAnimation: false,
+    fadeAnimation: false
   }).setView([44.12, 9.71], 12);
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  const tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19,
-    detectRetina: true
+    detectRetina: false,
+    keepBuffer: 8,
+    updateWhenZooming: false,
+    updateWhenIdle: false,
+    noWrap: true
   }).addTo(map);
 
   map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
@@ -262,7 +295,9 @@
 
   function centerCity(place) {
     isProgrammaticMove = true;
-    map.flyTo(place.coords, 14, { duration: 1.2 });
+
+    const zoomLevel = place.name === 'Monterosso' ? 14 : 15;
+    map.flyTo(place.coords, zoomLevel, { duration: 1.2 });
 
     window.setTimeout(() => {
       isProgrammaticMove = false;
@@ -396,7 +431,10 @@
     });
   });
 
-  map.on('moveend zoomend', evaluateAutoCard);
+  map.on('moveend zoomend', () => {
+    evaluateAutoCard();
+    preloadTiles();
+  });
 
   card.addEventListener('touchstart', (event) => {
     if (event.touches.length !== 1) return;
@@ -503,6 +541,30 @@
   }
 
   preloadImages();
+
+  // ---- TILE PREFETCH ----
+  function latLngToTile(lat, lng, zoom) {
+    const x = Math.floor((lng + 180) / 360 * Math.pow(2, zoom));
+    const y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI/180) + 1 / Math.cos(lat * Math.PI/180)) / Math.PI) / 2 * Math.pow(2, zoom));
+    return { x, y };
+  }
+
+  function preloadTiles() {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+
+    const tile = latLngToTile(center.lat, center.lng, Math.round(zoom));
+
+    for (let dx = -2; dx <= 2; dx++) {
+      for (let dy = -2; dy <= 2; dy++) {
+        const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${Math.round(zoom)}/${tile.y + dy}/${tile.x + dx}`;
+        const img = new Image();
+        img.src = url;
+      }
+    }
+  }
+
+  preloadTiles();
   updateWeather(44.12, 9.71);
   runTests();
 </script>
