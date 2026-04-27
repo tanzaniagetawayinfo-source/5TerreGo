@@ -179,15 +179,27 @@
     .subtitle {
       margin-top: 0;
       margin-bottom: 20px;
-      font-size: clamp(42px, 9vw, 120px);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
+      font-size: clamp(22px, 5vw, 48px);
+      line-height: 1.0;
+      letter-spacing: 0.00em;
       text-transform: uppercase;
       color: var(--text);
-      font-weight: 900;
+      font-weight: 700;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
       text-align: center;
-      max-width: 900px;
+      max-width: 760px;
+    }
+
+    .subtitle span {
+      display: inline-block;
+      white-space: nowrap;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+
+    .subtitle span {
+      display: inline-block;
+      white-space: nowrap;
     }
 
     .status {
@@ -236,22 +248,18 @@
       background: rgba(0,0,0,0.3);
       padding: 8px;
       border-radius: 16px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       margin: 0;
-      pointer-events: none; /* NON INTERAGIBILE */
+      pointer-events: none;
     }
 
     .timebox {
       padding: 14px 8px;
-      border: 1px solid var(--border);
       border-radius: 20px;
-      background: var(--glass);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
-      transition: transform 0.25s ease, background 0.25s ease;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
     }
 
     .timebox:hover {
@@ -594,8 +602,9 @@
       }
 
       .subtitle {
-        font-size: clamp(28px, 8vw, 64px);
-        letter-spacing: -0.02em;
+        font-size: clamp(18px, 5.8vw, 34px);
+        letter-spacing: 0;
+        font-weight: 700;
       }
 
       .countdown {
@@ -723,7 +732,10 @@
           </div>
 
           <div class="hero-copy">
-            <div class="subtitle" style="opacity:0.85;">EXPLORE CINQUE TERRE<br>LIKE NEVER BEFORE</div>
+            <div class="subtitle" style="opacity:0.85;">
+  EXPLORE CINQUE TERRE<br>
+  <span id="typeLine">LIKE NEVER BEFORE</span>
+</div>
 
             <div class="countdown" aria-label="Countdown">
               <div class="timebox"><strong id="days">00</strong><span>Days</span></div>
@@ -881,7 +893,6 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // TRUE PAGE SYSTEM (transform-based, no empty space)
     const wrapper = document.getElementById('pagesWrapper');
     const sections = Array.from(document.querySelectorAll('.hero, section'));
 
@@ -906,18 +917,8 @@
     }
 
     function setFloatingState(index) {
-      const brand = document.querySelector('.brand');
-      const countdown = document.querySelector('.countdown');
-
-      if (!brand || !countdown) return;
-
-      if (index > 0) {
-        brand.classList.add('floating');
-        countdown.classList.add('floating');
-      } else {
-        brand.classList.remove('floating');
-        countdown.classList.remove('floating');
-      }
+      // 5TerreGo.com e Preview restano sempre fixed dentro .hero-topline.
+      // Nessuna classe floating viene più aggiunta o rimossa qui.
     }
 
     function goToSection(index) {
@@ -935,7 +936,7 @@
 
     window.addEventListener('touchstart', (e) => {
       startY = e.touches[0].clientY;
-    });
+    }, { passive: true });
 
     window.addEventListener('touchend', (e) => {
       if (isAnimating) return;
@@ -951,12 +952,10 @@
         if (atBottom(currentSection)) {
           goToSection(currentIndex + 1);
         }
-      } else {
-        if (atTop(currentSection)) {
-          goToSection(currentIndex - 1);
-        }
+      } else if (atTop(currentSection)) {
+        goToSection(currentIndex - 1);
       }
-    });
+    }, { passive: true });
 
     document.body.addEventListener('wheel', (e) => {
       if (isAnimating) return;
@@ -967,14 +966,11 @@
         if (atBottom(currentSection)) {
           goToSection(currentIndex + 1);
         }
-      } else {
-        if (atTop(currentSection)) {
-          goToSection(currentIndex - 1);
-        }
+      } else if (atTop(currentSection)) {
+        goToSection(currentIndex - 1);
       }
     }, { passive: true });
 
-    // FIX BUTTON NAVIGATION (anchor -> internal slider)
     document.querySelectorAll('.hero-actions a').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -988,11 +984,53 @@
       });
     });
 
-    // Basic runtime tests to catch the previous syntax/navigation break.
     console.assert(typeof goToSection === 'function', 'goToSection must exist');
     console.assert(sections.length === 3, 'Expected hero + features + partnership sections');
     console.assert(document.querySelector('#features'), 'Features section must exist');
     console.assert(document.querySelector('#partnership'), 'Partnership section must exist');
-  </script>
+    console.assert(document.querySelector('.hero-topline .brand'), 'Floating brand must exist');
+    console.assert(document.querySelector('.preview-pill'), 'Preview pill must exist');
+  
+    // TYPEWRITER EFFECT
+    const phrases = [
+      "LIKE NEVER BEFORE",
+      "WITH AN INTERACTIVE MAP",
+      "WITH A FREE GUIDE",
+      "WITH EXCLUSIVE DISCOUNTS"
+    ];
+
+    const typeEl = document.getElementById('typeLine');
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+
+    function typeLoop() {
+      const current = phrases[phraseIndex];
+
+      if (!isDeleting) {
+        charIndex++;
+        typeEl.textContent = current.substring(0, charIndex);
+
+        if (charIndex === current.length) {
+          isDeleting = true;
+          setTimeout(typeLoop, 3200);
+          return;
+        }
+      } else {
+        charIndex--;
+        typeEl.textContent = current.substring(0, charIndex);
+
+        if (charIndex === 0) {
+          isDeleting = false;
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+        }
+      }
+
+      setTimeout(typeLoop, isDeleting ? 70 : 140);
+    }
+
+    typeLoop();
+
+</script>
 </body>
 </html>
