@@ -163,6 +163,38 @@ button{
   line-height:1.35;
 }
 
+.close-btn{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:auto;
+  min-height:0;
+  height:auto;
+  padding:0;
+  margin:0;
+  background:transparent;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:999;
+}
+
+.account-panel{
+  margin-top:8px;
+}
+
+.account-panel button{
+  width:100%;
+}
+
+.logout-btn{
+  background:#111;
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.2);
+}
+
 .hidden{
   display:none !important;
 }
@@ -199,30 +231,31 @@ button{
 
     <div id="social-row" class="social-row">
       <button id="google" class="google" type="button">
-  <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:8px">
-    <path fill="#4285F4" d="M22 12.2c0-.8-.1-1.6-.2-2.3H12v4.4h5.6c-.2 1.2-.9 2.2-1.9 2.9v2.4h3.1c1.8-1.7 3.2-4.3 3.2-7.4z"/>
-    <path fill="#34A853" d="M12 23c2.7 0 5-1 6.6-2.7l-3.1-2.4c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.2H3v2.6C4.6 20.6 8 23 12 23z"/>
-    <path fill="#FBBC05" d="M6.2 14.6c-.2-.6-.3-1.2-.3-1.8s.1-1.2.3-1.8V8.4H3C2.4 9.6 2 10.8 2 12s.4 2.4 1 3.6l3.2-1z"/>
-    <path fill="#EA4335" d="M12 5.2c1.5 0 2.9.5 4 1.5l3-3C17 1.7 14.7 1 12 1 8 1 4.6 3.4 3 6.8l3.2 2.6C7 7 9.3 5.2 12 5.2z"/>
-  </svg>
-  Google
-</button>
+        <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:8px">
+          <path fill="#4285F4" d="M22 12.2c0-.8-.1-1.6-.2-2.3H12v4.4h5.6c-.2 1.2-.9 2.2-1.9 2.9v2.4h3.1c1.8-1.7 3.2-4.3 3.2-7.4z"/>
+          <path fill="#34A853" d="M12 23c2.7 0 5-1 6.6-2.7l-3.1-2.4c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.2H3v2.6C4.6 20.6 8 23 12 23z"/>
+          <path fill="#FBBC05" d="M6.2 14.6c-.2-.6-.3-1.2-.3-1.8s.1-1.2.3-1.8V8.4H3C2.4 9.6 2 10.8 2 12s.4 2.4 1 3.6l3.2-1z"/>
+          <path fill="#EA4335" d="M12 5.2c1.5 0 2.9.5 4 1.5l3-3C17 1.7 14.7 1 12 1 8 1 4.6 3.4 3 6.8l3.2 2.6C7 7 9.3 5.2 12 5.2z"/>
+        </svg>
+        Google
+      </button>
       <button id="apple" class="apple" type="button">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="vertical-align:middle;margin-right:8px">
-    <path d="M16.365 1.43c0 1.14-.466 2.23-1.22 3.03-.78.83-2.05 1.47-3.18 1.38-.14-1.11.4-2.23 1.13-3 .8-.85 2.18-1.46 3.27-1.41zM20.92 17.13c-.54 1.25-.8 1.8-1.5 2.9-.97 1.6-2.34 3.6-4.03 3.62-1.5.02-1.9-.98-3.92-.97-2.02.01-2.45.99-3.95.97-1.69-.02-3-1.83-3.97-3.42-2.72-4.4-3-9.56-1.33-12.17 1.18-1.86 3.05-2.95 4.8-2.95 1.8 0 2.93 1 3.91 1 .96 0 2.46-1.24 4.15-1.06.71.03 2.7.29 3.98 2.17-.1.06-2.37 1.38-2.34 4.12.03 3.28 2.88 4.37 2.92 4.39z"/>
-  </svg>
-  Apple
-</button>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="vertical-align:middle;margin-right:8px">
+          <path d="M16.365 1.43c0 1.14-.466 2.23-1.22 3.03-.78.83-2.05 1.47-3.18 1.38-.14-1.11.4-2.23 1.13-3 .8-.85 2.18-1.46 3.27-1.41zM20.92 17.13c-.54 1.25-.8 1.8-1.5 2.9-.97 1.6-2.34 3.6-4.03 3.62-1.5.02-1.9-.98-3.92-.97-2.02.01-2.45.99-3.95.97-1.69-.02-3-1.83-3.97-3.42-2.72-4.4-3-9.56-1.33-12.17 1.18-1.86 3.05-2.95 4.8-2.95 1.8 0 2.93 1 3.91 1 .96 0 2.46-1.24 4.15-1.06.71.03 2.7.29 3.98 2.17-.1.06-2.37 1.38-2.34 4.12.03 3.28 2.88 4.37 2.92 4.39z"/>
+        </svg>
+        Apple
+      </button>
     </div>
 
     <div id="toggle" class="toggle">Non hai un account? Crealo</div>
     <div id="status" role="status" aria-live="polite"></div>
-      <button id="close" aria-label="Chiudi" style="position:absolute;top:12px;right:12px;width:auto;height:auto;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:999;">
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M5 5 L19 19"></path>
-    <path d="M19 5 L5 19"></path>
-  </svg>
-</button>
+
+    <button id="close" class="close-btn" aria-label="Chiudi" type="button">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 5 L19 19"></path>
+        <path d="M19 5 L5 19"></path>
+      </svg>
+    </button>
   </main>
 </div>
 
@@ -232,10 +265,13 @@ button{
 
   const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  // NON usare path relativo → rompe la sessione tra domini
   const REDIRECT_PATH = 'https://www.5terrego.com/map.html';
 
-  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,{
+  if(!window.supabase){
+    throw new Error('Supabase SDK non caricato.');
+  }
+
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth:{
       persistSession:true,
       autoRefreshToken:true,
@@ -260,21 +296,44 @@ button{
   const divider = document.getElementById('divider');
   const socialRow = document.getElementById('social-row');
   const closeBtn = document.getElementById('close');
-  const overlay = document.querySelector('.overlay');
 
-  // IMPORTANT: usa sempre stesso dominio (no localhost vs dominio)
-  // così la session viene condivisa tra tutte le pagine
   function getRedirectUrl(){
-    // FORZA dominio unico (www)
-    return 'https://www.5terrego.com/map.html';
+    return REDIRECT_PATH;
   }
 
   function setStatus(message){
     status.innerText = message || '';
   }
 
+  function removeAccountPanel(){
+    const existingPanel = document.getElementById('account-panel');
+    if(existingPanel) existingPanel.remove();
+  }
+
+  function hideAuthForm(){
+    username.classList.add('hidden');
+    language.classList.add('hidden');
+    email.classList.add('hidden');
+    phone.classList.add('hidden');
+    password.classList.add('hidden');
+    repeat.classList.add('hidden');
+    actionBtn.classList.add('hidden');
+    divider.classList.add('hidden');
+    socialRow.classList.add('hidden');
+    toggle.classList.add('hidden');
+  }
+
+  function showAuthBase(){
+    email.classList.remove('hidden');
+    password.classList.remove('hidden');
+    actionBtn.classList.remove('hidden');
+    toggle.classList.remove('hidden');
+  }
+
   function setMode(){
     setStatus('');
+    removeAccountPanel();
+    showAuthBase();
 
     if(isLogin){
       title.innerText = 'Accedi';
@@ -332,12 +391,13 @@ button{
       }
 
       setStatus('Accesso riuscito');
-      // IMPORTANT: aspetta che la session sia salvata
       const { data } = await client.auth.getSession();
       if(data?.session){
         window.location.href = getRedirectUrl();
       } else {
-        setTimeout(()=>window.location.href = getRedirectUrl(), 1000);
+        setTimeout(function(){
+          window.location.href = getRedirectUrl();
+        }, 1000);
       }
       return;
     }
@@ -385,81 +445,81 @@ button{
 
   async function oauth(provider){
     const { error } = await client.auth.signInWithOAuth({
-      provider:provider,
-      options:{ redirectTo:getRedirectUrl() }
+      provider: provider,
+      options:{ redirectTo: getRedirectUrl() }
     });
 
     if(error) setStatus(error.message);
-  }
-
-  function setupEvents(){
-    closeBtn.addEventListener('click', function(){
-      // se è stato aperto come pagina → torna indietro
-      if(window.history.length > 1){
-        window.history.back();
-      } else {
-        // fallback → vai alla mappa
-        window.location.href = 'https://www.5terrego.com/map.html';
-      }
-    });
-    actionBtn.addEventListener('click', handleAuth);
-    toggle.addEventListener('click', function(){
-      isLogin = !isLogin;
-      checkUser();
-  setMode();
-    });
-    googleBtn.addEventListener('click', function(){ oauth('google'); });
-    appleBtn.addEventListener('click', function(){ oauth('apple'); });
-    password.addEventListener('keydown', function(event){
-      if(event.key === 'Enter') handleAuth();
-    });
-    repeat.addEventListener('keydown', function(event){
-      if(event.key === 'Enter') handleAuth();
-    });
   }
 
   async function checkUser(){
     const { data } = await client.auth.getSession();
     const user = data?.session?.user;
 
-    if(user){
-      // nascondi form
-      username.classList.add('hidden');
-      language.classList.add('hidden');
-      email.classList.add('hidden');
-      phone.classList.add('hidden');
-      password.classList.add('hidden');
-      repeat.classList.add('hidden');
-      actionBtn.classList.add('hidden');
-      divider.classList.add('hidden');
-      socialRow.classList.add('hidden');
-      toggle.classList.add('hidden');
+    removeAccountPanel();
 
-      title.innerText = 'Account';
-
-      // crea pannello
-      const panel = document.createElement('div');
-      panel.innerHTML = `
-        <button class="primary" id="bookings">Le mie prenotazioni</button>
-        <button class="primary" id="profile">Modifica profilo</button>
-        <button style="background:#111;color:#fff;border:1px solid rgba(255,255,255,0.2);" id="logout">Logout</button>
-      `;
-
-      document.querySelector('.modal').appendChild(panel);
-
-      document.getElementById('logout').onclick = async ()=>{
-        await client.auth.signOut();
-        location.reload();
-      };
-
-      document.getElementById('bookings').onclick = ()=>{
-        window.location.href = '/bookings.html';
-      };
-
-      document.getElementById('profile').onclick = ()=>{
-        window.location.href = '/profile.html';
-      };
+    if(!user){
+      setMode();
+      return;
     }
+
+    hideAuthForm();
+    title.innerText = 'Account';
+    setStatus('');
+
+    const panel = document.createElement('div');
+    panel.id = 'account-panel';
+    panel.className = 'account-panel';
+    panel.innerHTML = `
+      <button class="primary" id="bookings" type="button">Le mie prenotazioni</button>
+      <button class="primary" id="profile" type="button">Modifica profilo</button>
+      <button class="logout-btn" id="logout" type="button">Logout</button>
+    `;
+
+    document.querySelector('.modal').appendChild(panel);
+
+    document.getElementById('logout').onclick = async function(){
+      await client.auth.signOut();
+      removeAccountPanel();
+      isLogin = true;
+      setMode();
+    };
+
+    document.getElementById('bookings').onclick = function(){
+      window.location.href = '/bookings.html';
+    };
+
+    document.getElementById('profile').onclick = function(){
+      window.location.href = '/profile.html';
+    };
+  }
+
+  function setupEvents(){
+    closeBtn.addEventListener('click', function(){
+      if(window.history.length > 1){
+        window.history.back();
+      } else {
+        window.location.href = getRedirectUrl();
+      }
+    });
+
+    actionBtn.addEventListener('click', handleAuth);
+
+    toggle.addEventListener('click', function(){
+      isLogin = !isLogin;
+      setMode();
+    });
+
+    googleBtn.addEventListener('click', function(){ oauth('google'); });
+    appleBtn.addEventListener('click', function(){ oauth('apple'); });
+
+    password.addEventListener('keydown', function(event){
+      if(event.key === 'Enter') handleAuth();
+    });
+
+    repeat.addEventListener('keydown', function(event){
+      if(event.key === 'Enter') handleAuth();
+    });
   }
 
   function runTests(){
@@ -477,31 +537,27 @@ button{
     console.assert(socialRow !== null,'Social row exists');
     console.assert(googleBtn !== null,'Google button exists');
     console.assert(appleBtn !== null,'Apple button exists');
+    console.assert(closeBtn !== null,'Close button exists');
     console.assert(isValidEmail('test@example.com') === true,'Valid email accepted');
     console.assert(isValidEmail('wrong-email') === false,'Invalid email rejected');
-    console.assert(getRedirectUrl().endsWith('/map.html'),'Redirect goes to map.html');
+    console.assert(getRedirectUrl() === 'https://www.5terrego.com/map.html','Redirect uses canonical www domain');
     console.assert(document.querySelectorAll('#google').length === 1,'Only one Google button exists');
     console.assert(document.querySelectorAll('#apple').length === 1,'Only one Apple button exists');
+    console.assert(document.querySelectorAll('#close').length === 1,'Only one close button exists');
     console.assert(!document.querySelector('style button#action'),'No HTML accidentally inside style');
   }
 
-  // DEBUG (puoi rimuoverlo dopo)
   window.client = client;
 
   setupEvents();
-
-  // controlla subito se utente è già loggato
+  runTests();
   checkUser();
 
-  // listener globale auth (fix persistenza)
-  client.auth.onAuthStateChange((event, session) => {
+  client.auth.onAuthStateChange(function(event, session){
     if(session?.user){
       checkUser();
     }
   });
-
-  setMode();
-  runTests();
 })();
 </script>
 
