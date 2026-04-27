@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>5TerreGo | Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  min-height:100%;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#05070a;
+  color:#fff;
+}
+
+body{
+  overflow:hidden;
+}
+
+.page-bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(30,155,255,0.28), transparent 34%),
+    radial-gradient(circle at 80% 5%, rgba(255,138,29,0.22), transparent 32%),
+    linear-gradient(160deg, #020305 0%, #071018 48%, #040506 100%);
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  padding:22px;
+  background:rgba(0,0,0,0.36);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal{
+  width:100%;
+  max-width:380px;
+  padding:22px;
+  border-radius:26px;
+  background:rgba(255,255,255,0.095);
+  border:1px solid rgba(255,255,255,0.14);
+  box-shadow:0 24px 70px rgba(0,0,0,0.42);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  text-align:center;
+}
+
+.brand{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  margin-bottom:12px;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-0.04em;
+}
+
+.blue{ color:#1e9bff; }
+.orange{ color:#ff8a1d; }
+
+h1{
+  margin:0;
+  font-size:24px;
+  line-height:1.05;
+  letter-spacing:-0.04em;
+}
+
+.subtitle{
+  margin:10px 0 18px;
+  color:rgba(255,255,255,0.68);
+  font-size:14px;
+  line-height:1.35;
+}
+
+.field{
+  width:100%;
+  padding:14px 14px;
+  margin-top:10px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.12);
+  outline:none;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  font-size:16px;
+}
+
+.field::placeholder{
+  color:rgba(255,255,255,0.48);
+}
+
+.btn{
+  width:100%;
+  min-height:48px;
+  padding:13px 14px;
+  margin-top:10px;
+  border-radius:16px;
+  border:0;
+  font-weight:800;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.btn-primary{
+  background:#fff;
+  color:#05070a;
+}
+
+.btn-google{
+  background:rgba(255,255,255,0.94);
+  color:#111;
+}
+
+.btn-apple{
+  background:#000;
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.26);
+}
+
+.btn:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+
+.status{
+  min-height:18px;
+  margin-top:13px;
+  font-size:13px;
+  color:rgba(255,255,255,0.72);
+}
+
+.terms{
+  margin-top:14px;
+  color:rgba(255,255,255,0.48);
+  font-size:11px;
+  line-height:1.35;
+}
+</style>
+</head>
+<body>
+<div class="page-bg" aria-hidden="true"></div>
+
+<div class="overlay">
+  <main class="modal" aria-label="Accesso o creazione account">
+    <div class="brand" aria-label="5TerreGo.com">
+      <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
+    </div>
+
+    <h1>Accedi o crea un account</h1>
+    <p class="subtitle">Usa la tua email oppure continua con Google o Apple.</p>
+
+    <input id="email" class="field" type="email" autocomplete="email" inputmode="email" placeholder="La tua email" />
+
+    <button id="email-login" class="btn btn-primary" type="button">Continua con email</button>
+    <button id="google-login" class="btn btn-google" type="button">Accedi con Google</button>
+    <button id="apple-login" class="btn btn-apple" type="button">Accedi con Apple</button>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+
+    <p class="terms">Continuando, accedi o crei un account 5TerreGo.</p>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
+  const MAP_REDIRECT_PATH = '/map.html';
+
+  const emailInput = document.getElementById('email');
+  const emailLoginBtn = document.getElementById('email-login');
+  const googleLoginBtn = document.getElementById('google-login');
+  const appleLoginBtn = document.getElementById('apple-login');
+  const statusEl = document.getElementById('status');
+
+  const authClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function getRedirectUrl() {
+    return new URL(MAP_REDIRECT_PATH, window.location.origin).href;
+  }
+
+  function setStatus(message) {
+    statusEl.textContent = message || '';
+  }
+
+  function setLoading(isLoading) {
+    emailLoginBtn.disabled = isLoading;
+    googleLoginBtn.disabled = isLoading;
+    appleLoginBtn.disabled = isLoading;
+  }
+
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  async function emailLogin() {
+    const email = emailInput.value.trim();
+
+    if (!isValidEmail(email)) {
+      setStatus('Inserisci una email valida.');
+      return;
+    }
+
+    setLoading(true);
+    setStatus('Invio link di accesso...');
+
+    const { error } = await authClient.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: getRedirectUrl(),
+        shouldCreateUser: true
+      }
+    });
+
+    setLoading(false);
+    setStatus(error ? error.message : 'Controlla la tua email per accedere.');
+  }
+
+  async function oauthLogin(provider) {
+    setLoading(true);
+    setStatus('Apertura accesso ' + provider + '...');
+
+    const { error } = await authClient.au
