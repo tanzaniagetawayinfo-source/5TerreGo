@@ -1,741 +1,402 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>5TerreGo | Map</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>5TerreGo | Login</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<style>
+*{
+  box-sizing:border-box;
+}
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #cfe5f2;
-    }
+html,
+body{
+  width:100%;
+  min-height:100%;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#05070a;
+  color:#fff;
+}
 
-    #map {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-    }
+body{
+  overflow:hidden;
+}
 
-    .top-bar {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 10px;
-      border-radius: 20px;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(30,155,255,0.22), transparent 32%),
+    radial-gradient(circle at 80% 10%, rgba(255,138,29,0.18), transparent 30%),
+    rgba(0,0,0,0.58);
+}
 
-    .top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-    }
+.modal{
+  width:100%;
+  max-width:380px;
+  padding:22px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 24px 70px rgba(0,0,0,0.42);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  text-align:center;
+}
 
-    .center-brand {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-weight: 800;
-      font-size: 14px;
-      text-decoration: none;
-      white-space: nowrap;
-      pointer-events: auto;
-      cursor: pointer;
-    }
+.brand{
+  margin-bottom:10px;
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:-0.04em;
+}
 
-    #weather {
-      color: white;
-      font-weight: 600;
-      padding: 6px 10px;
-      white-space: nowrap;
-    }
+.blue{color:#1e9bff;}
+.orange{color:#ff8a1d;}
 
-    #search {
-      width: 100%;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: none;
-      outline: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
+h2{
+  margin:0 0 14px;
+  font-size:25px;
+  letter-spacing:-0.04em;
+}
 
-    #search::placeholder { color: rgba(255,255,255,0.75); }
+input,
+select{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  outline:none;
+  background:rgba(255,255,255,0.1);
+  color:white;
+  font-size:16px;
+}
 
-    #login {
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
+input::placeholder{
+  color:rgba(255,255,255,0.52);
+}
 
-    .blue { color: #1e9bff; }
-    .orange { color: #ff8a1d; }
+select option{
+  background:#05070a;
+  color:white;
+}
 
-    .label {
-      color: white;
-      font-weight: 700;
-      font-size: 14px;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
-      white-space: nowrap;
-      cursor: pointer;
-      user-select: none;
-    }
+button{
+  width:100%;
+  min-height:48px;
+  padding:14px;
+  margin-top:10px;
+  border-radius:14px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+  font-size:15px;
+}
 
-    .poi-label {
-      min-width: 30px;
-      min-height: 30px;
-      display: grid;
-      place-items: center;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.55);
-      color: white;
-      font-size: 17px;
-      border: 1px solid rgba(255,255,255,0.28);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
+.primary{
+  background:white;
+  color:black;
+}
 
-    .leaflet-div-icon {
-      background: transparent !important;
-      border: none !important;
-    }
+.divider{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:13px;
+  color:rgba(255,255,255,0.62);
+  font-size:12px;
+  text-transform:lowercase;
+}
 
-    .leaflet-tile {
-      margin: -1px;
-      outline: none;
-      border: none;
-    }
+.divider::before,
+.divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:rgba(255,255,255,0.22);
+}
 
-    .leaflet-pane img {
-      image-rendering: auto;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
+.social-row{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
 
-    .leaflet-container {
-      background: #000;
-      transform: translateZ(0);
-      will-change: transform;
-    }
+.social-row button{
+  width:50%;
+  margin-top:0;
+}
 
-    .leaflet-control-zoom,
-    .leaflet-control-attribution {
-      display: none !important;
-    }
+.google{
+  background:white;
+  color:black;
+}
 
-    .mode-bar {
-      display: flex;
-      gap: 8px;
-    }
+.apple{
+  background:black;
+  color:white;
+  border:1px solid rgba(255,255,255,0.35);
+}
 
-    .mode-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(0,0,0,0.35);
-      color: #fff;
-      font-weight: 700;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor: pointer;
-    }
+.toggle{
+  margin-top:14px;
+  font-size:13px;
+  color:rgba(255,255,255,0.74);
+  cursor:pointer;
+}
 
-    .mode-btn.active { background: rgba(0,0,0,0.6); }
+#status{
+  min-height:18px;
+  margin-top:12px;
+  color:rgba(255,255,255,0.74);
+  font-size:13px;
+  line-height:1.35;
+}
 
-    #owner-panel {
-      display: none;
-      position: fixed;
-      bottom: 86px;
-      left: 12px;
-      right: 12px;
-      z-index: 1000;
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(0,0,0,0.62);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.28);
-    }
-
-    #owner-panel input,
-    #owner-panel button {
-      width: 100%;
-      margin-bottom: 7px;
-      padding: 10px 12px;
-      border: 0;
-      border-radius: 12px;
-      outline: none;
-      font: inherit;
-    }
-
-    #owner-panel button {
-      margin-bottom: 0;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .bottom-card {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      z-index: 1000;
-      border-radius: 20px;
-      overflow: hidden;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      touch-action: pan-y;
-      will-change: transform;
-    }
-
-    .bottom-card.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .bottom-card img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      display: block;
-      background: rgba(255,255,255,0.08);
-      pointer-events: none;
-    }
-
-    .bottom-card .title {
-      color: white;
-      font-weight: 700;
-      padding: 10px;
-      pointer-events: none;
-    }
-  </style>
+.hidden{
+  display:none !important;
+}
+</style>
 </head>
 <body>
 
-<div id="map"></div>
-
-<div class="top-bar">
-  <div class="top-row">
-    <div id="weather">--</div>
-
-    <a href="https://www.5terrego.com" class="center-brand" target="_blank" rel="noopener noreferrer" aria-label="Apri 5TerreGo.com">
+<div class="overlay">
+  <main class="modal" aria-label="Accesso 5TerreGo">
+    <div class="brand" aria-label="5TerreGo.com">
       <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
-    </a>
+    </div>
 
-    <button id="login" type="button">Accedi</button>
-  </div>
+    <h2 id="title">Accedi</h2>
 
-  <input id="search" placeholder="Search location..." />
+    <input id="username" class="hidden" placeholder="Nome utente" autocomplete="username" />
 
-  <div class="mode-bar">
-    <button class="mode-btn active" id="btn-experiences" type="button">Experiences</button>
-    <button class="mode-btn" id="btn-stories" type="button">Stories</button>
-  </div>
+    <select id="language" class="hidden" aria-label="Lingua preferita">
+      <option value="it">Italiano</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+      <option value="es">Español</option>
+    </select>
+
+    <input id="email" type="email" placeholder="Email" autocomplete="email" inputmode="email" />
+    <input id="phone" class="hidden" type="tel" placeholder="Telefono (opzionale)" autocomplete="tel" inputmode="tel" />
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+    <input id="repeat" type="password" class="hidden" placeholder="Ripeti password" autocomplete="new-password" />
+
+    <button id="action" class="primary" type="button">Accedi</button>
+
+    <div id="divider" class="divider">or</div>
+
+    <div id="social-row" class="social-row">
+      <button id="google" class="google" type="button">Google</button>
+      <button id="apple" class="apple" type="button">Apple</button>
+    </div>
+
+    <div id="toggle" class="toggle">Non hai un account? Crealo</div>
+    <div id="status" role="status" aria-live="polite"></div>
+  </main>
 </div>
-
-<div id="owner-panel" aria-hidden="true">
-  <input id="poi-name" placeholder="Nome POI" />
-  <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" />
-  <input id="poi-lat" placeholder="Latitudine" inputmode="decimal" />
-  <input id="poi-lng" placeholder="Longitudine" inputmode="decimal" />
-  <input id="poi-img" placeholder="URL foto" />
-  <input id="poi-email" placeholder="Email owner" inputmode="email" />
-  <input id="poi-phone" placeholder="Telefono" inputmode="tel" />
-  <input id="poi-relevance" placeholder="Punteggio rilevanza 1-100" inputmode="numeric" />
-  <button id="add-poi" type="button">Aggiungi POI</button>
-</div>
-
-<div class="bottom-card" id="card" aria-hidden="true">
-  <img id="card-img" src="" alt="" />
-  <div class="title" id="card-title"></div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+(function(){
+  'use strict';
+
   const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  const SUPABASE_READY = Boolean(
-    window.supabase &&
-    SUPABASE_URL &&
-    SUPABASE_ANON_KEY &&
-    !SUPABASE_URL.includes('YOUR_PROJECT') &&
-    !SUPABASE_ANON_KEY.includes('YOUR_PUBLIC')
-  );
-  const supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const REDIRECT_PATH = '/map.html';
 
-  const RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
-  const LOCAL_POI_KEY = '5terrego_pois_backup';
-  const AUTO_OPEN_ZOOM = 13;
-  const AUTO_OPEN_DISTANCE = 500;
-  const AUTO_CLOSE_ZOOM = 12;
-  const AUTO_CLOSE_DISTANCE = 800;
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const places = [
-    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg' },
-    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg' },
-    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg' },
-    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE }
-  ];
+  let isLogin = true;
 
-  const map = L.map('map', {
-    minZoom: 11,
-    zoomControl: false,
-    preferCanvas: true,
-    inertia: true,
-    inertiaDeceleration: 3000,
-    inertiaMaxSpeed: 1500,
-    zoomSnap: 1,
-    zoomDelta: 1,
-    updateWhenIdle: false,
-    zoomAnimation: false,
-    fadeAnimation: false
-  }).setView([44.12, 9.71], 12);
+  const username = document.getElementById('username');
+  const language = document.getElementById('language');
+  const email = document.getElementById('email');
+  const phone = document.getElementById('phone');
+  const password = document.getElementById('password');
+  const repeat = document.getElementById('repeat');
+  const actionBtn = document.getElementById('action');
+  const toggle = document.getElementById('toggle');
+  const title = document.getElementById('title');
+  const status = document.getElementById('status');
+  const googleBtn = document.getElementById('google');
+  const appleBtn = document.getElementById('apple');
+  const divider = document.getElementById('divider');
+  const socialRow = document.getElementById('social-row');
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 19,
-    detectRetina: false,
-    keepBuffer: 8,
-    updateWhenZooming: false,
-    updateWhenIdle: false,
-    noWrap: true
-  }).addTo(map);
-
-  map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
-
-  const card = document.getElementById('card');
-  const cardTitle = document.getElementById('card-title');
-  const cardImg = document.getElementById('card-img');
-  const ownerPanel = document.getElementById('owner-panel');
-  const loginBtn = document.getElementById('login');
-  const addPoiBtn = document.getElementById('add-poi');
-
-  let currentIndex = -1;
-  let currentDataset = 'places';
-  let poiLayer = L.layerGroup().addTo(map);
-  let isProgrammaticMove = false;
-  let startX = 0;
-  let currentX = 0;
-  let isDragging = false;
-  let hasMoved = false;
-
-  function normalizePOI(raw) {
-    const lat = Number(raw.lat ?? raw.latitude);
-    const lng = Number(raw.lng ?? raw.longitude);
-
-    return {
-      id: raw.id || `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      name: String(raw.name || raw.title || 'POI'),
-      symbol: raw.symbol || '📍',
-      coords: [lat, lng],
-      lat,
-      lng,
-      image: raw.image || raw.photo_url || raw.img || '',
-      owner_email: raw.owner_email || raw.email || '',
-      phone: raw.phone || raw.telephone || '',
-      relevance: Number(raw.relevance || raw.score || 0)
-    };
+  function getRedirectUrl(){
+    return new URL(REDIRECT_PATH, window.location.origin).href;
   }
 
-  function isValidPOI(poi) {
-    return poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0;
+  function setStatus(message){
+    status.innerText = message || '';
   }
 
-  function centerCity(place) {
-    isProgrammaticMove = true;
-    const zoomLevel = place.name === 'Monterosso' ? 14 : 15;
-    map.flyTo(place.coords, zoomLevel, { duration: 1.2 });
+  function setMode(){
+    setStatus('');
 
-    window.setTimeout(() => {
-      isProgrammaticMove = false;
-    }, 1400);
-  }
+    if(isLogin){
+      title.innerText = 'Accedi';
+      actionBtn.innerText = 'Accedi';
+      toggle.innerText = 'Non hai un account? Crealo';
+      password.setAttribute('autocomplete','current-password');
 
-  function preloadImages() {
-    places.forEach((place) => {
-      const img = new Image();
-      img.src = place.image;
-    });
-  }
+      username.classList.add('hidden');
+      language.classList.add('hidden');
+      phone.classList.add('hidden');
+      repeat.classList.add('hidden');
 
-  function setCardContent(item) {
-    cardTitle.innerText = item.name;
-    cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
-    cardImg.alt = item.name;
-  }
-
-  function showCityCard(item) {
-    setCardContent(item);
-    card.style.display = 'block';
-    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-    card.setAttribute('aria-hidden', 'false');
-
-    requestAnimationFrame(() => {
-      card.classList.add('is-visible');
-      card.style.transform = 'translateY(0)';
-    });
-  }
-
-  function hideCard() {
-    if (card.getAttribute('aria-hidden') === 'true') return;
-
-    card.classList.remove('is-visible');
-    card.setAttribute('aria-hidden', 'true');
-    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    card.style.transform = 'translateY(40px)';
-
-    window.setTimeout(() => {
-      if (card.getAttribute('aria-hidden') === 'true') {
-        card.style.display = 'none';
-      }
-    }, 300);
-  }
-
-  function showCityByIndex(index, shouldCenter = true) {
-    if (index < 0 || index >= places.length) return;
-
-    currentDataset = 'places';
-    currentIndex = index;
-    const place = places[index];
-
-    if (shouldCenter) centerCity(place);
-    showCityCard(place);
-  }
-
-  function getClosestCity() {
-    const center = map.getCenter();
-    let minDist = Infinity;
-    let closestIndex = -1;
-
-    places.forEach((place, index) => {
-      const distance = center.distanceTo(L.latLng(place.coords));
-      if (distance < minDist) {
-        minDist = distance;
-        closestIndex = index;
-      }
-    });
-
-    return { index: closestIndex, distance: minDist };
-  }
-
-  function evaluateAutoCard() {
-    if (isProgrammaticMove) return;
-
-    const zoom = map.getZoom();
-    const closest = getClosestCity();
-
-    if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
-      if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
-        showCityByIndex(closest.index, false);
-      }
-      return;
-    }
-
-    if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) {
-      hideCard();
-    }
-  }
-
-  function slideToIndex(nextIndex, direction) {
-    if (currentDataset !== 'places') return;
-
-    if (nextIndex < 0 || nextIndex >= places.length || nextIndex === currentIndex) {
-      card.style.transition = 'transform 0.2s ease';
-      card.style.transform = 'translateX(0)';
-      return;
-    }
-
-    const place = places[nextIndex];
-    const exitX = direction === 'next' ? '-110%' : '110%';
-    const enterX = direction === 'next' ? '110%' : '-110%';
-
-    card.style.transition = 'transform 0.25s ease';
-    card.style.transform = `translateX(${exitX})`;
-
-    window.setTimeout(() => {
-      card.style.transition = 'none';
-      card.style.transform = `translateX(${enterX})`;
-      currentIndex = nextIndex;
-      setCardContent(place);
-
-      requestAnimationFrame(() => {
-        card.style.transition = 'transform 0.3s ease';
-        card.style.transform = 'translateX(0)';
-      });
-
-      centerCity(place);
-    }, 250);
-  }
-
-  function createCityMarkers() {
-    places.forEach((place, index) => {
-      L.marker(place.coords, {
-        icon: L.divIcon({
-          className: 'custom-label',
-          html: `<div class="label">${place.name}</div>`
-        })
-      }).addTo(map).on('click', () => {
-        showCityByIndex(index, true);
-      });
-    });
-  }
-
-  async function loadPOIs() {
-    poiLayer.clearLayers();
-
-    let pois = [];
-
-    if (SUPABASE_READY) {
-      const { data, error } = await supabaseClient
-        .from('pois')
-        .select('id,name,symbol,lat,lng,image,owner_email,phone,relevance')
-        .order('relevance', { ascending: false });
-
-      if (error) {
-        console.warn('Supabase POI load failed:', error.message);
-      } else {
-        pois = data || [];
-      }
+      divider.classList.remove('hidden');
+      socialRow.classList.remove('hidden');
     } else {
-      pois = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
+      title.innerText = 'Crea account';
+      actionBtn.innerText = 'Registrati';
+      toggle.innerText = 'Hai già un account? Accedi';
+      password.setAttribute('autocomplete','new-password');
+
+      username.classList.remove('hidden');
+      language.classList.remove('hidden');
+      phone.classList.remove('hidden');
+      repeat.classList.remove('hidden');
+
+      divider.classList.add('hidden');
+      socialRow.classList.add('hidden');
     }
-
-    pois.map(normalizePOI).filter(isValidPOI).forEach((poi) => {
-      L.marker(poi.coords, {
-        icon: L.divIcon({
-          className: 'custom-poi',
-          html: `<div class="poi-label">${poi.symbol}</div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16]
-        })
-      }).addTo(poiLayer).on('click', () => {
-        currentDataset = 'pois';
-        currentIndex = -1;
-        showCityCard(poi);
-      });
-    });
   }
 
-  function saveLocalPOI(poi) {
-    const current = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
-    current.push(poi);
-    localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
+  function isValidEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
-  async function addPOI() {
-    const name = document.getElementById('poi-name').value.trim();
-    const symbol = document.getElementById('poi-symbol').value.trim() || '📍';
-    const lat = Number(document.getElementById('poi-lat').value);
-    const lng = Number(document.getElementById('poi-lng').value);
-    const image = document.getElementById('poi-img').value.trim();
-    const ownerEmail = document.getElementById('poi-email').value.trim();
-    const phone = document.getElementById('poi-phone').value.trim();
-    const relevance = Number(document.getElementById('poi-relevance').value || 0);
+  async function handleAuth(){
+    const e = email.value.trim();
+    const p = password.value;
 
-    const poi = normalizePOI({ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance });
-
-    if (!isValidPOI(poi)) {
-      alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
+    if(!isValidEmail(e)){
+      setStatus('Inserisci una email valida.');
       return;
     }
 
-    if (SUPABASE_READY) {
-      const { error } = await supabaseClient
-        .from('pois')
-        .insert([{ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance }]);
-
-      if (error) {
-        alert('Errore salvataggio: ' + error.message);
-        return;
-      }
-    } else {
-      saveLocalPOI(poi);
+    if(!p){
+      setStatus('Inserisci la password.');
+      return;
     }
 
-    await loadPOIs();
-    alert('POI salvato');
-  }
+    if(isLogin){
+      const { error } = await client.auth.signInWithPassword({ email:e, password:p });
 
-  function latLngToTile(lat, lng, zoom) {
-    const z = Math.round(zoom);
-    const n = Math.pow(2, z);
-    const x = Math.floor((lng + 180) / 360 * n);
-    const y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n);
-    return { x, y, z };
-  }
-
-  function preloadTiles() {
-    const center = map.getCenter();
-    const tile = latLngToTile(center.lat, center.lng, map.getZoom());
-
-    for (let dx = -2; dx <= 2; dx++) {
-      for (let dy = -2; dy <= 2; dy++) {
-        const img = new Image();
-        img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${tile.z}/${tile.y + dy}/${tile.x + dx}`;
-      }
-    }
-  }
-
-  async function updateWeather(lat, lng) {
-    try {
-      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
-      const data = await response.json();
-      const temperature = data.current_weather?.temperature;
-      document.getElementById('weather').innerText = temperature === undefined ? '--' : `🌤️ ${temperature}°`;
-    } catch (error) {
-      document.getElementById('weather').innerText = '--';
-    }
-  }
-
-  function setupEvents() {
-    loginBtn.addEventListener('click', () => {
-      window.location.href = '/login.html';
-    });
-
-    addPoiBtn.addEventListener('click', addPOI);
-
-    document.getElementById('search').addEventListener('keydown', async (event) => {
-      if (event.key !== 'Enter') return;
-
-      const query = event.target.value.trim();
-      if (!query) return;
-
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        if (data[0]) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          map.setView([lat, lon], 12);
-          updateWeather(lat, lon);
-        }
-      } catch (error) {
-        console.warn('Search failed:', error);
-      }
-    });
-
-    map.on('moveend zoomend', () => {
-      evaluateAutoCard();
-      preloadTiles();
-    });
-
-    card.addEventListener('touchstart', (event) => {
-      if (event.touches.length !== 1) return;
-      startX = event.touches[0].clientX;
-      currentX = startX;
-      isDragging = true;
-      hasMoved = false;
-      card.style.transition = 'none';
-    }, { passive: true });
-
-    card.addEventListener('touchmove', (event) => {
-      if (!isDragging || event.touches.length !== 1) return;
-
-      currentX = event.touches[0].clientX;
-      let delta = currentX - startX;
-
-      const blockedRight = currentIndex === 0 && delta > 0;
-      const blockedLeft = currentIndex === places.length - 1 && delta < 0;
-
-      if (blockedRight || blockedLeft) delta = 0;
-      if (Math.abs(delta) > 4) hasMoved = true;
-
-      card.style.transform = `translateX(${delta}px)`;
-    }, { passive: true });
-
-    card.addEventListener('touchend', () => {
-      if (!isDragging) return;
-
-      const delta = currentX - startX;
-      isDragging = false;
-
-      const blockedRight = currentIndex === 0 && delta > 0;
-      const blockedLeft = currentIndex === places.length - 1 && delta < 0;
-
-      if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
-        card.style.transition = 'transform 0.2s ease';
-        card.style.transform = 'translateX(0)';
+      if(error){
+        setStatus(error.message);
         return;
       }
 
-      if (delta < -80) {
-        slideToIndex(currentIndex + 1, 'next');
-        return;
-      }
+      setStatus('Accesso riuscito');
+      window.setTimeout(function(){ window.location.href = getRedirectUrl(); }, 800);
+      return;
+    }
 
-      if (delta > 80) {
-        slideToIndex(currentIndex - 1, 'prev');
+    const u = username.value.trim();
+    const phoneVal = phone.value.trim();
+    const lang = language.value;
+    const r = repeat.value;
+
+    if(!u){
+      setStatus('Inserisci nome utente.');
+      return;
+    }
+
+    if(p.length < 6){
+      setStatus('La password deve avere almeno 6 caratteri.');
+      return;
+    }
+
+    if(p !== r){
+      setStatus('Le password non coincidono.');
+      return;
+    }
+
+    const { error } = await client.auth.signUp({
+      email:e,
+      password:p,
+      options:{
+        data:{
+          username:u,
+          language:lang,
+          phone:phoneVal
+        },
+        emailRedirectTo:getRedirectUrl()
       }
     });
 
-    card.addEventListener('touchcancel', () => {
-      isDragging = false;
-      card.style.transition = 'transform 0.2s ease';
-      card.style.transform = 'translateX(0)';
+    if(error){
+      setStatus(error.message);
+      return;
+    }
+
+    setStatus('Account creato. Controlla la tua email se Supabase richiede conferma.');
+  }
+
+  async function oauth(provider){
+    const { error } = await client.auth.signInWithOAuth({
+      provider:provider,
+      options:{ redirectTo:getRedirectUrl() }
+    });
+
+    if(error) setStatus(error.message);
+  }
+
+  function setupEvents(){
+    actionBtn.addEventListener('click', handleAuth);
+    toggle.addEventListener('click', function(){
+      isLogin = !isLogin;
+      setMode();
+    });
+    googleBtn.addEventListener('click', function(){ oauth('google'); });
+    appleBtn.addEventListener('click', function(){ oauth('apple'); });
+    password.addEventListener('keydown', function(event){
+      if(event.key === 'Enter') handleAuth();
+    });
+    repeat.addEventListener('keydown', function(event){
+      if(event.key === 'Enter') handleAuth();
     });
   }
 
-  function runTests() {
-    console.assert(Array.isArray(places), 'places must be an array');
-    console.assert(places.length === 5, '5 cities expected');
-    console.assert(places.every((place) => typeof place.name === 'string'), 'Each city needs a name');
-    console.assert(places.every((place) => Array.isArray(place.coords) && place.coords.length === 2), 'Each city needs coords [lat, lng]');
-    console.assert(places.every((place) => typeof place.image === 'string' && place.image.startsWith('https://')), 'Each city needs a stable image URL');
-    console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay as the fifth city');
-    console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore must use the fixed Pexels image');
-    console.assert(currentIndex === -1, 'Initial index should be -1');
-    console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
-    console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
-    console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
-    console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
-    console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
-    console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
-    console.assert(typeof addPOI === 'function', 'addPOI function exists');
-    console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
-    console.assert(typeof supabaseClient?.auth?.getSession === 'function' || supabaseClient === null, 'Supabase client is either ready or safely null');
-    console.assert(!document.documentElement.innerHTML.includes('= await supabaseClient.auth.getSession'), 'Broken auth fragment removed');
-    console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
-    console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button remains visible');
+  function runTests(){
+    console.assert(typeof client.auth.signInWithPassword === 'function','Password login exists');
+    console.assert(typeof client.auth.signUp === 'function','Signup exists');
+    console.assert(typeof client.auth.signInWithOAuth === 'function','OAuth exists');
+    console.assert(username !== null,'Username field exists');
+    console.assert(language !== null,'Language field exists');
+    console.assert(email !== null,'Email field exists');
+    console.assert(phone !== null,'Phone field exists');
+    console.assert(password !== null,'Password field exists');
+    console.assert(repeat !== null,'Repeat password exists');
+    console.assert(actionBtn !== null,'Action button exists');
+    console.assert(divider !== null,'Divider exists');
+    console.assert(socialRow !== null,'Social row exists');
+    console.assert(googleBtn !== null,'Google button exists');
+    console.assert(appleBtn !== null,'Apple button exists');
+    console.assert(isValidEmail('test@example.com') === true,'Valid email accepted');
+    console.assert(isValidEmail('wrong-email') === false,'Invalid email rejected');
+    console.assert(getRedirectUrl().endsWith('/map.html'),'Redirect goes to map.html');
+    console.assert(document.querySelectorAll('#google').length === 1,'Only one Google button exists');
+    console.assert(document.querySelectorAll('#apple').length === 1,'Only one Apple button exists');
+    console.assert(!document.querySelector('style button#action'),'No HTML accidentally inside style');
   }
 
-  createCityMarkers();
-  preloadImages();
-  preloadTiles();
-  updateWeather(44.12, 9.71);
   setupEvents();
-  loadPOIs();
+  setMode();
   runTests();
+})();
 </script>
 
 </body>
