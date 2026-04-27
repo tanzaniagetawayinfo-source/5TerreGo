@@ -225,17 +225,17 @@
     {
       name: 'Monterosso',
       coords: [44.1461, 9.6548],
-      image: 'https://cdn.pixabay.com/photo/2016/11/29/05/45/beach-1867271_1280.jpg'
+      image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg'
     },
     {
       name: 'Vernazza',
       coords: [44.1350, 9.6847],
-      image: 'https://cdn.pixabay.com/photo/2016/03/27/22/22/italy-1283699_1280.jpg'
+      image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg'
     },
     {
       name: 'Corniglia',
       coords: [44.1197, 9.7089],
-      image: 'https://cdn.pixabay.com/photo/2017/06/20/19/22/sea-2424780_1280.jpg'
+      image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg'
     },
     {
       name: 'Manarola',
@@ -276,10 +276,14 @@
     });
   }
 
-  function showCityCard(place) {
+  function setCardContent(place) {
     cardTitle.innerText = place.name;
     cardImg.src = place.image;
     cardImg.alt = place.name;
+  }
+
+  function showCityCard(place) {
+    setCardContent(place);
 
     card.style.display = 'block';
     card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
@@ -353,10 +357,11 @@
   function slideToIndex(nextIndex, direction) {
     if (nextIndex < 0 || nextIndex >= places.length || nextIndex === currentIndex) {
       card.style.transition = 'transform 0.2s ease';
-      card.style.transform = 'translateY(0)';
+      card.style.transform = 'translateX(0)';
       return;
     }
 
+    const place = places[nextIndex];
     const exitX = direction === 'next' ? '-110%' : '110%';
     const enterX = direction === 'next' ? '110%' : '-110%';
 
@@ -366,12 +371,15 @@
     window.setTimeout(() => {
       card.style.transition = 'none';
       card.style.transform = `translateX(${enterX})`;
-      showCityByIndex(nextIndex, true);
+      currentIndex = nextIndex;
+      setCardContent(place);
 
       requestAnimationFrame(() => {
         card.style.transition = 'transform 0.3s ease';
         card.style.transform = 'translateX(0)';
       });
+
+      centerCity(place);
     }, 250);
   }
 
@@ -490,6 +498,7 @@
     console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
     console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
     console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
+    console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
   }
 
