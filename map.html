@@ -25,7 +25,6 @@
       height: 100vh;
     }
 
-    /* ===== SINGLE TOP BAR ===== */
     .top-bar {
       position: fixed;
       top: 12px;
@@ -39,6 +38,7 @@
       border-radius: 20px;
       background: rgba(0,0,0,0.4);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .top-row {
@@ -54,7 +54,10 @@
       transform: translateX(-50%);
       font-weight: 800;
       font-size: 14px;
-      pointer-events: none;
+      text-decoration: none;
+      white-space: nowrap;
+      pointer-events: auto;
+      cursor: pointer;
     }
 
     #weather {
@@ -74,9 +77,7 @@
       color: white;
     }
 
-    #search::placeholder {
-      color: rgba(255,255,255,0.75);
-    }
+    #search::placeholder { color: rgba(255,255,255,0.75); }
 
     #login {
       padding: 8px 12px;
@@ -101,17 +102,14 @@
       user-select: none;
     }
 
-    /* remove white squares from divIcon */
     .leaflet-div-icon {
       background: transparent !important;
       border: none !important;
     }
 
-    /* tile seam fix */
     .leaflet-tile { margin: -0.5px; }
     .leaflet-container { background: #000; }
 
-    /* hide zoom buttons + leaflet attribution */
     .leaflet-control-zoom,
     .leaflet-control-attribution {
       display: none !important;
@@ -131,12 +129,12 @@
       color: #fff;
       font-weight: 700;
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       cursor: pointer;
     }
 
     .mode-btn.active { background: rgba(0,0,0,0.6); }
 
-    /* bottom card */
     .bottom-card {
       position: fixed;
       left: 12px;
@@ -147,10 +145,13 @@
       overflow: hidden;
       background: rgba(0,0,0,0.5);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: none;
       opacity: 0;
       transform: translateY(40px);
       transition: opacity 0.4s ease, transform 0.4s ease;
+      touch-action: pan-y;
+      will-change: transform;
     }
 
     .bottom-card.is-visible {
@@ -164,12 +165,14 @@
       object-fit: cover;
       display: block;
       background: rgba(255,255,255,0.08);
+      pointer-events: none;
     }
 
     .bottom-card .title {
       color: white;
       font-weight: 700;
       padding: 10px;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -177,30 +180,25 @@
 
 <div id="map"></div>
 
-<!-- SINGLE ACTION BAR -->
 <div class="top-bar">
-  <!-- ROW 1: weather - brand - login -->
   <div class="top-row">
     <div id="weather">--</div>
 
-    <a href="https://www.5terrego.com" class="center-brand" target="_blank" style="text-decoration:none;">
+    <a href="https://www.5terrego.com" class="center-brand" target="_blank" rel="noopener noreferrer" aria-label="Apri 5TerreGo.com">
       <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
     </a>
 
     <button id="login" type="button">Accedi</button>
   </div>
 
-  <!-- ROW 2: search -->
   <input id="search" placeholder="Search location..." />
 
-  <!-- ROW 3: modes -->
   <div class="mode-bar">
     <button class="mode-btn active" id="btn-experiences" type="button">Experiences</button>
     <button class="mode-btn" id="btn-stories" type="button">Stories</button>
   </div>
 </div>
 
-<!-- BOTTOM CARD -->
 <div class="bottom-card" id="card" aria-hidden="true">
   <img id="card-img" src="" alt="" />
   <div class="title" id="card-title"></div>
@@ -221,20 +219,34 @@
 
   map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
 
-  const places = [
-    { name: 'Monterosso', coords: [44.1461, 9.6548] },
-    { name: 'Vernazza', coords: [44.1350, 9.6847] },
-    { name: 'Corniglia', coords: [44.1197, 9.7089] },
-    { name: 'Manarola', coords: [44.1076, 9.7290] },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378] }
-  ];
+  const RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
 
-  const images = [
-    'https://cdn.pixabay.com/photo/2016/11/29/05/45/beach-1867271_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/03/27/22/22/italy-1283699_1280.jpg',
-    'https://cdn.pixabay.com/photo/2017/06/20/19/22/sea-2424780_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/11/18/15/16/manarola-1838448_1280.jpg',
-    'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg?_gl=1*1c4ie5q*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3NzcyODMwMjEkbzgkZzEkdDE3NzcyODMwNDQkajM3JGwwJGgw'
+  const places = [
+    {
+      name: 'Monterosso',
+      coords: [44.1461, 9.6548],
+      image: 'https://cdn.pixabay.com/photo/2016/11/29/05/45/beach-1867271_1280.jpg'
+    },
+    {
+      name: 'Vernazza',
+      coords: [44.1350, 9.6847],
+      image: 'https://cdn.pixabay.com/photo/2016/03/27/22/22/italy-1283699_1280.jpg'
+    },
+    {
+      name: 'Corniglia',
+      coords: [44.1197, 9.7089],
+      image: 'https://cdn.pixabay.com/photo/2017/06/20/19/22/sea-2424780_1280.jpg'
+    },
+    {
+      name: 'Manarola',
+      coords: [44.1076, 9.7290],
+      image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg'
+    },
+    {
+      name: 'Riomaggiore',
+      coords: [44.0990, 9.7378],
+      image: RIOMAGGIORE_IMAGE
+    }
   ];
 
   const card = document.getElementById('card');
@@ -243,23 +255,39 @@
 
   let currentIndex = -1;
   let isProgrammaticMove = false;
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  let hasMoved = false;
 
   function centerCity(place) {
     isProgrammaticMove = true;
     map.flyTo(place.coords, 14, { duration: 1.2 });
-    setTimeout(() => { isProgrammaticMove = false; }, 1300);
+
+    window.setTimeout(() => {
+      isProgrammaticMove = false;
+    }, 1400);
   }
 
-  function showCityCard(place, imageUrl) {
+  function preloadImages() {
+    places.forEach((place) => {
+      const img = new Image();
+      img.src = place.image;
+    });
+  }
+
+  function showCityCard(place) {
     cardTitle.innerText = place.name;
-    cardImg.src = imageUrl;
+    cardImg.src = place.image;
     cardImg.alt = place.name;
 
     card.style.display = 'block';
+    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     card.setAttribute('aria-hidden', 'false');
 
     requestAnimationFrame(() => {
       card.classList.add('is-visible');
+      card.style.transform = 'translateY(0)';
     });
   }
 
@@ -268,27 +296,85 @@
 
     card.classList.remove('is-visible');
     card.setAttribute('aria-hidden', 'true');
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    card.style.transform = 'translateY(40px)';
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (card.getAttribute('aria-hidden') === 'true') {
         card.style.display = 'none';
       }
     }, 300);
   }
 
-  function showCityByIndex(index, fromAuto = false) {
+  function showCityByIndex(index, shouldCenter = true) {
     if (index < 0 || index >= places.length) return;
-
-    if (currentIndex === index && card.getAttribute('aria-hidden') === 'false') return;
 
     currentIndex = index;
     const place = places[index];
 
-    if (!fromAuto) centerCity(place);
-    showCityCard(place, images[index % images.length]);
+    if (shouldCenter) centerCity(place);
+    showCityCard(place);
   }
 
-  // MARKERS
+  function getClosestCity() {
+    const center = map.getCenter();
+    let minDist = Infinity;
+    let closestIndex = -1;
+
+    places.forEach((place, index) => {
+      const distance = center.distanceTo(L.latLng(place.coords));
+      if (distance < minDist) {
+        minDist = distance;
+        closestIndex = index;
+      }
+    });
+
+    return { index: closestIndex, distance: minDist };
+  }
+
+  function evaluateAutoCard() {
+    if (isProgrammaticMove) return;
+
+    const zoom = map.getZoom();
+    const closest = getClosestCity();
+
+    if (zoom >= 13 && closest.distance < 500) {
+      if (currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
+        showCityByIndex(closest.index, false);
+      }
+      return;
+    }
+
+    if (zoom < 12 || closest.distance > 800) {
+      hideCard();
+    }
+  }
+
+  function slideToIndex(nextIndex, direction) {
+    if (nextIndex < 0 || nextIndex >= places.length || nextIndex === currentIndex) {
+      card.style.transition = 'transform 0.2s ease';
+      card.style.transform = 'translateY(0)';
+      return;
+    }
+
+    const exitX = direction === 'next' ? '-110%' : '110%';
+    const enterX = direction === 'next' ? '110%' : '-110%';
+
+    card.style.transition = 'transform 0.25s ease';
+    card.style.transform = `translateX(${exitX})`;
+
+    window.setTimeout(() => {
+      card.style.transition = 'none';
+      card.style.transform = `translateX(${enterX})`;
+      showCityByIndex(nextIndex, true);
+
+      requestAnimationFrame(() => {
+        card.style.transition = 'transform 0.3s ease';
+        card.style.transform = 'translateX(0)';
+      });
+    }, 250);
+  }
+
   places.forEach((place, index) => {
     const marker = L.marker(place.coords, {
       icon: L.divIcon({
@@ -298,63 +384,36 @@
     }).addTo(map);
 
     marker.on('click', () => {
-      showCityByIndex(index);
-    });
-  });
-
-  // AUTO OPEN / CLOSE LOGIC
-  function getClosestCity() {
-    const center = map.getCenter();
-    let minDist = Infinity;
-    let closestIndex = -1;
-
-    places.forEach((p, i) => {
-      const d = center.distanceTo(p.coords);
-      if (d < minDist) {
-        minDist = d;
-        closestIndex = i;
-      }
-    });
-
-    return { index: closestIndex, distance: minDist };
-  }
-
-  map.on('moveend zoomend', () => {
-    if (isProgrammaticMove) return;
-
-    const zoom = map.getZoom();
-    const { index, distance } = getClosestCity();
-
-    // OPEN when zoomed in AND close to city
-    if (zoom >= 13 && distance < 500) {
       showCityByIndex(index, true);
-      return;
-    }
-
-    // CLOSE when zoomed out OR far
-    if (zoom < 12 || distance > 800) {
-      hideCard();
-    }
+    });
   });
 
-  /* ===== SWIPE LOGIC ===== */
-  let startX = 0;
-  let currentX = 0;
-  let isDragging = false;
+  map.on('moveend zoomend', evaluateAutoCard);
 
-  card.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
+  card.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) return;
+
+    startX = event.touches[0].clientX;
+    currentX = startX;
     isDragging = true;
-  });
+    hasMoved = false;
+    card.style.transition = 'none';
+  }, { passive: true });
 
-  card.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
+  card.addEventListener('touchmove', (event) => {
+    if (!isDragging || event.touches.length !== 1) return;
 
-    currentX = e.touches[0].clientX;
-    const delta = currentX - startX;
+    currentX = event.touches[0].clientX;
+    let delta = currentX - startX;
+
+    const blockedRight = currentIndex === 0 && delta > 0;
+    const blockedLeft = currentIndex === places.length - 1 && delta < 0;
+
+    if (blockedRight || blockedLeft) delta = 0;
+    if (Math.abs(delta) > 4) hasMoved = true;
 
     card.style.transform = `translateX(${delta}px)`;
-  });
+  }, { passive: true });
 
   card.addEventListener('touchend', () => {
     if (!isDragging) return;
@@ -362,41 +421,29 @@
     const delta = currentX - startX;
     isDragging = false;
 
-    card.style.transition = 'transform 0.3s ease';
+    const blockedRight = currentIndex === 0 && delta > 0;
+    const blockedLeft = currentIndex === places.length - 1 && delta < 0;
 
-    if (delta < -80 && currentIndex < places.length - 1) {
-      const next = currentIndex + 1;
-      card.style.transform = 'translateX(-100%)';
-
-      setTimeout(() => {
-        card.style.transition = 'none';
-        card.style.transform = 'translateX(100%)';
-        showCityByIndex(next);
-
-        requestAnimationFrame(() => {
-          card.style.transition = 'transform 0.3s ease';
-          card.style.transform = 'translateX(0)';
-        });
-      }, 200);
-
-    } else if (delta > 80 && currentIndex > 0) {
-      const prev = currentIndex - 1;
-      card.style.transform = 'translateX(100%)';
-
-      setTimeout(() => {
-        card.style.transition = 'none';
-        card.style.transform = 'translateX(-100%)';
-        showCityByIndex(prev);
-
-        requestAnimationFrame(() => {
-          card.style.transition = 'transform 0.3s ease';
-          card.style.transform = 'translateX(0)';
-        });
-      }, 200);
-
-    } else {
+    if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
+      card.style.transition = 'transform 0.2s ease';
       card.style.transform = 'translateX(0)';
+      return;
     }
+
+    if (delta < -80) {
+      slideToIndex(currentIndex + 1, 'next');
+      return;
+    }
+
+    if (delta > 80) {
+      slideToIndex(currentIndex - 1, 'prev');
+    }
+  });
+
+  card.addEventListener('touchcancel', () => {
+    isDragging = false;
+    card.style.transition = 'transform 0.2s ease';
+    card.style.transform = 'translateX(0)';
   });
 
   async function updateWeather(lat, lng) {
@@ -405,12 +452,10 @@
       const data = await response.json();
       const temperature = data.current_weather?.temperature;
       document.getElementById('weather').innerText = temperature === undefined ? '--' : `🌤️ ${temperature}°`;
-    } catch {
+    } catch (error) {
       document.getElementById('weather').innerText = '--';
     }
   }
-
-  updateWeather(44.12, 9.71);
 
   document.getElementById('search').addEventListener('keydown', async (event) => {
     if (event.key !== 'Enter') return;
@@ -433,10 +478,24 @@
     }
   });
 
-  // TESTS
-  console.assert(typeof getClosestCity === 'function', 'Closest city fn exists');
-  console.assert(Array.isArray(places) && places.length === 5, '5 cities expected');
-  console.assert(currentIndex === -1, 'Initial index should be -1');
+  function runTests() {
+    console.assert(Array.isArray(places), 'places must be an array');
+    console.assert(places.length === 5, '5 cities expected');
+    console.assert(places.every((place) => typeof place.name === 'string'), 'Each city needs a name');
+    console.assert(places.every((place) => Array.isArray(place.coords) && place.coords.length === 2), 'Each city needs coords [lat, lng]');
+    console.assert(places.every((place) => typeof place.image === 'string' && place.image.startsWith('https://')), 'Each city needs a stable image URL');
+    console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay as the fifth city');
+    console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore must use the fixed Pexels image');
+    console.assert(currentIndex === -1, 'Initial index should be -1');
+    console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
+    console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
+    console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
+    console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
+  }
+
+  preloadImages();
+  updateWeather(44.12, 9.71);
+  runTests();
 </script>
 
 </body>
