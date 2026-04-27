@@ -335,13 +335,6 @@
 
   let currentIndex = -1;
   let currentDataset = 'places';
-  let user = null;
-  let isOwner = false;
-  let isProgrammaticMove = false;
-  let startX = 0;
-  let currentX = 0;
-  let isDragging = false;
-  let hasMoved = false;
   let poiLayer = L.layerGroup().addTo(map);
 
   function normalizePOI(raw) {
@@ -547,17 +540,9 @@
     localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
   }
 
-  function openOwnerPanel() {
-    isOwner = true;
-    ownerPanel.style.display = 'block';
-    ownerPanel.setAttribute('aria-hidden', 'false');
-    loginBtn.innerText = user?.email ? 'Owner' : 'Owner demo';
-  }
+  
 
-  async function checkSession() {
-    if (!SUPABASE_READY) return;
-
-    const { data } = await supabaseClient.auth.getSession();
+   = await supabaseClient.auth.getSession();
     user = data.session?.user || null;
     if (user) openOwnerPanel();
 
@@ -567,11 +552,7 @@
     });
   }
 
-  async function handleLogin() {
-    if (!SUPABASE_READY) {
-      const email = prompt('Email owner demo');
-      if (!email || !email.includes('@')) return;
-      user = { email };
+  ;
       openOwnerPanel();
       return;
     }
@@ -588,10 +569,35 @@
   }
 
   async function addPOI() {
-    if (!user) {
-      alert('Devi essere loggato come owner');
+    const name = document.getElementById('poi-name').value.trim();
+    const symbol = document.getElementById('poi-symbol').value.trim() || '📍';
+    const lat = Number(document.getElementById('poi-lat').value);
+    const lng = Number(document.getElementById('poi-lng').value);
+    const image = document.getElementById('poi-img').value.trim();
+    const ownerEmail = document.getElementById('poi-email').value.trim();
+    const phone = document.getElementById('poi-phone').value.trim();
+    const relevance = Number(document.getElementById('poi-relevance').value || 0);
+
+    const poi = normalizePOI({ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance });
+
+    if (!isValidPOI(poi)) {
+      alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
       return;
     }
+
+    if (SUPABASE_READY) {
+      const { error } = await supabaseClient.from('pois').insert([{ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance }]);
+      if (error) {
+        alert('Errore salvataggio: ' + error.message);
+        return;
+      }
+    } else {
+      saveLocalPOI(poi);
+    }
+
+    await loadPOIs();
+    alert('POI salvato');
+  }
 
     const name = document.getElementById('poi-name').value.trim();
     const symbol = document.getElementById('poi-symbol').value.trim() || '📍';
@@ -735,7 +741,7 @@
     card.style.transform = 'translateX(0)';
   });
 
-  loginBtn.addEventListener('click', handleLogin);
+  
   document.getElementById('add-poi').addEventListener('click', addPOI);
 
   function runTests() {
@@ -761,7 +767,7 @@
   preloadImages();
   preloadTiles();
   updateWeather(44.12, 9.71);
-  checkSession();
+  
   loadPOIs();
   runTests();
 </script>
