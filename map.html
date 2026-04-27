@@ -291,7 +291,9 @@
     !SUPABASE_URL.includes('YOUR_PROJECT') &&
     !SUPABASE_ANON_KEY.includes('YOUR_PUBLIC')
   );
-  const supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,{
+  auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+}) : null;
 
   const RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   const LOCAL_POI_KEY = '5terrego_pois_backup';
@@ -617,7 +619,22 @@
     }
   }
 
-  function setupEvents() {
+  async function checkUser(){
+  if(!supabaseClient) return;
+  const { data } = await supabaseClient.auth.getSession();
+  const user = data?.session?.user;
+
+  if(user){
+    const name = user.user_metadata?.username || user.email?.split('@')[0] || 'User';
+    loginBtn.innerText = `Hi, ${name}`;
+
+    loginBtn.onclick = ()=>{
+      window.location.href = '/login.html';
+    };
+  }
+}
+
+function setupEvents() {
     loginBtn.addEventListener('click', () => {
       window.location.href = '/login.html';
     });
@@ -734,6 +751,15 @@
   preloadTiles();
   updateWeather(44.12, 9.71);
   setupEvents();
+
+  // check login stato utente
+  checkUser();
+
+  if(supabaseClient){
+    supabaseClient.auth.onAuthStateChange((event, session)=>{
+      if(session?.user) checkUser();
+    });
+  }
   loadPOIs();
   runTests();
 </script>
