@@ -107,6 +107,51 @@
       transition: all 0.5s ease;
     }
 
+    .hero-topline {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .hero-topline .brand {
+      pointer-events: auto;
+      font-size: 20px !important;
+      line-height: 1 !important;
+      padding: 10px 13px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      white-space: nowrap;
+    }
+
+    .preview-pill {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 15px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
     .brand.floating {
       position: fixed;
       top: 16px;
@@ -133,13 +178,16 @@
 
     .subtitle {
       margin-top: 0;
-      margin-bottom: 8px;
-      font-size: 14px;
-      letter-spacing: 0.18em;
+      margin-bottom: 20px;
+      font-size: clamp(42px, 9vw, 120px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
       text-transform: uppercase;
-      color: var(--muted);
-      font-family: "SF Mono", "Helvetica Neue", sans-serif;
-      order: -1;
+      color: var(--text);
+      font-weight: 900;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      text-align: center;
+      max-width: 900px;
     }
 
     .status {
@@ -546,8 +594,8 @@
       }
 
       .subtitle {
-        font-size: 12px;
-        letter-spacing: 0.14em;
+        font-size: clamp(28px, 8vw, 64px);
+        letter-spacing: -0.02em;
       }
 
       .countdown {
@@ -604,6 +652,23 @@
         padding: 7px 9px;
       }
 
+      .hero-topline {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+      }
+
+      .hero-topline .brand {
+        font-size: 15px !important;
+        padding: 8px 10px;
+      }
+
+      .preview-pill {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 10px;
+      }
+
       .countdown.floating {
         top: 12px;
         right: 12px;
@@ -650,12 +715,15 @@
     <div class="pages-wrapper" id="pagesWrapper">
       <header class="hero" id="top">
         <div class="hero-inner">
-          <div class="hero-copy">
-            <div class="brand" style="font-size: clamp(52px,10vw,96px); line-height:1;">
+          <div class="hero-topline">
+            <div class="brand">
               <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
             </div>
+            <a class="preview-pill" href="map.html">Preview</a>
+          </div>
 
-            <div class="subtitle" style="opacity:0.85;">Explore Cinque Terre Like Never Before</div>
+          <div class="hero-copy">
+            <div class="subtitle" style="opacity:0.85;">EXPLORE CINQUE TERRE<br>LIKE NEVER BEFORE</div>
 
             <div class="countdown" aria-label="Countdown">
               <div class="timebox"><strong id="days">00</strong><span>Days</span></div>
