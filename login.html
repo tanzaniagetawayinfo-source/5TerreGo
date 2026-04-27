@@ -232,9 +232,16 @@ button{
 
   const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  const REDIRECT_PATH = '/map.html';
+  // NON usare path relativo → rompe la sessione tra domini
+  const REDIRECT_PATH = 'https://www.tuosito.com/map.html';
 
-  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,{
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true
+    }
+  });
 
   let isLogin = true;
 
@@ -255,8 +262,11 @@ button{
   const closeBtn = document.getElementById('close');
   const overlay = document.querySelector('.overlay');
 
+  // IMPORTANT: usa sempre stesso dominio (no localhost vs dominio)
+  // così la session viene condivisa tra tutte le pagine
   function getRedirectUrl(){
-    return new URL(REDIRECT_PATH, window.location.origin).href;
+    // FORZA dominio unico (www)
+    return 'https://www.tuosito.com/map.html';
   }
 
   function setStatus(message){
@@ -322,7 +332,13 @@ button{
       }
 
       setStatus('Accesso riuscito');
-      window.setTimeout(function(){ window.location.href = getRedirectUrl(); }, 800);
+      // IMPORTANT: aspetta che la session sia salvata
+      const { data } = await client.auth.getSession();
+      if(data?.session){
+        window.location.href = getRedirectUrl();
+      } else {
+        setTimeout(()=>window.location.href = getRedirectUrl(), 1000);
+      }
       return;
     }
 
@@ -469,7 +485,21 @@ button{
     console.assert(!document.querySelector('style button#action'),'No HTML accidentally inside style');
   }
 
+  // DEBUG (puoi rimuoverlo dopo)
+  window.client = client;
+
   setupEvents();
+
+  // controlla subito se utente è già loggato
+  checkUser();
+
+  // listener globale auth (fix persistenza)
+  client.auth.onAuthStateChange((event, session) => {
+    if(session?.user){
+      checkUser();
+    }
+  });
+
   setMode();
   runTests();
 })();
