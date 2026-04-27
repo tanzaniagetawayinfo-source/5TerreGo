@@ -389,7 +389,8 @@ button{
     actionBtn.addEventListener('click', handleAuth);
     toggle.addEventListener('click', function(){
       isLogin = !isLogin;
-      setMode();
+      checkUser();
+  setMode();
     });
     googleBtn.addEventListener('click', function(){ oauth('google'); });
     appleBtn.addEventListener('click', function(){ oauth('apple'); });
@@ -399,6 +400,50 @@ button{
     repeat.addEventListener('keydown', function(event){
       if(event.key === 'Enter') handleAuth();
     });
+  }
+
+  async function checkUser(){
+    const { data } = await client.auth.getSession();
+    const user = data?.session?.user;
+
+    if(user){
+      // nascondi form
+      username.classList.add('hidden');
+      language.classList.add('hidden');
+      email.classList.add('hidden');
+      phone.classList.add('hidden');
+      password.classList.add('hidden');
+      repeat.classList.add('hidden');
+      actionBtn.classList.add('hidden');
+      divider.classList.add('hidden');
+      socialRow.classList.add('hidden');
+      toggle.classList.add('hidden');
+
+      title.innerText = 'Account';
+
+      // crea pannello
+      const panel = document.createElement('div');
+      panel.innerHTML = `
+        <button class="primary" id="bookings">Le mie prenotazioni</button>
+        <button class="primary" id="profile">Modifica profilo</button>
+        <button style="background:#111;color:#fff;border:1px solid rgba(255,255,255,0.2);" id="logout">Logout</button>
+      `;
+
+      document.querySelector('.modal').appendChild(panel);
+
+      document.getElementById('logout').onclick = async ()=>{
+        await client.auth.signOut();
+        location.reload();
+      };
+
+      document.getElementById('bookings').onclick = ()=>{
+        window.location.href = '/bookings.html';
+      };
+
+      document.getElementById('profile').onclick = ()=>{
+        window.location.href = '/profile.html';
+      };
+    }
   }
 
   function runTests(){
