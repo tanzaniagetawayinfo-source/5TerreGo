@@ -282,9 +282,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  const SUPABASE_URL = 'https://jpfclbktcnhmlvaibzcw.supabase.co';
+  const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT') && !SUPABASE_ANON_KEY.includes('YOUR_PUBLIC');
+  const SUPABASE_READY = Boolean(
+    window.supabase &&
+    SUPABASE_URL &&
+    SUPABASE_ANON_KEY &&
+    !SUPABASE_URL.includes('YOUR_PROJECT') &&
+    !SUPABASE_ANON_KEY.includes('YOUR_PUBLIC')
+  );
   const supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
   const RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
@@ -332,10 +338,16 @@
   const cardImg = document.getElementById('card-img');
   const ownerPanel = document.getElementById('owner-panel');
   const loginBtn = document.getElementById('login');
+  const addPoiBtn = document.getElementById('add-poi');
 
   let currentIndex = -1;
   let currentDataset = 'places';
   let poiLayer = L.layerGroup().addTo(map);
+  let isProgrammaticMove = false;
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  let hasMoved = false;
 
   function normalizePOI(raw) {
     const lat = Number(raw.lat ?? raw.latitude);
@@ -540,34 +552,6 @@
     localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
   }
 
-  
-
-   = await supabaseClient.auth.getSession();
-    user = data.session?.user || null;
-    if (user) openOwnerPanel();
-
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
-      user = session?.user || null;
-      if (user) openOwnerPanel();
-    });
-  }
-
-  ;
-      openOwnerPanel();
-      return;
-    }
-
-    const email = prompt('Email');
-    if (!email || !email.includes('@')) return;
-
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href }
-    });
-
-    alert(error ? 'Errore login: ' + error.message : 'Controlla la tua email per accedere');
-  }
-
   async function addPOI() {
     const name = document.getElementById('poi-name').value.trim();
     const symbol = document.getElementById('poi-symbol').value.trim() || '📍';
@@ -586,37 +570,10 @@
     }
 
     if (SUPABASE_READY) {
-      const { error } = await supabaseClient.from('pois').insert([{ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance }]);
-      if (error) {
-        alert('Errore salvataggio: ' + error.message);
-        return;
-      }
-    } else {
-      saveLocalPOI(poi);
-    }
+      const { error } = await supabaseClient
+        .from('pois')
+        .insert([{ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance }]);
 
-    await loadPOIs();
-    alert('POI salvato');
-  }
-
-    const name = document.getElementById('poi-name').value.trim();
-    const symbol = document.getElementById('poi-symbol').value.trim() || '📍';
-    const lat = Number(document.getElementById('poi-lat').value);
-    const lng = Number(document.getElementById('poi-lng').value);
-    const image = document.getElementById('poi-img').value.trim();
-    const ownerEmail = document.getElementById('poi-email').value.trim() || user.email;
-    const phone = document.getElementById('poi-phone').value.trim();
-    const relevance = Number(document.getElementById('poi-relevance').value || 0);
-
-    const poi = normalizePOI({ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance });
-
-    if (!isValidPOI(poi)) {
-      alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
-      return;
-    }
-
-    if (SUPABASE_READY) {
-      const { error } = await supabaseClient.from('pois').insert([{ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance }]);
       if (error) {
         alert('Errore salvataggio: ' + error.message);
         return;
@@ -660,89 +617,94 @@
     }
   }
 
-  document.getElementById('search').addEventListener('keydown', async (event) => {
-    if (event.key !== 'Enter') return;
+  function setupEvents() {
+    loginBtn.addEventListener('click', () => {
+      window.location.href = '/login.html';
+    });
 
-    const query = event.target.value.trim();
-    if (!query) return;
+    addPoiBtn.addEventListener('click', addPOI);
 
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-      const data = await response.json();
+    document.getElementById('search').addEventListener('keydown', async (event) => {
+      if (event.key !== 'Enter') return;
 
-      if (data[0]) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        map.setView([lat, lon], 12);
-        updateWeather(lat, lon);
+      const query = event.target.value.trim();
+      if (!query) return;
+
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data[0]) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          map.setView([lat, lon], 12);
+          updateWeather(lat, lon);
+        }
+      } catch (error) {
+        console.warn('Search failed:', error);
       }
-    } catch (error) {
-      console.warn('Search failed:', error);
-    }
-  });
+    });
 
-  map.on('moveend zoomend', () => {
-    evaluateAutoCard();
-    preloadTiles();
-  });
+    map.on('moveend zoomend', () => {
+      evaluateAutoCard();
+      preloadTiles();
+    });
 
-  card.addEventListener('touchstart', (event) => {
-    if (event.touches.length !== 1) return;
-    startX = event.touches[0].clientX;
-    currentX = startX;
-    isDragging = true;
-    hasMoved = false;
-    card.style.transition = 'none';
-  }, { passive: true });
+    card.addEventListener('touchstart', (event) => {
+      if (event.touches.length !== 1) return;
+      startX = event.touches[0].clientX;
+      currentX = startX;
+      isDragging = true;
+      hasMoved = false;
+      card.style.transition = 'none';
+    }, { passive: true });
 
-  card.addEventListener('touchmove', (event) => {
-    if (!isDragging || event.touches.length !== 1) return;
+    card.addEventListener('touchmove', (event) => {
+      if (!isDragging || event.touches.length !== 1) return;
 
-    currentX = event.touches[0].clientX;
-    let delta = currentX - startX;
+      currentX = event.touches[0].clientX;
+      let delta = currentX - startX;
 
-    const blockedRight = currentIndex === 0 && delta > 0;
-    const blockedLeft = currentIndex === places.length - 1 && delta < 0;
+      const blockedRight = currentIndex === 0 && delta > 0;
+      const blockedLeft = currentIndex === places.length - 1 && delta < 0;
 
-    if (blockedRight || blockedLeft) delta = 0;
-    if (Math.abs(delta) > 4) hasMoved = true;
+      if (blockedRight || blockedLeft) delta = 0;
+      if (Math.abs(delta) > 4) hasMoved = true;
 
-    card.style.transform = `translateX(${delta}px)`;
-  }, { passive: true });
+      card.style.transform = `translateX(${delta}px)`;
+    }, { passive: true });
 
-  card.addEventListener('touchend', () => {
-    if (!isDragging) return;
+    card.addEventListener('touchend', () => {
+      if (!isDragging) return;
 
-    const delta = currentX - startX;
-    isDragging = false;
+      const delta = currentX - startX;
+      isDragging = false;
 
-    const blockedRight = currentIndex === 0 && delta > 0;
-    const blockedLeft = currentIndex === places.length - 1 && delta < 0;
+      const blockedRight = currentIndex === 0 && delta > 0;
+      const blockedLeft = currentIndex === places.length - 1 && delta < 0;
 
-    if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
+      if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
+        card.style.transition = 'transform 0.2s ease';
+        card.style.transform = 'translateX(0)';
+        return;
+      }
+
+      if (delta < -80) {
+        slideToIndex(currentIndex + 1, 'next');
+        return;
+      }
+
+      if (delta > 80) {
+        slideToIndex(currentIndex - 1, 'prev');
+      }
+    });
+
+    card.addEventListener('touchcancel', () => {
+      isDragging = false;
       card.style.transition = 'transform 0.2s ease';
       card.style.transform = 'translateX(0)';
-      return;
-    }
-
-    if (delta < -80) {
-      slideToIndex(currentIndex + 1, 'next');
-      return;
-    }
-
-    if (delta > 80) {
-      slideToIndex(currentIndex - 1, 'prev');
-    }
-  });
-
-  card.addEventListener('touchcancel', () => {
-    isDragging = false;
-    card.style.transition = 'transform 0.2s ease';
-    card.style.transform = 'translateX(0)';
-  });
-
-  
-  document.getElementById('add-poi').addEventListener('click', addPOI);
+    });
+  }
 
   function runTests() {
     console.assert(Array.isArray(places), 'places must be an array');
@@ -760,14 +722,18 @@
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof addPOI === 'function', 'addPOI function exists');
+    console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
+    console.assert(typeof supabaseClient?.auth?.getSession === 'function' || supabaseClient === null, 'Supabase client is either ready or safely null');
+    console.assert(!document.documentElement.innerHTML.includes('= await supabaseClient.auth.getSession'), 'Broken auth fragment removed');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
+    console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button remains visible');
   }
 
   createCityMarkers();
   preloadImages();
   preloadTiles();
   updateWeather(44.12, 9.71);
-  
+  setupEvents();
   loadPOIs();
   runTests();
 </script>
