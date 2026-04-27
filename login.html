@@ -279,6 +279,15 @@ button{
     }
   });
 
+  // OWNER CONFIG
+  const OWNER_EMAILS = [
+    'your@email.com' // ← metti qui la tua mail owner
+  ];
+
+  function isOwner(user){
+    return OWNER_EMAILS.includes((user?.email || '').toLowerCase());
+  }
+
   let isLogin = true;
 
   const username = document.getElementById('username');
@@ -476,6 +485,19 @@ button{
       <button class="logout-btn" id="logout" type="button">Logout</button>
     `;
 
+    // se OWNER → aggiungi gestione POI
+    if(isOwner(user)){
+      const poiBtn = document.createElement('button');
+      poiBtn.className = 'primary';
+      poiBtn.id = 'poi-dashboard';
+      poiBtn.innerText = 'Gestisci POI';
+      panel.appendChild(poiBtn);
+
+      poiBtn.onclick = function(){
+        window.location.href = '/poidashboard.html';
+      };
+    }
+
     document.querySelector('.modal').appendChild(panel);
 
     document.getElementById('logout').onclick = async function(){
@@ -545,6 +567,7 @@ button{
     console.assert(document.querySelectorAll('#apple').length === 1,'Only one Apple button exists');
     console.assert(document.querySelectorAll('#close').length === 1,'Only one close button exists');
     console.assert(!document.querySelector('style button#action'),'No HTML accidentally inside style');
+    console.assert(typeof isOwner === 'function','isOwner function exists');
   }
 
   window.client = client;
