@@ -70,6 +70,22 @@ const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 
 let pois = [];
 
+const status = document.getElementById("status");
+const list = document.getElementById("list");
+const modal = document.getElementById("modal");
+const addBtn = document.getElementById("addBtn");
+const closeBtn = document.getElementById("closeBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+const name = document.getElementById("name");
+const coords = document.getElementById("coords");
+const description = document.getElementById("description");
+const importance = document.getElementById("importance");
+const type = document.getElementById("type");
+const emails = document.getElementById("emails");
+const phone = document.getElementById("phone");
+const discount = document.getElementById("discount");
+
 function getToken(){
   for(const k of Object.keys(localStorage)){
     if(k.includes("auth-token")){
@@ -91,11 +107,17 @@ async function loadPois(){
       }
     });
 
+    if(!res.ok){
+      const txt = await res.text();
+      throw new Error(txt);
+    }
+
     pois = await res.json();
     render();
     status.innerText = pois.length + " POI";
   }catch(e){
-    status.innerText = "errore";
+    console.error(e);
+    status.innerText = "errore caricamento POI";
   }
 }
 
