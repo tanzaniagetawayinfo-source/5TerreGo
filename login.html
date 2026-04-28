@@ -266,7 +266,8 @@ button{
   const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   const REDIRECT_PATH = 'https://www.5terrego.com/map.html';
-  const OWNER_CHECK_ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.functions.supabase.co/backend?action=me';
+  // 🔥 FIX: corretto path edge function (mancava /v1)
+  const OWNER_CHECK_ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.functions.supabase.co/v1/backend?action=me';
 
   if(!window.supabase){
     throw new Error('Supabase SDK non caricato.');
