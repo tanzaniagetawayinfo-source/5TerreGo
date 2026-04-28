@@ -62,7 +62,11 @@ button.save{width:100%;padding:14px;margin-top:14px;background:white;color:black
 
 <script>
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
-const ANON_KEY = "INSERISCI_QUI_ANON_KEY";
+// ⚠️ USA SOLO LA ANON PUBLIC KEY (NON service_role, NON secret)
+// ⚠️ IMPORTANTE: NON usare sb_publishable
+// Usa SOLO la ANON KEY (Legacy → anon public)
+// Vai in: Settings → API → Legacy anon key
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
 
 let pois = [];
 
@@ -81,7 +85,9 @@ async function loadPois(){
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`,{
       headers:{
-        apikey:ANON_KEY
+        apikey:ANON_KEY,
+        "Content-Type":"application/json",
+        "Accept":"application/json"
       }
     });
 
