@@ -347,21 +347,6 @@ async function loadPois(){
   try{
     // 🔥 PUBLIC CALL (no auth needed)
     const data = await fetchJsonSafe(`${ENDPOINT}?action=list-pois`, {
-      method:"GET"
-    });
-
-    pois = Array.isArray(data?.pois) ? data.pois.map(normalizePoi) : [];
-    renderList();
-    setStatus(`${pois.length} POI caricati dal backend`);
-    return;
-
-  }catch(err){
-    console.error("LOAD POIS ERROR", err);
-    pois = [];
-    renderList();
-    setStatus(`Errore caricamento POI: ${err.message}`, true);
-  }
-}?action=list-pois`, {
         method:"GET"
       });
 
