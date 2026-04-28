@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POI Editor</title>
 
+<style>
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:#05070a;
+  color:#fff;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  color:white;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:14px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  background:white;
+  color:black;
+}
+
+.search{
+  margin-bottom:20px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SEARCH -->
+  <input class="search" placeholder="Cerca POI..." />
+
+  <!-- FORM -->
+
+  <input placeholder="Nome" />
+  <input placeholder="Coordinate (lat,lng)" />
+
+  <input type="number" placeholder="Importanza (numero)" />
+
+  <select>
+    <option>chiesa</option>
+    <option>monumento</option>
+    <option>sentiero</option>
+    <option>spiaggia</option>
+    <option>stazione</option>
+    <option>ristorante</option>
+    <option>bar</option>
+    <option>punto panoramico</option>
+  </select>
+
+  <input placeholder="Email autorizzate (separate da virgola)" />
+
+  <input type="tel" placeholder="Telefono" />
+
+  <input type="number" placeholder="Sconto % (1-100)" min="1" max="100" />
+
+  <button>Aggiungi / Salva POI</button>
+
+</div>
+
+</body>
+</html>
