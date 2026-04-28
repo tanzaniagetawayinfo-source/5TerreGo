@@ -220,11 +220,6 @@ button.save{
 
 <script>
 const ENDPOINT = "https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/backend";
-
-// Quando avrai un CSV pubblico su Supabase Storage, inserisci qui il link diretto.
-// Esempio: https://jpflcbktcnhmlvaibzcw.supabase.co/storage/v1/object/public/poi/pois.csv
-const CSV_URL = "";
-
 let pois = [];
 
 const listEl = document.getElementById("list");
@@ -249,7 +244,9 @@ function getToken(){
         const raw = JSON.parse(localStorage.getItem(key));
         const token = raw?.access_token || raw?.currentSession?.access_token;
         if(token) return token;
-      }catch(err){}
+      }catch(err){
+        console.warn("Token parse error", err);
+      }
     }
   }
 
@@ -259,6 +256,12 @@ function getToken(){
   }catch(err){
     return "";
   }
+}
+
+function clampNumber(value, min, max, fallback){
+  const n = Number(value);
+  if(Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
 }
 
 function normalizePoi(row){
@@ -273,12 +276,6 @@ function normalizePoi(row){
     phone: row.phone || row.telefono || "",
     discount: clampNumber(row.discount || row.sconto, 0, 100, 0)
   };
-}
-
-function clampNumber(value, min, max, fallback){
-  const n = Number(value);
-  if(Number.isNaN(n)) return fallback;
-  return Math.max(min, Math.min(max, n));
 }
 
 function parseCsvLine(line){
@@ -323,7 +320,7 @@ function parseCsv(csvText){
   });
 }
 
-async function fetchJsonSafe(url, options){
+async function fetchJsonSafe(url, options = {}){
   const res = await fetch(url, options);
   const text = await res.text();
   let data = null;
@@ -345,35 +342,17 @@ async function loadPois(){
   setStatus("Caricamento POI...");
 
   try{
-    // 🔥 PUBLIC CALL (no auth needed)
     const data = await fetchJsonSafe(`${ENDPOINT}?action=list-pois`, {
-        method:"GET"
-      });
+      method: "GET"
+    });
 
-      pois = Array.isArray(data?.pois) ? data.pois.map(normalizePoi) : [];
-      renderList();
-      setStatus(`${pois.length} POI caricati dal backend`);
-      return;
-    }
-
-    if(CSV_URL){
-      const res = await fetch(CSV_URL, { method:"GET" });
-      if(!res.ok) throw new Error(`Errore CSV HTTP ${res.status}`);
-      const csvText = await res.text();
-      pois = parseCsv(csvText);
-      renderList();
-      setStatus(`${pois.length} POI caricati dal CSV`);
-      return;
-    }
-
-    pois = [];
-    renderList();
-    setStatus("Nessun token Supabase e nessun CSV_URL configurato", true);
-
+    pois = Array.isArray(data?.pois) ? data.pois.map(normalizePoi) : [];
+    renderList(searchEl.value);
+    setStatus(`${pois.length} POI caricati dal backend`);
   }catch(err){
     console.error("LOAD POIS ERROR", err);
     pois = [];
-    renderList();
+    renderList(searchEl.value);
     setStatus(`Errore caricamento POI: ${err.message}`, true);
   }
 }
@@ -465,20 +444,16 @@ async function savePoi(){
   }
 
   if(!token){
-    pois.push(poi);
-    clearForm();
-    closeModal();
-    renderList(searchEl.value);
-    setStatus("POI aggiunto solo in memoria. Per salvarlo davvero serve token Supabase/backend.", true);
+    alert("Devi essere loggato come owner per salvare i POI.");
     return;
   }
 
   try{
     const data = await fetchJsonSafe(`${ENDPOINT}?action=create-poi`, {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        Authorization:`Bearer ${token}`
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(poi)
     });
@@ -490,7 +465,6 @@ async function savePoi(){
     clearForm();
     closeModal();
     await loadPois();
-
   }catch(err){
     console.error("SAVE POI ERROR", err);
     alert(`Errore salvataggio: ${err.message}`);
@@ -517,6 +491,11 @@ function runTests(){
   console.assert(parseCsv("name,type,importance\nTest,bar,120")[0].importance === 100, "importance viene limitata a 100");
   console.assert(parseCsv("name,type,discount\nTest,bar,-10")[0].discount === 0, "discount viene limitato a 0");
   console.assert(clampNumber("abc", 1, 100, 1) === 1, "clampNumber fallback corretto");
+  console.assert(typeof fetchJsonSafe === "function", "fetchJsonSafe deve esistere");
+  openModal();
+  console.assert(modalEl.classList.contains("is-open"), "openModal apre il popup");
+  closeModal();
+  console.assert(!modalEl.classList.contains("is-open"), "closeModal chiude il popup");
 }
 
 runTests();
