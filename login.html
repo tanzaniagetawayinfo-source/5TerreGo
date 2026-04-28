@@ -520,13 +520,41 @@ button{
     if(result.error) setStatus(result.error.message);
   }
 
-  function createAccountPanel(){
+  function createAccountPanel(user){
     removeAccountPanel();
 
     const panel = document.createElement('div');
     panel.id = 'account-panel';
     panel.className = 'account-panel';
     panel.innerHTML = '';
+
+    // 👇 HEADER BENTORNATO
+    const welcome = document.createElement('div');
+    welcome.style.marginBottom = '14px';
+    welcome.style.textAlign = 'left';
+
+    let name = '';
+    if(user && user.user_metadata && user.user_metadata.username){
+      name = user.user_metadata.username;
+    } else if(user && user.email){
+      name = user.email.split('@')[0];
+    }
+    const emailVal = user && user.email ? user.email : '';
+
+    const titleEl = document.createElement('div');
+    titleEl.style.fontWeight = '800';
+    titleEl.style.fontSize = '16px';
+    titleEl.innerText = 'Bentornato' + (name ? ', ' + name : '');
+
+    const emailEl = document.createElement('div');
+    emailEl.style.fontSize = '12px';
+    emailEl.style.opacity = '0.7';
+    emailEl.innerText = emailVal;
+
+    welcome.appendChild(titleEl);
+    welcome.appendChild(emailEl);
+
+    panel.appendChild(welcome);
 
     const bookingsBtn = document.createElement('button');
     bookingsBtn.className = 'primary';
@@ -589,7 +617,9 @@ button{
     title.innerText = 'Account';
     setStatus('');
 
-    const panel = createAccountPanel();
+    const session = await getReliableSession();
+    const user = session && session.user ? session.user : null;
+    const panel = createAccountPanel(user);
     await maybeAddOwnerButton(panel);
   }
 
