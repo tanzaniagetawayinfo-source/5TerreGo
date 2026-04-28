@@ -347,10 +347,9 @@ async function loadPois(){
   try{
     const token = getToken();
 
-    if(token){
+    // 🔥 PUBLIC CALL (no auth needed, avoids permission issues)
       const data = await fetchJsonSafe(`${ENDPOINT}?action=list-pois`, {
-        method:"GET",
-        headers:{ Authorization:`Bearer ${token}` }
+        method:"GET"
       });
 
       pois = Array.isArray(data?.pois) ? data.pois.map(normalizePoi) : [];
