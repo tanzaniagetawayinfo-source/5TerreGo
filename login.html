@@ -541,6 +541,26 @@ button{
   }
 
   async function checkUser(){
+    // ⚡ FAST PATH: evita flicker accedi
+    try{
+      const raw = localStorage.getItem('supabase.auth.token');
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && parsed.currentSession && parsed.currentSession.user){
+          const user = parsed.currentSession.user;
+
+          removeAccountPanel();
+          hideAuthForm();
+          title.innerText = 'Account';
+          setStatus('');
+
+          const panel = createAccountPanel();
+          maybeAddOwnerButton(panel);
+          return;
+        }
+      }
+    }catch(e){}
+
     const result = await client.auth.getSession();
     const user = result && result.data && result.data.session ? result.data.session.user : null;
 
@@ -607,7 +627,7 @@ button{
     console.assert(isValidEmail('test@example.com') === true,'Valid email accepted');
     console.assert(isValidEmail('wrong-email') === false,'Invalid email rejected');
     console.assert(getRedirectUrl() === 'https://www.5terrego.com/map.html','Redirect uses canonical www domain');
-    console.assert(OWNER_CHECK_ENDPOINT.indexOf('poi-backend?action=me') > -1,'Owner check endpoint configured');
+    console.assert(OWNER_CHECK_ENDPOINT.indexOf('backend?action=me') > -1,'Owner check endpoint configured');
     console.assert(document.querySelectorAll('#google').length === 1,'Only one Google button exists');
     console.assert(document.querySelectorAll('#apple').length === 1,'Only one Apple button exists');
     console.assert(document.querySelectorAll('#close').length === 1,'Only one close button exists');
