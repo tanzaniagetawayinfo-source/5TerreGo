@@ -668,6 +668,17 @@
   }
 
   async function readCurrentUser() {
+    // ⚡ FAST PATH: leggi session salvata subito (evita delay su login.html)
+    try {
+      var raw = localStorage.getItem('supabase.auth.token');
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.currentSession && parsed.currentSession.user) {
+          return parsed.currentSession.user;
+        }
+      }
+    } catch (e) {}
+
     var sessionResponse;
     var session;
     var userResponse;
