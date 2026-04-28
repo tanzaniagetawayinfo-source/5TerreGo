@@ -530,8 +530,10 @@ button{
 
     // 👇 HEADER BENTORNATO
     const welcome = document.createElement('div');
-    welcome.style.marginBottom = '14px';
+    welcome.style.marginBottom = '16px';
     welcome.style.textAlign = 'left';
+    welcome.style.borderBottom = '1px solid rgba(255,255,255,0.12)';
+    welcome.style.paddingBottom = '10px';
 
     let name = '';
     if(user && user.user_metadata && user.user_metadata.username){
@@ -608,7 +610,13 @@ button{
       window.location.href = '/poidashboard.html';
     };
 
-    panel.appendChild(poiBtn);
+    // inserisce come primo pulsante (dopo header bentornato)
+    const firstButton = panel.children[1];
+    if(firstButton){
+      panel.insertBefore(poiBtn, firstButton);
+    } else {
+      panel.appendChild(poiBtn);
+    }
   }
 
   async function renderAccount(){
