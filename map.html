@@ -166,41 +166,6 @@
 
     .mode-btn.active { background: rgba(0,0,0,0.6); }
 
-    #account-menu {
-      display: none;
-      position: fixed;
-      top: 76px;
-      right: 12px;
-      z-index: 1200;
-      min-width: 190px;
-      padding: 8px;
-      border-radius: 18px;
-      background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.28);
-    }
-
-    #account-menu[aria-hidden="false"] { display: block; }
-
-    #account-menu button {
-      width: 100%;
-      padding: 11px 12px;
-      margin: 0 0 6px;
-      border: 0;
-      border-radius: 13px;
-      background: rgba(255,255,255,0.12);
-      color: white;
-      text-align: left;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    #account-menu button:last-child { margin-bottom: 0; }
-
-    #manage-poi-btn { display: none; }
-    #manage-poi-btn.is-visible { display: block; }
-
     #owner-panel {
       display: none;
       position: fixed;
@@ -299,12 +264,6 @@
   </div>
 </div>
 
-<div id="account-menu" aria-hidden="true">
-  <button id="profile-btn" type="button">Profilo</button>
-  <button id="manage-poi-btn" type="button">Gestisci POI</button>
-  <button id="logout-btn" type="button">Logout</button>
-</div>
-
 <div id="owner-panel" aria-hidden="true">
   <input id="poi-name" placeholder="Nome POI" />
   <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" />
@@ -331,7 +290,6 @@
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  var OWNER_BACKEND_URL = 'https://jpflcbktcnhmlvaibzcw.functions.supabase.co/backend?action=me';
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
   var AUTO_OPEN_ZOOM = 13;
@@ -396,12 +354,8 @@
   var cardTitle = document.getElementById('card-title');
   var cardImg = document.getElementById('card-img');
   var ownerPanel = document.getElementById('owner-panel');
-  var accountMenu = document.getElementById('account-menu');
   var loginBtn = document.getElementById('login');
   var addPoiBtn = document.getElementById('add-poi');
-  var managePoiBtn = document.getElementById('manage-poi-btn');
-  var logoutBtn = document.getElementById('logout-btn');
-  var profileBtn = document.getElementById('profile-btn');
   var searchInput = document.getElementById('search');
 
   var currentIndex = -1;
@@ -413,7 +367,7 @@
   var isDragging = false;
   var hasMoved = false;
   var currentUser = null;
-  var currentIsOwner = false;
+  var userCheckTimer = null;
 
   function readValue(value, fallback) {
     return value === undefined || value === null ? fallback : value;
@@ -699,46 +653,9 @@
     }
   }
 
-  function closeAccountMenu() {
-    accountMenu.setAttribute('aria-hidden', 'true');
-  }
-
-  function toggleAccountMenu() {
-    var isHidden = accountMenu.getAttribute('aria-hidden') !== 'false';
-    accountMenu.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
-  }
-
   function setOwnerPanelVisible(visible) {
     ownerPanel.setAttribute('aria-hidden', visible ? 'false' : 'true');
     ownerPanel.style.display = visible ? 'block' : 'none';
-  }
-
-  async function fetchOwnerStatus(session) {
-    // 🔥 fallback diretto (debug immediato)
-    if (currentUser && currentUser.email === '5terrego.info@gmail.com') {
-      return true;
-    }
-
-    if (!session || !session.access_token) return false;
-
-    try {
-      var response = await fetch(OWNER_BACKEND_URL, {
-        headers: {
-          Authorization: 'Bearer ' + session.access_token
-        }
-      });
-
-      if (!response.ok) {
-        console.warn('Owner check failed:', response.status);
-        return false;
-      }
-
-      var result = await response.json();
-      return Boolean(result && result.isOwner === true);
-    } catch (error) {
-      console.warn('Owner check error:', error);
-      return false;
-    }
   }
 
   function getUserDisplayName(user) {
@@ -750,94 +667,62 @@
     return 'User';
   }
 
-  async function checkUser() {
+  async function readCurrentUser() {
     var sessionResponse;
     var session;
+    var userResponse;
     var user;
 
-    if (!supabaseClient) {
-      currentUser = null;
-      currentIsOwner = false;
-      loginBtn.innerText = 'Accedi';
-      managePoiBtn.classList.remove('is-visible');
-      closeAccountMenu();
-      setOwnerPanelVisible(false);
-      return;
-    }
+    if (!supabaseClient) return null;
 
-    // 🔥 FIX: usa getUser (più affidabile per sessioni persistenti)
-    var userResponse = await supabaseClient.auth.getUser();
-    user = userResponse && userResponse.data ? userResponse.data.user : null;
-
-    // ricava comunque session per backend owner
     sessionResponse = await supabaseClient.auth.getSession();
     session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
 
+    if (session && session.user) {
+      return session.user;
+    }
+
+    userResponse = await supabaseClient.auth.getUser();
+    user = userResponse && userResponse.data ? userResponse.data.user : null;
+    return user || null;
+  }
+
+  async function checkUser() {
+    var user = await readCurrentUser();
     currentUser = user;
-    currentIsOwner = false;
-    closeAccountMenu();
-    setOwnerPanelVisible(false);
 
     if (!user) {
       loginBtn.innerText = 'Accedi';
-      managePoiBtn.classList.remove('is-visible');
-      return;
+      setOwnerPanelVisible(false);
+      return false;
     }
 
     loginBtn.innerText = 'Hi, ' + getUserDisplayName(user);
-    currentIsOwner = await fetchOwnerStatus(session);
+    return true;
+  }
 
-    if (currentIsOwner) {
-      managePoiBtn.classList.add('is-visible');
-    } else {
-      managePoiBtn.classList.remove('is-visible');
+  function startUserPolling() {
+    var tries = 0;
+
+    if (userCheckTimer) {
+      clearInterval(userCheckTimer);
+      userCheckTimer = null;
     }
+
+    userCheckTimer = setInterval(async function () {
+      tries += 1;
+      await checkUser();
+
+      if (currentUser || tries >= 12) {
+        clearInterval(userCheckTimer);
+        userCheckTimer = null;
+      }
+    }, 250);
   }
 
   function setupEvents() {
     loginBtn.addEventListener('click', function () {
-      if (!currentUser) {
-        window.location.href = '/login.html';
-        return;
-      }
-
-      toggleAccountMenu();
-    });
-
-    profileBtn.addEventListener('click', function () {
-      alert(currentUser && currentUser.email ? 'Account: ' + currentUser.email : 'Account');
-    });
-
-    managePoiBtn.addEventListener('click', function () {
-      if (!currentIsOwner) return;
-      closeAccountMenu();
-      setOwnerPanelVisible(ownerPanel.getAttribute('aria-hidden') !== 'false');
-    });
-
-    logoutBtn.addEventListener('click', async function () {
-      if (supabaseClient) {
-    supabaseClient.auth.onAuthStateChange(function () {
-      // 🔥 re-check immediato quando session cambia
-      checkUser();
-    });
-
-    // 🔥 polling iniziale (fix race condition login → map)
-    var tries = 0;
-    var interval = setInterval(async function(){
-      tries++;
-      await checkUser();
-      if(currentUser || tries > 5){
-        clearInterval(interval);
-      }
-    }, 300);
-  }
-
-      currentUser = null;
-      currentIsOwner = false;
-      loginBtn.innerText = 'Accedi';
-      managePoiBtn.classList.remove('is-visible');
-      closeAccountMenu();
-      setOwnerPanelVisible(false);
+      window.location.href = '/login.html';
     });
 
     addPoiBtn.addEventListener('click', addPOI);
@@ -866,12 +751,6 @@
     map.on('moveend zoomend', function () {
       evaluateAutoCard();
       preloadTiles();
-    });
-
-    document.addEventListener('click', function (event) {
-      var clickedMenu = accountMenu.contains(event.target);
-      var clickedLogin = loginBtn.contains(event.target);
-      if (!clickedMenu && !clickedLogin) closeAccountMenu();
     });
 
     card.addEventListener('touchstart', function (event) {
@@ -954,20 +833,19 @@
     console.assert(typeof addPOI === 'function', 'addPOI function exists');
     console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
     console.assert(typeof checkUser === 'function', 'checkUser function exists');
-    console.assert(typeof fetchOwnerStatus === 'function', 'fetchOwnerStatus function exists');
-    console.assert(typeof toggleAccountMenu === 'function', 'toggleAccountMenu function exists');
+    console.assert(typeof readCurrentUser === 'function', 'readCurrentUser function exists');
+    console.assert(typeof startUserPolling === 'function', 'startUserPolling function exists');
     console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
     console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
     console.assert(document.documentElement.innerHTML.indexOf('= await supabaseClient.auth.getSession') === -1, 'Broken auth fragment removed');
+    console.assert(document.documentElement.innerHTML.indexOf('currentUser = null;\n      currentIsOwner = false;') === -1, 'Broken orphan logout fragment removed');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
     console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
-    console.assert(accountMenu.getAttribute('aria-hidden') === 'true', 'Account menu starts hidden');
     console.assert(ownerPanel.getAttribute('aria-hidden') === 'true', 'Owner panel starts hidden');
-    console.assert(managePoiBtn.classList.contains('is-visible') === false, 'Manage POI starts hidden until backend confirms owner');
-    console.assert(OWNER_BACKEND_URL.indexOf('/backend?action=me') !== -1, 'Owner backend endpoint uses function named backend');
     console.assert(typeof getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'string', 'Display name helper returns a string');
     console.assert(getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'test', 'Display name falls back to email prefix');
     console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
+    console.assert(typeof loginBtn.onclick !== 'function', 'Login button uses addEventListener, not overwritten onclick');
   }
 
   createCityMarkers();
@@ -976,14 +854,16 @@
   updateWeather(44.12, 9.71);
   setupEvents();
   runTests();
-  // 🔥 FIX: aspetta che Supabase ripristini la sessione
-  setTimeout(function(){
+
+  setTimeout(function () {
     checkUser();
-  }, 300);
+    startUserPolling();
+  }, 250);
 
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange(function () {
       checkUser();
+      startUserPolling();
     });
   }
 
