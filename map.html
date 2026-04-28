@@ -87,6 +87,7 @@
       color: white;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .blue { color: #1e9bff; }
@@ -165,6 +166,41 @@
 
     .mode-btn.active { background: rgba(0,0,0,0.6); }
 
+    #account-menu {
+      display: none;
+      position: fixed;
+      top: 76px;
+      right: 12px;
+      z-index: 1200;
+      min-width: 190px;
+      padding: 8px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.28);
+    }
+
+    #account-menu[aria-hidden="false"] { display: block; }
+
+    #account-menu button {
+      width: 100%;
+      padding: 11px 12px;
+      margin: 0 0 6px;
+      border: 0;
+      border-radius: 13px;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      text-align: left;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #account-menu button:last-child { margin-bottom: 0; }
+
+    #manage-poi-btn { display: none; }
+    #manage-poi-btn.is-visible { display: block; }
+
     #owner-panel {
       display: none;
       position: fixed;
@@ -179,6 +215,8 @@
       -webkit-backdrop-filter: blur(14px);
       box-shadow: 0 18px 45px rgba(0,0,0,0.28);
     }
+
+    #owner-panel[aria-hidden="false"] { display: block; }
 
     #owner-panel input,
     #owner-panel button {
@@ -261,6 +299,12 @@
   </div>
 </div>
 
+<div id="account-menu" aria-hidden="true">
+  <button id="profile-btn" type="button">Profilo</button>
+  <button id="manage-poi-btn" type="button">Gestisci POI</button>
+  <button id="logout-btn" type="button">Logout</button>
+</div>
+
 <div id="owner-panel" aria-hidden="true">
   <input id="poi-name" placeholder="Nome POI" />
   <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" />
@@ -282,27 +326,36 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  const SUPABASE_READY = Boolean(
+(function () {
+  'use strict';
+
+  var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
+  var OWNER_BACKEND_URL = 'https://jpflcbktcnhmlvaibzcw.functions.supabase.co/backend?action=me';
+  var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
+  var LOCAL_POI_KEY = '5terrego_pois_backup';
+  var AUTO_OPEN_ZOOM = 13;
+  var AUTO_OPEN_DISTANCE = 500;
+  var AUTO_CLOSE_ZOOM = 12;
+  var AUTO_CLOSE_DISTANCE = 800;
+
+  var SUPABASE_READY = Boolean(
     window.supabase &&
     SUPABASE_URL &&
     SUPABASE_ANON_KEY &&
-    !SUPABASE_URL.includes('YOUR_PROJECT') &&
-    !SUPABASE_ANON_KEY.includes('YOUR_PUBLIC')
+    SUPABASE_URL.indexOf('YOUR_PROJECT') === -1 &&
+    SUPABASE_ANON_KEY.indexOf('YOUR_PUBLIC') === -1
   );
-  const supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,{
-  auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
-}) : null;
 
-  const RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
-  const LOCAL_POI_KEY = '5terrego_pois_backup';
-  const AUTO_OPEN_ZOOM = 13;
-  const AUTO_OPEN_DISTANCE = 500;
-  const AUTO_CLOSE_ZOOM = 12;
-  const AUTO_CLOSE_DISTANCE = 800;
+  var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }) : null;
 
-  const places = [
+  var places = [
     { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg' },
     { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg' },
     { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg' },
@@ -310,7 +363,11 @@
     { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE }
   ];
 
-  const map = L.map('map', {
+  if (!window.L) {
+    throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
+  }
+
+  var map = L.map('map', {
     minZoom: 11,
     zoomControl: false,
     preferCanvas: true,
@@ -335,33 +392,47 @@
 
   map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
 
-  const card = document.getElementById('card');
-  const cardTitle = document.getElementById('card-title');
-  const cardImg = document.getElementById('card-img');
-  const ownerPanel = document.getElementById('owner-panel');
-  const loginBtn = document.getElementById('login');
-  const addPoiBtn = document.getElementById('add-poi');
+  var card = document.getElementById('card');
+  var cardTitle = document.getElementById('card-title');
+  var cardImg = document.getElementById('card-img');
+  var ownerPanel = document.getElementById('owner-panel');
+  var accountMenu = document.getElementById('account-menu');
+  var loginBtn = document.getElementById('login');
+  var addPoiBtn = document.getElementById('add-poi');
+  var managePoiBtn = document.getElementById('manage-poi-btn');
+  var logoutBtn = document.getElementById('logout-btn');
+  var profileBtn = document.getElementById('profile-btn');
+  var searchInput = document.getElementById('search');
 
-  let currentIndex = -1;
-  let currentDataset = 'places';
-  let poiLayer = L.layerGroup().addTo(map);
-  let isProgrammaticMove = false;
-  let startX = 0;
-  let currentX = 0;
-  let isDragging = false;
-  let hasMoved = false;
+  var currentIndex = -1;
+  var currentDataset = 'places';
+  var poiLayer = L.layerGroup().addTo(map);
+  var isProgrammaticMove = false;
+  var startX = 0;
+  var currentX = 0;
+  var isDragging = false;
+  var hasMoved = false;
+  var currentUser = null;
+  var currentIsOwner = false;
+
+  function readValue(value, fallback) {
+    return value === undefined || value === null ? fallback : value;
+  }
 
   function normalizePOI(raw) {
-    const lat = Number(raw.lat ?? raw.latitude);
-    const lng = Number(raw.lng ?? raw.longitude);
+    raw = raw || {};
+    var rawLat = readValue(raw.lat, raw.latitude);
+    var rawLng = readValue(raw.lng, raw.longitude);
+    var lat = Number(rawLat);
+    var lng = Number(rawLng);
 
     return {
-      id: raw.id || `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
       name: String(raw.name || raw.title || 'POI'),
       symbol: raw.symbol || '📍',
       coords: [lat, lng],
-      lat,
-      lng,
+      lat: lat,
+      lng: lng,
       image: raw.image || raw.photo_url || raw.img || '',
       owner_email: raw.owner_email || raw.email || '',
       phone: raw.phone || raw.telephone || '',
@@ -370,22 +441,22 @@
   }
 
   function isValidPOI(poi) {
-    return poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0;
+    return Boolean(poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0);
   }
 
   function centerCity(place) {
     isProgrammaticMove = true;
-    const zoomLevel = place.name === 'Monterosso' ? 14 : 15;
+    var zoomLevel = place.name === 'Monterosso' ? 14 : 15;
     map.flyTo(place.coords, zoomLevel, { duration: 1.2 });
 
-    window.setTimeout(() => {
+    window.setTimeout(function () {
       isProgrammaticMove = false;
     }, 1400);
   }
 
   function preloadImages() {
-    places.forEach((place) => {
-      const img = new Image();
+    places.forEach(function (place) {
+      var img = new Image();
       img.src = place.image;
     });
   }
@@ -402,7 +473,7 @@
     card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     card.setAttribute('aria-hidden', 'false');
 
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(function () {
       card.classList.add('is-visible');
       card.style.transform = 'translateY(0)';
     });
@@ -416,31 +487,32 @@
     card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
     card.style.transform = 'translateY(40px)';
 
-    window.setTimeout(() => {
+    window.setTimeout(function () {
       if (card.getAttribute('aria-hidden') === 'true') {
         card.style.display = 'none';
       }
     }, 300);
   }
 
-  function showCityByIndex(index, shouldCenter = true) {
+  function showCityByIndex(index, shouldCenter) {
+    if (shouldCenter === undefined) shouldCenter = true;
     if (index < 0 || index >= places.length) return;
 
     currentDataset = 'places';
     currentIndex = index;
-    const place = places[index];
+    var place = places[index];
 
     if (shouldCenter) centerCity(place);
     showCityCard(place);
   }
 
   function getClosestCity() {
-    const center = map.getCenter();
-    let minDist = Infinity;
-    let closestIndex = -1;
+    var center = map.getCenter();
+    var minDist = Infinity;
+    var closestIndex = -1;
 
-    places.forEach((place, index) => {
-      const distance = center.distanceTo(L.latLng(place.coords));
+    places.forEach(function (place, index) {
+      var distance = center.distanceTo(L.latLng(place.coords));
       if (distance < minDist) {
         minDist = distance;
         closestIndex = index;
@@ -453,8 +525,8 @@
   function evaluateAutoCard() {
     if (isProgrammaticMove) return;
 
-    const zoom = map.getZoom();
-    const closest = getClosestCity();
+    var zoom = map.getZoom();
+    var closest = getClosestCity();
 
     if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
       if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
@@ -477,20 +549,20 @@
       return;
     }
 
-    const place = places[nextIndex];
-    const exitX = direction === 'next' ? '-110%' : '110%';
-    const enterX = direction === 'next' ? '110%' : '-110%';
+    var place = places[nextIndex];
+    var exitX = direction === 'next' ? '-110%' : '110%';
+    var enterX = direction === 'next' ? '110%' : '-110%';
 
     card.style.transition = 'transform 0.25s ease';
-    card.style.transform = `translateX(${exitX})`;
+    card.style.transform = 'translateX(' + exitX + ')';
 
-    window.setTimeout(() => {
+    window.setTimeout(function () {
       card.style.transition = 'none';
-      card.style.transform = `translateX(${enterX})`;
+      card.style.transform = 'translateX(' + enterX + ')';
       currentIndex = nextIndex;
       setCardContent(place);
 
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(function () {
         card.style.transition = 'transform 0.3s ease';
         card.style.transform = 'translateX(0)';
       });
@@ -500,13 +572,13 @@
   }
 
   function createCityMarkers() {
-    places.forEach((place, index) => {
+    places.forEach(function (place, index) {
       L.marker(place.coords, {
         icon: L.divIcon({
           className: 'custom-label',
-          html: `<div class="label">${place.name}</div>`
+          html: '<div class="label">' + place.name + '</div>'
         })
-      }).addTo(map).on('click', () => {
+      }).addTo(map).on('click', function () {
         showCityByIndex(index, true);
       });
     });
@@ -514,33 +586,32 @@
 
   async function loadPOIs() {
     poiLayer.clearLayers();
+    var pois = [];
 
-    let pois = [];
-
-    if (SUPABASE_READY) {
-      const { data, error } = await supabaseClient
+    if (SUPABASE_READY && supabaseClient) {
+      var response = await supabaseClient
         .from('pois')
         .select('id,name,symbol,lat,lng,image,owner_email,phone,relevance')
         .order('relevance', { ascending: false });
 
-      if (error) {
-        console.warn('Supabase POI load failed:', error.message);
+      if (response.error) {
+        console.warn('Supabase POI load failed:', response.error.message);
       } else {
-        pois = data || [];
+        pois = response.data || [];
       }
     } else {
       pois = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
     }
 
-    pois.map(normalizePOI).filter(isValidPOI).forEach((poi) => {
+    pois.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
       L.marker(poi.coords, {
         icon: L.divIcon({
           className: 'custom-poi',
-          html: `<div class="poi-label">${poi.symbol}</div>`,
+          html: '<div class="poi-label">' + poi.symbol + '</div>',
           iconSize: [32, 32],
           iconAnchor: [16, 16]
         })
-      }).addTo(poiLayer).on('click', () => {
+      }).addTo(poiLayer).on('click', function () {
         currentDataset = 'pois';
         currentIndex = -1;
         showCityCard(poi);
@@ -549,35 +620,44 @@
   }
 
   function saveLocalPOI(poi) {
-    const current = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
+    var current = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
     current.push(poi);
     localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
   }
 
   async function addPOI() {
-    const name = document.getElementById('poi-name').value.trim();
-    const symbol = document.getElementById('poi-symbol').value.trim() || '📍';
-    const lat = Number(document.getElementById('poi-lat').value);
-    const lng = Number(document.getElementById('poi-lng').value);
-    const image = document.getElementById('poi-img').value.trim();
-    const ownerEmail = document.getElementById('poi-email').value.trim();
-    const phone = document.getElementById('poi-phone').value.trim();
-    const relevance = Number(document.getElementById('poi-relevance').value || 0);
+    var name = document.getElementById('poi-name').value.trim();
+    var symbol = document.getElementById('poi-symbol').value.trim() || '📍';
+    var lat = Number(document.getElementById('poi-lat').value);
+    var lng = Number(document.getElementById('poi-lng').value);
+    var image = document.getElementById('poi-img').value.trim();
+    var ownerEmail = document.getElementById('poi-email').value.trim();
+    var phone = document.getElementById('poi-phone').value.trim();
+    var relevance = Number(document.getElementById('poi-relevance').value || 0);
 
-    const poi = normalizePOI({ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance });
+    var poi = normalizePOI({
+      name: name,
+      symbol: symbol,
+      lat: lat,
+      lng: lng,
+      image: image,
+      owner_email: ownerEmail,
+      phone: phone,
+      relevance: relevance
+    });
 
     if (!isValidPOI(poi)) {
       alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
       return;
     }
 
-    if (SUPABASE_READY) {
-      const { error } = await supabaseClient
+    if (SUPABASE_READY && supabaseClient) {
+      var insertResponse = await supabaseClient
         .from('pois')
-        .insert([{ name, symbol, lat, lng, image, owner_email: ownerEmail, phone, relevance }]);
+        .insert([{ name: name, symbol: symbol, lat: lat, lng: lng, image: image, owner_email: ownerEmail, phone: phone, relevance: relevance }]);
 
-      if (error) {
-        alert('Errore salvataggio: ' + error.message);
+      if (insertResponse.error) {
+        alert('Errore salvataggio: ' + insertResponse.error.message);
         return;
       }
     } else {
@@ -589,71 +669,170 @@
   }
 
   function latLngToTile(lat, lng, zoom) {
-    const z = Math.round(zoom);
-    const n = Math.pow(2, z);
-    const x = Math.floor((lng + 180) / 360 * n);
-    const y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n);
-    return { x, y, z };
+    var z = Math.round(zoom);
+    var n = Math.pow(2, z);
+    var x = Math.floor((lng + 180) / 360 * n);
+    var y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n);
+    return { x: x, y: y, z: z };
   }
 
   function preloadTiles() {
-    const center = map.getCenter();
-    const tile = latLngToTile(center.lat, center.lng, map.getZoom());
+    var center = map.getCenter();
+    var tile = latLngToTile(center.lat, center.lng, map.getZoom());
 
-    for (let dx = -2; dx <= 2; dx++) {
-      for (let dy = -2; dy <= 2; dy++) {
-        const img = new Image();
-        img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${tile.z}/${tile.y + dy}/${tile.x + dx}`;
+    for (var dx = -2; dx <= 2; dx += 1) {
+      for (var dy = -2; dy <= 2; dy += 1) {
+        var img = new Image();
+        img.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/' + tile.z + '/' + (tile.y + dy) + '/' + (tile.x + dx);
       }
     }
   }
 
   async function updateWeather(lat, lng) {
     try {
-      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
-      const data = await response.json();
-      const temperature = data.current_weather?.temperature;
-      document.getElementById('weather').innerText = temperature === undefined ? '--' : `🌤️ ${temperature}°`;
+      var response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true');
+      var data = await response.json();
+      var temperature = data && data.current_weather ? data.current_weather.temperature : undefined;
+      document.getElementById('weather').innerText = temperature === undefined ? '--' : '🌤️ ' + temperature + '°';
     } catch (error) {
       document.getElementById('weather').innerText = '--';
     }
   }
 
-  async function checkUser(){
-  if(!supabaseClient) return;
-  const { data } = await supabaseClient.auth.getSession();
-  const user = data?.session?.user;
-
-  if(user){
-    const name = user.user_metadata?.username || user.email?.split('@')[0] || 'User';
-    loginBtn.innerText = `Hi, ${name}`;
-
-    loginBtn.onclick = ()=>{
-      window.location.href = '/login.html';
-    };
+  function closeAccountMenu() {
+    accountMenu.setAttribute('aria-hidden', 'true');
   }
-}
 
-function setupEvents() {
-    loginBtn.addEventListener('click', () => {
-      window.location.href = '/login.html';
+  function toggleAccountMenu() {
+    var isHidden = accountMenu.getAttribute('aria-hidden') !== 'false';
+    accountMenu.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
+  }
+
+  function setOwnerPanelVisible(visible) {
+    ownerPanel.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    ownerPanel.style.display = visible ? 'block' : 'none';
+  }
+
+  async function fetchOwnerStatus(session) {
+    if (!session || !session.access_token) return false;
+
+    try {
+      var response = await fetch(OWNER_BACKEND_URL, {
+        headers: {
+          Authorization: 'Bearer ' + session.access_token
+        }
+      });
+
+      if (!response.ok) {
+        console.warn('Owner check failed:', response.status);
+        return false;
+      }
+
+      var result = await response.json();
+      return Boolean(result && result.isOwner === true);
+    } catch (error) {
+      console.warn('Owner check error:', error);
+      return false;
+    }
+  }
+
+  function getUserDisplayName(user) {
+    if (!user) return 'User';
+    var meta = user.user_metadata || {};
+    if (meta.username) return meta.username;
+    if (meta.name) return meta.name;
+    if (user.email) return user.email.split('@')[0];
+    return 'User';
+  }
+
+  async function checkUser() {
+    var sessionResponse;
+    var session;
+    var user;
+
+    if (!supabaseClient) {
+      currentUser = null;
+      currentIsOwner = false;
+      loginBtn.innerText = 'Accedi';
+      managePoiBtn.classList.remove('is-visible');
+      closeAccountMenu();
+      setOwnerPanelVisible(false);
+      return;
+    }
+
+    sessionResponse = await supabaseClient.auth.getSession();
+    session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
+    user = session ? session.user : null;
+
+    currentUser = user;
+    currentIsOwner = false;
+    closeAccountMenu();
+    setOwnerPanelVisible(false);
+
+    if (!user) {
+      loginBtn.innerText = 'Accedi';
+      managePoiBtn.classList.remove('is-visible');
+      return;
+    }
+
+    loginBtn.innerText = 'Hi, ' + getUserDisplayName(user);
+    currentIsOwner = await fetchOwnerStatus(session);
+
+    if (currentIsOwner) {
+      managePoiBtn.classList.add('is-visible');
+    } else {
+      managePoiBtn.classList.remove('is-visible');
+    }
+  }
+
+  function setupEvents() {
+    loginBtn.addEventListener('click', function () {
+      if (!currentUser) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      toggleAccountMenu();
+    });
+
+    profileBtn.addEventListener('click', function () {
+      alert(currentUser && currentUser.email ? 'Account: ' + currentUser.email : 'Account');
+    });
+
+    managePoiBtn.addEventListener('click', function () {
+      if (!currentIsOwner) return;
+      closeAccountMenu();
+      setOwnerPanelVisible(ownerPanel.getAttribute('aria-hidden') !== 'false');
+    });
+
+    logoutBtn.addEventListener('click', async function () {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+      }
+
+      currentUser = null;
+      currentIsOwner = false;
+      loginBtn.innerText = 'Accedi';
+      managePoiBtn.classList.remove('is-visible');
+      closeAccountMenu();
+      setOwnerPanelVisible(false);
     });
 
     addPoiBtn.addEventListener('click', addPOI);
 
-    document.getElementById('search').addEventListener('keydown', async (event) => {
+    searchInput.addEventListener('keydown', async function (event) {
       if (event.key !== 'Enter') return;
 
-      const query = event.target.value.trim();
+      var query = event.target.value.trim();
       if (!query) return;
 
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-        const data = await response.json();
+        var response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query));
+        var data = await response.json();
 
         if (data[0]) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
+          var lat = parseFloat(data[0].lat);
+          var lon = parseFloat(data[0].lon);
           map.setView([lat, lon], 12);
           updateWeather(lat, lon);
         }
@@ -662,12 +841,18 @@ function setupEvents() {
       }
     });
 
-    map.on('moveend zoomend', () => {
+    map.on('moveend zoomend', function () {
       evaluateAutoCard();
       preloadTiles();
     });
 
-    card.addEventListener('touchstart', (event) => {
+    document.addEventListener('click', function (event) {
+      var clickedMenu = accountMenu.contains(event.target);
+      var clickedLogin = loginBtn.contains(event.target);
+      if (!clickedMenu && !clickedLogin) closeAccountMenu();
+    });
+
+    card.addEventListener('touchstart', function (event) {
       if (event.touches.length !== 1) return;
       startX = event.touches[0].clientX;
       currentX = startX;
@@ -676,29 +861,35 @@ function setupEvents() {
       card.style.transition = 'none';
     }, { passive: true });
 
-    card.addEventListener('touchmove', (event) => {
+    card.addEventListener('touchmove', function (event) {
+      var delta;
+      var blockedRight;
+      var blockedLeft;
+
       if (!isDragging || event.touches.length !== 1) return;
 
       currentX = event.touches[0].clientX;
-      let delta = currentX - startX;
-
-      const blockedRight = currentIndex === 0 && delta > 0;
-      const blockedLeft = currentIndex === places.length - 1 && delta < 0;
+      delta = currentX - startX;
+      blockedRight = currentIndex === 0 && delta > 0;
+      blockedLeft = currentIndex === places.length - 1 && delta < 0;
 
       if (blockedRight || blockedLeft) delta = 0;
       if (Math.abs(delta) > 4) hasMoved = true;
 
-      card.style.transform = `translateX(${delta}px)`;
+      card.style.transform = 'translateX(' + delta + 'px)';
     }, { passive: true });
 
-    card.addEventListener('touchend', () => {
+    card.addEventListener('touchend', function () {
+      var delta;
+      var blockedRight;
+      var blockedLeft;
+
       if (!isDragging) return;
 
-      const delta = currentX - startX;
+      delta = currentX - startX;
       isDragging = false;
-
-      const blockedRight = currentIndex === 0 && delta > 0;
-      const blockedLeft = currentIndex === places.length - 1 && delta < 0;
+      blockedRight = currentIndex === 0 && delta > 0;
+      blockedLeft = currentIndex === places.length - 1 && delta < 0;
 
       if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
         card.style.transition = 'transform 0.2s ease';
@@ -716,7 +907,7 @@ function setupEvents() {
       }
     });
 
-    card.addEventListener('touchcancel', () => {
+    card.addEventListener('touchcancel', function () {
       isDragging = false;
       card.style.transition = 'transform 0.2s ease';
       card.style.transform = 'translateX(0)';
@@ -726,9 +917,9 @@ function setupEvents() {
   function runTests() {
     console.assert(Array.isArray(places), 'places must be an array');
     console.assert(places.length === 5, '5 cities expected');
-    console.assert(places.every((place) => typeof place.name === 'string'), 'Each city needs a name');
-    console.assert(places.every((place) => Array.isArray(place.coords) && place.coords.length === 2), 'Each city needs coords [lat, lng]');
-    console.assert(places.every((place) => typeof place.image === 'string' && place.image.startsWith('https://')), 'Each city needs a stable image URL');
+    console.assert(places.every(function (place) { return typeof place.name === 'string'; }), 'Each city needs a name');
+    console.assert(places.every(function (place) { return Array.isArray(place.coords) && place.coords.length === 2; }), 'Each city needs coords [lat, lng]');
+    console.assert(places.every(function (place) { return typeof place.image === 'string' && place.image.indexOf('https://') === 0; }), 'Each city needs a stable image URL');
     console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay as the fifth city');
     console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore must use the fixed Pexels image');
     console.assert(currentIndex === -1, 'Initial index should be -1');
@@ -740,10 +931,21 @@ function setupEvents() {
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof addPOI === 'function', 'addPOI function exists');
     console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
-    console.assert(typeof supabaseClient?.auth?.getSession === 'function' || supabaseClient === null, 'Supabase client is either ready or safely null');
-    console.assert(!document.documentElement.innerHTML.includes('= await supabaseClient.auth.getSession'), 'Broken auth fragment removed');
+    console.assert(typeof checkUser === 'function', 'checkUser function exists');
+    console.assert(typeof fetchOwnerStatus === 'function', 'fetchOwnerStatus function exists');
+    console.assert(typeof toggleAccountMenu === 'function', 'toggleAccountMenu function exists');
+    console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
+    console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
+    console.assert(document.documentElement.innerHTML.indexOf('= await supabaseClient.auth.getSession') === -1, 'Broken auth fragment removed');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
-    console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button remains visible');
+    console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
+    console.assert(accountMenu.getAttribute('aria-hidden') === 'true', 'Account menu starts hidden');
+    console.assert(ownerPanel.getAttribute('aria-hidden') === 'true', 'Owner panel starts hidden');
+    console.assert(managePoiBtn.classList.contains('is-visible') === false, 'Manage POI starts hidden until backend confirms owner');
+    console.assert(OWNER_BACKEND_URL.indexOf('/backend?action=me') !== -1, 'Owner backend endpoint uses function named backend');
+    console.assert(typeof getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'string', 'Display name helper returns a string');
+    console.assert(getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'test', 'Display name falls back to email prefix');
+    console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
   }
 
   createCityMarkers();
@@ -751,17 +953,17 @@ function setupEvents() {
   preloadTiles();
   updateWeather(44.12, 9.71);
   setupEvents();
-
-  // check login stato utente
+  runTests();
   checkUser();
 
-  if(supabaseClient){
-    supabaseClient.auth.onAuthStateChange((event, session)=>{
-      if(session?.user) checkUser();
+  if (supabaseClient) {
+    supabaseClient.auth.onAuthStateChange(function () {
+      checkUser();
     });
   }
+
   loadPOIs();
-  runTests();
+}());
 </script>
 
 </body>
