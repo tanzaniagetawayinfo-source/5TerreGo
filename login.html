@@ -372,60 +372,158 @@ button{
 
   async function fetchOwnerStatus(){
     try{
-      const raw = localStorage.getItem('supabase.auth.token');
-      if(raw){
-        const parsed = JSON.parse(raw);
-        const token = parsed && parsed.currentSession ? parsed.currentSession.access_token : null;
-
-        if(token){
-          const res = await fetch(OWNER_CHECK_ENDPOINT,{
-            headers:{ Authorization:'Bearer '+token }
-          });
-
-          if(res.ok){
-            const data = await res.json();
-            return data && data.isOwner === true;
-          }
-        }
-      }
-    }catch(e){}
-
-    try{
       const result = await client.auth.getSession();
       const token = result && result.data && result.data.session ? result.data.session.access_token : '';
       if(!token) return false;
 
       const res = await fetch(OWNER_CHECK_ENDPOINT, {
-        headers:{ Authorization:'Bearer ' + token }
+        method:'GET',
+        headers:{
+          'Authorization':'Bearer ' + token
+        }
       });
 
       if(!res.ok) return false;
 
       const payload = await res.json();
-      return payload && payload.isOwner === true;
+      return !!payload.isOwner;
     } catch(_err){
       return false;
     }
   }
 
-  async function maybeAddOwnerButton(panel){
-    const owner = await fetchOwnerStatus();
-    if(!owner) return;
-    if(document.getElementById('poi-dashboard')) return;
+  async function handleAuth(){
+    const e = email.value.trim();
+    const p = password.value;
 
-    const poiBtn = document.createElement('button');
-    poiBtn.className = 'primary';
-    poiBtn.id = 'poi-dashboard';
-    poiBtn.type = 'button';
-    poiBtn.textContent = 'Gestisci POI';
-    poiBtn.onclick = function(){
-      window.location.href = '/poidashboard.html';
-    };
+    if(!isValidEmail(e)){
+      setStatus('Inserisci una email valida.');
+      return;
+    }
 
-    panel.appendChild(poiBtn);
+    if(!p){
+      setStatus('Inserisci la password.');
+      return;
+    }
+
+    if(isLogin){
+      const result = await client.auth.signInWithPassword({ email:e, password:p });
+      const error = result.error;
+
+      if(error){
+        setStatus(error.message);
+        return;
+      }
+
+      setStatus('Accesso riuscito');
+      const sessionResult = await client.auth.getSession();
+      if(sessionResult.data && sessionResult.data.session){
+        window.location.href = getRedirectUrl();
+      } else {
+        setTimeout(function(){
+          window.location.href = getRedirectUrl();
+        }, 1000);
+      }
+      return;
+    }
+
+    const u = username.value.trim();
+    const phoneVal = phone.value.trim();
+    const lang = language.value;
+    const r = repeat.value;
+
+    if(!u){
+      setStatus('Inserisci nome utente.');
+      return;
+    }
+
+    if(p.length < 6){
+      setStatus('La password deve avere almeno 6 caratteri.');
+      return;
+    }
+
+    if(p !== r){
+      setStatus('Le password non coincidono.');
+      return;
+    }
+
+    const signupResult = await client.auth.signUp({
+      email:e,
+      password:p,
+      options:{
+        data:{
+          username:u,
+          language:lang,
+          phone:phoneVal
+        },
+        emailRedirectTo:getRedirectUrl()
+      }
+    });
+
+    if(signupResult.error){
+      setStatus(signupResult.error.message);
+      return;
+    }
+
+    setStatus('Account creato. Controlla la tua email se Supabase richiede conferma.');
   }
 
-  (panel){
+  async function oauth(provider){
+    const result = await client.auth.signInWithOAuth({
+      provider: provider,
+      options:{ redirectTo: getRedirectUrl() }
+    });
+
+    if(result.error) setStatus(result.error.message);
+  }
+
+  function createAccountPanel(){
+    removeAccountPanel();
+
+    const panel = document.createElement('div');
+    panel.id = 'account-panel';
+    panel.className = 'account-panel';
+    panel.innerHTML = '';
+
+    const bookingsBtn = document.createElement('button');
+    bookingsBtn.className = 'primary';
+    bookingsBtn.id = 'bookings';
+    bookingsBtn.type = 'button';
+    bookingsBtn.textContent = 'Le mie prenotazioni';
+    bookingsBtn.onclick = function(){
+      window.location.href = '/bookings.html';
+    };
+
+    const profileBtn = document.createElement('button');
+    profileBtn.className = 'primary';
+    profileBtn.id = 'profile';
+    profileBtn.type = 'button';
+    profileBtn.textContent = 'Modifica profilo';
+    profileBtn.onclick = function(){
+      window.location.href = '/profile.html';
+    };
+
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'logout-btn';
+    logoutBtn.id = 'logout';
+    logoutBtn.type = 'button';
+    logoutBtn.textContent = 'Logout';
+    logoutBtn.onclick = async function(){
+      await client.auth.signOut();
+      removeAccountPanel();
+      isLogin = true;
+      setMode();
+    };
+
+    panel.appendChild(bookingsBtn);
+    panel.appendChild(profileBtn);
+    panel.appendChild(logoutBtn);
+
+    modal.appendChild(panel);
+    return panel;
+  }
+
+  async function maybeAddOwnerButton(panel){
     const owner = await fetchOwnerStatus();
     if(!owner) return;
     if(document.getElementById('poi-dashboard')) return;
@@ -509,7 +607,7 @@ button{
     console.assert(isValidEmail('test@example.com') === true,'Valid email accepted');
     console.assert(isValidEmail('wrong-email') === false,'Invalid email rejected');
     console.assert(getRedirectUrl() === 'https://www.5terrego.com/map.html','Redirect uses canonical www domain');
-    console.assert(OWNER_CHECK_ENDPOINT.indexOf('backend?action=me') > -1,'Owner check endpoint configured');
+    console.assert(OWNER_CHECK_ENDPOINT.indexOf('poi-backend?action=me') > -1,'Owner check endpoint configured');
     console.assert(document.querySelectorAll('#google').length === 1,'Only one Google button exists');
     console.assert(document.querySelectorAll('#apple').length === 1,'Only one Apple button exists');
     console.assert(document.querySelectorAll('#close').length === 1,'Only one close button exists');
