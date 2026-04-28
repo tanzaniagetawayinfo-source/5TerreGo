@@ -760,9 +760,13 @@
       return;
     }
 
+    // 🔥 FIX: usa getUser (più affidabile per sessioni persistenti)
+    var userResponse = await supabaseClient.auth.getUser();
+    user = userResponse && userResponse.data ? userResponse.data.user : null;
+
+    // ricava comunque session per backend owner
     sessionResponse = await supabaseClient.auth.getSession();
     session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
-    user = session ? session.user : null;
 
     currentUser = user;
     currentIsOwner = false;
