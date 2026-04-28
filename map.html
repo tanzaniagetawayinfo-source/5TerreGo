@@ -816,8 +816,21 @@
 
     logoutBtn.addEventListener('click', async function () {
       if (supabaseClient) {
-        await supabaseClient.auth.signOut();
+    supabaseClient.auth.onAuthStateChange(function () {
+      // 🔥 re-check immediato quando session cambia
+      checkUser();
+    });
+
+    // 🔥 polling iniziale (fix race condition login → map)
+    var tries = 0;
+    var interval = setInterval(async function(){
+      tries++;
+      await checkUser();
+      if(currentUser || tries > 5){
+        clearInterval(interval);
       }
+    }, 300);
+  }
 
       currentUser = null;
       currentIsOwner = false;
@@ -963,7 +976,10 @@
   updateWeather(44.12, 9.71);
   setupEvents();
   runTests();
-  checkUser();
+  // 🔥 FIX: aspetta che Supabase ripristini la sessione
+  setTimeout(function(){
+    checkUser();
+  }, 300);
 
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange(function () {
