@@ -345,10 +345,23 @@ async function loadPois(){
   setStatus("Caricamento POI...");
 
   try{
-    const token = getToken();
+    // 🔥 PUBLIC CALL (no auth needed)
+    const data = await fetchJsonSafe(`${ENDPOINT}?action=list-pois`, {
+      method:"GET"
+    });
 
-    // 🔥 PUBLIC CALL (no auth needed, avoids permission issues)
-      const data = await fetchJsonSafe(`${ENDPOINT}?action=list-pois`, {
+    pois = Array.isArray(data?.pois) ? data.pois.map(normalizePoi) : [];
+    renderList();
+    setStatus(`${pois.length} POI caricati dal backend`);
+    return;
+
+  }catch(err){
+    console.error("LOAD POIS ERROR", err);
+    pois = [];
+    renderList();
+    setStatus(`Errore caricamento POI: ${err.message}`, true);
+  }
+}?action=list-pois`, {
         method:"GET"
       });
 
