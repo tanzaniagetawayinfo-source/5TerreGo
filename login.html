@@ -541,6 +541,7 @@ button{
   }
 
   async function checkUser(){
+    // ⚡ ensure owner check waits correctly
     // ⚡ FAST PATH: evita flicker accedi
     try{
       const raw = localStorage.getItem('supabase.auth.token');
@@ -555,7 +556,7 @@ button{
           setStatus('');
 
           const panel = createAccountPanel();
-          maybeAddOwnerButton(panel);
+          await maybeAddOwnerButton(panel);
           return;
         }
       }
@@ -576,7 +577,7 @@ button{
     setStatus('');
 
     const panel = createAccountPanel();
-    maybeAddOwnerButton(panel);
+          await maybeAddOwnerButton(panel);
   }
 
   function setupEvents(){
