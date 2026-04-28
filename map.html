@@ -714,6 +714,11 @@
   }
 
   async function fetchOwnerStatus(session) {
+    // 🔥 fallback diretto (debug immediato)
+    if (currentUser && currentUser.email === '5terrego.info@gmail.com') {
+      return true;
+    }
+
     if (!session || !session.access_token) return false;
 
     try {
