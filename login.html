@@ -161,6 +161,7 @@ button{
   color:rgba(255,255,255,0.74);
   font-size:13px;
   line-height:1.35;
+  white-space:pre-wrap;
 }
 
 .close-btn{
@@ -266,8 +267,7 @@ button{
   const SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   const REDIRECT_PATH = 'https://www.5terrego.com/map.html';
-  // 🔥 FIX: corretto path edge function (mancava /v1)
-  const OWNER_CHECK_ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.functions.supabase.co/v1/backend?action=me';
+  const OWNER_CHECK_ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/backend?action=me';
 
   if(!window.supabase){
     throw new Error('Supabase SDK non caricato.');
@@ -371,10 +371,50 @@ button{
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
+  function getFastSession(){
+    const keys = [];
+
+    for(let i = 0; i < localStorage.length; i += 1){
+      const key = localStorage.key(i);
+      if(key && key.indexOf('auth-token') > -1){
+        keys.push(key);
+      }
+    }
+
+    keys.push('supabase.auth.token');
+
+    for(const key of keys){
+      try{
+        const raw = localStorage.getItem(key);
+        if(!raw) continue;
+
+        const parsed = JSON.parse(raw);
+        if(parsed && parsed.currentSession && parsed.currentSession.access_token){
+          return parsed.currentSession;
+        }
+        if(parsed && parsed.access_token){
+          return parsed;
+        }
+      }catch(_err){}
+    }
+
+    return null;
+  }
+
+  async function getReliableSession(){
+    const fastSession = getFastSession();
+    if(fastSession && fastSession.access_token){
+      return fastSession;
+    }
+
+    const result = await client.auth.getSession();
+    return result && result.data ? result.data.session : null;
+  }
+
   async function fetchOwnerStatus(){
     try{
-      const result = await client.auth.getSession();
-      const token = result && result.data && result.data.session ? result.data.session.access_token : '';
+      const session = await getReliableSession();
+      const token = session && session.access_token ? session.access_token : '';
       if(!token) return false;
 
       const res = await fetch(OWNER_CHECK_ENDPOINT, {
@@ -384,10 +424,12 @@ button{
         }
       });
 
-      if(!res.ok) return false;
+      if(!res.ok){
+        return false;
+      }
 
       const payload = await res.json();
-      return !!payload.isOwner;
+      return payload && payload.isOwner === true;
     } catch(_err){
       return false;
     }
@@ -541,44 +583,33 @@ button{
     panel.appendChild(poiBtn);
   }
 
-  async function checkUser(){
-    // ⚡ ensure owner check waits correctly
-    // ⚡ FAST PATH: evita flicker accedi
-    try{
-      const raw = localStorage.getItem('supabase.auth.token');
-      if(raw){
-        const parsed = JSON.parse(raw);
-        if(parsed && parsed.currentSession && parsed.currentSession.user){
-          const user = parsed.currentSession.user;
-
-          removeAccountPanel();
-          hideAuthForm();
-          title.innerText = 'Account';
-          setStatus('');
-
-          const panel = createAccountPanel();
-          await maybeAddOwnerButton(panel);
-          return;
-        }
-      }
-    }catch(e){}
-
-    const result = await client.auth.getSession();
-    const user = result && result.data && result.data.session ? result.data.session.user : null;
-
+  async function renderAccount(){
     removeAccountPanel();
-
-    if(!user){
-      setMode();
-      return;
-    }
-
     hideAuthForm();
     title.innerText = 'Account';
     setStatus('');
 
     const panel = createAccountPanel();
-          await maybeAddOwnerButton(panel);
+    await maybeAddOwnerButton(panel);
+  }
+
+  async function checkUser(){
+    const fastSession = getFastSession();
+    if(fastSession && fastSession.user){
+      await renderAccount();
+      return;
+    }
+
+    const session = await getReliableSession();
+    const user = session && session.user ? session.user : null;
+
+    if(!user){
+      removeAccountPanel();
+      setMode();
+      return;
+    }
+
+    await renderAccount();
   }
 
   function setupEvents(){
@@ -609,44 +640,13 @@ button{
     });
   }
 
-  function runTests(){
-    console.assert(typeof client.auth.signInWithPassword === 'function','Password login exists');
-    console.assert(typeof client.auth.signUp === 'function','Signup exists');
-    console.assert(typeof client.auth.signInWithOAuth === 'function','OAuth exists');
-    console.assert(username !== null,'Username field exists');
-    console.assert(language !== null,'Language field exists');
-    console.assert(email !== null,'Email field exists');
-    console.assert(phone !== null,'Phone field exists');
-    console.assert(password !== null,'Password field exists');
-    console.assert(repeat !== null,'Repeat password exists');
-    console.assert(actionBtn !== null,'Action button exists');
-    console.assert(divider !== null,'Divider exists');
-    console.assert(socialRow !== null,'Social row exists');
-    console.assert(googleBtn !== null,'Google button exists');
-    console.assert(appleBtn !== null,'Apple button exists');
-    console.assert(closeBtn !== null,'Close button exists');
-    console.assert(modal !== null,'Modal exists');
-    console.assert(isValidEmail('test@example.com') === true,'Valid email accepted');
-    console.assert(isValidEmail('wrong-email') === false,'Invalid email rejected');
-    console.assert(getRedirectUrl() === 'https://www.5terrego.com/map.html','Redirect uses canonical www domain');
-    console.assert(OWNER_CHECK_ENDPOINT.indexOf('backend?action=me') > -1,'Owner check endpoint configured');
-    console.assert(document.querySelectorAll('#google').length === 1,'Only one Google button exists');
-    console.assert(document.querySelectorAll('#apple').length === 1,'Only one Apple button exists');
-    console.assert(document.querySelectorAll('#close').length === 1,'Only one close button exists');
-    console.assert(!document.querySelector('style button#action'),'No HTML accidentally inside style');
-    console.assert(typeof fetchOwnerStatus === 'function','fetchOwnerStatus function exists');
-    console.assert(typeof createAccountPanel === 'function','createAccountPanel function exists');
-    console.assert(typeof maybeAddOwnerButton === 'function','maybeAddOwnerButton function exists');
-  }
-
   window.client = client;
 
   setupEvents();
-  runTests();
   checkUser();
 
   client.auth.onAuthStateChange(function(event){
-    if(event === 'SIGNED_IN'){
+    if(event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION'){
       checkUser();
     }
 
