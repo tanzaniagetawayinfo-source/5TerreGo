@@ -6,499 +6,145 @@
 <title>POI Editor</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  background:#05070a;
-  color:#fff;
-}
-
-.header{
-  position:sticky;
-  top:0;
-  background:#05070a;
-  padding:16px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  z-index:10;
-}
-
-.search{
-  flex:1;
-  min-width:0;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.08);
-  color:white;
-  outline:none;
-}
-
-.search::placeholder,
-input::placeholder,
-textarea::placeholder{
-  color:rgba(255,255,255,0.55);
-}
-
-.add-btn{
-  padding:12px 16px;
-  border-radius:12px;
-  border:none;
-  background:white;
-  color:black;
-  font-weight:700;
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-.status{
-  padding:0 16px 8px;
-  color:rgba(255,255,255,0.65);
-  font-size:13px;
-}
-
-.status.error{
-  color:#ffb4b4;
-}
-
-.list{
-  padding:16px;
-}
-
-.poi{
-  padding:14px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.06);
-  margin-bottom:10px;
-  border:1px solid rgba(255,255,255,0.08);
-}
-
-.poi-title{
-  font-weight:700;
-  margin-bottom:4px;
-}
-
-.poi-meta{
-  font-size:13px;
-  color:rgba(255,255,255,0.65);
-  line-height:1.35;
-}
-
-.empty{
-  padding:24px;
-  text-align:center;
-  color:rgba(255,255,255,0.55);
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.72);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  z-index:100;
-}
-
-.modal.is-open{
-  display:flex;
-}
-
-.modal-content{
-  position:relative;
-  width:100%;
-  max-width:420px;
-  max-height:90vh;
-  overflow:auto;
-  background:#0a0c10;
-  border-radius:18px;
-  padding:18px;
-  border:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 24px 80px rgba(0,0,0,0.55);
-}
-
-.modal-title{
-  margin:0 44px 12px 0;
-  font-size:20px;
-  line-height:1.2;
-}
-
-.close-btn{
-  position:absolute;
-  right:14px;
-  top:14px;
-  width:34px;
-  height:34px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.14);
-  background:rgba(255,255,255,0.08);
-  color:white;
-  font-size:18px;
-  line-height:1;
-  cursor:pointer;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.08);
-  color:white;
-  outline:none;
-}
-
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
-
-select option{
-  color:#111;
-}
-
-button.save{
-  width:100%;
-  padding:14px;
-  margin-top:14px;
-  border-radius:12px;
-  border:none;
-  background:white;
-  color:black;
-  font-weight:800;
-  cursor:pointer;
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#05070a;color:#fff}
+.header{position:sticky;top:0;background:#05070a;padding:16px;display:flex;gap:10px;align-items:center;z-index:10}
+.search{flex:1;min-width:0;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
+.add-btn{padding:12px 16px;border-radius:12px;border:none;background:white;color:black;font-weight:700;cursor:pointer}
+.status{padding:0 16px 8px;color:rgba(255,255,255,0.65);font-size:13px}
+.status.error{color:#ffb4b4}
+.list{padding:16px}
+.poi{padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)}
+.poi-title{font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center}
+.modal.is-open{display:flex}
+.modal-content{background:#0a0c10;border-radius:18px;padding:18px;width:100%;max-width:420px}
+.close-btn{position:absolute;right:14px;top:14px}
+input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;background:rgba(255,255,255,0.08);color:white}
+button.save{width:100%;padding:14px;margin-top:14px;background:white;color:black;font-weight:800}
 </style>
 </head>
 <body>
 
 <div class="header">
   <input id="search" class="search" placeholder="Cerca POI..." />
-  <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
+  <button id="addBtn" class="add-btn">Aggiungi</button>
 </div>
 
 <div id="status" class="status">Caricamento POI...</div>
 <div id="list" class="list"></div>
 
-<div id="modal" class="modal" aria-hidden="true">
-  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi popup">×</button>
-
-    <h2 id="modalTitle" class="modal-title">Aggiungi POI</h2>
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <button id="closeBtn" class="close-btn">×</button>
+    <h2>Aggiungi POI</h2>
 
     <input id="name" placeholder="Nome" />
-    <input id="coords" placeholder="Coordinate (lat,lng)" />
+    <input id="coords" placeholder="Coordinate" />
     <textarea id="description" placeholder="Descrizione"></textarea>
-
-    <input id="importance" type="number" min="1" max="100" placeholder="Importanza (1-100)" />
+    <input id="importance" type="number" placeholder="Importanza" />
 
     <select id="type">
       <option value="chiesa">chiesa</option>
       <option value="monumento">monumento</option>
       <option value="sentiero">sentiero</option>
       <option value="spiaggia">spiaggia</option>
-      <option value="stazione">stazione</option>
       <option value="ristorante">ristorante</option>
-      <option value="bar">bar</option>
-      <option value="punto panoramico">punto panoramico</option>
     </select>
 
-    <input id="emails" placeholder="Email autorizzate (separate da virgola)" />
-    <input id="phone" type="tel" placeholder="Telefono" />
-    <input id="discount" type="number" min="0" max="100" placeholder="Sconto % (0-100)" />
+    <input id="emails" placeholder="emails" />
+    <input id="phone" placeholder="phone" />
+    <input id="discount" type="number" placeholder="sconto" />
 
-    <button class="save" type="button" id="saveBtn">Salva POI</button>
+    <button class="save" id="saveBtn">Salva</button>
   </div>
 </div>
 
 <script>
-const ENDPOINT = "https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/backend";
+const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+const ANON_KEY = "INSERISCI_QUI_ANON_KEY";
+
 let pois = [];
 
-const listEl = document.getElementById("list");
-const modalEl = document.getElementById("modal");
-const searchEl = document.getElementById("search");
-const addBtn = document.getElementById("addBtn");
-const closeBtn = document.getElementById("closeBtn");
-const saveBtn = document.getElementById("saveBtn");
-const statusEl = document.getElementById("status");
-
-function setStatus(message, isError = false){
-  statusEl.innerText = message || "";
-  statusEl.classList.toggle("error", Boolean(isError));
-}
-
 function getToken(){
-  const keys = Object.keys(localStorage);
-
-  for(const key of keys){
-    if(key.startsWith("sb-") && key.endsWith("-auth-token")){
+  for(const k of Object.keys(localStorage)){
+    if(k.includes("auth-token")){
       try{
-        const raw = JSON.parse(localStorage.getItem(key));
-        const token = raw?.access_token || raw?.currentSession?.access_token;
-        if(token) return token;
-      }catch(err){
-        console.warn("Token parse error", err);
-      }
+        return JSON.parse(localStorage.getItem(k)).access_token;
+      }catch{}
     }
   }
-
-  try{
-    const legacy = JSON.parse(localStorage.getItem("sb-session") || "null");
-    return legacy?.access_token || "";
-  }catch(err){
-    return "";
-  }
-}
-
-function clampNumber(value, min, max, fallback){
-  const n = Number(value);
-  if(Number.isNaN(n)) return fallback;
-  return Math.max(min, Math.min(max, n));
-}
-
-function normalizePoi(row){
-  return {
-    id: row.id || row._id || crypto.randomUUID(),
-    name: row.name || row.nome || "Senza nome",
-    coords: row.coords || row.coordinates || row.coordinate || "",
-    description: row.description || row.descrizione || "",
-    importance: clampNumber(row.importance || row.importanza, 1, 100, 1),
-    type: row.type || row.tipo || "monumento",
-    emails: row.emails || row.email_autorizzate || row.allowed_emails || "",
-    phone: row.phone || row.telefono || "",
-    discount: clampNumber(row.discount || row.sconto, 0, 100, 0)
-  };
-}
-
-function parseCsvLine(line){
-  const result = [];
-  let current = "";
-  let insideQuotes = false;
-
-  for(let i = 0; i < line.length; i++){
-    const char = line[i];
-    const next = line[i + 1];
-
-    if(char === '"' && next === '"'){
-      current += '"';
-      i++;
-    }else if(char === '"'){
-      insideQuotes = !insideQuotes;
-    }else if(char === "," && !insideQuotes){
-      result.push(current.trim());
-      current = "";
-    }else{
-      current += char;
-    }
-  }
-
-  result.push(current.trim());
-  return result;
-}
-
-function parseCsv(csvText){
-  const lines = csvText.split(/\r?\n/).filter(line => line.trim());
-  if(lines.length < 2) return [];
-
-  const headers = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
-
-  return lines.slice(1).map(line => {
-    const values = parseCsvLine(line);
-    const row = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] || "";
-    });
-    return normalizePoi(row);
-  });
-}
-
-async function fetchJsonSafe(url, options = {}){
-  const res = await fetch(url, options);
-  const text = await res.text();
-  let data = null;
-
-  try{
-    data = text ? JSON.parse(text) : null;
-  }catch(err){
-    throw new Error(`Risposta non JSON (${res.status}): ${text.slice(0, 120)}`);
-  }
-
-  if(!res.ok){
-    throw new Error(data?.error || `Errore HTTP ${res.status}`);
-  }
-
-  return data;
+  return null;
 }
 
 async function loadPois(){
-  setStatus("Caricamento POI...");
-
   try{
-    const data = await fetchJsonSafe(`${ENDPOINT}?action=list-pois`, {
-      method: "GET"
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`,{
+      headers:{
+        apikey:ANON_KEY
+      }
     });
 
-    pois = Array.isArray(data?.pois) ? data.pois.map(normalizePoi) : [];
-    renderList(searchEl.value);
-    setStatus(`${pois.length} POI caricati dal backend`);
-  }catch(err){
-    console.error("LOAD POIS ERROR", err);
-    pois = [];
-    renderList(searchEl.value);
-    setStatus(`Errore caricamento POI: ${err.message}`, true);
+    pois = await res.json();
+    render();
+    status.innerText = pois.length + " POI";
+  }catch(e){
+    status.innerText = "errore";
   }
 }
 
-function renderList(filter = ""){
-  const normalizedFilter = filter.trim().toLowerCase();
-
-  const filteredPois = pois
-    .filter((poi) => {
-      const searchable = `${poi.name || ""} ${poi.type || ""} ${poi.description || ""}`.toLowerCase();
-      return searchable.includes(normalizedFilter);
-    })
-    .sort((a,b) => (b.importance || 0) - (a.importance || 0));
-
-  listEl.innerHTML = "";
-
-  if(filteredPois.length === 0){
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.innerText = "Nessun POI trovato";
-    listEl.appendChild(empty);
-    return;
-  }
-
-  filteredPois.forEach((poi) => {
-    const div = document.createElement("div");
-    div.className = "poi";
-
-    const title = document.createElement("div");
-    title.className = "poi-title";
-    title.innerText = poi.name;
-
-    const meta = document.createElement("div");
-    meta.className = "poi-meta";
-    meta.innerText = `${poi.type} • importanza ${poi.importance} • sconto ${poi.discount || 0}%`;
-
-    const extra = document.createElement("div");
-    extra.className = "poi-meta";
-    extra.style.marginTop = "6px";
-    extra.innerText = poi.description || "";
-
-    div.appendChild(title);
-    div.appendChild(meta);
-    if(poi.description) div.appendChild(extra);
-
-    listEl.appendChild(div);
-  });
-}
-
-function openModal(){
-  modalEl.classList.add("is-open");
-  modalEl.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-
-function closeModal(){
-  modalEl.classList.remove("is-open");
-  modalEl.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
-
-function clearForm(){
-  ["name","coords","description","importance","emails","phone","discount"].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-  document.getElementById("type").value = "chiesa";
-}
-
-function readFormPoi(){
-  return normalizePoi({
-    name: document.getElementById("name").value.trim(),
-    coords: document.getElementById("coords").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    importance: document.getElementById("importance").value,
-    type: document.getElementById("type").value,
-    emails: document.getElementById("emails").value.trim(),
-    phone: document.getElementById("phone").value.trim(),
-    discount: document.getElementById("discount").value
+function render(){
+  list.innerHTML = "";
+  pois.forEach(p=>{
+    const d=document.createElement("div");
+    d.className="poi";
+    d.innerHTML = `<b>${p.name}</b><br>${p.type}`;
+    list.appendChild(d);
   });
 }
 
 async function savePoi(){
   const token = getToken();
-  const poi = readFormPoi();
 
-  if(!poi.name || poi.name === "Senza nome"){
-    alert("Nome obbligatorio");
-    return;
-  }
-
-  if(!token){
-    alert("Devi essere loggato come owner per salvare i POI.");
-    return;
-  }
+  const poi = {
+    name: name.value,
+    coords: coords.value,
+    description: description.value,
+    importance: Number(importance.value)||1,
+    type: type.value,
+    emails: emails.value,
+    phone: phone.value,
+    discount: Number(discount.value)||0
+  };
 
   try{
-    const data = await fetchJsonSafe(`${ENDPOINT}?action=create-poi`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`,{
+      method:"POST",
+      headers:{
+        apikey:ANON_KEY,
+        Authorization:`Bearer ${token}`,
+        "Content-Type":"application/json"
       },
       body: JSON.stringify(poi)
     });
 
-    if(data?.poi){
-      pois.push(normalizePoi(data.poi));
+    if(!res.ok){
+      const t = await res.text();
+      throw new Error(t);
     }
 
-    clearForm();
     closeModal();
-    await loadPois();
-  }catch(err){
-    console.error("SAVE POI ERROR", err);
-    alert(`Errore salvataggio: ${err.message}`);
+    loadPois();
+
+  }catch(e){
+    alert(e.message);
   }
 }
 
-addBtn.addEventListener("click", openModal);
-closeBtn.addEventListener("click", closeModal);
-saveBtn.addEventListener("click", savePoi);
+addBtn.onclick=()=>modal.classList.add("is-open");
+closeBtn.onclick=()=>modal.classList.remove("is-open");
+saveBtn.onclick=savePoi;
 
-modalEl.addEventListener("click", (event) => {
-  if(event.target === modalEl) closeModal();
-});
-
-document.addEventListener("keydown", (event) => {
-  if(event.key === "Escape" && modalEl.classList.contains("is-open")) closeModal();
-});
-
-searchEl.addEventListener("input", (event) => renderList(event.target.value));
-
-function runTests(){
-  console.assert(typeof parseCsv === "function", "parseCsv deve esistere");
-  console.assert(parseCsv("name,type,importance\nTest,bar,90")[0].name === "Test", "CSV parser legge name");
-  console.assert(parseCsv("name,type,importance\nTest,bar,120")[0].importance === 100, "importance viene limitata a 100");
-  console.assert(parseCsv("name,type,discount\nTest,bar,-10")[0].discount === 0, "discount viene limitato a 0");
-  console.assert(clampNumber("abc", 1, 100, 1) === 1, "clampNumber fallback corretto");
-  console.assert(typeof fetchJsonSafe === "function", "fetchJsonSafe deve esistere");
-  openModal();
-  console.assert(modalEl.classList.contains("is-open"), "openModal apre il popup");
-  closeModal();
-  console.assert(!modalEl.classList.contains("is-open"), "closeModal chiude il popup");
-}
-
-runTests();
 loadPois();
 </script>
 
