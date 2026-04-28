@@ -502,6 +502,8 @@ button{
 
     document.getElementById('logout').onclick = async function(){
       await client.auth.signOut();
+
+      // pulizia immediata (non aspettiamo listener)
       removeAccountPanel();
       isLogin = true;
       setMode();
@@ -577,8 +579,15 @@ button{
   checkUser();
 
   client.auth.onAuthStateChange(function(event, session){
-    if(session?.user){
+    if(event === 'SIGNED_IN'){
       checkUser();
+    }
+
+    if(event === 'SIGNED_OUT'){
+      // reset totale UI
+      removeAccountPanel();
+      isLogin = true;
+      setMode();
     }
   });
 })();
