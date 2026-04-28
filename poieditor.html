@@ -6,20 +6,133 @@
 <title>POI Editor</title>
 
 <style>
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   background:#05070a;
   color:#fff;
 }
 
-.container{
-  max-width:500px;
-  margin:auto;
-  padding:20px;
+.header{
+  position:sticky;
+  top:0;
+  background:#05070a;
+  padding:16px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  z-index:10;
 }
 
-input,select{
+.search{
+  flex:1;
+  min-width:0;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  outline:none;
+}
+
+.search::placeholder,
+input::placeholder{
+  color:rgba(255,255,255,0.55);
+}
+
+.add-btn{
+  padding:12px 16px;
+  border-radius:12px;
+  border:none;
+  background:white;
+  color:black;
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.list{
+  padding:16px;
+}
+
+.poi{
+  padding:14px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.06);
+  margin-bottom:10px;
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.poi-title{
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.poi-meta{
+  font-size:13px;
+  color:rgba(255,255,255,0.65);
+}
+
+.empty{
+  padding:24px;
+  text-align:center;
+  color:rgba(255,255,255,0.55);
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.72);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:100;
+}
+
+.modal.is-open{
+  display:flex;
+}
+
+.modal-content{
+  position:relative;
+  width:100%;
+  max-width:420px;
+  max-height:90vh;
+  overflow:auto;
+  background:#0a0c10;
+  border-radius:18px;
+  padding:18px;
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 24px 80px rgba(0,0,0,0.55);
+}
+
+.modal-title{
+  margin:0 44px 12px 0;
+  font-size:20px;
+  line-height:1.2;
+}
+
+.close-btn{
+  position:absolute;
+  right:14px;
+  top:14px;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+}
+
+input,select,textarea{
   width:100%;
   padding:12px;
   margin-top:10px;
@@ -27,59 +140,226 @@ input,select{
   border:1px solid rgba(255,255,255,0.15);
   background:rgba(255,255,255,0.08);
   color:white;
+  outline:none;
 }
 
-button{
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  outline:none;
+}
+
+select option{
+  color:#111;
+}
+
+button.save{
   width:100%;
   padding:14px;
   margin-top:14px;
   border-radius:12px;
   border:none;
-  font-weight:700;
   background:white;
   color:black;
+  font-weight:800;
+  cursor:pointer;
 }
-
-.search{
-  margin-bottom:20px;
-}
-
 </style>
 </head>
 <body>
 
-<div class="container">
-
-  <!-- SEARCH -->
-  <input class="search" placeholder="Cerca POI..." />
-
-  <!-- FORM -->
-
-  <input placeholder="Nome" />
-  <input placeholder="Coordinate (lat,lng)" />
-
-  <input type="number" placeholder="Importanza (numero)" />
-
-  <select>
-    <option>chiesa</option>
-    <option>monumento</option>
-    <option>sentiero</option>
-    <option>spiaggia</option>
-    <option>stazione</option>
-    <option>ristorante</option>
-    <option>bar</option>
-    <option>punto panoramico</option>
-  </select>
-
-  <input placeholder="Email autorizzate (separate da virgola)" />
-
-  <input type="tel" placeholder="Telefono" />
-
-  <input type="number" placeholder="Sconto % (1-100)" min="1" max="100" />
-
-  <button>Aggiungi / Salva POI</button>
-
+<!-- HEADER -->
+<div class="header">
+  <input id="search" class="search" placeholder="Cerca POI..." />
+  <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
 </div>
+
+<!-- LIST -->
+<div id="list" class="list"></div>
+
+<!-- MODAL -->
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi popup">×</button>
+
+    <h2 id="modalTitle" class="modal-title">Aggiungi POI</h2>
+
+    <input id="name" placeholder="Nome" />
+    <input id="coords" placeholder="Coordinate (lat,lng)" />
+
+    <textarea id="description" placeholder="Descrizione"></textarea>
+
+    <input id="importance" type="number" min="1" max="100" placeholder="Importanza (1-100)" />
+
+    <select id="type">
+      <option value="chiesa">chiesa</option>
+      <option value="monumento">monumento</option>
+      <option value="sentiero">sentiero</option>
+      <option value="spiaggia">spiaggia</option>
+      <option value="stazione">stazione</option>
+      <option value="ristorante">ristorante</option>
+      <option value="bar">bar</option>
+      <option value="punto panoramico">punto panoramico</option>
+    </select>
+
+    <input id="emails" placeholder="Email autorizzate (separate da virgola)" />
+    <input id="phone" type="tel" placeholder="Telefono" />
+    <input id="discount" type="number" min="1" max="100" placeholder="Sconto % (1-100)" />
+
+    <button class="save" type="button" id="saveBtn">Salva POI</button>
+  </div>
+</div>
+
+<script>
+const pois = [
+  { name:"Spiaggia A", coords:"", description:"Bella spiaggia", importance:80, type:"spiaggia", emails:"", phone:"", discount:10 },
+  { name:"Ristorante B", coords:"", description:"Vista mare", importance:60, type:"ristorante", emails:"", phone:"", discount:15 },
+  { name:"Spiaggia A", coords:"", importance:80, type:"spiaggia", emails:"", phone:"", discount:10 },
+  { name:"Ristorante B", coords:"", importance:60, type:"ristorante", emails:"", phone:"", discount:15 }
+];
+
+const listEl = document.getElementById("list");
+const modalEl = document.getElementById("modal");
+const searchEl = document.getElementById("search");
+const addBtn = document.getElementById("addBtn");
+const closeBtn = document.getElementById("closeBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+function renderList(filter = ""){
+  const normalizedFilter = filter.trim().toLowerCase();
+  const filteredPois = pois
+    .filter((poi) => poi.name.toLowerCase().includes(normalizedFilter))
+    .sort((a,b) => b.importance - a.importance);
+
+  listEl.innerHTML = "";
+
+  if(filteredPois.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerText = "Nessun POI trovato";
+    listEl.appendChild(empty);
+    return;
+  }
+
+  filteredPois.forEach((poi) => {
+    const div = document.createElement("div");
+    div.className = "poi";
+
+    const title = document.createElement("div");
+    title.className = "poi-title";
+    title.innerText = poi.name;
+
+    const meta = document.createElement("div");
+
+    const desc = document.createElement("div");
+    desc.className = "poi-meta";
+    desc.style.marginTop = "6px";
+    desc.innerText = poi.description || "";
+    meta.className = "poi-meta";
+    meta.innerText = `${poi.type} • importanza ${poi.importance} • sconto ${poi.discount || 0}%`;
+
+    div.appendChild(title);
+    div.appendChild(meta);
+    if(poi.description){
+      div.appendChild(desc);
+    }
+    listEl.appendChild(div);
+  });
+}
+
+function openModal(){
+  modalEl.classList.add("is-open");
+  modalEl.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("name").focus(), 0);
+}
+
+function closeModal(){
+  modalEl.classList.remove("is-open");
+  modalEl.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function getNumberInRange(inputId, fallback, min, max){
+  const value = Number(document.getElementById(inputId).value);
+  if(Number.isNaN(value)) return fallback;
+  return Math.min(max, Math.max(min, value));
+}
+
+function clearForm(){
+  document.getElementById("name").value = "";
+  document.getElementById("coords").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("importance").value = "";
+  document.getElementById("type").value = "chiesa";
+  document.getElementById("emails").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("discount").value = "";
+}
+
+function savePoi(){
+  const name = document.getElementById("name").value.trim();
+
+  if(!name){
+    alert("Inserisci il nome del POI");
+    return;
+  }
+
+  const poi = {
+    description: document.getElementById("description").value.trim(),
+    name,
+    coords: document.getElementById("coords").value.trim(),
+    importance: getNumberInRange("importance", 1, 1, 100),
+    type: document.getElementById("type").value,
+    emails: document.getElementById("emails").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    discount: getNumberInRange("discount", 0, 0, 100)
+  };
+
+  pois.push(poi);
+  clearForm();
+  closeModal();
+  renderList(searchEl.value);
+}
+
+addBtn.addEventListener("click", openModal);
+closeBtn.addEventListener("click", closeModal);
+saveBtn.addEventListener("click", savePoi);
+
+modalEl.addEventListener("click", (event) => {
+  if(event.target === modalEl){
+    closeModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if(event.key === "Escape" && modalEl.classList.contains("is-open")){
+    closeModal();
+  }
+});
+
+searchEl.addEventListener("input", (event) => {
+  renderList(event.target.value);
+});
+
+function runTests(){
+  console.assert(typeof openModal === "function", "openModal deve esistere");
+  console.assert(typeof closeModal === "function", "closeModal deve esistere");
+  console.assert(Array.isArray(pois), "pois deve essere un array");
+  console.assert(pois.every((poi) => poi.importance >= 1 && poi.importance <= 100), "importance deve essere tra 1 e 100");
+}
+
+renderList();
+runTests();
+</script>
 
 </body>
 </html>
