@@ -83,7 +83,7 @@ function getToken(){
 
 async function loadPois(){
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`,{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?select=*`,{
       headers:{
         apikey:ANON_KEY,
         "Content-Type":"application/json",
@@ -104,7 +104,7 @@ function render(){
   pois.forEach(p=>{
     const d=document.createElement("div");
     d.className="poi";
-    d.innerHTML = `<b>${p.name}</b><br>${p.type}`;
+    d.innerHTML = `<b>${p.name || "(senza nome)"}</b><br>${p.type || "-"}`;
     list.appendChild(d);
   });
 }
@@ -147,8 +147,11 @@ async function savePoi(){
   }
 }
 
-addBtn.onclick=()=>modal.classList.add("is-open");
-closeBtn.onclick=()=>modal.classList.remove("is-open");
+function openModal(){ modal.classList.add("is-open"); }
+function closeModal(){ modal.classList.remove("is-open"); }
+
+addBtn.onclick=()=>openModal();
+closeBtn.onclick=()=>closeModal();
 saveBtn.onclick=savePoi;
 
 loadPois();
