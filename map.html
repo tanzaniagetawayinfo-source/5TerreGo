@@ -329,14 +329,23 @@
     minZoom: 11,
     zoomControl: false,
     preferCanvas: true,
+
+    // ✨ smooth zoom + pan tuning
     inertia: true,
-    inertiaDeceleration: 3000,
-    inertiaMaxSpeed: 1500,
-    zoomSnap: 1,
-    zoomDelta: 1,
-    updateWhenIdle: false,
-    zoomAnimation: false,
-    fadeAnimation: false
+    inertiaDeceleration: 2500,
+    inertiaMaxSpeed: 2000,
+    easeLinearity: 0.2,
+
+    zoomAnimation: true,
+    fadeAnimation: true,
+    markerZoomAnimation: true,
+
+    zoomSnap: 0.25,      // smoother zoom steps
+    zoomDelta: 0.25,
+    wheelPxPerZoomLevel: 80,
+    wheelDebounceTime: 20,
+
+    updateWhenIdle: false
   }).setView([44.12, 9.71], 12);
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -446,15 +455,16 @@
   function getMinZoomForImportance(importance) {
     var n = Number(importance || 0);
 
-    // MUCH stricter scaling so POIs don't appear too early
-    if (n >= 90) return 11;   // super important → always visible
-    if (n >= 75) return 12;
-    if (n >= 60) return 13;
-    if (n >= 45) return 14;
-    if (n >= 30) return 15;
-    if (n >= 15) return 16;
+    // 🔧 Tuned so 60 is NOT visible early
+    // Push mid scores deeper into zoom
+    if (n >= 95) return 11;   // only top POIs very early
+    if (n >= 85) return 12;
+    if (n >= 75) return 13;
+    if (n >= 65) return 14;
+    if (n >= 55) return 15;   // ← 60 now appears later (zoom 15)
+    if (n >= 40) return 16;
 
-    return 17; // low importance → only max zoom
+    return 17;
   }
 
   function updatePOIVisibility() {
@@ -917,6 +927,7 @@
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
     console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
     console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'importance affects zoom');
+    console.assert(getMinZoomForImportance(60) >= 15, 'importance 60 should not appear early');
     console.assert(typeof addPOI === 'function', 'addPOI function exists');
     console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
     console.assert(typeof checkUser === 'function', 'checkUser function exists');
