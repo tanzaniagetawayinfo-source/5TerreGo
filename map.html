@@ -331,6 +331,23 @@
       max-width: 320px;
       margin-left: auto;
       margin-right: auto;
+      max-height: 72px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #poi-desc.expanded {
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    #read-more {
+      display: none;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e9bff;
+      cursor: pointer;
     }
 
     #poi-close {
@@ -410,6 +427,7 @@
   <div class="poi-content">
     <div id="poi-title"></div>
     <div id="poi-desc"></div>
+    <div id="read-more">Read more</div>
   </div>
   <div id="poi-close">×</div>
 </div>
@@ -496,6 +514,7 @@
   var poiCard = document.getElementById('poi-card');
   var poiTitle = document.getElementById('poi-title');
   var poiDesc = document.getElementById('poi-desc');
+  var readMoreBtn = document.getElementById('read-more');
   var poiClose = document.getElementById('poi-close');
   var poiCircle = document.getElementById('poi-circle');
   var poiMapPreview = document.getElementById('poi-map-preview');
@@ -789,8 +808,20 @@
     poiCard.style.display = 'block';
     poiCard.setAttribute('aria-hidden', 'false');
     poiTitle.innerText = poi.name;
-    poiDesc.innerText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
+    var fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
+    poiDesc.innerText = fullText;
+    poiDesc.classList.remove('expanded');
     poiDesc.style.display = 'block';
+
+    // check overflow
+    setTimeout(function () {
+      if (poiDesc.scrollHeight > poiDesc.clientHeight + 10) {
+        readMoreBtn.style.display = 'block';
+        readMoreBtn.innerText = 'Read more';
+      } else {
+        readMoreBtn.style.display = 'none';
+      }
+    }, 50);
     poiMapPreview.style.background = '#f6f1e8';
 
     destroyPoiMiniMap();
@@ -1043,6 +1074,15 @@
   }
 
   function setupEvents() {
+    readMoreBtn.addEventListener('click', function () {
+      if (poiDesc.classList.contains('expanded')) {
+        poiDesc.classList.remove('expanded');
+        readMoreBtn.innerText = 'Read more';
+      } else {
+        poiDesc.classList.add('expanded');
+        readMoreBtn.innerText = 'Read less';
+      }
+    });
     loginBtn.addEventListener('click', function () {
       // FIX: GitHub Pages compat (no root path)
       // robust redirect for GitHub Pages (works in subfolder or root)
