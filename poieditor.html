@@ -1,1153 +1,457 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>5TerreGo | Map</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POI Editor</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #cfe5f2;
-    }
-
-    #map {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .top-bar {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 10px;
-      border-radius: 20px;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-    }
-
-    .center-brand {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-weight: 800;
-      font-size: 14px;
-      text-decoration: none;
-      white-space: nowrap;
-      pointer-events: auto;
-      cursor: pointer;
-    }
-
-    #weather {
-      color: white;
-      font-weight: 600;
-      padding: 6px 10px;
-      white-space: nowrap;
-    }
-
-    #search {
-      width: 100%;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: none;
-      outline: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    #search::placeholder { color: rgba(255,255,255,0.75); }
-
-    #login {
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .blue { color: #1e9bff; }
-    .orange { color: #ff8a1d; }
-
-    .label {
-      color: white;
-      font-weight: 700;
-      font-size: 14px;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
-      white-space: nowrap;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .poi-label {
-      min-width: 30px;
-      min-height: 30px;
-      display: grid;
-      place-items: center;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.55);
-      color: white;
-      font-size: 17px;
-      border: 1px solid rgba(255,255,255,0.28);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-
-    .leaflet-div-icon {
-      background: transparent !important;
-      border: none !important;
-    }
-
-    .leaflet-tile {
-      margin: -1px;
-      outline: none;
-      border: none;
-    }
-
-    .leaflet-pane img {
-      image-rendering: auto;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
-
-    .leaflet-container {
-      background: #f6f1e8 !important; /* fix nero */
-      transform: translateZ(0);
-      will-change: transform;
-    }
-
-    .leaflet-control-zoom,
-    .leaflet-control-attribution {
-      display: none !important;
-    }
-
-    .mode-bar {
-      display: flex;
-      gap: 8px;
-    }
-
-    .mode-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(0,0,0,0.35);
-      color: #fff;
-      font-weight: 700;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor: pointer;
-    }
-
-    .mode-btn.active { background: rgba(0,0,0,0.6); }
-
-    #owner-panel {
-      display: none;
-      position: fixed;
-      bottom: 86px;
-      left: 12px;
-      right: 12px;
-      z-index: 1000;
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(0,0,0,0.62);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.28);
-    }
-
-    #owner-panel[aria-hidden="false"] { display: block; }
-
-    #owner-panel input,
-    #owner-panel button {
-      width: 100%;
-      margin-bottom: 7px;
-      padding: 10px 12px;
-      border: 0;
-      border-radius: 12px;
-      outline: none;
-      font: inherit;
-    }
-
-    #owner-panel button {
-      margin-bottom: 0;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .bottom-card {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      z-index: 1000;
-      border-radius: 20px;
-      overflow: hidden;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      touch-action: pan-y;
-      will-change: transform;
-    }
-
-    .bottom-card.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .bottom-card img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      display: block;
-      background: rgba(255,255,255,0.08);
-      pointer-events: none;
-    }
-
-    .bottom-card .title {
-      color: white;
-      font-weight: 700;
-      padding: 10px;
-      pointer-events: none;
-    }
-
-    #poi-card {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
-      background: #f6f1e8; /* bianco panna */
-      overflow: hidden;
-    }
-
-    #poi-map-preview {
-      position: absolute;
-      inset: 0;
-      background: #f6f1e8; /* niente nero */
-    }
-
-    #poi-circle {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: min(60vw, 240px);
-      height: min(60vw, 240px);
-      border-radius: 50%;
-      overflow: hidden;
-      border: 3px solid rgba(255,255,255,0.9);
-      box-shadow: 0 18px 55px rgba(0,0,0,0.25);
-      background: #f6f1e8; /* niente nero */
-      z-index: 2;
-    }
-
-    #poi-circle .leaflet-container {
-      width: 100% !important;
-      height: 100% !important;
-      border-radius: 50%;
-      overflow: hidden;
-    }
-
-    .poi-content {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 3;
-      padding: 40px 28px calc(28px + env(safe-area-inset-bottom));
-      background: transparent; /* niente tendina */
-      color: #000;
-      box-shadow: none;
-      text-align: center; /* centra tutto */
-    }
-
-    #poi-title {
-      font-size: 26px;
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: 14px;
-      letter-spacing: -0.04em;
-      text-align: center;
-    }
-
-    #poi-desc {
-      font-size: 16px;
-      line-height: 1.6;
-      color: rgba(0,0,0,0.7);
-      margin-top: 6px;
-      text-align: center;
-      max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    #poi-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 4;
-      width: 42px;
-      height: 42px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.52);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 24px;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#05070a;color:#fff}
+.header{position:sticky;top:0;background:#05070a;padding:16px;display:flex;gap:10px;align-items:center;z-index:10}
+.search{flex:1;min-width:0;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
+.add-btn{padding:12px 16px;border-radius:12px;border:none;background:white;color:black;font-weight:700;cursor:pointer;white-space:nowrap}
+.status{padding:0 16px 8px;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.45}
+.status.error{color:#ffb4b4}
+.status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
+.list{padding:16px}
+.poi{padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease}
+.poi:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
+.poi-title{font-weight:700;margin-bottom:4px}
+.poi-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
+.empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.is-open{display:flex}
+.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
+.close-btn{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:18px;cursor:pointer}
+input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
+textarea{min-height:90px;resize:vertical}
+select option{color:#111}
+button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
+button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:none;background:#ff3b30;color:white;font-weight:800;cursor:pointer}
+.range-card{margin-top:10px;padding:13px 12px 12px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07)}
+.range-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.68)}
+.range-value{min-width:46px;text-align:center;padding:5px 10px;border-radius:999px;background:white;color:black;font-weight:800;font-size:13px}
+.apple-range{appearance:none;-webkit-appearance:none;width:100%;height:30px;margin:0;padding:0;border:none;background:transparent;outline:none;cursor:pointer}
+.apple-range::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#fff var(--range-progress,50%),rgba(255,255,255,0.18) var(--range-progress,50%))}
+.apple-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:white;margin-top:-10px;box-shadow:0 4px 14px rgba(0,0,0,0.38);border:1px solid rgba(0,0,0,0.08)}
+.apple-range::-moz-range-track{height:8px;border-radius:999px;background:rgba(255,255,255,0.18)}
+.apple-range::-moz-range-progress{height:8px;border-radius:999px;background:white}
+.apple-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:white;box-shadow:0 4px 14px rgba(0,0,0,0.38);border:1px solid rgba(0,0,0,0.08)}
+</style>
 </head>
 <body>
 
-<div id="map"></div>
+<div class="header">
+  <input id="search" class="search" placeholder="Cerca POI..." />
+  <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
+</div>
 
-<div class="top-bar">
-  <div class="top-row">
-    <div id="weather">--</div>
+<div id="status" class="status">Caricamento POI...</div>
+<div id="list" class="list"></div>
 
-    <a href="https://www.5terrego.com" class="center-brand" target="_blank" rel="noopener noreferrer" aria-label="Apri 5TerreGo.com">
-      <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
-    </a>
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true">
+    <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
+    <h2 id="modalTitle">Aggiungi POI</h2>
 
-    <button id="login" type="button">Accedi</button>
+    <input id="name" placeholder="Nome" />
+    <input id="coords" placeholder="Coordinate" />
+    <textarea id="description" placeholder="Descrizione"></textarea>
+    <div class="range-card">
+      <div class="range-head">
+        <span>Importanza</span>
+        <span id="importanceValue" class="range-value">50</span>
+      </div>
+      <input id="importance" class="apple-range" type="range" min="1" max="100" step="1" value="50" />
+    </div>
+
+    <select id="type">
+      <option value="chiesa">chiesa</option>
+      <option value="monumento">monumento</option>
+      <option value="sentiero">sentiero</option>
+      <option value="spiaggia">spiaggia</option>
+      <option value="stazione">stazione</option>
+      <option value="ristorante">ristorante</option>
+      <option value="bar">bar</option>
+      <option value="punto panoramico">punto panoramico</option>
+    </select>
+
+    <input id="emails" placeholder="Email autorizzate" />
+    <input id="phone" placeholder="Telefono" />
+    <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
+
+    <button class="save" id="saveBtn" type="button">Salva</button>
+    <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina POI</button>
   </div>
-
-  <input id="search" placeholder="Search location..." />
-
-  <div class="mode-bar">
-    <button class="mode-btn active" id="btn-experiences" type="button">Experiences</button>
-    <button class="mode-btn" id="btn-stories" type="button">Stories</button>
-  </div>
 </div>
-
-<div id="owner-panel" aria-hidden="true">
-  <input id="poi-name" placeholder="Nome POI" />
-  <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" />
-  <input id="poi-lat" placeholder="Latitudine" inputmode="decimal" />
-  <input id="poi-lng" placeholder="Longitudine" inputmode="decimal" />
-  <input id="poi-img" placeholder="URL foto" />
-  <input id="poi-email" placeholder="Email owner" inputmode="email" />
-  <input id="poi-phone" placeholder="Telefono" inputmode="tel" />
-  <input id="poi-description" placeholder="Descrizione POI" />
-  <input id="poi-relevance" placeholder="Punteggio rilevanza 1-100" inputmode="numeric" />
-  <button id="add-poi" type="button">Aggiungi POI</button>
-</div>
-
-<div class="bottom-card" id="card" aria-hidden="true">
-  <img id="card-img" src="" alt="" />
-  <div class="title" id="card-title"></div>
-  <div class="desc" id="card-desc" style="color: rgba(255,255,255,0.8); padding: 0 10px 12px; font-size: 13px; line-height: 1.4;"></div>
-</div>
-
-<div id="poi-card" aria-hidden="true">
-  <div id="poi-map-preview"></div>
-  <div id="poi-circle"></div>
-  <div class="poi-content">
-    <div id="poi-title"></div>
-    <div id="poi-desc"></div>
-  </div>
-  <div id="poi-close">×</div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-(function () {
-  'use strict';
+const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const OWNER_EMAIL = "5terrego.info@gmail.com";
 
-  var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
-  var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
-  var LOCAL_POI_KEY = '5terrego_pois_backup';
-  var AUTO_OPEN_ZOOM = 13;
-  var AUTO_OPEN_DISTANCE = 500;
-  var AUTO_CLOSE_ZOOM = 12;
-  var AUTO_CLOSE_DISTANCE = 800;
+let pois = [];
+let editingPoiId = null;
 
-  var SUPABASE_READY = Boolean(
-    window.supabase &&
-    SUPABASE_URL &&
-    SUPABASE_ANON_KEY &&
-    SUPABASE_URL.indexOf('YOUR_PROJECT') === -1 &&
-    SUPABASE_ANON_KEY.indexOf('YOUR_PUBLIC') === -1
-  );
+const statusEl = document.getElementById("status");
+const listEl = document.getElementById("list");
+const modalEl = document.getElementById("modal");
+const modalTitleEl = document.getElementById("modalTitle");
+const searchEl = document.getElementById("search");
+const addBtn = document.getElementById("addBtn");
+const closeBtn = document.getElementById("closeBtn");
+const saveBtn = document.getElementById("saveBtn");
+const deleteBtn = document.getElementById("deleteBtn");
 
-  var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }) : null;
+const nameEl = document.getElementById("name");
+const coordsEl = document.getElementById("coords");
+const descriptionEl = document.getElementById("description");
+const importanceEl = document.getElementById("importance");
+const importanceValueEl = document.getElementById("importanceValue");
+const typeEl = document.getElementById("type");
+const emailsEl = document.getElementById("emails");
+const phoneEl = document.getElementById("phone");
+const discountEl = document.getElementById("discount");
 
-  var places = [
-    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg' },
-    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg' },
-    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg' },
-    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE }
-  ];
+function setStatus(message, isError = false){
+  statusEl.innerHTML = message;
+  statusEl.classList.toggle("error", Boolean(isError));
+}
 
-  if (!window.L) {
-    throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
-  }
-
-  var map = L.map('map', {
-    minZoom: 11,
-    zoomControl: false,
-    preferCanvas: true,
-    inertia: true,
-    inertiaDeceleration: 2500,
-    inertiaMaxSpeed: 2000,
-    easeLinearity: 0.2,
-    zoomAnimation: true,
-    fadeAnimation: true,
-    markerZoomAnimation: true,
-    zoomSnap: 0.25,
-    zoomDelta: 0.25,
-    wheelPxPerZoomLevel: 80,
-    wheelDebounceTime: 20,
-    updateWhenIdle: false
-  }).setView([44.12, 9.71], 12);
-
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 19,
-    detectRetina: false,
-    keepBuffer: 8,
-    updateWhenZooming: false,
-    updateWhenIdle: false,
-    noWrap: true
-  }).addTo(map);
-
-  map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
-
-  var card = document.getElementById('card');
-  var cardTitle = document.getElementById('card-title');
-  var cardDesc = document.getElementById('card-desc');
-  var cardImg = document.getElementById('card-img');
-  var ownerPanel = document.getElementById('owner-panel');
-  var poiCard = document.getElementById('poi-card');
-  var poiTitle = document.getElementById('poi-title');
-  var poiDesc = document.getElementById('poi-desc');
-  var poiClose = document.getElementById('poi-close');
-  var poiCircle = document.getElementById('poi-circle');
-  var poiMapPreview = document.getElementById('poi-map-preview');
-  var loginBtn = document.getElementById('login');
-  var addPoiBtn = document.getElementById('add-poi');
-  var searchInput = document.getElementById('search');
-
-  var currentIndex = -1;
-  var currentDataset = 'places';
-  var poiLayer = L.layerGroup().addTo(map);
-  var poiMarkers = [];
-  var isProgrammaticMove = false;
-  var startX = 0;
-  var currentX = 0;
-  var isDragging = false;
-  var hasMoved = false;
-  var currentUser = null;
-  var userCheckTimer = null;
-  var poiMiniMap = null;
-
-  function readValue(value, fallback) {
-    return value === undefined || value === null ? fallback : value;
-  }
-
-  function getPOIEmoji(type, fallback) {
-    switch (String(type || '').toLowerCase()) {
-      case 'chiesa': return '⛪';
-      case 'monumento': return '🏛️';
-      case 'sentiero': return '🥾';
-      case 'spiaggia': return '🏖️';
-      case 'stazione': return '🚉';
-      case 'ristorante': return '🍽️';
-      case 'bar': return '🍸';
-      case 'punto panoramico': return '📍';
-      default: return fallback || '📌';
-    }
-  }
-
-  function parseCoords(raw) {
-    var lat;
-    var lng;
-
-    if (raw && typeof raw.coords === 'string') {
-      var str = raw.coords.trim();
-      var parts = str.split(',');
-
-      if (parts.length > 2) {
-        lat = Number(String(parts[0]).trim() + '.' + String(parts[1]).trim());
-        lng = Number(String(parts[2]).trim() + '.' + String(parts[3]).trim());
-      } else {
-        lat = Number(String(parts[0]).trim());
-        lng = Number(String(parts[1]).trim());
+function getAuthSession(){
+  for(const key of Object.keys(localStorage)){
+    if(key.startsWith("sb-") && key.endsWith("-auth-token")){
+      try{
+        const parsed = JSON.parse(localStorage.getItem(key));
+        if(parsed?.access_token) return parsed;
+        if(parsed?.currentSession?.access_token) return parsed.currentSession;
+      }catch(err){
+        console.warn("Auth token non leggibile", err);
       }
-
-      return { lat: lat, lng: lng };
-    }
-
-    lat = Number(readValue(raw.lat, raw.latitude));
-    lng = Number(readValue(raw.lng, raw.longitude));
-
-    return { lat: lat, lng: lng };
-  }
-
-  function normalizePOI(raw) {
-    var parsed;
-    var symbol;
-
-    raw = raw || {};
-    parsed = parseCoords(raw);
-    symbol = raw.symbol || getPOIEmoji(raw.type, '📍');
-
-    return {
-      id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
-      name: String(raw.name || raw.title || 'POI'),
-      symbol: symbol,
-      coords: [parsed.lat, parsed.lng],
-      lat: parsed.lat,
-      lng: parsed.lng,
-      image: raw.image || raw.photo_url || raw.img || '',
-      description: raw.description || raw.descrizione || '',
-      type: raw.type || raw.tipo || '',
-      owner_email: raw.owner_email || raw.email || '',
-      phone: raw.phone || raw.telephone || '',
-      relevance: Number(raw.importance || raw.relevance || raw.score || 0)
-    };
-  }
-
-  function isValidPOI(poi) {
-    return Boolean(poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0);
-  }
-
-  function getMinZoomForImportance(importance) {
-    var n = Number(importance || 0);
-    if (n >= 95) return 11;
-    if (n >= 85) return 12;
-    if (n >= 75) return 13;
-    if (n >= 65) return 14;
-    if (n >= 55) return 15;
-    if (n >= 40) return 16;
-    return 17;
-  }
-
-  function updatePOIVisibility() {
-    var zoom = map.getZoom();
-    poiLayer.clearLayers();
-
-    poiMarkers.forEach(function (item) {
-      if (zoom >= getMinZoomForImportance(item.importance)) {
-        item.marker.addTo(poiLayer);
-      }
-    });
-  }
-
-  function centerCity(place) {
-    isProgrammaticMove = true;
-    var zoomLevel = place.name === 'Monterosso' ? 14 : 15;
-    map.flyTo(place.coords, zoomLevel, { duration: 1.2 });
-
-    window.setTimeout(function () {
-      isProgrammaticMove = false;
-    }, 1400);
-  }
-
-  function preloadImages() {
-    places.forEach(function (place) {
-      var img = new Image();
-      img.src = place.image;
-    });
-  }
-
-  function setCardContent(item) {
-    cardTitle.innerText = item.name;
-    cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
-    cardImg.alt = item.name;
-
-    if (item.description && item.description.trim().length > 0) {
-      cardDesc.style.display = 'block';
-      cardDesc.innerText = item.description;
-    } else {
-      cardDesc.style.display = 'none';
-      cardDesc.innerText = '';
     }
   }
+  return null;
+}
 
-  function showCityCard(item) {
-    closePOICard();
-    setCardContent(item);
-    card.style.display = 'block';
-    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-    card.setAttribute('aria-hidden', 'false');
+function getToken(){
+  return getAuthSession()?.access_token || null;
+}
 
-    window.requestAnimationFrame(function () {
-      card.classList.add('is-visible');
-      card.style.transform = 'translateY(0)';
-    });
+function getUserEmail(){
+  const session = getAuthSession();
+  return (session?.user?.email || "").toLowerCase();
+}
+
+function clampNumber(value, min, max, fallback){
+  const n = Number(value);
+  if(Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function updateImportanceUI(value = importanceEl.value){
+  const safeValue = clampNumber(value, 1, 100, 50);
+  const progress = ((safeValue - 1) / 99) * 100;
+  importanceEl.value = String(safeValue);
+  importanceValueEl.innerText = String(safeValue);
+  importanceEl.style.setProperty("--range-progress", `${progress}%`);
+}
+
+function buildHeaders({ useUserToken = false, extra = {} } = {}){
+  const token = useUserToken ? getToken() : null;
+  return {
+    apikey: ANON_KEY,
+    Authorization: `Bearer ${token || ANON_KEY}`,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    ...extra
+  };
+}
+
+async function parseResponse(res){
+  const text = await res.text();
+  let data = null;
+
+  try{
+    data = text ? JSON.parse(text) : null;
+  }catch(err){
+    data = text;
   }
 
-  function hideCard() {
-    if (card.getAttribute('aria-hidden') === 'true') return;
-
-    card.classList.remove('is-visible');
-    card.setAttribute('aria-hidden', 'true');
-    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    card.style.transform = 'translateY(40px)';
-
-    window.setTimeout(function () {
-      if (card.getAttribute('aria-hidden') === 'true') {
-        card.style.display = 'none';
-      }
-    }, 300);
+  if(!res.ok){
+    const message = typeof data === "object" && data
+      ? (data.message || data.hint || JSON.stringify(data))
+      : String(data || res.statusText);
+    const error = new Error(message);
+    error.payload = data;
+    error.status = res.status;
+    throw error;
   }
 
-  function closePOICard() {
-    poiCard.style.display = 'none';
-    poiCard.setAttribute('aria-hidden', 'true');
+  return data;
+}
 
-    if (poiMiniMap) {
-      try { poiMiniMap.remove(); } catch (error) {}
-      poiMiniMap = null;
-    }
+function isPermissionError(err){
+  const text = `${err?.message || ""} ${JSON.stringify(err?.payload || {})}`.toLowerCase();
+  return err?.status === 401 || err?.status === 403 || text.includes("42501") || text.includes("permission denied") || text.includes("grant select");
+}
 
-    poiCircle.innerHTML = '';
-  }
+function permissionHelp(){
+  return `Errore permessi Supabase.<br><br>Esegui in SQL Editor:<br>
+    <code>GRANT SELECT ON public.pois TO anon;</code><br>
+    <code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;</code>`;
+}
 
-  function showCityByIndex(index, shouldCenter) {
-    if (shouldCenter === undefined) shouldCenter = true;
-    if (index < 0 || index >= places.length) return;
+async function loadPois(){
+  setStatus("Caricamento POI...");
 
-    currentDataset = 'places';
-    currentIndex = index;
-    var place = places[index];
-
-    if (shouldCenter) centerCity(place);
-    showCityCard(place);
-  }
-
-  function getClosestCity() {
-    var center = map.getCenter();
-    var minDist = Infinity;
-    var closestIndex = -1;
-
-    places.forEach(function (place, index) {
-      var distance = center.distanceTo(L.latLng(place.coords));
-      if (distance < minDist) {
-        minDist = distance;
-        closestIndex = index;
-      }
+  try{
+    const hasUser = Boolean(getToken());
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?select=*&order=importance.desc.nullslast`, {
+      method: "GET",
+      headers: buildHeaders({ useUserToken: hasUser })
     });
 
-    return { index: closestIndex, distance: minDist };
-  }
+    pois = await parseResponse(res);
+    editingPoiId = null;
+    renderPois(searchEl.value);
+    setStatus(`${pois.length} POI caricati`);
+  }catch(err){
+    console.error("LOAD POIS ERROR", err);
+    pois = [];
+    renderPois(searchEl.value);
 
-  function evaluateAutoCard() {
-    if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return;
-
-    var zoom = map.getZoom();
-    var closest = getClosestCity();
-
-    if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
-      if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
-        showCityByIndex(closest.index, false);
-      }
+    if(isPermissionError(err)){
+      setStatus(`${permissionHelp()}<br><br>⚠️ Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: ${err.message}`, true);
       return;
     }
 
-    if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) {
-      hideCard();
-    }
+    setStatus(`Errore caricamento POI: ${err.message}`, true);
+  }
+}
+
+function renderPois(filter = ""){
+  const q = filter.trim().toLowerCase();
+  const filtered = pois.filter(p => `${p.name || ""} ${p.type || ""} ${p.description || ""}`.toLowerCase().includes(q));
+
+  listEl.innerHTML = "";
+  if(filtered.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerText = "Nessun POI trovato";
+    listEl.appendChild(empty);
+    return;
   }
 
-  function slideToIndex(nextIndex, direction) {
-    if (currentDataset !== 'places') return;
+  filtered.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "poi";
 
-    if (nextIndex < 0 || nextIndex >= places.length || nextIndex === currentIndex) {
-      card.style.transition = 'transform 0.2s ease';
-      card.style.transform = 'translateX(0)';
-      return;
-    }
+    const title = document.createElement("div");
+    title.className = "poi-title";
+    title.innerText = p.name || "(senza nome)";
 
-    var place = places[nextIndex];
-    var exitX = direction === 'next' ? '-110%' : '110%';
-    var enterX = direction === 'next' ? '110%' : '-110%';
+    const meta = document.createElement("div");
+    meta.className = "poi-meta";
+    meta.innerText = `${p.type || "-"} • importanza ${p.importance ?? "-"} • sconto ${p.discount ?? 0}%`;
 
-    card.style.transition = 'transform 0.25s ease';
-    card.style.transform = 'translateX(' + exitX + ')';
+    const desc = document.createElement("div");
+    desc.className = "poi-meta";
+    desc.innerText = p.description || "";
 
-    window.setTimeout(function () {
-      card.style.transition = 'none';
-      card.style.transform = 'translateX(' + enterX + ')';
-      currentIndex = nextIndex;
-      setCardContent(place);
+    div.appendChild(title);
+    div.appendChild(meta);
+    if(p.description) div.appendChild(desc);
+    div.addEventListener("click", () => openModal(p));
+    listEl.appendChild(div);
+  });
+}
 
-      window.requestAnimationFrame(function () {
-        card.style.transition = 'transform 0.3s ease';
-        card.style.transform = 'translateX(0)';
-      });
-
-      centerCity(place);
-    }, 250);
+function openModal(poi = null){
+  deleteBtn.style.display = poi ? "block" : "none";
+  if(poi){
+    editingPoiId = poi.id;
+    modalTitleEl.innerText = "Modifica POI";
+    nameEl.value = poi.name || "";
+    coordsEl.value = poi.coords || "";
+    descriptionEl.value = poi.description || "";
+    updateImportanceUI(poi.importance ?? 50);
+    typeEl.value = poi.type || "chiesa";
+    emailsEl.value = poi.emails || "";
+    phoneEl.value = poi.phone || "";
+    discountEl.value = poi.discount ?? "";
+  }else{
+    editingPoiId = null;
+    modalTitleEl.innerText = "Aggiungi POI";
+    clearForm(false);
   }
 
-  function showPOICard(poi) {
-    hideCard();
-    currentDataset = 'pois';
-    currentIndex = -1;
-    poiCard.style.display = 'block';
-    poiCard.setAttribute('aria-hidden', 'false');
-    poiTitle.innerText = poi.name;
-    poiDesc.innerText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
-    poiDesc.style.display = 'block';
-    poiMapPreview.style.background = '#f6f1e8';
+  modalEl.classList.add("is-open");
+  modalEl.setAttribute("aria-hidden", "false");
+}
 
-    if (poiMiniMap) {
-      try { poiMiniMap.remove(); } catch (error) {}
-      poiMiniMap = null;
-    }
+function closeModal(){
+  modalEl.classList.remove("is-open");
+  modalEl.setAttribute("aria-hidden", "true");
+}
 
-    poiCircle.innerHTML = '';
+function clearForm(resetEditing = true){
+  if(resetEditing) editingPoiId = null;
+  nameEl.value = "";
+  coordsEl.value = "";
+  descriptionEl.value = "";
+  updateImportanceUI(50);
+  typeEl.value = "chiesa";
+  emailsEl.value = "";
+  phoneEl.value = "";
+  discountEl.value = "";
+}
 
-    poiMiniMap = L.map(poiCircle, {
-      zoomControl: false,
-      attributionControl: false,
-      dragging: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      touchZoom: false,
-      boxZoom: false,
-      keyboard: false
+function readPoiForm(){
+  return {
+    name: nameEl.value.trim(),
+    coords: coordsEl.value.trim(),
+    description: descriptionEl.value.trim(),
+    importance: clampNumber(importanceEl.value, 1, 100, 1),
+    type: typeEl.value,
+    emails: emailsEl.value.trim(),
+    phone: phoneEl.value.trim(),
+    discount: clampNumber(discountEl.value, 0, 100, 0)
+  };
+}
+
+function buildPoiSaveRequest(poiId){
+  const isEdit = Boolean(poiId);
+  return {
+    url: isEdit
+      ? `${SUPABASE_URL}/rest/v1/pois?id=eq.${encodeURIComponent(poiId)}`
+      : `${SUPABASE_URL}/rest/v1/pois`,
+    method: isEdit ? "PATCH" : "POST"
+  };
+}
+
+async function savePoi(){
+  const token = getToken();
+  const email = getUserEmail();
+  const poi = readPoiForm();
+  const saveTargetId = editingPoiId;
+  const request = buildPoiSaveRequest(saveTargetId);
+
+  if(!poi.name){
+    alert("Nome obbligatorio");
+    return;
+  }
+
+  if(!token){
+    alert("Devi essere loggato per salvare.");
+    return;
+  }
+
+  if(email !== OWNER_EMAIL){
+    alert(`Utente non autorizzato: ${email || "email non trovata"}`);
+    return;
+  }
+
+  try{
+    const res = await fetch(request.url, {
+      method: request.method,
+      headers: buildHeaders({
+        useUserToken: true,
+        extra: { Prefer: "return=representation" }
+      }),
+      body: JSON.stringify(poi)
     });
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      noWrap: true
-    }).addTo(poiMiniMap);
+    await parseResponse(res);
+    clearForm();
+    closeModal();
+    await loadPois();
+  }catch(err){
+    console.error("SAVE POI ERROR", err);
+    const grantMsg = "SQL richiesto se è 42501:\nGRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;";
+    alert(`Errore salvataggio: ${err.message}\n\n${grantMsg}`);
+  }
+}
 
-    L.marker(poi.coords, {
-      icon: L.divIcon({
-        className: 'custom-poi',
-        html: '<div class="poi-label">' + poi.symbol + '</div>',
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
-      })
-    }).addTo(poiMiniMap);
+addBtn.addEventListener("click", () => openModal());
+deleteBtn.addEventListener("click", deletePoi);
+closeBtn.addEventListener("click", closeModal);
+saveBtn.addEventListener("click", savePoi);
+searchEl.addEventListener("input", () => renderPois(searchEl.value));
+importanceEl.addEventListener("input", () => updateImportanceUI());
+modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
+document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
 
-    poiMiniMap.setView(poi.coords, 18);
+async function deletePoi(){
+  if(!editingPoiId) return;
 
-    window.setTimeout(function () {
-      if (poiMiniMap) {
-        poiMiniMap.invalidateSize(true);
-        poiMiniMap.setView(poi.coords, 18, { animate: false });
-      }
-    }, 80);
+  if(!confirm("Sei sicuro di voler eliminare questo POI?")) return;
+
+  const token = getToken();
+  const email = getUserEmail();
+
+  if(!token){
+    alert("Devi essere loggato per eliminare.");
+    return;
   }
 
-  function createCityMarkers() {
-    places.forEach(function (place, index) {
-      L.marker(place.coords, {
-        icon: L.divIcon({
-          className: 'custom-label',
-          html: '<div class="label">' + place.name + '</div>'
-        })
-      }).addTo(map).on('click', function () {
-        showCityByIndex(index, true);
-      });
-    });
+  if(email !== OWNER_EMAIL){
+    alert(`Utente non autorizzato: ${email || "email non trovata"}`);
+    return;
   }
 
-  async function loadPOIs() {
-    var response;
-    var rows = [];
-
-    poiLayer.clearLayers();
-    poiMarkers = [];
-
-    if (SUPABASE_READY && supabaseClient) {
-      response = await supabaseClient
-        .from('pois')
-        .select('*')
-        .order('importance', { ascending: false, nullsFirst: false });
-
-      if (response.error) {
-        console.warn('Supabase POI load failed:', response.error.message);
-      } else {
-        rows = response.data || [];
-      }
-    } else {
-      rows = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
-    }
-
-    rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
-      var marker = L.marker(poi.coords, {
-        icon: L.divIcon({
-          className: 'custom-poi',
-          html: '<div class="poi-label">' + poi.symbol + '</div>',
-          iconSize: [32, 32],
-          iconAnchor: [16, 16]
-        })
-      }).on('click', function () {
-        showPOICard(poi);
-      });
-
-      poiMarkers.push({ marker: marker, importance: poi.relevance || 0 });
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?id=eq.${encodeURIComponent(editingPoiId)}`, {
+      method: "DELETE",
+      headers: buildHeaders({ useUserToken: true })
     });
 
-    updatePOIVisibility();
+    await parseResponse(res);
+    closeModal();
+    await loadPois();
+  }catch(err){
+    console.error("DELETE POI ERROR", err);
+    alert(`Errore eliminazione: ${err.message}`);
   }
+}
 
-  function saveLocalPOI(poi) {
-    var current = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
-    current.push(poi);
-    localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
-  }
+function runTests(){
+  console.assert(typeof loadPois === "function", "loadPois deve esistere");
+  console.assert(typeof savePoi === "function", "savePoi deve esistere");
+  console.assert(typeof buildPoiSaveRequest === "function", "buildPoiSaveRequest deve esistere");
+  console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
+  updateImportanceUI(75);
+  console.assert(importanceEl.value === "75", "slider importanza si aggiorna");
+  console.assert(importanceValueEl.innerText === "75", "valore slider visibile corretto");
+  console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
+  console.assert(clampNumber("-10", 0, 100, 0) === 0, "discount min 0");
+  console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
+  console.assert(buildHeaders().Authorization === `Bearer ${ANON_KEY}`, "read Authorization usa anon");
+  console.assert(buildHeaders({ useUserToken: true }).Authorization.startsWith("Bearer "), "user token header presente se richiesto");
+  console.assert(permissionHelp().includes("GRANT SELECT"), "messaggio permessi contiene GRANT SELECT");
+  console.assert(isPermissionError({ status: 403, message: "permission denied for table pois" }) === true, "riconosce permission denied");
+  console.assert(isPermissionError({ status: 200, message: "ok" }) === false, "non segnala falsi permission error");
+  console.assert(buildPoiSaveRequest(null).method === "POST", "nuovo POI usa POST");
+  console.assert(buildPoiSaveRequest("123").method === "PATCH", "POI esistente usa PATCH");
+  console.assert(buildPoiSaveRequest("123").url.includes("id=eq.123"), "PATCH filtra per id");
 
-  async function addPOI() {
-    var name = document.getElementById('poi-name').value.trim();
-    var symbol = document.getElementById('poi-symbol').value.trim() || '📍';
-    var lat = Number(document.getElementById('poi-lat').value);
-    var lng = Number(document.getElementById('poi-lng').value);
-    var image = document.getElementById('poi-img').value.trim();
-    var ownerEmail = document.getElementById('poi-email').value.trim();
-    var phone = document.getElementById('poi-phone').value.trim();
-    var description = document.getElementById('poi-description').value.trim();
-    var relevance = Number(document.getElementById('poi-relevance').value || 0);
+  openModal();
+  console.assert(editingPoiId === null, "openModal nuovo non mantiene id vecchi");
+  console.assert(modalTitleEl.innerText === "Aggiungi POI", "titolo nuovo corretto");
+  console.assert(modalEl.classList.contains("is-open"), "openModal apre");
 
-    var poi = normalizePOI({
-      name: name,
-      symbol: symbol,
-      lat: lat,
-      lng: lng,
-      image: image,
-      owner_email: ownerEmail,
-      phone: phone,
-      description: description,
-      relevance: relevance,
-      importance: relevance
-    });
+  openModal({ id:"poi-test", name:"Test", coords:"44,9", description:"Desc", importance:50, type:"bar", emails:"a@b.com", phone:"123", discount:10 });
+  console.assert(editingPoiId === "poi-test", "openModal edit imposta editingPoiId");
+  console.assert(modalTitleEl.innerText === "Modifica POI", "titolo edit corretto");
+  console.assert(nameEl.value === "Test", "edit compila nome");
+  console.assert(typeEl.value === "bar", "edit compila tipo");
 
-    if (!isValidPOI(poi)) {
-      alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
-      return;
-    }
+  closeModal();
+  console.assert(!modalEl.classList.contains("is-open"), "closeModal chiude");
+}
 
-    if (SUPABASE_READY && supabaseClient) {
-      var insertResponse = await supabaseClient
-        .from('pois')
-        .insert([{ name: name, symbol: symbol, lat: lat, lng: lng, image: image, owner_email: ownerEmail, phone: phone, description: description, relevance: relevance, importance: relevance }]);
-
-      if (insertResponse.error) {
-        alert('Errore salvataggio: ' + insertResponse.error.message);
-        return;
-      }
-    } else {
-      saveLocalPOI(poi);
-    }
-
-    await loadPOIs();
-    alert('POI salvato');
-  }
-
-  function latLngToTile(lat, lng, zoom) {
-    var z = Math.round(zoom);
-    var n = Math.pow(2, z);
-    var x = Math.floor((lng + 180) / 360 * n);
-    var y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n);
-    return { x: x, y: y, z: z };
-  }
-
-  function preloadTiles() {
-    var center = map.getCenter();
-    var tile = latLngToTile(center.lat, center.lng, map.getZoom());
-
-    for (var dx = -2; dx <= 2; dx += 1) {
-      for (var dy = -2; dy <= 2; dy += 1) {
-        var img = new Image();
-        img.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/' + tile.z + '/' + (tile.y + dy) + '/' + (tile.x + dx);
-      }
-    }
-  }
-
-  async function updateWeather(lat, lng) {
-    try {
-      var response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true');
-      var data = await response.json();
-      var temperature = data && data.current_weather ? data.current_weather.temperature : undefined;
-      document.getElementById('weather').innerText = temperature === undefined ? '--' : '🌤️ ' + temperature + '°';
-    } catch (error) {
-      document.getElementById('weather').innerText = '--';
-    }
-  }
-
-  function setOwnerPanelVisible(visible) {
-    ownerPanel.setAttribute('aria-hidden', visible ? 'false' : 'true');
-    ownerPanel.style.display = visible ? 'block' : 'none';
-  }
-
-  function getUserDisplayName(user) {
-    if (!user) return 'User';
-    var meta = user.user_metadata || {};
-    if (meta.username) return meta.username;
-    if (meta.name) return meta.name;
-    if (user.email) return user.email.split('@')[0];
-    return 'User';
-  }
-
-  async function readCurrentUser() {
-    try {
-      var raw = localStorage.getItem('supabase.auth.token');
-      if (raw) {
-        var parsed = JSON.parse(raw);
-        if (parsed && parsed.currentSession && parsed.currentSession.user) {
-          return parsed.currentSession.user;
-        }
-      }
-    } catch (error) {}
-
-    if (!supabaseClient) return null;
-
-    var sessionResponse = await supabaseClient.auth.getSession();
-    var session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
-
-    if (session && session.user) {
-      return session.user;
-    }
-
-    var userResponse = await supabaseClient.auth.getUser();
-    var user = userResponse && userResponse.data ? userResponse.data.user : null;
-    return user || null;
-  }
-
-  async function checkUser() {
-    var user = await readCurrentUser();
-    currentUser = user;
-
-    if (!user) {
-      loginBtn.innerText = 'Accedi';
-      setOwnerPanelVisible(false);
-      return false;
-    }
-
-    loginBtn.innerText = 'Hi, ' + getUserDisplayName(user);
-    return true;
-  }
-
-  function startUserPolling() {
-    var tries = 0;
-
-    if (userCheckTimer) {
-      clearInterval(userCheckTimer);
-      userCheckTimer = null;
-    }
-
-    userCheckTimer = setInterval(async function () {
-      tries += 1;
-      await checkUser();
-
-      if (currentUser || tries >= 12) {
-        clearInterval(userCheckTimer);
-        userCheckTimer = null;
-      }
-    }, 250);
-  }
-
-  function setupEvents() {
-    loginBtn.addEventListener('click', function () {
-      window.location.href = '/login.html';
-    });
-
-    poiClose.addEventListener('click', closePOICard);
-    addPoiBtn.addEventListener('click', addPOI);
-
-    searchInput.addEventListener('keydown', async function (event) {
-      if (event.key !== 'Enter') return;
-
-      var query = event.target.value.trim();
-      if (!query) return;
-
-      try {
-        var response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query));
-        var data = await response.json();
-
-        if (data[0]) {
-          var lat = parseFloat(data[0].lat);
-          var lon = parseFloat(data[0].lon);
-          map.setView([lat, lon], 12);
-          updateWeather(lat, lon);
-        }
-      } catch (error) {
-        console.warn('Search failed:', error);
-      }
-    });
-
-    map.on('moveend zoomend', function () {
-      evaluateAutoCard();
-      preloadTiles();
-      updatePOIVisibility();
-    });
-
-    card.addEventListener('touchstart', function (event) {
-      if (event.touches.length !== 1) return;
-      startX = event.touches[0].clientX;
-      currentX = startX;
-      isDragging = true;
-      hasMoved = false;
-      card.style.transition = 'none';
-    }, { passive: true });
-
-    card.addEventListener('touchmove', function (event) {
-      var delta;
-      var blockedRight;
-      var blockedLeft;
-
-      if (!isDragging || event.touches.length !== 1) return;
-
-      currentX = event.touches[0].clientX;
-      delta = currentX - startX;
-      blockedRight = currentIndex === 0 && delta > 0;
-      blockedLeft = currentIndex === places.length - 1 && delta < 0;
-
-      if (blockedRight || blockedLeft) delta = 0;
-      if (Math.abs(delta) > 4) hasMoved = true;
-
-      card.style.transform = 'translateX(' + delta + 'px)';
-    }, { passive: true });
-
-    card.addEventListener('touchend', function () {
-      var delta;
-      var blockedRight;
-      var blockedLeft;
-
-      if (!isDragging) return;
-
-      delta = currentX - startX;
-      isDragging = false;
-      blockedRight = currentIndex === 0 && delta > 0;
-      blockedLeft = currentIndex === places.length - 1 && delta < 0;
-
-      if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
-        card.style.transition = 'transform 0.2s ease';
-        card.style.transform = 'translateX(0)';
-        return;
-      }
-
-      if (delta < -80) {
-        slideToIndex(currentIndex + 1, 'next');
-        return;
-      }
-
-      if (delta > 80) {
-        slideToIndex(currentIndex - 1, 'prev');
-      }
-    });
-
-    card.addEventListener('touchcancel', function () {
-      isDragging = false;
-      card.style.transition = 'transform 0.2s ease';
-      card.style.transform = 'translateX(0)';
-    });
-  }
-
-  function runTests() {
-    console.assert(Array.isArray(places), 'places must be an array');
-    console.assert(places.length === 5, '5 cities expected');
-    console.assert(places.every(function (place) { return typeof place.name === 'string'; }), 'Each city needs a name');
-    console.assert(places.every(function (place) { return Array.isArray(place.coords) && place.coords.length === 2; }), 'Each city needs coords [lat, lng]');
-    console.assert(places.every(function (place) { return typeof place.image === 'string' && place.image.indexOf('https://') === 0; }), 'Each city needs a stable image URL');
-    console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay as the fifth city');
-    console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore must use the fixed Pexels image');
-    console.assert(currentIndex === -1, 'Initial index should be -1');
-    console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
-    console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
-    console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
-    console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
-    console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
-    console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
-    console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
-    console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
-    console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'importance affects zoom');
-    console.assert(getMinZoomForImportance(60) >= 15, 'importance 60 should not appear early');
-    console.assert(typeof addPOI === 'function', 'addPOI function exists');
-    console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
-    console.assert(typeof checkUser === 'function', 'checkUser function exists');
-    console.assert(typeof readCurrentUser === 'function', 'readCurrentUser function exists');
-    console.assert(typeof startUserPolling === 'function', 'startUserPolling function exists');
-    console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
-    console.assert(typeof showPOICard === 'function', 'showPOICard function exists');
-    console.assert(typeof closePOICard === 'function', 'closePOICard function exists');
-    console.assert(document.getElementById('poi-circle') !== null, 'POI circle exists');
-    console.assert(document.getElementById('poi-description') !== null, 'POI description input exists');
-    console.assert(document.documentElement.innerHTML.indexOf('}).setView(poi.coords, 17);') === -1, 'Broken duplicated POI map fragment removed');
-    console.assert(document.documentElement.innerHTML.indexOf('var clone = container.cloneNode(true);') === -1, 'Broken cloned map fragment removed');
-    console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
-    console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
-    console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
-    console.assert(ownerPanel.getAttribute('aria-hidden') === 'true', 'Owner panel starts hidden');
-    console.assert(getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'test', 'Display name falls back to email prefix');
-    console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
-    console.assert(normalizePOI({ name: 'Y', coords: '44.2,9.8', type: 'chiesa' }).symbol === '⛪', 'normalizePOI supports coords string and church emoji');
-    console.assert(normalizePOI({ name: 'Z', coords: '44.2,9.8', type: 'ristorante' }).symbol === '🍽️', 'normalizePOI supports restaurant emoji');
-    console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'normalizePOI supports european decimal coords');
-    console.assert(normalizePOI({ name: 'D', coords: '44.2,9.8', description: 'Testo' }).description === 'Testo', 'normalizePOI keeps description');
-  }
-
-  createCityMarkers();
-  preloadImages();
-  preloadTiles();
-  updateWeather(44.12, 9.71);
-  setupEvents();
-  runTests();
-
-  setTimeout(function () {
-    checkUser();
-    startUserPolling();
-  }, 250);
-
-  if (supabaseClient) {
-    supabaseClient.auth.onAuthStateChange(function () {
-      checkUser();
-      startUserPolling();
-    });
-  }
-
-  loadPOIs();
-}());
+runTests();
+loadPois();
 </script>
-
 </body>
 </html>
