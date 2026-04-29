@@ -15,7 +15,8 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,san
 .status.error{color:#ffb4b4}
 .status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
 .list{padding:16px}
-.poi{padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)}
+.poi{padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease}
+.poi:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
 .poi-title{font-weight:700;margin-bottom:4px}
 .poi-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
 .empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
@@ -42,7 +43,7 @@ button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:no
 <div id="modal" class="modal" aria-hidden="true">
   <div class="modal-content" role="dialog" aria-modal="true">
     <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
-    <h2>Aggiungi POI</h2>
+    <h2 id="modalTitle">Aggiungi POI</h2>
 
     <input id="name" placeholder="Nome" />
     <input id="coords" placeholder="Coordinate" />
@@ -74,10 +75,12 @@ const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const OWNER_EMAIL = "5terrego.info@gmail.com";
 
 let pois = [];
+let editingPoiId = null;
 
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
 const modalEl = document.getElementById("modal");
+const modalTitleEl = document.getElementById("modalTitle");
 const searchEl = document.getElementById("search");
 const addBtn = document.getElementById("addBtn");
 const closeBtn = document.getElementById("closeBtn");
@@ -183,6 +186,7 @@ async function loadPois(){
     });
 
     pois = await parseResponse(res);
+    editingPoiId = null;
     renderPois(searchEl.value);
     setStatus(`${pois.length} POI caricati`);
   }catch(err){
@@ -231,11 +235,29 @@ function renderPois(filter = ""){
     div.appendChild(title);
     div.appendChild(meta);
     if(p.description) div.appendChild(desc);
+    div.addEventListener("click", () => openModal(p));
     listEl.appendChild(div);
   });
 }
 
-function openModal(){
+function openModal(poi = null){
+  if(poi){
+    editingPoiId = poi.id;
+    modalTitleEl.innerText = "Modifica POI";
+    nameEl.value = poi.name || "";
+    coordsEl.value = poi.coords || "";
+    descriptionEl.value = poi.description || "";
+    importanceEl.value = poi.importance ?? "";
+    typeEl.value = poi.type || "chiesa";
+    emailsEl.value = poi.emails || "";
+    phoneEl.value = poi.phone || "";
+    discountEl.value = poi.discount ?? "";
+  }else{
+    editingPoiId = null;
+    modalTitleEl.innerText = "Aggiungi POI";
+    clearForm(false);
+  }
+
   modalEl.classList.add("is-open");
   modalEl.setAttribute("aria-hidden", "false");
 }
@@ -245,7 +267,8 @@ function closeModal(){
   modalEl.setAttribute("aria-hidden", "true");
 }
 
-function clearForm(){
+function clearForm(resetEditing = true){
+  if(resetEditing) editingPoiId = null;
   nameEl.value = "";
   coordsEl.value = "";
   descriptionEl.value = "";
@@ -269,10 +292,22 @@ function readPoiForm(){
   };
 }
 
+function buildPoiSaveRequest(poiId){
+  const isEdit = Boolean(poiId);
+  return {
+    url: isEdit
+      ? `${SUPABASE_URL}/rest/v1/pois?id=eq.${encodeURIComponent(poiId)}`
+      : `${SUPABASE_URL}/rest/v1/pois`,
+    method: isEdit ? "PATCH" : "POST"
+  };
+}
+
 async function savePoi(){
   const token = getToken();
   const email = getUserEmail();
   const poi = readPoiForm();
+  const saveTargetId = editingPoiId;
+  const request = buildPoiSaveRequest(saveTargetId);
 
   if(!poi.name){
     alert("Nome obbligatorio");
@@ -290,8 +325,8 @@ async function savePoi(){
   }
 
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`, {
-      method: "POST",
+    const res = await fetch(request.url, {
+      method: request.method,
       headers: buildHeaders({
         useUserToken: true,
         extra: { Prefer: "return=representation" }
@@ -310,7 +345,7 @@ async function savePoi(){
   }
 }
 
-addBtn.addEventListener("click", openModal);
+addBtn.addEventListener("click", () => openModal());
 closeBtn.addEventListener("click", closeModal);
 saveBtn.addEventListener("click", savePoi);
 searchEl.addEventListener("input", () => renderPois(searchEl.value));
@@ -320,17 +355,31 @@ document.addEventListener("keydown", (event) => { if(event.key === "Escape") clo
 function runTests(){
   console.assert(typeof loadPois === "function", "loadPois deve esistere");
   console.assert(typeof savePoi === "function", "savePoi deve esistere");
+  console.assert(typeof buildPoiSaveRequest === "function", "buildPoiSaveRequest deve esistere");
   console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
   console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
+  console.assert(clampNumber("-10", 0, 100, 0) === 0, "discount min 0");
   console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
   console.assert(buildHeaders().Authorization === `Bearer ${ANON_KEY}`, "read Authorization usa anon");
   console.assert(buildHeaders({ useUserToken: true }).Authorization.startsWith("Bearer "), "user token header presente se richiesto");
   console.assert(permissionHelp().includes("GRANT SELECT"), "messaggio permessi contiene GRANT SELECT");
   console.assert(isPermissionError({ status: 403, message: "permission denied for table pois" }) === true, "riconosce permission denied");
   console.assert(isPermissionError({ status: 200, message: "ok" }) === false, "non segnala falsi permission error");
-  console.assert(document.documentElement.innerHTML.includes("}/rest/v1/pois?") === false, "nessun blocco fetch duplicato o spezzato dopo loadPois");
+  console.assert(buildPoiSaveRequest(null).method === "POST", "nuovo POI usa POST");
+  console.assert(buildPoiSaveRequest("123").method === "PATCH", "POI esistente usa PATCH");
+  console.assert(buildPoiSaveRequest("123").url.includes("id=eq.123"), "PATCH filtra per id");
+
   openModal();
+  console.assert(editingPoiId === null, "openModal nuovo non mantiene id vecchi");
+  console.assert(modalTitleEl.innerText === "Aggiungi POI", "titolo nuovo corretto");
   console.assert(modalEl.classList.contains("is-open"), "openModal apre");
+
+  openModal({ id:"poi-test", name:"Test", coords:"44,9", description:"Desc", importance:50, type:"bar", emails:"a@b.com", phone:"123", discount:10 });
+  console.assert(editingPoiId === "poi-test", "openModal edit imposta editingPoiId");
+  console.assert(modalTitleEl.innerText === "Modifica POI", "titolo edit corretto");
+  console.assert(nameEl.value === "Test", "edit compila nome");
+  console.assert(typeEl.value === "bar", "edit compila tipo");
+
   closeModal();
   console.assert(!modalEl.classList.contains("is-open"), "closeModal chiude");
 }
