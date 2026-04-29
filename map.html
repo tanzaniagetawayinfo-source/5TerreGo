@@ -248,8 +248,10 @@
       opacity: 0;
       transform: translateY(40px);
       transition: opacity 0.4s ease, transform 0.4s ease;
-      touch-action: pan-y;
-      will-change: transform;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      will-change: transform, opacity;
     }
 
     .bottom-card.is-visible {
@@ -622,7 +624,7 @@
       .sort(function (a, b) {
         if (a.lng === b.lng) return b.lat - a.lat;
         return a.lng - b.lng;
-      });
+      }, { passive: false });
   }
 
   function getNearestFerryPort(sourcePort, allPorts) {
@@ -1517,6 +1519,7 @@
 
     card.addEventListener('touchstart', function (event) {
       if (event.touches.length !== 1) return;
+      event.preventDefault();
       startX = event.touches[0].clientX;
       startY = event.touches[0].clientY;
       currentX = startX;
@@ -1525,7 +1528,7 @@
       hasMoved = false;
       dragAxis = null;
       card.style.transition = 'none';
-    }, { passive: true });
+    }, { passive: false });
 
     card.addEventListener('touchmove', function (event) {
       var deltaX;
@@ -1535,6 +1538,7 @@
       var pullDown;
 
       if (!isDragging || event.touches.length !== 1) return;
+      event.preventDefault();
 
       currentX = event.touches[0].clientX;
       currentY = event.touches[0].clientY;
@@ -1560,15 +1564,19 @@
 
       if (blockedRight || blockedLeft) deltaX = 0;
       card.style.transform = 'translateX(' + deltaX + 'px)';
-    }, { passive: true });
+    }, { passive: false });
 
-    card.addEventListener('touchend', function () {
+    card.addEventListener('touchend', function (event) {
       var deltaX;
       var deltaY;
       var blockedRight;
       var blockedLeft;
 
       if (!isDragging) return;
+      if (event && event.changedTouches && event.changedTouches.length) {
+        currentX = event.changedTouches[0].clientX;
+        currentY = event.changedTouches[0].clientY;
+      }
 
       deltaX = currentX - startX;
       deltaY = currentY - startY;
@@ -1577,7 +1585,7 @@
       if (dragAxis === 'y') {
         card.style.opacity = '';
 
-        if (deltaY > 85) {
+        if (deltaY > 55) {
           hideCard(true);
           dragAxis = null;
           return;
@@ -1612,7 +1620,8 @@
       dragAxis = null;
     });
 
-    card.addEventListener('touchcancel', function () {
+    card.addEventListener('touchcancel', function (event) {
+      if (event) event.preventDefault();
       isDragging = false;
       dragAxis = null;
       card.style.opacity = '';
@@ -1663,6 +1672,7 @@
     console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
     console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
     console.assert(typeof hideCard === 'function', 'hideCard function exists for downward city-card swipe');
+    console.assert(card.style.touchAction !== 'pan-y', 'City card touch action does not let iOS steal downward swipe');
     console.assert(typeof cityCardManuallyClosed === 'boolean', 'Manual city-card close lock exists');
     console.assert(typeof currentIndex === 'number', 'Manual city-card close lock is tied to the current city index');
     console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
