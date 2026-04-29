@@ -361,6 +361,7 @@
   var currentIndex = -1;
   var currentDataset = 'places';
   var poiLayer = L.layerGroup().addTo(map);
+  var poiMarkers = [];
   var isProgrammaticMove = false;
   var startX = 0;
   var currentX = 0;
@@ -373,29 +374,94 @@
     return value === undefined || value === null ? fallback : value;
   }
 
+  function getPOIEmoji(type, fallback) {
+    switch (String(type || '').toLowerCase()) {
+      case 'chiesa': return '⛪';
+      case 'monumento': return '🏛️';
+      case 'sentiero': return '🥾';
+      case 'spiaggia': return '🏖️';
+      case 'stazione': return '🚉';
+      case 'ristorante': return '🍽️';
+      case 'bar': return '🍸';
+      case 'punto panoramico': return '📍';
+      default: return fallback || '📌';
+    }
+  }
+
+  function parseCoords(raw) {
+    var lat;
+    var lng;
+
+    if (raw && typeof raw.coords === 'string') {
+      var str = raw.coords.trim();
+      var parts;
+
+      if (str.split(',').length > 2) {
+        parts = str.split(',');
+        lat = Number(String(parts[0]).trim() + '.' + String(parts[1]).trim());
+        lng = Number(String(parts[2]).trim() + '.' + String(parts[3]).trim());
+      } else {
+        parts = str.split(',');
+        lat = Number(String(parts[0]).trim());
+        lng = Number(String(parts[1]).trim());
+      }
+
+      return { lat: lat, lng: lng };
+    }
+
+    lat = Number(readValue(raw.lat, raw.latitude));
+    lng = Number(readValue(raw.lng, raw.longitude));
+
+    return { lat: lat, lng: lng };
+  }
+
   function normalizePOI(raw) {
+    var parsed;
+    var symbol;
+
     raw = raw || {};
-    var rawLat = readValue(raw.lat, raw.latitude);
-    var rawLng = readValue(raw.lng, raw.longitude);
-    var lat = Number(rawLat);
-    var lng = Number(rawLng);
+    parsed = parseCoords(raw);
+    symbol = raw.symbol || getPOIEmoji(raw.type, '📍');
 
     return {
       id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
       name: String(raw.name || raw.title || 'POI'),
-      symbol: raw.symbol || '📍',
-      coords: [lat, lng],
-      lat: lat,
-      lng: lng,
+      symbol: symbol,
+      coords: [parsed.lat, parsed.lng],
+      lat: parsed.lat,
+      lng: parsed.lng,
       image: raw.image || raw.photo_url || raw.img || '',
+      description: raw.description || raw.descrizione || '',
+      type: raw.type || raw.tipo || '',
       owner_email: raw.owner_email || raw.email || '',
       phone: raw.phone || raw.telephone || '',
-      relevance: Number(raw.relevance || raw.score || 0)
+      relevance: Number(raw.importance || raw.relevance || raw.score || 0)
     };
   }
 
   function isValidPOI(poi) {
     return Boolean(poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0);
+  }
+
+  function getMinZoomForImportance(importance) {
+    var n = Number(importance || 0);
+    if (n >= 80) return 11;
+    if (n >= 60) return 12;
+    if (n >= 40) return 13;
+    if (n >= 20) return 14;
+    return 15;
+  }
+
+  function updatePOIVisibility() {
+    var zoom = map.getZoom();
+
+    poiLayer.clearLayers();
+
+    poiMarkers.forEach(function (item) {
+      if (zoom >= getMinZoomForImportance(item.importance)) {
+        item.marker.addTo(poiLayer);
+      }
+    });
   }
 
   function centerCity(place) {
@@ -539,38 +605,45 @@
   }
 
   async function loadPOIs() {
+    var response;
+    var rows = [];
+
     poiLayer.clearLayers();
-    var pois = [];
+    poiMarkers = [];
 
     if (SUPABASE_READY && supabaseClient) {
-      var response = await supabaseClient
+      response = await supabaseClient
         .from('pois')
-        .select('id,name,symbol,lat,lng,image,owner_email,phone,relevance')
-        .order('relevance', { ascending: false });
+        .select('*')
+        .order('importance', { ascending: false, nullsFirst: false });
 
       if (response.error) {
         console.warn('Supabase POI load failed:', response.error.message);
       } else {
-        pois = response.data || [];
+        rows = response.data || [];
       }
     } else {
-      pois = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
+      rows = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
     }
 
-    pois.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
-      L.marker(poi.coords, {
+    rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
+      var marker = L.marker(poi.coords, {
         icon: L.divIcon({
           className: 'custom-poi',
           html: '<div class="poi-label">' + poi.symbol + '</div>',
           iconSize: [32, 32],
           iconAnchor: [16, 16]
         })
-      }).addTo(poiLayer).on('click', function () {
+      }).on('click', function () {
         currentDataset = 'pois';
         currentIndex = -1;
         showCityCard(poi);
       });
+
+      poiMarkers.push({ marker: marker, importance: poi.relevance || 0 });
     });
+
+    updatePOIVisibility();
   }
 
   function saveLocalPOI(poi) {
@@ -668,7 +741,6 @@
   }
 
   async function readCurrentUser() {
-    // ⚡ FAST PATH: leggi session salvata subito (evita delay su login.html)
     try {
       var raw = localStorage.getItem('supabase.auth.token');
       if (raw) {
@@ -679,22 +751,17 @@
       }
     } catch (e) {}
 
-    var sessionResponse;
-    var session;
-    var userResponse;
-    var user;
-
     if (!supabaseClient) return null;
 
-    sessionResponse = await supabaseClient.auth.getSession();
-    session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
+    var sessionResponse = await supabaseClient.auth.getSession();
+    var session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
 
     if (session && session.user) {
       return session.user;
     }
 
-    userResponse = await supabaseClient.auth.getUser();
-    user = userResponse && userResponse.data ? userResponse.data.user : null;
+    var userResponse = await supabaseClient.auth.getUser();
+    var user = userResponse && userResponse.data ? userResponse.data.user : null;
     return user || null;
   }
 
@@ -762,6 +829,7 @@
     map.on('moveend zoomend', function () {
       evaluateAutoCard();
       preloadTiles();
+      updatePOIVisibility();
     });
 
     card.addEventListener('touchstart', function (event) {
@@ -841,6 +909,9 @@
     console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
+    console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
+    console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
+    console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'importance affects zoom');
     console.assert(typeof addPOI === 'function', 'addPOI function exists');
     console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
     console.assert(typeof checkUser === 'function', 'checkUser function exists');
@@ -849,14 +920,20 @@
     console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
     console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
     console.assert(document.documentElement.innerHTML.indexOf('= await supabaseClient.auth.getSession') === -1, 'Broken auth fragment removed');
-    console.assert(document.documentElement.innerHTML.indexOf('currentUser = null;\n      currentIsOwner = false;') === -1, 'Broken orphan logout fragment removed');
+    console.assert(document.documentElement.innerHTML.indexOf('currentUser = null;\\n      currentIsOwner = false;') === -1, 'Broken orphan logout fragment removed');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
     console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
     console.assert(ownerPanel.getAttribute('aria-hidden') === 'true', 'Owner panel starts hidden');
     console.assert(typeof getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'string', 'Display name helper returns a string');
     console.assert(getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'test', 'Display name falls back to email prefix');
     console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
+    console.assert(normalizePOI({ name: 'Y', coords: '44.2,9.8', type: 'chiesa' }).symbol === '⛪', 'normalizePOI supports coords string and church emoji');
+    console.assert(normalizePOI({ name: 'Z', coords: '44.2,9.8', type: 'ristorante' }).symbol === '🍽️', 'normalizePOI supports restaurant emoji');
+    console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'normalizePOI supports european decimal coords');
     console.assert(typeof loginBtn.onclick !== 'function', 'Login button uses addEventListener, not overwritten onclick');
+    console.assert(document.documentElement.innerHTML.indexOf('var rawLat = readValue(raw.lat, raw.latitude);') === -1, 'Old stray normalizePOI fragment removed');
+    console.assert(document.documentElement.innerHTML.indexOf('updatePOIVisibility();\\n  });') === -1, 'Old broken loadPOIs closing removed');
+    console.assert(document.documentElement.innerHTML.indexOf("importance affects zoom');,") === -1, 'Broken test fragment removed');
   }
 
   createCityMarkers();
