@@ -1045,7 +1045,21 @@
   function setupEvents() {
     loginBtn.addEventListener('click', function () {
       // FIX: GitHub Pages compat (no root path)
-      window.location.href = './login.html';
+      // robust redirect for GitHub Pages (works in subfolder or root)
+      // FIX definitivo per dominio custom (5terrego.com)
+      // robust redirect: try /login.html then /login/index.html
+      var baseOrigin = window.location.origin;
+      fetch(baseOrigin + '/login.html', { method: 'HEAD' })
+        .then(function (res) {
+          if (res && res.ok) {
+            window.location.href = baseOrigin + '/login.html';
+          } else {
+            window.location.href = baseOrigin + '/login/index.html';
+          }
+        })
+        .catch(function () {
+          window.location.href = baseOrigin + '/login/index.html';
+        });
     });
 
     poiClose.addEventListener('click', function () {
