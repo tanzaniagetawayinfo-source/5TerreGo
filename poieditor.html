@@ -28,6 +28,15 @@ input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px
 textarea{min-height:90px;resize:vertical}
 select option{color:#111}
 button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
+.range-card{margin-top:10px;padding:13px 12px 12px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07)}
+.range-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.68)}
+.range-value{min-width:46px;text-align:center;padding:5px 10px;border-radius:999px;background:white;color:black;font-weight:800;font-size:13px}
+.apple-range{appearance:none;-webkit-appearance:none;width:100%;height:30px;margin:0;padding:0;border:none;background:transparent;outline:none;cursor:pointer}
+.apple-range::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#fff var(--range-progress,50%),rgba(255,255,255,0.18) var(--range-progress,50%))}
+.apple-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:white;margin-top:-10px;box-shadow:0 4px 14px rgba(0,0,0,0.38);border:1px solid rgba(0,0,0,0.08)}
+.apple-range::-moz-range-track{height:8px;border-radius:999px;background:rgba(255,255,255,0.18)}
+.apple-range::-moz-range-progress{height:8px;border-radius:999px;background:white}
+.apple-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:white;box-shadow:0 4px 14px rgba(0,0,0,0.38);border:1px solid rgba(0,0,0,0.08)}
 </style>
 </head>
 <body>
@@ -48,7 +57,13 @@ button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:no
     <input id="name" placeholder="Nome" />
     <input id="coords" placeholder="Coordinate" />
     <textarea id="description" placeholder="Descrizione"></textarea>
-    <input id="importance" type="number" min="1" max="100" placeholder="Importanza (1-100)" />
+    <div class="range-card">
+      <div class="range-head">
+        <span>Importanza</span>
+        <span id="importanceValue" class="range-value">50</span>
+      </div>
+      <input id="importance" class="apple-range" type="range" min="1" max="100" step="1" value="50" />
+    </div>
 
     <select id="type">
       <option value="chiesa">chiesa</option>
@@ -90,6 +105,7 @@ const nameEl = document.getElementById("name");
 const coordsEl = document.getElementById("coords");
 const descriptionEl = document.getElementById("description");
 const importanceEl = document.getElementById("importance");
+const importanceValueEl = document.getElementById("importanceValue");
 const typeEl = document.getElementById("type");
 const emailsEl = document.getElementById("emails");
 const phoneEl = document.getElementById("phone");
@@ -128,6 +144,14 @@ function clampNumber(value, min, max, fallback){
   const n = Number(value);
   if(Number.isNaN(n)) return fallback;
   return Math.max(min, Math.min(max, n));
+}
+
+function updateImportanceUI(value = importanceEl.value){
+  const safeValue = clampNumber(value, 1, 100, 50);
+  const progress = ((safeValue - 1) / 99) * 100;
+  importanceEl.value = String(safeValue);
+  importanceValueEl.innerText = String(safeValue);
+  importanceEl.style.setProperty("--range-progress", `${progress}%`);
 }
 
 function buildHeaders({ useUserToken = false, extra = {} } = {}){
@@ -247,7 +271,7 @@ function openModal(poi = null){
     nameEl.value = poi.name || "";
     coordsEl.value = poi.coords || "";
     descriptionEl.value = poi.description || "";
-    importanceEl.value = poi.importance ?? "";
+    updateImportanceUI(poi.importance ?? 50);
     typeEl.value = poi.type || "chiesa";
     emailsEl.value = poi.emails || "";
     phoneEl.value = poi.phone || "";
@@ -272,7 +296,7 @@ function clearForm(resetEditing = true){
   nameEl.value = "";
   coordsEl.value = "";
   descriptionEl.value = "";
-  importanceEl.value = "";
+  updateImportanceUI(50);
   typeEl.value = "chiesa";
   emailsEl.value = "";
   phoneEl.value = "";
@@ -349,6 +373,7 @@ addBtn.addEventListener("click", () => openModal());
 closeBtn.addEventListener("click", closeModal);
 saveBtn.addEventListener("click", savePoi);
 searchEl.addEventListener("input", () => renderPois(searchEl.value));
+importanceEl.addEventListener("input", () => updateImportanceUI());
 modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
 document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
 
@@ -357,6 +382,9 @@ function runTests(){
   console.assert(typeof savePoi === "function", "savePoi deve esistere");
   console.assert(typeof buildPoiSaveRequest === "function", "buildPoiSaveRequest deve esistere");
   console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
+  updateImportanceUI(75);
+  console.assert(importanceEl.value === "75", "slider importanza si aggiorna");
+  console.assert(importanceValueEl.innerText === "75", "valore slider visibile corretto");
   console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
   console.assert(clampNumber("-10", 0, 100, 0) === 0, "discount min 0");
   console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
