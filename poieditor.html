@@ -108,15 +108,50 @@ const OWNER_EMAIL = "5terrego.info@gmail.com";
 
 // POI fondamentali 5 Terre (EN)
 const REQUIRED_POIS = [
-  "Vernazza Harbor",
-  "Monterosso Beach",
-  "Riomaggiore Marina",
-  "Manarola Viewpoint",
-  "Corniglia Village",
-  "Via dell'Amore",
-  "Cinque Terre Trail",
+  // Trails
+  "Blue Trail (Sentiero Azzurro)",
+  "Monterosso to Vernazza Trail",
+  "Vernazza to Corniglia Trail",
+  "Corniglia to Manarola Trail",
+  "Manarola to Riomaggiore Trail",
+
+  // Castles & Historic
+  "Doria Castle, Vernazza",
+  "Riomaggiore Castle",
+  "Monterosso Old Town Tower",
+
+  // Churches
+  "Church of San Pietro, Manarola",
+  "Church of St. John the Baptist, Monterosso",
+  "Church of Santa Margherita d'Antiochia, Vernazza",
+  "Church of San Lorenzo, Manarola",
+
+  // Viewpoints
+  "Manarola Scenic Viewpoint",
+  "Vernazza Panorama Viewpoint",
+  "Corniglia Panoramic Terrace",
+  "Riomaggiore Sunset Viewpoint",
+
+  // Beaches
+  "Fegina Beach",
   "Guvano Beach",
-  "Castle of Riomaggiore"
+  "Monterosso Old Town Beach",
+
+  // Landmarks & Spots
+  "Manarola Harbor",
+  "Riomaggiore Harbor",
+  "Vernazza Harbor Viewpoint",
+  "Corniglia Train Station Viewpoint",
+
+  // Museums / Info
+  "Cinque Terre National Park Visitor Center",
+  "Wine Museum Manarola",
+
+  // Extra precise POI
+  "Scalinata Lardarina (Corniglia Stairs)",
+  "Vernazza Pier",
+  "Riomaggiore Marina",
+  "Manarola Rocks Swimming Spot"
 ];
 
 let pois = [];
@@ -630,7 +665,7 @@ function runTests(){
   pois = [];
   renderPois("");
   console.assert(taskSliderEl.querySelectorAll(".task-card").length >= REQUIRED_POIS.length, "mostra POI fondamentali mancanti");
-  console.assert(taskSliderEl.innerText.toLowerCase().includes("vernazza harbor"), "include POI fondamentale");
+  console.assert(taskSliderEl.innerText.toLowerCase().includes("blue trail"), "include POI fondamentale");
   console.assert(taskSliderEl.innerText.toLowerCase().includes("poi mancante"), "rinomina missing poi in poi mancante");
   openSuggestedPoi("Vernazza Harbor");
   console.assert(modalEl.classList.contains("is-open"), "click POI mancante apre modale aggiungi");
