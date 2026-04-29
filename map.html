@@ -353,7 +353,7 @@
     #poi-close {
       position: absolute;
       top: 16px;
-      right: 16px;
+      left: 16px;
       z-index: 4;
       width: 42px;
       height: 42px;
@@ -364,13 +364,37 @@
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 24px;
+      font-size: 22px;
       cursor: pointer;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       opacity: 0;
       transform: scale(0.92);
       transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    #poi-directions {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 4;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.52);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    #poi-card.open #poi-directions {
+      opacity: 1;
+      transform: scale(1);
     }
 
     #poi-card.open #poi-close {
@@ -429,7 +453,8 @@
     <div id="poi-desc"></div>
     <div id="read-more">Read more</div>
   </div>
-  <div id="poi-close">×</div>
+  <div id="poi-close">←</div>
+  <a id="poi-directions" target="_blank">Directions</a>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -516,6 +541,7 @@
   var poiDesc = document.getElementById('poi-desc');
   var readMoreBtn = document.getElementById('read-more');
   var poiClose = document.getElementById('poi-close');
+  var poiDirections = document.getElementById('poi-directions');
   var poiCircle = document.getElementById('poi-circle');
   var poiMapPreview = document.getElementById('poi-map-preview');
   var loginBtn = document.getElementById('login');
@@ -852,6 +878,11 @@
     }).addTo(poiMiniMap);
 
     poiMiniMap.setView(poi.coords, 18);
+
+    // directions link
+    var lat = poi.coords[0];
+    var lng = poi.coords[1];
+    poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
 
     window.requestAnimationFrame(function () {
       poiCard.classList.add('open');
