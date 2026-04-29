@@ -136,7 +136,7 @@
     }
 
     .leaflet-container {
-      background: #f6f1e8 !important; /* fix nero */
+      background: #f6f1e8 !important;
       transform: translateZ(0);
       will-change: transform;
     }
@@ -245,29 +245,44 @@
       position: fixed;
       inset: 0;
       z-index: 2000;
-      background: #f6f1e8; /* bianco panna */
+      background: #f6f1e8;
       overflow: hidden;
+      opacity: 0;
+      transform: scale(0.985);
+      transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    #poi-card.open {
+      opacity: 1;
+      transform: scale(1);
     }
 
     #poi-map-preview {
       position: absolute;
       inset: 0;
-      background: #f6f1e8; /* niente nero */
+      background: #f6f1e8;
     }
 
     #poi-circle {
       position: absolute;
-      top: 30%;
+      top: 28%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) scale(0.88);
       width: min(60vw, 240px);
       height: min(60vw, 240px);
       border-radius: 50%;
       overflow: hidden;
       border: 3px solid rgba(255,255,255,0.9);
-      box-shadow: 0 18px 55px rgba(0,0,0,0.25);
-      background: #f6f1e8; /* niente nero */
+      box-shadow: 0 18px 55px rgba(0,0,0,0.22);
+      background: #f6f1e8;
       z-index: 2;
+      opacity: 0;
+      transition: opacity 0.46s ease, transform 0.46s cubic-bezier(.2,.9,.2,1);
+    }
+
+    #poi-card.open #poi-circle {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
 
     #poi-circle .leaflet-container {
@@ -279,15 +294,23 @@
 
     .poi-content {
       position: absolute;
-      bottom: 0;
+      top: 49%;
       left: 0;
       right: 0;
       z-index: 3;
-      padding: 40px 28px calc(28px + env(safe-area-inset-bottom));
-      background: transparent; /* niente tendina */
+      padding: 20px 28px;
+      background: transparent;
       color: #000;
       box-shadow: none;
-      text-align: center; /* centra tutto */
+      text-align: center;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.48s ease, transform 0.48s cubic-bezier(.2,.9,.2,1);
+    }
+
+    #poi-card.open .poi-content {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     #poi-title {
@@ -328,6 +351,14 @@
       cursor: pointer;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    #poi-card.open #poi-close {
+      opacity: 1;
+      transform: scale(1);
     }
   </style>
 </head>
@@ -398,6 +429,7 @@
   var AUTO_OPEN_DISTANCE = 500;
   var AUTO_CLOSE_ZOOM = 12;
   var AUTO_CLOSE_DISTANCE = 800;
+  var poiCloseTimer = null;
 
   var SUPABASE_READY = Boolean(
     window.supabase &&
@@ -608,8 +640,38 @@
     }
   }
 
+  function destroyPoiMiniMap() {
+    if (poiMiniMap) {
+      try { poiMiniMap.remove(); } catch (error) {}
+      poiMiniMap = null;
+    }
+    poiCircle.innerHTML = '';
+  }
+
+  function closePOICard(immediate) {
+    if (poiCloseTimer) {
+      window.clearTimeout(poiCloseTimer);
+      poiCloseTimer = null;
+    }
+
+    poiCard.classList.remove('open');
+    poiCard.setAttribute('aria-hidden', 'true');
+
+    if (immediate || poiCard.style.display === 'none') {
+      poiCard.style.display = 'none';
+      destroyPoiMiniMap();
+      return;
+    }
+
+    poiCloseTimer = window.setTimeout(function () {
+      poiCard.style.display = 'none';
+      destroyPoiMiniMap();
+      poiCloseTimer = null;
+    }, 360);
+  }
+
   function showCityCard(item) {
-    closePOICard();
+    closePOICard(true);
     setCardContent(item);
     card.style.display = 'block';
     card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
@@ -634,18 +696,6 @@
         card.style.display = 'none';
       }
     }, 300);
-  }
-
-  function closePOICard() {
-    poiCard.style.display = 'none';
-    poiCard.setAttribute('aria-hidden', 'true');
-
-    if (poiMiniMap) {
-      try { poiMiniMap.remove(); } catch (error) {}
-      poiMiniMap = null;
-    }
-
-    poiCircle.innerHTML = '';
   }
 
   function showCityByIndex(index, shouldCenter) {
@@ -729,6 +779,13 @@
     hideCard();
     currentDataset = 'pois';
     currentIndex = -1;
+
+    if (poiCloseTimer) {
+      window.clearTimeout(poiCloseTimer);
+      poiCloseTimer = null;
+    }
+
+    poiCard.classList.remove('open');
     poiCard.style.display = 'block';
     poiCard.setAttribute('aria-hidden', 'false');
     poiTitle.innerText = poi.name;
@@ -736,12 +793,7 @@
     poiDesc.style.display = 'block';
     poiMapPreview.style.background = '#f6f1e8';
 
-    if (poiMiniMap) {
-      try { poiMiniMap.remove(); } catch (error) {}
-      poiMiniMap = null;
-    }
-
-    poiCircle.innerHTML = '';
+    destroyPoiMiniMap();
 
     poiMiniMap = L.map(poiCircle, {
       zoomControl: false,
@@ -770,12 +822,16 @@
 
     poiMiniMap.setView(poi.coords, 18);
 
+    window.requestAnimationFrame(function () {
+      poiCard.classList.add('open');
+    });
+
     window.setTimeout(function () {
       if (poiMiniMap) {
         poiMiniMap.invalidateSize(true);
         poiMiniMap.setView(poi.coords, 18, { animate: false });
       }
-    }, 80);
+    }, 90);
   }
 
   function createCityMarkers() {
@@ -988,10 +1044,14 @@
 
   function setupEvents() {
     loginBtn.addEventListener('click', function () {
-      window.location.href = '/login.html';
+      // FIX: GitHub Pages compat (no root path)
+      window.location.href = './login.html';
     });
 
-    poiClose.addEventListener('click', closePOICard);
+    poiClose.addEventListener('click', function () {
+      closePOICard(false);
+    });
+
     addPoiBtn.addEventListener('click', addPOI);
 
     searchInput.addEventListener('keydown', async function (event) {
@@ -1110,10 +1170,12 @@
     console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
     console.assert(typeof showPOICard === 'function', 'showPOICard function exists');
     console.assert(typeof closePOICard === 'function', 'closePOICard function exists');
+    console.assert(typeof destroyPoiMiniMap === 'function', 'destroyPoiMiniMap function exists');
     console.assert(document.getElementById('poi-circle') !== null, 'POI circle exists');
     console.assert(document.getElementById('poi-description') !== null, 'POI description input exists');
     console.assert(document.documentElement.innerHTML.indexOf('}).setView(poi.coords, 17);') === -1, 'Broken duplicated POI map fragment removed');
     console.assert(document.documentElement.innerHTML.indexOf('var clone = container.cloneNode(true);') === -1, 'Broken cloned map fragment removed');
+    console.assert(document.documentElement.innerHTML.indexOf('poiCard.style.display = \'none\';\n    poiCard.setAttribute') === -1, 'Duplicated orphan closePOICard fragment removed');
     console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
     console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
