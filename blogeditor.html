@@ -54,6 +54,18 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 .task-title{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-pill{font-size:9px;padding:4px 7px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;line-height:1;margin-right:4px;margin-top:4px}
 .task-pill.red{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
+.poi-link-card{margin-top:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.1)}
+.poi-link-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.55);margin-bottom:8px}
+.poi-search{margin-top:0}
+.poi-results{margin-top:8px;display:flex;gap:7px;overflow-x:auto;padding-bottom:2px}
+.poi-results::-webkit-scrollbar{display:none}
+.poi-result{flex:0 0 auto;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.poi-result.is-selected{background:#fff;color:#000;border-color:#fff}
+.selected-pois{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
+.selected-poi{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.16);font-size:12px;font-weight:800;color:#fff}
+.selected-poi button{width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;line-height:18px;padding:0;cursor:pointer}
+.linked-pois-line{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
+.linked-poi-mini{font-size:10px;font-weight:800;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.74)}
 @media(max-width:520px){.row{grid-template-columns:1fr}.post{padding-right:100px}.header{padding:12px}.add-btn{padding-left:14px;padding-right:14px}}
 </style>
 </head>
@@ -87,6 +99,14 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
     <textarea id="content" placeholder="Contenuto completo articolo"></textarea>
 
     <input id="coverImage" placeholder="URL immagine copertina" />
+
+    <div class="poi-link-card">
+      <div class="poi-link-title">POI collegati</div>
+      <input id="poiSearch" class="poi-search" placeholder="Cerca POI da collegare all’articolo..." autocomplete="off" oninput="handlePoiSearchInput()" onkeyup="handlePoiSearchInput()" />
+      <div id="poiSearchCount" class="slug-preview">POI caricati: 0</div>
+      <div id="poiResults" class="poi-results"></div>
+      <div id="selectedPois" class="selected-pois"></div>
+    </div>
 
     <div class="row">
       <select id="category">
@@ -134,8 +154,11 @@ const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const SUPABASE_ANON_REST_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
 const OWNER_EMAIL = "5terrego.info@gmail.com";
 const BLOG_TABLE = "blog_posts";
+const POIS_TABLE = "pois";
 
 let posts = [];
+let pois = [];
+let selectedPoiIds = [];
 let editingPostId = null;
 
 const statusEl = document.getElementById("status");
@@ -161,6 +184,10 @@ const authorEl = document.getElementById("author");
 const publishedAtEl = document.getElementById("publishedAt");
 const previewTitleEl = document.getElementById("previewTitle");
 const previewExcerptEl = document.getElementById("previewExcerpt");
+const poiSearchEl = document.getElementById("poiSearch");
+const poiResultsEl = document.getElementById("poiResults");
+const selectedPoisEl = document.getElementById("selectedPois");
+const poiSearchCountEl = document.getElementById("poiSearchCount");
 
 function setStatus(message, isError = false){
   statusEl.innerHTML = message;
@@ -234,7 +261,9 @@ function isPermissionError(err){
 
 function permissionHelp(){
   return "Errore permessi Supabase.<br><br>Se non esiste ancora, crea la tabella blog_posts in SQL Editor:<br>" +
-    "<code>create table public.blog_posts (id uuid default gen_random_uuid() primary key, title text not null, slug text unique, excerpt text, content text, cover_image text, category text, status text default 'draft', author text, published_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());</code><br><br>" +
+    "<code>create table public.blog_posts (id uuid default gen_random_uuid() primary key, title text not null, slug text unique, excerpt text, content text, cover_image text, related_pois jsonb default '[]'::jsonb, category text, status text default 'draft', author text, published_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());</code><br><br>" +
+    "Se la tabella esiste già aggiungi solo la colonna:<br>" +
+    "<code>alter table public.blog_posts add column if not exists related_pois jsonb default '[]'::jsonb;</code><br><br>" +
     "Poi esegui:<br>" +
     "<code>GRANT SELECT ON public.blog_posts TO anon;</code><br>" +
     "<code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.blog_posts TO authenticated;</code>";
@@ -263,6 +292,134 @@ function formatDateForDisplay(value){
   const d = new Date(value);
   if(Number.isNaN(d.getTime())) return "data non valida";
   return d.toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function normalizeSearchText(value){
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
+}
+
+function getPoiId(poi){
+  return String((poi && poi.id) || (poi && poi._id) || (poi && poi.uuid) || (poi && poi.slug) || (poi && poi.name) || "");
+}
+
+function getPoiLabel(poi){
+  return String((poi && poi.name) || (poi && poi.title) || (poi && poi.nome) || "POI");
+}
+
+function getPoiNameById(id){
+  const poi = pois.find(p => getPoiId(p) === String(id));
+  return poi ? getPoiLabel(poi) : String(id || "POI");
+}
+
+function normalizeRelatedPois(value){
+  if(Array.isArray(value)) return value.map(String).filter(Boolean);
+  if(typeof value === "string" && value.trim()){
+    try{
+      const parsed = JSON.parse(value);
+      if(Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    }catch(err){
+      return value.split(",").map(v=>v.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+function togglePoiSelection(poiId){
+  const id = String(poiId || "");
+  if(!id) return;
+
+  if(selectedPoiIds.includes(id)){
+    selectedPoiIds = selectedPoiIds.filter(x => x !== id);
+  } else {
+    selectedPoiIds.push(id);
+  }
+
+  renderPoiPicker(poiSearchEl.value);
+}
+
+function removeSelectedPoi(poiId){
+  selectedPoiIds = selectedPoiIds.filter(x => x !== String(poiId));
+  renderPoiPicker(poiSearchEl.value);
+}
+
+function handlePoiSearchInput(){
+  renderPoiPicker(poiSearchEl.value);
+}
+
+function renderPoiPicker(filter = ""){
+  poiResultsEl.innerHTML = "";
+  selectedPoisEl.innerHTML = "";
+
+  const query = normalizeSearchText(filter);
+  const matches = pois.filter(p=>{
+    const label = normalizeSearchText(getPoiLabel(p));
+    const secondary = normalizeSearchText([
+      p.type,
+      p.category,
+      p.coords
+    ].join(" "));
+
+    if(!query) return true;
+    return label.includes(query) || secondary.includes(query);
+  });
+  const filtered = matches.slice(0, 30);
+
+  poiResultsEl.scrollLeft = 0;
+  poiSearchCountEl.innerText = query
+    ? (matches.length + " POI trovati per: " + filter)
+    : (pois.length + " POI caricati");
+
+  if(!filtered.length){
+    const empty = document.createElement("div");
+    empty.className = "poi-result";
+    empty.innerText = pois.length ? "Nessun POI trovato" : "Nessun POI caricato";
+    poiResultsEl.appendChild(empty);
+  }
+
+  filtered.forEach(poi=>{
+    const id = getPoiId(poi);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = selectedPoiIds.includes(id) ? "poi-result is-selected" : "poi-result";
+    btn.innerText = getPoiLabel(poi);
+    btn.addEventListener("click", () => togglePoiSelection(id));
+    poiResultsEl.appendChild(btn);
+  });
+
+  selectedPoiIds.forEach(id=>{
+    const chip = document.createElement("span");
+    chip.className = "selected-poi";
+    chip.innerHTML = "<span>" + getPoiNameById(id) + "</span>";
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.innerText = "×";
+    remove.addEventListener("click", () => removeSelectedPoi(id));
+
+    chip.appendChild(remove);
+    selectedPoisEl.appendChild(chip);
+  });
+}
+
+async function loadPoisForBlog(){
+  try{
+    const hasUser = Boolean(getToken());
+    const res = await fetch(SUPABASE_URL + "/rest/v1/" + POIS_TABLE + "?select=*&order=importance.desc.nullslast", {
+      method:"GET",
+      headers:buildHeaders({ useUserToken:hasUser })
+    });
+
+    pois = await parseResponse(res);
+    renderPoiPicker(poiSearchEl.value);
+  }catch(err){
+    console.warn("LOAD POIS FOR BLOG ERROR", err);
+    pois = [];
+    renderPoiPicker(poiSearchEl.value);
+  }
 }
 
 function getMissingPostFields(post){
@@ -349,7 +506,8 @@ function renderPosts(filter = ""){
 
   const query = String(filter || "").trim().toLowerCase();
   const filtered = posts.filter(post=>{
-    const haystack = String(post.title || "") + " " + String(post.slug || "") + " " + String(post.category || "") + " " + String(post.excerpt || "") + " " + String(post.content || "");
+    const relatedNames = normalizeRelatedPois(post.related_pois).map(getPoiNameById).join(" ");
+    const haystack = String(post.title || "") + " " + String(post.slug || "") + " " + String(post.category || "") + " " + String(post.excerpt || "") + " " + String(post.content || "") + " " + relatedNames;
     return !query || haystack.toLowerCase().includes(query);
   });
 
@@ -397,6 +555,26 @@ function renderPosts(filter = ""){
     div.appendChild(title);
     div.appendChild(meta);
     if(post.excerpt) div.appendChild(excerpt);
+
+    const related = normalizeRelatedPois(post.related_pois);
+    if(related.length){
+      const linkedLine = document.createElement("div");
+      linkedLine.className = "linked-pois-line";
+      related.slice(0,4).forEach(id=>{
+        const mini = document.createElement("span");
+        mini.className = "linked-poi-mini";
+        mini.innerText = getPoiNameById(id);
+        linkedLine.appendChild(mini);
+      });
+      if(related.length > 4){
+        const more = document.createElement("span");
+        more.className = "linked-poi-mini";
+        more.innerText = "+" + (related.length - 4);
+        linkedLine.appendChild(more);
+      }
+      div.appendChild(linkedLine);
+    }
+
     div.addEventListener("click", () => openModal(post));
     listEl.appendChild(div);
   });
@@ -421,11 +599,14 @@ function clearForm(resetEditing = true){
   excerptEl.value = "";
   contentEl.value = "";
   coverImageEl.value = "";
+  selectedPoiIds = [];
+  poiSearchEl.value = "";
   categoryEl.value = "guide";
   statusSelectEl.value = "draft";
   authorEl.value = "5TerreGo";
   publishedAtEl.value = "";
   updateSlugAndPreview();
+  renderPoiPicker();
 }
 
 function openModal(post = null){
@@ -439,6 +620,8 @@ function openModal(post = null){
     excerptEl.value = post.excerpt || "";
     contentEl.value = post.content || "";
     coverImageEl.value = post.cover_image || "";
+    selectedPoiIds = normalizeRelatedPois(post.related_pois);
+    poiSearchEl.value = "";
     categoryEl.value = post.category || "guide";
     statusSelectEl.value = post.status || "draft";
     authorEl.value = post.author || "5TerreGo";
@@ -450,6 +633,7 @@ function openModal(post = null){
   }
 
   updateSlugAndPreview();
+  renderPoiPicker();
   modalEl.classList.add("is-open");
   modalEl.setAttribute("aria-hidden", "false");
 }
@@ -469,6 +653,7 @@ function readPostForm(){
     excerpt:excerptEl.value.trim(),
     content:contentEl.value.trim(),
     cover_image:coverImageEl.value.trim(),
+    related_pois:selectedPoiIds,
     category:categoryEl.value,
     status:statusSelectEl.value,
     author:authorEl.value.trim() || "5TerreGo",
@@ -564,6 +749,9 @@ searchEl.addEventListener("input", () => renderPosts(searchEl.value));
 titleInputEl.addEventListener("input", updateSlugAndPreview);
 slugEl.addEventListener("input", updateSlugAndPreview);
 excerptEl.addEventListener("input", updateSlugAndPreview);
+poiSearchEl.addEventListener("input", handlePoiSearchInput);
+poiSearchEl.addEventListener("keyup", handlePoiSearchInput);
+poiSearchEl.addEventListener("change", handlePoiSearchInput);
 modalEl.addEventListener("click", event => { if(event.target === modalEl) closeModal(); });
 document.addEventListener("keydown", event => { if(event.key === "Escape") closeModal(); });
 
@@ -576,10 +764,18 @@ function runTests(){
   console.assert(buildPostSaveRequest(null).method === "POST", "nuovo articolo usa POST");
   console.assert(buildPostSaveRequest("123").method === "PATCH", "articolo esistente usa PATCH");
   console.assert(getMissingPostFields({title:"",slug:"",excerpt:"",content:"",cover_image:""}).length === 5, "rileva campi mancanti");
+  console.assert(Array.isArray(normalizeRelatedPois(['a','b'])), "related_pois array corretto");
+  console.assert(normalizeRelatedPois('["a","b"]').length === 2, "related_pois json string corretto");
+  console.assert(normalizeSearchText('Vernazzà') === 'vernazza', 'ricerca senza accenti corretta');
+}
+
+async function loadEditorData(){
+  await loadPoisForBlog();
+  await loadPosts();
 }
 
 runTests();
-loadPosts();
+loadEditorData();
 </script>
 </body>
 </html>
