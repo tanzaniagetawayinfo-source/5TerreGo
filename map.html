@@ -279,12 +279,17 @@
 
     .card-live-frame {
       position: absolute;
-      inset: 0;
+      top: 50%;
+      left: 50%;
       width: 100%;
-      height: 100%;
+      height: calc((100vw - 24px) * 9 / 16);
+      min-width: 100%;
+      min-height: 100%;
       border: 0;
       opacity: 0;
       pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1.18);
+      transform-origin: center center;
       transition: opacity 0.35s ease;
     }
 
@@ -1763,6 +1768,7 @@
     console.assert(typeof resetCardLive === 'function', 'Card live reset function exists');
     console.assert(typeof loadCardLive === 'function', 'Card live loader exists');
     console.assert(document.getElementById('card-live') !== null, 'Card live iframe exists');
+    console.assert(window.getComputedStyle(document.getElementById('card-live')).transform !== 'none', 'Card live iframe is scaled to cover the city-card media area');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
