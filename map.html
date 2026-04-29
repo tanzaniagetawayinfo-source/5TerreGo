@@ -445,11 +445,16 @@
 
   function getMinZoomForImportance(importance) {
     var n = Number(importance || 0);
-    if (n >= 80) return 11;
-    if (n >= 60) return 12;
-    if (n >= 40) return 13;
-    if (n >= 20) return 14;
-    return 15;
+
+    // MUCH stricter scaling so POIs don't appear too early
+    if (n >= 90) return 11;   // super important → always visible
+    if (n >= 75) return 12;
+    if (n >= 60) return 13;
+    if (n >= 45) return 14;
+    if (n >= 30) return 15;
+    if (n >= 15) return 16;
+
+    return 17; // low importance → only max zoom
   }
 
   function updatePOIVisibility() {
