@@ -1260,6 +1260,7 @@
   function nudgeCityCard() {
     var direction;
     var distance;
+    var secondDistance;
 
     if (cityCardHasSwitchedOnce) return;
     if (isDragging) return;
@@ -1270,15 +1271,28 @@
 
     direction = getCityCardNudgeDirection();
     distance = direction * 14;
+    secondDistance = direction * 22;
 
-    card.style.transition = 'transform 0.22s cubic-bezier(.22,.61,.36,1)';
+    card.style.transition = 'transform 0.18s cubic-bezier(.22,.61,.36,1)';
     card.style.transform = 'translateX(' + distance + 'px)';
 
     window.setTimeout(function () {
-      if (isDragging || card.getAttribute('aria-hidden') === 'true') return;
-      card.style.transition = 'transform 0.32s cubic-bezier(.22,.61,.36,1)';
+      if (cityCardHasSwitchedOnce || isDragging || card.getAttribute('aria-hidden') === 'true') return;
+      card.style.transition = 'transform 0.16s cubic-bezier(.22,.61,.36,1)';
       card.style.transform = 'translateX(0)';
-    }, 220);
+    }, 180);
+
+    window.setTimeout(function () {
+      if (cityCardHasSwitchedOnce || isDragging || card.getAttribute('aria-hidden') === 'true') return;
+      card.style.transition = 'transform 0.2s cubic-bezier(.22,.61,.36,1)';
+      card.style.transform = 'translateX(' + secondDistance + 'px)';
+    }, 340);
+
+    window.setTimeout(function () {
+      if (isDragging || card.getAttribute('aria-hidden') === 'true') return;
+      card.style.transition = 'transform 0.34s cubic-bezier(.22,.61,.36,1)';
+      card.style.transform = 'translateX(0)';
+    }, 560);
   }
 
   function startCityCardNudges() {
@@ -2238,7 +2252,7 @@
     console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
     console.assert(typeof clearCityCardNudges === 'function', 'City-card nudge cleanup function exists');
     console.assert(typeof startCityCardNudges === 'function', 'City-card nudge scheduler exists');
-    console.assert(typeof nudgeCityCard === 'function', 'City-card nudge animation function exists');
+    console.assert(typeof nudgeCityCard === 'function', 'City-card double nudge animation function exists');
     console.assert(typeof getCityCardNudgeDirection === 'function', 'City-card nudge direction function exists');
     console.assert(Array.isArray(cityCardNudgeTimers), 'City-card nudge timers are tracked');
     console.assert(typeof cityCardHasSwitchedOnce === 'boolean', 'City-card nudge stops after first village swipe');
