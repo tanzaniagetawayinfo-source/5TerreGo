@@ -105,7 +105,6 @@
     }
 
     .search-item:last-child { border-bottom: none; }
-
     .search-item:hover { background: rgba(255,255,255,0.1); }
 
     #login {
@@ -594,6 +593,10 @@
   var userCheckTimer = null;
   var poiMiniMap = null;
 
+  function isIOSDevice() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
   function readValue(value, fallback) {
     return value === undefined || value === null ? fallback : value;
   }
@@ -691,6 +694,31 @@
         item.marker.addTo(poiLayer);
       }
     });
+  }
+
+  function openPOIWithMapMove(poi, sourceEvent) {
+    if (!poi || !isValidPOI(poi)) return;
+
+    if (sourceEvent && sourceEvent.originalEvent) {
+      L.DomEvent.stopPropagation(sourceEvent.originalEvent);
+      L.DomEvent.preventDefault(sourceEvent.originalEvent);
+    }
+
+    isProgrammaticMove = true;
+
+    if (isIOSDevice()) {
+      map.setView(poi.coords, 17, { animate: true });
+      window.setTimeout(function () {
+        showPOICard(poi);
+        isProgrammaticMove = false;
+      }, 300);
+    } else {
+      map.flyTo(poi.coords, 17, { duration: 1.2 });
+      window.setTimeout(function () {
+        showPOICard(poi);
+        isProgrammaticMove = false;
+      }, 400);
+    }
   }
 
   function centerCity(place) {
@@ -943,11 +971,16 @@
   function createCityMarkers() {
     places.forEach(function (place, index) {
       L.marker(place.coords, {
+        title: place.name,
         icon: L.divIcon({
           className: 'custom-label',
           html: '<div class="label">' + escapeHTML(place.name) + '</div>'
         })
-      }).addTo(map).on('click', function () {
+      }).addTo(map).on('click', function (e) {
+        if (e && e.originalEvent) {
+          L.DomEvent.stopPropagation(e.originalEvent);
+          L.DomEvent.preventDefault(e.originalEvent);
+        }
         showCityByIndex(index, true);
       });
     });
@@ -984,16 +1017,8 @@
           iconSize: [32, 32],
           iconAnchor: [16, 16]
         })
-      }).on('click', function () {
-        // 🔥 FIX: zoom + center on POI
-        isProgrammaticMove = true;
-        map.flyTo(poi.coords, 17, { duration: 1.2 });
-
-        setTimeout(function () {
-          isProgrammaticMove = false;
-        }, 1400);
-
-        showPOICard(poi);
+      }).on('click', function (e) {
+        openPOIWithMapMove(poi, e);
       });
 
       poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi });
@@ -1199,30 +1224,19 @@
 
   function selectSearchResult(name) {
     var cityIndex = places.findIndex(function (p) { return p.name === name; });
-    var poi;
-    var latlng;
+    var poiItem;
 
     if (cityIndex !== -1) {
       showCityByIndex(cityIndex, true);
       return true;
     }
 
-    poi = poiMarkers.find(function (m) {
+    poiItem = poiMarkers.find(function (m) {
       return m.marker.options.title === name;
     });
 
-    if (poi) {
-      latlng = poi.marker.getLatLng();
-
-      // 🔥 FIX: animated zoom like native maps
-      isProgrammaticMove = true;
-      map.flyTo(latlng, 17, { duration: 1.2 });
-
-      setTimeout(function () {
-        isProgrammaticMove = false;
-      }, 1400);
-
-      if (poi.poi) showPOICard(poi.poi);
+    if (poiItem && poiItem.poi) {
+      openPOIWithMapMove(poiItem.poi, null);
       return true;
     }
 
@@ -1405,6 +1419,8 @@
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
     console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
+    console.assert(typeof openPOIWithMapMove === 'function', 'openPOIWithMapMove function exists');
+    console.assert(typeof isIOSDevice === 'function', 'isIOSDevice function exists');
     console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'importance affects zoom');
     console.assert(getMinZoomForImportance(60) >= 15, 'importance 60 should not appear early');
     console.assert(typeof addPOI === 'function', 'addPOI function exists');
@@ -1435,6 +1451,8 @@
     console.assert(normalizePOI({ name: 'D', coords: '44.2,9.8', description: 'Testo' }).description === 'Testo', 'normalizePOI keeps description');
     console.assert(getSearchResults('ver').some(function (r) { return r.name === 'Vernazza'; }), 'Search suggestions find Vernazza');
     console.assert(roadsLayer && satelliteLayer, 'Satellite and roads overlay are both loaded');
+    console.assert(typeof marker === 'undefined', 'No leaked global marker variable');
+    console.assert(typeof poi === 'undefined', 'No leaked global poi variable');
   }
 
   createCityMarkers();
@@ -1444,7 +1462,7 @@
   setupEvents();
   runTests();
 
-  setTimeout(function () {
+  window.setTimeout(function () {
     checkUser();
     startUserPolling();
   }, 250);
