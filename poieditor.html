@@ -15,8 +15,11 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,san
 .status.error{color:#ffb4b4}
 .status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
 .list{padding:16px}
-.poi{position:relative;padding:14px;padding-right:118px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease}
-.poi-alert{position:absolute;right:10px;top:10px;max-width:98px;padding:6px 8px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;font-size:10px;font-weight:800;line-height:1.1;text-align:center;text-transform:uppercase;letter-spacing:.02em;pointer-events:none}
+.poi{position:relative;padding:14px;padding-right:124px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease}
+.poi-alert{position:absolute;right:10px;max-width:112px;padding:5px 7px;border-radius:999px;font-size:9px;font-weight:800;line-height:1;text-align:center;text-transform:uppercase;letter-spacing:.01em;pointer-events:none;white-space:nowrap}
+.poi-alert.desc{top:10px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966}
+.poi-alert.coord{top:10px;background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
+.poi-alert.coord.has-desc{top:36px}
 .poi:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
 .poi-title{font-weight:700;margin-bottom:4px}
 .poi-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
@@ -39,6 +42,15 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 .apple-range::-moz-range-track{height:8px;border-radius:999px;background:rgba(255,255,255,0.18)}
 .apple-range::-moz-range-progress{height:8px;border-radius:999px;background:white}
 .apple-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:white;box-shadow:0 4px 14px rgba(0,0,0,0.38);border:1px solid rgba(0,0,0,0.08)}
+
+/* TASK SLIDER */
+.task-slider{display:flex;gap:10px;overflow-x:auto;padding:12px 16px 4px;scroll-snap-type:x mandatory}
+.task-slider::-webkit-scrollbar{display:none}
+.task-card{flex:0 0 auto;min-width:140px;max-width:160px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
+.task-card:active{transform:scale(.98)}
+.task-title{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-pill{font-size:9px;padding:4px 7px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;line-height:1;margin-right:4px;margin-top:4px}
+.task-pill.red{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
 </style>
 </head>
 <body>
@@ -47,6 +59,8 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
   <input id="search" class="search" placeholder="Cerca POI..." />
   <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
 </div>
+
+<div id="taskSlider" class="task-slider"></div>
 
 <div id="status" class="status">Caricamento POI...</div>
 <div id="list" class="list"></div>
@@ -92,11 +106,25 @@ const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
 const OWNER_EMAIL = "5terrego.info@gmail.com";
 
+// POI fondamentali 5 Terre (EN)
+const REQUIRED_POIS = [
+  "Vernazza Harbor",
+  "Monterosso Beach",
+  "Riomaggiore Marina",
+  "Manarola Viewpoint",
+  "Corniglia Village",
+  "Via dell'Amore",
+  "Cinque Terre Trail",
+  "Guvano Beach",
+  "Castle of Riomaggiore"
+];
+
 let pois = [];
 let editingPoiId = null;
 
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
+const taskSliderEl = document.getElementById("taskSlider");
 const modalEl = document.getElementById("modal");
 const modalTitleEl = document.getElementById("modalTitle");
 const searchEl = document.getElementById("search");
@@ -125,8 +153,8 @@ function getAuthSession(){
     if(key.startsWith("sb-") && key.endsWith("-auth-token")){
       try{
         const parsed = JSON.parse(localStorage.getItem(key));
-        if(parsed?.access_token) return parsed;
-        if(parsed?.currentSession?.access_token) return parsed.currentSession;
+        if(parsed && parsed.access_token) return parsed;
+        if(parsed && parsed.currentSession && parsed.currentSession.access_token) return parsed.currentSession;
       }catch(err){
         console.warn("Auth token non leggibile", err);
       }
@@ -136,12 +164,13 @@ function getAuthSession(){
 }
 
 function getToken(){
-  return getAuthSession()?.access_token || null;
+  const session = getAuthSession();
+  return session && session.access_token ? session.access_token : null;
 }
 
 function getUserEmail(){
   const session = getAuthSession();
-  return (session?.user?.email || "").toLowerCase();
+  return String((session && session.user && session.user.email) || "").toLowerCase();
 }
 
 function clampNumber(value, min, max, fallback){
@@ -155,14 +184,14 @@ function updateImportanceUI(value = importanceEl.value){
   const progress = ((safeValue - 1) / 99) * 100;
   importanceEl.value = String(safeValue);
   importanceValueEl.innerText = String(safeValue);
-  importanceEl.style.setProperty("--range-progress", `${progress}%`);
+  importanceEl.style.setProperty("--range-progress", progress + "%");
 }
 
 function buildHeaders({ useUserToken = false, extra = {} } = {}){
   const token = useUserToken ? getToken() : null;
   return {
     apikey: ANON_KEY,
-    Authorization: `Bearer ${token || ANON_KEY}`,
+    Authorization: "Bearer " + (token || ANON_KEY),
     Accept: "application/json",
     "Content-Type": "application/json",
     ...extra
@@ -193,14 +222,15 @@ async function parseResponse(res){
 }
 
 function isPermissionError(err){
-  const text = `${err?.message || ""} ${JSON.stringify(err?.payload || {})}`.toLowerCase();
-  return err?.status === 401 || err?.status === 403 || text.includes("42501") || text.includes("permission denied") || text.includes("grant select");
+  const text = String((err && err.message) || "") + " " + JSON.stringify((err && err.payload) || {});
+  const lower = text.toLowerCase();
+  return (err && (err.status === 401 || err.status === 403)) || lower.includes("42501") || lower.includes("permission denied") || lower.includes("grant select");
 }
 
 function permissionHelp(){
-  return `Errore permessi Supabase.<br><br>Esegui in SQL Editor:<br>
-    <code>GRANT SELECT ON public.pois TO anon;</code><br>
-    <code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;</code>`;
+  return "Errore permessi Supabase.<br><br>Esegui in SQL Editor:<br>" +
+    "<code>GRANT SELECT ON public.pois TO anon;</code><br>" +
+    "<code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;</code>";
 }
 
 async function loadPois(){
@@ -208,7 +238,7 @@ async function loadPois(){
 
   try{
     const hasUser = Boolean(getToken());
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?select=*&order=importance.desc.nullslast`, {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/pois?select=*&order=importance.desc.nullslast", {
       method: "GET",
       headers: buildHeaders({ useUserToken: hasUser })
     });
@@ -216,33 +246,107 @@ async function loadPois(){
     pois = await parseResponse(res);
     editingPoiId = null;
     renderPois(searchEl.value);
-    setStatus(`${pois.length} POI caricati`);
+    setStatus(String(pois.length) + " POI caricati");
   }catch(err){
     console.error("LOAD POIS ERROR", err);
     pois = [];
     renderPois(searchEl.value);
 
     if(isPermissionError(err)){
-      setStatus(`${permissionHelp()}<br><br>⚠️ Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: ${err.message}`, true);
+      setStatus(permissionHelp() + "<br><br>⚠️ Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: " + err.message, true);
       return;
     }
 
-    setStatus(`Errore caricamento POI: ${err.message}`, true);
+    setStatus("Errore caricamento POI: " + err.message, true);
   }
 }
 
 function getMissingPoiFields(poi){
   const missingFields = [];
-  if(!String(poi?.description || "").trim()) missingFields.push("descrizione");
-  if(!String(poi?.coords || "").trim()) missingFields.push("coordinate");
+  if(!String((poi && poi.description) || "").trim()) missingFields.push("descrizione");
+  if(!String((poi && poi.coords) || "").trim()) missingFields.push("coordinate");
   return missingFields;
+}
+
+function hasOnlyMissingDescription(poi){
+  const missing = getMissingPoiFields(poi);
+  return missing.length === 1 && missing[0] === "descrizione";
 }
 
 function getPoiAlertText(poi){
   const missingFields = getMissingPoiFields(poi);
   if(missingFields.length === 0) return "";
   if(missingFields.length === 2) return "manca desc. + coord.";
-  return `manca ${missingFields[0]}`;
+  return "manca " + missingFields[0];
+}
+
+function createTaskPill(text, isRed){
+  const pill = document.createElement("div");
+  pill.className = isRed ? "task-pill red" : "task-pill";
+  pill.innerText = text;
+  return pill;
+}
+
+function normalizeName(str){
+  return String(str||"").toLowerCase().trim();
+}
+
+function getMissingCorePois(){
+  const existing = pois.map(p=>normalizeName(p.name));
+  return REQUIRED_POIS.filter(name=>{
+    const n = normalizeName(name);
+    return !existing.some(e=>e.includes(n) || n.includes(e));
+  });
+}
+
+function renderTaskSlider(filteredPois){
+  taskSliderEl.innerHTML = "";
+
+  const taskPois = filteredPois.filter((p) => getMissingPoiFields(p).length > 0);
+
+  taskPois.forEach((p) => {
+    const missing = getMissingPoiFields(p);
+
+    const card = document.createElement("div");
+    card.className = "task-card";
+    card.addEventListener("click", () => openModal(p));
+
+    const title = document.createElement("div");
+    title.className = "task-title";
+    title.innerText = p.name || "(senza nome)";
+
+    card.appendChild(title);
+
+    if(missing.includes("descrizione")){
+      card.appendChild(createTaskPill("manca desc.", false));
+    }
+
+    if(missing.includes("coordinate")){
+      card.appendChild(createTaskPill("no coord.", true));
+    }
+
+    taskSliderEl.appendChild(card);
+  });
+
+  // --- POI fondamentali mancanti ---
+  const missingCore = getMissingCorePois();
+  missingCore.forEach(name=>{
+    const card = document.createElement("div");
+    card.className = "task-card";
+    card.addEventListener("click", () => openSuggestedPoi(name));
+
+    const title = document.createElement("div");
+    title.className = "task-title";
+    title.innerText = name;
+
+    const pill = document.createElement("div");
+    pill.className = "task-pill red";
+    pill.innerText = "poi mancante";
+
+    card.appendChild(title);
+    card.appendChild(pill);
+    taskSliderEl.appendChild(card);
+  });
 }
 
 function renderPois(filter = ""){
@@ -250,9 +354,11 @@ function renderPois(filter = ""){
 
   const query = String(filter || "").trim().toLowerCase();
   const filtered = pois.filter((p) => {
-    const haystack = `${p.name || ""} ${p.type || ""} ${p.description || ""}`.toLowerCase();
-    return !query || haystack.includes(query);
+    const haystack = String((p && p.name) || "") + " " + String((p && p.type) || "") + " " + String((p && p.description) || "");
+    return !query || haystack.toLowerCase().includes(query);
   });
+
+  renderTaskSlider(filtered);
 
   if(!filtered.length){
     const empty = document.createElement("div");
@@ -262,15 +368,23 @@ function renderPois(filter = ""){
     return;
   }
 
-  filtered.forEach(p => {
+  filtered.forEach((p) => {
     const div = document.createElement("div");
     div.className = "poi";
 
-    const alertText = getPoiAlertText(p);
-    if(alertText){
+    const missing = getMissingPoiFields(p);
+
+    if(missing.includes("descrizione")){
       const alertBadge = document.createElement("div");
-      alertBadge.className = "poi-alert";
-      alertBadge.innerText = alertText;
+      alertBadge.className = "poi-alert desc";
+      alertBadge.innerText = "manca desc.";
+      div.appendChild(alertBadge);
+    }
+
+    if(missing.includes("coordinate")){
+      const alertBadge = document.createElement("div");
+      alertBadge.className = missing.includes("descrizione") ? "poi-alert coord has-desc" : "poi-alert coord";
+      alertBadge.innerText = "no coord.";
       div.appendChild(alertBadge);
     }
 
@@ -280,7 +394,7 @@ function renderPois(filter = ""){
 
     const meta = document.createElement("div");
     meta.className = "poi-meta";
-    meta.innerText = `${p.type || "-"} • importanza ${p.importance ?? "-"} • sconto ${p.discount ?? 0}%`;
+    meta.innerText = String(p.type || "-") + " • importanza " + String(p.importance ?? "-") + " • sconto " + String(p.discount ?? 0) + "%";
 
     const desc = document.createElement("div");
     desc.className = "poi-meta";
@@ -292,6 +406,14 @@ function renderPois(filter = ""){
     div.addEventListener("click", () => openModal(p));
     listEl.appendChild(div);
   });
+}
+
+function openSuggestedPoi(name){
+  editingPoiId = null;
+  openModal();
+  nameEl.value = name || "";
+  modalTitleEl.innerText = "Aggiungi POI";
+  deleteBtn.style.display = "none";
 }
 
 function openModal(poi = null){
@@ -351,8 +473,8 @@ function buildPoiSaveRequest(poiId){
   const isEdit = Boolean(poiId);
   return {
     url: isEdit
-      ? `${SUPABASE_URL}/rest/v1/pois?id=eq.${encodeURIComponent(poiId)}`
-      : `${SUPABASE_URL}/rest/v1/pois`,
+      ? SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId)
+      : SUPABASE_URL + "/rest/v1/pois",
     method: isEdit ? "PATCH" : "POST"
   };
 }
@@ -375,7 +497,7 @@ async function savePoi(){
   }
 
   if(email !== OWNER_EMAIL){
-    alert(`Utente non autorizzato: ${email || "email non trovata"}`);
+    alert("Utente non autorizzato: " + (email || "email non trovata"));
     return;
   }
 
@@ -396,18 +518,9 @@ async function savePoi(){
   }catch(err){
     console.error("SAVE POI ERROR", err);
     const grantMsg = "SQL richiesto se è 42501:\nGRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;";
-    alert(`Errore salvataggio: ${err.message}\n\n${grantMsg}`);
+    alert("Errore salvataggio: " + err.message + "\n\n" + grantMsg);
   }
 }
-
-addBtn.addEventListener("click", () => openModal());
-deleteBtn.addEventListener("click", deletePoi);
-closeBtn.addEventListener("click", closeModal);
-saveBtn.addEventListener("click", savePoi);
-searchEl.addEventListener("input", () => renderPois(searchEl.value));
-importanceEl.addEventListener("input", () => updateImportanceUI());
-modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
-document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
 
 async function deletePoi(){
   if(!editingPoiId) return;
@@ -423,12 +536,12 @@ async function deletePoi(){
   }
 
   if(email !== OWNER_EMAIL){
-    alert(`Utente non autorizzato: ${email || "email non trovata"}`);
+    alert("Utente non autorizzato: " + (email || "email non trovata"));
     return;
   }
 
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?id=eq.${encodeURIComponent(editingPoiId)}`, {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(editingPoiId), {
       method: "DELETE",
       headers: buildHeaders({ useUserToken: true })
     });
@@ -438,17 +551,31 @@ async function deletePoi(){
     await loadPois();
   }catch(err){
     console.error("DELETE POI ERROR", err);
-    alert(`Errore eliminazione: ${err.message}`);
+    alert("Errore eliminazione: " + err.message);
   }
 }
+
+addBtn.addEventListener("click", () => openModal());
+deleteBtn.addEventListener("click", deletePoi);
+closeBtn.addEventListener("click", closeModal);
+saveBtn.addEventListener("click", savePoi);
+searchEl.addEventListener("input", () => renderPois(searchEl.value));
+importanceEl.addEventListener("input", () => updateImportanceUI());
+modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
+document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
 
 function runTests(){
   console.assert(typeof loadPois === "function", "loadPois deve esistere");
   console.assert(typeof savePoi === "function", "savePoi deve esistere");
   console.assert(typeof buildPoiSaveRequest === "function", "buildPoiSaveRequest deve esistere");
   console.assert(typeof renderPois === "function", "renderPois deve esistere");
+  console.assert(typeof renderTaskSlider === "function", "renderTaskSlider deve esistere");
   console.assert(typeof getMissingPoiFields === "function", "getMissingPoiFields deve esistere");
   console.assert(typeof getPoiAlertText === "function", "getPoiAlertText deve esistere");
+  console.assert(typeof hasOnlyMissingDescription === "function", "hasOnlyMissingDescription deve esistere");
+  console.assert(typeof createTaskPill === "function", "createTaskPill deve esistere");
+  console.assert(typeof openSuggestedPoi === "function", "openSuggestedPoi deve esistere");
+  console.assert(Array.isArray(REQUIRED_POIS), "lista POI fondamentali esiste");
   console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
   updateImportanceUI(75);
   console.assert(importanceEl.value === "75", "slider importanza si aggiorna");
@@ -456,7 +583,7 @@ function runTests(){
   console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
   console.assert(clampNumber("-10", 0, 100, 0) === 0, "discount min 0");
   console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
-  console.assert(buildHeaders().Authorization === `Bearer ${ANON_KEY}`, "read Authorization usa anon");
+  console.assert(buildHeaders().Authorization === "Bearer " + ANON_KEY, "read Authorization usa anon");
   console.assert(buildHeaders({ useUserToken: true }).Authorization.startsWith("Bearer "), "user token header presente se richiesto");
   console.assert(permissionHelp().includes("GRANT SELECT"), "messaggio permessi contiene GRANT SELECT");
   console.assert(isPermissionError({ status: 403, message: "permission denied for table pois" }) === true, "riconosce permission denied");
@@ -465,10 +592,14 @@ function runTests(){
   console.assert(buildPoiSaveRequest("123").method === "PATCH", "POI esistente usa PATCH");
   console.assert(buildPoiSaveRequest("123").url.includes("id=eq.123"), "PATCH filtra per id");
   console.assert(getMissingPoiFields({ description:"", coords:"" }).length === 2, "rileva descrizione e coordinate mancanti");
-  console.assert(getPoiAlertText({ description:"", coords:"" }) === "manca desc. + coord.", "testo badge per entrambi i campi mancanti");
-  console.assert(getPoiAlertText({ description:"test", coords:"" }) === "manca coordinate", "testo badge coordinate mancanti");
-  console.assert(getPoiAlertText({ description:"", coords:"44,9" }) === "manca descrizione", "testo badge descrizione mancante");
-  console.assert(getPoiAlertText({ description:"test", coords:"44,9" }) === "", "nessun badge se non manca nulla");
+  console.assert(getPoiAlertText({ description:"", coords:"" }) === "manca desc. + coord.", "testo logico per entrambi i campi mancanti");
+  console.assert(getPoiAlertText({ description:"test", coords:"" }) === "manca coordinate", "testo logico coordinate mancanti");
+  console.assert(getPoiAlertText({ description:"", coords:"44,9" }) === "manca descrizione", "testo logico descrizione mancante");
+  console.assert(getPoiAlertText({ description:"test", coords:"44,9" }) === "", "nessun testo se non manca nulla");
+  console.assert(hasOnlyMissingDescription({ description:"", coords:"44,9" }) === true, "helper solo descrizione mancante");
+  console.assert(hasOnlyMissingDescription({ description:"", coords:"" }) === false, "helper false se mancano anche coordinate");
+  console.assert(hasOnlyMissingDescription({ description:"test", coords:"" }) === false, "helper false se manca solo coordinate");
+  console.assert(hasOnlyMissingDescription({ description:"test", coords:"44,9" }) === false, "helper false se completo");
 
   const previousPois = pois;
   pois = [
@@ -477,12 +608,41 @@ function runTests(){
     { id:"missing-coords", name:"Senza coordinate", type:"bar", description:"Desc", coords:"", importance:50, discount:0 },
     { id:"missing-both", name:"Senza tutto", type:"bar", description:"", coords:"", importance:40, discount:0 }
   ];
+
   renderPois("");
   console.assert(listEl.querySelectorAll(".poi").length === 4, "renderPois mostra tutti i POI test");
-  console.assert(listEl.querySelectorAll(".poi-alert").length === 3, "renderPois crea badge solo sui POI incompleti");
-  console.assert(listEl.innerText.includes("manca desc. + coord."), "renderPois mostra badge combinato");
+  console.assert(listEl.querySelectorAll(".poi-alert").length === 4, "renderPois crea badge separati per descrizione e coordinate mancanti");
+  console.assert(listEl.querySelectorAll(".poi-alert.desc").length === 2, "lista mostra due badge gialli descrizione");
+  console.assert(listEl.querySelectorAll(".poi-alert.coord").length === 2, "lista mostra due badge rossi coordinate");
+  console.assert(listEl.innerText.includes("manca desc."), "lista mostra badge descrizione compatto");
+  console.assert(listEl.innerText.includes("no coord."), "lista mostra badge coordinate compatto");
+  console.assert(taskSliderEl.querySelectorAll(".task-card").length === 3, "task slider mostra tutti i POI con almeno un avviso");
+  console.assert(taskSliderEl.querySelectorAll(".task-pill").length === 4, "task slider crea pillole separate per ogni avviso");
+  console.assert(taskSliderEl.querySelectorAll(".task-pill.red").length === 2, "task slider crea pillole rosse per coordinate");
+  console.assert(taskSliderEl.innerText.includes("Senza descrizione"), "task slider contiene POI con descrizione mancante");
+  console.assert(taskSliderEl.innerText.includes("Senza coordinate"), "task slider contiene POI con coordinate mancanti");
+  console.assert(taskSliderEl.innerText.includes("Senza tutto"), "task slider contiene POI con entrambi gli avvisi");
+  console.assert(!taskSliderEl.innerText.includes("Completo"), "task slider esclude POI completi");
+  console.assert(taskSliderEl.innerText.includes("manca desc."), "task slider mostra pillola descrizione compatta");
+  console.assert(taskSliderEl.innerText.includes("no coord."), "task slider mostra pillola coordinate compatta");
+
+  // test missing core poi
+  pois = [];
+  renderPois("");
+  console.assert(taskSliderEl.querySelectorAll(".task-card").length >= REQUIRED_POIS.length, "mostra POI fondamentali mancanti");
+  console.assert(taskSliderEl.innerText.toLowerCase().includes("vernazza harbor"), "include POI fondamentale");
+  console.assert(taskSliderEl.innerText.toLowerCase().includes("poi mancante"), "rinomina missing poi in poi mancante");
+  openSuggestedPoi("Vernazza Harbor");
+  console.assert(modalEl.classList.contains("is-open"), "click POI mancante apre modale aggiungi");
+  console.assert(modalTitleEl.innerText === "Aggiungi POI", "POI mancante apre modale aggiungi");
+  console.assert(editingPoiId === null, "POI mancante non modifica un POI esistente");
+  console.assert(nameEl.value === "Vernazza Harbor", "POI mancante precompila il nome consigliato");
+  closeModal();
+  pois = previousPois;
+
   renderPois("completo");
   console.assert(listEl.querySelectorAll(".poi").length === 1, "renderPois filtra per ricerca");
+  console.assert(taskSliderEl.querySelectorAll(".task-card").length === 0, "task slider rispetta filtro ricerca");
   pois = previousPois;
   renderPois(searchEl.value);
 
