@@ -10,174 +10,354 @@
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#05070a;color:#fff}
 .header{position:sticky;top:0;background:#05070a;padding:16px;display:flex;gap:10px;align-items:center;z-index:10}
 .search{flex:1;min-width:0;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
-.add-btn{padding:12px 16px;border-radius:12px;border:none;background:white;color:black;font-weight:700;cursor:pointer}
-.status{padding:0 16px 8px;color:rgba(255,255,255,0.65);font-size:13px}
+.add-btn{padding:12px 16px;border-radius:12px;border:none;background:white;color:black;font-weight:700;cursor:pointer;white-space:nowrap}
+.status{padding:0 16px 8px;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.45}
 .status.error{color:#ffb4b4}
+.status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
 .list{padding:16px}
 .poi{padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)}
-.poi-title{font-weight:700}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center}
+.poi-title{font-weight:700;margin-bottom:4px}
+.poi-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
+.empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
 .modal.is-open{display:flex}
-.modal-content{background:#0a0c10;border-radius:18px;padding:18px;width:100%;max-width:420px}
-.close-btn{position:absolute;right:14px;top:14px}
-input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;background:rgba(255,255,255,0.08);color:white}
-button.save{width:100%;padding:14px;margin-top:14px;background:white;color:black;font-weight:800}
+.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
+.close-btn{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:18px;cursor:pointer}
+input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
+textarea{min-height:90px;resize:vertical}
+select option{color:#111}
+button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
 
 <div class="header">
   <input id="search" class="search" placeholder="Cerca POI..." />
-  <button id="addBtn" class="add-btn">Aggiungi</button>
+  <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
 </div>
 
 <div id="status" class="status">Caricamento POI...</div>
 <div id="list" class="list"></div>
 
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <button id="closeBtn" class="close-btn">×</button>
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true">
+    <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
     <h2>Aggiungi POI</h2>
 
     <input id="name" placeholder="Nome" />
     <input id="coords" placeholder="Coordinate" />
     <textarea id="description" placeholder="Descrizione"></textarea>
-    <input id="importance" type="number" placeholder="Importanza" />
+    <input id="importance" type="number" min="1" max="100" placeholder="Importanza (1-100)" />
 
     <select id="type">
       <option value="chiesa">chiesa</option>
       <option value="monumento">monumento</option>
       <option value="sentiero">sentiero</option>
       <option value="spiaggia">spiaggia</option>
+      <option value="stazione">stazione</option>
       <option value="ristorante">ristorante</option>
+      <option value="bar">bar</option>
+      <option value="punto panoramico">punto panoramico</option>
     </select>
 
-    <input id="emails" placeholder="emails" />
-    <input id="phone" placeholder="phone" />
-    <input id="discount" type="number" placeholder="sconto" />
+    <input id="emails" placeholder="Email autorizzate" />
+    <input id="phone" placeholder="Telefono" />
+    <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
 
-    <button class="save" id="saveBtn">Salva</button>
+    <button class="save" id="saveBtn" type="button">Salva</button>
   </div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
-// ⚠️ USA SOLO LA ANON PUBLIC KEY (NON service_role, NON secret)
-// ⚠️ IMPORTANTE: NON usare sb_publishable
-// Usa SOLO la ANON KEY (Legacy → anon public)
-// Vai in: Settings → API → Legacy anon key
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const OWNER_EMAIL = "5terrego.info@gmail.com";
 
 let pois = [];
 
-const status = document.getElementById("status");
-const list = document.getElementById("list");
-const modal = document.getElementById("modal");
+const statusEl = document.getElementById("status");
+const listEl = document.getElementById("list");
+const modalEl = document.getElementById("modal");
+const searchEl = document.getElementById("search");
 const addBtn = document.getElementById("addBtn");
 const closeBtn = document.getElementById("closeBtn");
 const saveBtn = document.getElementById("saveBtn");
 
-const name = document.getElementById("name");
-const coords = document.getElementById("coords");
-const description = document.getElementById("description");
-const importance = document.getElementById("importance");
-const type = document.getElementById("type");
-const emails = document.getElementById("emails");
-const phone = document.getElementById("phone");
-const discount = document.getElementById("discount");
+const nameEl = document.getElementById("name");
+const coordsEl = document.getElementById("coords");
+const descriptionEl = document.getElementById("description");
+const importanceEl = document.getElementById("importance");
+const typeEl = document.getElementById("type");
+const emailsEl = document.getElementById("emails");
+const phoneEl = document.getElementById("phone");
+const discountEl = document.getElementById("discount");
 
-function getToken(){
-  for(const k of Object.keys(localStorage)){
-    if(k.includes("auth-token")){
+function setStatus(message, isError = false){
+  statusEl.innerHTML = message;
+  statusEl.classList.toggle("error", Boolean(isError));
+}
+
+function getAuthSession(){
+  for(const key of Object.keys(localStorage)){
+    if(key.startsWith("sb-") && key.endsWith("-auth-token")){
       try{
-        return JSON.parse(localStorage.getItem(k)).access_token;
-      }catch{}
+        const parsed = JSON.parse(localStorage.getItem(key));
+        if(parsed?.access_token) return parsed;
+        if(parsed?.currentSession?.access_token) return parsed.currentSession;
+      }catch(err){
+        console.warn("Auth token non leggibile", err);
+      }
     }
   }
   return null;
 }
 
-async function loadPois(){
+function getToken(){
+  return getAuthSession()?.access_token || null;
+}
+
+function getUserEmail(){
+  const session = getAuthSession();
+  return (session?.user?.email || "").toLowerCase();
+}
+
+function clampNumber(value, min, max, fallback){
+  const n = Number(value);
+  if(Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function buildHeaders({ useUserToken = false, extra = {} } = {}){
+  const token = useUserToken ? getToken() : null;
+  return {
+    apikey: ANON_KEY,
+    Authorization: `Bearer ${token || ANON_KEY}`,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    ...extra
+  };
+}
+
+async function parseResponse(res){
+  const text = await res.text();
+  let data = null;
+
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?select=*`,{
-      headers:{
-        apikey:ANON_KEY,
-        "Content-Type":"application/json",
-        "Accept":"application/json"
-      }
+    data = text ? JSON.parse(text) : null;
+  }catch(err){
+    data = text;
+  }
+
+  if(!res.ok){
+    const message = typeof data === "object" && data
+      ? (data.message || data.hint || JSON.stringify(data))
+      : String(data || res.statusText);
+    const error = new Error(message);
+    error.payload = data;
+    error.status = res.status;
+    throw error;
+  }
+
+  return data;
+}
+
+function isPermissionError(err){
+  const text = `${err?.message || ""} ${JSON.stringify(err?.payload || {})}`.toLowerCase();
+  return err?.status === 401 || err?.status === 403 || text.includes("42501") || text.includes("permission denied") || text.includes("grant select");
+}
+
+function permissionHelp(){
+  return `Errore permessi Supabase.<br><br>Esegui in SQL Editor:<br>
+    <code>GRANT SELECT ON public.pois TO anon;</code><br>
+    <code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;</code>`;
+}
+
+async function loadPois(){
+  setStatus("Caricamento POI...");
+
+  try{
+    // 🔥 usa token utente se disponibile (così bypassi problema anon)
+    const hasUser = !!getToken();
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?select=*&order=importance.desc.nullslast`, {
+      method: "GET",
+      headers: buildHeaders({ useUserToken: hasUser })
     });
 
-    if(!res.ok){
-      const txt = await res.text();
-      throw new Error(txt);
+    pois = await parseResponse(res);
+    renderPois(searchEl.value);
+    setStatus(`${pois.length} POI caricati`);
+
+  }catch(err){
+    console.error("LOAD POIS ERROR", err);
+    pois = [];
+    renderPois(searchEl.value);
+
+    if(isPermissionError(err)){
+      setStatus(`${permissionHelp()}<br><br>⚠️ Oppure assicurati di essere loggato (lettura usa utente se presente)<br><br>Dettaglio: ${err.message}`, true);
+      return;
     }
 
-    pois = await res.json();
-    render();
-    status.innerText = pois.length + " POI";
-  }catch(e){
-    console.error(e);
-    status.innerText = "errore caricamento POI";
+    setStatus(`Errore caricamento POI: ${err.message}`, true);
+  }
+}/rest/v1/pois?select=*&order=importance.desc.nullslast`, {
+      method: "GET",
+      headers: buildHeaders()
+    });
+
+    pois = await parseResponse(res);
+    renderPois(searchEl.value);
+    setStatus(`${pois.length} POI caricati`);
+  }catch(err){
+    console.error("LOAD POIS ERROR", err);
+    pois = [];
+    renderPois(searchEl.value);
+
+    if(isPermissionError(err)){
+      setStatus(`${permissionHelp()}<br><br>Dettaglio: ${err.message}`, true);
+      return;
+    }
+
+    setStatus(`Errore caricamento POI: ${err.message}`, true);
   }
 }
 
-function render(){
-  list.innerHTML = "";
-  pois.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="poi";
-    d.innerHTML = `<b>${p.name || "(senza nome)"}</b><br>${p.type || "-"}`;
-    list.appendChild(d);
+function renderPois(filter = ""){
+  const q = filter.trim().toLowerCase();
+  const filtered = pois.filter(p => `${p.name || ""} ${p.type || ""} ${p.description || ""}`.toLowerCase().includes(q));
+
+  listEl.innerHTML = "";
+  if(filtered.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerText = "Nessun POI trovato";
+    listEl.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "poi";
+
+    const title = document.createElement("div");
+    title.className = "poi-title";
+    title.innerText = p.name || "(senza nome)";
+
+    const meta = document.createElement("div");
+    meta.className = "poi-meta";
+    meta.innerText = `${p.type || "-"} • importanza ${p.importance ?? "-"} • sconto ${p.discount ?? 0}%`;
+
+    const desc = document.createElement("div");
+    desc.className = "poi-meta";
+    desc.innerText = p.description || "";
+
+    div.appendChild(title);
+    div.appendChild(meta);
+    if(p.description) div.appendChild(desc);
+    listEl.appendChild(div);
   });
+}
+
+function openModal(){
+  modalEl.classList.add("is-open");
+  modalEl.setAttribute("aria-hidden", "false");
+}
+
+function closeModal(){
+  modalEl.classList.remove("is-open");
+  modalEl.setAttribute("aria-hidden", "true");
+}
+
+function clearForm(){
+  nameEl.value = "";
+  coordsEl.value = "";
+  descriptionEl.value = "";
+  importanceEl.value = "";
+  typeEl.value = "chiesa";
+  emailsEl.value = "";
+  phoneEl.value = "";
+  discountEl.value = "";
+}
+
+function readPoiForm(){
+  return {
+    name: nameEl.value.trim(),
+    coords: coordsEl.value.trim(),
+    description: descriptionEl.value.trim(),
+    importance: clampNumber(importanceEl.value, 1, 100, 1),
+    type: typeEl.value,
+    emails: emailsEl.value.trim(),
+    phone: phoneEl.value.trim(),
+    discount: clampNumber(discountEl.value, 0, 100, 0)
+  };
 }
 
 async function savePoi(){
   const token = getToken();
+  const email = getUserEmail();
+  const poi = readPoiForm();
 
-  const poi = {
-    name: name.value,
-    coords: coords.value,
-    description: description.value,
-    importance: Number(importance.value)||1,
-    type: type.value,
-    emails: emails.value,
-    phone: phone.value,
-    discount: Number(discount.value)||0
-  };
+  if(!poi.name){
+    alert("Nome obbligatorio");
+    return;
+  }
+
+  if(!token){
+    alert("Devi essere loggato per salvare.");
+    return;
+  }
+
+  if(email !== OWNER_EMAIL){
+    alert(`Utente non autorizzato: ${email || "email non trovata"}`);
+    return;
+  }
 
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`,{
-      method:"POST",
-      headers:{
-        apikey:ANON_KEY,
-        Authorization:`Bearer ${token}`,
-        "Content-Type":"application/json"
-      },
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois`, {
+      method: "POST",
+      headers: buildHeaders({
+        useUserToken: true,
+        extra: { Prefer: "return=representation" }
+      }),
       body: JSON.stringify(poi)
     });
 
-    if(!res.ok){
-      const t = await res.text();
-      throw new Error(t);
-    }
-
+    await parseResponse(res);
+    clearForm();
     closeModal();
-    loadPois();
-
-  }catch(e){
-    alert(e.message);
+    await loadPois();
+  }catch(err){
+    console.error("SAVE POI ERROR", err);
+    const grantMsg = "SQL richiesto se è 42501:\nGRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;";
+    alert(`Errore salvataggio: ${err.message}\n\n${grantMsg}`);
   }
 }
 
-function openModal(){ modal.classList.add("is-open"); }
-function closeModal(){ modal.classList.remove("is-open"); }
+addBtn.addEventListener("click", openModal);
+closeBtn.addEventListener("click", closeModal);
+saveBtn.addEventListener("click", savePoi);
+searchEl.addEventListener("input", () => renderPois(searchEl.value));
+modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
+document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
 
-addBtn.onclick=()=>openModal();
-closeBtn.onclick=()=>closeModal();
-saveBtn.onclick=savePoi;
+function runTests(){
+  console.assert(typeof loadPois === "function", "loadPois deve esistere");
+  console.assert(typeof savePoi === "function", "savePoi deve esistere");
+  console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
+  console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
+  console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
+  console.assert(buildHeaders().Authorization === `Bearer ${ANON_KEY}`, "read Authorization usa anon");
+  console.assert(permissionHelp().includes("GRANT SELECT"), "messaggio permessi contiene GRANT SELECT");
+  console.assert(isPermissionError({ status: 403, message: "permission denied for table pois" }) === true, "riconosce permission denied");
+  console.assert(isPermissionError({ status: 200, message: "ok" }) === false, "non segnala falsi permission error");
+  openModal();
+  console.assert(modalEl.classList.contains("is-open"), "openModal apre");
+  closeModal();
+  console.assert(!modalEl.classList.contains("is-open"), "closeModal chiude");
+}
 
+runTests();
 loadPois();
 </script>
-
 </body>
 </html>
