@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blog Editor</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#05070a;color:#fff}
+.header{position:sticky;top:0;background:#05070a;padding:16px;display:flex;gap:10px;align-items:center;z-index:10}
+.search{flex:1;min-width:0;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;outline:none;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,0.25);transition:all .2s ease}
+.search::placeholder{color:rgba(255,255,255,0.5)}
+.search:focus{border:1px solid rgba(255,255,255,0.25);background:linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.06));box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+.add-btn{padding:14px 18px;border-radius:16px;border:none;background:linear-gradient(135deg,#ffffff,#eaeaea);color:black;font-weight:800;cursor:pointer;white-space:nowrap;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.3);transition:all .18s ease}
+.add-btn:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(0,0,0,0.4)}
+.add-btn:active{transform:scale(.96);box-shadow:0 4px 12px rgba(0,0,0,0.25)}
+.status{padding:0 16px 8px;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.45}
+.status.error{color:#ffb4b4}
+.status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
+.top-title{padding:18px 16px 4px}
+.top-title h1{margin:0;font-size:26px;letter-spacing:-.04em}
+.top-title p{margin:6px 0 0;color:rgba(255,255,255,.62);font-size:13px;line-height:1.4}
+.list{padding:16px}
+.post{position:relative;padding:14px;padding-right:124px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease;overflow:hidden}
+.post:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
+.post-title{font-weight:800;margin-bottom:5px;line-height:1.25}
+.post-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
+.post-excerpt{margin-top:6px;font-size:13px;color:rgba(255,255,255,0.72);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post-alert{position:absolute;right:10px;max-width:112px;padding:5px 7px;border-radius:999px;font-size:9px;font-weight:800;line-height:1;text-align:center;text-transform:uppercase;letter-spacing:.01em;pointer-events:none;white-space:nowrap}
+.post-alert.draft{top:10px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966}
+.post-alert.missing{top:36px;background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
+.empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.is-open{display:flex}
+.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;padding-top:60px;width:100%;max-width:560px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
+.close-btn{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:18px;cursor:pointer}
+input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none;font-size:14px}
+textarea{min-height:110px;resize:vertical;line-height:1.45}
+#content{min-height:260px}
+select option{color:#111}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
+button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:none;background:#ff3b30;color:white;font-weight:800;cursor:pointer}
+.slug-preview{margin-top:8px;font-size:12px;color:rgba(255,255,255,.58);word-break:break-all}
+.slug-preview strong{color:#fff}
+.preview-card{margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08)}
+.preview-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);font-weight:800;margin-bottom:8px}
+.preview-title{font-weight:900;font-size:18px;line-height:1.15;letter-spacing:-.03em}
+.preview-excerpt{margin-top:6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.68)}
+.task-slider{display:flex;gap:10px;overflow-x:auto;padding:12px 16px 4px;scroll-snap-type:x mandatory}
+.task-slider::-webkit-scrollbar{display:none}
+.task-card{position:relative;flex:0 0 auto;min-width:150px;max-width:175px;padding:12px;padding-top:34px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
+.task-title{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-pill{font-size:9px;padding:4px 7px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;line-height:1;margin-right:4px;margin-top:4px}
+.task-pill.red{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
+@media(max-width:520px){.row{grid-template-columns:1fr}.post{padding-right:100px}.header{padding:12px}.add-btn{padding-left:14px;padding-right:14px}}
+</style>
+</head>
+<body>
+
+<div class="top-title">
+  <h1>Blog Editor</h1>
+  <p>Gestisci articoli, guide e contenuti editoriali di 5TerreGo.</p>
+</div>
+
+<div id="taskSlider" class="task-slider"></div>
+
+<div class="header">
+  <input id="search" class="search" placeholder="Cerca articoli..." />
+  <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
+</div>
+
+<div id="status" class="status">Caricamento articoli...</div>
+<div id="list" class="list"></div>
+
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true">
+    <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
+    <h2 id="modalTitle">Aggiungi articolo</h2>
+
+    <input id="titleInput" placeholder="Titolo articolo" />
+    <input id="slug" placeholder="Slug URL, es: best-beaches-cinque-terre" />
+    <div id="slugPreview" class="slug-preview">URL: <strong>/blog/</strong></div>
+
+    <textarea id="excerpt" placeholder="Estratto breve per card e anteprima"></textarea>
+    <textarea id="content" placeholder="Contenuto completo articolo"></textarea>
+
+    <input id="coverImage" placeholder="URL immagine copertina" />
+
+    <div class="row">
+      <select id="category">
+        <option value="guide">guide</option>
+        <option value="beaches">beaches</option>
+        <option value="trails">trails</option>
+        <option value="food">food</option>
+        <option value="transport">transport</option>
+        <option value="tips">tips</option>
+        <option value="news">news</option>
+      </select>
+
+      <select id="statusSelect">
+        <option value="draft">draft</option>
+        <option value="published">published</option>
+        <option value="hidden">hidden</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <input id="author" placeholder="Autore" />
+      <input id="publishedAt" type="datetime-local" placeholder="Data pubblicazione" />
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-label">Anteprima card</div>
+      <div id="previewTitle" class="preview-title">Titolo articolo</div>
+      <div id="previewExcerpt" class="preview-excerpt">Estratto breve dell’articolo...</div>
+    </div>
+
+    <button class="save" id="saveBtn" type="button">Salva</button>
+    <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina articolo</button>
+  </div>
+</div>
+
+
+<script>
+/*
+  IMPORTANTE:
+  Sostituisci ANON_KEY sotto con la stessa anon key REST lunga che usi in poieditor.html.
+  Nel tuo POI editor è questa:
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+*/
+const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+const SUPABASE_ANON_REST_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const OWNER_EMAIL = "5terrego.info@gmail.com";
+const BLOG_TABLE = "blog_posts";
+
+let posts = [];
+let editingPostId = null;
+
+const statusEl = document.getElementById("status");
+const listEl = document.getElementById("list");
+const taskSliderEl = document.getElementById("taskSlider");
+const modalEl = document.getElementById("modal");
+const modalTitleEl = document.getElementById("modalTitle");
+const searchEl = document.getElementById("search");
+const addBtn = document.getElementById("addBtn");
+const closeBtn = document.getElementById("closeBtn");
+const saveBtn = document.getElementById("saveBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+
+const titleInputEl = document.getElementById("titleInput");
+const slugEl = document.getElementById("slug");
+const slugPreviewEl = document.getElementById("slugPreview");
+const excerptEl = document.getElementById("excerpt");
+const contentEl = document.getElementById("content");
+const coverImageEl = document.getElementById("coverImage");
+const categoryEl = document.getElementById("category");
+const statusSelectEl = document.getElementById("statusSelect");
+const authorEl = document.getElementById("author");
+const publishedAtEl = document.getElementById("publishedAt");
+const previewTitleEl = document.getElementById("previewTitle");
+const previewExcerptEl = document.getElementById("previewExcerpt");
+
+function setStatus(message, isError = false){
+  statusEl.innerHTML = message;
+  statusEl.classList.toggle("error", Boolean(isError));
+}
+
+function getAuthSession(){
+  for(const key of Object.keys(localStorage)){
+    if(key.startsWith("sb-") && key.endsWith("-auth-token")){
+      try{
+        const parsed = JSON.parse(localStorage.getItem(key));
+        if(parsed && parsed.access_token) return parsed;
+        if(parsed && parsed.currentSession && parsed.currentSession.access_token) return parsed.currentSession;
+      }catch(err){
+        console.warn("Auth token non leggibile", err);
+      }
+    }
+  }
+  return null;
+}
+
+function getToken(){
+  const session = getAuthSession();
+  return session && session.access_token ? session.access_token : null;
+}
+
+function getUserEmail(){
+  const session = getAuthSession();
+  return String((session && session.user && session.user.email) || "").toLowerCase();
+}
+
+function buildHeaders({ useUserToken = false, extra = {} } = {}){
+  const token = useUserToken ? getToken() : null;
+  return {
+    apikey: SUPABASE_ANON_REST_KEY,
+    Authorization: "Bearer " + (token || SUPABASE_ANON_REST_KEY),
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    ...extra
+  };
+}
+
+async function parseResponse(res){
+  const text = await res.text();
+  let data = null;
+
+  try{
+    data = text ? JSON.parse(text) : null;
+  }catch(err){
+    data = text;
+  }
+
+  if(!res.ok){
+    const message = typeof data === "object" && data
+      ? (data.message || data.hint || JSON.stringify(data))
+      : String(data || res.statusText);
+    const error = new Error(message);
+    error.payload = data;
+    error.status = res.status;
+    throw error;
+  }
+
+  return data;
+}
+
+function isPermissionError(err){
+  const text = String((err && err.message) || "") + " " + JSON.stringify((err && err.payload) || {});
+  const lower = text.toLowerCase();
+  return (err && (err.status === 401 || err.status === 403)) || lower.includes("42501") || lower.includes("permission denied") || lower.includes("grant select");
+}
+
+function permissionHelp(){
+  return "Errore permessi Supabase.<br><br>Se non esiste ancora, crea la tabella blog_posts in SQL Editor:<br>" +
+    "<code>create table public.blog_posts (id uuid default gen_random_uuid() primary key, title text not null, slug text unique, excerpt text, content text, cover_image text, category text, status text default 'draft', author text, published_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());</code><br><br>" +
+    "Poi esegui:<br>" +
+    "<code>GRANT SELECT ON public.blog_posts TO anon;</code><br>" +
+    "<code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.blog_posts TO authenticated;</code>";
+}
+
+function slugify(value){
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 90);
+}
+
+function formatDateForInput(value){
+  if(!value) return "";
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return "";
+  const pad = n => String(n).padStart(2,"0");
+  return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+
+function formatDateForDisplay(value){
+  if(!value) return "non pubblicato";
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return "data non valida";
+  return d.toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function getMissingPostFields(post){
+  const missing = [];
+  if(!String((post && post.title) || "").trim()) missing.push("titolo");
+  if(!String((post && post.slug) || "").trim()) missing.push("slug");
+  if(!String((post && post.excerpt) || "").trim()) missing.push("estratto");
+  if(!String((post && post.content) || "").trim()) missing.push("contenuto");
+  if(!String((post && post.cover_image) || "").trim()) missing.push("cover");
+  return missing;
+}
+
+function renderTaskSlider(filteredPosts){
+  taskSliderEl.innerHTML = "";
+  const taskPosts = filteredPosts.filter(p => getMissingPostFields(p).length > 0 || p.status !== "published");
+
+  if(!taskPosts.length){
+    const card = document.createElement("div");
+    card.className = "task-card";
+    card.innerHTML = '<div class="task-title">Tutto ok</div><div class="task-pill">nessun problema</div>';
+    taskSliderEl.appendChild(card);
+    return;
+  }
+
+  taskPosts.forEach(post=>{
+    const missing = getMissingPostFields(post);
+    const card = document.createElement("div");
+    card.className = "task-card";
+    card.addEventListener("click", () => openModal(post));
+
+    const title = document.createElement("div");
+    title.className = "task-title";
+    title.innerText = post.title || "Articolo senza titolo";
+    card.appendChild(title);
+
+    if(post.status !== "published"){
+      const pill = document.createElement("div");
+      pill.className = "task-pill";
+      pill.innerText = post.status || "draft";
+      card.appendChild(pill);
+    }
+
+    missing.slice(0,3).forEach(field=>{
+      const pill = document.createElement("div");
+      pill.className = field === "contenuto" || field === "cover" ? "task-pill red" : "task-pill";
+      pill.innerText = "manca " + field;
+      card.appendChild(pill);
+    });
+
+    taskSliderEl.appendChild(card);
+  });
+}
+
+async function loadPosts(){
+  setStatus("Caricamento articoli...");
+
+  try{
+    const hasUser = Boolean(getToken());
+    const res = await fetch(SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?select=*&order=created_at.desc", {
+      method:"GET",
+      headers:buildHeaders({ useUserToken:hasUser })
+    });
+
+    posts = await parseResponse(res);
+    editingPostId = null;
+    renderPosts(searchEl.value);
+    setStatus(String(posts.length) + " articoli caricati");
+  }catch(err){
+    console.error("LOAD POSTS ERROR", err);
+    posts = [];
+    renderPosts(searchEl.value);
+
+    if(isPermissionError(err)){
+      setStatus(permissionHelp() + "<br><br>Dettaglio: " + err.message, true);
+      return;
+    }
+
+    setStatus("Errore caricamento articoli: " + err.message, true);
+  }
+}
+
+function renderPosts(filter = ""){
+  listEl.innerHTML = "";
+
+  const query = String(filter || "").trim().toLowerCase();
+  const filtered = posts.filter(post=>{
+    const haystack = String(post.title || "") + " " + String(post.slug || "") + " " + String(post.category || "") + " " + String(post.excerpt || "") + " " + String(post.content || "");
+    return !query || haystack.toLowerCase().includes(query);
+  });
+
+  renderTaskSlider(filtered);
+
+  if(!filtered.length){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerText = posts.length ? "Nessun articolo trovato" : "Nessun articolo disponibile";
+    listEl.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(post=>{
+    const div = document.createElement("div");
+    div.className = "post";
+
+    if(post.status !== "published"){
+      const badge = document.createElement("div");
+      badge.className = "post-alert draft";
+      badge.innerText = post.status || "draft";
+      div.appendChild(badge);
+    }
+
+    const missing = getMissingPostFields(post);
+    if(missing.length){
+      const badge = document.createElement("div");
+      badge.className = "post-alert missing";
+      badge.innerText = "manca " + missing[0];
+      div.appendChild(badge);
+    }
+
+    const title = document.createElement("div");
+    title.className = "post-title";
+    title.innerText = post.title || "Articolo senza titolo";
+
+    const meta = document.createElement("div");
+    meta.className = "post-meta";
+    meta.innerText = String(post.category || "-") + " • " + String(post.status || "draft") + " • " + formatDateForDisplay(post.published_at);
+
+    const excerpt = document.createElement("div");
+    excerpt.className = "post-excerpt";
+    excerpt.innerText = post.excerpt || "";
+
+    div.appendChild(title);
+    div.appendChild(meta);
+    if(post.excerpt) div.appendChild(excerpt);
+    div.addEventListener("click", () => openModal(post));
+    listEl.appendChild(div);
+  });
+}
+
+function updateSlugAndPreview(){
+  if(!editingPostId && !slugEl.value.trim()){
+    slugEl.value = slugify(titleInputEl.value);
+  } else {
+    slugEl.value = slugify(slugEl.value);
+  }
+
+  slugPreviewEl.innerHTML = "URL: <strong>/blog/" + (slugEl.value || "") + "</strong>";
+  previewTitleEl.innerText = titleInputEl.value.trim() || "Titolo articolo";
+  previewExcerptEl.innerText = excerptEl.value.trim() || "Estratto breve dell’articolo...";
+}
+
+function clearForm(resetEditing = true){
+  if(resetEditing) editingPostId = null;
+  titleInputEl.value = "";
+  slugEl.value = "";
+  excerptEl.value = "";
+  contentEl.value = "";
+  coverImageEl.value = "";
+  categoryEl.value = "guide";
+  statusSelectEl.value = "draft";
+  authorEl.value = "5TerreGo";
+  publishedAtEl.value = "";
+  updateSlugAndPreview();
+}
+
+function openModal(post = null){
+  deleteBtn.style.display = post ? "block" : "none";
+
+  if(post){
+    editingPostId = post.id;
+    modalTitleEl.innerText = "Modifica articolo";
+    titleInputEl.value = post.title || "";
+    slugEl.value = post.slug || "";
+    excerptEl.value = post.excerpt || "";
+    contentEl.value = post.content || "";
+    coverImageEl.value = post.cover_image || "";
+    categoryEl.value = post.category || "guide";
+    statusSelectEl.value = post.status || "draft";
+    authorEl.value = post.author || "5TerreGo";
+    publishedAtEl.value = formatDateForInput(post.published_at);
+  } else {
+    editingPostId = null;
+    modalTitleEl.innerText = "Aggiungi articolo";
+    clearForm(false);
+  }
+
+  updateSlugAndPreview();
+  modalEl.classList.add("is-open");
+  modalEl.setAttribute("aria-hidden", "false");
+}
+
+function closeModal(){
+  modalEl.classList.remove("is-open");
+  modalEl.setAttribute("aria-hidden", "true");
+}
+
+function readPostForm(){
+  const publishedAtValue = publishedAtEl.value ? new Date(publishedAtEl.value).toISOString() : null;
+  const now = new Date().toISOString();
+
+  return {
+    title:titleInputEl.value.trim(),
+    slug:slugify(slugEl.value.trim() || titleInputEl.value.trim()),
+    excerpt:excerptEl.value.trim(),
+    content:contentEl.value.trim(),
+    cover_image:coverImageEl.value.trim(),
+    category:categoryEl.value,
+    status:statusSelectEl.value,
+    author:authorEl.value.trim() || "5TerreGo",
+    published_at:publishedAtValue,
+    updated_at:now
+  };
+}
+
+function buildPostSaveRequest(postId){
+  const isEdit = Boolean(postId);
+  return {
+    url:isEdit ? SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?id=eq." + encodeURIComponent(postId) : SUPABASE_URL + "/rest/v1/" + BLOG_TABLE,
+    method:isEdit ? "PATCH" : "POST"
+  };
+}
+
+async function assertOwner(){
+  const token = getToken();
+  const email = getUserEmail();
+
+  if(!token){
+    alert("Devi essere loggato per modificare il blog.");
+    return false;
+  }
+
+  if(email !== OWNER_EMAIL){
+    alert("Utente non autorizzato: " + (email || "email non trovata"));
+    return false;
+  }
+
+  return true;
+}
+
+async function savePost(){
+  if(!(await assertOwner())) return;
+
+  const post = readPostForm();
+  const saveTargetId = editingPostId;
+  const request = buildPostSaveRequest(saveTargetId);
+
+  if(!post.title){
+    alert("Titolo obbligatorio");
+    return;
+  }
+
+  if(!post.slug){
+    alert("Slug obbligatorio");
+    return;
+  }
+
+  try{
+    const res = await fetch(request.url, {
+      method:request.method,
+      headers:buildHeaders({ useUserToken:true, extra:{ Prefer:"return=representation" } }),
+      body:JSON.stringify(post)
+    });
+
+    await parseResponse(res);
+    clearForm();
+    closeModal();
+    await loadPosts();
+  }catch(err){
+    console.error("SAVE POST ERROR", err);
+    alert("Errore salvataggio: " + err.message + "\n\nSe è 42501 esegui i GRANT indicati nella pagina.");
+  }
+}
+
+async function deletePost(){
+  if(!editingPostId) return;
+  if(!(await assertOwner())) return;
+  if(!confirm("Sei sicuro di voler eliminare questo articolo?")) return;
+
+  try{
+    const res = await fetch(SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?id=eq." + encodeURIComponent(editingPostId), {
+      method:"DELETE",
+      headers:buildHeaders({ useUserToken:true })
+    });
+
+    await parseResponse(res);
+    closeModal();
+    await loadPosts();
+  }catch(err){
+    console.error("DELETE POST ERROR", err);
+    alert("Errore eliminazione: " + err.message);
+  }
+}
+
+addBtn.addEventListener("click", () => openModal());
+deleteBtn.addEventListener("click", deletePost);
+closeBtn.addEventListener("click", closeModal);
+saveBtn.addEventListener("click", savePost);
+searchEl.addEventListener("input", () => renderPosts(searchEl.value));
+titleInputEl.addEventListener("input", updateSlugAndPreview);
+slugEl.addEventListener("input", updateSlugAndPreview);
+excerptEl.addEventListener("input", updateSlugAndPreview);
+modalEl.addEventListener("click", event => { if(event.target === modalEl) closeModal(); });
+document.addEventListener("keydown", event => { if(event.key === "Escape") closeModal(); });
+
+function runTests(){
+  console.assert(typeof loadPosts === "function", "loadPosts deve esistere");
+  console.assert(typeof savePost === "function", "savePost deve esistere");
+  console.assert(typeof deletePost === "function", "deletePost deve esistere");
+  console.assert(typeof slugify === "function", "slugify deve esistere");
+  console.assert(slugify("Best Beaches Cinque Terre!") === "best-beaches-cinque-terre", "slugify corretto");
+  console.assert(buildPostSaveRequest(null).method === "POST", "nuovo articolo usa POST");
+  console.assert(buildPostSaveRequest("123").method === "PATCH", "articolo esistente usa PATCH");
+  console.assert(getMissingPostFields({title:"",slug:"",excerpt:"",content:"",cover_image:""}).length === 5, "rileva campi mancanti");
+}
+
+runTests();
+loadPosts();
+</script>
+</body>
+</html>
