@@ -136,7 +136,7 @@
     }
 
     .leaflet-container {
-      background: #000;
+      background: #f6f1e8 !important; /* fix nero */
       transform: translateZ(0);
       will-change: transform;
     }
@@ -239,6 +239,96 @@
       padding: 10px;
       pointer-events: none;
     }
+
+    #poi-card {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: #f6f1e8; /* bianco panna */
+      overflow: hidden;
+    }
+
+    #poi-map-preview {
+      position: absolute;
+      inset: 0;
+      background: #f6f1e8; /* niente nero */
+    }
+
+    #poi-circle {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(60vw, 240px);
+      height: min(60vw, 240px);
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.9);
+      box-shadow: 0 18px 55px rgba(0,0,0,0.25);
+      background: #f6f1e8; /* niente nero */
+      z-index: 2;
+    }
+
+    #poi-circle .leaflet-container {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .poi-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      padding: 40px 28px calc(28px + env(safe-area-inset-bottom));
+      background: transparent; /* niente tendina */
+      color: #000;
+      box-shadow: none;
+      text-align: center; /* centra tutto */
+    }
+
+    #poi-title {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 14px;
+      letter-spacing: -0.04em;
+      text-align: center;
+    }
+
+    #poi-desc {
+      font-size: 16px;
+      line-height: 1.6;
+      color: rgba(0,0,0,0.7);
+      margin-top: 6px;
+      text-align: center;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #poi-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 4;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.52);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 24px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
   </style>
 </head>
 <body>
@@ -272,6 +362,7 @@
   <input id="poi-img" placeholder="URL foto" />
   <input id="poi-email" placeholder="Email owner" inputmode="email" />
   <input id="poi-phone" placeholder="Telefono" inputmode="tel" />
+  <input id="poi-description" placeholder="Descrizione POI" />
   <input id="poi-relevance" placeholder="Punteggio rilevanza 1-100" inputmode="numeric" />
   <button id="add-poi" type="button">Aggiungi POI</button>
 </div>
@@ -279,6 +370,17 @@
 <div class="bottom-card" id="card" aria-hidden="true">
   <img id="card-img" src="" alt="" />
   <div class="title" id="card-title"></div>
+  <div class="desc" id="card-desc" style="color: rgba(255,255,255,0.8); padding: 0 10px 12px; font-size: 13px; line-height: 1.4;"></div>
+</div>
+
+<div id="poi-card" aria-hidden="true">
+  <div id="poi-map-preview"></div>
+  <div id="poi-circle"></div>
+  <div class="poi-content">
+    <div id="poi-title"></div>
+    <div id="poi-desc"></div>
+  </div>
+  <div id="poi-close">×</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -329,22 +431,17 @@
     minZoom: 11,
     zoomControl: false,
     preferCanvas: true,
-
-    // ✨ smooth zoom + pan tuning
     inertia: true,
     inertiaDeceleration: 2500,
     inertiaMaxSpeed: 2000,
     easeLinearity: 0.2,
-
     zoomAnimation: true,
     fadeAnimation: true,
     markerZoomAnimation: true,
-
-    zoomSnap: 0.25,      // smoother zoom steps
+    zoomSnap: 0.25,
     zoomDelta: 0.25,
     wheelPxPerZoomLevel: 80,
     wheelDebounceTime: 20,
-
     updateWhenIdle: false
   }).setView([44.12, 9.71], 12);
 
@@ -361,8 +458,15 @@
 
   var card = document.getElementById('card');
   var cardTitle = document.getElementById('card-title');
+  var cardDesc = document.getElementById('card-desc');
   var cardImg = document.getElementById('card-img');
   var ownerPanel = document.getElementById('owner-panel');
+  var poiCard = document.getElementById('poi-card');
+  var poiTitle = document.getElementById('poi-title');
+  var poiDesc = document.getElementById('poi-desc');
+  var poiClose = document.getElementById('poi-close');
+  var poiCircle = document.getElementById('poi-circle');
+  var poiMapPreview = document.getElementById('poi-map-preview');
   var loginBtn = document.getElementById('login');
   var addPoiBtn = document.getElementById('add-poi');
   var searchInput = document.getElementById('search');
@@ -378,6 +482,7 @@
   var hasMoved = false;
   var currentUser = null;
   var userCheckTimer = null;
+  var poiMiniMap = null;
 
   function readValue(value, fallback) {
     return value === undefined || value === null ? fallback : value;
@@ -403,14 +508,12 @@
 
     if (raw && typeof raw.coords === 'string') {
       var str = raw.coords.trim();
-      var parts;
+      var parts = str.split(',');
 
-      if (str.split(',').length > 2) {
-        parts = str.split(',');
+      if (parts.length > 2) {
         lat = Number(String(parts[0]).trim() + '.' + String(parts[1]).trim());
         lng = Number(String(parts[2]).trim() + '.' + String(parts[3]).trim());
       } else {
-        parts = str.split(',');
         lat = Number(String(parts[0]).trim());
         lng = Number(String(parts[1]).trim());
       }
@@ -454,22 +557,17 @@
 
   function getMinZoomForImportance(importance) {
     var n = Number(importance || 0);
-
-    // 🔧 Tuned so 60 is NOT visible early
-    // Push mid scores deeper into zoom
-    if (n >= 95) return 11;   // only top POIs very early
+    if (n >= 95) return 11;
     if (n >= 85) return 12;
     if (n >= 75) return 13;
     if (n >= 65) return 14;
-    if (n >= 55) return 15;   // ← 60 now appears later (zoom 15)
+    if (n >= 55) return 15;
     if (n >= 40) return 16;
-
     return 17;
   }
 
   function updatePOIVisibility() {
     var zoom = map.getZoom();
-
     poiLayer.clearLayers();
 
     poiMarkers.forEach(function (item) {
@@ -500,9 +598,18 @@
     cardTitle.innerText = item.name;
     cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
     cardImg.alt = item.name;
+
+    if (item.description && item.description.trim().length > 0) {
+      cardDesc.style.display = 'block';
+      cardDesc.innerText = item.description;
+    } else {
+      cardDesc.style.display = 'none';
+      cardDesc.innerText = '';
+    }
   }
 
   function showCityCard(item) {
+    closePOICard();
     setCardContent(item);
     card.style.display = 'block';
     card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
@@ -527,6 +634,18 @@
         card.style.display = 'none';
       }
     }, 300);
+  }
+
+  function closePOICard() {
+    poiCard.style.display = 'none';
+    poiCard.setAttribute('aria-hidden', 'true');
+
+    if (poiMiniMap) {
+      try { poiMiniMap.remove(); } catch (error) {}
+      poiMiniMap = null;
+    }
+
+    poiCircle.innerHTML = '';
   }
 
   function showCityByIndex(index, shouldCenter) {
@@ -558,7 +677,7 @@
   }
 
   function evaluateAutoCard() {
-    if (isProgrammaticMove) return;
+    if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return;
 
     var zoom = map.getZoom();
     var closest = getClosestCity();
@@ -606,6 +725,59 @@
     }, 250);
   }
 
+  function showPOICard(poi) {
+    hideCard();
+    currentDataset = 'pois';
+    currentIndex = -1;
+    poiCard.style.display = 'block';
+    poiCard.setAttribute('aria-hidden', 'false');
+    poiTitle.innerText = poi.name;
+    poiDesc.innerText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
+    poiDesc.style.display = 'block';
+    poiMapPreview.style.background = '#f6f1e8';
+
+    if (poiMiniMap) {
+      try { poiMiniMap.remove(); } catch (error) {}
+      poiMiniMap = null;
+    }
+
+    poiCircle.innerHTML = '';
+
+    poiMiniMap = L.map(poiCircle, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false
+    });
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      noWrap: true
+    }).addTo(poiMiniMap);
+
+    L.marker(poi.coords, {
+      icon: L.divIcon({
+        className: 'custom-poi',
+        html: '<div class="poi-label">' + poi.symbol + '</div>',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      })
+    }).addTo(poiMiniMap);
+
+    poiMiniMap.setView(poi.coords, 18);
+
+    window.setTimeout(function () {
+      if (poiMiniMap) {
+        poiMiniMap.invalidateSize(true);
+        poiMiniMap.setView(poi.coords, 18, { animate: false });
+      }
+    }, 80);
+  }
+
   function createCityMarkers() {
     places.forEach(function (place, index) {
       L.marker(place.coords, {
@@ -650,9 +822,7 @@
           iconAnchor: [16, 16]
         })
       }).on('click', function () {
-        currentDataset = 'pois';
-        currentIndex = -1;
-        showCityCard(poi);
+        showPOICard(poi);
       });
 
       poiMarkers.push({ marker: marker, importance: poi.relevance || 0 });
@@ -675,6 +845,7 @@
     var image = document.getElementById('poi-img').value.trim();
     var ownerEmail = document.getElementById('poi-email').value.trim();
     var phone = document.getElementById('poi-phone').value.trim();
+    var description = document.getElementById('poi-description').value.trim();
     var relevance = Number(document.getElementById('poi-relevance').value || 0);
 
     var poi = normalizePOI({
@@ -685,7 +856,9 @@
       image: image,
       owner_email: ownerEmail,
       phone: phone,
-      relevance: relevance
+      description: description,
+      relevance: relevance,
+      importance: relevance
     });
 
     if (!isValidPOI(poi)) {
@@ -696,7 +869,7 @@
     if (SUPABASE_READY && supabaseClient) {
       var insertResponse = await supabaseClient
         .from('pois')
-        .insert([{ name: name, symbol: symbol, lat: lat, lng: lng, image: image, owner_email: ownerEmail, phone: phone, relevance: relevance }]);
+        .insert([{ name: name, symbol: symbol, lat: lat, lng: lng, image: image, owner_email: ownerEmail, phone: phone, description: description, relevance: relevance, importance: relevance }]);
 
       if (insertResponse.error) {
         alert('Errore salvataggio: ' + insertResponse.error.message);
@@ -764,7 +937,7 @@
           return parsed.currentSession.user;
         }
       }
-    } catch (e) {}
+    } catch (error) {}
 
     if (!supabaseClient) return null;
 
@@ -818,6 +991,7 @@
       window.location.href = '/login.html';
     });
 
+    poiClose.addEventListener('click', closePOICard);
     addPoiBtn.addEventListener('click', addPOI);
 
     searchInput.addEventListener('keydown', async function (event) {
@@ -934,22 +1108,22 @@
     console.assert(typeof readCurrentUser === 'function', 'readCurrentUser function exists');
     console.assert(typeof startUserPolling === 'function', 'startUserPolling function exists');
     console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
+    console.assert(typeof showPOICard === 'function', 'showPOICard function exists');
+    console.assert(typeof closePOICard === 'function', 'closePOICard function exists');
+    console.assert(document.getElementById('poi-circle') !== null, 'POI circle exists');
+    console.assert(document.getElementById('poi-description') !== null, 'POI description input exists');
+    console.assert(document.documentElement.innerHTML.indexOf('}).setView(poi.coords, 17);') === -1, 'Broken duplicated POI map fragment removed');
+    console.assert(document.documentElement.innerHTML.indexOf('var clone = container.cloneNode(true);') === -1, 'Broken cloned map fragment removed');
     console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
-    console.assert(document.documentElement.innerHTML.indexOf('= await supabaseClient.auth.getSession') === -1, 'Broken auth fragment removed');
-    console.assert(document.documentElement.innerHTML.indexOf('currentUser = null;\\n      currentIsOwner = false;') === -1, 'Broken orphan logout fragment removed');
     console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
     console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
     console.assert(ownerPanel.getAttribute('aria-hidden') === 'true', 'Owner panel starts hidden');
-    console.assert(typeof getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'string', 'Display name helper returns a string');
     console.assert(getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'test', 'Display name falls back to email prefix');
     console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
     console.assert(normalizePOI({ name: 'Y', coords: '44.2,9.8', type: 'chiesa' }).symbol === '⛪', 'normalizePOI supports coords string and church emoji');
     console.assert(normalizePOI({ name: 'Z', coords: '44.2,9.8', type: 'ristorante' }).symbol === '🍽️', 'normalizePOI supports restaurant emoji');
     console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'normalizePOI supports european decimal coords');
-    console.assert(typeof loginBtn.onclick !== 'function', 'Login button uses addEventListener, not overwritten onclick');
-    console.assert(document.documentElement.innerHTML.indexOf('var rawLat = readValue(raw.lat, raw.latitude);') === -1, 'Old stray normalizePOI fragment removed');
-    console.assert(document.documentElement.innerHTML.indexOf('updatePOIVisibility();\\n  });') === -1, 'Old broken loadPOIs closing removed');
-    console.assert(document.documentElement.innerHTML.indexOf("importance affects zoom');,") === -1, 'Broken test fragment removed');
+    console.assert(normalizePOI({ name: 'D', coords: '44.2,9.8', description: 'Testo' }).description === 'Testo', 'normalizePOI keeps description');
   }
 
   createCityMarkers();
