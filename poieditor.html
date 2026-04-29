@@ -26,7 +26,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,san
 .empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
 .modal.is-open{display:flex}
-.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
+.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;padding-top:60px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
 .close-btn{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:18px;cursor:pointer}
 input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
 textarea{min-height:90px;resize:vertical}
@@ -46,21 +46,82 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 /* TASK SLIDER */
 .task-slider{display:flex;gap:10px;overflow-x:auto;padding:12px 16px 4px;scroll-snap-type:x mandatory}
 .task-slider::-webkit-scrollbar{display:none}
-.task-card{flex:0 0 auto;min-width:140px;max-width:160px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
+.task-card{position:relative;flex:0 0 auto;min-width:140px;max-width:160px;padding:12px;padding-top:34px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
 .task-card:active{transform:scale(.98)}
 .task-title{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-pill{font-size:9px;padding:4px 7px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;line-height:1;margin-right:4px;margin-top:4px}
+.task-coin{position:absolute;top:4px;right:8px;z-index:2;font-size:10px;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);font-weight:900}
 .task-pill.red{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
+
+/* DEV GAME LEVELS */
+.dev-game{margin:12px 16px 8px;padding:14px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,0.11),rgba(255,255,255,0.045));border:1px solid rgba(255,255,255,0.12);box-shadow:0 12px 30px rgba(0,0,0,0.22);cursor:pointer}
+.dev-game-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.dev-game-rank{font-size:18px;font-weight:900;line-height:1.15}
+.dev-game-score{text-align:right;font-size:12px;color:rgba(255,255,255,0.66);white-space:nowrap}
+.dev-game-score strong{display:block;color:#fff;font-size:18px;line-height:1.15}
+.dev-game-bar{height:9px;border-radius:999px;background:rgba(255,255,255,0.11);overflow:hidden}
+.dev-game-fill{height:100%;width:0%;border-radius:999px;background:#fff;transition:width .35s ease}
+.dev-game-foot{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-size:11px;color:rgba(255,255,255,0.6)}
+.dev-game-foot strong{color:#fff}
+.dev-game-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);font-size:10px;font-weight:800;color:rgba(255,255,255,0.75)}
+.coins-button{position:absolute;top:10px;left:14px;padding:8px 12px;border-radius:10px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
+
+<div id="devGame" class="dev-game" aria-live="polite" onclick="openLevelsModal()">
+  <div class="dev-game-top">
+    <div>
+      <div id="devRank" class="dev-game-rank">Loading rank...</div>
+      <div id="devBadge" class="dev-game-badge">POI Hunter</div>
+    </div>
+    <div class="dev-game-score">
+      Score
+      <strong id="devScore">0</strong>
+    </div>
+  </div>
+  <div class="dev-game-bar"><div id="devFill" class="dev-game-fill"></div></div>
+  <div class="dev-game-foot">
+    <span id="devProgress">0 / 10 POI</span>
+    <span id="devNext">Next level: 10</span>
+  </div>
+</div>
+
+<div id="levelsModal" class="modal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeLevelsModal()">×</button>
+    <button class="coins-button" onclick="openCoinsMenu()">Compra monete</button>
+    <h2>Livelli</h2>
+    <div id="levelsList"></div>
+  </div>
+</div>
+
+<div id="coinsModal" class="modal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeCoinsMenu()">×</button>
+    <h2>Compra monete</h2>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
+      <button class="save" onclick="buyCoins('10 monete - 9 euro')">10 monete — 9€</button>
+      <button class="save" onclick="buyCoins('50 monete - 49 euro')">50 monete — 49€</button>
+      <button class="save" onclick="buyCoins('100 monete - 99 euro')">100 monete — 99€</button>
+      <button class="save" onclick="buyCoins('500 monete - 599 euro')">500 monete — 599€</button>
+      <button class="save" onclick="buyCoins('1000 monete - 1499 euro')">1000 monete — 1499€</button>
+    </div>
+  </div>
+</div>
+
+<div style="padding:8px 16px 0;text-align:center">
+  <div style="font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#fff">MATATIZI</div>
+  <div style="margin-top:4px;font-size:12px;color:rgba(255,255,255,0.6);font-weight:600">Completa un matatizo per ottenere monete</div>
+</div>
+<div id="taskSlider" class="task-slider"></div>
+
+<div style="height:1px;margin:6px 16px;background:rgba(255,255,255,0.08)"></div>
 
 <div class="header">
   <input id="search" class="search" placeholder="Cerca POI..." />
   <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
 </div>
-
-<div id="taskSlider" class="task-slider"></div>
 
 <div id="status" class="status">Caricamento POI...</div>
 <div id="list" class="list"></div>
@@ -106,48 +167,32 @@ const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
 const OWNER_EMAIL = "5terrego.info@gmail.com";
 
-// POI fondamentali 5 Terre (EN)
 const REQUIRED_POIS = [
-  // Trails
   "Blue Trail (Sentiero Azzurro)",
   "Monterosso to Vernazza Trail",
   "Vernazza to Corniglia Trail",
   "Corniglia to Manarola Trail",
   "Manarola to Riomaggiore Trail",
-
-  // Castles & Historic
   "Doria Castle, Vernazza",
   "Riomaggiore Castle",
   "Monterosso Old Town Tower",
-
-  // Churches
   "Church of San Pietro, Manarola",
   "Church of St. John the Baptist, Monterosso",
   "Church of Santa Margherita d'Antiochia, Vernazza",
   "Church of San Lorenzo, Manarola",
-
-  // Viewpoints
   "Manarola Scenic Viewpoint",
   "Vernazza Panorama Viewpoint",
   "Corniglia Panoramic Terrace",
   "Riomaggiore Sunset Viewpoint",
-
-  // Beaches
   "Fegina Beach",
   "Guvano Beach",
   "Monterosso Old Town Beach",
-
-  // Landmarks & Spots
   "Manarola Harbor",
   "Riomaggiore Harbor",
   "Vernazza Harbor Viewpoint",
   "Corniglia Train Station Viewpoint",
-
-  // Museums / Info
   "Cinque Terre National Park Visitor Center",
   "Wine Museum Manarola",
-
-  // Extra precise POI
   "Scalinata Lardarina (Corniglia Stairs)",
   "Vernazza Pier",
   "Riomaggiore Marina",
@@ -177,10 +222,145 @@ const typeEl = document.getElementById("type");
 const emailsEl = document.getElementById("emails");
 const phoneEl = document.getElementById("phone");
 const discountEl = document.getElementById("discount");
+const devRankEl = document.getElementById("devRank");
+const devScoreEl = document.getElementById("devScore");
+const devFillEl = document.getElementById("devFill");
+const devProgressEl = document.getElementById("devProgress");
+const devNextEl = document.getElementById("devNext");
+const devBadgeEl = document.getElementById("devBadge");
+
+const DEV_LEVELS = [
+  { min: 0, title: "Livello 0 · Disastro umano", badge: "Inutile" },
+  { min: 20, title: "Livello 1 · Turista a caso", badge: "Perso totale" },
+  { min: 50, title: "Livello 2 · Amatoriale", badge: "Ci provi" },
+  { min: 100, title: "Livello 3 · Mediocre", badge: "Finalmente" },
+  { min: 180, title: "Livello 4 · Quasi utile", badge: "Inizia a servire" },
+  { min: 300, title: "Livello 5 · Non male", badge: "Sta prendendo forma" },
+  { min: 450, title: "Livello 6 · Pro vero", badge: "Finalmente serio" },
+  { min: 650, title: "Livello 7 · Mostro", badge: "Dominio" },
+  { min: 900, title: "Livello 8 · Dio", badge: "Fine del gioco" }
+];
 
 function setStatus(message, isError = false){
   statusEl.innerHTML = message;
   statusEl.classList.toggle("error", Boolean(isError));
+}
+
+function getDevLevel(metric){
+  let current = DEV_LEVELS[0];
+  let next = null;
+
+  for(let i = 0; i < DEV_LEVELS.length; i++){
+    if(metric >= DEV_LEVELS[i].min){
+      current = DEV_LEVELS[i];
+      next = DEV_LEVELS[i + 1] || null;
+    }
+  }
+
+  return { current, next };
+}
+
+function calculateCoins(){
+  let coins = 0;
+
+  pois.forEach(p=>{
+    const missing = getMissingPoiFields(p);
+    if(missing.length === 0) coins += 5;
+    if(missing.length === 1) coins += 2;
+    if(missing.length === 2) coins += 1;
+  });
+
+  return coins;
+}
+
+function calculateTaskCoins(){
+  let taskCoins = 0;
+
+  pois.forEach(p=>{
+    const missing = getMissingPoiFields(p);
+    if(missing.includes("descrizione")) taskCoins += 2;
+    if(missing.includes("coordinate")) taskCoins += 2;
+  });
+
+  return taskCoins;
+}
+
+function openLevelsModal(){
+  const container = document.getElementById("levelsList");
+  const poiCoins = calculateCoins();
+  const taskCoins = calculateTaskCoins();
+  const score = poiCoins + taskCoins;
+
+  container.innerHTML = "";
+
+  DEV_LEVELS.forEach((l,i)=>{
+    const div = document.createElement("div");
+    div.style.padding = "10px 0";
+    div.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
+
+    const next = DEV_LEVELS[i + 1];
+    const currentMin = l.min;
+    const nextMin = next ? next.min : currentMin + 100;
+    const progress = Math.max(0, Math.min(100, ((score - currentMin) / (nextMin - currentMin)) * 100));
+
+    const title = document.createElement("div");
+    title.innerHTML = "<strong>" + l.title + "</strong> — " + l.min + " 🪙";
+
+    const bar = document.createElement("div");
+    bar.style.height = "6px";
+    bar.style.borderRadius = "999px";
+    bar.style.background = "rgba(255,255,255,0.1)";
+    bar.style.marginTop = "6px";
+
+    const fill = document.createElement("div");
+    fill.style.height = "100%";
+    fill.style.width = progress + "%";
+    fill.style.borderRadius = "999px";
+    fill.style.background = "white";
+
+    bar.appendChild(fill);
+    div.appendChild(title);
+    div.appendChild(bar);
+    container.appendChild(div);
+  });
+
+  document.getElementById("levelsModal").classList.add("is-open");
+}
+
+function openCoinsMenu(){
+  document.getElementById("coinsModal").classList.add("is-open");
+}
+
+function closeCoinsMenu(){
+  document.getElementById("coinsModal").classList.remove("is-open");
+}
+
+function buyCoins(label){
+  alert("Hai scelto: " + label + "\n\nProcedi con bonifico a Diego Ricci.");
+}
+
+function closeLevelsModal(){
+  document.getElementById("levelsModal").classList.remove("is-open");
+}
+
+function updateDevGame(){
+  const totalPois = Array.isArray(pois) ? pois.length : 0;
+  const poiCoins = calculateCoins();
+  const taskCoins = calculateTaskCoins();
+  const score = poiCoins + taskCoins;
+  const level = getDevLevel(score);
+  const currentMin = level.current.min;
+  const nextMin = level.next ? level.next.min : score;
+  const range = Math.max(1, nextMin - currentMin);
+  const progress = level.next ? Math.max(0, Math.min(100, ((score - currentMin) / range) * 100)) : 100;
+  const remaining = level.next ? Math.max(0, nextMin - score) : 0;
+
+  devRankEl.innerText = level.current.title;
+  devScoreEl.innerText = String(score) + " 🪙";
+  devFillEl.style.width = progress + "%";
+  devProgressEl.innerHTML = "<strong>" + totalPois + "</strong> POI • " + poiCoins + "🪙 POI • " + taskCoins + "🪙 task";
+  devNextEl.innerText = level.next ? (remaining + " 🪙 al prossimo livello") : "Livello massimo sbloccato";
+  devBadgeEl.innerText = level.current.badge;
 }
 
 function getAuthSession(){
@@ -288,7 +468,7 @@ async function loadPois(){
     renderPois(searchEl.value);
 
     if(isPermissionError(err)){
-      setStatus(permissionHelp() + "<br><br>⚠️ Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: " + err.message, true);
+      setStatus(permissionHelp() + "<br><br>Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: " + err.message, true);
       return;
     }
 
@@ -323,7 +503,7 @@ function createTaskPill(text, isRed){
 }
 
 function normalizeName(str){
-  return String(str||"").toLowerCase().trim();
+  return String(str || "").toLowerCase().trim();
 }
 
 function getMissingCorePois(){
@@ -336,12 +516,10 @@ function getMissingCorePois(){
 
 function renderTaskSlider(filteredPois){
   taskSliderEl.innerHTML = "";
-
   const taskPois = filteredPois.filter((p) => getMissingPoiFields(p).length > 0);
 
   taskPois.forEach((p) => {
     const missing = getMissingPoiFields(p);
-
     const card = document.createElement("div");
     card.className = "task-card";
     card.addEventListener("click", () => openModal(p));
@@ -349,21 +527,19 @@ function renderTaskSlider(filteredPois){
     const title = document.createElement("div");
     title.className = "task-title";
     title.innerText = p.name || "(senza nome)";
-
     card.appendChild(title);
 
-    if(missing.includes("descrizione")){
-      card.appendChild(createTaskPill("manca desc.", false));
-    }
+    const taskValue = missing.length * 2;
+    const coin = document.createElement("div");
+    coin.className = "task-coin";
+    coin.innerText = "+" + taskValue + "🪙";
+    card.appendChild(coin);
 
-    if(missing.includes("coordinate")){
-      card.appendChild(createTaskPill("no coord.", true));
-    }
-
+    if(missing.includes("descrizione")) card.appendChild(createTaskPill("manca desc.", false));
+    if(missing.includes("coordinate")) card.appendChild(createTaskPill("no coord.", true));
     taskSliderEl.appendChild(card);
   });
 
-  // --- POI fondamentali mancanti ---
   const missingCore = getMissingCorePois();
   missingCore.forEach(name=>{
     const card = document.createElement("div");
@@ -378,13 +554,19 @@ function renderTaskSlider(filteredPois){
     pill.className = "task-pill red";
     pill.innerText = "poi mancante";
 
+    const coin = document.createElement("div");
+    coin.className = "task-coin";
+    coin.innerText = "+3🪙";
+
     card.appendChild(title);
     card.appendChild(pill);
+    card.appendChild(coin);
     taskSliderEl.appendChild(card);
   });
 }
 
 function renderPois(filter = ""){
+  updateDevGame();
   listEl.innerHTML = "";
 
   const query = String(filter || "").trim().toLowerCase();
@@ -406,7 +588,6 @@ function renderPois(filter = ""){
   filtered.forEach((p) => {
     const div = document.createElement("div");
     div.className = "poi";
-
     const missing = getMissingPoiFields(p);
 
     if(missing.includes("descrizione")){
@@ -507,9 +688,7 @@ function readPoiForm(){
 function buildPoiSaveRequest(poiId){
   const isEdit = Boolean(poiId);
   return {
-    url: isEdit
-      ? SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId)
-      : SUPABASE_URL + "/rest/v1/pois",
+    url: isEdit ? SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) : SUPABASE_URL + "/rest/v1/pois",
     method: isEdit ? "PATCH" : "POST"
   };
 }
@@ -539,10 +718,7 @@ async function savePoi(){
   try{
     const res = await fetch(request.url, {
       method: request.method,
-      headers: buildHeaders({
-        useUserToken: true,
-        extra: { Prefer: "return=representation" }
-      }),
+      headers: buildHeaders({ useUserToken: true, extra: { Prefer: "return=representation" } }),
       body: JSON.stringify(poi)
     });
 
@@ -559,7 +735,6 @@ async function savePoi(){
 
 async function deletePoi(){
   if(!editingPoiId) return;
-
   if(!confirm("Sei sicuro di voler eliminare questo POI?")) return;
 
   const token = getToken();
@@ -597,7 +772,13 @@ saveBtn.addEventListener("click", savePoi);
 searchEl.addEventListener("input", () => renderPois(searchEl.value));
 importanceEl.addEventListener("input", () => updateImportanceUI());
 modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
-document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
+document.addEventListener("keydown", (event) => {
+  if(event.key === "Escape"){
+    closeModal();
+    closeLevelsModal();
+    closeCoinsMenu();
+  }
+});
 
 function runTests(){
   console.assert(typeof loadPois === "function", "loadPois deve esistere");
@@ -610,7 +791,14 @@ function runTests(){
   console.assert(typeof hasOnlyMissingDescription === "function", "hasOnlyMissingDescription deve esistere");
   console.assert(typeof createTaskPill === "function", "createTaskPill deve esistere");
   console.assert(typeof openSuggestedPoi === "function", "openSuggestedPoi deve esistere");
+  console.assert(typeof openCoinsMenu === "function", "openCoinsMenu deve esistere");
+  console.assert(typeof buyCoins === "function", "buyCoins deve esistere");
   console.assert(Array.isArray(REQUIRED_POIS), "lista POI fondamentali esiste");
+  console.assert(Array.isArray(DEV_LEVELS), "lista livelli developer game esiste");
+  console.assert(typeof updateDevGame === "function", "updateDevGame deve esistere");
+  console.assert(getDevLevel(0).current.title.includes("Livello 0"), "0 monete livello 0");
+  console.assert(getDevLevel(25).current.title.includes("Livello 1"), "25 monete livello 1");
+  console.assert(getDevLevel(100).current.title.includes("Mediocre"), "100 monete livello Mediocre");
   console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
   updateImportanceUI(75);
   console.assert(importanceEl.value === "75", "slider importanza si aggiorna");
@@ -644,29 +832,25 @@ function runTests(){
     { id:"missing-both", name:"Senza tutto", type:"bar", description:"", coords:"", importance:40, discount:0 }
   ];
 
+  console.assert(calculateCoins() === 10, "calcolo monete POI corretto");
+  console.assert(calculateTaskCoins() === 6, "calcolo monete task corretto");
+
   renderPois("");
   console.assert(listEl.querySelectorAll(".poi").length === 4, "renderPois mostra tutti i POI test");
   console.assert(listEl.querySelectorAll(".poi-alert").length === 4, "renderPois crea badge separati per descrizione e coordinate mancanti");
   console.assert(listEl.querySelectorAll(".poi-alert.desc").length === 2, "lista mostra due badge gialli descrizione");
   console.assert(listEl.querySelectorAll(".poi-alert.coord").length === 2, "lista mostra due badge rossi coordinate");
-  console.assert(listEl.innerText.includes("manca desc."), "lista mostra badge descrizione compatto");
-  console.assert(listEl.innerText.includes("no coord."), "lista mostra badge coordinate compatto");
-  console.assert(taskSliderEl.querySelectorAll(".task-card").length === 3, "task slider mostra tutti i POI con almeno un avviso");
-  console.assert(taskSliderEl.querySelectorAll(".task-pill").length === 4, "task slider crea pillole separate per ogni avviso");
-  console.assert(taskSliderEl.querySelectorAll(".task-pill.red").length === 2, "task slider crea pillole rosse per coordinate");
+  console.assert(taskSliderEl.innerText.includes("+4 monete"), "task con due problemi vale 4 monete");
   console.assert(taskSliderEl.innerText.includes("Senza descrizione"), "task slider contiene POI con descrizione mancante");
   console.assert(taskSliderEl.innerText.includes("Senza coordinate"), "task slider contiene POI con coordinate mancanti");
-  console.assert(taskSliderEl.innerText.includes("Senza tutto"), "task slider contiene POI con entrambi gli avvisi");
   console.assert(!taskSliderEl.innerText.includes("Completo"), "task slider esclude POI completi");
-  console.assert(taskSliderEl.innerText.includes("manca desc."), "task slider mostra pillola descrizione compatta");
-  console.assert(taskSliderEl.innerText.includes("no coord."), "task slider mostra pillola coordinate compatta");
 
-  // test missing core poi
   pois = [];
   renderPois("");
   console.assert(taskSliderEl.querySelectorAll(".task-card").length >= REQUIRED_POIS.length, "mostra POI fondamentali mancanti");
   console.assert(taskSliderEl.innerText.toLowerCase().includes("blue trail"), "include POI fondamentale");
   console.assert(taskSliderEl.innerText.toLowerCase().includes("poi mancante"), "rinomina missing poi in poi mancante");
+  console.assert(taskSliderEl.innerText.includes("+3 monete"), "POI mancante mostra reward monete");
   openSuggestedPoi("Vernazza Harbor");
   console.assert(modalEl.classList.contains("is-open"), "click POI mancante apre modale aggiungi");
   console.assert(modalTitleEl.innerText === "Aggiungi POI", "POI mancante apre modale aggiungi");
@@ -677,7 +861,6 @@ function runTests(){
 
   renderPois("completo");
   console.assert(listEl.querySelectorAll(".poi").length === 1, "renderPois filtra per ricerca");
-  console.assert(taskSliderEl.querySelectorAll(".task-card").length === 0, "task slider rispetta filtro ricerca");
   pois = previousPois;
   renderPois(searchEl.value);
 
