@@ -301,11 +301,19 @@
       opacity: 1;
     }
 
+    .card-live-touch-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background: transparent;
+      touch-action: none;
+    }
+
     .card-live-badge {
       position: absolute;
       top: 8px;
       left: 8px;
-      z-index: 2;
+      z-index: 4;
       padding: 5px 8px;
       border-radius: 999px;
       background: rgba(0,0,0,0.58);
@@ -534,6 +542,7 @@
   <div class="card-media" id="card-media">
     <img id="card-img" src="" alt="" />
     <iframe id="card-live" class="card-live-frame" title="Live webcam" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    <div id="card-live-touch-layer" class="card-live-touch-layer" aria-hidden="true"></div>
     <div class="card-live-badge">LIVE</div>
   </div>
   <div class="title" id="card-title"></div>
@@ -588,10 +597,10 @@
 
   var places = [
     { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', liveVideoId: 'Mjrd1nmlW5s' },
-    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: '' },
-    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: '' },
-    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: '' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: '' }
+    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: 'YfKWbnMCNZ8' },
+    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: 'BhPxgJ3w8Ag' },
+    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU' },
+    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg' }
   ];
 
   var ferryPorts = [];
@@ -770,6 +779,7 @@
   var cardImg = document.getElementById('card-img');
   var cardMedia = document.getElementById('card-media');
   var cardLive = document.getElementById('card-live');
+  var cardLiveTouchLayer = document.getElementById('card-live-touch-layer');
   var ownerPanel = document.getElementById('owner-panel');
   var poiCard = document.getElementById('poi-card');
   var poiTitle = document.getElementById('poi-title');
@@ -1714,6 +1724,69 @@
       card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
       card.style.transform = 'translateX(0) translateY(0)';
     });
+
+    if (cardLiveTouchLayer) {
+      cardLiveTouchLayer.addEventListener('touchstart', function (event) {
+        if (event.touches.length !== 1) return;
+        event.preventDefault();
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+        currentX = startX;
+        currentY = startY;
+        isDragging = true;
+        hasMoved = false;
+        dragAxis = null;
+        card.style.transition = 'none';
+      }, { passive: false });
+
+      cardLiveTouchLayer.addEventListener('touchmove', function (event) {
+        var deltaY;
+        var pullDown;
+
+        if (!isDragging || event.touches.length !== 1) return;
+        event.preventDefault();
+
+        currentY = event.touches[0].clientY;
+        deltaY = currentY - startY;
+        dragAxis = 'y';
+        hasMoved = true;
+        pullDown = Math.max(0, deltaY);
+        card.style.transform = 'translateY(' + pullDown + 'px)';
+        card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260));
+      }, { passive: false });
+
+      cardLiveTouchLayer.addEventListener('touchend', function (event) {
+        var deltaY;
+
+        if (!isDragging) return;
+        if (event && event.changedTouches && event.changedTouches.length) {
+          currentY = event.changedTouches[0].clientY;
+        }
+
+        deltaY = currentY - startY;
+        isDragging = false;
+        card.style.opacity = '';
+
+        if (deltaY > 55) {
+          hideCard(true);
+          dragAxis = null;
+          return;
+        }
+
+        card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        card.style.transform = 'translateY(0)';
+        dragAxis = null;
+      }, { passive: false });
+
+      cardLiveTouchLayer.addEventListener('touchcancel', function (event) {
+        if (event) event.preventDefault();
+        isDragging = false;
+        dragAxis = null;
+        card.style.opacity = '';
+        card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+        card.style.transform = 'translateY(0)';
+      }, { passive: false });
+    }
   }
 
   function runTests() {
@@ -1768,6 +1841,7 @@
     console.assert(typeof resetCardLive === 'function', 'Card live reset function exists');
     console.assert(typeof loadCardLive === 'function', 'Card live loader exists');
     console.assert(document.getElementById('card-live') !== null, 'Card live iframe exists');
+    console.assert(document.getElementById('card-live-touch-layer') !== null, 'Transparent touch layer over YouTube iframe exists');
     console.assert(window.getComputedStyle(document.getElementById('card-live')).transform !== 'none', 'Card live iframe is scaled to cover the city-card media area');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
