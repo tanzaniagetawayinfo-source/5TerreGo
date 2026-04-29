@@ -16,7 +16,6 @@
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: #cfe5f2;
-      /* 🔥 iOS FIX: prevent layout jump when keyboard opens */
       position: fixed;
       inset: 0;
     }
@@ -25,7 +24,7 @@
       position: fixed;
       inset: 0;
       width: 100vw;
-      height: 100dvh; /* 🔥 iOS dynamic viewport fix */
+      height: 100dvh;
     }
 
     .top-bar {
@@ -78,7 +77,6 @@
       outline: none;
       background: rgba(255,255,255,0.1);
       color: white;
-      /* 🔥 iOS zoom + layout bug fix */
       font-size: 16px;
     }
 
@@ -528,6 +526,8 @@
     { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE }
   ];
 
+  var ferryPorts = [];
+
   if (!window.L) {
     throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
   }
@@ -564,6 +564,122 @@
     opacity: 0.82,
     noWrap: true
   }).addTo(map);
+
+  var whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20,
+    opacity: 0,
+    subdomains: 'abcd',
+    noWrap: true
+  }).addTo(map);
+
+  var labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20,
+    opacity: 0,
+    subdomains: 'abcd',
+    noWrap: true
+  }).addTo(map);
+
+  var ferryRoutesLayer = L.layerGroup().addTo(map);
+
+  function createSeaArc(p1, p2, segments) {
+    var lat1 = p1[0];
+    var lng1 = p1[1];
+    var lat2 = p2[0];
+    var lng2 = p2[1];
+    var midLat = (lat1 + lat2) / 2;
+    var midLng = (lng1 + lng2) / 2;
+    var distance = Math.abs(lng2 - lng1);
+    var offset = 0.018 + distance * 0.45;
+    var control = [midLat - 0.003, midLng - offset];
+    var points = [];
+    var i;
+    var t;
+    var lat;
+    var lng;
+
+    for (i = 0; i <= segments; i += 1) {
+      t = i / segments;
+      lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2;
+      lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2;
+      points.push([lat, lng]);
+    }
+
+    return points;
+  }
+
+  function getFerryPOIs() {
+    return poiMarkers
+      .map(function (m) { return m.poi; })
+      .filter(function (p) {
+        return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry';
+      })
+      .sort(function (a, b) {
+        if (a.lng === b.lng) return b.lat - a.lat;
+        return a.lng - b.lng;
+      });
+  }
+
+  function getNearestFerryPort(sourcePort, allPorts) {
+    var nearest = null;
+    var minDist = Infinity;
+    var i;
+    var dist;
+
+    for (i = 0; i < allPorts.length; i += 1) {
+      if (allPorts[i].id === sourcePort.id) continue;
+
+      dist = map.distance(sourcePort.coords, allPorts[i].coords);
+
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = allPorts[i];
+      }
+    }
+
+    return nearest;
+  }
+
+  function addFerryRoutes() {
+    var i;
+    var arc;
+    var nearest;
+
+    ferryRoutesLayer.clearLayers();
+    ferryPorts = getFerryPOIs();
+
+    if (ferryPorts.length < 2) return;
+
+    for (i = 0; i < ferryPorts.length; i += 1) {
+      nearest = getNearestFerryPort(ferryPorts[i], ferryPorts);
+
+      if (!nearest) continue;
+
+      arc = createSeaArc(ferryPorts[i].coords, nearest.coords, 32);
+
+      L.polyline(arc, {
+        color: '#00e0ff',
+        weight: 3,
+        opacity: 0.95,
+        dashArray: '8, 10',
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(ferryRoutesLayer);
+    }
+  }
+
+  function updateMapVisualByZoom() {
+    var z = map.getZoom();
+    var t = Math.min(1, Math.max(0, (z - 16) / 2));
+
+    satelliteLayer.setOpacity(1 - t);
+    roadsLayer.setOpacity(0.82 * (1 - t));
+    whiteLayer.setOpacity(t);
+    labelsLayer.setOpacity(t);
+
+    ferryRoutesLayer.eachLayer(function (layer) {
+      layer.setStyle({ opacity: 0.85 * (1 - t * 0.2) });
+    });
+  }
 
   map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
 
@@ -621,6 +737,7 @@
       case 'stazione': return '🚉';
       case 'ristorante': return '🍽️';
       case 'bar': return '🍸';
+      case 'ferry': return '⛴️';
       case 'punto panoramico': return '📍';
       default: return fallback || '📌';
     }
@@ -629,10 +746,12 @@
   function parseCoords(raw) {
     var lat;
     var lng;
+    var str;
+    var parts;
 
     if (raw && typeof raw.coords === 'string') {
-      var str = raw.coords.trim();
-      var parts = str.split(',');
+      str = raw.coords.trim();
+      parts = str.split(',');
 
       if (parts.length > 2) {
         lat = Number(String(parts[0]).trim() + '.' + String(parts[1]).trim());
@@ -657,7 +776,7 @@
 
     raw = raw || {};
     parsed = parseCoords(raw);
-    symbol = raw.symbol || getPOIEmoji(raw.type, '📍');
+    symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍');
 
     return {
       id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
@@ -893,6 +1012,10 @@
   }
 
   function showPOICard(poi) {
+    var fullText;
+    var lat;
+    var lng;
+
     hideCard();
     currentDataset = 'pois';
     currentIndex = -1;
@@ -907,7 +1030,7 @@
     poiCard.setAttribute('aria-hidden', 'false');
     poiTitle.innerText = poi.name;
 
-    var fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
+    fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
     poiDesc.innerText = fullText;
     poiDesc.classList.remove('expanded');
     poiDesc.style.display = 'block';
@@ -957,8 +1080,8 @@
 
     poiMiniMap.setView(poi.coords, 18);
 
-    var lat = poi.coords[0];
-    var lng = poi.coords[1];
+    lat = poi.coords[0];
+    lng = poi.coords[1];
     poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
 
     window.requestAnimationFrame(function () {
@@ -1030,6 +1153,7 @@
     });
 
     updatePOIVisibility();
+    addFerryRoutes();
     renderSearchSuggestions(searchInput.value);
   }
 
@@ -1096,10 +1220,13 @@
   function preloadTiles() {
     var center = map.getCenter();
     var tile = latLngToTile(center.lat, center.lng, map.getZoom());
+    var dx;
+    var dy;
+    var img;
 
-    for (var dx = -2; dx <= 2; dx += 1) {
-      for (var dy = -2; dy <= 2; dy += 1) {
-        var img = new Image();
+    for (dx = -2; dx <= 2; dx += 1) {
+      for (dy = -2; dy <= 2; dy += 1) {
+        img = new Image();
         img.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/' + tile.z + '/' + (tile.y + dy) + '/' + (tile.x + dx);
       }
     }
@@ -1201,7 +1328,7 @@
     });
 
     poiMarkers.forEach(function (item) {
-      var title = item.marker.options.title || '';
+      var title = item.marker && item.marker.options ? item.marker.options.title || '' : '';
       if (title.toLowerCase().includes(q)) {
         results.push({ type: 'poi', name: title, poiName: title });
       }
@@ -1237,7 +1364,7 @@
     }
 
     poiItem = poiMarkers.find(function (m) {
-      return m.marker.options.title === name;
+      return m.marker && m.marker.options && m.marker.options.title === name;
     });
 
     if (poiItem && poiItem.poi) {
@@ -1268,7 +1395,6 @@
   }
 
   function setupEvents() {
-    // 🔥 iOS keyboard fix: prevent viewport resize jump
     if (isIOSDevice()) {
       searchInput.addEventListener('focus', function () {
         document.body.style.position = 'fixed';
@@ -1278,6 +1404,7 @@
         document.body.style.position = 'fixed';
       });
     }
+
     readMoreBtn.addEventListener('click', function () {
       if (poiDesc.classList.contains('expanded')) {
         poiDesc.classList.remove('expanded');
@@ -1353,6 +1480,7 @@
       evaluateAutoCard();
       preloadTiles();
       updatePOIVisibility();
+      updateMapVisualByZoom();
     });
 
     card.addEventListener('touchstart', function (event) {
@@ -1418,6 +1546,10 @@
   }
 
   function runTests() {
+    var sampleFerries;
+    var previousPoiMarkers;
+    var previousFerryPorts;
+
     console.assert(Array.isArray(places), 'places must be an array');
     console.assert(places.length === 5, '5 cities expected');
     console.assert(places.every(function (place) { return typeof place.name === 'string'; }), 'Each city needs a name');
@@ -1425,6 +1557,31 @@
     console.assert(places.every(function (place) { return typeof place.image === 'string' && place.image.indexOf('https://') === 0; }), 'Each city needs a stable image URL');
     console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay as the fifth city');
     console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore must use the fixed Pexels image');
+    console.assert(Array.isArray(ferryPorts), 'ferryPorts must be an array');
+    console.assert(typeof getFerryPOIs === 'function', 'getFerryPOIs function exists');
+    console.assert(typeof getNearestFerryPort === 'function', 'getNearestFerryPort function exists');
+    console.assert(typeof createSeaArc === 'function', 'createSeaArc function exists');
+    console.assert(createSeaArc([44.1461, 9.6548], [44.1350, 9.6847], 8).length === 9, 'createSeaArc returns segments + 1 points');
+    console.assert(typeof addFerryRoutes === 'function', 'addFerryRoutes function exists');
+
+    previousPoiMarkers = poiMarkers.slice();
+    previousFerryPorts = ferryPorts.slice();
+    sampleFerries = [
+      normalizePOI({ name: 'Ferry Monterosso', coords: '44.1461,9.6548', type: 'ferry' }),
+      normalizePOI({ name: 'Ferry Vernazza', coords: '44.1350,9.6847', type: 'ferry' }),
+      normalizePOI({ name: 'Non Ferry', coords: '44.1197,9.7089', type: 'monumento' }),
+      normalizePOI({ name: 'Ferry Manarola', coords: '44.1076,9.7290', type: 'ferry' })
+    ];
+    poiMarkers = sampleFerries.map(function (poi) { return { poi: poi, importance: 100, marker: null }; });
+    addFerryRoutes();
+    console.assert(ferryPorts.length === 3, 'Ferry routes must use only POIs with type ferry');
+    console.assert(ferryPorts.every(function (p) { return String(p.type).toLowerCase() === 'ferry'; }), 'Every ferry route port must be type ferry');
+    console.assert(ferryRoutesLayer.getLayers().length === ferryPorts.length, 'Nearest ferry mode creates one arc from each ferry POI');
+    console.assert(getNearestFerryPort(ferryPorts[0], ferryPorts) !== null, 'Each ferry with neighbors finds a nearest ferry');
+    poiMarkers = previousPoiMarkers;
+    ferryPorts = previousFerryPorts;
+    addFerryRoutes();
+
     console.assert(currentIndex === -1, 'Initial index should be -1');
     console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
     console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
@@ -1462,6 +1619,7 @@
     console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
     console.assert(normalizePOI({ name: 'Y', coords: '44.2,9.8', type: 'chiesa' }).symbol === '⛪', 'normalizePOI supports coords string and church emoji');
     console.assert(normalizePOI({ name: 'Z', coords: '44.2,9.8', type: 'ristorante' }).symbol === '🍽️', 'normalizePOI supports restaurant emoji');
+    console.assert(normalizePOI({ name: 'F', coords: '44.2,9.8', type: 'ferry' }).symbol === '⛴️', 'normalizePOI supports ferry emoji');
     console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'normalizePOI supports european decimal coords');
     console.assert(normalizePOI({ name: 'D', coords: '44.2,9.8', description: 'Testo' }).description === 'Testo', 'normalizePOI keeps description');
     console.assert(getSearchResults('ver').some(function (r) { return r.name === 'Vernazza'; }), 'Search suggestions find Vernazza');
@@ -1475,6 +1633,7 @@
   preloadTiles();
   updateWeather(44.12, 9.71);
   setupEvents();
+  updateMapVisualByZoom();
   runTests();
 
   window.setTimeout(function () {
