@@ -599,23 +599,46 @@ button{
   async function maybeAddOwnerButton(panel){
     const owner = await fetchOwnerStatus();
     if(!owner) return;
-    if(document.getElementById('poi-dashboard')) return;
 
-    const poiBtn = document.createElement('button');
-    poiBtn.className = 'primary';
-    poiBtn.id = 'poi-dashboard';
-    poiBtn.type = 'button';
-    poiBtn.textContent = 'Gestisci POI';
-    poiBtn.onclick = function(){
-      window.location.href = '/poieditor.html';
-    };
-
-    // inserisce come primo pulsante (dopo header bentornato)
     const firstButton = panel.children[1];
-    if(firstButton){
-      panel.insertBefore(poiBtn, firstButton);
-    } else {
-      panel.appendChild(poiBtn);
+
+    if(!document.getElementById('poi-dashboard')){
+      const poiBtn = document.createElement('button');
+      poiBtn.className = 'primary';
+      poiBtn.id = 'poi-dashboard';
+      poiBtn.type = 'button';
+      poiBtn.textContent = 'Gestisci POI';
+      poiBtn.onclick = function(){
+        window.location.href = '/poieditor.html';
+      };
+
+      if(firstButton){
+        panel.insertBefore(poiBtn, firstButton);
+      } else {
+        panel.appendChild(poiBtn);
+      }
+    }
+
+    if(!document.getElementById('blog-dashboard')){
+      const blogBtn = document.createElement('button');
+      blogBtn.className = 'primary';
+      blogBtn.id = 'blog-dashboard';
+      blogBtn.type = 'button';
+      blogBtn.textContent = 'Gestisci Blog';
+      blogBtn.onclick = function(){
+        window.location.href = '/blogeditor.html';
+      };
+
+      const poiButton = document.getElementById('poi-dashboard');
+      if(poiButton && poiButton.nextSibling){
+        panel.insertBefore(blogBtn, poiButton.nextSibling);
+      } else if(poiButton){
+        panel.appendChild(blogBtn);
+      } else if(firstButton){
+        panel.insertBefore(blogBtn, firstButton);
+      } else {
+        panel.appendChild(blogBtn);
+      }
     }
   }
 
