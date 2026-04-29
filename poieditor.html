@@ -176,9 +176,7 @@ async function loadPois(){
   setStatus("Caricamento POI...");
 
   try{
-    // 🔥 usa token utente se disponibile (così bypassi problema anon)
-    const hasUser = !!getToken();
-
+    const hasUser = Boolean(getToken());
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?select=*&order=importance.desc.nullslast`, {
       method: "GET",
       headers: buildHeaders({ useUserToken: hasUser })
@@ -187,34 +185,13 @@ async function loadPois(){
     pois = await parseResponse(res);
     renderPois(searchEl.value);
     setStatus(`${pois.length} POI caricati`);
-
   }catch(err){
     console.error("LOAD POIS ERROR", err);
     pois = [];
     renderPois(searchEl.value);
 
     if(isPermissionError(err)){
-      setStatus(`${permissionHelp()}<br><br>⚠️ Oppure assicurati di essere loggato (lettura usa utente se presente)<br><br>Dettaglio: ${err.message}`, true);
-      return;
-    }
-
-    setStatus(`Errore caricamento POI: ${err.message}`, true);
-  }
-}/rest/v1/pois?select=*&order=importance.desc.nullslast`, {
-      method: "GET",
-      headers: buildHeaders()
-    });
-
-    pois = await parseResponse(res);
-    renderPois(searchEl.value);
-    setStatus(`${pois.length} POI caricati`);
-  }catch(err){
-    console.error("LOAD POIS ERROR", err);
-    pois = [];
-    renderPois(searchEl.value);
-
-    if(isPermissionError(err)){
-      setStatus(`${permissionHelp()}<br><br>Dettaglio: ${err.message}`, true);
+      setStatus(`${permissionHelp()}<br><br>⚠️ Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: ${err.message}`, true);
       return;
     }
 
@@ -347,9 +324,11 @@ function runTests(){
   console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
   console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
   console.assert(buildHeaders().Authorization === `Bearer ${ANON_KEY}`, "read Authorization usa anon");
+  console.assert(buildHeaders({ useUserToken: true }).Authorization.startsWith("Bearer "), "user token header presente se richiesto");
   console.assert(permissionHelp().includes("GRANT SELECT"), "messaggio permessi contiene GRANT SELECT");
   console.assert(isPermissionError({ status: 403, message: "permission denied for table pois" }) === true, "riconosce permission denied");
   console.assert(isPermissionError({ status: 200, message: "ok" }) === false, "non segnala falsi permission error");
+  console.assert(document.documentElement.innerHTML.includes("}/rest/v1/pois?") === false, "nessun blocco fetch duplicato o spezzato dopo loadPois");
   openModal();
   console.assert(modalEl.classList.contains("is-open"), "openModal apre");
   closeModal();
