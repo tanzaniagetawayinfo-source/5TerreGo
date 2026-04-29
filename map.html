@@ -506,6 +506,7 @@
   var AUTO_CLOSE_ZOOM = 12;
   var AUTO_CLOSE_DISTANCE = 800;
   var poiCloseTimer = null;
+  var cityCardManuallyClosed = false;
 
   var SUPABASE_READY = Boolean(
     window.supabase &&
@@ -725,9 +726,12 @@
   var poiMarkers = [];
   var isProgrammaticMove = false;
   var startX = 0;
+  var startY = 0;
   var currentX = 0;
+  var currentY = 0;
   var isDragging = false;
   var hasMoved = false;
+  var dragAxis = null;
   var currentUser = null;
   var userCheckTimer = null;
   var poiMiniMap = null;
@@ -925,6 +929,7 @@
   }
 
   function showCityCard(item) {
+    cityCardManuallyClosed = false;
     closePOICard(true);
     setCardContent(item);
     card.style.display = 'block';
@@ -937,7 +942,8 @@
     });
   }
 
-  function hideCard() {
+  function hideCard(manual) {
+    if (manual) cityCardManuallyClosed = true;
     if (card.getAttribute('aria-hidden') === 'true') return;
 
     card.classList.remove('is-visible');
@@ -985,6 +991,9 @@
 
     var zoom = map.getZoom();
     var closest = getClosestCity();
+
+    if (cityCardManuallyClosed && closest.index === currentIndex) return;
+    if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false;
 
     if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
       if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
@@ -1127,6 +1136,7 @@
           L.DomEvent.stopPropagation(e.originalEvent);
           L.DomEvent.preventDefault(e.originalEvent);
         }
+        cityCardManuallyClosed = false;
         showCityByIndex(index, true);
       });
     });
@@ -1377,6 +1387,7 @@
     var poiItem;
 
     if (cityIndex !== -1) {
+      cityCardManuallyClosed = false;
       showCityByIndex(cityIndex, true);
       return true;
     }
@@ -1507,62 +1518,106 @@
     card.addEventListener('touchstart', function (event) {
       if (event.touches.length !== 1) return;
       startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
       currentX = startX;
+      currentY = startY;
       isDragging = true;
       hasMoved = false;
+      dragAxis = null;
       card.style.transition = 'none';
     }, { passive: true });
 
     card.addEventListener('touchmove', function (event) {
-      var delta;
+      var deltaX;
+      var deltaY;
       var blockedRight;
       var blockedLeft;
+      var pullDown;
 
       if (!isDragging || event.touches.length !== 1) return;
 
       currentX = event.touches[0].clientX;
-      delta = currentX - startX;
-      blockedRight = currentIndex === 0 && delta > 0;
-      blockedLeft = currentIndex === places.length - 1 && delta < 0;
+      currentY = event.touches[0].clientY;
+      deltaX = currentX - startX;
+      deltaY = currentY - startY;
 
-      if (blockedRight || blockedLeft) delta = 0;
-      if (Math.abs(delta) > 4) hasMoved = true;
+      if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+        dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x';
+      }
 
-      card.style.transform = 'translateX(' + delta + 'px)';
+      if (!dragAxis) return;
+      hasMoved = true;
+
+      if (dragAxis === 'y') {
+        pullDown = Math.max(0, deltaY);
+        card.style.transform = 'translateY(' + pullDown + 'px)';
+        card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260));
+        return;
+      }
+
+      blockedRight = currentIndex === 0 && deltaX > 0;
+      blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
+
+      if (blockedRight || blockedLeft) deltaX = 0;
+      card.style.transform = 'translateX(' + deltaX + 'px)';
     }, { passive: true });
 
     card.addEventListener('touchend', function () {
-      var delta;
+      var deltaX;
+      var deltaY;
       var blockedRight;
       var blockedLeft;
 
       if (!isDragging) return;
 
-      delta = currentX - startX;
+      deltaX = currentX - startX;
+      deltaY = currentY - startY;
       isDragging = false;
-      blockedRight = currentIndex === 0 && delta > 0;
-      blockedLeft = currentIndex === places.length - 1 && delta < 0;
 
-      if (!hasMoved || blockedRight || blockedLeft || Math.abs(delta) < 80) {
+      if (dragAxis === 'y') {
+        card.style.opacity = '';
+
+        if (deltaY > 85) {
+          hideCard(true);
+          dragAxis = null;
+          return;
+        }
+
+        card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        card.style.transform = 'translateY(0)';
+        dragAxis = null;
+        return;
+      }
+
+      blockedRight = currentIndex === 0 && deltaX > 0;
+      blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
+
+      if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) {
         card.style.transition = 'transform 0.2s ease';
         card.style.transform = 'translateX(0)';
+        dragAxis = null;
         return;
       }
 
-      if (delta < -80) {
+      if (deltaX < -80) {
         slideToIndex(currentIndex + 1, 'next');
+        dragAxis = null;
         return;
       }
 
-      if (delta > 80) {
+      if (deltaX > 80) {
         slideToIndex(currentIndex - 1, 'prev');
       }
+
+      dragAxis = null;
     });
 
     card.addEventListener('touchcancel', function () {
       isDragging = false;
-      card.style.transition = 'transform 0.2s ease';
-      card.style.transform = 'translateX(0)';
+      dragAxis = null;
+      card.style.opacity = '';
+      card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      card.style.transform = 'translateX(0) translateY(0)';
     });
   }
 
@@ -1607,6 +1662,9 @@
     console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
     console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
     console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
+    console.assert(typeof hideCard === 'function', 'hideCard function exists for downward city-card swipe');
+    console.assert(typeof cityCardManuallyClosed === 'boolean', 'Manual city-card close lock exists');
+    console.assert(typeof currentIndex === 'number', 'Manual city-card close lock is tied to the current city index');
     console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
