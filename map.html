@@ -642,23 +642,31 @@
   function addFerryRoutes() {
     var i;
     var arc;
-    var nearest;
+    var fromPort;
+    var toPort;
+    var routeKey;
+    var usedRoutes = {};
 
     ferryRoutesLayer.clearLayers();
     ferryPorts = getFerryPOIs();
 
     if (ferryPorts.length < 2) return;
 
-    for (i = 0; i < ferryPorts.length; i += 1) {
-      nearest = getNearestFerryPort(ferryPorts[i], ferryPorts);
+    for (i = 0; i < ferryPorts.length - 1; i += 1) {
+      fromPort = ferryPorts[i];
+      toPort = ferryPorts[i + 1];
 
-      if (!nearest) continue;
+      if (!fromPort || !toPort) continue;
 
-      arc = createSeaArc(ferryPorts[i].coords, nearest.coords, 32);
+      routeKey = [fromPort.id, toPort.id].sort().join('::');
+      if (usedRoutes[routeKey]) continue;
+      usedRoutes[routeKey] = true;
+
+      arc = createSeaArc(fromPort.coords, toPort.coords, 32);
 
       L.polyline(arc, {
         color: '#00e0ff',
-        weight: 3,
+        weight: 1,
         opacity: 0.95,
         dashArray: '8, 10',
         lineCap: 'round',
@@ -1576,7 +1584,7 @@
     addFerryRoutes();
     console.assert(ferryPorts.length === 3, 'Ferry routes must use only POIs with type ferry');
     console.assert(ferryPorts.every(function (p) { return String(p.type).toLowerCase() === 'ferry'; }), 'Every ferry route port must be type ferry');
-    console.assert(ferryRoutesLayer.getLayers().length === ferryPorts.length, 'Nearest ferry mode creates one arc from each ferry POI');
+    console.assert(ferryRoutesLayer.getLayers().length === ferryPorts.length - 1, 'Ferry routes connect available ferry POIs in sequence, skipping villages without ferry ports');
     console.assert(getNearestFerryPort(ferryPorts[0], ferryPorts) !== null, 'Each ferry with neighbors finds a nearest ferry');
     poiMarkers = previousPoiMarkers;
     ferryPorts = previousFerryPorts;
