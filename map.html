@@ -166,6 +166,11 @@
       backface-visibility: hidden;
     }
 
+    .leaflet-layer {
+      transition: opacity 0.75s cubic-bezier(.22,.61,.36,1);
+      will-change: opacity;
+    }
+
     .leaflet-container {
       background: #f6f1e8 !important;
       transform: translateZ(0);
@@ -677,12 +682,17 @@
 
   function updateMapVisualByZoom() {
     var z = map.getZoom();
-    var t = Math.min(1, Math.max(0, (z - 16) / 2));
+    var raw = Math.min(1, Math.max(0, (z - 14.75) / 3.75));
+    var t = raw * raw * (3 - 2 * raw);
+    var satelliteOpacity = Math.max(0.08, 1 - t);
+    var roadsOpacity = 0.82 * (1 - t * 0.72);
+    var whiteOpacity = t;
+    var labelsOpacity = Math.max(0, (t - 0.18) / 0.82);
 
-    satelliteLayer.setOpacity(1 - t);
-    roadsLayer.setOpacity(0.82 * (1 - t));
-    whiteLayer.setOpacity(t);
-    labelsLayer.setOpacity(t);
+    satelliteLayer.setOpacity(satelliteOpacity);
+    roadsLayer.setOpacity(roadsOpacity);
+    whiteLayer.setOpacity(whiteOpacity);
+    labelsLayer.setOpacity(labelsOpacity);
 
     ferryRoutesLayer.eachLayer(function (layer) {
       layer.setStyle({ opacity: 0.85 * (1 - t * 0.2) });
@@ -1484,11 +1494,14 @@
       }
     });
 
+    map.on('zoom zoomend moveend', function () {
+      updateMapVisualByZoom();
+    });
+
     map.on('moveend zoomend', function () {
       evaluateAutoCard();
       preloadTiles();
       updatePOIVisibility();
-      updateMapVisualByZoom();
     });
 
     card.addEventListener('touchstart', function (event) {
