@@ -28,6 +28,7 @@ input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px
 textarea{min-height:90px;resize:vertical}
 select option{color:#111}
 button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
+button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:none;background:#ff3b30;color:white;font-weight:800;cursor:pointer}
 .range-card{margin-top:10px;padding:13px 12px 12px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07)}
 .range-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.68)}
 .range-value{min-width:46px;text-align:center;padding:5px 10px;border-radius:999px;background:white;color:black;font-weight:800;font-size:13px}
@@ -81,6 +82,7 @@ button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:no
     <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
 
     <button class="save" id="saveBtn" type="button">Salva</button>
+    <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina POI</button>
   </div>
 </div>
 
@@ -100,6 +102,7 @@ const searchEl = document.getElementById("search");
 const addBtn = document.getElementById("addBtn");
 const closeBtn = document.getElementById("closeBtn");
 const saveBtn = document.getElementById("saveBtn");
+const deleteBtn = document.getElementById("deleteBtn");
 
 const nameEl = document.getElementById("name");
 const coordsEl = document.getElementById("coords");
@@ -265,6 +268,7 @@ function renderPois(filter = ""){
 }
 
 function openModal(poi = null){
+  deleteBtn.style.display = poi ? "block" : "none";
   if(poi){
     editingPoiId = poi.id;
     modalTitleEl.innerText = "Modifica POI";
@@ -370,12 +374,46 @@ async function savePoi(){
 }
 
 addBtn.addEventListener("click", () => openModal());
+deleteBtn.addEventListener("click", deletePoi);
 closeBtn.addEventListener("click", closeModal);
 saveBtn.addEventListener("click", savePoi);
 searchEl.addEventListener("input", () => renderPois(searchEl.value));
 importanceEl.addEventListener("input", () => updateImportanceUI());
 modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
 document.addEventListener("keydown", (event) => { if(event.key === "Escape") closeModal(); });
+
+async function deletePoi(){
+  if(!editingPoiId) return;
+
+  if(!confirm("Sei sicuro di voler eliminare questo POI?")) return;
+
+  const token = getToken();
+  const email = getUserEmail();
+
+  if(!token){
+    alert("Devi essere loggato per eliminare.");
+    return;
+  }
+
+  if(email !== OWNER_EMAIL){
+    alert(`Utente non autorizzato: ${email || "email non trovata"}`);
+    return;
+  }
+
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pois?id=eq.${encodeURIComponent(editingPoiId)}`, {
+      method: "DELETE",
+      headers: buildHeaders({ useUserToken: true })
+    });
+
+    await parseResponse(res);
+    closeModal();
+    await loadPois();
+  }catch(err){
+    console.error("DELETE POI ERROR", err);
+    alert(`Errore eliminazione: ${err.message}`);
+  }
+}
 
 function runTests(){
   console.assert(typeof loadPois === "function", "loadPois deve esistere");
