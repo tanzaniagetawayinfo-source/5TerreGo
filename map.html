@@ -578,6 +578,9 @@
   var AUTO_CLOSE_DISTANCE = 800;
   var poiCloseTimer = null;
   var cityCardManuallyClosed = false;
+  var cityCardHasSwitchedOnce = false;
+  var cityCardNudgeTimers = [];
+  var cityCardNudgeInterval = null;
 
   var SUPABASE_READY = Boolean(
     window.supabase &&
@@ -1233,6 +1236,67 @@
     cardLive.src = src;
   }
 
+  function clearCityCardNudges() {
+    cityCardNudgeTimers.forEach(function (timer) {
+      window.clearTimeout(timer);
+    });
+    cityCardNudgeTimers = [];
+
+    if (cityCardNudgeInterval) {
+      window.clearInterval(cityCardNudgeInterval);
+      cityCardNudgeInterval = null;
+    }
+  }
+
+  function getCityCardNudgeDirection() {
+    var citiesBefore = currentIndex;
+    var citiesAfter = places.length - 1 - currentIndex;
+
+    if (currentIndex <= 0) return -1;
+    if (currentIndex >= places.length - 1) return 1;
+    return citiesAfter >= citiesBefore ? -1 : 1;
+  }
+
+  function nudgeCityCard() {
+    var direction;
+    var distance;
+
+    if (cityCardHasSwitchedOnce) return;
+    if (isDragging) return;
+    if (currentDataset !== 'places') return;
+    if (currentIndex < 0) return;
+    if (card.getAttribute('aria-hidden') === 'true') return;
+    if (poiCard.getAttribute('aria-hidden') === 'false') return;
+
+    direction = getCityCardNudgeDirection();
+    distance = direction * 14;
+
+    card.style.transition = 'transform 0.22s cubic-bezier(.22,.61,.36,1)';
+    card.style.transform = 'translateX(' + distance + 'px)';
+
+    window.setTimeout(function () {
+      if (isDragging || card.getAttribute('aria-hidden') === 'true') return;
+      card.style.transition = 'transform 0.32s cubic-bezier(.22,.61,.36,1)';
+      card.style.transform = 'translateX(0)';
+    }, 220);
+  }
+
+  function startCityCardNudges() {
+    clearCityCardNudges();
+
+    if (cityCardHasSwitchedOnce) return;
+    if (currentDataset !== 'places') return;
+    if (currentIndex < 0) return;
+
+    cityCardNudgeTimers.push(window.setTimeout(nudgeCityCard, 1200));
+    cityCardNudgeTimers.push(window.setTimeout(nudgeCityCard, 3000));
+
+    cityCardNudgeTimers.push(window.setTimeout(function () {
+      nudgeCityCard();
+      cityCardNudgeInterval = window.setInterval(nudgeCityCard, 5000);
+    }, 5000));
+  }
+
   function setCardContent(item) {
     cardTitle.innerText = item.name;
     cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
@@ -1289,10 +1353,12 @@
     window.requestAnimationFrame(function () {
       card.classList.add('is-visible');
       card.style.transform = 'translateY(0)';
+      startCityCardNudges();
     });
   }
 
   function hideCard(manual) {
+    clearCityCardNudges();
     if (manual) cityCardManuallyClosed = true;
     if (card.getAttribute('aria-hidden') === 'true') return;
 
@@ -1365,6 +1431,9 @@
       card.style.transform = 'translateX(0)';
       return;
     }
+
+    cityCardHasSwitchedOnce = true;
+    clearCityCardNudges();
 
     var place = places[nextIndex];
     var exitX = direction === 'next' ? '-110%' : '110%';
@@ -2167,6 +2236,12 @@
     console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
     console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
     console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
+    console.assert(typeof clearCityCardNudges === 'function', 'City-card nudge cleanup function exists');
+    console.assert(typeof startCityCardNudges === 'function', 'City-card nudge scheduler exists');
+    console.assert(typeof nudgeCityCard === 'function', 'City-card nudge animation function exists');
+    console.assert(typeof getCityCardNudgeDirection === 'function', 'City-card nudge direction function exists');
+    console.assert(Array.isArray(cityCardNudgeTimers), 'City-card nudge timers are tracked');
+    console.assert(typeof cityCardHasSwitchedOnce === 'boolean', 'City-card nudge stops after first village swipe');
     console.assert(typeof hideCard === 'function', 'hideCard function exists for downward city-card swipe');
     console.assert(card.style.touchAction !== 'pan-y', 'City card touch action does not let iOS steal downward swipe');
     console.assert(typeof cityCardManuallyClosed === 'boolean', 'Manual city-card close lock exists');
