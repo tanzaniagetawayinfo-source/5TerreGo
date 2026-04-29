@@ -15,7 +15,8 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,san
 .status.error{color:#ffb4b4}
 .status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
 .list{padding:16px}
-.poi{padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease}
+.poi{position:relative;padding:14px;padding-right:118px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease}
+.poi-alert{position:absolute;right:10px;top:10px;max-width:98px;padding:6px 8px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;font-size:10px;font-weight:800;line-height:1.1;text-align:center;text-transform:uppercase;letter-spacing:.02em;pointer-events:none}
 .poi:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
 .poi-title{font-weight:700;margin-bottom:4px}
 .poi-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
@@ -230,15 +231,33 @@ async function loadPois(){
   }
 }
 
-function renderPois(filter = ""){
-  const q = filter.trim().toLowerCase();
-  const filtered = pois.filter(p => `${p.name || ""} ${p.type || ""} ${p.description || ""}`.toLowerCase().includes(q));
+function getMissingPoiFields(poi){
+  const missingFields = [];
+  if(!String(poi?.description || "").trim()) missingFields.push("descrizione");
+  if(!String(poi?.coords || "").trim()) missingFields.push("coordinate");
+  return missingFields;
+}
 
+function getPoiAlertText(poi){
+  const missingFields = getMissingPoiFields(poi);
+  if(missingFields.length === 0) return "";
+  if(missingFields.length === 2) return "manca desc. + coord.";
+  return `manca ${missingFields[0]}`;
+}
+
+function renderPois(filter = ""){
   listEl.innerHTML = "";
-  if(filtered.length === 0){
+
+  const query = String(filter || "").trim().toLowerCase();
+  const filtered = pois.filter((p) => {
+    const haystack = `${p.name || ""} ${p.type || ""} ${p.description || ""}`.toLowerCase();
+    return !query || haystack.includes(query);
+  });
+
+  if(!filtered.length){
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.innerText = "Nessun POI trovato";
+    empty.innerText = pois.length ? "Nessun POI trovato" : "Nessun POI disponibile";
     listEl.appendChild(empty);
     return;
   }
@@ -246,6 +265,14 @@ function renderPois(filter = ""){
   filtered.forEach(p => {
     const div = document.createElement("div");
     div.className = "poi";
+
+    const alertText = getPoiAlertText(p);
+    if(alertText){
+      const alertBadge = document.createElement("div");
+      alertBadge.className = "poi-alert";
+      alertBadge.innerText = alertText;
+      div.appendChild(alertBadge);
+    }
 
     const title = document.createElement("div");
     title.className = "poi-title";
@@ -419,6 +446,9 @@ function runTests(){
   console.assert(typeof loadPois === "function", "loadPois deve esistere");
   console.assert(typeof savePoi === "function", "savePoi deve esistere");
   console.assert(typeof buildPoiSaveRequest === "function", "buildPoiSaveRequest deve esistere");
+  console.assert(typeof renderPois === "function", "renderPois deve esistere");
+  console.assert(typeof getMissingPoiFields === "function", "getMissingPoiFields deve esistere");
+  console.assert(typeof getPoiAlertText === "function", "getPoiAlertText deve esistere");
   console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
   updateImportanceUI(75);
   console.assert(importanceEl.value === "75", "slider importanza si aggiorna");
@@ -434,6 +464,27 @@ function runTests(){
   console.assert(buildPoiSaveRequest(null).method === "POST", "nuovo POI usa POST");
   console.assert(buildPoiSaveRequest("123").method === "PATCH", "POI esistente usa PATCH");
   console.assert(buildPoiSaveRequest("123").url.includes("id=eq.123"), "PATCH filtra per id");
+  console.assert(getMissingPoiFields({ description:"", coords:"" }).length === 2, "rileva descrizione e coordinate mancanti");
+  console.assert(getPoiAlertText({ description:"", coords:"" }) === "manca desc. + coord.", "testo badge per entrambi i campi mancanti");
+  console.assert(getPoiAlertText({ description:"test", coords:"" }) === "manca coordinate", "testo badge coordinate mancanti");
+  console.assert(getPoiAlertText({ description:"", coords:"44,9" }) === "manca descrizione", "testo badge descrizione mancante");
+  console.assert(getPoiAlertText({ description:"test", coords:"44,9" }) === "", "nessun badge se non manca nulla");
+
+  const previousPois = pois;
+  pois = [
+    { id:"complete", name:"Completo", type:"bar", description:"Desc", coords:"44,9", importance:70, discount:0 },
+    { id:"missing-desc", name:"Senza descrizione", type:"bar", description:"", coords:"44,9", importance:60, discount:0 },
+    { id:"missing-coords", name:"Senza coordinate", type:"bar", description:"Desc", coords:"", importance:50, discount:0 },
+    { id:"missing-both", name:"Senza tutto", type:"bar", description:"", coords:"", importance:40, discount:0 }
+  ];
+  renderPois("");
+  console.assert(listEl.querySelectorAll(".poi").length === 4, "renderPois mostra tutti i POI test");
+  console.assert(listEl.querySelectorAll(".poi-alert").length === 3, "renderPois crea badge solo sui POI incompleti");
+  console.assert(listEl.innerText.includes("manca desc. + coord."), "renderPois mostra badge combinato");
+  renderPois("completo");
+  console.assert(listEl.querySelectorAll(".poi").length === 1, "renderPois filtra per ricerca");
+  pois = previousPois;
+  renderPois(searchEl.value);
 
   openModal();
   console.assert(editingPoiId === null, "openModal nuovo non mantiene id vecchi");
