@@ -259,13 +259,64 @@
       transform: translateY(0);
     }
 
-    .bottom-card img {
+    .card-media {
+      position: relative;
       width: 100%;
       height: 140px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .bottom-card img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       display: block;
       background: rgba(255,255,255,0.08);
       pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    .card-live-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      opacity: 0;
+      pointer-events: auto;
+      transition: opacity 0.35s ease;
+    }
+
+    .card-media.live-ready img {
+      opacity: 0;
+    }
+
+    .card-media.live-ready .card-live-frame {
+      opacity: 1;
+    }
+
+    .card-live-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 2;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.58);
+      color: white;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      pointer-events: none;
+    }
+
+    .card-media.live-ready .card-live-badge {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .bottom-card .title {
@@ -475,7 +526,11 @@
 </div>
 
 <div class="bottom-card" id="card" aria-hidden="true">
-  <img id="card-img" src="" alt="" />
+  <div class="card-media" id="card-media">
+    <img id="card-img" src="" alt="" />
+    <iframe id="card-live" class="card-live-frame" title="Live webcam" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    <div class="card-live-badge">LIVE</div>
+  </div>
   <div class="title" id="card-title"></div>
   <div class="desc" id="card-desc" style="color: rgba(255,255,255,0.8); padding: 0 10px 12px; font-size: 13px; line-height: 1.4;"></div>
 </div>
@@ -527,11 +582,11 @@
   }) : null;
 
   var places = [
-    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg' },
-    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg' },
-    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg' },
-    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE }
+    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', liveVideoId: 'Mjrd1nmlW5s' },
+    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: '' },
+    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: '' },
+    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: '' },
+    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: '' }
   ];
 
   var ferryPorts = [];
@@ -708,6 +763,8 @@
   var cardTitle = document.getElementById('card-title');
   var cardDesc = document.getElementById('card-desc');
   var cardImg = document.getElementById('card-img');
+  var cardMedia = document.getElementById('card-media');
+  var cardLive = document.getElementById('card-live');
   var ownerPanel = document.getElementById('owner-panel');
   var poiCard = document.getElementById('poi-card');
   var poiTitle = document.getElementById('poi-title');
@@ -886,10 +943,34 @@
     });
   }
 
+  function getYouTubeEmbedUrl(videoId) {
+    if (!videoId) return '';
+    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1';
+  }
+
+  function resetCardLive() {
+    cardMedia.classList.remove('live-ready');
+    cardLive.removeAttribute('src');
+  }
+
+  function loadCardLive(videoId) {
+    var src = getYouTubeEmbedUrl(videoId);
+
+    resetCardLive();
+    if (!src) return;
+
+    cardLive.onload = function () {
+      cardMedia.classList.add('live-ready');
+    };
+
+    cardLive.src = src;
+  }
+
   function setCardContent(item) {
     cardTitle.innerText = item.name;
     cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
     cardImg.alt = item.name;
+    loadCardLive(item.liveVideoId);
 
     if (item.description && item.description.trim().length > 0) {
       cardDesc.style.display = 'block';
@@ -1676,6 +1757,12 @@
     console.assert(typeof cityCardManuallyClosed === 'boolean', 'Manual city-card close lock exists');
     console.assert(typeof currentIndex === 'number', 'Manual city-card close lock is tied to the current city index');
     console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
+    console.assert(typeof getYouTubeEmbedUrl === 'function', 'YouTube embed URL function exists');
+    console.assert(getYouTubeEmbedUrl('abc123').indexOf('autoplay=1') !== -1, 'YouTube live embed uses autoplay');
+    console.assert(getYouTubeEmbedUrl('abc123').indexOf('mute=1') !== -1, 'YouTube live embed is muted for mobile autoplay');
+    console.assert(typeof resetCardLive === 'function', 'Card live reset function exists');
+    console.assert(typeof loadCardLive === 'function', 'Card live loader exists');
+    console.assert(document.getElementById('card-live') !== null, 'Card live iframe exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
