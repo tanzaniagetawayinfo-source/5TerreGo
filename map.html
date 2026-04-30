@@ -909,6 +909,8 @@
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
+  var POI_TRANSLATION_CACHE_KEY = '5terrego_poi_translation_cache_v1';
+  var POI_TEXT_SOURCE_LANG = 'en';
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
   var AUTO_CLOSE_ZOOM = 12;
@@ -1407,6 +1409,7 @@
   var currentUser = null;
   var userCheckTimer = null;
   var poiMiniMap = null;
+  var currentPOITextToken = 0;
 
   function isIOSDevice() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -1451,6 +1454,13 @@
       readMoreBtn.innerText = poiDesc.classList.contains('expanded') ? t('readLess') : t('readMore');
     }
 
+    if (currentDataset === 'pois' && window.currentOpenPOI) {
+      currentPOITextToken += 1;
+      poiTitle.innerText = getLocalizedPOIName(window.currentOpenPOI);
+      poiDesc.innerText = getLocalizedPOIDescription(window.currentOpenPOI);
+      applyTranslatedPOIText(window.currentOpenPOI, currentPOITextToken);
+    }
+
     renderSearchSuggestions(searchInput ? searchInput.value : '');
   }
 
@@ -1481,6 +1491,21 @@
     languageToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
+  function dispatchNativeChange(element) {
+    var event;
+
+    if (!element) return;
+
+    try {
+      event = new Event('change', { bubbles: true });
+    } catch (error) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent('change', true, false);
+    }
+
+    element.dispatchEvent(event);
+  }
+
   function applyGoogleTranslateCombo(lang) {
     var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
     var tries = 0;
@@ -1489,12 +1514,12 @@
       tries += 1;
 
       if (!combo) {
-        if (tries >= 20) window.clearInterval(timer);
+        if (tries >= 12) window.clearInterval(timer);
         return;
       }
 
       combo.value = targetLang === 'it' ? '' : targetLang;
-      combo.dispatchEvent(new Event('change'));
+      dispatchNativeChange(combo);
       window.clearInterval(timer);
     }, 250);
   }
@@ -1508,20 +1533,26 @@
     localStorage.setItem('5terrego_lang', targetLang);
     updateLanguageUI(targetLang);
     applyInterfaceTranslations();
-    applyGoogleTranslateCombo(targetLang);
 
-    if (shouldReload && targetLang !== 'it') {
-      window.setTimeout(function () {
-        window.location.reload();
-      }, 450);
-    }
+    window.setTimeout(function () {
+      applyInterfaceTranslations();
+      applyGoogleTranslateCombo(targetLang);
+    }, 80);
+
+    window.setTimeout(function () {
+      applyInterfaceTranslations();
+    }, 650);
   }
 
   function setCookie(name, value) {
     var host = window.location.hostname;
     var domain = host && host.indexOf('.') !== -1 ? ';domain=.' + host : '';
-    document.cookie = name + '=' + value + ';path=/;max-age=31536000;SameSite=Lax' + domain;
-    document.cookie = name + '=' + value + ';path=/;max-age=31536000;SameSite=Lax';
+    var expires = ';expires=Tue, 19 Jan 2038 03:14:07 GMT';
+
+    document.cookie = name + '=' + value + ';path=/' + expires + ';SameSite=Lax' + domain;
+    document.cookie = name + '=' + value + ';path=/' + expires + ';SameSite=Lax';
+    document.cookie = name + '=' + value + ';path=/' + expires + domain;
+    document.cookie = name + '=' + value + ';path=/' + expires;
   }
 
   function forcePageTranslation() {
@@ -1590,17 +1621,142 @@
     return {
       id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
       name: String(raw.name || raw.title || 'POI'),
+      name_it: raw.name_it || raw.title_it || raw.name || raw.title || '',
+      name_en: raw.name_en || raw.title_en || '',
+      name_fr: raw.name_fr || raw.title_fr || '',
+      name_de: raw.name_de || raw.title_de || '',
+      name_es: raw.name_es || raw.title_es || '',
       symbol: symbol,
       coords: [parsed.lat, parsed.lng],
       lat: parsed.lat,
       lng: parsed.lng,
       image: raw.image || raw.photo_url || raw.img || '',
       description: raw.description || raw.descrizione || '',
+      description_it: raw.description_it || raw.descrizione_it || raw.description || raw.descrizione || '',
+      description_en: raw.description_en || raw.descrizione_en || '',
+      description_fr: raw.description_fr || raw.descrizione_fr || '',
+      description_de: raw.description_de || raw.descrizione_de || '',
+      description_es: raw.description_es || raw.descrizione_es || '',
       type: raw.type || raw.tipo || '',
       owner_email: raw.owner_email || raw.email || '',
       phone: raw.phone || raw.telephone || '',
       relevance: Number(raw.importance || raw.relevance || raw.score || 0)
     };
+  }
+
+  function getLocalizedPOIName(poi) {
+    var lang = getBrowserLanguage();
+    var key = 'name_' + lang;
+    var value = poi && poi[key] ? String(poi[key]).trim() : '';
+
+    return value || String((poi && (poi.name || poi.name_it)) || 'POI');
+  }
+
+  function getLocalizedPOIDescription(poi) {
+    var lang = getBrowserLanguage();
+    var key = 'description_' + lang;
+    var value = poi && poi[key] ? String(poi[key]).trim() : '';
+    var fallback = poi && (poi.description || poi.description_it) ? String(poi.description || poi.description_it).trim() : '';
+
+    return value || fallback || t('noDescription');
+  }
+
+  function getTranslationCache() {
+    try {
+      return JSON.parse(localStorage.getItem(POI_TRANSLATION_CACHE_KEY) || '{}');
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function setTranslationCache(cache) {
+    try {
+      localStorage.setItem(POI_TRANSLATION_CACHE_KEY, JSON.stringify(cache));
+    } catch (error) {}
+  }
+
+  function getTranslationCacheKey(text, targetLang) {
+    return targetLang + '::' + String(text || '').slice(0, 900);
+  }
+
+  async function translateTextFallback(text, targetLang) {
+    var cleanText = String(text || '').trim();
+    var lang = SUPPORTED_TRANSLATION_LANGS.indexOf(targetLang) !== -1 ? targetLang : 'en';
+    var cache;
+    var cacheKey;
+    var url;
+    var response;
+    var data;
+    var translated;
+
+    if (!cleanText || lang === POI_TEXT_SOURCE_LANG) return cleanText;
+
+    cache = getTranslationCache();
+    cacheKey = getTranslationCacheKey(cleanText, lang);
+
+    if (cache[cacheKey]) return cache[cacheKey];
+
+    url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(cleanText) + '&langpair=' + encodeURIComponent(POI_TEXT_SOURCE_LANG + '|' + lang);
+
+    try {
+      response = await fetch(url, { method: 'GET', cache: 'force-cache' });
+      if (!response.ok) throw new Error('Translation request failed');
+
+      data = await response.json();
+      translated = data && data.responseData && data.responseData.translatedText ? String(data.responseData.translatedText).trim() : '';
+
+      if (!translated) return cleanText;
+
+      cache[cacheKey] = translated;
+      setTranslationCache(cache);
+      return translated;
+    } catch (error) {
+      console.warn('POI auto translation failed:', error);
+      return cleanText;
+    }
+  }
+
+  async function applyTranslatedPOIText(poi, token) {
+    var lang = getBrowserLanguage();
+    var nameKey = 'name_' + lang;
+    var descriptionKey = 'description_' + lang;
+    var baseName;
+    var baseDescription;
+    var translatedName;
+    var translatedDescription;
+
+    if (!poi) return;
+    if (token !== currentPOITextToken) return;
+
+    baseName = getLocalizedPOIName(poi);
+    baseDescription = getLocalizedPOIDescription(poi);
+
+    if (lang === 'it' || lang === 'en') {
+      if (token === currentPOITextToken) {
+        poiTitle.innerText = baseName;
+        poiDesc.innerText = baseDescription;
+      }
+      return;
+    }
+
+    translatedName = poi[nameKey] ? baseName : await translateTextFallback(baseName, lang);
+    if (token !== currentPOITextToken) return;
+
+    translatedDescription = poi[descriptionKey] ? baseDescription : await translateTextFallback(baseDescription, lang);
+    if (token !== currentPOITextToken) return;
+
+    poiTitle.innerText = translatedName;
+    poiDesc.innerText = translatedDescription;
+
+    window.setTimeout(function () {
+      if (token !== currentPOITextToken) return;
+      if (poiDesc.scrollHeight > poiDesc.clientHeight + 10) {
+        readMoreBtn.style.display = 'block';
+        readMoreBtn.innerText = poiDesc.classList.contains('expanded') ? t('readLess') : t('readMore');
+      } else {
+        readMoreBtn.style.display = 'none';
+      }
+    }, 80);
   }
 
   function isValidPOI(poi) {
@@ -1770,14 +1926,14 @@
   }
 
   function setCardContent(item) {
-    cardTitle.innerText = item.name;
+    cardTitle.innerText = item && item.lat !== undefined && item.lng !== undefined ? getLocalizedPOIName(item) : item.name;
     cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
     cardImg.alt = item.name;
     loadCardLive(item.liveVideoId);
 
     if (item.description && item.description.trim().length > 0) {
       cardDesc.style.display = 'block';
-      cardDesc.innerText = item.description;
+      cardDesc.innerText = item && item.lat !== undefined && item.lng !== undefined ? getLocalizedPOIDescription(item) : item.description;
     } else {
       cardDesc.style.display = 'none';
       cardDesc.innerText = '';
@@ -1946,10 +2102,13 @@
     poiCard.classList.remove('open');
     poiCard.style.display = 'block';
     poiCard.setAttribute('aria-hidden', 'false');
-    poiTitle.innerText = poi.name;
+    window.currentOpenPOI = poi;
+    currentPOITextToken += 1;
+    poiTitle.innerText = getLocalizedPOIName(poi);
 
-    fullText = poi.description && poi.description.trim().length > 0 ? poi.description : t('noDescription');
+    fullText = getLocalizedPOIDescription(poi);
     poiDesc.innerText = fullText;
+    applyTranslatedPOIText(poi, currentPOITextToken);
     poiDesc.classList.remove('expanded');
     poiDesc.style.display = 'block';
 
@@ -2057,7 +2216,7 @@
 
     rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
       var marker = L.marker(poi.coords, {
-        title: poi.name,
+        title: getLocalizedPOIName(poi),
         icon: L.divIcon({
           className: 'custom-poi',
           html: '<div class="poi-label">' + escapeHTML(poi.symbol) + '</div>',
@@ -2249,9 +2408,10 @@
     });
 
     poiMarkers.forEach(function (item) {
-      var title = item.marker && item.marker.options ? item.marker.options.title || '' : '';
-      if (title.toLowerCase().includes(q)) {
-        results.push({ type: 'poi', name: title, poiName: title });
+      var title = item && item.poi ? getLocalizedPOIName(item.poi) : '';
+      var baseTitle = item && item.poi ? String(item.poi.name || '').trim() : '';
+      if (title.toLowerCase().includes(q) || baseTitle.toLowerCase().includes(q)) {
+        results.push({ type: 'poi', name: title, poiName: baseTitle || title });
       }
     });
 
@@ -2286,7 +2446,7 @@
     }
 
     poiItem = poiMarkers.find(function (m) {
-      return m.marker && m.marker.options && m.marker.options.title === name;
+      return m && m.poi && (getLocalizedPOIName(m.poi) === name || m.poi.name === name);
     });
 
     if (poiItem && poiItem.poi) {
@@ -2321,6 +2481,10 @@
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) forcePageTranslation();
     });
+
+    window.addEventListener('pageshow', function () {
+      forcePageTranslation();
+    });
     if (isIOSDevice()) {
       searchInput.addEventListener('focus', function () {
         document.body.style.position = 'fixed';
@@ -2349,11 +2513,17 @@
     }
 
     languageOptions.forEach(function (option) {
-      option.addEventListener('click', function (event) {
-        event.stopPropagation();
+      function activateLanguageOption(event) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
         closeLanguageMenu();
         setPageLanguage(option.getAttribute('data-lang'), true);
-      });
+      }
+
+      option.addEventListener('click', activateLanguageOption);
+      option.addEventListener('touchend', activateLanguageOption, { passive: false });
     });
 
     document.addEventListener('click', function (event) {
@@ -2774,9 +2944,14 @@
     console.assert(typeof setPageLanguage === 'function', 'Manual language switcher exists');
     console.assert(typeof applyInterfaceTranslations === 'function', 'Manual interface translations exist');
     console.assert(typeof t === 'function', 'Translation helper exists');
+    console.assert(typeof dispatchNativeChange === 'function', 'iPhone-safe change dispatcher exists');
     console.assert(document.getElementById('language-toggle') !== null, 'Language flag button exists next to login');
     console.assert(document.getElementById('language-menu') !== null, 'Language dropdown menu exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
+    console.assert(typeof getLocalizedPOIName === 'function', 'Localized POI name helper exists');
+    console.assert(typeof getLocalizedPOIDescription === 'function', 'Localized POI description helper exists');
+    console.assert(typeof translateTextFallback === 'function', 'POI dynamic fallback translator exists');
+    console.assert(typeof applyTranslatedPOIText === 'function', 'POI dynamic translated text applier exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
     console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
