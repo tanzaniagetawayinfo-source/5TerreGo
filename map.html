@@ -670,6 +670,20 @@
       transform: scale(1);
     }
 
+    #google_translate_element,
+    .goog-te-banner-frame,
+    .goog-te-balloon-frame,
+    .goog-te-gadget,
+    .goog-tooltip,
+    .goog-tooltip:hover {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      pointer-events: none !important;
+    }
+
     body {
       top: 0 !important;
     }
@@ -678,6 +692,7 @@
 <body>
 
 <div id="map"></div>
+<div id="google_translate_element" aria-hidden="true"></div>
 
 <div class="top-bar">
   <div class="top-row">
@@ -759,6 +774,22 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.googleTranslateElementInit = function () {
+    if (!window.google || !window.google.translate) return;
+
+    new window.google.translate.TranslateElement({
+      pageLanguage: 'it',
+      includedLanguages: 'it,en,fr,de,es,zh-CN,ar',
+      autoDisplay: false
+    }, 'google_translate_element');
+
+    window.setTimeout(function () {
+      if (window.forcePageTranslation) window.forcePageTranslation();
+    }, 600);
+  };
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
 (function () {
@@ -1543,12 +1574,51 @@
     languageToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
+  function dispatchNativeChange(element) {
+    var event;
+
+    if (!element) return;
+
+    try {
+      event = new Event('change', { bubbles: true });
+    } catch (error) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent('change', true, false);
+    }
+
+    element.dispatchEvent(event);
+  }
+
+  function getGoogleTranslateLang(lang) {
+    return lang === 'zh' ? 'zh-CN' : lang;
+  }
+
   function getFallbackTranslationLang(lang) {
     return lang === 'zh' ? 'zh-CN' : lang;
   }
 
+  function applyGoogleTranslateCombo(lang) {
+    var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
+    var tries = 0;
+    var timer = window.setInterval(function () {
+      var combo = document.querySelector('.goog-te-combo');
+      tries += 1;
+
+      if (!combo) {
+        if (tries >= 12) window.clearInterval(timer);
+        return;
+      }
+
+      combo.value = targetLang === 'it' ? '' : getGoogleTranslateLang(targetLang);
+      dispatchNativeChange(combo);
+      window.clearInterval(timer);
+    }, 250);
+  }
+
   function setPageLanguage(lang, shouldReload) {
     var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
+    var translateValue = targetLang === 'it' ? '/it/it' : '/it/' + targetLang;
+
     document.documentElement.setAttribute('lang', targetLang === 'zh' ? 'zh-CN' : targetLang);
     document.documentElement.setAttribute('dir', targetLang === 'ar' ? 'rtl' : 'ltr');
     setCookie('googtrans', translateValue);
@@ -1558,11 +1628,23 @@
 
     window.setTimeout(function () {
       applyInterfaceTranslations();
+      applyGoogleTranslateCombo(targetLang);
     }, 80);
 
     window.setTimeout(function () {
       applyInterfaceTranslations();
     }, 650);
+  }
+
+  function setCookie(name, value) {
+    var host = window.location.hostname;
+    var domain = host && host.indexOf('.') !== -1 ? ';domain=.' + host : '';
+    var expires = ';expires=Tue, 19 Jan 2038 03:14:07 GMT';
+
+    document.cookie = name + '=' + value + ';path=/' + expires + ';SameSite=Lax' + domain;
+    document.cookie = name + '=' + value + ';path=/' + expires + ';SameSite=Lax';
+    document.cookie = name + '=' + value + ';path=/' + expires + domain;
+    document.cookie = name + '=' + value + ';path=/' + expires;
   }
 
   function forcePageTranslation() {
@@ -2958,8 +3040,10 @@
     console.assert(typeof setPageLanguage === 'function', 'Manual language switcher exists');
     console.assert(typeof applyInterfaceTranslations === 'function', 'Manual interface translations exist');
     console.assert(typeof t === 'function', 'Translation helper exists');
+    console.assert(typeof dispatchNativeChange === 'function', 'iPhone-safe change dispatcher exists');
     console.assert(SUPPORTED_TRANSLATION_LANGS.indexOf('zh') !== -1, 'Chinese language is supported');
     console.assert(SUPPORTED_TRANSLATION_LANGS.indexOf('ar') !== -1, 'Arabic language is supported');
+    console.assert(typeof getGoogleTranslateLang === 'function', 'Google Translate language mapper exists');
     console.assert(typeof getFallbackTranslationLang === 'function', 'Fallback translation language mapper exists');
     console.assert(document.getElementById('language-toggle') !== null, 'Language flag button exists next to login');
     console.assert(document.getElementById('language-menu') !== null, 'Language dropdown menu exists');
