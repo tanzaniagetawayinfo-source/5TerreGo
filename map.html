@@ -332,11 +332,47 @@
       transform: translateY(0);
     }
 
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 10px 8px;
+    }
+
     .bottom-card .title {
+      flex: 1;
+      min-width: 0;
       color: white;
       font-weight: 700;
-      padding: 10px;
+      padding: 0;
       pointer-events: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .card-action-btn {
+      flex: 0 0 auto;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .card-action-btn:active {
+      transform: scale(0.98);
     }
 
     #poi-card {
@@ -545,7 +581,13 @@
     <div id="card-live-touch-layer" class="card-live-touch-layer" aria-hidden="true"></div>
     <div class="card-live-badge">LIVE</div>
   </div>
-  <div class="title" id="card-title"></div>
+  <div class="card-title-row">
+    <div class="title" id="card-title"></div>
+    <div class="card-actions">
+      <button class="card-action-btn" id="card-experiences" type="button">Experiences</button>
+      <button class="card-action-btn" id="card-stories" type="button">Stories</button>
+    </div>
+  </div>
   <div class="desc" id="card-desc" style="color: rgba(255,255,255,0.8); padding: 0 10px 12px; font-size: 13px; line-height: 1.4;"></div>
 </div>
 
@@ -1048,6 +1090,8 @@
   var addPoiBtn = document.getElementById('add-poi');
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
+  var cardExperiencesBtn = document.getElementById('card-experiences');
+  var cardStoriesBtn = document.getElementById('card-stories');
 
   var currentIndex = -1;
   var currentDataset = 'places';
@@ -1896,6 +1940,16 @@
 
     document.getElementById('btn-stories').addEventListener('click', function () {
       window.location.href = 'blog.html';
+    });
+
+    cardStoriesBtn.addEventListener('click', function (event) {
+      event.stopPropagation();
+      window.location.href = 'blog.html';
+    });
+
+    cardExperiencesBtn.addEventListener('click', function (event) {
+      event.stopPropagation();
+      window.location.href = 'experiences.html';
     });
 
     poiClose.addEventListener('click', function () {
