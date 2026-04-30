@@ -230,6 +230,33 @@
         #012169;
     }
 
+    .flag-zh {
+      background: radial-gradient(circle at 34% 30%, #ffde00 0 10%, transparent 11%), #de2910;
+    }
+
+    .flag-ar {
+      background: linear-gradient(180deg, #00732f 0 100%);
+    }
+
+    html[dir="rtl"] .top-row,
+    html[dir="rtl"] .mode-bar,
+    html[dir="rtl"] .card-title-row,
+    html[dir="rtl"] .language-option {
+      direction: rtl;
+    }
+
+    html[dir="rtl"] #language-menu {
+      right: auto;
+      left: 0;
+    }
+
+    html[dir="rtl"] #poi-desc,
+    html[dir="rtl"] #poi-title,
+    html[dir="rtl"] #card-desc,
+    html[dir="rtl"] #card-title {
+      direction: rtl;
+    }
+
     .blue { color: #1e9bff; }
     .orange { color: #ff8a1d; }
 
@@ -643,20 +670,6 @@
       transform: scale(1);
     }
 
-    #google_translate_element,
-    .goog-te-banner-frame,
-    .goog-te-balloon-frame,
-    .goog-te-gadget,
-    .goog-tooltip,
-    .goog-tooltip:hover {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      height: 0 !important;
-      width: 0 !important;
-      pointer-events: none !important;
-    }
-
     body {
       top: 0 !important;
     }
@@ -665,7 +678,6 @@
 <body>
 
 <div id="map"></div>
-<div id="google_translate_element" aria-hidden="true"></div>
 
 <div class="top-bar">
   <div class="top-row">
@@ -684,6 +696,8 @@
           <button class="language-option" type="button" data-lang="fr" role="menuitem"><span class="language-flag flag-fr" aria-hidden="true"></span><span>Français</span></button>
           <button class="language-option" type="button" data-lang="de" role="menuitem"><span class="language-flag flag-de" aria-hidden="true"></span><span>Deutsch</span></button>
           <button class="language-option" type="button" data-lang="es" role="menuitem"><span class="language-flag flag-es" aria-hidden="true"></span><span>Español</span></button>
+          <button class="language-option" type="button" data-lang="zh" role="menuitem"><span class="language-flag flag-zh" aria-hidden="true"></span><span>中文</span></button>
+          <button class="language-option" type="button" data-lang="ar" role="menuitem"><span class="language-flag flag-ar" aria-hidden="true"></span><span>العربية</span></button>
         </div>
       </div>
       <button id="login" type="button">Accedi</button>
@@ -745,30 +759,14 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  window.googleTranslateElementInit = function () {
-    if (!window.google || !window.google.translate) return;
-
-    new window.google.translate.TranslateElement({
-      pageLanguage: 'it',
-      includedLanguages: 'it,en,fr,de,es',
-      autoDisplay: false
-    }, 'google_translate_element');
-
-    window.setTimeout(function () {
-      if (window.forcePageTranslation) window.forcePageTranslation();
-    }, 600);
-  };
-</script>
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
 (function () {
   'use strict';
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
-  var SUPPORTED_TRANSLATION_LANGS = ['it', 'en', 'fr', 'de', 'es'];
-  var LANGUAGE_FLAGS = { it: 'flag-it', en: 'flag-en', fr: 'flag-fr', de: 'flag-de', es: 'flag-es' };
+  var SUPPORTED_TRANSLATION_LANGS = ['it', 'en', 'fr', 'de', 'es', 'zh', 'ar'];
+  var LANGUAGE_FLAGS = { it: 'flag-it', en: 'flag-en', fr: 'flag-fr', de: 'flag-de', es: 'flag-es', zh: 'flag-zh', ar: 'flag-ar' };
   var I18N = {
     it: {
       login: 'Accedi',
@@ -904,6 +902,60 @@
       saveError: 'Error al guardar: ',
       poiSaved: 'POI guardado',
       hi: 'Hola, '
+    },
+    zh: {
+      login: '登录',
+      searchPlaceholder: '搜索地点...',
+      experiences: '体验',
+      stories: '故事',
+      village: '村庄',
+      poi: '兴趣点',
+      live: '直播',
+      directions: '路线',
+      readMore: '阅读更多',
+      readLess: '收起',
+      noDescription: '暂无描述',
+      addPoi: '添加兴趣点',
+      poiName: '兴趣点名称',
+      poiSymbol: '符号 / 表情',
+      latitude: '纬度',
+      longitude: '经度',
+      photoUrl: '照片链接',
+      ownerEmail: '所有者邮箱',
+      phone: '电话',
+      poiDescription: '兴趣点描述',
+      relevance: '相关度 1-100',
+      invalidData: '数据无效：名称、纬度和经度为必填项',
+      saveError: '保存错误：',
+      poiSaved: '兴趣点已保存',
+      hi: '你好，'
+    },
+    ar: {
+      login: 'دخول',
+      searchPlaceholder: 'ابحث عن مكان...',
+      experiences: 'تجارب',
+      stories: 'قصص',
+      village: 'قرية',
+      poi: 'نقطة اهتمام',
+      live: 'مباشر',
+      directions: 'الاتجاهات',
+      readMore: 'اقرأ المزيد',
+      readLess: 'عرض أقل',
+      noDescription: 'لا يوجد وصف متاح',
+      addPoi: 'إضافة نقطة اهتمام',
+      poiName: 'اسم نقطة الاهتمام',
+      poiSymbol: 'رمز / إيموجي',
+      latitude: 'خط العرض',
+      longitude: 'خط الطول',
+      photoUrl: 'رابط الصورة',
+      ownerEmail: 'بريد المالك',
+      phone: 'الهاتف',
+      poiDescription: 'وصف نقطة الاهتمام',
+      relevance: 'درجة الأهمية 1-100',
+      invalidData: 'بيانات غير صالحة: الاسم وخط العرض وخط الطول مطلوبة',
+      saveError: 'خطأ في الحفظ: ',
+      poiSaved: 'تم حفظ نقطة الاهتمام',
+      hi: 'مرحباً، '
     }
   };
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
@@ -1491,44 +1543,14 @@
     languageToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
-  function dispatchNativeChange(element) {
-    var event;
-
-    if (!element) return;
-
-    try {
-      event = new Event('change', { bubbles: true });
-    } catch (error) {
-      event = document.createEvent('HTMLEvents');
-      event.initEvent('change', true, false);
-    }
-
-    element.dispatchEvent(event);
-  }
-
-  function applyGoogleTranslateCombo(lang) {
-    var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
-    var tries = 0;
-    var timer = window.setInterval(function () {
-      var combo = document.querySelector('.goog-te-combo');
-      tries += 1;
-
-      if (!combo) {
-        if (tries >= 12) window.clearInterval(timer);
-        return;
-      }
-
-      combo.value = targetLang === 'it' ? '' : targetLang;
-      dispatchNativeChange(combo);
-      window.clearInterval(timer);
-    }, 250);
+  function getFallbackTranslationLang(lang) {
+    return lang === 'zh' ? 'zh-CN' : lang;
   }
 
   function setPageLanguage(lang, shouldReload) {
     var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
-    var translateValue = targetLang === 'it' ? '/it/it' : '/it/' + targetLang;
-
-    document.documentElement.setAttribute('lang', targetLang);
+    document.documentElement.setAttribute('lang', targetLang === 'zh' ? 'zh-CN' : targetLang);
+    document.documentElement.setAttribute('dir', targetLang === 'ar' ? 'rtl' : 'ltr');
     setCookie('googtrans', translateValue);
     localStorage.setItem('5terrego_lang', targetLang);
     updateLanguageUI(targetLang);
@@ -1536,23 +1558,11 @@
 
     window.setTimeout(function () {
       applyInterfaceTranslations();
-      applyGoogleTranslateCombo(targetLang);
     }, 80);
 
     window.setTimeout(function () {
       applyInterfaceTranslations();
     }, 650);
-  }
-
-  function setCookie(name, value) {
-    var host = window.location.hostname;
-    var domain = host && host.indexOf('.') !== -1 ? ';domain=.' + host : '';
-    var expires = ';expires=Tue, 19 Jan 2038 03:14:07 GMT';
-
-    document.cookie = name + '=' + value + ';path=/' + expires + ';SameSite=Lax' + domain;
-    document.cookie = name + '=' + value + ';path=/' + expires + ';SameSite=Lax';
-    document.cookie = name + '=' + value + ';path=/' + expires + domain;
-    document.cookie = name + '=' + value + ';path=/' + expires;
   }
 
   function forcePageTranslation() {
@@ -1626,6 +1636,8 @@
       name_fr: raw.name_fr || raw.title_fr || '',
       name_de: raw.name_de || raw.title_de || '',
       name_es: raw.name_es || raw.title_es || '',
+      name_zh: raw.name_zh || raw.title_zh || raw.name_cn || raw.title_cn || '',
+      name_ar: raw.name_ar || raw.title_ar || '',
       symbol: symbol,
       coords: [parsed.lat, parsed.lng],
       lat: parsed.lat,
@@ -1637,6 +1649,8 @@
       description_fr: raw.description_fr || raw.descrizione_fr || '',
       description_de: raw.description_de || raw.descrizione_de || '',
       description_es: raw.description_es || raw.descrizione_es || '',
+      description_zh: raw.description_zh || raw.descrizione_zh || raw.description_cn || raw.descrizione_cn || '',
+      description_ar: raw.description_ar || raw.descrizione_ar || '',
       type: raw.type || raw.tipo || '',
       owner_email: raw.owner_email || raw.email || '',
       phone: raw.phone || raw.telephone || '',
@@ -1696,7 +1710,7 @@
 
     if (cache[cacheKey]) return cache[cacheKey];
 
-    url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(cleanText) + '&langpair=' + encodeURIComponent(POI_TEXT_SOURCE_LANG + '|' + lang);
+    url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(cleanText) + '&langpair=' + encodeURIComponent(POI_TEXT_SOURCE_LANG + '|' + getFallbackTranslationLang(lang));
 
     try {
       response = await fetch(url, { method: 'GET', cache: 'force-cache' });
@@ -2944,7 +2958,9 @@
     console.assert(typeof setPageLanguage === 'function', 'Manual language switcher exists');
     console.assert(typeof applyInterfaceTranslations === 'function', 'Manual interface translations exist');
     console.assert(typeof t === 'function', 'Translation helper exists');
-    console.assert(typeof dispatchNativeChange === 'function', 'iPhone-safe change dispatcher exists');
+    console.assert(SUPPORTED_TRANSLATION_LANGS.indexOf('zh') !== -1, 'Chinese language is supported');
+    console.assert(SUPPORTED_TRANSLATION_LANGS.indexOf('ar') !== -1, 'Arabic language is supported');
+    console.assert(typeof getFallbackTranslationLang === 'function', 'Fallback translation language mapper exists');
     console.assert(document.getElementById('language-toggle') !== null, 'Language flag button exists next to login');
     console.assert(document.getElementById('language-menu') !== null, 'Language dropdown menu exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
