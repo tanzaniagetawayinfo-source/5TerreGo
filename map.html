@@ -1451,11 +1451,6 @@
       readMoreBtn.innerText = poiDesc.classList.contains('expanded') ? t('readLess') : t('readMore');
     }
 
-    if (currentDataset === 'pois' && window.currentOpenPOI) {
-      poiTitle.innerText = getLocalizedPOIName(window.currentOpenPOI);
-      poiDesc.innerText = getLocalizedPOIDescription(window.currentOpenPOI);
-    }
-
     renderSearchSuggestions(searchInput ? searchInput.value : '');
   }
 
@@ -1616,44 +1611,17 @@
     return {
       id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
       name: String(raw.name || raw.title || 'POI'),
-      name_it: raw.name_it || raw.title_it || raw.name || raw.title || '',
-      name_en: raw.name_en || raw.title_en || '',
-      name_fr: raw.name_fr || raw.title_fr || '',
-      name_de: raw.name_de || raw.title_de || '',
-      name_es: raw.name_es || raw.title_es || '',
       symbol: symbol,
       coords: [parsed.lat, parsed.lng],
       lat: parsed.lat,
       lng: parsed.lng,
       image: raw.image || raw.photo_url || raw.img || '',
       description: raw.description || raw.descrizione || '',
-      description_it: raw.description_it || raw.descrizione_it || raw.description || raw.descrizione || '',
-      description_en: raw.description_en || raw.descrizione_en || '',
-      description_fr: raw.description_fr || raw.descrizione_fr || '',
-      description_de: raw.description_de || raw.descrizione_de || '',
-      description_es: raw.description_es || raw.descrizione_es || '',
       type: raw.type || raw.tipo || '',
       owner_email: raw.owner_email || raw.email || '',
       phone: raw.phone || raw.telephone || '',
       relevance: Number(raw.importance || raw.relevance || raw.score || 0)
     };
-  }
-
-  function getLocalizedPOIName(poi) {
-    var lang = getBrowserLanguage();
-    var key = 'name_' + lang;
-    var value = poi && poi[key] ? String(poi[key]).trim() : '';
-
-    return value || String((poi && (poi.name || poi.name_it)) || 'POI');
-  }
-
-  function getLocalizedPOIDescription(poi) {
-    var lang = getBrowserLanguage();
-    var key = 'description_' + lang;
-    var value = poi && poi[key] ? String(poi[key]).trim() : '';
-    var fallback = poi && (poi.description || poi.description_it) ? String(poi.description || poi.description_it).trim() : '';
-
-    return value || fallback || t('noDescription');
   }
 
   function isValidPOI(poi) {
@@ -1823,14 +1791,14 @@
   }
 
   function setCardContent(item) {
-    cardTitle.innerText = item && item.lat !== undefined && item.lng !== undefined ? getLocalizedPOIName(item) : item.name;
+    cardTitle.innerText = item.name;
     cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
     cardImg.alt = item.name;
     loadCardLive(item.liveVideoId);
 
     if (item.description && item.description.trim().length > 0) {
       cardDesc.style.display = 'block';
-      cardDesc.innerText = item && item.lat !== undefined && item.lng !== undefined ? getLocalizedPOIDescription(item) : item.description;
+      cardDesc.innerText = item.description;
     } else {
       cardDesc.style.display = 'none';
       cardDesc.innerText = '';
@@ -1999,10 +1967,9 @@
     poiCard.classList.remove('open');
     poiCard.style.display = 'block';
     poiCard.setAttribute('aria-hidden', 'false');
-    window.currentOpenPOI = poi;
-    poiTitle.innerText = getLocalizedPOIName(poi);
+    poiTitle.innerText = poi.name;
 
-    fullText = getLocalizedPOIDescription(poi);
+    fullText = poi.description && poi.description.trim().length > 0 ? poi.description : t('noDescription');
     poiDesc.innerText = fullText;
     poiDesc.classList.remove('expanded');
     poiDesc.style.display = 'block';
@@ -2111,7 +2078,7 @@
 
     rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
       var marker = L.marker(poi.coords, {
-        title: getLocalizedPOIName(poi),
+        title: poi.name,
         icon: L.divIcon({
           className: 'custom-poi',
           html: '<div class="poi-label">' + escapeHTML(poi.symbol) + '</div>',
@@ -2303,10 +2270,9 @@
     });
 
     poiMarkers.forEach(function (item) {
-      var title = item && item.poi ? getLocalizedPOIName(item.poi) : '';
-      var baseTitle = item && item.poi ? String(item.poi.name || '').trim() : '';
-      if (title.toLowerCase().includes(q) || baseTitle.toLowerCase().includes(q)) {
-        results.push({ type: 'poi', name: title, poiName: baseTitle || title });
+      var title = item.marker && item.marker.options ? item.marker.options.title || '' : '';
+      if (title.toLowerCase().includes(q)) {
+        results.push({ type: 'poi', name: title, poiName: title });
       }
     });
 
@@ -2341,7 +2307,7 @@
     }
 
     poiItem = poiMarkers.find(function (m) {
-      return m && m.poi && (getLocalizedPOIName(m.poi) === name || m.poi.name === name);
+      return m.marker && m.marker.options && m.marker.options.title === name;
     });
 
     if (poiItem && poiItem.poi) {
@@ -2843,8 +2809,6 @@
     console.assert(document.getElementById('language-toggle') !== null, 'Language flag button exists next to login');
     console.assert(document.getElementById('language-menu') !== null, 'Language dropdown menu exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
-    console.assert(typeof getLocalizedPOIName === 'function', 'Localized POI name helper exists');
-    console.assert(typeof getLocalizedPOIDescription === 'function', 'Localized POI description helper exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
     console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
