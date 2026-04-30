@@ -230,33 +230,6 @@
         #012169;
     }
 
-    .flag-zh {
-      background: radial-gradient(circle at 34% 30%, #ffde00 0 10%, transparent 11%), #de2910;
-    }
-
-    .flag-ar {
-      background: linear-gradient(180deg, #00732f 0 100%);
-    }
-
-    html[dir="rtl"] .top-row,
-    html[dir="rtl"] .mode-bar,
-    html[dir="rtl"] .card-title-row,
-    html[dir="rtl"] .language-option {
-      direction: rtl;
-    }
-
-    html[dir="rtl"] #language-menu {
-      right: auto;
-      left: 0;
-    }
-
-    html[dir="rtl"] #poi-desc,
-    html[dir="rtl"] #poi-title,
-    html[dir="rtl"] #card-desc,
-    html[dir="rtl"] #card-title {
-      direction: rtl;
-    }
-
     .blue { color: #1e9bff; }
     .orange { color: #ff8a1d; }
 
@@ -711,8 +684,6 @@
           <button class="language-option" type="button" data-lang="fr" role="menuitem"><span class="language-flag flag-fr" aria-hidden="true"></span><span>Français</span></button>
           <button class="language-option" type="button" data-lang="de" role="menuitem"><span class="language-flag flag-de" aria-hidden="true"></span><span>Deutsch</span></button>
           <button class="language-option" type="button" data-lang="es" role="menuitem"><span class="language-flag flag-es" aria-hidden="true"></span><span>Español</span></button>
-          <button class="language-option" type="button" data-lang="zh" role="menuitem"><span class="language-flag flag-zh" aria-hidden="true"></span><span>中文</span></button>
-          <button class="language-option" type="button" data-lang="ar" role="menuitem"><span class="language-flag flag-ar" aria-hidden="true"></span><span>العربية</span></button>
         </div>
       </div>
       <button id="login" type="button">Accedi</button>
@@ -780,7 +751,7 @@
 
     new window.google.translate.TranslateElement({
       pageLanguage: 'it',
-      includedLanguages: 'it,en,fr,de,es,zh-CN,ar',
+      includedLanguages: 'it,en,fr,de,es',
       autoDisplay: false
     }, 'google_translate_element');
 
@@ -796,8 +767,8 @@
   'use strict';
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
-  var SUPPORTED_TRANSLATION_LANGS = ['it', 'en', 'fr', 'de', 'es', 'zh', 'ar'];
-  var LANGUAGE_FLAGS = { it: 'flag-it', en: 'flag-en', fr: 'flag-fr', de: 'flag-de', es: 'flag-es', zh: 'flag-zh', ar: 'flag-ar' };
+  var SUPPORTED_TRANSLATION_LANGS = ['it', 'en', 'fr', 'de', 'es'];
+  var LANGUAGE_FLAGS = { it: 'flag-it', en: 'flag-en', fr: 'flag-fr', de: 'flag-de', es: 'flag-es' };
   var I18N = {
     it: {
       login: 'Accedi',
@@ -933,60 +904,6 @@
       saveError: 'Error al guardar: ',
       poiSaved: 'POI guardado',
       hi: 'Hola, '
-    },
-    zh: {
-      login: '登录',
-      searchPlaceholder: '搜索地点...',
-      experiences: '体验',
-      stories: '故事',
-      village: '村庄',
-      poi: '兴趣点',
-      live: '直播',
-      directions: '路线',
-      readMore: '阅读更多',
-      readLess: '收起',
-      noDescription: '暂无描述',
-      addPoi: '添加兴趣点',
-      poiName: '兴趣点名称',
-      poiSymbol: '符号 / 表情',
-      latitude: '纬度',
-      longitude: '经度',
-      photoUrl: '照片链接',
-      ownerEmail: '所有者邮箱',
-      phone: '电话',
-      poiDescription: '兴趣点描述',
-      relevance: '相关度 1-100',
-      invalidData: '数据无效：名称、纬度和经度为必填项',
-      saveError: '保存错误：',
-      poiSaved: '兴趣点已保存',
-      hi: '你好，'
-    },
-    ar: {
-      login: 'دخول',
-      searchPlaceholder: 'ابحث عن مكان...',
-      experiences: 'تجارب',
-      stories: 'قصص',
-      village: 'قرية',
-      poi: 'نقطة اهتمام',
-      live: 'مباشر',
-      directions: 'الاتجاهات',
-      readMore: 'اقرأ المزيد',
-      readLess: 'عرض أقل',
-      noDescription: 'لا يوجد وصف متاح',
-      addPoi: 'إضافة نقطة اهتمام',
-      poiName: 'اسم نقطة الاهتمام',
-      poiSymbol: 'رمز / إيموجي',
-      latitude: 'خط العرض',
-      longitude: 'خط الطول',
-      photoUrl: 'رابط الصورة',
-      ownerEmail: 'بريد المالك',
-      phone: 'الهاتف',
-      poiDescription: 'وصف نقطة الاهتمام',
-      relevance: 'درجة الأهمية 1-100',
-      invalidData: 'بيانات غير صالحة: الاسم وخط العرض وخط الطول مطلوبة',
-      saveError: 'خطأ في الحفظ: ',
-      poiSaved: 'تم حفظ نقطة الاهتمام',
-      hi: 'مرحباً، '
     }
   };
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
