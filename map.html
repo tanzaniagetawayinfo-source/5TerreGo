@@ -1589,14 +1589,6 @@
     element.dispatchEvent(event);
   }
 
-  function getGoogleTranslateLang(lang) {
-    return lang === 'zh' ? 'zh-CN' : lang;
-  }
-
-  function getFallbackTranslationLang(lang) {
-    return lang === 'zh' ? 'zh-CN' : lang;
-  }
-
   function applyGoogleTranslateCombo(lang) {
     var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
     var tries = 0;
@@ -1609,7 +1601,7 @@
         return;
       }
 
-      combo.value = targetLang === 'it' ? '' : getGoogleTranslateLang(targetLang);
+      combo.value = targetLang === 'it' ? '' : targetLang;
       dispatchNativeChange(combo);
       window.clearInterval(timer);
     }, 250);
@@ -1619,8 +1611,7 @@
     var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
     var translateValue = targetLang === 'it' ? '/it/it' : '/it/' + targetLang;
 
-    document.documentElement.setAttribute('lang', targetLang === 'zh' ? 'zh-CN' : targetLang);
-    document.documentElement.setAttribute('dir', targetLang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', targetLang);
     setCookie('googtrans', translateValue);
     localStorage.setItem('5terrego_lang', targetLang);
     updateLanguageUI(targetLang);
@@ -1718,8 +1709,6 @@
       name_fr: raw.name_fr || raw.title_fr || '',
       name_de: raw.name_de || raw.title_de || '',
       name_es: raw.name_es || raw.title_es || '',
-      name_zh: raw.name_zh || raw.title_zh || raw.name_cn || raw.title_cn || '',
-      name_ar: raw.name_ar || raw.title_ar || '',
       symbol: symbol,
       coords: [parsed.lat, parsed.lng],
       lat: parsed.lat,
@@ -1731,8 +1720,6 @@
       description_fr: raw.description_fr || raw.descrizione_fr || '',
       description_de: raw.description_de || raw.descrizione_de || '',
       description_es: raw.description_es || raw.descrizione_es || '',
-      description_zh: raw.description_zh || raw.descrizione_zh || raw.description_cn || raw.descrizione_cn || '',
-      description_ar: raw.description_ar || raw.descrizione_ar || '',
       type: raw.type || raw.tipo || '',
       owner_email: raw.owner_email || raw.email || '',
       phone: raw.phone || raw.telephone || '',
@@ -1792,7 +1779,7 @@
 
     if (cache[cacheKey]) return cache[cacheKey];
 
-    url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(cleanText) + '&langpair=' + encodeURIComponent(POI_TEXT_SOURCE_LANG + '|' + getFallbackTranslationLang(lang));
+    url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(cleanText) + '&langpair=' + encodeURIComponent(POI_TEXT_SOURCE_LANG + '|' + lang);
 
     try {
       response = await fetch(url, { method: 'GET', cache: 'force-cache' });
@@ -3041,10 +3028,6 @@
     console.assert(typeof applyInterfaceTranslations === 'function', 'Manual interface translations exist');
     console.assert(typeof t === 'function', 'Translation helper exists');
     console.assert(typeof dispatchNativeChange === 'function', 'iPhone-safe change dispatcher exists');
-    console.assert(SUPPORTED_TRANSLATION_LANGS.indexOf('zh') !== -1, 'Chinese language is supported');
-    console.assert(SUPPORTED_TRANSLATION_LANGS.indexOf('ar') !== -1, 'Arabic language is supported');
-    console.assert(typeof getGoogleTranslateLang === 'function', 'Google Translate language mapper exists');
-    console.assert(typeof getFallbackTranslationLang === 'function', 'Fallback translation language mapper exists');
     console.assert(document.getElementById('language-toggle') !== null, 'Language flag button exists next to login');
     console.assert(document.getElementById('language-menu') !== null, 'Language dropdown menu exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
