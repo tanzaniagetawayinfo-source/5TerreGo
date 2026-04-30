@@ -110,6 +110,13 @@
     .search-item:last-child { border-bottom: none; }
     .search-item:hover { background: rgba(255,255,255,0.1); }
 
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
     #login {
       padding: 8px 12px;
       border-radius: 999px;
@@ -119,6 +126,108 @@
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
+    }
+
+    .language-switcher {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    #language-toggle {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.12);
+      color: white;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    #language-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      display: none;
+      min-width: 142px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 14px 32px rgba(0,0,0,0.28);
+      z-index: 1004;
+    }
+
+    .language-switcher.open #language-menu {
+      display: block;
+    }
+
+    .language-option {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .language-option.active,
+    .language-option:active {
+      background: rgba(255,255,255,0.14);
+    }
+
+    .language-flag {
+      width: 22px;
+      height: 22px;
+      display: block;
+      border-radius: 999px;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28);
+      background-size: cover;
+      background-position: center;
+    }
+
+    #language-toggle .language-flag {
+      width: 24px;
+      height: 24px;
+    }
+
+    .flag-it {
+      background: linear-gradient(90deg, #009246 0 33.333%, #ffffff 33.333% 66.666%, #ce2b37 66.666% 100%);
+    }
+
+    .flag-fr {
+      background: linear-gradient(90deg, #0055a4 0 33.333%, #ffffff 33.333% 66.666%, #ef4135 66.666% 100%);
+    }
+
+    .flag-de {
+      background: linear-gradient(180deg, #000000 0 33.333%, #dd0000 33.333% 66.666%, #ffce00 66.666% 100%);
+    }
+
+    .flag-es {
+      background: linear-gradient(180deg, #aa151b 0 25%, #f1bf00 25% 75%, #aa151b 75% 100%);
+    }
+
+    .flag-en {
+      background:
+        linear-gradient(33deg, transparent 0 42%, #ffffff 42% 47%, #c8102e 47% 53%, #ffffff 53% 58%, transparent 58%),
+        linear-gradient(147deg, transparent 0 42%, #ffffff 42% 47%, #c8102e 47% 53%, #ffffff 53% 58%, transparent 58%),
+        linear-gradient(90deg, transparent 0 38%, #ffffff 38% 45%, #c8102e 45% 55%, #ffffff 55% 62%, transparent 62%),
+        linear-gradient(180deg, transparent 0 38%, #ffffff 38% 45%, #c8102e 45% 55%, #ffffff 55% 62%, transparent 62%),
+        #012169;
     }
 
     .blue { color: #1e9bff; }
@@ -533,11 +642,30 @@
       opacity: 1;
       transform: scale(1);
     }
+
+    #google_translate_element,
+    .goog-te-banner-frame,
+    .goog-te-balloon-frame,
+    .goog-te-gadget,
+    .goog-tooltip,
+    .goog-tooltip:hover {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      pointer-events: none !important;
+    }
+
+    body {
+      top: 0 !important;
+    }
   </style>
 </head>
 <body>
 
 <div id="map"></div>
+<div id="google_translate_element" aria-hidden="true"></div>
 
 <div class="top-bar">
   <div class="top-row">
@@ -547,31 +675,43 @@
       <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
     </a>
 
-    <button id="login" type="button">Accedi</button>
+    <div class="top-actions">
+      <div class="language-switcher notranslate" id="language-switcher" translate="no">
+        <button id="language-toggle" type="button" aria-label="Cambia lingua" aria-expanded="false"><span class="language-flag flag-it" aria-hidden="true"></span></button>
+        <div id="language-menu" role="menu" aria-label="Lingua">
+          <button class="language-option" type="button" data-lang="it" role="menuitem"><span class="language-flag flag-it" aria-hidden="true"></span><span>Italiano</span></button>
+          <button class="language-option" type="button" data-lang="en" role="menuitem"><span class="language-flag flag-en" aria-hidden="true"></span><span>English</span></button>
+          <button class="language-option" type="button" data-lang="fr" role="menuitem"><span class="language-flag flag-fr" aria-hidden="true"></span><span>Français</span></button>
+          <button class="language-option" type="button" data-lang="de" role="menuitem"><span class="language-flag flag-de" aria-hidden="true"></span><span>Deutsch</span></button>
+          <button class="language-option" type="button" data-lang="es" role="menuitem"><span class="language-flag flag-es" aria-hidden="true"></span><span>Español</span></button>
+        </div>
+      </div>
+      <button id="login" type="button">Accedi</button>
+    </div>
   </div>
 
   <div style="position:relative;">
-    <input id="search" placeholder="Search location..." autocomplete="off" />
+    <input id="search" placeholder="Search location..." autocomplete="off" data-i18n-placeholder="searchPlaceholder" />
     <div id="search-results"></div>
   </div>
 
   <div class="mode-bar">
-    <button class="mode-btn active" id="btn-experiences" type="button">Experiences</button>
-    <button class="mode-btn" id="btn-stories" type="button">Stories</button>
+    <button class="mode-btn active" id="btn-experiences" type="button" data-i18n="experiences">Experiences</button>
+    <button class="mode-btn" id="btn-stories" type="button" data-i18n="stories">Stories</button>
   </div>
 </div>
 
 <div id="owner-panel" aria-hidden="true">
-  <input id="poi-name" placeholder="Nome POI" />
-  <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" />
-  <input id="poi-lat" placeholder="Latitudine" inputmode="decimal" />
-  <input id="poi-lng" placeholder="Longitudine" inputmode="decimal" />
-  <input id="poi-img" placeholder="URL foto" />
-  <input id="poi-email" placeholder="Email owner" inputmode="email" />
-  <input id="poi-phone" placeholder="Telefono" inputmode="tel" />
-  <input id="poi-description" placeholder="Descrizione POI" />
-  <input id="poi-relevance" placeholder="Punteggio rilevanza 1-100" inputmode="numeric" />
-  <button id="add-poi" type="button">Aggiungi POI</button>
+  <input id="poi-name" placeholder="Nome POI" data-i18n-placeholder="poiName" />
+  <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" data-i18n-placeholder="poiSymbol" />
+  <input id="poi-lat" placeholder="Latitudine" inputmode="decimal" data-i18n-placeholder="latitude" />
+  <input id="poi-lng" placeholder="Longitudine" inputmode="decimal" data-i18n-placeholder="longitude" />
+  <input id="poi-img" placeholder="URL foto" data-i18n-placeholder="photoUrl" />
+  <input id="poi-email" placeholder="Email owner" inputmode="email" data-i18n-placeholder="ownerEmail" />
+  <input id="poi-phone" placeholder="Telefono" inputmode="tel" data-i18n-placeholder="phone" />
+  <input id="poi-description" placeholder="Descrizione POI" data-i18n-placeholder="poiDescription" />
+  <input id="poi-relevance" placeholder="Punteggio rilevanza 1-100" inputmode="numeric" data-i18n-placeholder="relevance" />
+  <button id="add-poi" type="button" data-i18n="addPoi">Aggiungi POI</button>
 </div>
 
 <div class="bottom-card" id="card" aria-hidden="true">
@@ -579,13 +719,13 @@
     <img id="card-img" src="" alt="" />
     <iframe id="card-live" class="card-live-frame" title="Live webcam" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
     <div id="card-live-touch-layer" class="card-live-touch-layer" aria-hidden="true"></div>
-    <div class="card-live-badge">LIVE</div>
+    <div class="card-live-badge" data-i18n="live">LIVE</div>
   </div>
   <div class="card-title-row">
     <div class="title" id="card-title"></div>
     <div class="card-actions">
-      <button class="card-action-btn" id="card-experiences" type="button">Experiences</button>
-      <button class="card-action-btn" id="card-stories" type="button">Stories</button>
+      <button class="card-action-btn" id="card-experiences" type="button" data-i18n="experiences">Experiences</button>
+      <button class="card-action-btn" id="card-stories" type="button" data-i18n="stories">Stories</button>
     </div>
   </div>
   <div class="desc" id="card-desc" style="color: rgba(255,255,255,0.8); padding: 0 10px 12px; font-size: 13px; line-height: 1.4;"></div>
@@ -597,20 +737,175 @@
   <div class="poi-content">
     <div id="poi-title"></div>
     <div id="poi-desc"></div>
-    <div id="read-more">Read more</div>
+    <div id="read-more" data-i18n="readMore">Read more</div>
   </div>
   <div id="poi-close">←</div>
-  <a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a>
+  <a id="poi-directions" target="_blank" rel="noopener noreferrer" data-i18n="directions">Directions</a>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.googleTranslateElementInit = function () {
+    if (!window.google || !window.google.translate) return;
+
+    new window.google.translate.TranslateElement({
+      pageLanguage: 'it',
+      includedLanguages: 'it,en,fr,de,es',
+      autoDisplay: false
+    }, 'google_translate_element');
+
+    window.setTimeout(function () {
+      if (window.forcePageTranslation) window.forcePageTranslation();
+    }, 600);
+  };
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
 (function () {
   'use strict';
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
+  var SUPPORTED_TRANSLATION_LANGS = ['it', 'en', 'fr', 'de', 'es'];
+  var LANGUAGE_FLAGS = { it: 'flag-it', en: 'flag-en', fr: 'flag-fr', de: 'flag-de', es: 'flag-es' };
+  var I18N = {
+    it: {
+      login: 'Accedi',
+      searchPlaceholder: 'Cerca luogo...',
+      experiences: 'Experiences',
+      stories: 'Stories',
+      village: 'Borgo',
+      poi: 'POI',
+      live: 'LIVE',
+      directions: 'Indicazioni',
+      readMore: 'Leggi di più',
+      readLess: 'Mostra meno',
+      noDescription: 'Nessuna descrizione disponibile',
+      addPoi: 'Aggiungi POI',
+      poiName: 'Nome POI',
+      poiSymbol: 'Simbolo / emoji',
+      latitude: 'Latitudine',
+      longitude: 'Longitudine',
+      photoUrl: 'URL foto',
+      ownerEmail: 'Email owner',
+      phone: 'Telefono',
+      poiDescription: 'Descrizione POI',
+      relevance: 'Punteggio rilevanza 1-100',
+      invalidData: 'Dati non validi: nome, latitudine e longitudine sono obbligatori',
+      saveError: 'Errore salvataggio: ',
+      poiSaved: 'POI salvato',
+      hi: 'Ciao, '
+    },
+    en: {
+      login: 'Login',
+      searchPlaceholder: 'Search location...',
+      experiences: 'Experiences',
+      stories: 'Stories',
+      village: 'Village',
+      poi: 'POI',
+      live: 'LIVE',
+      directions: 'Directions',
+      readMore: 'Read more',
+      readLess: 'Read less',
+      noDescription: 'No description available',
+      addPoi: 'Add POI',
+      poiName: 'POI name',
+      poiSymbol: 'Symbol / emoji',
+      latitude: 'Latitude',
+      longitude: 'Longitude',
+      photoUrl: 'Photo URL',
+      ownerEmail: 'Owner email',
+      phone: 'Phone',
+      poiDescription: 'POI description',
+      relevance: 'Relevance score 1-100',
+      invalidData: 'Invalid data: name, latitude and longitude are required',
+      saveError: 'Save error: ',
+      poiSaved: 'POI saved',
+      hi: 'Hi, '
+    },
+    fr: {
+      login: 'Accès',
+      searchPlaceholder: 'Rechercher un lieu...',
+      experiences: 'Expériences',
+      stories: 'Histoires',
+      village: 'Village',
+      poi: 'POI',
+      live: 'DIRECT',
+      directions: 'Itinéraire',
+      readMore: 'Lire plus',
+      readLess: 'Réduire',
+      noDescription: 'Aucune description disponible',
+      addPoi: 'Ajouter un POI',
+      poiName: 'Nom du POI',
+      poiSymbol: 'Symbole / emoji',
+      latitude: 'Latitude',
+      longitude: 'Longitude',
+      photoUrl: 'URL photo',
+      ownerEmail: 'Email du propriétaire',
+      phone: 'Téléphone',
+      poiDescription: 'Description du POI',
+      relevance: 'Score de pertinence 1-100',
+      invalidData: 'Données non valides : nom, latitude et longitude sont obligatoires',
+      saveError: 'Erreur d’enregistrement : ',
+      poiSaved: 'POI enregistré',
+      hi: 'Bonjour, '
+    },
+    de: {
+      login: 'Anmelden',
+      searchPlaceholder: 'Ort suchen...',
+      experiences: 'Erlebnisse',
+      stories: 'Stories',
+      village: 'Dorf',
+      poi: 'POI',
+      live: 'LIVE',
+      directions: 'Route',
+      readMore: 'Mehr lesen',
+      readLess: 'Weniger anzeigen',
+      noDescription: 'Keine Beschreibung verfügbar',
+      addPoi: 'POI hinzufügen',
+      poiName: 'POI-Name',
+      poiSymbol: 'Symbol / Emoji',
+      latitude: 'Breitengrad',
+      longitude: 'Längengrad',
+      photoUrl: 'Foto-URL',
+      ownerEmail: 'Owner-E-Mail',
+      phone: 'Telefon',
+      poiDescription: 'POI-Beschreibung',
+      relevance: 'Relevanz 1-100',
+      invalidData: 'Ungültige Daten: Name, Breitengrad und Längengrad sind erforderlich',
+      saveError: 'Fehler beim Speichern: ',
+      poiSaved: 'POI gespeichert',
+      hi: 'Hallo, '
+    },
+    es: {
+      login: 'Acceder',
+      searchPlaceholder: 'Buscar lugar...',
+      experiences: 'Experiencias',
+      stories: 'Historias',
+      village: 'Pueblo',
+      poi: 'POI',
+      live: 'EN VIVO',
+      directions: 'Indicaciones',
+      readMore: 'Leer más',
+      readLess: 'Mostrar menos',
+      noDescription: 'No hay descripción disponible',
+      addPoi: 'Añadir POI',
+      poiName: 'Nombre del POI',
+      poiSymbol: 'Símbolo / emoji',
+      latitude: 'Latitud',
+      longitude: 'Longitud',
+      photoUrl: 'URL de foto',
+      ownerEmail: 'Email del propietario',
+      phone: 'Teléfono',
+      poiDescription: 'Descripción del POI',
+      relevance: 'Relevancia 1-100',
+      invalidData: 'Datos no válidos: nombre, latitud y longitud son obligatorios',
+      saveError: 'Error al guardar: ',
+      poiSaved: 'POI guardado',
+      hi: 'Hola, '
+    }
+  };
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
@@ -1087,6 +1382,10 @@
   var poiCircle = document.getElementById('poi-circle');
   var poiMapPreview = document.getElementById('poi-map-preview');
   var loginBtn = document.getElementById('login');
+  var languageSwitcher = document.getElementById('language-switcher');
+  var languageToggle = document.getElementById('language-toggle');
+  var languageMenu = document.getElementById('language-menu');
+  var languageOptions = Array.prototype.slice.call(document.querySelectorAll('.language-option'));
   var addPoiBtn = document.getElementById('add-poi');
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
@@ -1116,6 +1415,121 @@
   function readValue(value, fallback) {
     return value === undefined || value === null ? fallback : value;
   }
+
+  function getBrowserLanguage() {
+    var savedLang = localStorage.getItem('5terrego_lang');
+    var lang = savedLang || (navigator.languages && navigator.languages[0]) || navigator.language || 'it';
+    lang = String(lang).toLowerCase().split('-')[0];
+    return SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
+  }
+
+  function t(key) {
+    var lang = getBrowserLanguage();
+    var pack = I18N[lang] || I18N.en;
+    return pack[key] || I18N.en[key] || key;
+  }
+
+  function applyInterfaceTranslations() {
+    var lang = getBrowserLanguage();
+    var pack = I18N[lang] || I18N.en;
+
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (pack[key] || I18N.en[key]) el.innerText = pack[key] || I18N.en[key];
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      if (pack[key] || I18N.en[key]) el.setAttribute('placeholder', pack[key] || I18N.en[key]);
+    });
+
+    if (loginBtn && !currentUser) {
+      loginBtn.innerText = t('login');
+    }
+
+    if (readMoreBtn && readMoreBtn.style.display !== 'none') {
+      readMoreBtn.innerText = poiDesc.classList.contains('expanded') ? t('readLess') : t('readMore');
+    }
+
+    renderSearchSuggestions(searchInput ? searchInput.value : '');
+  }
+
+  function updateLanguageUI(lang) {
+    var activeLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : getBrowserLanguage();
+
+    if (languageToggle) {
+      languageToggle.innerHTML = '<span class="language-flag ' + (LANGUAGE_FLAGS[activeLang] || 'flag-en') + '" aria-hidden="true"></span>';
+      languageToggle.setAttribute('aria-label', 'Lingua attuale: ' + activeLang.toUpperCase());
+    }
+
+    languageOptions.forEach(function (option) {
+      var isActive = option.getAttribute('data-lang') === activeLang;
+      option.classList.toggle('active', isActive);
+      option.setAttribute('aria-current', isActive ? 'true' : 'false');
+    });
+  }
+
+  function closeLanguageMenu() {
+    if (!languageSwitcher || !languageToggle) return;
+    languageSwitcher.classList.remove('open');
+    languageToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleLanguageMenu() {
+    if (!languageSwitcher || !languageToggle) return;
+    var isOpen = languageSwitcher.classList.toggle('open');
+    languageToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  function applyGoogleTranslateCombo(lang) {
+    var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
+    var tries = 0;
+    var timer = window.setInterval(function () {
+      var combo = document.querySelector('.goog-te-combo');
+      tries += 1;
+
+      if (!combo) {
+        if (tries >= 20) window.clearInterval(timer);
+        return;
+      }
+
+      combo.value = targetLang === 'it' ? '' : targetLang;
+      combo.dispatchEvent(new Event('change'));
+      window.clearInterval(timer);
+    }, 250);
+  }
+
+  function setPageLanguage(lang, shouldReload) {
+    var targetLang = SUPPORTED_TRANSLATION_LANGS.indexOf(lang) !== -1 ? lang : 'en';
+    var translateValue = targetLang === 'it' ? '/it/it' : '/it/' + targetLang;
+
+    document.documentElement.setAttribute('lang', targetLang);
+    setCookie('googtrans', translateValue);
+    localStorage.setItem('5terrego_lang', targetLang);
+    updateLanguageUI(targetLang);
+    applyInterfaceTranslations();
+    applyGoogleTranslateCombo(targetLang);
+
+    if (shouldReload && targetLang !== 'it') {
+      window.setTimeout(function () {
+        window.location.reload();
+      }, 450);
+    }
+  }
+
+  function setCookie(name, value) {
+    var host = window.location.hostname;
+    var domain = host && host.indexOf('.') !== -1 ? ';domain=.' + host : '';
+    document.cookie = name + '=' + value + ';path=/;max-age=31536000;SameSite=Lax' + domain;
+    document.cookie = name + '=' + value + ';path=/;max-age=31536000;SameSite=Lax';
+  }
+
+  function forcePageTranslation() {
+    setPageLanguage(getBrowserLanguage(), false);
+  }
+
+  window.forcePageTranslation = forcePageTranslation;
+  forcePageTranslation();
 
   function escapeHTML(value) {
     return String(value || '').replace(/[&<>"]/g, function (char) {
@@ -1534,7 +1948,7 @@
     poiCard.setAttribute('aria-hidden', 'false');
     poiTitle.innerText = poi.name;
 
-    fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
+    fullText = poi.description && poi.description.trim().length > 0 ? poi.description : t('noDescription');
     poiDesc.innerText = fullText;
     poiDesc.classList.remove('expanded');
     poiDesc.style.display = 'block';
@@ -1542,7 +1956,7 @@
     window.setTimeout(function () {
       if (poiDesc.scrollHeight > poiDesc.clientHeight + 10) {
         readMoreBtn.style.display = 'block';
-        readMoreBtn.innerText = 'Read more';
+        readMoreBtn.innerText = t('readMore');
       } else {
         readMoreBtn.style.display = 'none';
       }
@@ -1695,7 +2109,7 @@
     });
 
     if (!isValidPOI(poi)) {
-      alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
+      alert(t('invalidData'));
       return;
     }
 
@@ -1705,7 +2119,7 @@
         .insert([{ name: name, symbol: symbol, lat: lat, lng: lng, image: image, owner_email: ownerEmail, phone: phone, description: description, relevance: relevance, importance: relevance }]);
 
       if (insertResponse.error) {
-        alert('Errore salvataggio: ' + insertResponse.error.message);
+        alert(t('saveError') + insertResponse.error.message);
         return;
       }
     } else {
@@ -1713,7 +2127,7 @@
     }
 
     await loadPOIs();
-    alert('POI salvato');
+    alert(t('poiSaved'));
   }
 
   function latLngToTile(lat, lng, zoom) {
@@ -1794,12 +2208,12 @@
     currentUser = user;
 
     if (!user) {
-      loginBtn.innerText = 'Accedi';
+      loginBtn.innerText = t('login');
       setOwnerPanelVisible(false);
       return false;
     }
 
-    loginBtn.innerText = 'Hi, ' + getUserDisplayName(user);
+    loginBtn.innerText = t('hi') + getUserDisplayName(user);
     return true;
   }
 
@@ -1854,7 +2268,7 @@
     }
 
     searchResults.innerHTML = results.slice(0, 8).map(function (r) {
-      var label = r.type === 'city' ? 'Village' : 'POI';
+      var label = r.type === 'city' ? t('village') : t('poi');
       return '<div class="search-item" data-type="' + escapeHTML(r.type) + '" data-name="' + escapeHTML(r.name) + '">' + escapeHTML(r.name) + ' · ' + label + '</div>';
     }).join('');
 
@@ -1903,6 +2317,10 @@
   }
 
   function setupEvents() {
+    window.addEventListener('focus', forcePageTranslation);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) forcePageTranslation();
+    });
     if (isIOSDevice()) {
       searchInput.addEventListener('focus', function () {
         document.body.style.position = 'fixed';
@@ -1916,10 +2334,31 @@
     readMoreBtn.addEventListener('click', function () {
       if (poiDesc.classList.contains('expanded')) {
         poiDesc.classList.remove('expanded');
-        readMoreBtn.innerText = 'Read more';
+        readMoreBtn.innerText = t('readMore');
       } else {
         poiDesc.classList.add('expanded');
-        readMoreBtn.innerText = 'Read less';
+        readMoreBtn.innerText = t('readLess');
+      }
+    });
+
+    if (languageToggle) {
+      languageToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        toggleLanguageMenu();
+      });
+    }
+
+    languageOptions.forEach(function (option) {
+      option.addEventListener('click', function (event) {
+        event.stopPropagation();
+        closeLanguageMenu();
+        setPageLanguage(option.getAttribute('data-lang'), true);
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      if (languageSwitcher && !languageSwitcher.contains(event.target)) {
+        closeLanguageMenu();
       }
     });
 
@@ -2328,6 +2767,15 @@
     console.assert(document.getElementById('card-live-touch-layer') !== null, 'Transparent touch layer over YouTube iframe exists');
     console.assert(cardLiveTouchLayer !== null, 'Live video touch layer can handle both vertical close and horizontal village swipe');
     console.assert(window.getComputedStyle(document.getElementById('card-live')).transform !== 'none', 'Card live iframe is scaled to cover the city-card media area');
+    console.assert(typeof getBrowserLanguage === 'function', 'Browser language detector exists');
+    console.assert(typeof forcePageTranslation === 'function', 'Page translation enforcer exists');
+    console.assert(Array.isArray(SUPPORTED_TRANSLATION_LANGS), 'Supported translation languages are configured');
+    console.assert(typeof updateLanguageUI === 'function', 'Language flag UI updater exists');
+    console.assert(typeof setPageLanguage === 'function', 'Manual language switcher exists');
+    console.assert(typeof applyInterfaceTranslations === 'function', 'Manual interface translations exist');
+    console.assert(typeof t === 'function', 'Translation helper exists');
+    console.assert(document.getElementById('language-toggle') !== null, 'Language flag button exists next to login');
+    console.assert(document.getElementById('language-menu') !== null, 'Language dropdown menu exists');
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
@@ -2375,6 +2823,7 @@
   preloadTiles();
   updateWeather(44.12, 9.71);
   setupEvents();
+  applyInterfaceTranslations();
   updateMapVisualByZoom();
   runTests();
 
