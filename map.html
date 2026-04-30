@@ -909,8 +909,6 @@
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
-  var POI_TRANSLATION_CACHE_KEY = '5terrego_poi_translation_cache_v1';
-  var POI_TEXT_SOURCE_LANG = 'en';
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
   var AUTO_CLOSE_ZOOM = 12;
@@ -1409,7 +1407,6 @@
   var currentUser = null;
   var userCheckTimer = null;
   var poiMiniMap = null;
-  var currentPOITextToken = 0;
 
   function isIOSDevice() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -1455,10 +1452,8 @@
     }
 
     if (currentDataset === 'pois' && window.currentOpenPOI) {
-      currentPOITextToken += 1;
       poiTitle.innerText = getLocalizedPOIName(window.currentOpenPOI);
       poiDesc.innerText = getLocalizedPOIDescription(window.currentOpenPOI);
-      applyTranslatedPOIText(window.currentOpenPOI, currentPOITextToken);
     }
 
     renderSearchSuggestions(searchInput ? searchInput.value : '');
@@ -1659,104 +1654,6 @@
     var fallback = poi && (poi.description || poi.description_it) ? String(poi.description || poi.description_it).trim() : '';
 
     return value || fallback || t('noDescription');
-  }
-
-  function getTranslationCache() {
-    try {
-      return JSON.parse(localStorage.getItem(POI_TRANSLATION_CACHE_KEY) || '{}');
-    } catch (error) {
-      return {};
-    }
-  }
-
-  function setTranslationCache(cache) {
-    try {
-      localStorage.setItem(POI_TRANSLATION_CACHE_KEY, JSON.stringify(cache));
-    } catch (error) {}
-  }
-
-  function getTranslationCacheKey(text, targetLang) {
-    return targetLang + '::' + String(text || '').slice(0, 900);
-  }
-
-  async function translateTextFallback(text, targetLang) {
-    var cleanText = String(text || '').trim();
-    var lang = SUPPORTED_TRANSLATION_LANGS.indexOf(targetLang) !== -1 ? targetLang : 'en';
-    var cache;
-    var cacheKey;
-    var url;
-    var response;
-    var data;
-    var translated;
-
-    if (!cleanText || lang === POI_TEXT_SOURCE_LANG) return cleanText;
-
-    cache = getTranslationCache();
-    cacheKey = getTranslationCacheKey(cleanText, lang);
-
-    if (cache[cacheKey]) return cache[cacheKey];
-
-    url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(cleanText) + '&langpair=' + encodeURIComponent(POI_TEXT_SOURCE_LANG + '|' + lang);
-
-    try {
-      response = await fetch(url, { method: 'GET', cache: 'force-cache' });
-      if (!response.ok) throw new Error('Translation request failed');
-
-      data = await response.json();
-      translated = data && data.responseData && data.responseData.translatedText ? String(data.responseData.translatedText).trim() : '';
-
-      if (!translated) return cleanText;
-
-      cache[cacheKey] = translated;
-      setTranslationCache(cache);
-      return translated;
-    } catch (error) {
-      console.warn('POI auto translation failed:', error);
-      return cleanText;
-    }
-  }
-
-  async function applyTranslatedPOIText(poi, token) {
-    var lang = getBrowserLanguage();
-    var nameKey = 'name_' + lang;
-    var descriptionKey = 'description_' + lang;
-    var baseName;
-    var baseDescription;
-    var translatedName;
-    var translatedDescription;
-
-    if (!poi) return;
-    if (token !== currentPOITextToken) return;
-
-    baseName = getLocalizedPOIName(poi);
-    baseDescription = getLocalizedPOIDescription(poi);
-
-    if (lang === 'it' || lang === 'en') {
-      if (token === currentPOITextToken) {
-        poiTitle.innerText = baseName;
-        poiDesc.innerText = baseDescription;
-      }
-      return;
-    }
-
-    translatedName = poi[nameKey] ? baseName : await translateTextFallback(baseName, lang);
-    if (token !== currentPOITextToken) return;
-
-    translatedDescription = poi[descriptionKey] ? baseDescription : await translateTextFallback(baseDescription, lang);
-    if (token !== currentPOITextToken) return;
-
-    poiTitle.innerText = translatedName;
-    poiDesc.innerText = translatedDescription;
-
-    window.setTimeout(function () {
-      if (token !== currentPOITextToken) return;
-      if (poiDesc.scrollHeight > poiDesc.clientHeight + 10) {
-        readMoreBtn.style.display = 'block';
-        readMoreBtn.innerText = poiDesc.classList.contains('expanded') ? t('readLess') : t('readMore');
-      } else {
-        readMoreBtn.style.display = 'none';
-      }
-    }, 80);
   }
 
   function isValidPOI(poi) {
@@ -2103,12 +2000,10 @@
     poiCard.style.display = 'block';
     poiCard.setAttribute('aria-hidden', 'false');
     window.currentOpenPOI = poi;
-    currentPOITextToken += 1;
     poiTitle.innerText = getLocalizedPOIName(poi);
 
     fullText = getLocalizedPOIDescription(poi);
     poiDesc.innerText = fullText;
-    applyTranslatedPOIText(poi, currentPOITextToken);
     poiDesc.classList.remove('expanded');
     poiDesc.style.display = 'block';
 
@@ -2950,8 +2845,6 @@
     console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
     console.assert(typeof getLocalizedPOIName === 'function', 'Localized POI name helper exists');
     console.assert(typeof getLocalizedPOIDescription === 'function', 'Localized POI description helper exists');
-    console.assert(typeof translateTextFallback === 'function', 'POI dynamic fallback translator exists');
-    console.assert(typeof applyTranslatedPOIText === 'function', 'POI dynamic translated text applier exists');
     console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
     console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
     console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
