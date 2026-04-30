@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>5TerreGo Blog</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f7f7f4;color:#111}
+body{overflow-x:hidden}
+.hero{padding:22px 16px 12px;background:linear-gradient(180deg,#ffffff,#f7f7f4);position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(0,0,0,.06)}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.logo{font-weight:950;letter-spacing:-.05em;font-size:20px;line-height:1}
+.logo .blue{color:#1178ff}.logo .orange{color:#ff7a00}
+.back-link{border:none;background:#111;color:#fff;border-radius:999px;padding:9px 12px;font-weight:850;font-size:12px;text-decoration:none;white-space:nowrap}
+.title{margin:0;font-size:34px;letter-spacing:-.075em;line-height:.92;font-weight:950}
+.subtitle{margin:10px 0 0;color:rgba(0,0,0,.58);font-size:14px;line-height:1.35;max-width:460px}
+.controls{padding:12px 16px 8px;background:#f7f7f4;position:sticky;top:128px;z-index:18;border-bottom:1px solid rgba(0,0,0,.05)}
+.search{width:100%;padding:15px 16px;border-radius:18px;border:1px solid rgba(0,0,0,.08);background:#fff;color:#111;outline:none;font-size:15px;box-shadow:0 10px 28px rgba(0,0,0,.06)}
+.search::placeholder{color:rgba(0,0,0,.38)}
+.filters{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scroll-snap-type:x mandatory}
+.filters::-webkit-scrollbar{display:none}
+.filter{flex:0 0 auto;border:none;border-radius:999px;padding:9px 12px;background:#fff;color:rgba(0,0,0,.62);font-weight:850;font-size:12px;border:1px solid rgba(0,0,0,.07);scroll-snap-align:start;cursor:pointer}
+.filter.is-active{background:#111;color:#fff;border-color:#111}
+.status{padding:8px 16px;color:rgba(0,0,0,.52);font-size:13px;line-height:1.35}
+.status.error{color:#b00020}
+.grid{padding:8px 16px 96px;display:grid;grid-template-columns:1fr;gap:14px;max-width:920px;margin:0 auto}
+.card{border:none;text-align:left;width:100%;padding:0;margin:0;border-radius:24px;background:#fff;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.05);cursor:pointer;color:#111}
+.cover{height:190px;background:linear-gradient(135deg,#e9eef5,#fff);position:relative;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:42px;letter-spacing:-.08em;color:rgba(0,0,0,.12)}
+.category{position:absolute;left:12px;top:12px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.card-body{padding:15px}
+.card-title{font-size:22px;font-weight:950;line-height:1.03;letter-spacing:-.055em;margin:0}
+.card-meta{margin-top:8px;color:rgba(0,0,0,.5);font-size:12px;font-weight:700}
+.card-excerpt{margin:10px 0 0;color:rgba(0,0,0,.68);font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.linked-pois{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.poi-chip{font-size:11px;font-weight:850;padding:6px 8px;border-radius:999px;background:#f2f2ef;color:rgba(0,0,0,.66)}
+.empty{padding:44px 20px;text-align:center;color:rgba(0,0,0,.46);font-weight:750}
+.article-view{position:fixed;inset:0;background:#f7f7f4;z-index:60;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.article-view.is-open{transform:translateY(0)}
+.article-top{position:sticky;top:0;z-index:4;padding:12px 14px;background:rgba(247,247,244,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06)}
+.icon-btn{border:none;background:#111;color:#fff;border-radius:999px;width:38px;height:38px;font-size:20px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.article-wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+.article-cover{height:265px;border-radius:0 0 28px 28px;overflow:hidden;background:#e9eef5;margin:0 -16px 22px;position:relative}
+.article-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.article-category{display:inline-flex;padding:8px 11px;border-radius:999px;background:#111;color:#fff;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}
+.article-title{margin:14px 0 0;font-size:42px;line-height:.92;letter-spacing:-.08em;font-weight:950}
+.article-meta{margin-top:12px;color:rgba(0,0,0,.52);font-size:13px;font-weight:750}
+.article-excerpt{margin:18px 0 0;font-size:18px;line-height:1.4;color:rgba(0,0,0,.7);font-weight:650}
+.article-content{margin-top:24px;font-size:17px;line-height:1.72;color:rgba(0,0,0,.82);white-space:pre-wrap}
+.article-content p{margin:0 0 16px}
+.related-box{margin-top:28px;padding:16px;border-radius:22px;background:#fff;border:1px solid rgba(0,0,0,.06);box-shadow:0 12px 30px rgba(0,0,0,.055)}
+.related-title{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:950;color:rgba(0,0,0,.42);margin-bottom:10px}
+.related-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.related-list::-webkit-scrollbar{display:none}
+.related-item{flex:0 0 auto;padding:9px 11px;border-radius:999px;background:#f2f2ef;color:#111;font-size:12px;font-weight:900;text-decoration:none;cursor:pointer;border:none}
+@media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.hero{padding-left:28px;padding-right:28px}.controls{top:126px;padding-left:28px;padding-right:28px}.title{font-size:48px}.cover{height:220px}.article-title{font-size:58px}.article-cover{height:380px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="brand">
+    <div class="logo"><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></div>
+    <a class="back-link" href="/map.html">Mappa</a>
+  </div>
+  <h1 class="title">Guide alle 5 Terre</h1>
+  <p class="subtitle">Articoli, consigli e luoghi collegati alla mappa interattiva.</p>
+</header>
+
+<section class="controls">
+  <input id="search" class="search" placeholder="Cerca articoli, luoghi, sentieri..." autocomplete="off" />
+  <div id="filters" class="filters"></div>
+</section>
+
+<div id="status" class="status">Caricamento articoli...</div>
+<main id="grid" class="grid"></main>
+
+<article id="articleView" class="article-view" aria-hidden="true">
+  <div class="article-top">
+    <button id="closeArticle" class="icon-btn" type="button" aria-label="Chiudi">‹</button>
+    <a id="shareArticle" class="icon-btn" href="#" aria-label="Condividi">↗</a>
+  </div>
+  <div id="articleContent" class="article-wrap"></div>
+</article>
+
+<script>
+const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+const SUPABASE_ANON_REST_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const BLOG_TABLE = "blog_posts";
+const POIS_TABLE = "pois";
+
+let posts = [];
+let pois = [];
+let activeCategory = "all";
+let activePost = null;
+
+const searchEl = document.getElementById("search");
+const filtersEl = document.getElementById("filters");
+const statusEl = document.getElementById("status");
+const gridEl = document.getElementById("grid");
+const articleViewEl = document.getElementById("articleView");
+const articleContentEl = document.getElementById("articleContent");
+const closeArticleEl = document.getElementById("closeArticle");
+const shareArticleEl = document.getElementById("shareArticle");
+
+function buildHeaders(){
+  return {
+    apikey: SUPABASE_ANON_REST_KEY,
+    Authorization: "Bearer " + SUPABASE_ANON_REST_KEY,
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+}
+
+async function parseResponse(res){
+  const text = await res.text();
+  let data = null;
+  try{ data = text ? JSON.parse(text) : null; }catch(err){ data = text; }
+  if(!res.ok){ throw new Error(typeof data === "object" && data ? (data.message || JSON.stringify(data)) : String(data || res.statusText)); }
+  return data;
+}
+
+function setStatus(message, isError = false){
+  statusEl.textContent = message;
+  statusEl.classList.toggle("error", Boolean(isError));
+}
+
+function normalizeSearchText(value){
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function normalizeRelatedPois(value){
+  if(Array.isArray(value)) return value.map(String).filter(Boolean);
+  if(typeof value === "string" && value.trim()){
+    try{
+      const parsed = JSON.parse(value);
+      if(Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    }catch(err){
+      return value.split(",").map(v=>v.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+function getPoiId(poi){
+  return String((poi && poi.id) || (poi && poi._id) || (poi && poi.uuid) || (poi && poi.slug) || (poi && poi.name) || "");
+}
+
+function getPoiLabel(poi){
+  return String((poi && poi.name) || (poi && poi.title) || (poi && poi.nome) || "POI");
+}
+
+function getPoiById(id){
+  return pois.find(p=>getPoiId(p) === String(id));
+}
+
+function getPoiNameById(id){
+  const poi = getPoiById(id);
+  return poi ? getPoiLabel(poi) : String(id || "POI");
+}
+
+function formatDate(value){
+  if(!value) return "";
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function escapeHtml(value){
+  return String(value || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function getPostUrl(post){
+  const slug = post && post.slug ? String(post.slug) : "";
+  return window.location.origin + window.location.pathname + (slug ? "#" + encodeURIComponent(slug) : "");
+}
+
+async function loadData(){
+  setStatus("Caricamento articoli...");
+
+  try{
+    const [postData, poiData] = await Promise.all([
+      fetch(SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?select=*&status=eq.published&order=published_at.desc.nullslast,created_at.desc", { headers:buildHeaders() }).then(parseResponse),
+      fetch(SUPABASE_URL + "/rest/v1/" + POIS_TABLE + "?select=*", { headers:buildHeaders() }).then(parseResponse).catch(()=>[])
+    ]);
+
+    posts = Array.isArray(postData) ? postData : [];
+    pois = Array.isArray(poiData) ? poiData : [];
+    renderFilters();
+    renderPosts();
+    openArticleFromHash();
+    setStatus(posts.length + " articoli pubblicati");
+  }catch(err){
+    console.error("LOAD BLOG ERROR", err);
+    posts = [];
+    pois = [];
+    renderFilters();
+    renderPosts();
+    setStatus("Errore caricamento blog: " + err.message, true);
+  }
+}
+
+function getCategories(){
+  const list = Array.from(new Set(posts.map(p=>String(p.category || "guide")).filter(Boolean)));
+  return ["all", ...list];
+}
+
+function getCategoryLabel(category){
+  const labels = { all:"Tutti", guide:"Guide", beaches:"Spiagge", trails:"Sentieri", food:"Food", transport:"Trasporti", tips:"Tips", news:"News" };
+  return labels[category] || category;
+}
+
+function renderFilters(){
+  filtersEl.innerHTML = "";
+  getCategories().forEach(category=>{
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = category === activeCategory ? "filter is-active" : "filter";
+    btn.textContent = getCategoryLabel(category);
+    btn.addEventListener("click", ()=>{
+      activeCategory = category;
+      renderFilters();
+      renderPosts();
+    });
+    filtersEl.appendChild(btn);
+  });
+}
+
+function getFilteredPosts(){
+  const query = normalizeSearchText(searchEl.value);
+
+  return posts.filter(post=>{
+    const relatedNames = normalizeRelatedPois(post.related_pois).map(getPoiNameById).join(" ");
+    const haystack = normalizeSearchText([
+      post.title,
+      post.slug,
+      post.category,
+      post.excerpt,
+      post.content,
+      relatedNames
+    ].join(" "));
+
+    const categoryOk = activeCategory === "all" || String(post.category || "guide") === activeCategory;
+    const queryOk = !query || haystack.includes(query);
+    return categoryOk && queryOk;
+  });
+}
+
+function renderPosts(){
+  gridEl.innerHTML = "";
+  const filtered = getFilteredPosts();
+
+  if(!filtered.length){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = posts.length ? "Nessun articolo trovato" : "Nessun articolo pubblicato";
+    gridEl.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(post=>{
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "card";
+
+    const related = normalizeRelatedPois(post.related_pois);
+    const chips = related.slice(0,4).map(id=>'<span class="poi-chip">' + escapeHtml(getPoiNameById(id)) + '</span>').join("");
+    const moreChip = related.length > 4 ? '<span class="poi-chip">+' + (related.length - 4) + '</span>' : "";
+    const cover = post.cover_image
+      ? '<img src="' + escapeHtml(post.cover_image) + '" alt="' + escapeHtml(post.title || "Articolo") + '" loading="lazy" />'
+      : '<div class="cover-placeholder">5T</div>';
+
+    card.innerHTML =
+      '<div class="cover">' +
+        cover +
+        '<div class="category">' + escapeHtml(getCategoryLabel(post.category || "guide")) + '</div>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<h2 class="card-title">' + escapeHtml(post.title || "Articolo") + '</h2>' +
+        '<div class="card-meta">' + escapeHtml(formatDate(post.published_at || post.created_at)) + ' • ' + escapeHtml(post.author || "5TerreGo") + '</div>' +
+        '<p class="card-excerpt">' + escapeHtml(post.excerpt || "") + '</p>' +
+        (related.length ? '<div class="linked-pois">' + chips + moreChip + '</div>' : '') +
+      '</div>';
+
+    card.addEventListener("click", ()=>openArticle(post));
+    gridEl.appendChild(card);
+  });
+}
+
+function openArticle(post){
+  activePost = post;
+  const related = normalizeRelatedPois(post.related_pois);
+  const relatedHtml = related.length
+    ? '<section class="related-box"><div class="related-title">Luoghi collegati nella mappa</div><div class="related-list">' +
+        related.map(id=>'<button class="related-item" type="button" data-poi-id="' + escapeHtml(id) + '">' + escapeHtml(getPoiNameById(id)) + '</button>').join("") +
+      '</div></section>'
+    : "";
+
+  const cover = post.cover_image
+    ? '<div class="article-cover"><img src="' + escapeHtml(post.cover_image) + '" alt="' + escapeHtml(post.title || "Articolo") + '" /></div>'
+    : '<div class="article-cover"><div class="cover-placeholder">5T</div></div>';
+
+  articleContentEl.innerHTML =
+    cover +
+    '<span class="article-category">' + escapeHtml(getCategoryLabel(post.category || "guide")) + '</span>' +
+    '<h1 class="article-title">' + escapeHtml(post.title || "Articolo") + '</h1>' +
+    '<div class="article-meta">' + escapeHtml(formatDate(post.published_at || post.created_at)) + ' • ' + escapeHtml(post.author || "5TerreGo") + '</div>' +
+    (post.excerpt ? '<div class="article-excerpt">' + escapeHtml(post.excerpt) + '</div>' : '') +
+    '<div class="article-content">' + escapeHtml(post.content || "") + '</div>' +
+    relatedHtml;
+
+  articleContentEl.querySelectorAll("[data-poi-id]").forEach(btn=>{
+    btn.addEventListener("click", ()=>openPoiOnMap(btn.getAttribute("data-poi-id")));
+  });
+
+  shareArticleEl.href = getPostUrl(post);
+  articleViewEl.classList.add("is-open");
+  articleViewEl.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+  if(post.slug) history.replaceState(null,"","#" + encodeURIComponent(post.slug));
+}
+
+function closeArticle(){
+  activePost = null;
+  articleViewEl.classList.remove("is-open");
+  articleViewEl.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+  if(location.hash) history.replaceState(null,"",window.location.pathname);
+}
+
+function openPoiOnMap(poiId){
+  const poi = getPoiById(poiId);
+  const id = encodeURIComponent(String(poiId || ""));
+  const name = encodeURIComponent(getPoiNameById(poiId));
+  const coords = poi && poi.coords ? encodeURIComponent(String(poi.coords)) : "";
+  window.location.href = "/map.html?poi=" + id + "&name=" + name + (coords ? "&coords=" + coords : "");
+}
+
+function openArticleFromHash(){
+  const slug = decodeURIComponent(String(location.hash || "").replace(/^#/,""));
+  if(!slug) return;
+  const post = posts.find(p=>String(p.slug || "") === slug);
+  if(post) openArticle(post);
+}
+
+searchEl.addEventListener("input", renderPosts);
+closeArticleEl.addEventListener("click", closeArticle);
+document.addEventListener("keydown", event=>{ if(event.key === "Escape" && articleViewEl.classList.contains("is-open")) closeArticle(); });
+window.addEventListener("hashchange", openArticleFromHash);
+
+loadData();
+</script>
+</body>
+</html>
