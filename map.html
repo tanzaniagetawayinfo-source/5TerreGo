@@ -1828,17 +1828,66 @@
   #ai-chat.ai-open { display: flex; }
 
   .ai-head {
-    padding: 14px 14px 10px;
+    padding: 14px 14px 12px;
     border-bottom: 1px solid rgba(0,0,0,0.07);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
   }
 
-  .ai-title-wrap { min-width: 0; }
-  .ai-title { font-size: 15px; font-weight: 900; letter-spacing: -0.03em; }
-  .ai-subtitle { margin-top: 2px; font-size: 12px; color: rgba(0,0,0,0.52); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ai-head-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .ai-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex: 0 0 42px;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+
+  .ai-avatar video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center 10%;
+    transform: scale(1.12);
+    transform-origin: center center;
+    pointer-events: none;
+  }
+
+  .ai-title-wrap {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .ai-title {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #111;
+  }
+
+  .ai-subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    color: rgba(0,0,0,0.52);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.15;
+  }
 
   #ai-close {
     width: 32px;
@@ -1951,9 +2000,14 @@
 
 <div id="ai-chat" aria-hidden="true">
   <div class="ai-head">
-    <div class="ai-title-wrap">
-      <div class="ai-title">Cinque Terre guide</div>
-      <div class="ai-subtitle">Risposte brevi, pratiche, gentili.</div>
+    <div class="ai-head-left">
+      <div class="ai-avatar">
+        <video id="ai-header-video" src="mascotterelax.mp4.mp4" autoplay muted loop playsinline preload="auto"></video>
+      </div>
+      <div class="ai-title-wrap">
+        <div class="ai-title">Captain Gull</div>
+        <div class="ai-subtitle">La tua guida delle Cinque Terre</div>
+      </div>
     </div>
     <button id="ai-close" type="button" aria-label="Chiudi AI">×</button>
   </div>
@@ -2020,7 +2074,7 @@
     if (shouldOpen) {
       if (!hasWelcomed) {
         hasWelcomed = true;
-        addMessage("Ciao, sono la tua guida AI. Chiedimi cosa vedere, dove andare o come spostarti nelle Cinque Terre.", false);
+        addMessage("Ciao, sono Captain Gull. Conosco scogli, sentieri e borghi meglio di qualsiasi gabbiano. Dimmi dove sei o cosa cerchi e ti guido io.", false);
       }
       window.setTimeout(function(){ input.focus(); }, 120);
     }
