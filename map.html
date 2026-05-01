@@ -278,6 +278,7 @@
       touch-action: none;
     }
 
+
     .card-live-badge {
       position: absolute;
       top: 8px;
@@ -296,6 +297,69 @@
 
     .card-media.live-ready .card-live-badge { opacity: 0; }
     .card-media.live-ready.live-visible .card-live-badge { opacity: 1; }
+
+    .card-live-loading {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      background: rgba(0,0,0,0.18);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+      pointer-events: none;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      text-align: center;
+    }
+
+    .card-media.live-loading .card-live-loading { display: flex; }
+    .card-media.live-visible .card-live-loading { display: none; }
+
+    .card-live-loading-text {
+      animation: liveLoadingTextPulse 1.4s ease-in-out infinite;
+    }
+
+    .card-live-loading-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .card-live-loading-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #fff;
+      opacity: 0.28;
+      transform: translateY(0);
+      animation: liveLoadingDot 1s infinite ease-in-out;
+    }
+
+    .card-live-loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .card-live-loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes liveLoadingDot {
+      0%, 80%, 100% {
+        opacity: 0.28;
+        transform: translateY(0) scale(0.9);
+      }
+      40% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1);
+      }
+    }
+
+    @keyframes liveLoadingTextPulse {
+      0%, 100% { opacity: 0.82; }
+      50% { opacity: 1; }
+    }
 
     .card-title-row {
       display: flex;
@@ -596,6 +660,14 @@
     <iframe id="card-live" class="card-live-frame" title="Live webcam" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
     <div id="card-live-touch-layer" class="card-live-touch-layer" aria-hidden="true"></div>
     <div class="card-live-badge">LIVE</div>
+    <div class="card-live-loading" aria-live="polite">
+      <span class="card-live-loading-text">Loading live stream</span>
+      <span class="card-live-loading-dots" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </div>
   </div>
   <div class="card-title-row">
     <div class="title" id="card-title"></div>
@@ -967,6 +1039,8 @@
   function resetCardLive() {
     cardMedia.classList.remove('live-ready');
     cardMedia.classList.remove('live-visible');
+    cardMedia.classList.remove('live-loading');
+    cardLive.onload = null;
     cardLive.removeAttribute('src');
   }
 
@@ -999,8 +1073,11 @@
 
   function loadCardLive(videoId) {
     var src = getYouTubeEmbedUrl(videoId);
+
     resetCardLive();
     if (!src) return;
+
+    cardMedia.classList.add('live-loading');
 
     cardLive.onload = function () {
       cardMedia.classList.add('live-ready');
@@ -1011,6 +1088,7 @@
         if (cardLive.src === src) {
           forceYouTubeAutoplay();
           cardMedia.classList.add('live-visible');
+          cardMedia.classList.remove('live-loading');
         }
       }, 5200);
     };
