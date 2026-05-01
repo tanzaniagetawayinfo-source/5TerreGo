@@ -519,19 +519,6 @@
   </div>
 </div>
 
-<div id="owner-panel" aria-hidden="true">
-  <input id="poi-name" placeholder="Nome POI" />
-  <input id="poi-symbol" placeholder="Simbolo / emoji" maxlength="3" />
-  <input id="poi-lat" placeholder="Latitudine" inputmode="decimal" />
-  <input id="poi-lng" placeholder="Longitudine" inputmode="decimal" />
-  <input id="poi-img" placeholder="URL foto" />
-  <input id="poi-email" placeholder="Email owner" inputmode="email" />
-  <input id="poi-phone" placeholder="Telefono" inputmode="tel" />
-  <input id="poi-description" placeholder="Descrizione POI" />
-  <input id="poi-relevance" placeholder="Punteggio rilevanza 1-100" inputmode="numeric" />
-  <button id="add-poi" type="button">Aggiungi POI</button>
-</div>
-
 <div class="bottom-card" id="card" aria-hidden="true">
   <div class="card-media" id="card-media">
     <img id="card-img" src="" alt="" />
@@ -571,7 +558,6 @@
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
-  var OWNER_EMAILS = ['5terrego.info@gmail.com'];
 
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
@@ -621,10 +607,7 @@
   var cardLiveTouchLayer = document.getElementById('card-live-touch-layer');
   var cardExperiencesBtn = document.getElementById('card-experiences');
   var cardStoriesBtn = document.getElementById('card-stories');
-
-  var ownerPanel = document.getElementById('owner-panel');
   var loginBtn = document.getElementById('login');
-  var addPoiBtn = document.getElementById('add-poi');
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
 
@@ -1352,60 +1335,6 @@
     renderSearchSuggestions(searchInput.value);
   }
 
-  async function addPOI() {
-    var name = document.getElementById('poi-name').value.trim();
-    var symbol = document.getElementById('poi-symbol').value.trim() || '📍';
-    var lat = Number(document.getElementById('poi-lat').value);
-    var lng = Number(document.getElementById('poi-lng').value);
-    var image = document.getElementById('poi-img').value.trim();
-    var ownerEmail = document.getElementById('poi-email').value.trim();
-    var phone = document.getElementById('poi-phone').value.trim();
-    var description = document.getElementById('poi-description').value.trim();
-    var relevance = Number(document.getElementById('poi-relevance').value || 0);
-    var poi = normalizePOI({
-      name: name,
-      symbol: symbol,
-      lat: lat,
-      lng: lng,
-      image: image,
-      owner_email: ownerEmail,
-      phone: phone,
-      description: description,
-      relevance: relevance,
-      importance: relevance
-    });
-
-    if (!isValidPOI(poi)) {
-      alert('Dati non validi: nome, latitudine e longitudine sono obbligatori');
-      return;
-    }
-
-    if (SUPABASE_READY && supabaseClient) {
-      var insertResponse = await supabaseClient.from('pois').insert([{
-        name: name,
-        symbol: symbol,
-        lat: lat,
-        lng: lng,
-        image: image,
-        owner_email: ownerEmail,
-        phone: phone,
-        description: description,
-        relevance: relevance,
-        importance: relevance
-      }]);
-
-      if (insertResponse.error) {
-        alert('Errore salvataggio: ' + insertResponse.error.message);
-        return;
-      }
-    } else {
-      saveLocalPOI(poi);
-    }
-
-    await loadPOIs();
-    alert('POI salvato');
-  }
-
   async function updateWeather(lat, lng) {
     try {
       var response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true');
@@ -1417,11 +1346,6 @@
     }
   }
 
-  function setOwnerPanelVisible(visible) {
-    ownerPanel.setAttribute('aria-hidden', visible ? 'false' : 'true');
-    ownerPanel.style.display = visible ? 'block' : 'none';
-  }
-
   function getUserDisplayName(user) {
     var meta;
 
@@ -1431,11 +1355,6 @@
     if (meta.name) return meta.name;
     if (user.email) return user.email.split('@')[0];
     return 'User';
-  }
-
-  function isOwnerUser(user) {
-    var email = user && user.email ? String(user.email).toLowerCase() : '';
-    return OWNER_EMAILS.map(function (item) { return item.toLowerCase(); }).indexOf(email) !== -1;
   }
 
   async function readCurrentUser() {
@@ -1460,12 +1379,10 @@
 
     if (!user) {
       loginBtn.innerText = 'Accedi';
-      setOwnerPanelVisible(false);
       return false;
     }
 
     loginBtn.innerText = 'Hi, ' + getUserDisplayName(user);
-    setOwnerPanelVisible(isOwnerUser(user));
     return true;
   }
 
@@ -1734,8 +1651,6 @@
       var baseOrigin = window.location.origin;
       window.location.href = baseOrigin + '/login.html';
     });
-
-    addPoiBtn.addEventListener('click', addPOI);
 
     searchInput.addEventListener('input', function () {
       renderSearchSuggestions(searchInput.value);
