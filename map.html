@@ -542,12 +542,10 @@
   <div class="card-title-row">
     <div class="title" id="card-title"></div>
     <div class="card-actions">
-      <button class="card-action-btn" id="card-ai" type="button">AI</button>
       <button class="card-action-btn" id="card-experiences" type="button">Experiences</button>
       <button class="card-action-btn" id="card-stories" type="button">Stories</button>
     </div>
   </div>
-  <div class="desc" id="card-desc"></div>
 </div>
 
 <div id="poi-card" aria-hidden="true">
@@ -617,12 +615,10 @@
 
   var card = document.getElementById('card');
   var cardTitle = document.getElementById('card-title');
-  var cardDesc = document.getElementById('card-desc');
   var cardImg = document.getElementById('card-img');
   var cardMedia = document.getElementById('card-media');
   var cardLive = document.getElementById('card-live');
   var cardLiveTouchLayer = document.getElementById('card-live-touch-layer');
-  var cardAiBtn = document.getElementById('card-ai');
   var cardExperiencesBtn = document.getElementById('card-experiences');
   var cardStoriesBtn = document.getElementById('card-stories');
 
@@ -774,7 +770,7 @@
 
   function getYouTubeEmbedUrl(videoId) {
     if (!videoId) return '';
-    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1';
+    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&enablejsapi=1&origin=' + encodeURIComponent(window.location.origin);
   }
 
   function speakText(text) {
@@ -918,6 +914,33 @@
     cardLive.removeAttribute('src');
   }
 
+  function postYouTubeCommand(command) {
+    if (!cardLive || !cardLive.contentWindow) return;
+
+    try {
+      cardLive.contentWindow.postMessage(JSON.stringify({
+        event: 'command',
+        func: command,
+        args: []
+      }), '*');
+    } catch (error) {}
+  }
+
+  function forceYouTubeAutoplay() {
+    postYouTubeCommand('mute');
+    postYouTubeCommand('playVideo');
+
+    window.setTimeout(function () {
+      postYouTubeCommand('mute');
+      postYouTubeCommand('playVideo');
+    }, 350);
+
+    window.setTimeout(function () {
+      postYouTubeCommand('mute');
+      postYouTubeCommand('playVideo');
+    }, 900);
+  }
+
   function loadCardLive(videoId) {
     var src = getYouTubeEmbedUrl(videoId);
     resetCardLive();
@@ -925,9 +948,11 @@
 
     cardLive.onload = function () {
       cardMedia.classList.add('live-ready');
+      forceYouTubeAutoplay();
     };
 
     cardLive.src = src;
+    forceYouTubeAutoplay();
   }
 
   function setCardContent(item) {
@@ -935,14 +960,6 @@
     cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg';
     cardImg.alt = item.name;
     loadCardLive(item.liveVideoId);
-
-    if (item.description && item.description.trim().length > 0) {
-      cardDesc.style.display = 'block';
-      cardDesc.innerText = item.description;
-    } else {
-      cardDesc.style.display = 'none';
-      cardDesc.innerText = '';
-    }
   }
 
   function showCityCard(item) {
@@ -1550,20 +1567,6 @@
     return false;
   }
 
-  function handleCardAI(event) {
-    var text = '';
-
-    if (event) event.stopPropagation();
-
-    if (currentDataset === 'places' && currentIndex >= 0) {
-      text = generateAIText(places[currentIndex], 'place');
-    } else if (currentDataset === 'pois' && currentPOI) {
-      text = generateAIText(currentPOI, 'poi');
-    }
-
-    speakText(text);
-  }
-
   function handlePOIAI(event) {
     if (event) event.stopPropagation();
     if (!currentPOI) return;
@@ -1711,7 +1714,6 @@
       window.location.href = 'experiences.html';
     });
 
-    cardAiBtn.addEventListener('click', handleCardAI);
     poiAiBtn.addEventListener('click', handlePOIAI);
 
     poiClose.addEventListener('click', function () {
@@ -1797,13 +1799,11 @@
     console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay fifth');
     console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore fixed image expected');
     console.assert(typeof setupEvents === 'function', 'setupEvents exists');
-    console.assert(typeof handleCardAI === 'function', 'AI card handler exists');
     console.assert(typeof handlePOIAI === 'function', 'AI POI handler exists');
     console.assert(typeof generateAIText === 'function', 'AI text generator exists');
     console.assert(typeof speakText === 'function', 'speech function exists');
     console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPlaces === 'function', 'Floating AI can read places');
     console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPOIs === 'function', 'Floating AI can read POIs');
-    console.assert(document.getElementById('card-ai') !== null, 'AI button exists on city card');
     console.assert(document.getElementById('poi-ai') !== null, 'AI button exists on POI card');
     console.assert(document.getElementById('card-experiences') !== null, 'Experiences button exists');
     console.assert(document.getElementById('card-stories') !== null, 'Stories button exists');
