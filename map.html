@@ -1992,6 +1992,14 @@
     font-weight: 900;
     cursor: pointer;
   }
+
+  body.ai-chat-active .top-bar,
+  body.ai-chat-active #ai-chat-btn,
+  body.ai-chat-active .bottom-card {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
 </style>
 
 <button id="ai-chat-btn" type="button" aria-label="Apri AI Guide">
@@ -2070,6 +2078,7 @@
     var shouldOpen = typeof open === 'boolean' ? open : !panel.classList.contains('ai-open');
     panel.classList.toggle('ai-open', shouldOpen);
     panel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+    document.body.classList.toggle('ai-chat-active', shouldOpen);
 
     if (shouldOpen) {
       if (!hasWelcomed) {
