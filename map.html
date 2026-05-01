@@ -2445,12 +2445,12 @@
     addMessage(text, true);
     input.value = '';
 
-    addMessage('Sto pensando...', false);
+    addMessage('Sta scrivendo...', false);
 
     reply = await callOpenRouterGuide(text);
     if (!reply) reply = simpleAI(text);
 
-    if (messages.lastChild && messages.lastChild.innerText === 'Sto pensando...') {
+    if (messages.lastChild && messages.lastChild.innerText === 'Sta scrivendo...') {
       messages.removeChild(messages.lastChild);
     }
 
