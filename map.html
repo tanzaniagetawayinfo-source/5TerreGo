@@ -297,22 +297,38 @@
     .card-title-row {
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       gap: 8px;
-      padding: 10px 10px 8px;
+      padding: 10px;
+      min-height: 50px;
     }
 
     .bottom-card .title {
-      flex: 1;
-      min-width: 0;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      z-index: 5;
+      max-width: calc(100% - 92px);
+      transform: translateX(-50%);
       color: white;
-      font-weight: 700;
+      font-weight: 900;
+      text-align: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      text-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      pointer-events: none;
     }
 
     .card-actions {
       display: flex;
+      justify-content: flex-start;
+      align-items: center;
       gap: 6px;
       flex-shrink: 0;
     }
@@ -440,6 +456,7 @@
       margin-bottom: 7px;
       letter-spacing: -0.04em;
       padding-right: 40px;
+      text-align: left;
     }
 
     #poi-desc {
@@ -459,7 +476,11 @@
 
     #read-more {
       display: none;
-      margin-top: 7px;
+      position: absolute;
+      left: 18px;
+      bottom: 13px;
+      margin-top: 0;
+      padding: 7px 0;
       font-size: 13px;
       font-weight: 800;
       color: #1e9bff;
@@ -494,8 +515,9 @@
     }
 
     #poi-directions {
-      right: 12px;
-      bottom: 10px;
+      left: 96px;
+      right: auto;
+      bottom: 13px;
       padding: 7px 11px;
       background: rgba(0,0,0,0.52);
       color: white;
