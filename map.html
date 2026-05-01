@@ -478,16 +478,15 @@
     }
 
     #read-more {
-      display: none;
-      position: absolute;
-      left: 18px;
-      bottom: 13px;
-      margin-top: 0;
-      padding: 7px 0;
-      font-size: 13px;
-      font-weight: 800;
+      display: none !important;
+    }
+
+    #poi-desc .inline-read-more {
+      display: inline;
       color: #1e9bff;
+      font-weight: 800;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     #poi-close,
@@ -702,6 +701,7 @@
   var isProgrammaticMove = false;
   var cityCardManuallyClosed = false;
   var userCheckTimer = null;
+  var poiTypeTimer = null;
 
   var startX = 0;
   var startY = 0;
@@ -1153,6 +1153,11 @@
   }
 
   function closePOICard(immediate) {
+    if (poiTypeTimer) {
+      clearTimeout(poiTypeTimer);
+      poiTypeTimer = null;
+    }
+
     poiCard.classList.remove('open');
     poiCard.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('poi-panel-active');
@@ -1171,6 +1176,62 @@
         destroyPoiMiniMap();
       }
     }, 360);
+  }
+
+  function getPOIPreviewText(text, maxChars) {
+    text = String(text || '').trim();
+    while (text.indexOf('  ') !== -1) text = text.replace('  ', ' ');
+    if (text.length <= maxChars) return { preview: text, truncated: false };
+    return {
+      preview: text.slice(0, maxChars).split(' ').slice(0, -1).join(' ').trim(),
+      truncated: true
+    };
+  }
+
+  function typePOICardText(previewText, truncated) {
+    var text = String(previewText || '');
+    var i = 0;
+    var speed = text.length > 120 ? 8 : 13;
+
+    if (poiTypeTimer) {
+      clearTimeout(poiTypeTimer);
+      poiTypeTimer = null;
+    }
+
+    poiDesc.innerHTML = '';
+
+    function finish() {
+      if (!truncated) return;
+      poiDesc.appendChild(document.createTextNode('...'));
+      var more = document.createElement('span');
+      more.className = 'inline-read-more';
+      more.textContent = 'read more';
+      poiDesc.appendChild(more);
+    }
+
+    function step() {
+      i += 1;
+      poiDesc.textContent = text.slice(0, i);
+
+      if (i < text.length) {
+        poiTypeTimer = window.setTimeout(step, speed);
+        return;
+      }
+
+      poiTypeTimer = null;
+      finish();
+    }
+
+    step();
+  }
+
+  function openCurrentPOIInCaptainGull() {
+    if (!currentPOI) return;
+
+    if (typeof window.openCaptainGullForPOI === 'function') {
+      window.openCaptainGullForPOI(currentPOI);
+      closePOICard(false);
+    }
   }
 
   function showPOICard(poi) {
@@ -1193,17 +1254,11 @@
     poiTitle.innerText = poi.name;
 
     fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
-    poiDesc.innerText = fullText;
+    var previewData = getPOIPreviewText(fullText, 145);
     poiDesc.classList.remove('expanded');
 
-    window.setTimeout(function () {
-      if (poiDesc.scrollHeight > poiDesc.clientHeight + 10) {
-        readMoreBtn.style.display = 'block';
-        readMoreBtn.innerText = 'Read more';
-      } else {
-        readMoreBtn.style.display = 'none';
-      }
-    }, 480);
+    poiDesc.innerHTML = '';
+    readMoreBtn.style.display = 'none';
 
     destroyPoiMiniMap();
 
@@ -1247,6 +1302,7 @@
     window.setTimeout(function () {
       if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') {
         poiCard.classList.add('open');
+        typePOICardText(previewData.preview, previewData.truncated);
       }
     }, 430);
 
@@ -1725,11 +1781,12 @@
     });
 
     readMoreBtn.addEventListener('click', function () {
-      if (!currentPOI) return;
+      openCurrentPOIInCaptainGull();
+    });
 
-      if (typeof window.openCaptainGullForPOI === 'function') {
-        window.openCaptainGullForPOI(currentPOI);
-        closePOICard(false);
+    poiDesc.addEventListener('click', function (event) {
+      if (event.target && event.target.classList.contains('inline-read-more')) {
+        openCurrentPOIInCaptainGull();
       }
     });
 
@@ -2192,20 +2249,51 @@
     addMessage(name + String.fromCharCode(10) + String.fromCharCode(10) + description, false, true);
   };
 
-  function addMessage(text, isUser, keepTop){
+  function typeMessage(div, text, keepTop) {
+    var fullText = String(text || '');
+    var index = 0;
+    var speed = fullText.length > 260 ? 7 : 14;
+
+    div.innerText = '';
+
+    function step() {
+      index += 1;
+      div.innerText = fullText.slice(0, index);
+
+      if (keepTop) {
+        messages.scrollTop = 0;
+      } else {
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      if (index < fullText.length) {
+        window.setTimeout(step, speed);
+      }
+    }
+
+    step();
+  }
+
+  function addMessage(text, isUser, keepTop, instant){
     var div = document.createElement('div');
     div.className = 'ai-msg ' + (isUser ? 'user' : 'bot');
-    div.innerText = text;
     messages.appendChild(div);
 
-    if (keepTop) {
-      requestAnimationFrame(function(){
-        messages.scrollTop = 0;
-      });
+    if (instant || isUser) {
+      div.innerText = text;
+
+      if (keepTop) {
+        requestAnimationFrame(function(){
+          messages.scrollTop = 0;
+        });
+        return;
+      }
+
+      messages.scrollTop = messages.scrollHeight;
       return;
     }
 
-    messages.scrollTop = messages.scrollHeight;
+    typeMessage(div, text, keepTop);
   }
 
   function normalizeText(value){
@@ -2557,7 +2645,7 @@
     addMessage(text, true);
     input.value = '';
 
-    addMessage('Sta scrivendo...', false);
+    addMessage('Sta scrivendo...', false, false, true);
 
     reply = await callOpenRouterGuide(text);
     if (!reply) reply = simpleAI(text);
