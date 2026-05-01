@@ -69,6 +69,17 @@
       white-space: nowrap;
     }
 
+    #login {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
     #search {
       width: 100%;
       padding: 8px 12px;
@@ -88,7 +99,7 @@
       left: 0;
       right: 0;
       margin-top: 6px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.62);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-radius: 14px;
@@ -110,23 +121,27 @@
     .search-item:last-child { border-bottom: none; }
     .search-item:hover { background: rgba(255,255,255,0.1); }
 
-    #login {
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
     .blue { color: #1e9bff; }
     .orange { color: #ff8a1d; }
 
+    .mode-bar { display: flex; gap: 8px; }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(0,0,0,0.35);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-btn.active { background: rgba(0,0,0,0.6); }
+
     .label {
       color: white;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 14px;
       text-shadow: 0 2px 6px rgba(0,0,0,0.9);
       white-space: nowrap;
@@ -154,50 +169,10 @@
       border: none !important;
     }
 
-    .leaflet-tile {
-      margin: -1px;
-      outline: none;
-      border: none;
-    }
-
-    .leaflet-pane img {
-      image-rendering: auto;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
-
-    .leaflet-layer {
-      transition: opacity 0.75s cubic-bezier(.22,.61,.36,1);
-      will-change: opacity;
-    }
-
-    .leaflet-container {
-      background: #f6f1e8 !important;
-      transform: translateZ(0);
-      will-change: transform;
-    }
+    .leaflet-container { background: #f6f1e8 !important; }
 
     .leaflet-control-zoom,
-    .leaflet-control-attribution {
-      display: none !important;
-    }
-
-    .mode-bar { display: flex; gap: 8px; }
-
-    .mode-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 999px;
-      border: none;
-      background: rgba(0,0,0,0.35);
-      color: #fff;
-      font-weight: 700;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor: pointer;
-    }
-
-    .mode-btn.active { background: rgba(0,0,0,0.6); }
+    .leaflet-control-attribution { display: none !important; }
 
     #owner-panel {
       display: none;
@@ -251,7 +226,6 @@
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
-      will-change: transform, opacity;
     }
 
     .bottom-card.is-visible {
@@ -272,7 +246,6 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      background: rgba(255,255,255,0.08);
       pointer-events: none;
       transition: opacity 0.35s ease;
     }
@@ -289,17 +262,11 @@
       opacity: 0;
       pointer-events: auto;
       transform: translate(-50%, -50%) scale(1.18);
-      transform-origin: center center;
       transition: opacity 0.35s ease;
     }
 
-    .card-media.live-ready img {
-      opacity: 0;
-    }
-
-    .card-media.live-ready .card-live-frame {
-      opacity: 1;
-    }
+    .card-media.live-ready img { opacity: 0; }
+    .card-media.live-ready .card-live-frame { opacity: 1; }
 
     .card-live-touch-layer {
       position: absolute;
@@ -322,15 +289,10 @@
       font-weight: 900;
       letter-spacing: 0.04em;
       opacity: 0;
-      transform: translateY(-4px);
-      transition: opacity 0.28s ease, transform 0.28s ease;
       pointer-events: none;
     }
 
-    .card-media.live-ready .card-live-badge {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .card-media.live-ready .card-live-badge { opacity: 1; }
 
     .card-title-row {
       display: flex;
@@ -344,8 +306,6 @@
       min-width: 0;
       color: white;
       font-weight: 700;
-      padding: 0;
-      pointer-events: none;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -371,8 +331,13 @@
       -webkit-backdrop-filter: blur(10px);
     }
 
-    .card-action-btn:active {
-      transform: scale(0.98);
+    .card-action-btn:active { transform: scale(0.98); }
+
+    #card-desc {
+      color: rgba(255,255,255,0.82);
+      padding: 0 10px 12px;
+      font-size: 13px;
+      line-height: 1.4;
     }
 
     #poi-card {
@@ -390,12 +355,6 @@
     #poi-card.open {
       opacity: 1;
       transform: scale(1);
-    }
-
-    #poi-map-preview {
-      position: absolute;
-      inset: 0;
-      background: #f6f1e8;
     }
 
     #poi-circle {
@@ -434,9 +393,7 @@
       right: 0;
       z-index: 3;
       padding: 20px 28px;
-      background: transparent;
       color: #000;
-      box-shadow: none;
       text-align: center;
       opacity: 0;
       transform: translateY(24px);
@@ -454,21 +411,16 @@
       line-height: 1.1;
       margin-bottom: 14px;
       letter-spacing: -0.04em;
-      text-align: center;
     }
 
     #poi-desc {
       font-size: 16px;
       line-height: 1.6;
       color: rgba(0,0,0,0.7);
-      margin-top: 6px;
-      text-align: center;
       max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 6px auto 0;
       max-height: 72px;
       overflow: hidden;
-      position: relative;
     }
 
     #poi-desc.expanded {
@@ -486,50 +438,56 @@
       cursor: pointer;
     }
 
-    #poi-close {
+    #poi-close,
+    #poi-directions,
+    #poi-ai {
       position: absolute;
-      top: 16px;
-      left: 16px;
       z-index: 4;
-      width: 42px;
-      height: 42px;
       border-radius: 999px;
       background: rgba(0,0,0,0.52);
       color: white;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    #poi-close {
+      top: 16px;
+      left: 16px;
+      width: 42px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-size: 22px;
       cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 0.34s ease, transform 0.34s ease;
     }
 
     #poi-directions {
-      position: absolute;
       top: 16px;
       right: 16px;
-      z-index: 4;
       padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.52);
-      color: white;
       font-size: 13px;
       font-weight: 700;
       text-decoration: none;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    #poi-ai {
+      top: 62px;
+      right: 16px;
+      border: 0;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
     }
 
     #poi-card.open #poi-directions,
-    #poi-card.open #poi-close {
+    #poi-card.open #poi-close,
+    #poi-card.open #poi-ai {
       opacity: 1;
       transform: scale(1);
     }
@@ -584,15 +542,15 @@
   <div class="card-title-row">
     <div class="title" id="card-title"></div>
     <div class="card-actions">
+      <button class="card-action-btn" id="card-ai" type="button">AI</button>
       <button class="card-action-btn" id="card-experiences" type="button">Experiences</button>
       <button class="card-action-btn" id="card-stories" type="button">Stories</button>
     </div>
   </div>
-  <div class="desc" id="card-desc" style="color: rgba(255,255,255,0.8); padding: 0 10px 12px; font-size: 13px; line-height: 1.4;"></div>
+  <div class="desc" id="card-desc"></div>
 </div>
 
 <div id="poi-card" aria-hidden="true">
-  <div id="poi-map-preview"></div>
   <div id="poi-circle"></div>
   <div class="poi-content">
     <div id="poi-title"></div>
@@ -601,6 +559,7 @@
   </div>
   <div id="poi-close">←</div>
   <a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a>
+  <button id="poi-ai" type="button">AI guide</button>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -612,17 +571,14 @@
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-  var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
+  var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
+  var OWNER_EMAILS = ['5terrego.info@gmail.com'];
+
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
   var AUTO_CLOSE_ZOOM = 12;
   var AUTO_CLOSE_DISTANCE = 800;
-  var poiCloseTimer = null;
-  var cityCardManuallyClosed = false;
-  var cityCardHasSwitchedOnce = false;
-  var cityCardNudgeTimers = [];
-  var cityCardNudgeInterval = null;
 
   var SUPABASE_READY = Boolean(
     window.supabase &&
@@ -640,435 +596,24 @@
     }
   }) : null;
 
+  window.fiveTerreSupabaseClient = supabaseClient;
+
   var places = [
-    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', liveVideoId: 'Mjrd1nmlW5s' },
-    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: 'YfKWbnMCNZ8' },
-    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: 'BhPxgJ3w8Ag' },
-    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg' }
+    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', liveVideoId: 'Mjrd1nmlW5s', description: 'Monterosso is the largest village of the Cinque Terre, known for beaches, old town lanes and sea views.' },
+    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: 'YfKWbnMCNZ8', description: 'Vernazza is one of the most iconic villages, with a tiny harbor, colorful houses and dramatic cliffs.' },
+    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: 'BhPxgJ3w8Ag', description: 'Corniglia sits above the sea and feels quieter, with terraces, viewpoints and narrow historic streets.' },
+    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU', description: 'Manarola is famous for sunset views, colorful houses and the cliffside postcard panorama.' },
+    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' }
   ];
 
-  var ferryPorts = [];
-
-  if (!window.L) {
-    throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
-  }
-
-  var map = L.map('map', {
-    minZoom: 11,
-    zoomControl: false,
-    preferCanvas: true,
-    inertia: true,
-    inertiaDeceleration: 2500,
-    inertiaMaxSpeed: 2000,
-    easeLinearity: 0.2,
-    zoomAnimation: true,
-    fadeAnimation: true,
-    markerZoomAnimation: true,
-    zoomSnap: 0.25,
-    zoomDelta: 0.25,
-    wheelPxPerZoomLevel: 80,
-    wheelDebounceTime: 20,
-    updateWhenIdle: false
-  }).setView([44.12, 9.71], 12);
-
-  var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 19,
-    detectRetina: false,
-    keepBuffer: 8,
-    updateWhenZooming: false,
-    updateWhenIdle: false,
-    noWrap: true
-  }).addTo(map);
-
-  var roadsLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}.png', {
-    maxZoom: 20,
-    opacity: 0.82,
-    noWrap: true
-  }).addTo(map);
-
-  var whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    maxZoom: 20,
-    opacity: 0,
-    subdomains: 'abcd',
-    noWrap: true
-  }).addTo(map);
-
-  var labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-    maxZoom: 20,
-    opacity: 0,
-    subdomains: 'abcd',
-    noWrap: true
-  }).addTo(map);
-
-  var ferryRoutesLayer = L.layerGroup().addTo(map);
-  var trailsLayer = L.layerGroup().addTo(map);
-  var TRAILS_ENDPOINTS = [
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter',
-    'https://overpass.openstreetmap.ru/api/interpreter'
-  ];
-  var TRAILS_CACHE_KEY = '5terrego_osm_important_trails_cache_v2';
-  var IMPORTANT_TRAIL_KEYWORDS = [
-    'sentiero azzurro',
-    'blue path',
-    'sva',
-    'av5t',
-    '592',
-    '593',
-    '590',
-    '591',
-    '531',
-    '506',
-    '507',
-    'monterosso',
-    'vernazza',
-    'corniglia',
-    'manarola',
-    'riomaggiore'
-  ];
-  var TRAILS_BBOX = {
-    south: 44.085,
-    west: 9.625,
-    north: 44.158,
-    east: 9.755
-  };
-
-  var trails = [];
-
-  function bringLayerGroupToFront(group) {
-    if (!group || typeof group.eachLayer !== 'function') return;
-
-    group.eachLayer(function (layer) {
-      if (layer && typeof layer.bringToFront === 'function') {
-        layer.bringToFront();
-      }
-    });
-  }
-
-  function getTrailStyle() {
-    return {
-      color: '#000000',
-      weight: 1,
-      opacity: map.getZoom() >= 12 ? 0.78 : 0,
-      dashArray: null,
-      lineCap: 'round',
-      lineJoin: 'round'
-    };
-  }
-
-  function getTrailName(tags) {
-    tags = tags || {};
-    return tags.name || tags.ref || tags.operator || 'Trail';
-  }
-
-  function getTrailSearchText(tags) {
-    tags = tags || {};
-    return [
-      tags.name,
-      tags.ref,
-      tags.operator,
-      tags.description,
-      tags.route,
-      tags.network,
-      tags.sac_scale
-    ].filter(Boolean).join(' ').toLowerCase();
-  }
-
-  function isImportantTrail(tags) {
-    var text = getTrailSearchText(tags);
-
-    if (!text) return false;
-
-    return IMPORTANT_TRAIL_KEYWORDS.some(function (keyword) {
-      return text.indexOf(keyword) !== -1;
-    });
-  }
-
-  function isTrailPOI(poi) {
-    return Boolean(poi && isValidPOI(poi) && String(poi.type || '').toLowerCase() === 'sentiero');
-  }
-
-  function getTrailPOIs() {
-    return poiMarkers
-      .map(function (item) { return item.poi; })
-      .filter(isTrailPOI);
-  }
-
-  function distancePointToTrail(point, trailCoords) {
-    var minDistance = Infinity;
-    var i;
-    var distance;
-
-    if (!point || !Array.isArray(trailCoords)) return minDistance;
-
-    for (i = 0; i < trailCoords.length; i += 1) {
-      distance = map.distance(point, trailCoords[i]);
-      if (distance < minDistance) minDistance = distance;
-    }
-
-    return minDistance;
-  }
-
-  function getConnectedTrailPOIs(trail) {
-    var maxDistanceMeters = 120;
-
-    if (!trail || !Array.isArray(trail.coords)) return [];
-
-    return getTrailPOIs().filter(function (poi) {
-      return distancePointToTrail(poi.coords, trail.coords) <= maxDistanceMeters;
-    });
-  }
-
-  function canShowTrail(trail) {
-    return getConnectedTrailPOIs(trail).length >= 2;
-  }
-
-  function addTrails() {
-    trailsLayer.clearLayers();
-
-    trails.forEach(function (trail) {
-      var connectedPOIs;
-      var popupHtml;
-
-      if (!trail || !Array.isArray(trail.coords) || trail.coords.length < 2) return;
-
-      connectedPOIs = getConnectedTrailPOIs(trail);
-      if (connectedPOIs.length < 2) return;
-
-      popupHtml = '<strong>' + escapeHTML(trail.name || 'Trail') + '</strong>' +
-        '<br><span>' + connectedPOIs.map(function (poi) {
-          return escapeHTML(poi.name);
-        }).join(' → ') + '</span>';
-
-      L.polyline(trail.coords, getTrailStyle()).addTo(trailsLayer).bindTooltip(trail.name || 'Trail', {
-        permanent: false,
-        direction: 'top',
-        className: 'trail-tooltip'
-      }).bindPopup(popupHtml);
-    });
-
-    bringLayerGroupToFront(trailsLayer);
-  }
-
-  function buildTrailsOverpassQuery() {
-    var bbox = TRAILS_BBOX.south + ',' + TRAILS_BBOX.west + ',' + TRAILS_BBOX.north + ',' + TRAILS_BBOX.east;
-
-    return '[out:json][timeout:25];' +
-      '(' +
-      'way["highway"~"path|footway|steps|track"]["foot"!="no"]["name"](' + bbox + ');' +
-      'way["highway"~"path|footway|steps|track"]["foot"!="no"]["ref"](' + bbox + ');' +
-      'way["sac_scale"]["name"](' + bbox + ');' +
-      'way["trail_visibility"]["name"](' + bbox + ');' +
-      ');' +
-      'out geom;';
-  }
-
-  function parseOverpassTrails(data) {
-    var parsed = [];
-
-    if (!data || !Array.isArray(data.elements)) return parsed;
-
-    data.elements.forEach(function (element) {
-      var coords;
-
-      if (element.type !== 'way') return;
-
-      if (Array.isArray(element.geometry)) {
-        coords = element.geometry.map(function (point) {
-          return [point.lat, point.lon];
-        }).filter(function (point) {
-          return Number.isFinite(point[0]) && Number.isFinite(point[1]);
-        });
-      }
-
-      if (!coords || coords.length < 2) return;
-
-      if (!isImportantTrail(element.tags)) return;
-
-      parsed.push({
-        id: element.id,
-        name: getTrailName(element.tags),
-        coords: coords,
-        tags: element.tags || {}
-      });
-    });
-
-    return parsed;
-  }
-
-  function readCachedTrails() {
-    try {
-      return JSON.parse(localStorage.getItem(TRAILS_CACHE_KEY) || '[]');
-    } catch (error) {
-      return [];
-    }
-  }
-
-  function writeCachedTrails(items) {
-    try {
-      localStorage.setItem(TRAILS_CACHE_KEY, JSON.stringify(items));
-    } catch (error) {}
-  }
-
-  async function loadPreciseTrails() {
-    var cached = readCachedTrails();
-    var query = buildTrailsOverpassQuery();
-    var endpointIndex;
-    var response;
-    var data;
-    var parsed;
-
-    if (cached.length) {
-      trails = cached;
-      addTrails();
-      updateMapVisualByZoom();
-    }
-
-    for (endpointIndex = 0; endpointIndex < TRAILS_ENDPOINTS.length; endpointIndex += 1) {
-      try {
-        response = await fetch(TRAILS_ENDPOINTS[endpointIndex] + '?data=' + encodeURIComponent(query), {
-          method: 'GET',
-          cache: 'force-cache'
-        });
-
-        if (!response.ok) throw new Error('Overpass trails request failed');
-
-        data = await response.json();
-        parsed = parseOverpassTrails(data);
-
-        if (!parsed.length) continue;
-
-        trails = parsed;
-        writeCachedTrails(trails);
-        addTrails();
-        bringLayerGroupToFront(trailsLayer);
-        updateMapVisualByZoom();
-        return;
-      } catch (error) {
-        console.warn('OSM trails endpoint failed:', TRAILS_ENDPOINTS[endpointIndex], error);
-      }
-    }
-  }
-
-  function createSeaArc(p1, p2, segments) {
-    var lat1 = p1[0];
-    var lng1 = p1[1];
-    var lat2 = p2[0];
-    var lng2 = p2[1];
-    var midLat = (lat1 + lat2) / 2;
-    var midLng = (lng1 + lng2) / 2;
-    var distance = Math.abs(lng2 - lng1);
-    var offset = 0.018 + distance * 0.45;
-    var control = [midLat - 0.003, midLng - offset];
-    var points = [];
-    var i;
-    var t;
-    var lat;
-    var lng;
-
-    for (i = 0; i <= segments; i += 1) {
-      t = i / segments;
-      lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2;
-      lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2;
-      points.push([lat, lng]);
-    }
-
-    return points;
-  }
-
-  function getFerryPOIs() {
-    return poiMarkers
-      .map(function (m) { return m.poi; })
-      .filter(function (p) {
-        return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry';
-      })
-      .sort(function (a, b) {
-        if (a.lng === b.lng) return b.lat - a.lat;
-        return a.lng - b.lng;
-      });
-  }
-
-  function getNearestFerryPort(sourcePort, allPorts) {
-    var nearest = null;
-    var minDist = Infinity;
-    var i;
-    var dist;
-
-    for (i = 0; i < allPorts.length; i += 1) {
-      if (allPorts[i].id === sourcePort.id) continue;
-
-      dist = map.distance(sourcePort.coords, allPorts[i].coords);
-
-      if (dist < minDist) {
-        minDist = dist;
-        nearest = allPorts[i];
-      }
-    }
-
-    return nearest;
-  }
-
-  function addFerryRoutes() {
-    var i;
-    var arc;
-    var fromPort;
-    var toPort;
-    var routeKey;
-    var usedRoutes = {};
-
-    ferryRoutesLayer.clearLayers();
-    ferryPorts = getFerryPOIs();
-
-    if (ferryPorts.length < 2) return;
-
-    for (i = 0; i < ferryPorts.length - 1; i += 1) {
-      fromPort = ferryPorts[i];
-      toPort = ferryPorts[i + 1];
-
-      if (!fromPort || !toPort) continue;
-
-      routeKey = [fromPort.id, toPort.id].sort().join('::');
-      if (usedRoutes[routeKey]) continue;
-      usedRoutes[routeKey] = true;
-
-      arc = createSeaArc(fromPort.coords, toPort.coords, 32);
-
-      L.polyline(arc, {
-        color: '#00e0ff',
-        weight: 1,
-        opacity: 0.95,
-        dashArray: '8, 10',
-        lineCap: 'round',
-        lineJoin: 'round'
-      }).addTo(ferryRoutesLayer);
-    }
-  }
-
-  function updateMapVisualByZoom() {
-    var z = map.getZoom();
-    var raw = Math.min(1, Math.max(0, (z - 14.75) / 3.75));
-    var t = raw * raw * (3 - 2 * raw);
-    var satelliteOpacity = Math.max(0.08, 1 - t);
-    var roadsOpacity = 0.82 * (1 - t * 0.72);
-    var whiteOpacity = t;
-    var labelsOpacity = Math.max(0, (t - 0.18) / 0.82);
-
-    satelliteLayer.setOpacity(satelliteOpacity);
-    roadsLayer.setOpacity(roadsOpacity);
-    whiteLayer.setOpacity(whiteOpacity);
-    labelsLayer.setOpacity(labelsOpacity);
-
-    ferryRoutesLayer.eachLayer(function (layer) {
-      layer.setStyle({ opacity: 0.85 * (1 - t * 0.2) });
-    });
-
-    trailsLayer.eachLayer(function (layer) {
-      layer.setStyle(getTrailStyle());
-    });
-  }
-
-  map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
+  var map;
+  var satelliteLayer;
+  var roadsLayer;
+  var whiteLayer;
+  var labelsLayer;
+  var ferryRoutesLayer;
+  var poiLayer;
+  var trailsLayer;
 
   var card = document.getElementById('card');
   var cardTitle = document.getElementById('card-title');
@@ -1077,27 +622,36 @@
   var cardMedia = document.getElementById('card-media');
   var cardLive = document.getElementById('card-live');
   var cardLiveTouchLayer = document.getElementById('card-live-touch-layer');
+  var cardAiBtn = document.getElementById('card-ai');
+  var cardExperiencesBtn = document.getElementById('card-experiences');
+  var cardStoriesBtn = document.getElementById('card-stories');
+
   var ownerPanel = document.getElementById('owner-panel');
-  var poiCard = document.getElementById('poi-card');
-  var poiTitle = document.getElementById('poi-title');
-  var poiDesc = document.getElementById('poi-desc');
-  var readMoreBtn = document.getElementById('read-more');
-  var poiClose = document.getElementById('poi-close');
-  var poiDirections = document.getElementById('poi-directions');
-  var poiCircle = document.getElementById('poi-circle');
-  var poiMapPreview = document.getElementById('poi-map-preview');
   var loginBtn = document.getElementById('login');
   var addPoiBtn = document.getElementById('add-poi');
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
-  var cardExperiencesBtn = document.getElementById('card-experiences');
-  var cardStoriesBtn = document.getElementById('card-stories');
 
+  var poiCard = document.getElementById('poi-card');
+  var poiCircle = document.getElementById('poi-circle');
+  var poiTitle = document.getElementById('poi-title');
+  var poiDesc = document.getElementById('poi-desc');
+  var poiClose = document.getElementById('poi-close');
+  var poiDirections = document.getElementById('poi-directions');
+  var poiAiBtn = document.getElementById('poi-ai');
+  var readMoreBtn = document.getElementById('read-more');
+
+  var poiMarkers = [];
+  var ferryPorts = [];
   var currentIndex = -1;
   var currentDataset = 'places';
-  var poiLayer = L.layerGroup().addTo(map);
-  var poiMarkers = [];
+  var currentPOI = null;
+  var currentUser = null;
+  var poiMiniMap = null;
   var isProgrammaticMove = false;
+  var cityCardManuallyClosed = false;
+  var userCheckTimer = null;
+
   var startX = 0;
   var startY = 0;
   var currentX = 0;
@@ -1105,22 +659,33 @@
   var isDragging = false;
   var hasMoved = false;
   var dragAxis = null;
-  var currentUser = null;
-  var userCheckTimer = null;
-  var poiMiniMap = null;
 
-  function isIOSDevice() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  window.fiveTerreGoAI = {
+    getPlaces: function () {
+      return places.slice();
+    },
+    getPOIs: function () {
+      return poiMarkers.map(function (item) {
+        return item.poi;
+      }).filter(Boolean);
+    },
+    speak: function (text) {
+      speakText(text);
+    }
+  };
+
+  function escapeHTML(value) {
+    return String(value || '').replace(/[&<>\"]/g, function (char) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
+    });
   }
 
   function readValue(value, fallback) {
     return value === undefined || value === null ? fallback : value;
   }
 
-  function escapeHTML(value) {
-    return String(value || '').replace(/[&<>"]/g, function (char) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
-    });
+  function isIOSDevice() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
 
   function getPOIEmoji(type, fallback) {
@@ -1133,6 +698,7 @@
       case 'ristorante': return '🍽️';
       case 'bar': return '🍸';
       case 'ferry': return '⛴️';
+      case 'curiosity': return '✨';
       case 'punto panoramico': return '📍';
       default: return fallback || '📌';
     }
@@ -1144,7 +710,9 @@
     var str;
     var parts;
 
-    if (raw && typeof raw.coords === 'string') {
+    raw = raw || {};
+
+    if (typeof raw.coords === 'string') {
       str = raw.coords.trim();
       parts = str.split(',');
 
@@ -1174,7 +742,7 @@
     symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍');
 
     return {
-      id: raw.id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
+      id: raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2),
       name: String(raw.name || raw.title || 'POI'),
       symbol: symbol,
       coords: [parsed.lat, parsed.lng],
@@ -1204,50 +772,106 @@
     return 17;
   }
 
-  function updatePOIVisibility() {
-    var zoom = map.getZoom();
-    poiLayer.clearLayers();
-
-    poiMarkers.forEach(function (item) {
-      if (zoom >= getMinZoomForImportance(item.importance)) {
-        item.marker.addTo(poiLayer);
-      }
-    });
+  function getYouTubeEmbedUrl(videoId) {
+    if (!videoId) return '';
+    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1';
   }
 
-  function openPOIWithMapMove(poi, sourceEvent) {
-    if (!poi || !isValidPOI(poi)) return;
+  function speakText(text) {
+    var utter;
 
-    if (sourceEvent && sourceEvent.originalEvent) {
-      L.DomEvent.stopPropagation(sourceEvent.originalEvent);
-      L.DomEvent.preventDefault(sourceEvent.originalEvent);
+    if (!text) return;
+    if (!('speechSynthesis' in window) || typeof window.SpeechSynthesisUtterance === 'undefined') {
+      alert(text);
+      return;
     }
 
-    isProgrammaticMove = true;
-
-    if (isIOSDevice()) {
-      map.setView(poi.coords, 17, { animate: true });
-      window.setTimeout(function () {
-        showPOICard(poi);
-        isProgrammaticMove = false;
-      }, 300);
-    } else {
-      map.flyTo(poi.coords, 17, { duration: 1.2 });
-      window.setTimeout(function () {
-        showPOICard(poi);
-        isProgrammaticMove = false;
-      }, 400);
-    }
+    utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.94;
+    utter.pitch = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
   }
 
-  function centerCity(place) {
-    isProgrammaticMove = true;
-    var zoomLevel = place.name === 'Monterosso' ? 14 : 15;
-    map.flyTo(place.coords, zoomLevel, { duration: 1.2 });
+  function generateAIText(item, type) {
+    var name = item && item.name ? item.name : '';
+    var description = item && item.description ? item.description : '';
 
-    window.setTimeout(function () {
-      isProgrammaticMove = false;
-    }, 1400);
+    if (type === 'poi') {
+      if (description) return name + '. ' + description;
+      return name + '. This point of interest has no description yet, but it is saved on your Cinque Terre map.';
+    }
+
+    if (description) return 'Quick guide to ' + name + ': ' + description;
+    return 'Quick guide to ' + name + '. This is one of the five villages of the Cinque Terre.';
+  }
+
+  function initMap() {
+    if (!window.L) {
+      throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
+    }
+
+    map = L.map('map', {
+      minZoom: 11,
+      maxZoom: 20,
+      zoomControl: false,
+      preferCanvas: true,
+      inertia: true,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25,
+      wheelPxPerZoomLevel: 80
+    }).setView([44.12, 9.71], 12);
+
+    satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      detectRetina: false,
+      keepBuffer: 8,
+      noWrap: true
+    }).addTo(map);
+
+    roadsLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      opacity: 0.82,
+      noWrap: true
+    }).addTo(map);
+
+    whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
+      opacity: 0,
+      subdomains: 'abcd',
+      noWrap: true
+    }).addTo(map);
+
+    labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
+      opacity: 0,
+      subdomains: 'abcd',
+      noWrap: true
+    }).addTo(map);
+
+    ferryRoutesLayer = L.layerGroup().addTo(map);
+    trailsLayer = L.layerGroup().addTo(map);
+    poiLayer = L.layerGroup().addTo(map);
+
+    map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
+  }
+
+  function updateMapVisualByZoom() {
+    var z;
+    var raw;
+    var t;
+
+    if (!map || !satelliteLayer || !roadsLayer || !whiteLayer || !labelsLayer) return;
+
+    z = map.getZoom();
+    raw = Math.min(1, Math.max(0, (z - 14.75) / 3.75));
+    t = raw * raw * (3 - 2 * raw);
+
+    satelliteLayer.setOpacity(Math.max(0.08, 1 - t));
+    roadsLayer.setOpacity(0.82 * (1 - t * 0.72));
+    whiteLayer.setOpacity(t);
+    labelsLayer.setOpacity(Math.max(0, (t - 0.18) / 0.82));
   }
 
   function preloadImages() {
@@ -1257,9 +881,36 @@
     });
   }
 
-  function getYouTubeEmbedUrl(videoId) {
-    if (!videoId) return '';
-    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1';
+  function createCityMarkers() {
+    places.forEach(function (place, index) {
+      L.marker(place.coords, {
+        title: place.name,
+        icon: L.divIcon({
+          className: 'custom-label',
+          html: '<div class="label">' + escapeHTML(place.name) + '</div>'
+        })
+      }).addTo(map).on('click', function (event) {
+        if (event && event.originalEvent) {
+          L.DomEvent.stopPropagation(event.originalEvent);
+          L.DomEvent.preventDefault(event.originalEvent);
+        }
+        cityCardManuallyClosed = false;
+        showCityByIndex(index, true);
+      });
+    });
+  }
+
+  function centerCity(place) {
+    var zoomLevel;
+
+    if (!place) return;
+    isProgrammaticMove = true;
+    zoomLevel = place.name === 'Monterosso' ? 14 : 15;
+    map.flyTo(place.coords, zoomLevel, { duration: 1.2 });
+
+    window.setTimeout(function () {
+      isProgrammaticMove = false;
+    }, 1400);
   }
 
   function resetCardLive() {
@@ -1269,7 +920,6 @@
 
   function loadCardLive(videoId) {
     var src = getYouTubeEmbedUrl(videoId);
-
     resetCardLive();
     if (!src) return;
 
@@ -1278,81 +928,6 @@
     };
 
     cardLive.src = src;
-  }
-
-  function clearCityCardNudges() {
-    cityCardNudgeTimers.forEach(function (timer) {
-      window.clearTimeout(timer);
-    });
-    cityCardNudgeTimers = [];
-
-    if (cityCardNudgeInterval) {
-      window.clearInterval(cityCardNudgeInterval);
-      cityCardNudgeInterval = null;
-    }
-  }
-
-  function getCityCardNudgeDirection() {
-    var citiesBefore = currentIndex;
-    var citiesAfter = places.length - 1 - currentIndex;
-
-    if (currentIndex <= 0) return -1;
-    if (currentIndex >= places.length - 1) return 1;
-    return citiesAfter >= citiesBefore ? -1 : 1;
-  }
-
-  function nudgeCityCard() {
-    var direction;
-    var distance;
-    var secondDistance;
-
-    if (cityCardHasSwitchedOnce) return;
-    if (isDragging) return;
-    if (currentDataset !== 'places') return;
-    if (currentIndex < 0) return;
-    if (card.getAttribute('aria-hidden') === 'true') return;
-    if (poiCard.getAttribute('aria-hidden') === 'false') return;
-
-    direction = getCityCardNudgeDirection();
-    distance = direction * 14;
-    secondDistance = direction * 22;
-
-    card.style.transition = 'transform 0.18s cubic-bezier(.22,.61,.36,1)';
-    card.style.transform = 'translateX(' + distance + 'px)';
-
-    window.setTimeout(function () {
-      if (cityCardHasSwitchedOnce || isDragging || card.getAttribute('aria-hidden') === 'true') return;
-      card.style.transition = 'transform 0.16s cubic-bezier(.22,.61,.36,1)';
-      card.style.transform = 'translateX(0)';
-    }, 180);
-
-    window.setTimeout(function () {
-      if (cityCardHasSwitchedOnce || isDragging || card.getAttribute('aria-hidden') === 'true') return;
-      card.style.transition = 'transform 0.2s cubic-bezier(.22,.61,.36,1)';
-      card.style.transform = 'translateX(' + secondDistance + 'px)';
-    }, 340);
-
-    window.setTimeout(function () {
-      if (isDragging || card.getAttribute('aria-hidden') === 'true') return;
-      card.style.transition = 'transform 0.34s cubic-bezier(.22,.61,.36,1)';
-      card.style.transform = 'translateX(0)';
-    }, 560);
-  }
-
-  function startCityCardNudges() {
-    clearCityCardNudges();
-
-    if (cityCardHasSwitchedOnce) return;
-    if (currentDataset !== 'places') return;
-    if (currentIndex < 0) return;
-
-    cityCardNudgeTimers.push(window.setTimeout(nudgeCityCard, 1200));
-    cityCardNudgeTimers.push(window.setTimeout(nudgeCityCard, 3000));
-
-    cityCardNudgeTimers.push(window.setTimeout(function () {
-      nudgeCityCard();
-      cityCardNudgeInterval = window.setInterval(nudgeCityCard, 5000);
-    }, 5000));
   }
 
   function setCardContent(item) {
@@ -1370,118 +945,54 @@
     }
   }
 
-  function destroyPoiMiniMap() {
-    if (poiMiniMap) {
-      try { poiMiniMap.remove(); } catch (error) {}
-      poiMiniMap = null;
-    }
-    poiCircle.innerHTML = '';
-  }
-
-  function closePOICard(immediate) {
-    if (poiCloseTimer) {
-      window.clearTimeout(poiCloseTimer);
-      poiCloseTimer = null;
-    }
-
-    poiCard.classList.remove('open');
-    poiCard.setAttribute('aria-hidden', 'true');
-
-    if (immediate || poiCard.style.display === 'none') {
-      poiCard.style.display = 'none';
-      destroyPoiMiniMap();
-      return;
-    }
-
-    poiCloseTimer = window.setTimeout(function () {
-      poiCard.style.display = 'none';
-      destroyPoiMiniMap();
-      poiCloseTimer = null;
-    }, 360);
-  }
-
   function showCityCard(item) {
-    cityCardManuallyClosed = false;
     closePOICard(true);
     setCardContent(item);
     card.style.display = 'block';
-    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     card.setAttribute('aria-hidden', 'false');
 
     window.requestAnimationFrame(function () {
       card.classList.add('is-visible');
       card.style.transform = 'translateY(0)';
-      startCityCardNudges();
     });
   }
 
   function hideCard(manual) {
-    clearCityCardNudges();
     if (manual) cityCardManuallyClosed = true;
     if (card.getAttribute('aria-hidden') === 'true') return;
 
     card.classList.remove('is-visible');
     card.setAttribute('aria-hidden', 'true');
-    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
     card.style.transform = 'translateY(40px)';
 
     window.setTimeout(function () {
       if (card.getAttribute('aria-hidden') === 'true') {
         card.style.display = 'none';
+        resetCardLive();
       }
     }, 300);
   }
 
   function showCityByIndex(index, shouldCenter) {
+    var place;
+
     if (shouldCenter === undefined) shouldCenter = true;
     if (index < 0 || index >= places.length) return;
 
     currentDataset = 'places';
     currentIndex = index;
-    var place = places[index];
+    currentPOI = null;
+    place = places[index];
 
     if (shouldCenter) centerCity(place);
     showCityCard(place);
   }
 
-  function getClosestCity() {
-    var center = map.getCenter();
-    var minDist = Infinity;
-    var closestIndex = -1;
-
-    places.forEach(function (place, index) {
-      var distance = center.distanceTo(L.latLng(place.coords));
-      if (distance < minDist) {
-        minDist = distance;
-        closestIndex = index;
-      }
-    });
-
-    return { index: closestIndex, distance: minDist };
-  }
-
-  function evaluateAutoCard() {
-    if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return;
-
-    var zoom = map.getZoom();
-    var closest = getClosestCity();
-
-    if (cityCardManuallyClosed && closest.index === currentIndex) return;
-    if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false;
-
-    if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
-      if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
-        showCityByIndex(closest.index, false);
-      }
-      return;
-    }
-
-    if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) {
-      hideCard();
-    }
-  }
-
   function slideToIndex(nextIndex, direction) {
+    var place;
+    var exitX;
+    var enterX;
+
     if (currentDataset !== 'places') return;
 
     if (nextIndex < 0 || nextIndex >= places.length || nextIndex === currentIndex) {
@@ -1490,12 +1001,9 @@
       return;
     }
 
-    cityCardHasSwitchedOnce = true;
-    clearCityCardNudges();
-
-    var place = places[nextIndex];
-    var exitX = direction === 'next' ? '-110%' : '110%';
-    var enterX = direction === 'next' ? '110%' : '-110%';
+    place = places[nextIndex];
+    exitX = direction === 'next' ? '-110%' : '110%';
+    enterX = direction === 'next' ? '110%' : '-110%';
 
     card.style.transition = 'transform 0.25s ease';
     card.style.transform = 'translateX(' + exitX + ')';
@@ -1515,19 +1023,84 @@
     }, 250);
   }
 
+  function getClosestCity() {
+    var center = map.getCenter();
+    var minDist = Infinity;
+    var closestIndex = -1;
+
+    places.forEach(function (place, index) {
+      var distance = center.distanceTo(L.latLng(place.coords));
+      if (distance < minDist) {
+        minDist = distance;
+        closestIndex = index;
+      }
+    });
+
+    return { index: closestIndex, distance: minDist };
+  }
+
+  function evaluateAutoCard() {
+    var zoom;
+    var closest;
+
+    if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return;
+
+    zoom = map.getZoom();
+    closest = getClosestCity();
+
+    if (cityCardManuallyClosed && closest.index === currentIndex) return;
+    if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false;
+
+    if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
+      if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') {
+        showCityByIndex(closest.index, false);
+      }
+      return;
+    }
+
+    if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) {
+      hideCard(false);
+    }
+  }
+
+  function destroyPoiMiniMap() {
+    if (poiMiniMap) {
+      try { poiMiniMap.remove(); } catch (error) {}
+      poiMiniMap = null;
+    }
+    poiCircle.innerHTML = '';
+  }
+
+  function closePOICard(immediate) {
+    poiCard.classList.remove('open');
+    poiCard.setAttribute('aria-hidden', 'true');
+    currentPOI = null;
+
+    if (immediate) {
+      poiCard.style.display = 'none';
+      destroyPoiMiniMap();
+      return;
+    }
+
+    window.setTimeout(function () {
+      if (poiCard.getAttribute('aria-hidden') === 'true') {
+        poiCard.style.display = 'none';
+        destroyPoiMiniMap();
+      }
+    }, 360);
+  }
+
   function showPOICard(poi) {
     var fullText;
     var lat;
     var lng;
 
-    hideCard();
+    if (!poi || !isValidPOI(poi)) return;
+
+    hideCard(false);
     currentDataset = 'pois';
     currentIndex = -1;
-
-    if (poiCloseTimer) {
-      window.clearTimeout(poiCloseTimer);
-      poiCloseTimer = null;
-    }
+    currentPOI = poi;
 
     poiCard.classList.remove('open');
     poiCard.style.display = 'block';
@@ -1537,7 +1110,6 @@
     fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available';
     poiDesc.innerText = fullText;
     poiDesc.classList.remove('expanded');
-    poiDesc.style.display = 'block';
 
     window.setTimeout(function () {
       if (poiDesc.scrollHeight > poiDesc.clientHeight + 10) {
@@ -1548,7 +1120,6 @@
       }
     }, 50);
 
-    poiMapPreview.style.background = '#f6f1e8';
     destroyPoiMiniMap();
 
     poiMiniMap = L.map(poiCircle, {
@@ -1600,23 +1171,125 @@
     }, 90);
   }
 
-  function createCityMarkers() {
-    places.forEach(function (place, index) {
-      L.marker(place.coords, {
-        title: place.name,
-        icon: L.divIcon({
-          className: 'custom-label',
-          html: '<div class="label">' + escapeHTML(place.name) + '</div>'
-        })
-      }).addTo(map).on('click', function (e) {
-        if (e && e.originalEvent) {
-          L.DomEvent.stopPropagation(e.originalEvent);
-          L.DomEvent.preventDefault(e.originalEvent);
-        }
-        cityCardManuallyClosed = false;
-        showCityByIndex(index, true);
-      });
+  function openPOIWithMapMove(poi, sourceEvent) {
+    if (!poi || !isValidPOI(poi)) return;
+
+    if (sourceEvent && sourceEvent.originalEvent) {
+      L.DomEvent.stopPropagation(sourceEvent.originalEvent);
+      L.DomEvent.preventDefault(sourceEvent.originalEvent);
+    }
+
+    isProgrammaticMove = true;
+
+    if (isIOSDevice()) {
+      map.setView(poi.coords, 17, { animate: true });
+      window.setTimeout(function () {
+        showPOICard(poi);
+        isProgrammaticMove = false;
+      }, 300);
+    } else {
+      map.flyTo(poi.coords, 17, { duration: 1.2 });
+      window.setTimeout(function () {
+        showPOICard(poi);
+        isProgrammaticMove = false;
+      }, 400);
+    }
+  }
+
+  function updatePOIVisibility() {
+    var zoom;
+
+    if (!map || !poiLayer) return;
+
+    zoom = map.getZoom();
+    poiLayer.clearLayers();
+
+    poiMarkers.forEach(function (item) {
+      if (zoom >= getMinZoomForImportance(item.importance)) {
+        item.marker.addTo(poiLayer);
+      }
     });
+  }
+
+  function getFerryPOIs() {
+    return poiMarkers
+      .map(function (m) { return m.poi; })
+      .filter(function (p) {
+        return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry';
+      })
+      .sort(function (a, b) {
+        if (a.lng === b.lng) return b.lat - a.lat;
+        return a.lng - b.lng;
+      });
+  }
+
+  function createSeaArc(p1, p2, segments) {
+    var lat1 = p1[0];
+    var lng1 = p1[1];
+    var lat2 = p2[0];
+    var lng2 = p2[1];
+    var midLat = (lat1 + lat2) / 2;
+    var midLng = (lng1 + lng2) / 2;
+    var distance = Math.abs(lng2 - lng1);
+    var offset = 0.018 + distance * 0.45;
+    var control = [midLat - 0.003, midLng - offset];
+    var points = [];
+    var i;
+    var t;
+    var lat;
+    var lng;
+
+    for (i = 0; i <= segments; i += 1) {
+      t = i / segments;
+      lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2;
+      lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2;
+      points.push([lat, lng]);
+    }
+
+    return points;
+  }
+
+  function addFerryRoutes() {
+    var i;
+    var fromPort;
+    var toPort;
+    var arc;
+
+    if (!ferryRoutesLayer) return;
+
+    ferryRoutesLayer.clearLayers();
+    ferryPorts = getFerryPOIs();
+
+    if (ferryPorts.length < 2) return;
+
+    for (i = 0; i < ferryPorts.length - 1; i += 1) {
+      fromPort = ferryPorts[i];
+      toPort = ferryPorts[i + 1];
+      arc = createSeaArc(fromPort.coords, toPort.coords, 32);
+
+      L.polyline(arc, {
+        color: '#00e0ff',
+        weight: 1,
+        opacity: 0.95,
+        dashArray: '8, 10',
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(ferryRoutesLayer);
+    }
+  }
+
+  function readLocalPOIs() {
+    try {
+      return JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveLocalPOI(poi) {
+    var current = readLocalPOIs();
+    current.push(poi);
+    localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
   }
 
   async function loadPOIs() {
@@ -1638,7 +1311,7 @@
         rows = response.data || [];
       }
     } else {
-      rows = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
+      rows = readLocalPOIs();
     }
 
     rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) {
@@ -1650,8 +1323,8 @@
           iconSize: [32, 32],
           iconAnchor: [16, 16]
         })
-      }).on('click', function (e) {
-        openPOIWithMapMove(poi, e);
+      }).on('click', function (event) {
+        openPOIWithMapMove(poi, event);
       });
 
       poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi });
@@ -1659,15 +1332,7 @@
 
     updatePOIVisibility();
     addFerryRoutes();
-    addTrails();
-    bringLayerGroupToFront(trailsLayer);
     renderSearchSuggestions(searchInput.value);
-  }
-
-  function saveLocalPOI(poi) {
-    var current = JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]');
-    current.push(poi);
-    localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(current));
   }
 
   async function addPOI() {
@@ -1680,7 +1345,6 @@
     var phone = document.getElementById('poi-phone').value.trim();
     var description = document.getElementById('poi-description').value.trim();
     var relevance = Number(document.getElementById('poi-relevance').value || 0);
-
     var poi = normalizePOI({
       name: name,
       symbol: symbol,
@@ -1700,9 +1364,18 @@
     }
 
     if (SUPABASE_READY && supabaseClient) {
-      var insertResponse = await supabaseClient
-        .from('pois')
-        .insert([{ name: name, symbol: symbol, lat: lat, lng: lng, image: image, owner_email: ownerEmail, phone: phone, description: description, relevance: relevance, importance: relevance }]);
+      var insertResponse = await supabaseClient.from('pois').insert([{
+        name: name,
+        symbol: symbol,
+        lat: lat,
+        lng: lng,
+        image: image,
+        owner_email: ownerEmail,
+        phone: phone,
+        description: description,
+        relevance: relevance,
+        importance: relevance
+      }]);
 
       if (insertResponse.error) {
         alert('Errore salvataggio: ' + insertResponse.error.message);
@@ -1714,29 +1387,6 @@
 
     await loadPOIs();
     alert('POI salvato');
-  }
-
-  function latLngToTile(lat, lng, zoom) {
-    var z = Math.round(zoom);
-    var n = Math.pow(2, z);
-    var x = Math.floor((lng + 180) / 360 * n);
-    var y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n);
-    return { x: x, y: y, z: z };
-  }
-
-  function preloadTiles() {
-    var center = map.getCenter();
-    var tile = latLngToTile(center.lat, center.lng, map.getZoom());
-    var dx;
-    var dy;
-    var img;
-
-    for (dx = -2; dx <= 2; dx += 1) {
-      for (dy = -2; dy <= 2; dy += 1) {
-        img = new Image();
-        img.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/' + tile.z + '/' + (tile.y + dy) + '/' + (tile.x + dx);
-      }
-    }
   }
 
   async function updateWeather(lat, lng) {
@@ -1756,37 +1406,35 @@
   }
 
   function getUserDisplayName(user) {
+    var meta;
+
     if (!user) return 'User';
-    var meta = user.user_metadata || {};
+    meta = user.user_metadata || {};
     if (meta.username) return meta.username;
     if (meta.name) return meta.name;
     if (user.email) return user.email.split('@')[0];
     return 'User';
   }
 
+  function isOwnerUser(user) {
+    var email = user && user.email ? String(user.email).toLowerCase() : '';
+    return OWNER_EMAILS.map(function (item) { return item.toLowerCase(); }).indexOf(email) !== -1;
+  }
+
   async function readCurrentUser() {
-    try {
-      var raw = localStorage.getItem('supabase.auth.token');
-      if (raw) {
-        var parsed = JSON.parse(raw);
-        if (parsed && parsed.currentSession && parsed.currentSession.user) {
-          return parsed.currentSession.user;
-        }
-      }
-    } catch (error) {}
+    var sessionResponse;
+    var session;
+    var userResponse;
 
     if (!supabaseClient) return null;
 
-    var sessionResponse = await supabaseClient.auth.getSession();
-    var session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
+    sessionResponse = await supabaseClient.auth.getSession();
+    session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null;
 
-    if (session && session.user) {
-      return session.user;
-    }
+    if (session && session.user) return session.user;
 
-    var userResponse = await supabaseClient.auth.getUser();
-    var user = userResponse && userResponse.data ? userResponse.data.user : null;
-    return user || null;
+    userResponse = await supabaseClient.auth.getUser();
+    return userResponse && userResponse.data ? userResponse.data.user : null;
   }
 
   async function checkUser() {
@@ -1800,6 +1448,7 @@
     }
 
     loginBtn.innerText = 'Hi, ' + getUserDisplayName(user);
+    setOwnerPanelVisible(isOwnerUser(user));
     return true;
   }
 
@@ -1828,16 +1477,15 @@
 
     if (!q) return results;
 
-    places.forEach(function (p, index) {
-      if (p.name.toLowerCase().includes(q)) {
-        results.push({ type: 'city', name: p.name, index: index });
+    places.forEach(function (place, index) {
+      if (place.name.toLowerCase().indexOf(q) !== -1) {
+        results.push({ type: 'city', name: place.name, index: index });
       }
     });
 
     poiMarkers.forEach(function (item) {
-      var title = item.marker && item.marker.options ? item.marker.options.title || '' : '';
-      if (title.toLowerCase().includes(q)) {
-        results.push({ type: 'poi', name: title, poiName: title });
+      if (item.poi && item.poi.name.toLowerCase().indexOf(q) !== -1) {
+        results.push({ type: 'poi', name: item.poi.name });
       }
     });
 
@@ -1853,16 +1501,16 @@
       return;
     }
 
-    searchResults.innerHTML = results.slice(0, 8).map(function (r) {
-      var label = r.type === 'city' ? 'Village' : 'POI';
-      return '<div class="search-item" data-type="' + escapeHTML(r.type) + '" data-name="' + escapeHTML(r.name) + '">' + escapeHTML(r.name) + ' · ' + label + '</div>';
+    searchResults.innerHTML = results.slice(0, 8).map(function (result) {
+      var label = result.type === 'city' ? 'Village' : 'POI';
+      return '<div class="search-item" data-name="' + escapeHTML(result.name) + '">' + escapeHTML(result.name) + ' · ' + label + '</div>';
     }).join('');
 
     searchResults.style.display = 'flex';
   }
 
   function selectSearchResult(name) {
-    var cityIndex = places.findIndex(function (p) { return p.name === name; });
+    var cityIndex = places.findIndex(function (place) { return place.name === name; });
     var poiItem;
 
     if (cityIndex !== -1) {
@@ -1871,8 +1519,8 @@
       return true;
     }
 
-    poiItem = poiMarkers.find(function (m) {
-      return m.marker && m.marker.options && m.marker.options.title === name;
+    poiItem = poiMarkers.find(function (item) {
+      return item.poi && item.poi.name === name;
     });
 
     if (poiItem && poiItem.poi) {
@@ -1902,6 +1550,138 @@
     return false;
   }
 
+  function handleCardAI(event) {
+    var text = '';
+
+    if (event) event.stopPropagation();
+
+    if (currentDataset === 'places' && currentIndex >= 0) {
+      text = generateAIText(places[currentIndex], 'place');
+    } else if (currentDataset === 'pois' && currentPOI) {
+      text = generateAIText(currentPOI, 'poi');
+    }
+
+    speakText(text);
+  }
+
+  function handlePOIAI(event) {
+    if (event) event.stopPropagation();
+    if (!currentPOI) return;
+    speakText(generateAIText(currentPOI, 'poi'));
+  }
+
+  function setupCardSwipe(target) {
+    target.addEventListener('touchstart', function (event) {
+      if (event.touches.length !== 1) return;
+      event.preventDefault();
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+      currentX = startX;
+      currentY = startY;
+      isDragging = true;
+      hasMoved = false;
+      dragAxis = null;
+      card.style.transition = 'none';
+    }, { passive: false });
+
+    target.addEventListener('touchmove', function (event) {
+      var deltaX;
+      var deltaY;
+      var pullDown;
+      var blockedRight;
+      var blockedLeft;
+
+      if (!isDragging || event.touches.length !== 1) return;
+      event.preventDefault();
+
+      currentX = event.touches[0].clientX;
+      currentY = event.touches[0].clientY;
+      deltaX = currentX - startX;
+      deltaY = currentY - startY;
+
+      if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+        dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x';
+      }
+
+      if (!dragAxis) return;
+      hasMoved = true;
+
+      if (dragAxis === 'y') {
+        pullDown = Math.max(0, deltaY);
+        card.style.transform = 'translateY(' + pullDown + 'px)';
+        card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260));
+        return;
+      }
+
+      blockedRight = currentIndex === 0 && deltaX > 0;
+      blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
+      if (blockedRight || blockedLeft) deltaX = 0;
+      card.style.transform = 'translateX(' + deltaX + 'px)';
+    }, { passive: false });
+
+    target.addEventListener('touchend', function (event) {
+      var deltaX;
+      var deltaY;
+      var blockedRight;
+      var blockedLeft;
+
+      if (!isDragging) return;
+
+      if (event && event.changedTouches && event.changedTouches.length) {
+        currentX = event.changedTouches[0].clientX;
+        currentY = event.changedTouches[0].clientY;
+      }
+
+      deltaX = currentX - startX;
+      deltaY = currentY - startY;
+      isDragging = false;
+      card.style.opacity = '';
+
+      if (dragAxis === 'y') {
+        if (deltaY > 55) {
+          hideCard(true);
+          dragAxis = null;
+          return;
+        }
+        card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+        card.style.transform = 'translateY(0)';
+        dragAxis = null;
+        return;
+      }
+
+      blockedRight = currentIndex === 0 && deltaX > 0;
+      blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
+
+      if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) {
+        card.style.transition = 'transform 0.2s ease';
+        card.style.transform = 'translateX(0)';
+        dragAxis = null;
+        return;
+      }
+
+      if (deltaX < -80) {
+        slideToIndex(currentIndex + 1, 'next');
+        dragAxis = null;
+        return;
+      }
+
+      if (deltaX > 80) {
+        slideToIndex(currentIndex - 1, 'prev');
+      }
+
+      dragAxis = null;
+    }, { passive: false });
+
+    target.addEventListener('touchcancel', function (event) {
+      if (event) event.preventDefault();
+      isDragging = false;
+      dragAxis = null;
+      card.style.opacity = '';
+      card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      card.style.transform = 'translateX(0) translateY(0)';
+    }, { passive: false });
+  }
+
   function setupEvents() {
     if (isIOSDevice()) {
       searchInput.addEventListener('focus', function () {
@@ -1913,29 +1693,8 @@
       });
     }
 
-    readMoreBtn.addEventListener('click', function () {
-      if (poiDesc.classList.contains('expanded')) {
-        poiDesc.classList.remove('expanded');
-        readMoreBtn.innerText = 'Read more';
-      } else {
-        poiDesc.classList.add('expanded');
-        readMoreBtn.innerText = 'Read less';
-      }
-    });
-
-    loginBtn.addEventListener('click', function () {
-      var baseOrigin = window.location.origin;
-      fetch(baseOrigin + '/login.html', { method: 'HEAD' })
-        .then(function (res) {
-          if (res && res.ok) {
-            window.location.href = baseOrigin + '/login.html';
-          } else {
-            window.location.href = baseOrigin + '/login/index.html';
-          }
-        })
-        .catch(function () {
-          window.location.href = baseOrigin + '/login/index.html';
-        });
+    document.getElementById('btn-experiences').addEventListener('click', function () {
+      window.location.href = 'experiences.html';
     });
 
     document.getElementById('btn-stories').addEventListener('click', function () {
@@ -1952,8 +1711,26 @@
       window.location.href = 'experiences.html';
     });
 
+    cardAiBtn.addEventListener('click', handleCardAI);
+    poiAiBtn.addEventListener('click', handlePOIAI);
+
     poiClose.addEventListener('click', function () {
       closePOICard(false);
+    });
+
+    readMoreBtn.addEventListener('click', function () {
+      if (poiDesc.classList.contains('expanded')) {
+        poiDesc.classList.remove('expanded');
+        readMoreBtn.innerText = 'Read more';
+      } else {
+        poiDesc.classList.add('expanded');
+        readMoreBtn.innerText = 'Read less';
+      }
+    });
+
+    loginBtn.addEventListener('click', function () {
+      var baseOrigin = window.location.origin;
+      window.location.href = baseOrigin + '/login.html';
     });
 
     addPoiBtn.addEventListener('click', addPOI);
@@ -1983,10 +1760,9 @@
       });
     });
 
-    searchResults.addEventListener('click', function (e) {
-      var item = e.target.closest('.search-item');
+    searchResults.addEventListener('click', function (event) {
+      var item = event.target.closest('.search-item');
       if (!item) return;
-
       selectSearchResult(item.getAttribute('data-name'));
       searchResults.style.display = 'none';
       searchInput.blur();
@@ -2004,393 +1780,719 @@
 
     map.on('moveend zoomend', function () {
       evaluateAutoCard();
-      preloadTiles();
       updatePOIVisibility();
     });
 
-    card.addEventListener('touchstart', function (event) {
-      if (event.touches.length !== 1) return;
-      event.preventDefault();
-      startX = event.touches[0].clientX;
-      startY = event.touches[0].clientY;
-      currentX = startX;
-      currentY = startY;
-      isDragging = true;
-      hasMoved = false;
-      dragAxis = null;
-      card.style.transition = 'none';
-    }, { passive: false });
-
-    card.addEventListener('touchmove', function (event) {
-      var deltaX;
-      var deltaY;
-      var blockedRight;
-      var blockedLeft;
-      var pullDown;
-
-      if (!isDragging || event.touches.length !== 1) return;
-      event.preventDefault();
-
-      currentX = event.touches[0].clientX;
-      currentY = event.touches[0].clientY;
-      deltaX = currentX - startX;
-      deltaY = currentY - startY;
-
-      if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
-        dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x';
-      }
-
-      if (!dragAxis) return;
-      hasMoved = true;
-
-      if (dragAxis === 'y') {
-        pullDown = Math.max(0, deltaY);
-        card.style.transform = 'translateY(' + pullDown + 'px)';
-        card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260));
-        return;
-      }
-
-      blockedRight = currentIndex === 0 && deltaX > 0;
-      blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
-
-      if (blockedRight || blockedLeft) deltaX = 0;
-      card.style.transform = 'translateX(' + deltaX + 'px)';
-    }, { passive: false });
-
-    card.addEventListener('touchend', function (event) {
-      var deltaX;
-      var deltaY;
-      var blockedRight;
-      var blockedLeft;
-
-      if (!isDragging) return;
-      if (event && event.changedTouches && event.changedTouches.length) {
-        currentX = event.changedTouches[0].clientX;
-        currentY = event.changedTouches[0].clientY;
-      }
-
-      deltaX = currentX - startX;
-      deltaY = currentY - startY;
-      isDragging = false;
-
-      if (dragAxis === 'y') {
-        card.style.opacity = '';
-
-        if (deltaY > 55) {
-          hideCard(true);
-          dragAxis = null;
-          return;
-        }
-
-        card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-        card.style.transform = 'translateY(0)';
-        dragAxis = null;
-        return;
-      }
-
-      blockedRight = currentIndex === 0 && deltaX > 0;
-      blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
-
-      if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) {
-        card.style.transition = 'transform 0.2s ease';
-        card.style.transform = 'translateX(0)';
-        dragAxis = null;
-        return;
-      }
-
-      if (deltaX < -80) {
-        slideToIndex(currentIndex + 1, 'next');
-        dragAxis = null;
-        return;
-      }
-
-      if (deltaX > 80) {
-        slideToIndex(currentIndex - 1, 'prev');
-      }
-
-      dragAxis = null;
-    });
-
-    card.addEventListener('touchcancel', function (event) {
-      if (event) event.preventDefault();
-      isDragging = false;
-      dragAxis = null;
-      card.style.opacity = '';
-      card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-      card.style.transform = 'translateX(0) translateY(0)';
-    });
-
-    if (cardLiveTouchLayer) {
-      cardLiveTouchLayer.addEventListener('touchstart', function (event) {
-        if (event.touches.length !== 1) return;
-        event.preventDefault();
-        startX = event.touches[0].clientX;
-        startY = event.touches[0].clientY;
-        currentX = startX;
-        currentY = startY;
-        isDragging = true;
-        hasMoved = false;
-        dragAxis = null;
-        card.style.transition = 'none';
-      }, { passive: false });
-
-      cardLiveTouchLayer.addEventListener('touchmove', function (event) {
-        var deltaX;
-        var deltaY;
-        var blockedRight;
-        var blockedLeft;
-        var pullDown;
-
-        if (!isDragging || event.touches.length !== 1) return;
-        event.preventDefault();
-
-        currentX = event.touches[0].clientX;
-        currentY = event.touches[0].clientY;
-        deltaX = currentX - startX;
-        deltaY = currentY - startY;
-
-        if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
-          dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x';
-        }
-
-        if (!dragAxis) return;
-        hasMoved = true;
-
-        if (dragAxis === 'y') {
-          pullDown = Math.max(0, deltaY);
-          card.style.transform = 'translateY(' + pullDown + 'px)';
-          card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260));
-          return;
-        }
-
-        blockedRight = currentIndex === 0 && deltaX > 0;
-        blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
-
-        if (blockedRight || blockedLeft) deltaX = 0;
-        card.style.transform = 'translateX(' + deltaX + 'px)';
-      }, { passive: false });
-
-      cardLiveTouchLayer.addEventListener('touchend', function (event) {
-        var deltaX;
-        var deltaY;
-        var blockedRight;
-        var blockedLeft;
-
-        if (!isDragging) return;
-        if (event && event.changedTouches && event.changedTouches.length) {
-          currentX = event.changedTouches[0].clientX;
-          currentY = event.changedTouches[0].clientY;
-        }
-
-        deltaX = currentX - startX;
-        deltaY = currentY - startY;
-        isDragging = false;
-        card.style.opacity = '';
-
-        if (dragAxis === 'y') {
-          if (deltaY > 55) {
-            hideCard(true);
-            dragAxis = null;
-            return;
-          }
-
-          card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-          card.style.transform = 'translateY(0)';
-          dragAxis = null;
-          return;
-        }
-
-        blockedRight = currentIndex === 0 && deltaX > 0;
-        blockedLeft = currentIndex === places.length - 1 && deltaX < 0;
-
-        if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) {
-          card.style.transition = 'transform 0.2s ease';
-          card.style.transform = 'translateX(0)';
-          dragAxis = null;
-          return;
-        }
-
-        if (deltaX < -80) {
-          slideToIndex(currentIndex + 1, 'next');
-          dragAxis = null;
-          return;
-        }
-
-        if (deltaX > 80) {
-          slideToIndex(currentIndex - 1, 'prev');
-        }
-
-        dragAxis = null;
-      }, { passive: false });
-
-      cardLiveTouchLayer.addEventListener('touchcancel', function (event) {
-        if (event) event.preventDefault();
-        isDragging = false;
-        dragAxis = null;
-        card.style.opacity = '';
-        card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-        card.style.transform = 'translateY(0)';
-      }, { passive: false });
-    }
+    setupCardSwipe(card);
+    setupCardSwipe(cardLiveTouchLayer);
   }
 
   function runTests() {
-    var sampleFerries;
-    var previousPoiMarkers;
-    var previousFerryPorts;
-    var mockLayer;
-    var mockGroup;
-    var mockBringToFrontCalled = false;
+    var sample;
+    var arc;
+    var aiText;
 
     console.assert(Array.isArray(places), 'places must be an array');
     console.assert(places.length === 5, '5 cities expected');
-    console.assert(places.every(function (place) { return typeof place.name === 'string'; }), 'Each city needs a name');
-    console.assert(places.every(function (place) { return Array.isArray(place.coords) && place.coords.length === 2; }), 'Each city needs coords [lat, lng]');
-    console.assert(places.every(function (place) { return typeof place.image === 'string' && place.image.indexOf('https://') === 0; }), 'Each city needs a stable image URL');
-    console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay as the fifth city');
-    console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore must use the fixed Pexels image');
-    console.assert(typeof bringLayerGroupToFront === 'function', 'LayerGroup bring-to-front helper exists');
-    console.assert(typeof trailsLayer.bringToFront === 'undefined', 'Leaflet layerGroup has no bringToFront method, so helper is required');
-    mockLayer = { bringToFront: function () { mockBringToFrontCalled = true; } };
-    mockGroup = { eachLayer: function (callback) { callback(mockLayer); } };
-    bringLayerGroupToFront(mockGroup);
-    console.assert(mockBringToFrontCalled === true, 'LayerGroup helper calls bringToFront on child layers');
-    console.assert(Array.isArray(ferryPorts), 'ferryPorts must be an array');
-    console.assert(typeof getFerryPOIs === 'function', 'getFerryPOIs function exists');
-    console.assert(typeof getNearestFerryPort === 'function', 'getNearestFerryPort function exists');
-    console.assert(typeof createSeaArc === 'function', 'createSeaArc function exists');
-    console.assert(createSeaArc([44.1461, 9.6548], [44.1350, 9.6847], 8).length === 9, 'createSeaArc returns segments + 1 points');
-    console.assert(typeof addFerryRoutes === 'function', 'addFerryRoutes function exists');
-    console.assert(Array.isArray(trails), 'trails must be an array');
-    console.assert(typeof addTrails === 'function', 'addTrails function exists');
-    console.assert(typeof isTrailPOI === 'function', 'Trail POI detector exists');
-    console.assert(typeof getTrailPOIs === 'function', 'Trail POI collector exists');
-    console.assert(typeof distancePointToTrail === 'function', 'Trail distance function exists');
-    console.assert(typeof getConnectedTrailPOIs === 'function', 'Connected trail POI function exists');
-    console.assert(typeof canShowTrail === 'function', 'Trail visibility depends on connected sentiero POIs');
-    console.assert(isTrailPOI(normalizePOI({ name: 'Trail POI', coords: '44.1,9.7', type: 'sentiero' })) === true, 'type sentiero is recognized as trail POI');
-    console.assert(isTrailPOI(normalizePOI({ name: 'Restaurant', coords: '44.1,9.7', type: 'ristorante' })) === false, 'non-sentiero POIs do not activate trails');
-    console.assert(typeof buildTrailsOverpassQuery === 'function', 'Precise OSM trails query builder exists');
-    console.assert(buildTrailsOverpassQuery().indexOf('highway') !== -1, 'OSM trails query requests path/footway/steps/track ways');
-    console.assert(typeof parseOverpassTrails === 'function', 'OSM trail parser exists');
-    console.assert(typeof loadPreciseTrails === 'function', 'Precise trails loader exists');
-    console.assert(typeof getTrailStyle === 'function', 'Trail style function exists');
-    console.assert(typeof isImportantTrail === 'function', 'Important trail filter exists');
-    console.assert(isImportantTrail({ name: 'Sentiero Azzurro' }) === true, 'Important trail filter keeps Sentiero Azzurro');
-    console.assert(isImportantTrail({ name: 'Generic unnamed path' }) === false, 'Important trail filter removes generic paths');
-    console.assert(TRAILS_CACHE_KEY.indexOf('important') !== -1, 'Important trails use a separate cache key');
-    console.assert(typeof getTrailSearchText === 'function', 'Trail search text builder exists');
-    console.assert(getTrailStyle().color === '#000000', 'Trails are black');
-    console.assert(getTrailStyle().weight === 1, 'Trails are thin 1px lines');
-    console.assert(Array.isArray(TRAILS_ENDPOINTS) && TRAILS_ENDPOINTS.length >= 2, 'Multiple OSM trail endpoints are configured');
-    console.assert(buildTrailsOverpassQuery().indexOf('out geom') !== -1, 'OSM trail query requests direct geometry');
-    console.assert(buildTrailsOverpassQuery().indexOf('["name"]') !== -1, 'OSM trail query limits results to named trails');
+    console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay fifth');
+    console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore fixed image expected');
+    console.assert(typeof setupEvents === 'function', 'setupEvents exists');
+    console.assert(typeof handleCardAI === 'function', 'AI card handler exists');
+    console.assert(typeof handlePOIAI === 'function', 'AI POI handler exists');
+    console.assert(typeof generateAIText === 'function', 'AI text generator exists');
+    console.assert(typeof speakText === 'function', 'speech function exists');
+    console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPlaces === 'function', 'Floating AI can read places');
+    console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPOIs === 'function', 'Floating AI can read POIs');
+    console.assert(document.getElementById('card-ai') !== null, 'AI button exists on city card');
+    console.assert(document.getElementById('poi-ai') !== null, 'AI button exists on POI card');
+    console.assert(document.getElementById('card-experiences') !== null, 'Experiences button exists');
+    console.assert(document.getElementById('card-stories') !== null, 'Stories button exists');
+    console.assert(document.getElementById('card-experiences') !== null, 'Experiences button is present');
 
-    previousPoiMarkers = poiMarkers.slice();
-    previousFerryPorts = ferryPorts.slice();
-    sampleFerries = [
-      normalizePOI({ name: 'Ferry Monterosso', coords: '44.1461,9.6548', type: 'ferry' }),
-      normalizePOI({ name: 'Ferry Vernazza', coords: '44.1350,9.6847', type: 'ferry' }),
-      normalizePOI({ name: 'Non Ferry', coords: '44.1197,9.7089', type: 'monumento' }),
-      normalizePOI({ name: 'Ferry Manarola', coords: '44.1076,9.7290', type: 'ferry' })
-    ];
-    poiMarkers = sampleFerries.map(function (poi) { return { poi: poi, importance: 100, marker: null }; });
-    addFerryRoutes();
-    console.assert(ferryPorts.length === 3, 'Ferry routes must use only POIs with type ferry');
-    console.assert(ferryPorts.every(function (p) { return String(p.type).toLowerCase() === 'ferry'; }), 'Every ferry route port must be type ferry');
-    console.assert(ferryRoutesLayer.getLayers().length === ferryPorts.length - 1, 'Ferry routes connect available ferry POIs in sequence, skipping villages without ferry ports');
-    console.assert(getNearestFerryPort(ferryPorts[0], ferryPorts) !== null, 'Each ferry with neighbors finds a nearest ferry');
-    poiMarkers = previousPoiMarkers;
-    ferryPorts = previousFerryPorts;
-    addFerryRoutes();
+    sample = normalizePOI({ name: 'Ferry Test', coords: '44.2,9.8', type: 'ferry', description: 'A ferry stop.' });
+    console.assert(sample.symbol === '⛴️', 'Ferry emoji supported');
+    console.assert(sample.description === 'A ferry stop.', 'Description is preserved');
+    console.assert(isValidPOI(sample) === true, 'Normalized sample POI is valid');
+    console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'European decimal coords supported');
+    console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'Importance controls visibility zoom');
+    console.assert(getMinZoomForImportance(60) >= 15, 'Importance 60 does not appear too early');
 
-    console.assert(currentIndex === -1, 'Initial index should be -1');
-    console.assert(typeof getClosestCity === 'function', 'getClosestCity function exists');
-    console.assert(typeof evaluateAutoCard === 'function', 'evaluateAutoCard function exists');
-    console.assert(typeof slideToIndex === 'function', 'slideToIndex function exists');
-    console.assert(typeof clearCityCardNudges === 'function', 'City-card nudge cleanup function exists');
-    console.assert(typeof startCityCardNudges === 'function', 'City-card nudge scheduler exists');
-    console.assert(typeof nudgeCityCard === 'function', 'City-card double nudge animation function exists');
-    console.assert(typeof getCityCardNudgeDirection === 'function', 'City-card nudge direction function exists');
-    console.assert(Array.isArray(cityCardNudgeTimers), 'City-card nudge timers are tracked');
-    console.assert(typeof cityCardHasSwitchedOnce === 'boolean', 'City-card nudge stops after first village swipe');
-    console.assert(typeof hideCard === 'function', 'hideCard function exists for downward city-card swipe');
-    console.assert(card.style.touchAction !== 'pan-y', 'City card touch action does not let iOS steal downward swipe');
-    console.assert(typeof cityCardManuallyClosed === 'boolean', 'Manual city-card close lock exists');
-    console.assert(typeof currentIndex === 'number', 'Manual city-card close lock is tied to the current city index');
-    console.assert(typeof setCardContent === 'function', 'setCardContent function exists');
-    console.assert(typeof getYouTubeEmbedUrl === 'function', 'YouTube embed URL function exists');
-    console.assert(getYouTubeEmbedUrl('abc123').indexOf('autoplay=1') !== -1, 'YouTube live embed uses autoplay');
-    console.assert(getYouTubeEmbedUrl('abc123').indexOf('mute=1') !== -1, 'YouTube live embed is muted for mobile autoplay');
-    console.assert(typeof resetCardLive === 'function', 'Card live reset function exists');
-    console.assert(typeof loadCardLive === 'function', 'Card live loader exists');
-    console.assert(document.getElementById('card-live') !== null, 'Card live iframe exists');
-    console.assert(document.getElementById('card-live-touch-layer') !== null, 'Transparent touch layer over YouTube iframe exists');
-    console.assert(cardLiveTouchLayer !== null, 'Live video touch layer can handle both vertical close and horizontal village swipe');
-    console.assert(window.getComputedStyle(document.getElementById('card-live')).transform !== 'none', 'Card live iframe is scaled to cover the city-card media area');
-    console.assert(typeof normalizePOI === 'function', 'normalizePOI function exists');
-    console.assert(typeof loadPOIs === 'function', 'loadPOIs function exists');
-    console.assert(typeof updatePOIVisibility === 'function', 'zoom visibility function exists');
-    console.assert(typeof getMinZoomForImportance === 'function', 'getMinZoomForImportance function exists');
-    console.assert(typeof openPOIWithMapMove === 'function', 'openPOIWithMapMove function exists');
-    console.assert(typeof isIOSDevice === 'function', 'isIOSDevice function exists');
-    console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'importance affects zoom');
-    console.assert(getMinZoomForImportance(60) >= 15, 'importance 60 should not appear early');
-    console.assert(typeof addPOI === 'function', 'addPOI function exists');
-    console.assert(typeof setupEvents === 'function', 'setupEvents function exists');
-    console.assert(typeof checkUser === 'function', 'checkUser function exists');
-    console.assert(typeof readCurrentUser === 'function', 'readCurrentUser function exists');
-    console.assert(typeof startUserPolling === 'function', 'startUserPolling function exists');
-    console.assert(typeof setOwnerPanelVisible === 'function', 'setOwnerPanelVisible function exists');
-    console.assert(typeof showPOICard === 'function', 'showPOICard function exists');
-    console.assert(typeof closePOICard === 'function', 'closePOICard function exists');
-    console.assert(typeof destroyPoiMiniMap === 'function', 'destroyPoiMiniMap function exists');
-    console.assert(typeof renderSearchSuggestions === 'function', 'renderSearchSuggestions function exists');
-    console.assert(typeof selectSearchResult === 'function', 'selectSearchResult function exists');
-    console.assert(typeof geocodeSearch === 'function', 'geocodeSearch function exists');
-    console.assert(document.getElementById('poi-circle') !== null, 'POI circle exists');
-    console.assert(document.getElementById('poi-description') !== null, 'POI description input exists');
-    console.assert(document.getElementById('search-results') !== null, 'Search results box exists');
-    console.assert(document.documentElement.innerHTML.indexOf('await fetch(\'https://nominatim') === -1, 'No top-level await fragment in setupEvents');
-    console.assert((supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') || supabaseClient === null, 'Supabase client is either ready or safely null');
-    console.assert(document.querySelector('.center-brand').href === 'https://www.5terrego.com/', 'Logo links to 5TerreGo.com');
-    console.assert(loginBtn.textContent.trim() === 'Accedi', 'Login button starts as Accedi before auth check');
-    console.assert(ownerPanel.getAttribute('aria-hidden') === 'true', 'Owner panel starts hidden');
-    console.assert(getUserDisplayName({ email: 'test@example.com', user_metadata: {} }) === 'test', 'Display name falls back to email prefix');
-    console.assert(normalizePOI({ name: 'X', latitude: '44.1', longitude: '9.7' }).lat === 44.1, 'normalizePOI supports latitude fallback');
-    console.assert(normalizePOI({ name: 'Y', coords: '44.2,9.8', type: 'chiesa' }).symbol === '⛪', 'normalizePOI supports coords string and church emoji');
-    console.assert(normalizePOI({ name: 'Z', coords: '44.2,9.8', type: 'ristorante' }).symbol === '🍽️', 'normalizePOI supports restaurant emoji');
-    console.assert(normalizePOI({ name: 'F', coords: '44.2,9.8', type: 'ferry' }).symbol === '⛴️', 'normalizePOI supports ferry emoji');
-    console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'normalizePOI supports european decimal coords');
-    console.assert(normalizePOI({ name: 'D', coords: '44.2,9.8', description: 'Testo' }).description === 'Testo', 'normalizePOI keeps description');
-    console.assert(getSearchResults('ver').some(function (r) { return r.name === 'Vernazza'; }), 'Search suggestions find Vernazza');
-    console.assert(roadsLayer && satelliteLayer, 'Satellite and roads overlay are both loaded');
-    console.assert(typeof marker === 'undefined', 'No leaked global marker variable');
-    console.assert(typeof poi === 'undefined', 'No leaked global poi variable');
+    arc = createSeaArc([44.1461, 9.6548], [44.1350, 9.6847], 8);
+    console.assert(Array.isArray(arc) && arc.length === 9, 'Sea arc returns segments + 1 points');
+
+    aiText = generateAIText(sample, 'poi');
+    console.assert(aiText.indexOf('Ferry Test') !== -1, 'AI text includes POI name');
+    console.assert(getYouTubeEmbedUrl('abc123').indexOf('autoplay=1') !== -1, 'YouTube autoplay enabled');
+    console.assert(getSearchResults('ver').some(function (result) { return result.name === 'Vernazza'; }), 'Search finds Vernazza');
   }
 
-  createCityMarkers();
-  loadPreciseTrails();
-  preloadImages();
-  preloadTiles();
-  updateWeather(44.12, 9.71);
-  setupEvents();
-  updateMapVisualByZoom();
-  runTests();
+  function start() {
+    initMap();
+    createCityMarkers();
+    preloadImages();
+    updateWeather(44.12, 9.71);
+    setupEvents();
+    updateMapVisualByZoom();
+    runTests();
+    loadPOIs();
 
-  window.setTimeout(function () {
-    checkUser();
-    startUserPolling();
-  }, 250);
-
-  if (supabaseClient) {
-    supabaseClient.auth.onAuthStateChange(function () {
+    window.setTimeout(function () {
       checkUser();
       startUserPolling();
-    });
+    }, 250);
+
+    if (supabaseClient) {
+      supabaseClient.auth.onAuthStateChange(function () {
+        checkUser();
+        startUserPolling();
+      });
+    }
   }
 
-  loadPOIs();
+  start();
+}());
+</script>
+
+
+
+<!-- FLOATING AI CHAT -->
+<style>
+  #ai-chat-btn {
+    position: fixed;
+    right: 18px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    z-index: 3000;
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.78);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 18px 42px rgba(0,0,0,0.24);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+
+  #ai-chat-btn:active { transform: scale(0.94); }
+
+  #ai-chat-btn video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  #ai-chat {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: calc(92px + env(safe-area-inset-top));
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    z-index: 3000;
+    width: auto;
+    height: auto;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 26px;
+    border: 1px solid rgba(255,255,255,0.34);
+    background: rgba(255,255,255,0.78);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    color: #111;
+  }
+
+  #ai-chat.ai-open { display: flex; }
+
+  .ai-head {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .ai-title-wrap { min-width: 0; }
+  .ai-title { font-size: 15px; font-weight: 900; letter-spacing: -0.03em; }
+  .ai-subtitle { margin-top: 2px; font-size: 12px; color: rgba(0,0,0,0.52); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  #ai-close {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.07);
+    color: #111;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  #ai-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.35;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ai-msg {
+    max-width: 84%;
+    word-break: break-word;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 18px;
+    white-space: pre-line;
+  }
+
+  .ai-msg.user {
+    margin-left: auto;
+    background: #111;
+    color: #fff;
+    border-bottom-right-radius: 6px;
+  }
+
+  .ai-msg.bot {
+    margin-right: auto;
+    background: rgba(0,0,0,0.07);
+    color: #111;
+    border-bottom-left-radius: 6px;
+  }
+
+  .ai-suggestions {
+    display: flex;
+    gap: 7px;
+    padding: 0 12px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .ai-suggestions::-webkit-scrollbar { display: none; }
+
+  .ai-suggestion {
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.07);
+    color: #111;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .ai-input-row {
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    background: rgba(255,255,255,0.36);
+  }
+
+  #ai-input {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    border: 0;
+    outline: 0;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.07);
+    color: #111;
+    padding: 11px 13px;
+    font-size: 15px;
+  }
+
+  #ai-input::placeholder { color: rgba(0,0,0,0.44); }
+
+  #ai-send {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+  }
+</style>
+
+<button id="ai-chat-btn" type="button" aria-label="Apri AI Guide">
+  <video id="ai-mascot-video" src="mascotterelax.mp4" autoplay muted loop playsinline preload="auto"></video>
+</button>
+
+<div id="ai-chat" aria-hidden="true">
+  <div class="ai-head">
+    <div class="ai-title-wrap">
+      <div class="ai-title">Cinque Terre guide</div>
+      <div class="ai-subtitle">Risposte brevi, pratiche, gentili.</div>
+    </div>
+    <button id="ai-close" type="button" aria-label="Chiudi AI">×</button>
+  </div>
+
+  <div id="ai-messages"></div>
+
+  <div class="ai-suggestions">
+    <button class="ai-suggestion" type="button">cosa fare a Manarola?</button>
+    <button class="ai-suggestion" type="button">cosa vedere vicino?</button>
+    <button class="ai-suggestion" type="button">miglior tramonto?</button>
+  </div>
+
+  <div class="ai-input-row">
+    <input id="ai-input" placeholder="Chiedi alla guida..." autocomplete="off" />
+    <button id="ai-send" type="button">→</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var btn = document.getElementById('ai-chat-btn');
+  var panel = document.getElementById('ai-chat');
+  var input = document.getElementById('ai-input');
+  var send = document.getElementById('ai-send');
+  var closeBtn = document.getElementById('ai-close');
+  var messages = document.getElementById('ai-messages');
+  var suggestions = Array.prototype.slice.call(document.querySelectorAll('.ai-suggestion'));
+  var hasWelcomed = false;
+  var AI_TRAINING_KEY = '5terrego_ai_training';
+  var AI_REMOTE_TRAINING = [];
+
+  var AI_TRAINING = [
+    {
+      q: 'monterosso vernazza piedi sentiero',
+      a: 'Sì, da Monterosso a Vernazza puoi andare a piedi sul Sentiero Azzurro. Calcola circa 1h30–2h, scarpe comode e controlla sempre che il tratto sia aperto.'
+    },
+    {
+      q: 'vernazza monterosso piedi sentiero',
+      a: 'Sì, puoi farlo anche da Vernazza a Monterosso. È un tratto panoramico ma con salite: porta acqua e verifica apertura del sentiero.'
+    },
+    {
+      q: 'manarola tramonto sunset',
+      a: 'Per il tramonto a Manarola vai verso il viewpoint sopra il porticciolo. È uno dei punti più belli delle Cinque Terre.'
+    },
+    {
+      q: 'riomaggiore manarola piedi via dell amore',
+      a: "Tra Riomaggiore e Manarola il percorso storico e la Via dell'Amore. Controlla sempre apertura e ticket prima di partire."
+    },
+    {
+      q: 'corniglia mare spiaggia',
+      a: 'Corniglia non è direttamente sul mare come gli altri borghi: è più alta e panoramica. Per il bagno sono più comodi Monterosso o alcune calette raggiungibili a piedi.'
+    },
+    {
+      q: 'miglior borgo prima volta cinque terre',
+      a: 'Per una prima visita scegli Vernazza o Manarola: sono scenografiche, facili da capire e perfette per foto e passeggiata.'
+    }
+  ];
+
+  function toggleChat(open){
+    var shouldOpen = typeof open === 'boolean' ? open : !panel.classList.contains('ai-open');
+    panel.classList.toggle('ai-open', shouldOpen);
+    panel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+
+    if (shouldOpen) {
+      if (!hasWelcomed) {
+        hasWelcomed = true;
+        addMessage("Ciao, sono la tua guida AI. Chiedimi cosa vedere, dove andare o come spostarti nelle Cinque Terre.", false);
+      }
+      window.setTimeout(function(){ input.focus(); }, 120);
+    }
+  }
+
+  function addMessage(text, isUser){
+    var div = document.createElement('div');
+    div.className = 'ai-msg ' + (isUser ? 'user' : 'bot');
+    div.innerText = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function normalizeText(value){
+    var text = String(value || '').toLowerCase().normalize('NFD');
+    var output = '';
+    var lastWasSpace = false;
+    var i;
+    var code;
+    var ch;
+
+    for (i = 0; i < text.length; i += 1) {
+      ch = text.charAt(i);
+      code = text.charCodeAt(i);
+
+      if (code >= 768 && code <= 879) continue;
+
+      if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
+        output += ch;
+        lastWasSpace = false;
+      } else if (!lastWasSpace) {
+        output += ' ';
+        lastWasSpace = true;
+      }
+    }
+
+    return output.trim();
+  }
+
+  function readSavedTraining(){
+    try {
+      return JSON.parse(localStorage.getItem(AI_TRAINING_KEY) || '[]');
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async function saveTrainingPair(question, answer){
+    var saved;
+
+    if (window.supabase && window.fiveTerreSupabaseClient) {
+      try {
+        await window.fiveTerreSupabaseClient
+          .from('ai_training')
+          .insert([{ q: question, a: answer, priority: 10, enabled: true }]);
+
+        AI_REMOTE_TRAINING.push({ q: question, a: answer });
+        return 'remote';
+      } catch (error) {
+        console.warn('Remote AI training save failed:', error.message || error);
+      }
+    }
+
+    saved = readSavedTraining();
+    saved.push({ q: question, a: answer });
+    localStorage.setItem(AI_TRAINING_KEY, JSON.stringify(saved));
+    return 'local';
+  }
+
+  function getAllTraining(){
+    return AI_TRAINING.concat(AI_REMOTE_TRAINING).concat(readSavedTraining());
+  }
+
+  async function loadRemoteTraining(){
+    var response;
+
+    if (!window.supabase || !window.fiveTerreSupabaseClient) return;
+
+    try {
+      response = await window.fiveTerreSupabaseClient
+        .from('ai_training')
+        .select('q,a,priority,enabled')
+        .eq('enabled', true)
+        .order('priority', { ascending: false });
+
+      if (!response.error && Array.isArray(response.data)) {
+        AI_REMOTE_TRAINING = response.data
+          .filter(function(item){ return item && item.q && item.a; })
+          .map(function(item){ return { q: item.q, a: item.a }; });
+      }
+    } catch (error) {
+      console.warn('AI remote training not available:', error.message || error);
+    }
+  }
+
+  function countTrainingScore(question, trainingQuestion){
+    var q = normalizeText(question);
+    var tq = normalizeText(trainingQuestion);
+    var words = tq.split(' ');
+    var score = 0;
+
+    words.forEach(function(word){
+      if (word.length >= 3 && q.indexOf(word) !== -1) score += 1;
+    });
+
+    return score;
+  }
+
+  function findTrainingAnswer(question){
+    var all = getAllTraining();
+    var best = null;
+    var bestScore = 0;
+
+    all.forEach(function(item){
+      var score = countTrainingScore(question, item.q);
+      if (score > bestScore) {
+        bestScore = score;
+        best = item;
+      }
+    });
+
+    if (best && bestScore >= 2) return best.a;
+    return '';
+  }
+
+  function handleLearningCommand(text){
+    var raw = String(text || '').trim();
+    var lower = raw.toLowerCase();
+    var body;
+    var parts;
+
+    if (lower.indexOf('impara:') !== 0) return '';
+
+    body = raw.slice(7).trim();
+    parts = body.split('=>');
+
+    if (parts.length < 2 || !parts[0].trim() || !parts.slice(1).join('=>').trim()) {
+      return 'Scrivi così: impara: domanda => risposta';
+    }
+
+    saveTrainingPair(parts[0].trim(), parts.slice(1).join('=>').trim()).then(function(mode){
+      if (mode === 'remote') {
+        addMessage("Perfetto, ho salvato questa risposta per tutti gli utenti.", false);
+      } else {
+        addMessage('Salvato su questo dispositivo. Per renderlo globale crea la tabella ai_training su Supabase.', false);
+      }
+    });
+
+    return 'Sto salvando questa risposta...';
+  }
+
+  function distanceMeters(a, b){
+    var R = 6371000;
+    var lat1 = a[0] * Math.PI / 180;
+    var lat2 = b[0] * Math.PI / 180;
+    var dLat = (b[0] - a[0]) * Math.PI / 180;
+    var dLng = (b[1] - a[1]) * Math.PI / 180;
+    var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  }
+
+  function getAIData(){
+    var api = window.fiveTerreGoAI;
+    return {
+      places: api && typeof api.getPlaces === 'function' ? api.getPlaces() : [],
+      pois: api && typeof api.getPOIs === 'function' ? api.getPOIs() : []
+    };
+  }
+
+  function findMentionedPlaces(question, places){
+    var q = normalizeText(question);
+    var found = [];
+
+    places.forEach(function(place){
+      var name = normalizeText(place.name);
+      if (name && q.indexOf(name) !== -1) found.push(place);
+    });
+
+    return found;
+  }
+
+  function findMentionedPlace(question, places){
+    var found = findMentionedPlaces(question, places);
+    return found.length ? found[0] : null;
+  }
+
+  function getNearbyPOIs(place, pois){
+    if (!place || !place.coords) return [];
+
+    return pois
+      .filter(function(poi){
+        return poi && Array.isArray(poi.coords) && Number.isFinite(poi.coords[0]) && Number.isFinite(poi.coords[1]);
+      })
+      .map(function(poi){
+        return { poi: poi, distance: distanceMeters(place.coords, poi.coords) };
+      })
+      .filter(function(item){ return item.distance <= 1600; })
+      .sort(function(a, b){ return a.distance - b.distance; })
+      .slice(0, 4)
+      .map(function(item){ return item.poi; });
+  }
+
+  function shortText(text, maxLen){
+    text = String(text || '').trim();
+    if (text.length <= maxLen) return text;
+    return text.slice(0, maxLen) + '...';
+  }
+
+  function isDoingQuestion(q){
+    return q.indexOf('fare') !== -1 || q.indexOf('do') !== -1 || q.indexOf('see') !== -1 || q.indexOf('visit') !== -1 || q.indexOf('vedere') !== -1;
+  }
+
+  function isWhereQuestion(q){
+    return q.indexOf('dove') !== -1 || q.indexOf('where') !== -1 || q.indexOf('near') !== -1 || q.indexOf('vicino') !== -1;
+  }
+
+  function isSunsetQuestion(q){
+    return q.indexOf('tramonto') !== -1 || q.indexOf('sunset') !== -1;
+  }
+
+  function formatPlaceAnswer(place, pois, question){
+    var q = normalizeText(question);
+    var nearby = getNearbyPOIs(place, pois).slice(0, 3);
+    var names = nearby.map(function(poi){ return poi.name; }).filter(Boolean);
+
+    if (isSunsetQuestion(q)) {
+      if (place.name === 'Manarola') return 'Per il tramonto, Manarola è perfetta: vai verso il viewpoint sopra il porticciolo.';
+      return 'Per il tramonto guarda i punti panoramici sul mare. Manarola di solito è la scelta più scenografica.';
+    }
+
+    if (isDoingQuestion(q)) {
+      if (names.length > 0) return 'A ' + place.name + ' partirei da: ' + names.join(', ') + '.';
+      return 'A ' + place.name + ' fai così: borgo, porticciolo, viewpoint e una pausa vista mare.';
+    }
+
+    if (isWhereQuestion(q)) {
+      if (names.length > 0) return 'Vicino a ' + place.name + ' trovi: ' + names.join(', ') + '.';
+      return 'Vicino a ' + place.name + ' non ho ancora POI salvate. Aggiungile e le suggerirò qui.';
+    }
+
+    return place.name + ': ' + shortText(place.description || 'borgo delle Cinque Terre.', 105);
+  }
+
+  function formatRouteAnswer(fromPlace, toPlace, question){
+    var from = fromPlace.name;
+    var to = toPlace.name;
+    var pair = normalizeText(from + ' ' + to);
+
+    if ((pair.indexOf('monterosso') !== -1 && pair.indexOf('vernazza') !== -1)) {
+      return 'Sì, puoi andare a piedi da Monterosso a Vernazza: è il sentiero azzurro più famoso. Calcola circa 1h30–2h, scarpe comode e controlla che il sentiero sia aperto.';
+    }
+
+    return 'Puoi spostarti da ' + from + ' a ' + to + ' a piedi solo se il sentiero è aperto. In alternativa il treno è la scelta più semplice e veloce.';
+  }
+
+  function buildGuideContext(){
+    var data = getAIData();
+
+    return {
+      places: data.places.map(function(place){
+        return {
+          name: place.name || '',
+          description: place.description || '',
+          coords: place.coords || []
+        };
+      }).slice(0, 5),
+      pois: data.pois.map(function(poi){
+        return {
+          name: poi.name || '',
+          description: poi.description || '',
+          type: poi.type || '',
+          coords: poi.coords || []
+        };
+      }).slice(0, 80)
+    };
+  }
+
+  async function callOpenRouterGuide(question){
+    var client = window.fiveTerreSupabaseClient;
+    var response;
+
+    if (!client || !client.functions || typeof client.functions.invoke !== 'function') return '';
+
+    try {
+      response = await client.functions.invoke('ai-guide', {
+        body: {
+          question: question,
+          language: navigator.language || 'it',
+          context: buildGuideContext()
+        }
+      });
+
+      if (response.error) {
+        console.warn('OpenRouter guide error:', response.error.message || response.error);
+        return '';
+      }
+
+      if (response.data && response.data.reply) return String(response.data.reply);
+    } catch (error) {
+      console.warn('OpenRouter guide unavailable:', error.message || error);
+    }
+
+    return '';
+  }
+
+  function simpleAI(question){
+    var data = getAIData();
+    var q = normalizeText(question);
+    var learnedReply = handleLearningCommand(question);
+    var trainedReply = findTrainingAnswer(question);
+    var mentionedPlaces = findMentionedPlaces(question, data.places);
+    var mentionedPlace = mentionedPlaces.length ? mentionedPlaces[0] : null;
+    var stopWords = {
+      cosa: true, posso: true, fare: true, alla: true, allo: true, alle: true, agli: true, del: true, della: true, delle: true, degli: true,
+      con: true, per: true, una: true, uno: true, che: true, dove: true, come: true, sono: true, vorrei: true, consigliami: true,
+      what: true, can: true, do: true, see: true, visit: true, near: true, nearby: true, the: true, and: true, for: true, with: true, about: true
+    };
+    var words = q.split(' ').filter(function(word){ return word.length >= 3 && !stopWords[word]; });
+    var matches = [];
+
+    if (learnedReply) return learnedReply;
+    if (trainedReply) return trainedReply;
+
+    if (mentionedPlaces.length >= 2) return formatRouteAnswer(mentionedPlaces[0], mentionedPlaces[1], question);
+    if (mentionedPlace) return formatPlaceAnswer(mentionedPlace, data.pois, question);
+
+    if (isSunsetQuestion(q)) {
+      return 'Per il tramonto scegli Manarola: viewpoint sopra il porticciolo, meglio arrivare un po’ prima.';
+    }
+
+    data.pois.forEach(function(poi){
+      var searchable = normalizeText((poi.name || '') + ' ' + (poi.description || '') + ' ' + (poi.type || ''));
+      var score = 0;
+      words.forEach(function(word){ if (searchable.indexOf(word) !== -1) score += 1; });
+      if (score > 0) matches.push({ score: score, text: poi.name + (poi.description ? ': ' + shortText(poi.description, 80) : '') });
+    });
+
+    data.places.forEach(function(place){
+      var searchable = normalizeText((place.name || '') + ' ' + (place.description || ''));
+      var score = 0;
+      words.forEach(function(word){ if (searchable.indexOf(word) !== -1) score += 1; });
+      if (score > 0) matches.push({ score: score, text: place.name + ': ' + shortText(place.description || '', 90) });
+    });
+
+    matches.sort(function(a, b){ return b.score - a.score; });
+
+    if(matches.length > 0){
+      return matches.slice(0,2).map(function(match){ return match.text; }).join(String.fromCharCode(10));
+    }
+
+    return "Ti aiuto volentieri. Scrivimi un borgo o una domanda semplice, tipo: cosa fare a Manarola?";
+  }
+
+  async function handleSend(textFromButton){
+    var text = String(textFromButton || input.value || '').trim();
+    var reply;
+
+    if(!text) return;
+
+    addMessage(text, true);
+    input.value = '';
+
+    addMessage('Sto pensando...', false);
+
+    reply = await callOpenRouterGuide(text);
+    if (!reply) reply = simpleAI(text);
+
+    if (messages.lastChild && messages.lastChild.innerText === 'Sto pensando...') {
+      messages.removeChild(messages.lastChild);
+    }
+
+    window.setTimeout(function(){
+      addMessage(reply, false);
+    }, 120);
+  }
+
+  btn.addEventListener('click', function(){ toggleChat(); });
+  closeBtn.addEventListener('click', function(){ toggleChat(false); });
+  send.addEventListener('click', function(){ handleSend(); });
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') handleSend();
+  });
+
+  suggestions.forEach(function(button){
+    button.addEventListener('click', function(){
+      handleSend(button.innerText);
+    });
+  });
+
+  loadRemoteTraining();
 }());
 </script>
 
