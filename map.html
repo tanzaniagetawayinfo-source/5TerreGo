@@ -2367,7 +2367,7 @@
     if (!client || !client.functions || typeof client.functions.invoke !== 'function') return '';
 
     try {
-      response = await client.functions.invoke('ai-guide', {
+      response = await client.functions.invoke('ai', {
         body: {
           question: question,
           language: navigator.language || 'it',
@@ -2478,3 +2478,4 @@
 
 </body>
 </html>
+
