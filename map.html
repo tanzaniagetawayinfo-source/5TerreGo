@@ -343,28 +343,48 @@
     #poi-card {
       display: none;
       position: fixed;
-      left: 102px;
-      right: 12px;
+      left: 94px;
+      right: 14px;
       bottom: calc(18px + env(safe-area-inset-bottom));
       z-index: 2998;
-      min-height: 72px;
-      max-height: 42dvh;
-      border-radius: 24px;
-      background: rgba(255,255,255,0.86);
-      border: 1px solid rgba(255,255,255,0.52);
-      box-shadow: 0 18px 42px rgba(0,0,0,0.24);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      overflow: hidden;
+      min-height: 118px;
+      max-height: 44dvh;
+      border-radius: 24px 24px 24px 18px;
+      background: rgba(255,255,255,0.97);
+      border: 1px solid rgba(255,255,255,0.82);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.16);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow: visible;
       opacity: 0;
-      transform: translateX(-86px) scale(0.96);
-      transform-origin: left center;
-      transition: opacity 0.34s ease, transform 0.42s cubic-bezier(.2,.9,.2,1);
+      transform: translateY(10px) scale(0.98);
+      transform-origin: left bottom;
+      transition: opacity .26s ease, transform .32s cubic-bezier(.2,.9,.2,1);
+    }
+
+    #poi-card::before {
+      content: "";
+      position: absolute;
+      left: -6px;
+      bottom: 20px;
+      width: 12px;
+      height: 12px;
+      background: rgba(255,255,255,0.97);
+      transform: rotate(45deg);
+      border-radius: 0 0 0 3px;
+      box-shadow: -2px 2px 5px rgba(0,0,0,0.025);
+      opacity: 0;
+      transition: opacity .26s ease;
+      pointer-events: none;
     }
 
     #poi-card.open {
       opacity: 1;
-      transform: translateX(0) scale(1);
+      transform: translateY(0) scale(1);
+    }
+
+    #poi-card.open::before {
+      opacity: 1;
     }
 
     #poi-circle {
@@ -400,48 +420,48 @@
     .poi-content {
       position: relative;
       z-index: 3;
-      padding: 14px 46px 14px 16px;
+      padding: 16px 16px 46px 18px;
       color: #111;
       text-align: left;
       opacity: 0;
-      transform: translateX(-14px);
-      transition: opacity 0.48s ease, transform 0.48s cubic-bezier(.2,.9,.2,1);
+      transform: translateY(6px);
+      transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1);
     }
 
     #poi-card.open .poi-content {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateY(0);
     }
 
     #poi-title {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 900;
-      line-height: 1.12;
-      margin-bottom: 5px;
+      line-height: 1.08;
+      margin-bottom: 7px;
       letter-spacing: -0.04em;
+      padding-right: 40px;
     }
 
     #poi-desc {
       font-size: 13px;
-      line-height: 1.35;
-      color: rgba(0,0,0,0.66);
-      max-width: none;
+      line-height: 1.36;
+      color: rgba(0,0,0,0.62);
       margin: 0;
-      max-height: 52px;
+      max-height: 72px;
       overflow: hidden;
     }
 
     #poi-desc.expanded {
-      max-height: 28dvh;
+      max-height: 24dvh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
 
     #read-more {
       display: none;
-      margin-top: 8px;
+      margin-top: 7px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       color: #1e9bff;
       cursor: pointer;
     }
@@ -452,32 +472,35 @@
       position: absolute;
       z-index: 4;
       border-radius: 999px;
-      background: rgba(0,0,0,0.52);
-      color: white;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       opacity: 0;
       transform: scale(0.92);
       transition: opacity 0.34s ease, transform 0.34s ease;
     }
 
     #poi-close {
-      top: 8px;
-      right: 8px;
-      width: 30px;
-      height: 30px;
+      top: 12px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 900;
-      font-size: 18px;
+      background: transparent;
+      color: #111;
+      font-weight: 300;
+      font-size: 30px;
+      line-height: 1;
       cursor: pointer;
     }
 
     #poi-directions {
-      right: 46px;
+      right: 12px;
       bottom: 10px;
-      padding: 7px 10px;
+      padding: 7px 11px;
+      background: rgba(0,0,0,0.52);
+      color: white;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       font-size: 11px;
       font-weight: 800;
       text-decoration: none;
@@ -489,6 +512,10 @@
       right: 16px;
       border: 0;
       padding: 10px 14px;
+      background: rgba(0,0,0,0.52);
+      color: white;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
@@ -504,6 +531,12 @@
     body.poi-panel-active #ai-chat-btn {
       right: auto;
       left: 18px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      transform: none;
+    }
+
+    body.poi-panel-active #ai-chat-btn video {
+      transform: scale(1.22) scaleX(-1);
     }
   </style>
 </head>
@@ -1090,6 +1123,7 @@
     poiCard.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('poi-panel-active');
     currentPOI = null;
+    window.currentFiveTerrePOI = null;
 
     if (immediate) {
       poiCard.style.display = 'none';
@@ -1116,6 +1150,7 @@
     currentDataset = 'pois';
     currentIndex = -1;
     currentPOI = poi;
+    window.currentFiveTerrePOI = poi;
 
     poiCard.classList.remove('open');
     poiCard.style.display = 'block';
@@ -1654,12 +1689,11 @@
     });
 
     readMoreBtn.addEventListener('click', function () {
-      if (poiDesc.classList.contains('expanded')) {
-        poiDesc.classList.remove('expanded');
-        readMoreBtn.innerText = 'Read more';
-      } else {
-        poiDesc.classList.add('expanded');
-        readMoreBtn.innerText = 'Read less';
+      if (!currentPOI) return;
+
+      if (typeof window.openCaptainGullForPOI === 'function') {
+        window.openCaptainGullForPOI(currentPOI);
+        closePOICard(false);
       }
     });
 
@@ -1920,6 +1954,10 @@
   #ai-messages {
     flex: 1;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 12px;
@@ -2099,16 +2137,38 @@
     if (shouldOpen) {
       if (!hasWelcomed) {
         hasWelcomed = true;
-        addMessage("Ciao, sono Captain Gull. Conosco scogli, sentieri e borghi meglio di qualsiasi gabbiano. Dimmi dove sei o cosa cerchi e ti guido io.", false);
+        addMessage("Ciao, sono Captain Gull. Conosco scogli, sentieri e borghi meglio di qualsiasi gabbiano. Dimmi dove sei o cosa cerchi e ti guido io.", false, true);
       }
     }
   }
 
-  function addMessage(text, isUser){
+  window.openCaptainGullForPOI = function(poi){
+    var name = poi && poi.name ? String(poi.name) : 'POI';
+    var description = poi && poi.description && String(poi.description).trim().length > 0
+      ? String(poi.description).trim()
+      : 'No description available.';
+
+    panel.classList.add('ai-open');
+    panel.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ai-chat-active');
+    messages.innerHTML = '';
+    hasWelcomed = true;
+    addMessage(name + String.fromCharCode(10) + String.fromCharCode(10) + description, false, true);
+  };
+
+  function addMessage(text, isUser, keepTop){
     var div = document.createElement('div');
     div.className = 'ai-msg ' + (isUser ? 'user' : 'bot');
     div.innerText = text;
     messages.appendChild(div);
+
+    if (keepTop) {
+      requestAnimationFrame(function(){
+        messages.scrollTop = 0;
+      });
+      return;
+    }
+
     messages.scrollTop = messages.scrollHeight;
   }
 
@@ -2475,7 +2535,14 @@
     }, 120);
   }
 
-  btn.addEventListener('click', function(){ toggleChat(); });
+  btn.addEventListener('click', function(){
+    if (window.currentFiveTerrePOI && typeof window.openCaptainGullForPOI === 'function') {
+      window.openCaptainGullForPOI(window.currentFiveTerrePOI);
+      return;
+    }
+
+    toggleChat();
+  });
   closeBtn.addEventListener('click', function(){ toggleChat(false); });
   send.addEventListener('click', function(){ handleSend(); });
   input.addEventListener('keydown', function(e){
