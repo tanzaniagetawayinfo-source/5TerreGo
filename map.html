@@ -554,8 +554,8 @@
     }
 
     body.poi-panel-active #ai-chat-btn {
-      right: auto;
-      left: 18px;
+      right: calc(100vw - 90px);
+      left: auto;
       bottom: calc(18px + env(safe-area-inset-bottom));
       transform: none;
     }
@@ -1203,7 +1203,7 @@
       } else {
         readMoreBtn.style.display = 'none';
       }
-    }, 50);
+    }, 480);
 
     destroyPoiMiniMap();
 
@@ -1244,9 +1244,11 @@
     lng = poi.coords[1];
     poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
 
-    window.requestAnimationFrame(function () {
-      poiCard.classList.add('open');
-    });
+    window.setTimeout(function () {
+      if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') {
+        poiCard.classList.add('open');
+      }
+    }, 430);
 
     window.setTimeout(function () {
       if (poiMiniMap) {
@@ -1872,7 +1874,7 @@
     box-shadow: 0 18px 42px rgba(0,0,0,0.24);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    transition: left 0.42s cubic-bezier(.2,.9,.2,1), right 0.42s cubic-bezier(.2,.9,.2,1), bottom 0.42s cubic-bezier(.2,.9,.2,1), transform 0.42s cubic-bezier(.2,.9,.2,1), box-shadow 0.22s ease;
   }
 
   #ai-chat-btn:active { transform: scale(0.94); }
