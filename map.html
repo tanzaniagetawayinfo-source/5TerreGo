@@ -265,8 +265,10 @@
       transition: opacity 0.35s ease;
     }
 
-    .card-media.live-ready img { opacity: 0; }
-    .card-media.live-ready .card-live-frame { opacity: 1; }
+    .card-media.live-ready img { opacity: 1; }
+    .card-media.live-ready .card-live-frame { opacity: 0; }
+    .card-media.live-ready.live-visible img { opacity: 0; }
+    .card-media.live-ready.live-visible .card-live-frame { opacity: 1; }
 
     .card-live-touch-layer {
       position: absolute;
@@ -292,7 +294,8 @@
       pointer-events: none;
     }
 
-    .card-media.live-ready .card-live-badge { opacity: 1; }
+    .card-media.live-ready .card-live-badge { opacity: 0; }
+    .card-media.live-ready.live-visible .card-live-badge { opacity: 1; }
 
     .card-title-row {
       display: flex;
@@ -822,7 +825,7 @@
 
   function getYouTubeEmbedUrl(videoId) {
     if (!videoId) return '';
-    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&enablejsapi=1&origin=' + encodeURIComponent(window.location.origin);
+    return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&origin=' + encodeURIComponent(window.location.origin);
   }
 
   function speakText(text) {
@@ -963,6 +966,7 @@
 
   function resetCardLive() {
     cardMedia.classList.remove('live-ready');
+    cardMedia.classList.remove('live-visible');
     cardLive.removeAttribute('src');
   }
 
@@ -1000,7 +1004,15 @@
 
     cardLive.onload = function () {
       cardMedia.classList.add('live-ready');
+      cardMedia.classList.remove('live-visible');
       forceYouTubeAutoplay();
+
+      window.setTimeout(function () {
+        if (cardLive.src === src) {
+          forceYouTubeAutoplay();
+          cardMedia.classList.add('live-visible');
+        }
+      }, 5200);
     };
 
     cardLive.src = src;
