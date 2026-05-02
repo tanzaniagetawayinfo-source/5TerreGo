@@ -54,10 +54,15 @@ button,input,select,textarea{font-family:inherit}
 .route-status.is-visible{display:block}
 .route-status.error{color:#ffb4ae;border-color:rgba(255,59,48,.34);background:rgba(65,10,10,.44)}
 .form-card{margin-top:14px;padding:14px;border-radius:24px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);box-shadow:0 14px 38px rgba(0,0,0,.22)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .stat{padding:10px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08)}
 .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.48);font-weight:900}
 .stat-value{font-size:16px;font-weight:900;margin-top:3px}
+.elevation-card{display:none;margin-top:12px;padding:12px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.elevation-card.is-visible{display:block}
+.elevation-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;font-size:12px;color:rgba(255,255,255,.68);font-weight:800}
+.elevation-head strong{color:#fff}
+#elevationChart{width:100%;height:92px;display:block}
 .field{margin-top:10px}
 .label{display:block;font-size:12px;font-weight:800;color:rgba(255,255,255,.72);margin-bottom:7px}
 input,select,textarea{width:100%;padding:13px 14px;border-radius:15px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.075);color:#fff;outline:none;font-size:14px}
@@ -143,6 +148,18 @@ select option{color:#111}
             <div class="stat-label">Preview</div>
             <div id="routingStat" class="stat-value">—</div>
           </div>
+          <div class="stat">
+            <div class="stat-label">Dislivello</div>
+            <div id="elevationStat" class="stat-value">—</div>
+          </div>
+        </div>
+
+        <div id="elevationCard" class="elevation-card">
+          <div class="elevation-head">
+            <span>Profilo altimetrico</span>
+            <strong id="elevationSummary">—</strong>
+          </div>
+          <canvas id="elevationChart" width="640" height="160"></canvas>
         </div>
 
         <div class="field">
@@ -241,6 +258,10 @@ let pointMarkers = [];
 let routeLine = null;
 let routeGeojson = null;
 let routeDistanceKm = 0;
+let routeDurationSeconds = 0;
+let elevationGainM = 0;
+let elevationLossM = 0;
+let elevationProfile = [];
 let routingMode = "-";
 let editingTrailId = null;
 let trails = [];
@@ -255,6 +276,10 @@ const mapHintEl = document.getElementById("mapHint");
 const pointsStatEl = document.getElementById("pointsStat");
 const distanceStatEl = document.getElementById("distanceStat");
 const routingStatEl = document.getElementById("routingStat");
+const elevationStatEl = document.getElementById("elevationStat");
+const elevationCardEl = document.getElementById("elevationCard");
+const elevationSummaryEl = document.getElementById("elevationSummary");
+const elevationChartEl = document.getElementById("elevationChart");
 const pointListEl = document.getElementById("pointList");
 const trailListEl = document.getElementById("trailList");
 const listStatusEl = document.getElementById("listStatus");
@@ -436,6 +461,10 @@ function startNewTrail(){
   rawPoints = [];
   routeGeojson = null;
   routeDistanceKm = 0;
+  routeDurationSeconds = 0;
+  elevationGainM = 0;
+  elevationLossM = 0;
+  elevationProfile = [];
   routingMode = "-";
   if(mapHintEl) mapHintEl.style.display = "block";
   clearMapLayers();
@@ -553,6 +582,25 @@ function getDifficultyColor(){
   return "#111";
 }
 
+function calculateAutoDifficulty(){
+  const distance = Number(routeDistanceKm) || 0;
+  const gain = Number(elevationGainM) || 0;
+  const climbPerKm = distance > 0 ? gain / distance : 0;
+
+  if(distance >= 13 || gain >= 800 || climbPerKm >= 140) return "expert";
+  if(distance >= 8 || gain >= 450 || climbPerKm >= 95) return "hard";
+  if(distance >= 4 || gain >= 180 || climbPerKm >= 55) return "medium";
+  return "easy";
+}
+
+function applyAutoDifficulty(){
+  if(rawPoints.length < 2) return;
+  const nextDifficulty = calculateAutoDifficulty();
+  if(difficultyEl.value !== nextDifficulty){
+    difficultyEl.value = nextDifficulty;
+  }
+}
+
 function redrawCurrentRouteColor(){
   if(rawPoints.length < 2) return;
   if(routeLine){
@@ -573,7 +621,12 @@ function drawManualPreview(showMessage){
     routeLine = null;
   }
   routeDistanceKm = calculateFallbackDistanceKm();
+  routeDurationSeconds = 0;
+  elevationGainM = 0;
+  elevationLossM = 0;
+  elevationProfile = [];
   routingMode = rawPoints.length >= 2 ? "manuale" : "-";
+  applyAutoDifficulty();
   if(rawPoints.length >= 2){
     routeGeojson = {
       type:"Feature",
@@ -588,7 +641,8 @@ function drawManualPreview(showMessage){
       lineCap:"round",
       lineJoin:"round"
     }).addTo(map);
-    if(showMessage) setRouteStatus("Preview manuale. Con una API key OpenRouteService il percorso proverà a seguire i sentieri hiking.", false);
+    updateEstimatedDuration(false);
+    if(showMessage) setRouteStatus("Preview manuale. La durata viene stimata dalla distanza; con routing hiking arriva anche il dislivello.", false);
   }else if(rawPoints.length === 1){
     routeGeojson = null;
     if(showMessage) setRouteStatus("Aggiungi un secondo punto per vedere il percorso.", false);
@@ -597,6 +651,105 @@ function drawManualPreview(showMessage){
     setRouteStatus("", false);
   }
   updateStats();
+}
+
+function formatDuration(seconds){
+  const safeSeconds = Math.max(0, Math.round(Number(seconds) || 0));
+  if(!safeSeconds) return "";
+  const totalMinutes = Math.max(1, Math.round(safeSeconds / 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if(hours && minutes) return hours + "h " + minutes + "m";
+  if(hours) return hours + "h";
+  return minutes + "m";
+}
+
+function estimateDurationFromDistance(){
+  if(!routeDistanceKm) return "";
+  let kmh = 3.8;
+  if(difficultyEl.value === "medium") kmh = 3.2;
+  if(difficultyEl.value === "hard") kmh = 2.7;
+  if(difficultyEl.value === "expert") kmh = 2.25;
+  const seconds = (routeDistanceKm / kmh) * 3600;
+  return formatDuration(seconds);
+}
+
+function updateEstimatedDuration(force){
+  const current = estimatedDurationEl.value.trim();
+  if(current && !force && estimatedDurationEl.dataset.auto !== "true") return;
+  const formatted = routeDurationSeconds ? formatDuration(routeDurationSeconds) : estimateDurationFromDistance();
+  if(formatted){
+    estimatedDurationEl.value = formatted;
+    estimatedDurationEl.dataset.auto = "true";
+  }
+}
+
+function getCoordDistanceMeters(a, b){
+  return map.distance([a[1], a[0]], [b[1], b[0]]);
+}
+
+function calculateElevationFromFeature(feature){
+  elevationGainM = 0;
+  elevationLossM = 0;
+  elevationProfile = [];
+  if(!feature || !feature.geometry || !Array.isArray(feature.geometry.coordinates)) return;
+  const coords = feature.geometry.coordinates;
+  let distanceM = 0;
+  let previousElevation = null;
+  coords.forEach(function(coord, index){
+    if(index > 0) distanceM += getCoordDistanceMeters(coords[index - 1], coord);
+    const elevation = Number(coord[2]);
+    if(!Number.isFinite(elevation)) return;
+    if(previousElevation !== null){
+      const diff = elevation - previousElevation;
+      if(diff > 1) elevationGainM += diff;
+      if(diff < -1) elevationLossM += Math.abs(diff);
+    }
+    previousElevation = elevation;
+    elevationProfile.push({ distanceKm:Number((distanceM / 1000).toFixed(3)), elevation:Number(elevation.toFixed(1)) });
+  });
+  elevationGainM = Math.round(elevationGainM);
+  elevationLossM = Math.round(elevationLossM);
+}
+
+function renderElevationChart(){
+  if(!elevationCardEl || !elevationChartEl) return;
+  if(!elevationProfile || elevationProfile.length < 2){
+    elevationCardEl.classList.remove("is-visible");
+    return;
+  }
+  elevationCardEl.classList.add("is-visible");
+  elevationSummaryEl.innerText = "+" + elevationGainM + " m / -" + elevationLossM + " m";
+  const canvas = elevationChartEl;
+  const ctx = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+  ctx.clearRect(0, 0, width, height);
+  const paddingX = 18;
+  const paddingY = 16;
+  const elevations = elevationProfile.map(function(p){ return p.elevation; });
+  const minEle = Math.min.apply(null, elevations);
+  const maxEle = Math.max.apply(null, elevations);
+  const maxDist = Math.max(elevationProfile[elevationProfile.length - 1].distanceKm, 0.001);
+  const eleRange = Math.max(maxEle - minEle, 1);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(255,255,255,.16)";
+  ctx.beginPath();
+  ctx.moveTo(paddingX, height - paddingY);
+  ctx.lineTo(width - paddingX, height - paddingY);
+  ctx.stroke();
+  ctx.beginPath();
+  elevationProfile.forEach(function(p, index){
+    const x = paddingX + (p.distanceKm / maxDist) * (width - paddingX * 2);
+    const y = height - paddingY - ((p.elevation - minEle) / eleRange) * (height - paddingY * 2);
+    if(index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = getDifficultyColor();
+  ctx.stroke();
 }
 
 function calculateFallbackDistanceKm(){
@@ -791,6 +944,7 @@ async function routeWithOpenRouteService(){
   const feature = data.features[0];
   const summary = feature.properties && feature.properties.summary ? feature.properties.summary : null;
   if(summary && summary.distance) feature.properties.distance_m = summary.distance;
+  if(summary && summary.duration) feature.properties.duration_s = summary.duration;
   return feature;
 }
 
@@ -800,7 +954,12 @@ function drawGeoJsonRoute(feature, label, message){
     routeLine = null;
   }
   routeGeojson = feature;
-  routeDistanceKm = feature.properties && feature.properties.distance_m ? Number((feature.properties.distance_m / 1000).toFixed(2)) : calculateFallbackDistanceKm();
+  const props = feature.properties || {};
+  routeDistanceKm = props.distance_m ? Number((props.distance_m / 1000).toFixed(2)) : calculateFallbackDistanceKm();
+  routeDurationSeconds = props.duration_s || (props.summary && props.summary.duration) || 0;
+  calculateElevationFromFeature(feature);
+  applyAutoDifficulty();
+  updateEstimatedDuration(false);
   routingMode = label;
   routeLine = L.geoJSON(routeGeojson, { style:{ color:getDifficultyColor(), weight:3, opacity:.94, lineCap:"round", lineJoin:"round" } }).addTo(map);
   setRouteStatus(message, false);
@@ -859,6 +1018,8 @@ function updateStats(){
   pointsStatEl.innerText = String(rawPoints.length);
   distanceStatEl.innerText = routeDistanceKm ? routeDistanceKm + " km" : "0 km";
   routingStatEl.innerText = routingMode;
+  elevationStatEl.innerText = elevationProfile.length >= 2 ? "+" + elevationGainM + "m" : "—";
+  renderElevationChart();
 }
 
 function fitRoute(){
@@ -879,7 +1040,12 @@ function clearRoute(){
   rawPoints = [];
   routeGeojson = null;
   routeDistanceKm = 0;
+  routeDurationSeconds = 0;
+  elevationGainM = 0;
+  elevationLossM = 0;
+  elevationProfile = [];
   routingMode = "-";
+  estimatedDurationEl.dataset.auto = "true";
   clearMapLayers();
   renderPoints(-1);
   setRouteStatus("", false);
@@ -900,6 +1066,9 @@ function readTrailForm(){
     start_name:startNameEl.value.trim(),
     end_name:endNameEl.value.trim(),
     distance_km:routeDistanceKm || calculateFallbackDistanceKm(),
+    elevation_gain_m:elevationGainM || 0,
+    elevation_loss_m:elevationLossM || 0,
+    elevation_profile:elevationProfile || [],
     points:rawPoints,
     route_geojson:routeGeojson,
     owner_email:getUserEmail()
@@ -1050,7 +1219,13 @@ document.getElementById("clearBtn").addEventListener("click", clearRoute);
 document.getElementById("undoBtn").addEventListener("click", undoPoint);
 document.getElementById("fitBtn").addEventListener("click", fitRoute);
 searchEl.addEventListener("input", function(){ renderTrailList(searchEl.value); });
-difficultyEl.addEventListener("change", redrawCurrentRouteColor);
+difficultyEl.addEventListener("change", function(){
+  redrawCurrentRouteColor();
+  if(estimatedDurationEl.dataset.auto === "true") updateEstimatedDuration(true);
+});
+estimatedDurationEl.addEventListener("input", function(){
+  estimatedDurationEl.dataset.auto = estimatedDurationEl.value.trim() ? "false" : "true";
+});
 
 document.addEventListener("keydown", function(event){
   if(event.key === "Escape"){
