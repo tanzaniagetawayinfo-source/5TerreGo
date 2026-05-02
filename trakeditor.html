@@ -178,25 +178,40 @@ select option{color:#111}
             </select>
           </div>
           <div class="field">
-            <label class="label" for="estimatedDuration">Durata stimata</label>
-            <input id="estimatedDuration" placeholder="Es. 1h 45m" />
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="field">
-            <label class="label" for="startName">Partenza</label>
-            <input id="startName" placeholder="Es. Monterosso" />
-          </div>
-          <div class="field">
-            <label class="label" for="endName">Arrivo</label>
-            <input id="endName" placeholder="Es. Vernazza" />
+            <label class="label" for="estimatedDuration">Estimated duration</label>
+            <input id="estimatedDuration" placeholder="e.g. 1h 45m" />
           </div>
         </div>
 
         <div class="field">
-          <label class="label" for="description">Descrizione</label>
-          <textarea id="description" placeholder="Note utili, panorama, condizioni, consigli..."></textarea>
+          <label class="label" for="shoeType">Recommended shoes</label>
+          <select id="shoeType">
+            <option value="sneakers">Sneakers / comfortable shoes</option>
+            <option value="trail">Trail running shoes</option>
+            <option value="hiking">Hiking shoes</option>
+            <option value="boots">Hiking boots</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="label" for="priceAmount">Price in EUR</label>
+          <input id="priceAmount" type="number" min="0" step="0.01" value="0" placeholder="0 = Free" />
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label class="label" for="startName">Start</label>
+            <input id="startName" placeholder="e.g. Monterosso" />
+          </div>
+          <div class="field">
+            <label class="label" for="endName">End</label>
+            <input id="endName" placeholder="e.g. Vernazza" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="description">Description</label>
+          <textarea id="description" placeholder="Useful notes, views, trail conditions, tips..."></textarea>
         </div>
 
         <div class="field">
@@ -227,6 +242,10 @@ select option{color:#111}
   description text,
   difficulty text,
   estimated_duration text,
+  shoe_type text,
+  price_amount numeric default 0,
+  price_currency text default 'EUR', -- always EUR
+  is_free boolean default true,
   start_name text,
   end_name text,
   distance_km numeric,
@@ -290,6 +309,9 @@ const editorSubtitleEl = document.getElementById("editorSubtitle");
 const trailNameEl = document.getElementById("trailName");
 const difficultyEl = document.getElementById("difficulty");
 const estimatedDurationEl = document.getElementById("estimatedDuration");
+const shoeTypeEl = document.getElementById("shoeType");
+const priceAmountEl = document.getElementById("priceAmount");
+const FIXED_CURRENCY = "EUR";
 const startNameEl = document.getElementById("startName");
 const endNameEl = document.getElementById("endName");
 const descriptionEl = document.getElementById("description");
@@ -455,6 +477,12 @@ function startNewTrail(){
   trailNameEl.value = "";
   difficultyEl.value = "easy";
   estimatedDurationEl.value = "";
+  if(priceAmountEl) priceAmountEl.value = "0";
+  // Currency is always EUR.
+  if(shoeTypeEl){
+    shoeTypeEl.value = "sneakers";
+    shoeTypeEl.dataset.auto = "true";
+  }
   startNameEl.value = "";
   endNameEl.value = "";
   descriptionEl.value = "";
@@ -599,6 +627,23 @@ function applyAutoDifficulty(){
   if(difficultyEl.value !== nextDifficulty){
     difficultyEl.value = nextDifficulty;
   }
+  applyAutoShoeType(false);
+}
+
+function getRecommendedShoeType(){
+  const difficulty = difficultyEl.value;
+  if(difficulty === "easy") return "sneakers";
+  if(difficulty === "medium") return "trail";
+  if(difficulty === "hard") return "hiking";
+  if(difficulty === "expert") return "boots";
+  return "trail";
+}
+
+function applyAutoShoeType(force){
+  if(!shoeTypeEl) return;
+  if(!force && shoeTypeEl.dataset.auto === "false") return;
+  shoeTypeEl.value = getRecommendedShoeType();
+  shoeTypeEl.dataset.auto = "true";
 }
 
 function redrawCurrentRouteColor(){
@@ -1062,6 +1107,10 @@ function readTrailForm(){
     name:trailNameEl.value.trim(),
     description:descriptionEl.value.trim(),
     difficulty:difficultyEl.value,
+    shoe_type:shoeTypeEl ? shoeTypeEl.value : "",
+    price_amount:priceAmountEl ? Math.max(0, Number(priceAmountEl.value || 0)) : 0,
+    price_currency:FIXED_CURRENCY,
+    is_free:priceAmountEl ? Number(priceAmountEl.value || 0) === 0 : true,
     estimated_duration:estimatedDurationEl.value.trim(),
     start_name:startNameEl.value.trim(),
     end_name:endNameEl.value.trim(),
@@ -1112,6 +1161,12 @@ async function loadTrails(){
   }
 }
 
+function formatTrailPrice(amount){
+  const value = Number(amount || 0);
+  if(!value) return "Free";
+  return value.toFixed(value % 1 === 0 ? 0 : 2) + " EUR";
+}
+
 function makeMetaPill(text){
   const pill = document.createElement("div");
   pill.className = "meta-pill";
@@ -1150,6 +1205,8 @@ function renderTrailList(filter){
     const meta = document.createElement("div");
     meta.className = "trail-card-meta";
     meta.appendChild(makeMetaPill(trail.difficulty || "difficulty -"));
+    if(trail.shoe_type) meta.appendChild(makeMetaPill("shoes: " + trail.shoe_type));
+    meta.appendChild(makeMetaPill(formatTrailPrice(trail.price_amount)));
     meta.appendChild(makeMetaPill((trail.distance_km || 0) + " km"));
     meta.appendChild(makeMetaPill(trail.estimated_duration || "durata -"));
     if(trail.start_name || trail.end_name) meta.appendChild(makeMetaPill((trail.start_name || "?") + " -> " + (trail.end_name || "?")));
@@ -1169,6 +1226,12 @@ function loadTrailIntoEditor(trail){
   trailNameEl.value = trail.name || "";
   difficultyEl.value = trail.difficulty || "easy";
   estimatedDurationEl.value = trail.estimated_duration || "";
+  if(priceAmountEl) priceAmountEl.value = trail.price_amount !== undefined && trail.price_amount !== null ? String(trail.price_amount) : "0";
+  // Currency is always EUR.
+  if(shoeTypeEl){
+    shoeTypeEl.value = trail.shoe_type || getRecommendedShoeType();
+    shoeTypeEl.dataset.auto = trail.shoe_type ? "false" : "true";
+  }
   startNameEl.value = trail.start_name || "";
   endNameEl.value = trail.end_name || "";
   descriptionEl.value = trail.description || "";
@@ -1221,11 +1284,17 @@ document.getElementById("fitBtn").addEventListener("click", fitRoute);
 searchEl.addEventListener("input", function(){ renderTrailList(searchEl.value); });
 difficultyEl.addEventListener("change", function(){
   redrawCurrentRouteColor();
+  applyAutoShoeType(true);
   if(estimatedDurationEl.dataset.auto === "true") updateEstimatedDuration(true);
 });
 estimatedDurationEl.addEventListener("input", function(){
   estimatedDurationEl.dataset.auto = estimatedDurationEl.value.trim() ? "false" : "true";
 });
+if(shoeTypeEl){
+  shoeTypeEl.addEventListener("change", function(){
+    shoeTypeEl.dataset.auto = "false";
+  });
+}
 
 document.addEventListener("keydown", function(event){
   if(event.key === "Escape"){
