@@ -526,9 +526,7 @@ button{
     const panel = document.createElement('div');
     panel.id = 'account-panel';
     panel.className = 'account-panel';
-    panel.innerHTML = '';
 
-    // 👇 HEADER BENTORNATO
     const welcome = document.createElement('div');
     welcome.style.marginBottom = '16px';
     welcome.style.textAlign = 'left';
@@ -541,6 +539,7 @@ button{
     } else if(user && user.email){
       name = user.email.split('@')[0];
     }
+
     const emailVal = user && user.email ? user.email : '';
 
     const titleEl = document.createElement('div');
@@ -555,7 +554,6 @@ button{
 
     welcome.appendChild(titleEl);
     welcome.appendChild(emailEl);
-
     panel.appendChild(welcome);
 
     const bookingsBtn = document.createElement('button');
@@ -576,6 +574,15 @@ button{
       window.location.href = '/profile.html';
     };
 
+    const trailsBtn = document.createElement('button');
+    trailsBtn.className = 'primary';
+    trailsBtn.id = 'trails-editor';
+    trailsBtn.type = 'button';
+    trailsBtn.textContent = 'Sentieri Editor';
+    trailsBtn.onclick = function(){
+      window.location.href = '/trakeditor.html';
+    };
+
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'logout-btn';
     logoutBtn.id = 'logout';
@@ -590,6 +597,7 @@ button{
 
     panel.appendChild(bookingsBtn);
     panel.appendChild(profileBtn);
+    panel.appendChild(trailsBtn);
     panel.appendChild(logoutBtn);
 
     modal.appendChild(panel);
