@@ -616,6 +616,15 @@
       transform: scale(1);
     }
 
+    #trail-card{display:none;position:fixed;left:12px;right:12px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:2997;max-height:46dvh;border-radius:24px;background:rgba(255,255,255,0.97);border:1px solid rgba(255,255,255,0.82);box-shadow:0 14px 34px rgba(0,0,0,0.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden;opacity:0;transform:translateY(12px) scale(0.98);transition:opacity .26s ease,transform .32s cubic-bezier(.2,.9,.2,1);color:#111}
+    #trail-card.open{opacity:1;transform:translateY(0) scale(1)}
+    .trail-content{padding:16px 16px 18px;overflow-y:auto;max-height:46dvh;-webkit-overflow-scrolling:touch}
+    #trail-title{font-size:20px;font-weight:900;letter-spacing:-0.04em;line-height:1.08;padding-right:38px;margin-bottom:9px}
+    .trail-meta-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+    .trail-pill{padding:6px 8px;border-radius:999px;background:rgba(0,0,0,0.07);color:rgba(0,0,0,0.72);font-size:11px;font-weight:850;line-height:1}
+    #trail-desc{font-size:13px;line-height:1.4;color:rgba(0,0,0,0.62)}
+    #trail-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#111;font-weight:300;font-size:30px;line-height:1;cursor:pointer;z-index:3}
+
     body.poi-panel-active #ai-chat-btn {
       right: calc(100vw - 90px);
       left: auto;
@@ -688,6 +697,15 @@
   <div id="poi-close">×</div>
   <a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a>
   <button id="poi-ai" type="button">AI guide</button>
+</div>
+
+<div id="trail-card" aria-hidden="true">
+  <div class="trail-content">
+    <div id="trail-title"></div>
+    <div id="trail-meta" class="trail-meta-row"></div>
+    <div id="trail-desc"></div>
+  </div>
+  <div id="trail-close">×</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -763,11 +781,19 @@
   var poiAiBtn = document.getElementById('poi-ai');
   var readMoreBtn = document.getElementById('read-more');
 
+  var trailCard = document.getElementById('trail-card');
+  var trailTitle = document.getElementById('trail-title');
+  var trailMeta = document.getElementById('trail-meta');
+  var trailDesc = document.getElementById('trail-desc');
+  var trailClose = document.getElementById('trail-close');
+
   var poiMarkers = [];
+  var trailItems = [];
   var ferryPorts = [];
   var currentIndex = -1;
   var currentDataset = 'places';
   var currentPOI = null;
+  var currentTrail = null;
   var currentUser = null;
   var poiMiniMap = null;
   var isProgrammaticMove = false;
@@ -809,6 +835,117 @@
 
   function isIOSDevice() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  function getTrailColor(difficulty) {
+    switch (String(difficulty || '').toLowerCase()) {
+      case 'easy': return '#20c997';
+      case 'medium': return '#f4c542';
+      case 'hard': return '#ff7a1a';
+      case 'expert': return '#ff3b30';
+      default: return '#111';
+    }
+  }
+
+  function formatTrailPrice(amount) {
+    var value = Number(amount || 0);
+    if (!value) return 'Free';
+    return value.toFixed(value % 1 === 0 ? 0 : 2) + ' EUR';
+  }
+
+  function formatTrailElevation(trail) {
+    var up = Number(trail.elevation_gain_m || 0);
+    var down = Number(trail.elevation_loss_m || 0);
+    if (!up && !down) return '';
+    return '+' + Math.round(up) + ' m / -' + Math.round(down) + ' m';
+  }
+
+  function normalizeTrail(raw) {
+    raw = raw || {};
+    return {
+      id: raw.id || 'trail-' + Date.now() + '-' + Math.random().toString(16).slice(2),
+      name: String(raw.name || 'Trail'),
+      description: raw.description || '',
+      difficulty: raw.difficulty || '',
+      estimated_duration: raw.estimated_duration || '',
+      shoe_type: raw.shoe_type || '',
+      price_amount: Number(raw.price_amount || 0),
+      distance_km: Number(raw.distance_km || 0),
+      elevation_gain_m: Number(raw.elevation_gain_m || 0),
+      elevation_loss_m: Number(raw.elevation_loss_m || 0),
+      points: Array.isArray(raw.points) ? raw.points : [],
+      route_geojson: raw.route_geojson || null,
+      start_name: raw.start_name || '',
+      end_name: raw.end_name || ''
+    };
+  }
+
+  function getTrailLatLngs(trail) {
+    var coords;
+    var points;
+
+    if (trail.route_geojson && trail.route_geojson.geometry && Array.isArray(trail.route_geojson.geometry.coordinates)) {
+      coords = trail.route_geojson.geometry.coordinates;
+      return coords.map(function (c) { return [Number(c[1]), Number(c[0])]; }).filter(function (p) {
+        return Number.isFinite(p[0]) && Number.isFinite(p[1]);
+      });
+    }
+
+    points = Array.isArray(trail.points) ? trail.points : [];
+    return points.map(function (p) { return [Number(p.lat), Number(p.lng)]; }).filter(function (p) {
+      return Number.isFinite(p[0]) && Number.isFinite(p[1]);
+    });
+  }
+
+  function makeTrailPill(text) {
+    var pill = document.createElement('span');
+    pill.className = 'trail-pill';
+    pill.innerText = text;
+    return pill;
+  }
+
+  function closeTrailCard(immediate) {
+    if (!trailCard) return;
+    trailCard.classList.remove('open');
+    trailCard.setAttribute('aria-hidden', 'true');
+    currentTrail = null;
+
+    if (immediate) {
+      trailCard.style.display = 'none';
+      return;
+    }
+
+    window.setTimeout(function () {
+      if (trailCard.getAttribute('aria-hidden') === 'true') trailCard.style.display = 'none';
+    }, 300);
+  }
+
+  function showTrailCard(trail) {
+    var elevation;
+
+    if (!trail || !trailCard) return;
+    closePOICard(true);
+    hideCard(false);
+    currentTrail = trail;
+
+    trailTitle.innerText = trail.name;
+    trailDesc.innerText = trail.description || 'No description available';
+    trailMeta.innerHTML = '';
+
+    if (trail.difficulty) trailMeta.appendChild(makeTrailPill(trail.difficulty));
+    if (trail.estimated_duration) trailMeta.appendChild(makeTrailPill(trail.estimated_duration));
+    if (trail.distance_km) trailMeta.appendChild(makeTrailPill(trail.distance_km + ' km'));
+    elevation = formatTrailElevation(trail);
+    if (elevation) trailMeta.appendChild(makeTrailPill(elevation));
+    if (trail.shoe_type) trailMeta.appendChild(makeTrailPill('Shoes: ' + trail.shoe_type));
+    trailMeta.appendChild(makeTrailPill(formatTrailPrice(trail.price_amount)));
+    if (trail.start_name || trail.end_name) trailMeta.appendChild(makeTrailPill((trail.start_name || '?') + ' → ' + (trail.end_name || '?')));
+
+    trailCard.style.display = 'block';
+    trailCard.setAttribute('aria-hidden', 'false');
+    window.requestAnimationFrame(function () {
+      trailCard.classList.add('open');
+    });
   }
 
   function getPOIEmoji(type, fallback) {
@@ -1231,6 +1368,7 @@
   }
 
   function closePOICard(immediate) {
+    closeTrailCard(true);
     if (poiTypeTimer) {
       clearTimeout(poiTypeTimer);
       poiTypeTimer = null;
@@ -1415,6 +1553,57 @@
         isProgrammaticMove = false;
       }, 400);
     }
+  }
+
+  async function loadTrails() {
+    var response;
+    var rows;
+
+    if (!trailsLayer) return;
+    trailsLayer.clearLayers();
+    trailItems = [];
+
+    if (!SUPABASE_READY || !supabaseClient) return;
+
+    response = await supabaseClient
+      .from('trails')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (response.error) {
+      console.warn('Supabase trails load failed:', response.error.message);
+      return;
+    }
+
+    rows = response.data || [];
+
+    rows.map(normalizeTrail).forEach(function (trail) {
+      var latLngs = getTrailLatLngs(trail);
+      var line;
+
+      if (!latLngs || latLngs.length < 2) return;
+      trailItems.push({ trail: trail, latLngs: latLngs });
+
+      line = L.polyline(latLngs, {
+        color: getTrailColor(trail.difficulty),
+        weight: 1,
+        opacity: 0.92,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(trailsLayer);
+
+      line.on('click', function (event) {
+        if (event && event.originalEvent) {
+          L.DomEvent.stopPropagation(event.originalEvent);
+          L.DomEvent.preventDefault(event.originalEvent);
+        }
+        showTrailCard(trail);
+      });
+
+      line.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 });
+    });
+
+    renderSearchSuggestions(searchInput.value);
   }
 
   function updatePOIVisibility() {
@@ -1644,6 +1833,12 @@
       }
     });
 
+    trailItems.forEach(function (item) {
+      if (item.trail && item.trail.name.toLowerCase().indexOf(q) !== -1) {
+        results.push({ type: 'trail', name: item.trail.name });
+      }
+    });
+
     return results;
   }
 
@@ -1657,7 +1852,7 @@
     }
 
     searchResults.innerHTML = results.slice(0, 8).map(function (result) {
-      var label = result.type === 'city' ? 'Village' : 'POI';
+      var label = result.type === 'city' ? 'Village' : (result.type === 'trail' ? 'Trail' : 'POI');
       return '<div class="search-item" data-name="' + escapeHTML(result.name) + '">' + escapeHTML(result.name) + ' · ' + label + '</div>';
     }).join('');
 
@@ -1680,6 +1875,16 @@
 
     if (poiItem && poiItem.poi) {
       openPOIWithMapMove(poiItem.poi, null);
+      return true;
+    }
+
+    var trailItem = trailItems.find(function (item) {
+      return item.trail && item.trail.name === name;
+    });
+
+    if (trailItem && trailItem.latLngs && trailItem.latLngs.length) {
+      map.fitBounds(L.latLngBounds(trailItem.latLngs), { padding: [40, 40] });
+      showTrailCard(trailItem.trail);
       return true;
     }
 
@@ -1852,17 +2057,27 @@
       window.location.href = 'experiences.html';
     });
 
-    poiAiBtn.addEventListener('click', handlePOIAI);
+    if (poiAiBtn) poiAiBtn.addEventListener('click', handlePOIAI);
 
-    poiClose.addEventListener('click', function () {
-      closePOICard(false);
-    });
+    if (poiClose) {
+      poiClose.addEventListener('click', function () {
+        closePOICard(false);
+      });
+    }
 
-    readMoreBtn.addEventListener('click', function () {
-      openCurrentPOIInCaptainGull();
-    });
+    if (trailClose) {
+      trailClose.addEventListener('click', function () {
+        closeTrailCard(false);
+      });
+    }
 
-    poiDesc.addEventListener('click', function (event) {
+    if (readMoreBtn) {
+      readMoreBtn.addEventListener('click', function () {
+        openCurrentPOIInCaptainGull();
+      });
+    }
+
+    if (poiDesc) poiDesc.addEventListener('click', function (event) {
       if (event.target && event.target.classList.contains('inline-read-more')) {
         openCurrentPOIInCaptainGull();
       }
@@ -1935,6 +2150,7 @@
     console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay fifth');
     console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore fixed image expected');
     console.assert(typeof setupEvents === 'function', 'setupEvents exists');
+    console.assert(typeof loadTrails === 'function', 'Trail loader exists');
     console.assert(typeof handlePOIAI === 'function', 'AI POI handler exists');
     console.assert(typeof generateAIText === 'function', 'AI text generator exists');
     console.assert(typeof speakText === 'function', 'speech function exists');
@@ -1971,6 +2187,7 @@
     updateMapVisualByZoom();
     runTests();
     loadPOIs();
+    loadTrails();
 
     window.setTimeout(function () {
       checkUser();
@@ -2763,4 +2980,3 @@
 
 </body>
 </html>
-
