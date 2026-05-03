@@ -164,6 +164,21 @@
       -webkit-backdrop-filter: blur(8px);
     }
 
+    .trail-start-label {
+      min-width: 32px;
+      min-height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.92);
+      color: #111;
+      font-size: 17px;
+      border: 2px solid currentColor;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
     .leaflet-div-icon {
       background: transparent !important;
       border: none !important;
@@ -618,27 +633,29 @@
 
     #trail-card{display:none;position:fixed;inset:0;z-index:2999;background:#f7f7f7;color:#111;opacity:0;transform:translateY(18px);transition:opacity .28s ease,transform .34s cubic-bezier(.2,.9,.2,1);overflow:hidden}
     #trail-card.open{opacity:1;transform:translateY(0)}
-    .trail-page{height:100dvh;display:flex;flex-direction:column;background:#f7f7f7;overflow:hidden}
-    .trail-map-head{position:relative;height:38dvh;min-height:260px;background:#f7f7f7;overflow:visible;flex:0 0 auto;padding:calc(58px + env(safe-area-inset-top)) 14px 14px;transition:height .34s cubic-bezier(.2,.9,.2,1);z-index:1}
+    .trail-page{height:100dvh;background:#f7f7f7;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(26px + env(safe-area-inset-bottom))}
+    .trail-map-head{position:relative;height:38dvh;min-height:260px;background:#f7f7f7;overflow:visible;padding:calc(58px + env(safe-area-inset-top)) 14px 14px;transition:height .34s cubic-bezier(.2,.9,.2,1);z-index:1}
     #trail-card.map-expanded .trail-map-head{height:64dvh;min-height:430px}
     .trail-map-box{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:#e8efe9;box-shadow:0 10px 28px rgba(0,0,0,.12);border:1px solid rgba(0,0,0,.06)}
     #trail-mini-map{position:absolute;inset:0;width:100%;height:100%}
     .trail-top-gradient{position:absolute;left:0;right:0;top:0;height:80px;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,0));z-index:2;pointer-events:none}
     #trail-map-expand{position:absolute;right:12px;bottom:12px;z-index:5;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#111;font-size:20px;font-weight:900;line-height:1;box-shadow:0 8px 22px rgba(0,0,0,.16);cursor:pointer}
     #trail-close{position:absolute;top:calc(10px + env(safe-area-inset-top));left:14px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.92);color:#111;font-weight:400;font-size:30px;line-height:1;cursor:pointer;z-index:4;box-shadow:0 8px 22px rgba(0,0,0,.14)}
-    .trail-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px calc(26px + env(safe-area-inset-bottom));background:#f7f7f7}
-    #trail-title{font-size:30px;font-weight:950;letter-spacing:-0.055em;line-height:1.02;margin:0 0 12px;color:#111}
-    #trail-desc{font-size:16px;line-height:1.58;color:rgba(0,0,0,.72);white-space:pre-line;margin-bottom:20px}
+    .trail-content{padding:18px 16px 0;background:#f7f7f7;overflow:visible}
+    #trail-title{font-size:30px;font-weight:950;letter-spacing:-0.055em;line-height:1.02;margin:0 0 7px;color:#111}
+    #trail-subtitle{font-size:14px;font-weight:850;color:rgba(0,0,0,.56);margin:0 0 16px;letter-spacing:-0.02em}
+    #trail-desc{font-size:16px;line-height:1.58;color:rgba(0,0,0,.72);white-space:pre-line;margin-bottom:18px}
     .trail-section-title{font-size:12px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.38);margin:0 0 10px}
     .trail-elevation-wrap{margin-bottom:18px}
-    #trail-elevation-chart{width:100%;height:auto;display:block;background:#fff;border-radius:20px;border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 18px rgba(0,0,0,.05)}
-    .trail-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-    .trail-secondary-grid{display:grid;grid-template-columns:1fr;gap:10px}
+    #trail-elevation-chart{width:100%;height:170px;display:block;background:#fff;border-radius:20px;border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 18px rgba(0,0,0,.05)}
+    .trail-elevation-legend{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;font-size:12px;font-weight:850;color:rgba(0,0,0,.54)}
+    .trail-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+    .trail-secondary-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px}
     .trail-info-item,.trail-secondary-item{background:#fff;border-radius:18px;padding:14px 14px 12px;border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 18px rgba(0,0,0,.04)}
     .trail-info-label{font-size:11px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:rgba(0,0,0,.42);margin-bottom:6px}
     .trail-info-value{font-size:18px;font-weight:900;line-height:1.18;color:#111;word-break:break-word}
     @media (max-width:390px){.trail-info-grid{grid-template-columns:1fr}}
-    .leaflet-container#trail-mini-map{background:#f6f1e8!important}
+    .leaflet-container#trail-mini-map{background:#111!important}
     #trail-mini-map .leaflet-control-attribution,#trail-mini-map .leaflet-control-zoom{display:none!important}
 
     body.poi-panel-active #ai-chat-btn {
@@ -646,6 +663,12 @@
       left: auto;
       bottom: calc(18px + env(safe-area-inset-bottom));
       transform: none;
+    }
+
+    body.trail-page-active #ai-chat-btn {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
     }
 
     body.poi-panel-active #ai-chat-btn video {
@@ -728,12 +751,8 @@
 
     <div class="trail-content">
       <div id="trail-title"></div>
+      <div id="trail-subtitle"></div>
       <div id="trail-desc"></div>
-
-      <div id="trail-elevation-wrap" class="trail-elevation-wrap">
-        <div class="trail-section-title">Elevation profile</div>
-        <canvas id="trail-elevation-chart" width="800" height="220"></canvas>
-      </div>
 
       <div class="trail-info-grid">
         <div class="trail-info-item">
@@ -760,13 +779,15 @@
           <div id="trail-price" class="trail-info-value">—</div>
         </div>
         <div class="trail-secondary-item">
-          <div class="trail-info-label">Route</div>
-          <div id="trail-route" class="trail-info-value">—</div>
-        </div>
-        <div class="trail-secondary-item">
           <div class="trail-info-label">Elevation gain / loss</div>
           <div id="trail-elevation-text" class="trail-info-value">—</div>
         </div>
+      </div>
+
+      <div id="trail-elevation-wrap" class="trail-elevation-wrap">
+        <div class="trail-section-title">Elevation profile</div>
+        <canvas id="trail-elevation-chart" width="800" height="220"></canvas>
+        <div id="trail-elevation-legend" class="trail-elevation-legend"></div>
       </div>
     </div>
   </div>
@@ -848,6 +869,7 @@
   var trailCard = document.getElementById('trail-card');
   var trailTitle = document.getElementById('trail-title');
   var trailDesc = document.getElementById('trail-desc');
+  var trailSubtitle = document.getElementById('trail-subtitle');
   var trailClose = document.getElementById('trail-close');
   var trailMiniMapEl = document.getElementById('trail-mini-map');
   var trailMapExpandBtn = document.getElementById('trail-map-expand');
@@ -860,6 +882,7 @@
   var trailElevationTextEl = document.getElementById('trail-elevation-text');
   var trailElevationWrapEl = document.getElementById('trail-elevation-wrap');
   var trailElevationChartEl = document.getElementById('trail-elevation-chart');
+  var trailElevationLegendEl = document.getElementById('trail-elevation-legend');
   var trailMiniMap = null;
   var trailMiniRoute = null;
 
@@ -932,18 +955,37 @@
   }
 
   function updateTrailWidths() {
-    if (!trailsLayer) return;
-    trailsLayer.eachLayer(function (layer) {
-      if (layer && typeof layer.setStyle === 'function') {
-        layer.setStyle({ weight: getTrailWeightByZoom() });
-      }
-    });
+    /* Trails are shown as start-point POIs on the main map. The full line is only shown inside the trail preview page. */
   }
 
   function formatTrailPrice(amount) {
     var value = Number(amount || 0);
     if (!value) return 'Free';
     return value.toFixed(value % 1 === 0 ? 0 : 2) + ' EUR';
+  }
+
+  function getReadableShoeType(value) {
+    value = String(value || '').toLowerCase();
+    if (value === 'sneakers') return 'Comfortable shoes';
+    if (value === 'trail') return 'Trail running shoes';
+    if (value === 'hiking') return 'Hiking shoes';
+    if (value === 'boots') return 'Hiking boots';
+    return value || '—';
+  }
+
+  function getDisplayDifficulty(trail) {
+    var distance = Number(trail && trail.distance_km || 0);
+    var gain = Number(trail && trail.elevation_gain_m || 0);
+    var climbPerKm = distance > 0 ? gain / distance : 0;
+
+    if (distance >= 13 || gain >= 850 || (distance >= 8 && climbPerKm >= 120)) return 'expert';
+    if (distance >= 8 || gain >= 450 || climbPerKm >= 120) return 'hard';
+    if (distance >= 4 || gain >= 180 || climbPerKm >= 65) return 'medium';
+    return 'easy';
+  }
+
+  function getDisplayTrailColor(trail) {
+    return getTrailColor(getDisplayDifficulty(trail));
   }
 
   function formatTrailElevation(trail) {
@@ -1008,14 +1050,40 @@
   }
 
   function fitTrailMiniMap(){
+    var bounds;
+    var southWest;
+    var northEast;
+    var diagonalMeters;
+    var box;
+    var shortestSide;
+    var dynamicPadding;
+    var dynamicMaxZoom;
+
     if (!trailMiniMap || !trailMiniRoute) return;
+
     try {
       trailMiniMap.invalidateSize(true);
-      trailMiniMap.fitBounds(trailMiniRoute.getBounds(), {
-        paddingTopLeft: [38, 58],
-        paddingBottomRight: [38, 44],
+      bounds = trailMiniRoute.getBounds();
+      if (!bounds || !bounds.isValid()) return;
+
+      southWest = bounds.getSouthWest();
+      northEast = bounds.getNorthEast();
+      diagonalMeters = southWest.distanceTo(northEast);
+      box = trailMiniMap.getSize();
+      shortestSide = Math.max(220, Math.min(box.x || 320, box.y || 260));
+
+      dynamicPadding = Math.round(Math.max(12, Math.min(30, shortestSide * 0.07)));
+      dynamicMaxZoom = 18;
+      if (diagonalMeters > 2200) dynamicMaxZoom = 15;
+      else if (diagonalMeters > 1200) dynamicMaxZoom = 16;
+      else if (diagonalMeters > 550) dynamicMaxZoom = 17;
+      else dynamicMaxZoom = 18;
+
+      trailMiniMap.fitBounds(bounds, {
+        paddingTopLeft: [dynamicPadding, dynamicPadding],
+        paddingBottomRight: [dynamicPadding, dynamicPadding],
         animate: false,
-        maxZoom: 15
+        maxZoom: dynamicMaxZoom
       });
     } catch (error) {}
   }
@@ -1038,16 +1106,22 @@
       preferCanvas: true
     });
 
-    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      maxZoom: 17,
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
       opacity: 1,
       noWrap: true
     }).addTo(trailMiniMap);
 
+    L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      opacity: 0.72,
+      noWrap: true
+    }).addTo(trailMiniMap);
+
     trailMiniRoute = L.polyline(latLngs, {
-      color: getTrailColor(trail.difficulty),
-      weight: 4,
-      opacity: 0.96,
+      color: getDisplayTrailColor(trail),
+      weight: 5,
+      opacity: 0.98,
       lineCap: 'round',
       lineJoin: 'round'
     }).addTo(trailMiniMap);
@@ -1079,6 +1153,13 @@
     }, 340);
   }
 
+  function sanitizeElevationValue(value) {
+    var n = Number(value || 0);
+    if (!Number.isFinite(n)) return 1;
+    if (n < 1 && n > -30) return 1;
+    return n;
+  }
+
   function drawTrailElevationChart(trail) {
     if (!trailElevationWrapEl || !trailElevationChartEl) return;
 
@@ -1086,6 +1167,7 @@
 
     if (!profile.length || profile.length < 2) {
       trailElevationWrapEl.style.display = 'none';
+      if (trailElevationLegendEl) trailElevationLegendEl.innerHTML = '';
       return;
     }
 
@@ -1093,40 +1175,67 @@
 
     var canvas = trailElevationChartEl;
     var ctx = canvas.getContext('2d');
-    var width = canvas.width;
-    var height = canvas.height;
-    var paddingX = 20;
-    var paddingY = 20;
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var width = Math.max(280, Math.round(rect.width || canvas.parentElement.clientWidth || 320));
+    var height = Math.max(150, Math.round(rect.height || 170));
+    var labelFont = width < 380 ? 11 : 12;
+    var paddingX = Math.max(44, Math.min(62, Math.round(width * 0.14)));
+    var paddingTop = 34;
+    var paddingBottom = 38;
+    var chartBottom = height - paddingBottom;
 
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
 
-    var elevations = profile.map(function (p) { return Number(p.elevation || 0); });
+    var elevations = profile.map(function (p) { return sanitizeElevationValue(p.elevation); });
     var distances = profile.map(function (p) { return Number(p.distanceKm || 0); });
     var minEle = Math.min.apply(null, elevations);
     var maxEle = Math.max.apply(null, elevations);
     var rangeEle = Math.max(1, maxEle - minEle);
-    var maxDist = Math.max(0.001, distances[distances.length - 1] || 0.001);
+    var savedDistance = Number(trail.distance_km || 0);
+    var profileDistance = Number(distances[distances.length - 1] || 0);
+    var maxDist = Math.max(0.001, savedDistance || profileDistance || 0.001);
 
     ctx.strokeStyle = 'rgba(0,0,0,.10)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(paddingX, height - paddingY);
-    ctx.lineTo(width - paddingX, height - paddingY);
+    ctx.moveTo(paddingX, chartBottom);
+    ctx.lineTo(width - paddingX, chartBottom);
     ctx.stroke();
+
+    ctx.fillStyle = 'rgba(0,0,0,.54)';
+    ctx.font = '800 ' + labelFont + 'px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(Math.round(maxEle) + ' m', paddingX - 8, paddingTop);
+    ctx.fillText(Math.round(minEle) + ' m', paddingX - 8, chartBottom);
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('0 km', paddingX, chartBottom + 10);
+    ctx.textAlign = 'right';
+    ctx.fillText(maxDist.toFixed(maxDist >= 10 ? 0 : 1) + ' km', width - paddingX, chartBottom + 10);
 
     ctx.beginPath();
     profile.forEach(function (p, i) {
       var x = paddingX + ((Number(p.distanceKm || 0) / maxDist) * (width - paddingX * 2));
-      var y = height - paddingY - (((Number(p.elevation || 0) - minEle) / rangeEle) * (height - paddingY * 2));
+      var y = chartBottom - (((sanitizeElevationValue(p.elevation) - minEle) / rangeEle) * (chartBottom - paddingTop));
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
 
-    ctx.lineWidth = 4;
+    ctx.lineWidth = width < 380 ? 3 : 4;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = getTrailColor(trail.difficulty);
+    ctx.strokeStyle = getDisplayTrailColor(trail);
     ctx.stroke();
+
+    if (trailElevationLegendEl) {
+      trailElevationLegendEl.innerHTML = '<span>Min ' + Math.round(minEle) + ' m</span><span>Max ' + Math.round(maxEle) + ' m</span>';
+    }
   }
 
   function showTrailCard(trail) {
@@ -1140,13 +1249,15 @@
     trailTitle.innerText = trail.name || 'Trail';
     trailDesc.innerText = trail.description || 'No description available';
 
-    if (trailDifficultyEl) trailDifficultyEl.innerText = trail.difficulty || '—';
+    if (trailSubtitle) {
+      trailSubtitle.innerText = (trail.start_name || '?') + ' → ' + (trail.end_name || '?');
+    }
+    if (trailDifficultyEl) trailDifficultyEl.innerText = getDisplayDifficulty(trail);
     if (trailDistanceEl) trailDistanceEl.innerText = trail.distance_km ? (trail.distance_km + ' km') : '—';
     if (trailDurationEl) trailDurationEl.innerText = trail.estimated_duration || '—';
-    if (trailShoesEl) trailShoesEl.innerText = trail.shoe_type || '—';
+    if (trailShoesEl) trailShoesEl.innerText = getReadableShoeType(trail.shoe_type);
     if (trailPriceEl) trailPriceEl.innerText = formatTrailPrice(trail.price_amount);
-    if (trailRouteEl) trailRouteEl.innerText = (trail.start_name || '?') + ' → ' + (trail.end_name || '?');
-
+    
     elevationText = formatTrailElevation(trail);
     if (trailElevationTextEl) trailElevationTextEl.innerText = elevationText || '—';
 
@@ -1158,6 +1269,8 @@
     trailCard.style.display = 'block';
     trailCard.setAttribute('aria-hidden', 'false');
     document.body.classList.add('trail-page-active');
+    var trailPage = trailCard.querySelector('.trail-page');
+    if (trailPage) trailPage.scrollTop = 0;
     window.requestAnimationFrame(function () {
       trailCard.classList.add('open');
       window.setTimeout(fitTrailMiniMap, 40);
@@ -1797,20 +1910,27 @@
 
     rows.map(normalizeTrail).forEach(function (trail) {
       var latLngs = getTrailLatLngs(trail);
-      var line;
+      var startPoint;
+      var marker;
+      var color;
 
       if (!latLngs || latLngs.length < 2) return;
       trailItems.push({ trail: trail, latLngs: latLngs });
 
-      line = L.polyline(latLngs, {
-        color: getTrailColor(trail.difficulty),
-        weight: getTrailWeightByZoom(),
-        opacity: 0.92,
-        lineCap: 'round',
-        lineJoin: 'round'
+      startPoint = latLngs[0];
+      color = getDisplayTrailColor(trail);
+
+      marker = L.marker(startPoint, {
+        title: trail.name,
+        icon: L.divIcon({
+          className: 'custom-trail-start',
+          html: '<div class="trail-start-label" style="color:' + color + '">🥾</div>',
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
+        })
       }).addTo(trailsLayer);
 
-      line.on('click', function (event) {
+      marker.on('click', function (event) {
         if (event && event.originalEvent) {
           L.DomEvent.stopPropagation(event.originalEvent);
           L.DomEvent.preventDefault(event.originalEvent);
@@ -1818,7 +1938,7 @@
         showTrailCard(trail);
       });
 
-      line.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 });
+      marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 });
     });
 
     renderSearchSuggestions(searchInput.value);
@@ -2101,7 +2221,7 @@
     });
 
     if (trailItem && trailItem.latLngs && trailItem.latLngs.length) {
-      map.fitBounds(L.latLngBounds(trailItem.latLngs), { padding: [40, 40] });
+      map.flyTo(trailItem.latLngs[0], 16, { duration: 0.9 });
       showTrailCard(trailItem.trail);
       return true;
     }
