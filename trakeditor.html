@@ -220,10 +220,10 @@ select option{color:#111}
         </div>
 
         <div class="actions">
-          <button id="undoBtn" class="action-btn" type="button">Annulla punto</button>
-          <button id="clearBtn" class="action-btn danger" type="button">Svuota</button>
-          <button id="fitBtn" class="action-btn" type="button">Centra</button>
-          <button id="saveBtn" class="action-btn primary" type="button">Salva sentiero</button>
+          <button id="undoBtn" class="action-btn" type="button">Undo point</button>
+          <button id="clearBtn" class="action-btn danger" type="button">Clear</button>
+          <button id="fitBtn" class="action-btn" type="button">Center</button>
+          <button id="saveBtn" class="action-btn primary" type="button">Save trail</button>
         </div>      </div>
     </div>
   </section>
@@ -232,32 +232,120 @@ select option{color:#111}
 <div id="helpModal" class="modal">
   <div class="modal-content">
     <button class="close-btn" onclick="closeHelpModal()">×</button>
-    <h2>Configurazione Supabase</h2>
-    <p style="color:rgba(255,255,255,.7);line-height:1.45;font-size:14px">Crea una tabella <strong>trails</strong> per salvare i sentieri. Il campo <strong>route_geojson</strong> contiene la linea precisa del percorso, mentre <strong>points</strong> contiene i punti inseriti tenendo premuto sulla mappa.</p>
-    <div class="sql-box">create table if not exists public.trails (
+    <h2>Supabase setup</h2>
+    <p style="color:rgba(255,255,255,.7);line-height:1.45;font-size:14px">La tabella deve chiamarsi <strong>trails</strong>. RLS deve restare attivo. La lettura è pubblica, mentre creazione, modifica ed eliminazione sono consentite solo all'utente autenticato <strong>5terrego.info@gmail.com</strong>. Se in Supabase vedi <strong>API DISABLED</strong>, abilita la tabella nella Data API/PostgREST senza disattivare RLS.</p>
+    <div class="sql-box">create extension if not exists pgcrypto;
+
+create table if not exists public.trails (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
+
   name text not null,
   description text,
   difficulty text,
   estimated_duration text,
   shoe_type text,
+
   price_amount numeric default 0,
-  price_currency text default 'EUR', -- always EUR
+  price_currency text default 'EUR',
   is_free boolean default true,
+
   start_name text,
   end_name text,
   distance_km numeric,
+  elevation_gain_m numeric default 0,
+  elevation_loss_m numeric default 0,
+  elevation_profile jsonb not null default '[]'::jsonb,
+
   points jsonb not null default '[]'::jsonb,
   route_geojson jsonb,
   owner_email text
 );
 
+alter table public.trails
+add column if not exists updated_at timestamptz default now(),
+add column if not exists description text,
+add column if not exists difficulty text,
+add column if not exists estimated_duration text,
+add column if not exists shoe_type text,
+add column if not exists price_amount numeric default 0,
+add column if not exists price_currency text default 'EUR',
+add column if not exists is_free boolean default true,
+add column if not exists start_name text,
+add column if not exists end_name text,
+add column if not exists distance_km numeric,
+add column if not exists elevation_gain_m numeric default 0,
+add column if not exists elevation_loss_m numeric default 0,
+add column if not exists elevation_profile jsonb not null default '[]'::jsonb,
+add column if not exists points jsonb not null default '[]'::jsonb,
+add column if not exists route_geojson jsonb,
+add column if not exists owner_email text;
+
+update public.trails
+set price_currency = 'EUR'
+where price_currency is null or price_currency &lt;&gt; 'EUR';
+
+update public.trails
+set price_amount = 0
+where price_amount is null;
+
+update public.trails
+set is_free = true
+where price_amount = 0;
+
+update public.trails
+set is_free = false
+where price_amount &gt; 0;
+
 alter table public.trails enable row level security;
 
+revoke insert, update, delete on public.trails from anon;
 grant select on public.trails to anon;
-grant select, insert, update, delete on public.trails to authenticated;</div>
+grant select, insert, update, delete on public.trails to authenticated;
+
+drop policy if exists "Public can read trails" on public.trails;
+drop policy if exists "Authenticated can insert trails" on public.trails;
+drop policy if exists "Authenticated can update trails" on public.trails;
+drop policy if exists "Authenticated can delete trails" on public.trails;
+drop policy if exists "Only owner can insert trails" on public.trails;
+drop policy if exists "Only owner can update trails" on public.trails;
+drop policy if exists "Only owner can delete trails" on public.trails;
+
+create policy "Public can read trails"
+on public.trails
+for select
+to anon, authenticated
+using (true);
+
+create policy "Only owner can insert trails"
+on public.trails
+for insert
+to authenticated
+with check (
+  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
+  and owner_email = '5terrego.info@gmail.com'
+);
+
+create policy "Only owner can update trails"
+on public.trails
+for update
+to authenticated
+using (
+  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
+)
+with check (
+  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
+  and owner_email = '5terrego.info@gmail.com'
+);
+
+create policy "Only owner can delete trails"
+on public.trails
+for delete
+to authenticated
+using (
+  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
+);</div>
   </div>
 </div>
 
@@ -269,6 +357,7 @@ const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const OSRM_FOOT_URL = "https://router.project-osrm.org/route/v1/foot";
 const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAxMzViYzBhMWYzZTQ0NTNiOTAzM2M3NGRhOWFkZjNjIiwiaCI6Im11cm11cjY0In0="; // obbligatoria per routing hiking reale
 const ORS_HIKING_URL = "https://api.openrouteservice.org/v2/directions/foot-hiking/geojson";
+const TRAILS_TABLE = "trails";
 
 let map = null;
 let mapReady = false;
@@ -325,9 +414,20 @@ function goBack(){
 }
 
 function checkAuthorization(){
-  userLineEl.innerText = "Modalita test: autorizzazioni disattivate";
-  authWarningEl.classList.remove("is-visible");
-  return true;
+  const token = getToken();
+  const email = getUserEmail();
+  const isAllowed = Boolean(token && email === "5terrego.info@gmail.com");
+
+  if(isAllowed){
+    userLineEl.innerText = "Authorized: " + email;
+    authWarningEl.classList.remove("is-visible");
+  }else{
+    userLineEl.innerText = email ? "Not authorized: " + email : "Login required";
+    authWarningEl.innerText = "This page is reserved for authorized users only.";
+    authWarningEl.classList.add("is-visible");
+  }
+
+  return isAllowed;
 }
 
 function getAuthSession(){
@@ -450,7 +550,10 @@ function initMap(){
 }
 
 function openEditor(mode, trail){
-  checkAuthorization();
+  if(!checkAuthorization()){
+    alert("You must be logged in as an authorized user to edit trails.");
+    return;
+  }
   editorEl.classList.add("is-open");
   editorEl.setAttribute("aria-hidden", "false");
   initMap();
@@ -1120,11 +1223,16 @@ function readTrailForm(){
     elevation_profile:elevationProfile || [],
     points:rawPoints,
     route_geojson:routeGeojson,
-    owner_email:getUserEmail()
+    owner_email:"5terrego.info@gmail.com"
   };
 }
 
 async function saveTrail(){
+  if(!checkAuthorization()){
+    alert("You must be logged in as an authorized user to save trails.");
+    return;
+  }
+
   const payload = readTrailForm();
   if(!payload.name){ alert("Nome sentiero obbligatorio"); return; }
   if(rawPoints.length < 2){ alert("Aggiungi almeno 2 punti sulla mappa."); return; }
@@ -1132,9 +1240,9 @@ async function saveTrail(){
   try{
     setRouteStatus("Salvataggio sentiero...", false);
     const isEdit = Boolean(editingTrailId);
-    const url = isEdit ? SUPABASE_URL + "/rest/v1/trails?id=eq." + encodeURIComponent(editingTrailId) : SUPABASE_URL + "/rest/v1/trails";
+    const url = isEdit ? SUPABASE_URL + "/rest/v1/" + TRAILS_TABLE + "?id=eq." + encodeURIComponent(editingTrailId) : SUPABASE_URL + "/rest/v1/" + TRAILS_TABLE;
     const method = isEdit ? "PATCH" : "POST";
-    const response = await fetch(url, { method:method, headers:buildHeaders({ useUserToken:false, extra:{ Prefer:"return=representation" } }), body:JSON.stringify(payload) });
+    const response = await fetch(url, { method:method, headers:buildHeaders({ useUserToken:true, extra:{ Prefer:"return=representation" } }), body:JSON.stringify(payload) });
     const saved = await parseResponse(response);
     if(Array.isArray(saved) && saved[0] && saved[0].id) editingTrailId = saved[0].id;
     setRouteStatus("Sentiero salvato correttamente.", false);
@@ -1142,22 +1250,21 @@ async function saveTrail(){
     renderTrailList(searchEl.value);
   }catch(err){
     console.error("SAVE TRAIL ERROR", err);
-    setRouteStatus("Errore salvataggio: " + err.message, true);
-    openHelpModal();
+    setRouteStatus("Save error: " + err.message, true);
   }
 }
 
 async function loadTrails(){
   listStatusEl.innerText = "Caricamento sentieri...";
   try{
-    const response = await fetch(SUPABASE_URL + "/rest/v1/trails?select=*&order=created_at.desc", { method:"GET", headers:buildHeaders({ useUserToken:false }) });
+    const response = await fetch(SUPABASE_URL + "/rest/v1/" + TRAILS_TABLE + "?select=*&order=created_at.desc", { method:"GET", headers:buildHeaders({ useUserToken:false }) });
     trails = await parseResponse(response) || [];
     renderTrailList(searchEl.value);
   }catch(err){
     console.warn("LOAD TRAILS ERROR", err);
     trails = [];
     renderTrailList(searchEl.value);
-    listStatusEl.innerText = "Tabella trails non disponibile. Puoi comunque provare l'editor.";
+    listStatusEl.innerText = "Tabella " + TRAILS_TABLE + " non disponibile o permessi Supabase mancanti. Puoi comunque provare l'editor.";
   }
 }
 
