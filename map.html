@@ -616,14 +616,30 @@
       transform: scale(1);
     }
 
-    #trail-card{display:none;position:fixed;left:12px;right:12px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:2997;max-height:46dvh;border-radius:24px;background:rgba(255,255,255,0.97);border:1px solid rgba(255,255,255,0.82);box-shadow:0 14px 34px rgba(0,0,0,0.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden;opacity:0;transform:translateY(12px) scale(0.98);transition:opacity .26s ease,transform .32s cubic-bezier(.2,.9,.2,1);color:#111}
-    #trail-card.open{opacity:1;transform:translateY(0) scale(1)}
-    .trail-content{padding:16px 16px 18px;overflow-y:auto;max-height:46dvh;-webkit-overflow-scrolling:touch}
-    #trail-title{font-size:20px;font-weight:900;letter-spacing:-0.04em;line-height:1.08;padding-right:38px;margin-bottom:9px}
-    .trail-meta-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
-    .trail-pill{padding:6px 8px;border-radius:999px;background:rgba(0,0,0,0.07);color:rgba(0,0,0,0.72);font-size:11px;font-weight:850;line-height:1}
-    #trail-desc{font-size:13px;line-height:1.4;color:rgba(0,0,0,0.62)}
-    #trail-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#111;font-weight:300;font-size:30px;line-height:1;cursor:pointer;z-index:3}
+    #trail-card{display:none;position:fixed;inset:0;z-index:2999;background:#f7f7f7;color:#111;opacity:0;transform:translateY(18px);transition:opacity .28s ease,transform .34s cubic-bezier(.2,.9,.2,1);overflow:hidden}
+    #trail-card.open{opacity:1;transform:translateY(0)}
+    .trail-page{height:100dvh;display:flex;flex-direction:column;background:#f7f7f7;overflow:hidden}
+    .trail-map-head{position:relative;height:38dvh;min-height:260px;background:#f7f7f7;overflow:visible;flex:0 0 auto;padding:calc(58px + env(safe-area-inset-top)) 14px 14px;transition:height .34s cubic-bezier(.2,.9,.2,1);z-index:1}
+    #trail-card.map-expanded .trail-map-head{height:64dvh;min-height:430px}
+    .trail-map-box{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:#e8efe9;box-shadow:0 10px 28px rgba(0,0,0,.12);border:1px solid rgba(0,0,0,.06)}
+    #trail-mini-map{position:absolute;inset:0;width:100%;height:100%}
+    .trail-top-gradient{position:absolute;left:0;right:0;top:0;height:80px;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,0));z-index:2;pointer-events:none}
+    #trail-map-expand{position:absolute;right:12px;bottom:12px;z-index:5;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#111;font-size:20px;font-weight:900;line-height:1;box-shadow:0 8px 22px rgba(0,0,0,.16);cursor:pointer}
+    #trail-close{position:absolute;top:calc(10px + env(safe-area-inset-top));left:14px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.92);color:#111;font-weight:400;font-size:30px;line-height:1;cursor:pointer;z-index:4;box-shadow:0 8px 22px rgba(0,0,0,.14)}
+    .trail-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px calc(26px + env(safe-area-inset-bottom));background:#f7f7f7}
+    #trail-title{font-size:30px;font-weight:950;letter-spacing:-0.055em;line-height:1.02;margin:0 0 12px;color:#111}
+    #trail-desc{font-size:16px;line-height:1.58;color:rgba(0,0,0,.72);white-space:pre-line;margin-bottom:20px}
+    .trail-section-title{font-size:12px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.38);margin:0 0 10px}
+    .trail-elevation-wrap{margin-bottom:18px}
+    #trail-elevation-chart{width:100%;height:auto;display:block;background:#fff;border-radius:20px;border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 18px rgba(0,0,0,.05)}
+    .trail-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .trail-secondary-grid{display:grid;grid-template-columns:1fr;gap:10px}
+    .trail-info-item,.trail-secondary-item{background:#fff;border-radius:18px;padding:14px 14px 12px;border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 18px rgba(0,0,0,.04)}
+    .trail-info-label{font-size:11px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:rgba(0,0,0,.42);margin-bottom:6px}
+    .trail-info-value{font-size:18px;font-weight:900;line-height:1.18;color:#111;word-break:break-word}
+    @media (max-width:390px){.trail-info-grid{grid-template-columns:1fr}}
+    .leaflet-container#trail-mini-map{background:#f6f1e8!important}
+    #trail-mini-map .leaflet-control-attribution,#trail-mini-map .leaflet-control-zoom{display:none!important}
 
     body.poi-panel-active #ai-chat-btn {
       right: calc(100vw - 90px);
@@ -700,12 +716,60 @@
 </div>
 
 <div id="trail-card" aria-hidden="true">
-  <div class="trail-content">
-    <div id="trail-title"></div>
-    <div id="trail-meta" class="trail-meta-row"></div>
-    <div id="trail-desc"></div>
+  <div class="trail-page">
+    <div class="trail-map-head">
+      <div id="trail-close">×</div>
+      <div class="trail-map-box">
+        <div id="trail-mini-map"></div>
+        <div class="trail-top-gradient"></div>
+        <button id="trail-map-expand" type="button" aria-label="Expand trail map">↗</button>
+      </div>
+    </div>
+
+    <div class="trail-content">
+      <div id="trail-title"></div>
+      <div id="trail-desc"></div>
+
+      <div id="trail-elevation-wrap" class="trail-elevation-wrap">
+        <div class="trail-section-title">Elevation profile</div>
+        <canvas id="trail-elevation-chart" width="800" height="220"></canvas>
+      </div>
+
+      <div class="trail-info-grid">
+        <div class="trail-info-item">
+          <div class="trail-info-label">Difficulty</div>
+          <div id="trail-difficulty" class="trail-info-value">—</div>
+        </div>
+        <div class="trail-info-item">
+          <div class="trail-info-label">Distance</div>
+          <div id="trail-distance" class="trail-info-value">—</div>
+        </div>
+        <div class="trail-info-item">
+          <div class="trail-info-label">Estimated time</div>
+          <div id="trail-duration" class="trail-info-value">—</div>
+        </div>
+        <div class="trail-info-item">
+          <div class="trail-info-label">Recommended shoes</div>
+          <div id="trail-shoes" class="trail-info-value">—</div>
+        </div>
+      </div>
+
+      <div class="trail-secondary-grid">
+        <div class="trail-secondary-item">
+          <div class="trail-info-label">Price</div>
+          <div id="trail-price" class="trail-info-value">—</div>
+        </div>
+        <div class="trail-secondary-item">
+          <div class="trail-info-label">Route</div>
+          <div id="trail-route" class="trail-info-value">—</div>
+        </div>
+        <div class="trail-secondary-item">
+          <div class="trail-info-label">Elevation gain / loss</div>
+          <div id="trail-elevation-text" class="trail-info-value">—</div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div id="trail-close">×</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -783,9 +847,21 @@
 
   var trailCard = document.getElementById('trail-card');
   var trailTitle = document.getElementById('trail-title');
-  var trailMeta = document.getElementById('trail-meta');
   var trailDesc = document.getElementById('trail-desc');
   var trailClose = document.getElementById('trail-close');
+  var trailMiniMapEl = document.getElementById('trail-mini-map');
+  var trailMapExpandBtn = document.getElementById('trail-map-expand');
+  var trailDifficultyEl = document.getElementById('trail-difficulty');
+  var trailDistanceEl = document.getElementById('trail-distance');
+  var trailDurationEl = document.getElementById('trail-duration');
+  var trailShoesEl = document.getElementById('trail-shoes');
+  var trailPriceEl = document.getElementById('trail-price');
+  var trailRouteEl = document.getElementById('trail-route');
+  var trailElevationTextEl = document.getElementById('trail-elevation-text');
+  var trailElevationWrapEl = document.getElementById('trail-elevation-wrap');
+  var trailElevationChartEl = document.getElementById('trail-elevation-chart');
+  var trailMiniMap = null;
+  var trailMiniRoute = null;
 
   var poiMarkers = [];
   var trailItems = [];
@@ -890,6 +966,7 @@
       distance_km: Number(raw.distance_km || 0),
       elevation_gain_m: Number(raw.elevation_gain_m || 0),
       elevation_loss_m: Number(raw.elevation_loss_m || 0),
+      elevation_profile: Array.isArray(raw.elevation_profile) ? raw.elevation_profile : [],
       points: Array.isArray(raw.points) ? raw.points : [],
       route_geojson: raw.route_geojson || null,
       start_name: raw.start_name || '',
@@ -921,47 +998,171 @@
     return pill;
   }
 
+  function destroyTrailMiniMap() {
+    if (trailMiniMap) {
+      try { trailMiniMap.remove(); } catch (error) {}
+      trailMiniMap = null;
+      trailMiniRoute = null;
+    }
+    if (trailMiniMapEl) trailMiniMapEl.innerHTML = '';
+  }
+
+  function fitTrailMiniMap(){
+    if (!trailMiniMap || !trailMiniRoute) return;
+    try {
+      trailMiniMap.invalidateSize(true);
+      trailMiniMap.fitBounds(trailMiniRoute.getBounds(), {
+        paddingTopLeft: [38, 58],
+        paddingBottomRight: [38, 44],
+        animate: false,
+        maxZoom: 15
+      });
+    } catch (error) {}
+  }
+
+  function drawTrailMiniMap(trail) {
+    var latLngs = getTrailLatLngs(trail);
+    if (!trailMiniMapEl || !latLngs || latLngs.length < 2) return;
+
+    destroyTrailMiniMap();
+
+    trailMiniMap = L.map(trailMiniMapEl, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      preferCanvas: true
+    });
+
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17,
+      opacity: 1,
+      noWrap: true
+    }).addTo(trailMiniMap);
+
+    trailMiniRoute = L.polyline(latLngs, {
+      color: getTrailColor(trail.difficulty),
+      weight: 4,
+      opacity: 0.96,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(trailMiniMap);
+
+    fitTrailMiniMap();
+    window.setTimeout(fitTrailMiniMap, 80);
+    window.setTimeout(fitTrailMiniMap, 260);
+  }
+
   function closeTrailCard(immediate) {
     if (!trailCard) return;
     trailCard.classList.remove('open');
+    trailCard.classList.remove('map-expanded');
     trailCard.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('trail-page-active');
     currentTrail = null;
 
     if (immediate) {
       trailCard.style.display = 'none';
+      destroyTrailMiniMap();
       return;
     }
 
     window.setTimeout(function () {
-      if (trailCard.getAttribute('aria-hidden') === 'true') trailCard.style.display = 'none';
-    }, 300);
+      if (trailCard.getAttribute('aria-hidden') === 'true') {
+        trailCard.style.display = 'none';
+        destroyTrailMiniMap();
+      }
+    }, 340);
+  }
+
+  function drawTrailElevationChart(trail) {
+    if (!trailElevationWrapEl || !trailElevationChartEl) return;
+
+    var profile = Array.isArray(trail.elevation_profile) ? trail.elevation_profile : [];
+
+    if (!profile.length || profile.length < 2) {
+      trailElevationWrapEl.style.display = 'none';
+      return;
+    }
+
+    trailElevationWrapEl.style.display = 'block';
+
+    var canvas = trailElevationChartEl;
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width;
+    var height = canvas.height;
+    var paddingX = 20;
+    var paddingY = 20;
+
+    ctx.clearRect(0, 0, width, height);
+
+    var elevations = profile.map(function (p) { return Number(p.elevation || 0); });
+    var distances = profile.map(function (p) { return Number(p.distanceKm || 0); });
+    var minEle = Math.min.apply(null, elevations);
+    var maxEle = Math.max.apply(null, elevations);
+    var rangeEle = Math.max(1, maxEle - minEle);
+    var maxDist = Math.max(0.001, distances[distances.length - 1] || 0.001);
+
+    ctx.strokeStyle = 'rgba(0,0,0,.10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(paddingX, height - paddingY);
+    ctx.lineTo(width - paddingX, height - paddingY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    profile.forEach(function (p, i) {
+      var x = paddingX + ((Number(p.distanceKm || 0) / maxDist) * (width - paddingX * 2));
+      var y = height - paddingY - (((Number(p.elevation || 0) - minEle) / rangeEle) * (height - paddingY * 2));
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = getTrailColor(trail.difficulty);
+    ctx.stroke();
   }
 
   function showTrailCard(trail) {
-    var elevation;
+    var elevationText;
 
     if (!trail || !trailCard) return;
     closePOICard(true);
     hideCard(false);
     currentTrail = trail;
 
-    trailTitle.innerText = trail.name;
+    trailTitle.innerText = trail.name || 'Trail';
     trailDesc.innerText = trail.description || 'No description available';
-    trailMeta.innerHTML = '';
 
-    if (trail.difficulty) trailMeta.appendChild(makeTrailPill(trail.difficulty));
-    if (trail.estimated_duration) trailMeta.appendChild(makeTrailPill(trail.estimated_duration));
-    if (trail.distance_km) trailMeta.appendChild(makeTrailPill(trail.distance_km + ' km'));
-    elevation = formatTrailElevation(trail);
-    if (elevation) trailMeta.appendChild(makeTrailPill(elevation));
-    if (trail.shoe_type) trailMeta.appendChild(makeTrailPill('Shoes: ' + trail.shoe_type));
-    trailMeta.appendChild(makeTrailPill(formatTrailPrice(trail.price_amount)));
-    if (trail.start_name || trail.end_name) trailMeta.appendChild(makeTrailPill((trail.start_name || '?') + ' → ' + (trail.end_name || '?')));
+    if (trailDifficultyEl) trailDifficultyEl.innerText = trail.difficulty || '—';
+    if (trailDistanceEl) trailDistanceEl.innerText = trail.distance_km ? (trail.distance_km + ' km') : '—';
+    if (trailDurationEl) trailDurationEl.innerText = trail.estimated_duration || '—';
+    if (trailShoesEl) trailShoesEl.innerText = trail.shoe_type || '—';
+    if (trailPriceEl) trailPriceEl.innerText = formatTrailPrice(trail.price_amount);
+    if (trailRouteEl) trailRouteEl.innerText = (trail.start_name || '?') + ' → ' + (trail.end_name || '?');
 
+    elevationText = formatTrailElevation(trail);
+    if (trailElevationTextEl) trailElevationTextEl.innerText = elevationText || '—';
+
+    drawTrailElevationChart(trail);
+    drawTrailMiniMap(trail);
+
+    trailCard.classList.remove('map-expanded');
+    if (trailMapExpandBtn) trailMapExpandBtn.innerText = '↗';
     trailCard.style.display = 'block';
     trailCard.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('trail-page-active');
     window.requestAnimationFrame(function () {
       trailCard.classList.add('open');
+      window.setTimeout(fitTrailMiniMap, 40);
+      window.setTimeout(fitTrailMiniMap, 260);
+      window.setTimeout(fitTrailMiniMap, 520);
     });
   }
 
@@ -2085,6 +2286,16 @@
     if (trailClose) {
       trailClose.addEventListener('click', function () {
         closeTrailCard(false);
+      });
+    }
+
+    if (trailMapExpandBtn) {
+      trailMapExpandBtn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        trailCard.classList.toggle('map-expanded');
+        trailMapExpandBtn.innerText = trailCard.classList.contains('map-expanded') ? '↙' : '↗';
+        window.setTimeout(fitTrailMiniMap, 80);
+        window.setTimeout(fitTrailMiniMap, 360);
       });
     }
 
