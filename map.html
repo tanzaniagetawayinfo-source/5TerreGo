@@ -954,8 +954,37 @@
     return 1;
   }
 
+  function clampTrailImportance(value) {
+    var number = Math.round(Number(value));
+    if (!Number.isFinite(number)) return 50;
+    return Math.max(0, Math.min(100, number));
+  }
+
+  function getMinZoomForTrailImportance(importance) {
+    var n = clampTrailImportance(importance);
+    if (n >= 95) return 11;
+    if (n >= 85) return 12;
+    if (n >= 75) return 13;
+    if (n >= 65) return 14;
+    if (n >= 50) return 15;
+    if (n >= 30) return 16;
+    return 17;
+  }
+
   function updateTrailWidths() {
-    /* Trails are shown as start-point POIs on the main map. The full line is only shown inside the trail preview page. */
+    var zoom;
+
+    if (!map || !trailsLayer) return;
+
+    zoom = map.getZoom();
+    trailsLayer.clearLayers();
+
+    trailItems.forEach(function (item) {
+      if (!item || !item.marker || !item.trail) return;
+      if (zoom >= getMinZoomForTrailImportance(item.trail.importance)) {
+        item.marker.addTo(trailsLayer);
+      }
+    });
   }
 
   function formatTrailPrice(amount) {
@@ -1004,6 +1033,7 @@
       difficulty: raw.difficulty || '',
       estimated_duration: raw.estimated_duration || '',
       shoe_type: raw.shoe_type || '',
+      importance: clampTrailImportance(raw.importance),
       price_amount: Number(raw.price_amount || 0),
       distance_km: Number(raw.distance_km || 0),
       elevation_gain_m: Number(raw.elevation_gain_m || 0),
@@ -1913,12 +1943,13 @@
       var startPoint;
       var marker;
       var color;
+      var importance;
 
       if (!latLngs || latLngs.length < 2) return;
-      trailItems.push({ trail: trail, latLngs: latLngs });
 
       startPoint = latLngs[0];
       color = getDisplayTrailColor(trail);
+      importance = clampTrailImportance(trail.importance);
 
       marker = L.marker(startPoint, {
         title: trail.name,
@@ -1928,7 +1959,7 @@
           iconSize: [34, 34],
           iconAnchor: [17, 17]
         })
-      }).addTo(trailsLayer);
+      });
 
       marker.on('click', function (event) {
         if (event && event.originalEvent) {
@@ -1939,8 +1970,10 @@
       });
 
       marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 });
+      trailItems.push({ trail: trail, latLngs: latLngs, marker: marker });
     });
 
+    updateTrailWidths();
     renderSearchSuggestions(searchInput.value);
   }
 
@@ -2501,6 +2534,11 @@
     console.assert(typeof setupEvents === 'function', 'setupEvents exists');
     console.assert(typeof loadTrails === 'function', 'Trail loader exists');
     console.assert(typeof updateTrailWidths === 'function', 'Trail dynamic width exists');
+    console.assert(clampTrailImportance(-5) === 0, 'Trail importance clamps to 0');
+    console.assert(clampTrailImportance(120) === 100, 'Trail importance clamps to 100');
+    console.assert(clampTrailImportance(undefined) === 50, 'Trail importance defaults to 50');
+    console.assert(getMinZoomForTrailImportance(100) <= getMinZoomForTrailImportance(10), 'Trail importance controls visibility zoom');
+    console.assert(normalizeTrail({ name: 'Test trail', importance: 87 }).importance === 87, 'Trail importance is read from Supabase row');
     console.assert(typeof handlePOIAI === 'function', 'AI POI handler exists');
     console.assert(typeof generateAIText === 'function', 'AI text generator exists');
     console.assert(typeof speakText === 'function', 'speech function exists');
