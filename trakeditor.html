@@ -23,8 +23,6 @@ button,input,select,textarea{font-family:inherit}
 .add-top{height:42px;border-radius:14px;border:none;background:#fff;color:#000;font-weight:900;padding:0 16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);white-space:nowrap}
 .auth-warning{display:none;margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(255,59,48,.14);border:1px solid rgba(255,59,48,.32);color:#ffb4ae;font-size:12px;line-height:1.35}
 .auth-warning.is-visible{display:block}
-
-/* DASHBOARD LIST */
 .dashboard{position:absolute;inset:0;overflow:auto;padding:0 14px calc(18px + env(safe-area-inset-bottom));background:#05070a}
 .dashboard-inner{padding-top:14px}
 .search{width:100%;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;outline:none;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
@@ -39,8 +37,6 @@ button,input,select,textarea{font-family:inherit}
 .trail-card-arrow{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#000;font-weight:900}
 .empty{padding:34px 14px;text-align:center;color:rgba(255,255,255,.58);line-height:1.4}
 .empty strong{display:block;color:#fff;font-size:18px;margin-bottom:6px}
-
-/* EDITOR */
 .editor{position:absolute;inset:0;z-index:50;background:#05070a;display:none;overflow:auto;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
 .editor.is-open{display:block}
 .editor-top{position:sticky;top:0;z-index:20;padding:calc(12px + env(safe-area-inset-top)) 14px 10px;background:linear-gradient(180deg,rgba(5,7,10,.98),rgba(5,7,10,.88));border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
@@ -65,6 +61,9 @@ button,input,select,textarea{font-family:inherit}
 #elevationChart{width:100%;height:92px;display:block}
 .field{margin-top:10px}
 .label{display:block;font-size:12px;font-weight:800;color:rgba(255,255,255,.72);margin-bottom:7px}
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row input[type="range"]{flex:1;padding:0;height:34px;border:none;background:transparent;accent-color:#fff}
+.range-value{width:54px;height:38px;border-radius:14px;background:#fff;color:#000;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px}
 input,select,textarea{width:100%;padding:13px 14px;border-radius:15px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.075);color:#fff;outline:none;font-size:14px}
 textarea{min-height:92px;resize:vertical}
 select option{color:#111}
@@ -125,40 +124,21 @@ select option{color:#111}
       <div class="map-card">
         <div id="map"></div>
         <div class="map-shade"></div>
-
-        <div id="mapHint" class="hint">
-          <strong>Tieni premuto sulla mappa</strong> per aggiungere punti. Per seguire automaticamente i sentieri serve una API key OpenRouteService nel codice.
-        </div>
+        <div id="mapHint" class="hint"><strong>Tieni premuto sulla mappa</strong> per aggiungere punti. Per seguire automaticamente i sentieri serve una API key OpenRouteService nel codice.</div>
       </div>
 
       <div id="routeStatus" class="route-status"></div>
 
       <div class="form-card">
-
         <div class="stats">
-          <div class="stat">
-            <div class="stat-label">Punti</div>
-            <div id="pointsStat" class="stat-value">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Distanza</div>
-            <div id="distanceStat" class="stat-value">0 km</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Preview</div>
-            <div id="routingStat" class="stat-value">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Dislivello</div>
-            <div id="elevationStat" class="stat-value">—</div>
-          </div>
+          <div class="stat"><div class="stat-label">Punti</div><div id="pointsStat" class="stat-value">0</div></div>
+          <div class="stat"><div class="stat-label">Distanza</div><div id="distanceStat" class="stat-value">0 km</div></div>
+          <div class="stat"><div class="stat-label">Preview</div><div id="routingStat" class="stat-value">—</div></div>
+          <div class="stat"><div class="stat-label">Dislivello</div><div id="elevationStat" class="stat-value">—</div></div>
         </div>
 
         <div id="elevationCard" class="elevation-card">
-          <div class="elevation-head">
-            <span>Profilo altimetrico</span>
-            <strong id="elevationSummary">—</strong>
-          </div>
+          <div class="elevation-head"><span>Profilo altimetrico</span><strong id="elevationSummary">—</strong></div>
           <canvas id="elevationChart" width="640" height="160"></canvas>
         </div>
 
@@ -186,11 +166,19 @@ select option{color:#111}
         <div class="field">
           <label class="label" for="shoeType">Recommended shoes</label>
           <select id="shoeType">
-            <option value="sneakers">Sneakers / comfortable shoes</option>
-            <option value="trail">Trail running shoes</option>
+            <option value="sneakers">Sneakers</option>
+            <option value="trail">Trail shoes</option>
             <option value="hiking">Hiking shoes</option>
             <option value="boots">Hiking boots</option>
           </select>
+        </div>
+
+        <div class="field">
+          <label class="label" for="trailImportance">Trail importance</label>
+          <div class="range-row">
+            <input id="trailImportance" type="range" min="0" max="100" step="1" value="50" />
+            <div id="trailImportanceValue" class="range-value">50</div>
+          </div>
         </div>
 
         <div class="field">
@@ -199,14 +187,8 @@ select option{color:#111}
         </div>
 
         <div class="grid-2">
-          <div class="field">
-            <label class="label" for="startName">Start</label>
-            <input id="startName" placeholder="e.g. Monterosso" />
-          </div>
-          <div class="field">
-            <label class="label" for="endName">End</label>
-            <input id="endName" placeholder="e.g. Vernazza" />
-          </div>
+          <div class="field"><label class="label" for="startName">Start</label><input id="startName" placeholder="e.g. Monterosso" /></div>
+          <div class="field"><label class="label" for="endName">End</label><input id="endName" placeholder="e.g. Vernazza" /></div>
         </div>
 
         <div class="field">
@@ -224,7 +206,8 @@ select option{color:#111}
           <button id="clearBtn" class="action-btn danger" type="button">Clear</button>
           <button id="fitBtn" class="action-btn" type="button">Center</button>
           <button id="saveBtn" class="action-btn primary" type="button">Save trail</button>
-        </div>      </div>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -233,119 +216,42 @@ select option{color:#111}
   <div class="modal-content">
     <button class="close-btn" onclick="closeHelpModal()">×</button>
     <h2>Supabase setup</h2>
-    <p style="color:rgba(255,255,255,.7);line-height:1.45;font-size:14px">La tabella deve chiamarsi <strong>trails</strong>. RLS deve restare attivo. La lettura è pubblica, mentre creazione, modifica ed eliminazione sono consentite solo all'utente autenticato <strong>5terrego.info@gmail.com</strong>. Se in Supabase vedi <strong>API DISABLED</strong>, abilita la tabella nella Data API/PostgREST senza disattivare RLS.</p>
+    <p style="color:rgba(255,255,255,.7);line-height:1.45;font-size:14px">La tabella deve chiamarsi <strong>trails</strong>. Aggiunta colonna <strong>importance</strong> da 0 a 100.</p>
     <div class="sql-box">create extension if not exists pgcrypto;
 
 create table if not exists public.trails (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
-
   name text not null,
   description text,
   difficulty text,
   estimated_duration text,
   shoe_type text,
-
+  importance integer default 50 check (importance &gt;= 0 and importance &lt;= 100),
   price_amount numeric default 0,
   price_currency text default 'EUR',
   is_free boolean default true,
-
   start_name text,
   end_name text,
   distance_km numeric,
   elevation_gain_m numeric default 0,
   elevation_loss_m numeric default 0,
   elevation_profile jsonb not null default '[]'::jsonb,
-
   points jsonb not null default '[]'::jsonb,
   route_geojson jsonb,
   owner_email text
 );
 
 alter table public.trails
-add column if not exists updated_at timestamptz default now(),
-add column if not exists description text,
-add column if not exists difficulty text,
-add column if not exists estimated_duration text,
-add column if not exists shoe_type text,
-add column if not exists price_amount numeric default 0,
-add column if not exists price_currency text default 'EUR',
-add column if not exists is_free boolean default true,
-add column if not exists start_name text,
-add column if not exists end_name text,
-add column if not exists distance_km numeric,
-add column if not exists elevation_gain_m numeric default 0,
-add column if not exists elevation_loss_m numeric default 0,
+add column if not exists importance integer default 50,
 add column if not exists elevation_profile jsonb not null default '[]'::jsonb,
-add column if not exists points jsonb not null default '[]'::jsonb,
-add column if not exists route_geojson jsonb,
-add column if not exists owner_email text;
-
-update public.trails
-set price_currency = 'EUR'
-where price_currency is null or price_currency &lt;&gt; 'EUR';
-
-update public.trails
-set price_amount = 0
-where price_amount is null;
-
-update public.trails
-set is_free = true
-where price_amount = 0;
-
-update public.trails
-set is_free = false
-where price_amount &gt; 0;
+add column if not exists points jsonb not null default '[]'::jsonb;
 
 alter table public.trails enable row level security;
 
-revoke insert, update, delete on public.trails from anon;
 grant select on public.trails to anon;
-grant select, insert, update, delete on public.trails to authenticated;
-
-drop policy if exists "Public can read trails" on public.trails;
-drop policy if exists "Authenticated can insert trails" on public.trails;
-drop policy if exists "Authenticated can update trails" on public.trails;
-drop policy if exists "Authenticated can delete trails" on public.trails;
-drop policy if exists "Only owner can insert trails" on public.trails;
-drop policy if exists "Only owner can update trails" on public.trails;
-drop policy if exists "Only owner can delete trails" on public.trails;
-
-create policy "Public can read trails"
-on public.trails
-for select
-to anon, authenticated
-using (true);
-
-create policy "Only owner can insert trails"
-on public.trails
-for insert
-to authenticated
-with check (
-  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
-  and owner_email = '5terrego.info@gmail.com'
-);
-
-create policy "Only owner can update trails"
-on public.trails
-for update
-to authenticated
-using (
-  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
-)
-with check (
-  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
-  and owner_email = '5terrego.info@gmail.com'
-);
-
-create policy "Only owner can delete trails"
-on public.trails
-for delete
-to authenticated
-using (
-  auth.jwt() -&gt;&gt; 'email' = '5terrego.info@gmail.com'
-);</div>
+grant select, insert, update, delete on public.trails to authenticated;</div>
   </div>
 </div>
 
@@ -355,9 +261,10 @@ const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const CINQUE_TERRE_CENTER = [44.1265, 9.7092];
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const OSRM_FOOT_URL = "https://router.project-osrm.org/route/v1/foot";
-const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAxMzViYzBhMWYzZTQ0NTNiOTAzM2M3NGRhOWFkZjNjIiwiaCI6Im11cm11cjY0In0="; // obbligatoria per routing hiking reale
+const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAxMzViYzBhMWYzZTQ0NTNiOTAzM2M3NGRhOWFkZjNjIiwiaCI6Im11cm11cjY0In0=";
 const ORS_HIKING_URL = "https://api.openrouteservice.org/v2/directions/foot-hiking/geojson";
 const TRAILS_TABLE = "trails";
+const FIXED_CURRENCY = "EUR";
 
 let map = null;
 let mapReady = false;
@@ -399,35 +306,29 @@ const trailNameEl = document.getElementById("trailName");
 const difficultyEl = document.getElementById("difficulty");
 const estimatedDurationEl = document.getElementById("estimatedDuration");
 const shoeTypeEl = document.getElementById("shoeType");
+const trailImportanceEl = document.getElementById("trailImportance");
+const trailImportanceValueEl = document.getElementById("trailImportanceValue");
 const priceAmountEl = document.getElementById("priceAmount");
-const FIXED_CURRENCY = "EUR";
 const startNameEl = document.getElementById("startName");
 const endNameEl = document.getElementById("endName");
 const descriptionEl = document.getElementById("description");
 
 function goBack(){
-  if(window.history.length > 1){
-    window.history.back();
-  }else{
-    window.location.href = "poidashboard.html";
-  }
+  if(window.history.length > 1) window.history.back();
+  else window.location.href = "poidashboard.html";
 }
 
-function checkAuthorization(){
-  const token = getToken();
-  const email = getUserEmail();
-  const isAllowed = Boolean(token && email === "5terrego.info@gmail.com");
+function clampTrailImportance(value){
+  const number = Math.round(Number(value));
+  if(!Number.isFinite(number)) return 50;
+  return Math.max(0, Math.min(100, number));
+}
 
-  if(isAllowed){
-    userLineEl.innerText = "Authorized: " + email;
-    authWarningEl.classList.remove("is-visible");
-  }else{
-    userLineEl.innerText = email ? "Not authorized: " + email : "Login required";
-    authWarningEl.innerText = "This page is reserved for authorized users only.";
-    authWarningEl.classList.add("is-visible");
-  }
-
-  return isAllowed;
+function updateTrailImportanceValue(){
+  if(!trailImportanceEl || !trailImportanceValueEl) return;
+  const value = clampTrailImportance(trailImportanceEl.value);
+  trailImportanceEl.value = String(value);
+  trailImportanceValueEl.innerText = String(value);
 }
 
 function getAuthSession(){
@@ -455,26 +356,36 @@ function getUserEmail(){
   return String(session && session.user && session.user.email ? session.user.email : "").toLowerCase();
 }
 
+function checkAuthorization(){
+  const token = getToken();
+  const email = getUserEmail();
+  const isAllowed = Boolean(token && email === "5terrego.info@gmail.com");
+  if(isAllowed){
+    userLineEl.innerText = "Authorized: " + email;
+    authWarningEl.classList.remove("is-visible");
+  }else{
+    userLineEl.innerText = email ? "Not authorized: " + email : "Login required";
+    authWarningEl.innerText = "This page is reserved for authorized users only.";
+    authWarningEl.classList.add("is-visible");
+  }
+  return isAllowed;
+}
+
 function buildHeaders(options){
   options = options || {};
   const token = options.useUserToken ? getToken() : null;
-  const headers = {
+  return Object.assign({
     apikey: ANON_KEY,
     Authorization: "Bearer " + (token || ANON_KEY),
     Accept: "application/json",
     "Content-Type": "application/json"
-  };
-  return Object.assign(headers, options.extra || {});
+  }, options.extra || {});
 }
 
 async function parseResponse(res){
   const text = await res.text();
   let data = null;
-  try{
-    data = text ? JSON.parse(text) : null;
-  }catch(err){
-    data = text;
-  }
+  try{ data = text ? JSON.parse(text) : null; }catch(err){ data = text; }
   if(!res.ok){
     const message = typeof data === "object" && data ? data.message || data.hint || JSON.stringify(data) : String(data || res.statusText);
     const error = new Error(message);
@@ -487,65 +398,28 @@ async function parseResponse(res){
 
 function setRouteStatus(message, isError){
   if(!message){
-    routeStatusEl.classList.remove("is-visible");
-    routeStatusEl.classList.remove("error");
+    routeStatusEl.classList.remove("is-visible", "error");
     routeStatusEl.innerText = "";
     return;
   }
   routeStatusEl.innerText = message;
   routeStatusEl.classList.add("is-visible");
-  if(isError){
-    routeStatusEl.classList.add("error");
-  }else{
-    routeStatusEl.classList.remove("error");
-  }
+  routeStatusEl.classList.toggle("error", Boolean(isError));
 }
 
 function initMap(){
   if(mapReady) return;
-
-  map = L.map("map", {
-    zoomControl:false,
-    attributionControl:true,
-    preferCanvas:true
-  }).setView(CINQUE_TERRE_CENTER, 13);
-
-  const openTopoMap = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-    maxZoom:17,
-    attribution:"Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap"
-  });
-
-  const cyclOsm = L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", {
-    maxZoom:20,
-    attribution:"© CyclOSM | © OpenStreetMap contributors"
-  });
-
-  const openStreetMap = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom:19,
-    attribution:"© OpenStreetMap"
-  });
-
+  map = L.map("map", { zoomControl:false, attributionControl:true, preferCanvas:true }).setView(CINQUE_TERRE_CENTER, 13);
+  const openTopoMap = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", { maxZoom:17, attribution:"Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap" });
+  const cyclOsm = L.tileLayer("https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png", { maxZoom:20, attribution:"© CyclOSM | © OpenStreetMap contributors" });
+  const openStreetMap = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19, attribution:"© OpenStreetMap" });
   openTopoMap.addTo(map);
-
-  L.control.layers({
-    "Sentieri / Topografica": openTopoMap,
-    "CyclOSM": cyclOsm,
-    "OpenStreetMap classica": openStreetMap
-  }, null, {
-    position:"topright",
-    collapsed:true
-  }).addTo(map);
-
+  L.control.layers({ "Sentieri / Topografica":openTopoMap, "CyclOSM":cyclOsm, "OpenStreetMap classica":openStreetMap }, null, { position:"topright", collapsed:true }).addTo(map);
   L.control.zoom({ position:"bottomright" }).addTo(map);
-
   map.on("mousedown touchstart", startLongPress);
   map.on("mousemove touchmove", moveLongPress);
   map.on("mouseup mouseleave touchend touchcancel", cancelLongPress);
-  map.on("contextmenu", function(e){
-    e.originalEvent.preventDefault();
-    addPoint(e.latlng);
-  });
-
+  map.on("contextmenu", function(e){ e.originalEvent.preventDefault(); addPoint(e.latlng); });
   mapReady = true;
 }
 
@@ -559,11 +433,8 @@ function openEditor(mode, trail){
   initMap();
   setTimeout(function(){
     map.invalidateSize();
-    if(mode === "edit" && trail){
-      loadTrailIntoEditor(trail);
-    }else{
-      startNewTrail();
-    }
+    if(mode === "edit" && trail) loadTrailIntoEditor(trail);
+    else startNewTrail();
   }, 100);
 }
 
@@ -580,12 +451,11 @@ function startNewTrail(){
   trailNameEl.value = "";
   difficultyEl.value = "easy";
   estimatedDurationEl.value = "";
+  estimatedDurationEl.dataset.auto = "true";
+  if(shoeTypeEl){ shoeTypeEl.value = "sneakers"; shoeTypeEl.dataset.auto = "true"; }
+  if(trailImportanceEl) trailImportanceEl.value = "50";
+  updateTrailImportanceValue();
   if(priceAmountEl) priceAmountEl.value = "0";
-  // Currency is always EUR.
-  if(shoeTypeEl){
-    shoeTypeEl.value = "sneakers";
-    shoeTypeEl.dataset.auto = "true";
-  }
   startNameEl.value = "";
   endNameEl.value = "";
   descriptionEl.value = "";
@@ -606,10 +476,7 @@ function startNewTrail(){
 function clearMapLayers(){
   pointMarkers.forEach(function(marker){ map.removeLayer(marker); });
   pointMarkers = [];
-  if(routeLine){
-    map.removeLayer(routeLine);
-    routeLine = null;
-  }
+  if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
 }
 
 function startLongPress(e){
@@ -621,13 +488,10 @@ function startLongPress(e){
     cancelLongPress();
   }, 560);
 }
-
 function moveLongPress(e){
-  if(!longPressTimer || !longPressLatLng) return;
-  if(!e.latlng) return;
+  if(!longPressTimer || !longPressLatLng || !e.latlng) return;
   if(map.distance(longPressLatLng, e.latlng) > 18) cancelLongPress();
 }
-
 function cancelLongPress(){
   if(longPressTimer) clearTimeout(longPressTimer);
   longPressTimer = null;
@@ -635,12 +499,7 @@ function cancelLongPress(){
 }
 
 function createPointIcon(index){
-  return L.divIcon({
-    className:"trail-point",
-    html:"<div style='width:26px;height:26px;border-radius:50%;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:2px solid #111'>" + index + "</div>",
-    iconSize:[26,26],
-    iconAnchor:[13,13]
-  });
+  return L.divIcon({ className:"trail-point", html:"<div style='width:26px;height:26px;border-radius:50%;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:2px solid #111'>" + index + "</div>", iconSize:[26,26], iconAnchor:[13,13] });
 }
 
 function addPoint(latlng){
@@ -680,7 +539,6 @@ function renderPoints(activeIndex){
 }
 
 function renderPointList(activeIndex){
-  if(typeof activeIndex !== "number") activeIndex = -1;
   pointListEl.innerHTML = "";
   if(rawPoints.length === 0){
     const empty = document.createElement("div");
@@ -717,22 +575,16 @@ function calculateAutoDifficulty(){
   const distance = Number(routeDistanceKm) || 0;
   const gain = Number(elevationGainM) || 0;
   const climbPerKm = distance > 0 ? gain / distance : 0;
-
   if(distance >= 13 || gain >= 800 || climbPerKm >= 140) return "expert";
   if(distance >= 8 || gain >= 450 || climbPerKm >= 95) return "hard";
   if(distance >= 4 || gain >= 180 || climbPerKm >= 55) return "medium";
   return "easy";
 }
-
 function applyAutoDifficulty(){
   if(rawPoints.length < 2) return;
-  const nextDifficulty = calculateAutoDifficulty();
-  if(difficultyEl.value !== nextDifficulty){
-    difficultyEl.value = nextDifficulty;
-  }
+  difficultyEl.value = calculateAutoDifficulty();
   applyAutoShoeType(false);
 }
-
 function getRecommendedShoeType(){
   const difficulty = difficultyEl.value;
   if(difficulty === "easy") return "sneakers";
@@ -741,33 +593,22 @@ function getRecommendedShoeType(){
   if(difficulty === "expert") return "boots";
   return "trail";
 }
-
 function applyAutoShoeType(force){
   if(!shoeTypeEl) return;
   if(!force && shoeTypeEl.dataset.auto === "false") return;
   shoeTypeEl.value = getRecommendedShoeType();
   shoeTypeEl.dataset.auto = "true";
 }
-
 function redrawCurrentRouteColor(){
   if(rawPoints.length < 2) return;
-  if(routeLine){
-    map.removeLayer(routeLine);
-    routeLine = null;
-  }
-  if(routeGeojson && routeGeojson.geometry){
-    routeLine = L.geoJSON(routeGeojson, { style:{ color:getDifficultyColor(), weight:3, opacity:.94, lineCap:"round", lineJoin:"round" } }).addTo(map);
-  }else{
-    drawManualPreview(false);
-  }
+  if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
+  if(routeGeojson && routeGeojson.geometry) routeLine = L.geoJSON(routeGeojson, { style:{ color:getDifficultyColor(), weight:3, opacity:.94, lineCap:"round", lineJoin:"round" } }).addTo(map);
+  else drawManualPreview(false);
 }
 
 function drawManualPreview(showMessage){
   if(showMessage !== false) showMessage = true;
-  if(routeLine){
-    map.removeLayer(routeLine);
-    routeLine = null;
-  }
+  if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
   routeDistanceKm = calculateFallbackDistanceKm();
   routeDurationSeconds = 0;
   elevationGainM = 0;
@@ -776,19 +617,8 @@ function drawManualPreview(showMessage){
   routingMode = rawPoints.length >= 2 ? "manuale" : "-";
   applyAutoDifficulty();
   if(rawPoints.length >= 2){
-    routeGeojson = {
-      type:"Feature",
-      properties:{ source:"manual", distance_m:routeDistanceKm * 1000 },
-      geometry:{ type:"LineString", coordinates:rawPoints.map(function(point){ return [point.lng, point.lat]; }) }
-    };
-    routeLine = L.polyline(rawPoints.map(function(point){ return [point.lat, point.lng]; }), {
-      color:getDifficultyColor(),
-      weight:3,
-      opacity:.82,
-      dashArray:"5 7",
-      lineCap:"round",
-      lineJoin:"round"
-    }).addTo(map);
+    routeGeojson = { type:"Feature", properties:{ source:"manual", distance_m:routeDistanceKm * 1000 }, geometry:{ type:"LineString", coordinates:rawPoints.map(function(point){ return [point.lng, point.lat]; }) } };
+    routeLine = L.polyline(rawPoints.map(function(point){ return [point.lat, point.lng]; }), { color:getDifficultyColor(), weight:3, opacity:.82, dashArray:"5 7", lineCap:"round", lineJoin:"round" }).addTo(map);
     updateEstimatedDuration(false);
     if(showMessage) setRouteStatus("Preview manuale. La durata viene stimata dalla distanza; con routing hiking arriva anche il dislivello.", false);
   }else if(rawPoints.length === 1){
@@ -811,35 +641,23 @@ function formatDuration(seconds){
   if(hours) return hours + "h";
   return minutes + "m";
 }
-
 function estimateDurationFromDistance(){
   if(!routeDistanceKm) return "";
   let kmh = 3.8;
   if(difficultyEl.value === "medium") kmh = 3.2;
   if(difficultyEl.value === "hard") kmh = 2.7;
   if(difficultyEl.value === "expert") kmh = 2.25;
-  const seconds = (routeDistanceKm / kmh) * 3600;
-  return formatDuration(seconds);
+  return formatDuration((routeDistanceKm / kmh) * 3600);
 }
-
 function updateEstimatedDuration(force){
   const current = estimatedDurationEl.value.trim();
   if(current && !force && estimatedDurationEl.dataset.auto !== "true") return;
   const formatted = routeDurationSeconds ? formatDuration(routeDurationSeconds) : estimateDurationFromDistance();
-  if(formatted){
-    estimatedDurationEl.value = formatted;
-    estimatedDurationEl.dataset.auto = "true";
-  }
+  if(formatted){ estimatedDurationEl.value = formatted; estimatedDurationEl.dataset.auto = "true"; }
 }
-
-function getCoordDistanceMeters(a, b){
-  return map.distance([a[1], a[0]], [b[1], b[0]]);
-}
-
+function getCoordDistanceMeters(a, b){ return map.distance([a[1], a[0]], [b[1], b[0]]); }
 function calculateElevationFromFeature(feature){
-  elevationGainM = 0;
-  elevationLossM = 0;
-  elevationProfile = [];
+  elevationGainM = 0; elevationLossM = 0; elevationProfile = [];
   if(!feature || !feature.geometry || !Array.isArray(feature.geometry.coordinates)) return;
   const coords = feature.geometry.coordinates;
   let distanceM = 0;
@@ -859,13 +677,9 @@ function calculateElevationFromFeature(feature){
   elevationGainM = Math.round(elevationGainM);
   elevationLossM = Math.round(elevationLossM);
 }
-
 function renderElevationChart(){
   if(!elevationCardEl || !elevationChartEl) return;
-  if(!elevationProfile || elevationProfile.length < 2){
-    elevationCardEl.classList.remove("is-visible");
-    return;
-  }
+  if(!elevationProfile || elevationProfile.length < 2){ elevationCardEl.classList.remove("is-visible"); return; }
   elevationCardEl.classList.add("is-visible");
   elevationSummaryEl.innerText = "+" + elevationGainM + " m / -" + elevationLossM + " m";
   const canvas = elevationChartEl;
@@ -899,96 +713,52 @@ function renderElevationChart(){
   ctx.strokeStyle = getDifficultyColor();
   ctx.stroke();
 }
-
 function calculateFallbackDistanceKm(){
   if(!map || rawPoints.length < 2) return 0;
   let meters = 0;
-  for(let i = 1; i < rawPoints.length; i++){
-    meters += map.distance([rawPoints[i - 1].lat, rawPoints[i - 1].lng], [rawPoints[i].lat, rawPoints[i].lng]);
-  }
+  for(let i = 1; i < rawPoints.length; i++) meters += map.distance([rawPoints[i - 1].lat, rawPoints[i - 1].lng], [rawPoints[i].lat, rawPoints[i].lng]);
   return Number((meters / 1000).toFixed(2));
 }
-
-function getMeters(a, b){
-  return map.distance([a.lat, a.lng], [b.lat, b.lng]);
-}
-
+function getMeters(a, b){ return map.distance([a.lat, a.lng], [b.lat, b.lng]); }
 function getBoundsForPoints(points){
-  let minLat = Infinity;
-  let minLng = Infinity;
-  let maxLat = -Infinity;
-  let maxLng = -Infinity;
-  points.forEach(function(point){
-    minLat = Math.min(minLat, point.lat);
-    minLng = Math.min(minLng, point.lng);
-    maxLat = Math.max(maxLat, point.lat);
-    maxLng = Math.max(maxLng, point.lng);
-  });
+  let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
+  points.forEach(function(point){ minLat = Math.min(minLat, point.lat); minLng = Math.min(minLng, point.lng); maxLat = Math.max(maxLat, point.lat); maxLng = Math.max(maxLng, point.lng); });
   const pad = 0.015;
   return { south:minLat - pad, west:minLng - pad, north:maxLat + pad, east:maxLng + pad };
 }
-
 function makeOverpassQuery(bounds){
   const bbox = bounds.south + "," + bounds.west + "," + bounds.north + "," + bounds.east;
   const highways = "path|footway|track|steps|pedestrian|living_street|service|residential|unclassified|tertiary|secondary|primary";
   return "[out:json][timeout:25];(way[highway~\"^(" + highways + ")$\"](" + bbox + "););(._;>;);out body;";
 }
-
 async function fetchOsmGraph(points){
   const bounds = getBoundsForPoints(points);
-  const query = makeOverpassQuery(bounds);
-  const response = await fetch(OVERPASS_URL, {
-    method:"POST",
-    headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
-    body:"data=" + encodeURIComponent(query)
-  });
+  const response = await fetch(OVERPASS_URL, { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" }, body:"data=" + encodeURIComponent(makeOverpassQuery(bounds)) });
   const data = await response.json();
   if(!response.ok || !data || !Array.isArray(data.elements)) throw new Error("Overpass non disponibile");
   const nodes = new Map();
   const ways = [];
-  data.elements.forEach(function(el){
-    if(el.type === "node") nodes.set(el.id, { id:el.id, lat:el.lat, lng:el.lon });
-    if(el.type === "way" && Array.isArray(el.nodes)) ways.push(el);
-  });
+  data.elements.forEach(function(el){ if(el.type === "node") nodes.set(el.id, { id:el.id, lat:el.lat, lng:el.lon }); if(el.type === "way" && Array.isArray(el.nodes)) ways.push(el); });
   const graph = new Map();
-  function addEdge(aId, bId, cost){
-    if(!graph.has(aId)) graph.set(aId, []);
-    graph.get(aId).push({ id:bId, cost:cost });
-  }
+  function addEdge(aId, bId, cost){ if(!graph.has(aId)) graph.set(aId, []); graph.get(aId).push({ id:bId, cost:cost }); }
   ways.forEach(function(way){
     for(let i = 1; i < way.nodes.length; i++){
-      const aId = way.nodes[i - 1];
-      const bId = way.nodes[i];
-      const a = nodes.get(aId);
-      const b = nodes.get(bId);
+      const aId = way.nodes[i - 1], bId = way.nodes[i], a = nodes.get(aId), b = nodes.get(bId);
       if(!a || !b) continue;
       const d = getMeters(a, b);
-      addEdge(aId, bId, d);
-      addEdge(bId, aId, d);
+      addEdge(aId, bId, d); addEdge(bId, aId, d);
     }
   });
   return { nodes:nodes, graph:graph };
 }
-
 function nearestNode(point, nodes){
-  let bestId = null;
-  let bestDistance = Infinity;
-  nodes.forEach(function(node, id){
-    const d = getMeters(point, node);
-    if(d < bestDistance){
-      bestDistance = d;
-      bestId = id;
-    }
-  });
+  let bestId = null, bestDistance = Infinity;
+  nodes.forEach(function(node, id){ const d = getMeters(point, node); if(d < bestDistance){ bestDistance = d; bestId = id; } });
   if(bestId === null || bestDistance > 260) throw new Error("Nessuna strada vicina al punto");
   return bestId;
 }
-
 function shortestPath(startId, endId, graph){
-  const dist = new Map();
-  const prev = new Map();
-  const visited = new Set();
-  const queue = [{ id:startId, cost:0 }];
+  const dist = new Map(), prev = new Map(), visited = new Set(), queue = [{ id:startId, cost:0 }];
   dist.set(startId, 0);
   while(queue.length > 0){
     queue.sort(function(a,b){ return a.cost - b.cost; });
@@ -996,29 +766,19 @@ function shortestPath(startId, endId, graph){
     if(!current || visited.has(current.id)) continue;
     if(current.id === endId) break;
     visited.add(current.id);
-    const edges = graph.get(current.id) || [];
-    edges.forEach(function(edge){
+    (graph.get(current.id) || []).forEach(function(edge){
       if(visited.has(edge.id)) return;
       const nextCost = current.cost + edge.cost;
       const oldCost = dist.has(edge.id) ? dist.get(edge.id) : Infinity;
-      if(nextCost < oldCost){
-        dist.set(edge.id, nextCost);
-        prev.set(edge.id, current.id);
-        queue.push({ id:edge.id, cost:nextCost });
-      }
+      if(nextCost < oldCost){ dist.set(edge.id, nextCost); prev.set(edge.id, current.id); queue.push({ id:edge.id, cost:nextCost }); }
     });
   }
   if(startId !== endId && !prev.has(endId)) throw new Error("Percorso non trovato");
   const path = [endId];
   let cursor = endId;
-  while(cursor !== startId){
-    cursor = prev.get(cursor);
-    if(!cursor) throw new Error("Percorso incompleto");
-    path.unshift(cursor);
-  }
+  while(cursor !== startId){ cursor = prev.get(cursor); if(!cursor) throw new Error("Percorso incompleto"); path.unshift(cursor); }
   return path;
 }
-
 async function routeWithOverpass(){
   const osm = await fetchOsmGraph(rawPoints);
   let coordinates = [];
@@ -1027,60 +787,29 @@ async function routeWithOverpass(){
     const aId = nearestNode(rawPoints[i - 1], osm.nodes);
     const bId = nearestNode(rawPoints[i], osm.nodes);
     const nodeIds = shortestPath(aId, bId, osm.graph);
-    let segment = nodeIds.map(function(id){
-      const node = osm.nodes.get(id);
-      return [node.lng, node.lat];
-    });
-    for(let j = 1; j < segment.length; j++){
-      totalMeters += map.distance([segment[j - 1][1], segment[j - 1][0]], [segment[j][1], segment[j][0]]);
-    }
+    let segment = nodeIds.map(function(id){ const node = osm.nodes.get(id); return [node.lng, node.lat]; });
+    for(let j = 1; j < segment.length; j++) totalMeters += map.distance([segment[j - 1][1], segment[j - 1][0]], [segment[j][1], segment[j][0]]);
     if(i > 1 && segment.length > 0) segment.shift();
     coordinates = coordinates.concat(segment);
   }
   if(coordinates.length < 2) throw new Error("Percorso troppo corto");
   return { type:"Feature", properties:{ source:"overpass", distance_m:totalMeters }, geometry:{ type:"LineString", coordinates:coordinates } };
 }
-
 async function routeWithOsrmFoot(){
   const coords = rawPoints.map(function(point){ return point.lng + "," + point.lat; }).join(";");
-  const url = OSRM_FOOT_URL + "/" + coords + "?overview=full&geometries=geojson&steps=false";
-  const response = await fetch(url);
+  const response = await fetch(OSRM_FOOT_URL + "/" + coords + "?overview=full&geometries=geojson&steps=false");
   const data = await response.json();
   if(!response.ok || !data || data.code !== "Ok" || !data.routes || !data.routes.length) throw new Error("OSRM non disponibile");
   const route = data.routes[0];
   return { type:"Feature", properties:{ source:"osrm-foot", distance_m:route.distance, duration_s:route.duration }, geometry:route.geometry };
 }
-
-function hasOpenRouteServiceKey(){
-  return ORS_API_KEY && ORS_API_KEY.indexOf("INCOLLA_QUI") === -1 && ORS_API_KEY.length > 20;
-}
-
+function hasOpenRouteServiceKey(){ return ORS_API_KEY && ORS_API_KEY.indexOf("INCOLLA_QUI") === -1 && ORS_API_KEY.length > 20; }
 async function routeWithOpenRouteService(){
-  const body = {
-    coordinates:rawPoints.map(function(point){ return [point.lng, point.lat]; }),
-    elevation:true,
-    instructions:false,
-    preference:"recommended"
-  };
-
-  const response = await fetch(ORS_HIKING_URL, {
-    method:"POST",
-    headers:{
-      Authorization:ORS_API_KEY,
-      "Content-Type":"application/json",
-      Accept:"application/json, application/geo+json"
-    },
-    body:JSON.stringify(body)
-  });
-
+  const body = { coordinates:rawPoints.map(function(point){ return [point.lng, point.lat]; }), elevation:true, instructions:false, preference:"recommended" };
+  const response = await fetch(ORS_HIKING_URL, { method:"POST", headers:{ Authorization:ORS_API_KEY, "Content-Type":"application/json", Accept:"application/json, application/geo+json" }, body:JSON.stringify(body) });
   const rawText = await response.text();
   let data = null;
-  try{
-    data = rawText ? JSON.parse(rawText) : null;
-  }catch(parseErr){
-    data = rawText;
-  }
-
+  try{ data = rawText ? JSON.parse(rawText) : null; }catch(parseErr){ data = rawText; }
   if(!response.ok || !data || !data.features || !data.features.length){
     let detail = "OpenRouteService non disponibile";
     if(data && data.error && data.error.message) detail = data.error.message;
@@ -1088,19 +817,14 @@ async function routeWithOpenRouteService(){
     else if(typeof data === "string" && data) detail = data.slice(0, 180);
     throw new Error("HTTP " + response.status + " - " + detail);
   }
-
   const feature = data.features[0];
   const summary = feature.properties && feature.properties.summary ? feature.properties.summary : null;
   if(summary && summary.distance) feature.properties.distance_m = summary.distance;
   if(summary && summary.duration) feature.properties.duration_s = summary.duration;
   return feature;
 }
-
 function drawGeoJsonRoute(feature, label, message){
-  if(routeLine){
-    map.removeLayer(routeLine);
-    routeLine = null;
-  }
+  if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
   routeGeojson = feature;
   const props = feature.properties || {};
   routeDistanceKm = props.distance_m ? Number((props.distance_m / 1000).toFixed(2)) : calculateFallbackDistanceKm();
@@ -1113,13 +837,8 @@ function drawGeoJsonRoute(feature, label, message){
   setRouteStatus(message, false);
   updateStats();
 }
-
 async function rebuildRoute(){
-  if(rawPoints.length < 2){
-    drawManualPreview();
-    return;
-  }
-
+  if(rawPoints.length < 2){ drawManualPreview(); return; }
   if(hasOpenRouteServiceKey()){
     try{
       setRouteStatus("Calcolo percorso hiking con OpenRouteService...", false);
@@ -1132,10 +851,7 @@ async function rebuildRoute(){
       console.warn("ORS failed", errOrs);
       setRouteStatus("OpenRouteService non ha preso questo tratto o la richiesta e stata rifiutata: " + errOrs.message + ". Provo un fallback su OpenStreetMap.", true);
     }
-  }else{
-    setRouteStatus("API key OpenRouteService assente: uso fallback OpenStreetMap/OSRM.", true);
-  }
-
+  }else setRouteStatus("API key OpenRouteService assente: uso fallback OpenStreetMap/OSRM.", true);
   try{
     setRouteStatus("Fallback: cerco sentieri e strade su OpenStreetMap...", false);
     routingMode = "OSM";
@@ -1143,10 +859,7 @@ async function rebuildRoute(){
     const overpassRoute = await routeWithOverpass();
     drawGeoJsonRoute(overpassRoute, "sentiero", "Percorso agganciato ai dati OpenStreetMap.");
     return;
-  }catch(errOverpass){
-    console.warn("Overpass failed", errOverpass);
-  }
-
+  }catch(errOverpass){ console.warn("Overpass failed", errOverpass); }
   try{
     setRouteStatus("Fallback: provo OSRM foot per strade principali e percorsi pedonali...", false);
     routingMode = "OSRM";
@@ -1154,14 +867,10 @@ async function rebuildRoute(){
     const osrmRoute = await routeWithOsrmFoot();
     drawGeoJsonRoute(osrmRoute, "strada", "Percorso agganciato con OSRM foot.");
     return;
-  }catch(errOsrm){
-    console.warn("OSRM failed", errOsrm);
-  }
-
+  }catch(errOsrm){ console.warn("OSRM failed", errOsrm); }
   drawManualPreview(false);
   setRouteStatus("Nessun router e riuscito ad agganciare il tratto. Resta la linea manuale.", true);
 }
-
 function updateStats(){
   pointsStatEl.innerText = String(rawPoints.length);
   distanceStatEl.innerText = routeDistanceKm ? routeDistanceKm + " km" : "0 km";
@@ -1169,20 +878,11 @@ function updateStats(){
   elevationStatEl.innerText = elevationProfile.length >= 2 ? "+" + elevationGainM + "m" : "—";
   renderElevationChart();
 }
-
 function fitRoute(){
-  if(routeLine){
-    map.fitBounds(routeLine.getBounds(), { padding:[40,40] });
-    return;
-  }
-  if(rawPoints.length > 0){
-    const group = L.featureGroup(pointMarkers);
-    map.fitBounds(group.getBounds(), { padding:[40,40] });
-    return;
-  }
+  if(routeLine){ map.fitBounds(routeLine.getBounds(), { padding:[40,40] }); return; }
+  if(rawPoints.length > 0){ map.fitBounds(L.featureGroup(pointMarkers).getBounds(), { padding:[40,40] }); return; }
   map.flyTo(CINQUE_TERRE_CENTER, 13, { duration:.65 });
 }
-
 function clearRoute(){
   if(!confirm("Svuotare tutti i punti del sentiero?")) return;
   rawPoints = [];
@@ -1198,22 +898,19 @@ function clearRoute(){
   renderPoints(-1);
   setRouteStatus("", false);
 }
-
-function undoPoint(){
-  rawPoints.pop();
-  renderPoints(-1);
-  scheduleRoutePreview();
-}
+function undoPoint(){ rawPoints.pop(); renderPoints(-1); scheduleRoutePreview(); }
 
 function readTrailForm(){
+  const priceValue = priceAmountEl ? Math.max(0, Number(priceAmountEl.value || 0)) : 0;
   return {
     name:trailNameEl.value.trim(),
     description:descriptionEl.value.trim(),
     difficulty:difficultyEl.value,
     shoe_type:shoeTypeEl ? shoeTypeEl.value : "",
-    price_amount:priceAmountEl ? Math.max(0, Number(priceAmountEl.value || 0)) : 0,
+    importance:trailImportanceEl ? clampTrailImportance(trailImportanceEl.value) : 50,
+    price_amount:priceValue,
     price_currency:FIXED_CURRENCY,
-    is_free:priceAmountEl ? Number(priceAmountEl.value || 0) === 0 : true,
+    is_free:priceValue === 0,
     estimated_duration:estimatedDurationEl.value.trim(),
     start_name:startNameEl.value.trim(),
     end_name:endNameEl.value.trim(),
@@ -1228,11 +925,7 @@ function readTrailForm(){
 }
 
 async function saveTrail(){
-  if(!checkAuthorization()){
-    alert("You must be logged in as an authorized user to save trails.");
-    return;
-  }
-
+  if(!checkAuthorization()){ alert("You must be logged in as an authorized user to save trails."); return; }
   const payload = readTrailForm();
   if(!payload.name){ alert("Nome sentiero obbligatorio"); return; }
   if(rawPoints.length < 2){ alert("Aggiungi almeno 2 punti sulla mappa."); return; }
@@ -1267,20 +960,17 @@ async function loadTrails(){
     listStatusEl.innerText = "Tabella " + TRAILS_TABLE + " non disponibile o permessi Supabase mancanti. Puoi comunque provare l'editor.";
   }
 }
-
 function formatTrailPrice(amount){
   const value = Number(amount || 0);
   if(!value) return "Free";
   return value.toFixed(value % 1 === 0 ? 0 : 2) + " EUR";
 }
-
 function makeMetaPill(text){
   const pill = document.createElement("div");
   pill.className = "meta-pill";
   pill.innerText = text;
   return pill;
 }
-
 function renderTrailList(filter){
   filter = filter || "";
   trailListEl.innerHTML = "";
@@ -1312,6 +1002,7 @@ function renderTrailList(filter){
     const meta = document.createElement("div");
     meta.className = "trail-card-meta";
     meta.appendChild(makeMetaPill(trail.difficulty || "difficulty -"));
+    meta.appendChild(makeMetaPill("importance: " + clampTrailImportance(trail.importance)));
     if(trail.shoe_type) meta.appendChild(makeMetaPill("shoes: " + trail.shoe_type));
     meta.appendChild(makeMetaPill(formatTrailPrice(trail.price_amount)));
     meta.appendChild(makeMetaPill((trail.distance_km || 0) + " km"));
@@ -1333,51 +1024,49 @@ function loadTrailIntoEditor(trail){
   trailNameEl.value = trail.name || "";
   difficultyEl.value = trail.difficulty || "easy";
   estimatedDurationEl.value = trail.estimated_duration || "";
+  estimatedDurationEl.dataset.auto = trail.estimated_duration ? "false" : "true";
+  if(shoeTypeEl){ shoeTypeEl.value = trail.shoe_type || getRecommendedShoeType(); shoeTypeEl.dataset.auto = trail.shoe_type ? "false" : "true"; }
+  if(trailImportanceEl) trailImportanceEl.value = String(clampTrailImportance(trail.importance));
+  updateTrailImportanceValue();
   if(priceAmountEl) priceAmountEl.value = trail.price_amount !== undefined && trail.price_amount !== null ? String(trail.price_amount) : "0";
-  // Currency is always EUR.
-  if(shoeTypeEl){
-    shoeTypeEl.value = trail.shoe_type || getRecommendedShoeType();
-    shoeTypeEl.dataset.auto = trail.shoe_type ? "false" : "true";
-  }
   startNameEl.value = trail.start_name || "";
   endNameEl.value = trail.end_name || "";
   descriptionEl.value = trail.description || "";
   rawPoints = Array.isArray(trail.points) ? trail.points.map(function(point){ return { lat:Number(point.lat), lng:Number(point.lng) }; }).filter(function(point){ return !Number.isNaN(point.lat) && !Number.isNaN(point.lng); }) : [];
   routeGeojson = trail.route_geojson || null;
   routeDistanceKm = Number(trail.distance_km || 0);
-  routingMode = "manuale";
+  elevationGainM = Number(trail.elevation_gain_m || 0);
+  elevationLossM = Number(trail.elevation_loss_m || 0);
+  elevationProfile = Array.isArray(trail.elevation_profile) ? trail.elevation_profile : [];
+  routingMode = routeGeojson ? "salvato" : "manuale";
   if(mapHintEl) mapHintEl.style.display = rawPoints.length ? "none" : "block";
   clearMapLayers();
   renderPoints(-1);
-  if(routeGeojson){
-    routeLine = L.geoJSON(routeGeojson, { style:{ color:getDifficultyColor(), weight:3, opacity:.9 } }).addTo(map);
-  }else{
-    drawManualPreview(false);
-  }
+  if(routeGeojson) routeLine = L.geoJSON(routeGeojson, { style:{ color:getDifficultyColor(), weight:3, opacity:.9 } }).addTo(map);
+  else drawManualPreview(false);
   updateStats();
   fitRoute();
   setRouteStatus("Sentiero caricato. Puoi modificare i punti o aggiungerne altri tenendo premuto.", false);
 }
 
-function openHelpModal(){
-  document.getElementById("helpModal").classList.add("is-open");
-}
-
-function closeHelpModal(){
-  document.getElementById("helpModal").classList.remove("is-open");
-}
+function openHelpModal(){ document.getElementById("helpModal").classList.add("is-open"); }
+function closeHelpModal(){ document.getElementById("helpModal").classList.remove("is-open"); }
 
 function runTests(){
   console.assert(typeof initMap === "function", "initMap ok");
   console.assert(typeof routeWithOsrmFoot === "function", "OSRM ok");
   console.assert(typeof routeWithOverpass === "function", "Overpass ok");
   console.assert(typeof saveTrail === "function", "save ok");
+  console.assert(clampTrailImportance(-1) === 0, "importance min clamp ok");
+  console.assert(clampTrailImportance(101) === 100, "importance max clamp ok");
+  console.assert(clampTrailImportance("abc") === 50, "importance default ok");
 }
 
 window.addEventListener("load", async function(){
   runTests();
   checkAuthorization();
   renderTrailList("");
+  updateTrailImportanceValue();
   await loadTrails();
 });
 
@@ -1394,15 +1083,14 @@ difficultyEl.addEventListener("change", function(){
   applyAutoShoeType(true);
   if(estimatedDurationEl.dataset.auto === "true") updateEstimatedDuration(true);
 });
-estimatedDurationEl.addEventListener("input", function(){
-  estimatedDurationEl.dataset.auto = estimatedDurationEl.value.trim() ? "false" : "true";
-});
+estimatedDurationEl.addEventListener("input", function(){ estimatedDurationEl.dataset.auto = estimatedDurationEl.value.trim() ? "false" : "true"; });
 if(shoeTypeEl){
-  shoeTypeEl.addEventListener("change", function(){
-    shoeTypeEl.dataset.auto = "false";
-  });
+  shoeTypeEl.addEventListener("change", function(){ shoeTypeEl.dataset.auto = "false"; });
 }
-
+if(trailImportanceEl){
+  trailImportanceEl.addEventListener("input", updateTrailImportanceValue);
+  updateTrailImportanceValue();
+}
 document.addEventListener("keydown", function(event){
   if(event.key === "Escape"){
     closeHelpModal();
