@@ -11,7 +11,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #cfe5f2; position: fixed; inset: 0; }
     #map { position: fixed; inset: 0; width: 100vw; height: 100dvh; }
-    .top-bar { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 20px; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+il c    .top-bar { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 20px; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     .top-row { display: flex; justify-content: space-between; align-items: center; position: relative; }
     .center-brand { position: absolute; left: 50%; transform: translateX(-50%); font-weight: 800; font-size: 14px; text-decoration: none; white-space: nowrap; pointer-events: auto; cursor: pointer; }
     #weather { color: white; font-weight: 600; padding: 6px 10px; white-space: nowrap; }
@@ -36,6 +36,13 @@
     body.tour-navigation-active .tour-top-actions { display: flex; }
     .label { color: white; font-weight: 800; font-size: 14px; text-shadow: 0 2px 6px rgba(0,0,0,0.9); white-space: nowrap; cursor: pointer; user-select: none; }
     .poi-label { min-width: 30px; min-height: 30px; display: grid; place-items: center; border-radius: 999px; background: rgba(0,0,0,0.55); color: white; font-size: 17px; border: 1px solid rgba(255,255,255,0.28); box-shadow: 0 8px 22px rgba(0,0,0,0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .moving-ferry-label { width: 54px; height: 36px; display: grid; place-items: center; background: transparent; border: 0; box-shadow: none; transform: translateZ(0); cursor: pointer; }
+    .moving-ferry-label img { width: 54px; height: auto; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; filter: drop-shadow(0 7px 12px rgba(0,0,0,0.32)); }
+    .moving-ferry-label.is-reversed img { transform: scaleX(-1); }
+    .ferry-popup { min-width: 170px; }
+    .ferry-popup-title { font-size: 14px; font-weight: 950; color: #111; margin-bottom: 4px; }
+    .ferry-popup-line { font-size: 12px; font-weight: 750; color: rgba(0,0,0,0.68); line-height: 1.32; }
+    .ferry-popup-arrival { margin-top: 7px; padding: 7px 8px; border-radius: 12px; background: rgba(0,224,255,0.14); font-size: 13px; font-weight: 900; color: #111; }
     .trail-start-label { min-width: 32px; min-height: 32px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,0.92); color: #111; font-size: 17px; border: 2px solid currentColor; box-shadow: 0 8px 24px rgba(0,0,0,0.22); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .leaflet-div-icon { background: transparent !important; border: none !important; }
     .leaflet-container { background: #f6f1e8 !important; }
@@ -259,7 +266,7 @@
     { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' }
   ];
 
-  var map, satelliteLayer, roadsLayer, whiteLayer, labelsLayer, ferryRoutesLayer, poiLayer, trailsLayer;
+  var map, satelliteLayer, roadsLayer, whiteLayer, labelsLayer, ferryRoutesLayer, ferryVehiclesLayer, poiLayer, trailsLayer;
   var card = document.getElementById('card');
   var cardTitle = document.getElementById('card-title');
   var cardImg = document.getElementById('card-img');
@@ -314,6 +321,10 @@
   var poiMarkers = [];
   var trailItems = [];
   var ferryPorts = [];
+  var ferryRouteArcs = [];
+  var ferryTimetableRows = [];
+  var ferryVehicleMarkers = [];
+  var ferryAnimationFrameId = null;
   var currentIndex = -1;
   var currentDataset = 'places';
   var currentPOI = null;
@@ -519,7 +530,7 @@
   function normalizeTourText(value) { var text = String(value || '').toLowerCase(); var output = ''; var lastWasSpace = false; var i; var code; var ch; try { text = text.normalize('NFD'); } catch (error) {} for (i = 0; i < text.length; i += 1) { ch = text.charAt(i); code = text.charCodeAt(i); if (code >= 768 && code <= 879) continue; if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) { output += ch; lastWasSpace = false; } else if (!lastWasSpace) { output += ' '; lastWasSpace = true; } } return output.trim(); }
   function isTouristicPOI(poi) { var type = normalizeTourText(poi && poi.type ? poi.type : ''); var name = normalizeTourText(poi && poi.name ? poi.name : ''); if (!poi) return false; if (type === 'ferry') return false; if (type === 'stazione') return false; if (type === 'station') return false; if (type === 'transport') return false; if (type === 'trasporto') return false; if (name.indexOf('ferry') !== -1) return false; if (name.indexOf('battelli') !== -1) return false; if (name.indexOf('traghetti') !== -1) return false; if (name.indexOf('boat station') !== -1) return false; if (name.indexOf('train station') !== -1) return false; if (name.indexOf('stazione') !== -1) return false; if (name.indexOf('station') !== -1) return false; return true; }
 
-  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.12, 9.71], 12); satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}.png', { maxZoom: 20, opacity: 0.82, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
+  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.12, 9.71], 12); satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}.png', { maxZoom: 20, opacity: 0.82, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
   function updateMapVisualByZoom() { var z, raw, t; if (!map || !satelliteLayer || !roadsLayer || !whiteLayer || !labelsLayer) return; z = map.getZoom(); raw = Math.min(1, Math.max(0, (z - 14.75) / 3.75)); t = raw * raw * (3 - 2 * raw); satelliteLayer.setOpacity(Math.max(0.08, 1 - t)); roadsLayer.setOpacity(0.82 * (1 - t * 0.72)); whiteLayer.setOpacity(t); labelsLayer.setOpacity(Math.max(0, (t - 0.18) / 0.82)); }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function createCityMarkers() { places.forEach(function (place, index) { L.marker(place.coords, { title: place.name, icon: L.divIcon({ className: 'custom-label', html: '<div class="label">' + escapeHTML(place.name) + '</div>' }) }).addTo(map).on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } cityCardManuallyClosed = false; showCityByIndex(index, true); }); }); }
@@ -884,9 +895,237 @@
   function updatePOIVisibility() { var zoom; if (!map || !poiLayer) return; poiLayer.clearLayers(); if (activeTour) return; zoom = map.getZoom(); poiMarkers.forEach(function (item) { if (zoom >= getMinZoomForImportance(item.importance)) item.marker.addTo(poiLayer); }); }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
   function createSeaArc(p1, p2, segments) { var lat1 = p1[0], lng1 = p1[1], lat2 = p2[0], lng2 = p2[1], midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2, distance = Math.abs(lng2 - lng1), offset = 0.018 + distance * 0.45, control = [midLat - 0.003, midLng - offset], points = [], i, t, lat, lng; for (i = 0; i <= segments; i += 1) { t = i / segments; lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2; lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2; points.push([lat, lng]); } return points; }
-  function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; ferryRoutesLayer.clearLayers(); ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 32); L.polyline(arc, { color: '#00e0ff', weight: 1, opacity: 0.95, dashArray: '8, 10', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } }
+  function normalizeFerryPortName(value) {
+    var text = String(value || '').toLowerCase();
+    try { text = text.normalize('NFD'); } catch (error) {}
+    text = text.replace(/[̀-ͯ]/g, '');
+    text = text.replace(/[^a-z0-9]+/g, ' ').trim();
+    return text;
+  }
+  function getFerryPortByName(name) {
+    var target = normalizeFerryPortName(name);
+    var exact;
+    var partial;
+    if (!target) return null;
+    exact = ferryPorts.find(function(port) { return normalizeFerryPortName(port.name) === target; });
+    if (exact) return exact;
+    partial = ferryPorts.find(function(port) {
+      var n = normalizeFerryPortName(port.name);
+      return n.indexOf(target) !== -1 || target.indexOf(n) !== -1;
+    });
+    return partial || null;
+  }
+  function getFerryRouteArc(fromPort, toPort) {
+    var fromKey;
+    var toKey;
+    var existing;
+    var arc;
+    if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return [];
+    fromKey = String(fromPort.id || fromPort.name);
+    toKey = String(toPort.id || toPort.name);
+    existing = ferryRouteArcs.find(function(route) {
+      return String(route.from.id || route.from.name) === fromKey && String(route.to.id || route.to.name) === toKey;
+    });
+    if (existing) return existing.arc;
+    existing = ferryRouteArcs.find(function(route) {
+      return String(route.from.id || route.from.name) === toKey && String(route.to.id || route.to.name) === fromKey;
+    });
+    if (existing) return existing.arc.slice().reverse();
+    arc = createSeaArc(fromPort.coords, toPort.coords, 64);
+    ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: true });
+    if (ferryRoutesLayer) L.polyline(arc, { color: '#00e0ff', weight: 1, opacity: 0.78, dashArray: '8, 10', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer);
+    return arc;
+  }
+  function getPointAlongLatLngs(latLngs, progress) {
+    var total = 0;
+    var distances = [];
+    var i;
+    var target;
+    var travelled = 0;
+    var segmentDistance;
+    var localT;
+    var a;
+    var b;
+
+    if (!latLngs || latLngs.length < 2) return null;
+    progress = Math.max(0, Math.min(1, Number(progress) || 0));
+
+    for (i = 1; i < latLngs.length; i += 1) {
+      segmentDistance = distanceMeters(latLngs[i - 1], latLngs[i]);
+      distances.push(segmentDistance);
+      total += segmentDistance;
+    }
+
+    if (!total) return latLngs[0];
+    target = total * progress;
+
+    for (i = 1; i < latLngs.length; i += 1) {
+      segmentDistance = distances[i - 1];
+      if (travelled + segmentDistance >= target) {
+        a = latLngs[i - 1];
+        b = latLngs[i];
+        localT = segmentDistance ? (target - travelled) / segmentDistance : 0;
+        return [a[0] + (b[0] - a[0]) * localT, a[1] + (b[1] - a[1]) * localT];
+      }
+      travelled += segmentDistance;
+    }
+
+    return latLngs[latLngs.length - 1];
+  }
+  function shouldReverseFerryIcon(fromPort, toPort) {
+    if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return false;
+    return Number(toPort.coords[1]) > Number(fromPort.coords[1]);
+  }
+  function createMovingFerryIcon(reverse) {
+    return L.divIcon({ className: 'moving-ferry-icon', html: '<div class="moving-ferry-label' + (reverse ? ' is-reversed' : '') + '"><img src="ferry.png" alt="Ferry"></div>', iconSize: [54, 36], iconAnchor: [27, 18] });
+  }
+  function formatMinutesAsTime(minutes) {
+    var value = Math.round(Number(minutes || 0));
+    var h;
+    var m;
+    while (value < 0) value += 1440;
+    value = value % 1440;
+    h = Math.floor(value / 60);
+    m = value % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+  function getFerryPopupHTML(item) {
+    var fromName = item && item.from && item.from.name ? item.from.name : 'Departure';
+    var toName = item && item.to && item.to.name ? item.to.name : 'next stop';
+    var arrival = formatMinutesAsTime(item && item.arriveMin);
+    var depart = formatMinutesAsTime(item && item.departMin);
+    return '<div class="ferry-popup"><div class="ferry-popup-title">⛴️ Ferry on route</div><div class="ferry-popup-line">From ' + escapeHTML(fromName) + '</div><div class="ferry-popup-line">Departed at ' + escapeHTML(depart) + '</div><div class="ferry-popup-arrival">Arrives in ' + escapeHTML(toName) + ' at ' + escapeHTML(arrival) + '</div></div>';
+  }
+  function bindMovingFerryPopup(marker, item) {
+    if (!marker || !item) return;
+    marker.bindPopup(getFerryPopupHTML(item), { closeButton: true, autoPan: true, className: 'ferry-live-popup' });
+    marker.on('click', function() {
+      marker.setPopupContent(getFerryPopupHTML(item));
+      marker.openPopup();
+    });
+  }
+  function stopMovingFerries() {
+    if (ferryAnimationFrameId !== null) {
+      cancelAnimationFrame(ferryAnimationFrameId);
+      ferryAnimationFrameId = null;
+    }
+    if (ferryVehiclesLayer) ferryVehiclesLayer.clearLayers();
+    ferryVehicleMarkers = [];
+  }
+  function getTodayDateString() {
+    var now = new Date();
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var day = String(now.getDate()).padStart(2, '0');
+    return now.getFullYear() + '-' + month + '-' + day;
+  }
+  function getMinutesFromTime(value) {
+    var parts = String(value || '').trim().split(':');
+    var h;
+    var m;
+    if (parts.length < 2) return null;
+    h = Number(parts[0]);
+    m = Number(parts[1]);
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+    return h * 60 + m;
+  }
+  function getCurrentMinutesOfDay() {
+    var now = new Date();
+    return now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+  }
+  function isFerryRowActiveForDate(row) {
+    var today = getTodayDateString();
+    var from = row && row.valid_from ? String(row.valid_from) : '';
+    var to = row && row.valid_to ? String(row.valid_to) : '';
+    if (from && today < from) return false;
+    if (to && today > to) return false;
+    return true;
+  }
+  function getActiveFerryLegs() {
+    var grouped = {};
+    var nowMin = getCurrentMinutesOfDay();
+    var legs = [];
+
+    ferryTimetableRows.forEach(function(row) {
+      var tripId;
+      if (!row || row.no_stop === true || row.no_stop === 'true') return;
+      if (!row.scheduled_time) return;
+      if (!isFerryRowActiveForDate(row)) return;
+      tripId = String(row.trip_id || row.direction || 'trip');
+      if (!grouped[tripId]) grouped[tripId] = [];
+      grouped[tripId].push(row);
+    });
+
+    Object.keys(grouped).forEach(function(tripId) {
+      var stops = grouped[tripId].slice().sort(function(a, b) { return Number(a.stop_sequence || 0) - Number(b.stop_sequence || 0); });
+      var i;
+      var fromRow;
+      var toRow;
+      var depart;
+      var arrive;
+      var fromPort;
+      var toPort;
+      var arc;
+      for (i = 1; i < stops.length; i += 1) {
+        fromRow = stops[i - 1];
+        toRow = stops[i];
+        depart = getMinutesFromTime(fromRow.scheduled_time);
+        arrive = getMinutesFromTime(toRow.scheduled_time);
+        if (depart === null || arrive === null) continue;
+        if (arrive <= depart) arrive += 1440;
+        if (nowMin < depart || nowMin > arrive) continue;
+        fromPort = getFerryPortByName(fromRow.port_name);
+        toPort = getFerryPortByName(toRow.port_name);
+        if (!fromPort || !toPort) continue;
+        arc = getFerryRouteArc(fromPort, toPort);
+        if (!arc || arc.length < 2) continue;
+        legs.push({ tripId: tripId, from: fromPort, to: toPort, arc: arc, departMin: depart, arriveMin: arrive, progress: (nowMin - depart) / Math.max(1, arrive - depart), direction: fromRow.direction || toRow.direction || '' });
+      }
+    });
+
+    return legs;
+  }
+  function animateMovingFerries() {
+    var nowMin = getCurrentMinutesOfDay();
+    ferryVehicleMarkers.forEach(function(item) {
+      var progress;
+      var point;
+      if (!item || !item.marker || !item.arc || item.arc.length < 2) return;
+      progress = (nowMin - item.departMin) / Math.max(1, item.arriveMin - item.departMin);
+      progress = Math.max(0, Math.min(1, progress));
+      point = getPointAlongLatLngs(item.arc, progress);
+      if (point) item.marker.setLatLng(point);
+    });
+    ferryAnimationFrameId = requestAnimationFrame(animateMovingFerries);
+  }
+  function startMovingFerries() {
+    var activeLegs;
+    stopMovingFerries();
+    if (!ferryVehiclesLayer || !ferryRouteArcs.length) return;
+    activeLegs = getActiveFerryLegs();
+    activeLegs.forEach(function(leg) {
+      var startPoint = getPointAlongLatLngs(leg.arc, leg.progress) || leg.arc[0];
+      var marker = L.marker(startPoint, { icon: createMovingFerryIcon(shouldReverseFerryIcon(leg.from, leg.to)), interactive: true, zIndexOffset: 1700 }).addTo(ferryVehiclesLayer);
+      ferryVehicleMarkers.push({ marker: marker, arc: leg.arc, departMin: leg.departMin, arriveMin: leg.arriveMin, tripId: leg.tripId, from: leg.from, to: leg.to, direction: leg.direction });
+      bindMovingFerryPopup(marker, ferryVehicleMarkers[ferryVehicleMarkers.length - 1]);
+    });
+    if (ferryVehicleMarkers.length) ferryAnimationFrameId = requestAnimationFrame(animateMovingFerries);
+  }
+  function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; stopMovingFerries(); ferryRoutesLayer.clearLayers(); ferryRouteArcs = []; ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 48); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: false }); L.polyline(arc, { color: '#00e0ff', weight: 1, opacity: 0.95, dashArray: '8, 10', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } startMovingFerries(); }
+  async function loadFerryTimetable() {
+    var response;
+    if (!SUPABASE_READY || !supabaseClient) return;
+    response = await supabaseClient.from('ferry_timetable').select('*').order('trip_id', { ascending: true }).order('stop_sequence', { ascending: true });
+    if (response.error) {
+      console.warn('Supabase ferry timetable load failed:', response.error.message);
+      ferryTimetableRows = [];
+      startMovingFerries();
+      return;
+    }
+    ferryTimetableRows = response.data || [];
+    startMovingFerries();
+  }
   function readLocalPOIs() { try { return JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]'); } catch (error) { return []; } }
-  async function loadPOIs() { var response, rows = []; poiLayer.clearLayers(); poiMarkers = []; if (SUPABASE_READY && supabaseClient) { response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }); if (response.error) console.warn('Supabase POI load failed:', response.error.message); else rows = response.data || []; } else rows = readLocalPOIs(); rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) { var marker = L.marker(poi.coords, { title: poi.name, icon: L.divIcon({ className: 'custom-poi', html: '<div class="poi-label">' + escapeHTML(poi.symbol) + '</div>', iconSize: [32, 32], iconAnchor: [16, 16] }) }).on('click', function (event) { openPOIWithMapMove(poi, event); }); poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi }); }); updatePOIVisibility(); addFerryRoutes(); renderSearchSuggestions(searchInput.value); }
+  async function loadPOIs() { var response, rows = []; poiLayer.clearLayers(); poiMarkers = []; if (SUPABASE_READY && supabaseClient) { response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }); if (response.error) console.warn('Supabase POI load failed:', response.error.message); else rows = response.data || []; } else rows = readLocalPOIs(); rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) { var marker = L.marker(poi.coords, { title: poi.name, icon: L.divIcon({ className: 'custom-poi', html: '<div class="poi-label">' + escapeHTML(poi.symbol) + '</div>', iconSize: [32, 32], iconAnchor: [16, 16] }) }).on('click', function (event) { openPOIWithMapMove(poi, event); }); poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi }); }); updatePOIVisibility(); addFerryRoutes(); await loadFerryTimetable(); renderSearchSuggestions(searchInput.value); }
   async function updateWeather(lat, lng) { try { var response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true'); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; document.getElementById('weather').innerText = temperature === undefined ? '--' : '🌤️ ' + temperature + '°'; } catch (error) { document.getElementById('weather').innerText = '--'; } }
   function getUserDisplayName(user) { var meta; if (!user) return 'User'; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return 'User'; }
   async function readCurrentUser() { var sessionResponse, session, userResponse; if (!supabaseClient) return null; sessionResponse = await supabaseClient.auth.getSession(); session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null; if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
@@ -920,7 +1159,7 @@
   function drawAITourRoute(routeData) { var waypointCoords; var boundsPoints = []; var startMarker; clearAITourRoute(); if (!map || !routeData) return false; waypointCoords = getAITourWaypointCoords(routeData); if (isValidCoords(routeData.startCoords)) { boundsPoints.push(routeData.startCoords); startMarker = L.marker(routeData.startCoords, { icon: L.divIcon({ className: 'ai-tour-start-marker', html: getAITourMarkerHTML(0, true), iconSize: [30, 30], iconAnchor: [15, 15] }), zIndexOffset: 1800 }).addTo(map); if (routeData.startLabel) startMarker.bindTooltip('Start: ' + routeData.startLabel, { direction: 'top', opacity: 0.9 }); aiTourRouteMarkers.push(startMarker); } (routeData.stops || []).forEach(function(stop, index) { var marker; if (!stop || !isValidCoords(stop.coords)) return; boundsPoints.push(stop.coords); marker = L.marker(stop.coords, { icon: L.divIcon({ className: 'ai-tour-stop-marker', html: getAITourMarkerHTML(index + 1, false), iconSize: [28, 28], iconAnchor: [14, 14] }), zIndexOffset: 1900 + index }).addTo(map); marker.bindTooltip((index + 1) + '. ' + (stop.name || 'Stop'), { direction: 'top', opacity: 0.92 }); marker.on('click', function() { marker.openTooltip(); }); aiTourRouteMarkers.push(marker); }); if (!routeData.markersOnly && waypointCoords.length >= 2) { fetchTourRouteLatLngs(waypointCoords).then(function(routedLatLngs) { if (routedLatLngs && routedLatLngs.length >= 2) { drawAITourRouteLine(routedLatLngs); fitAITourBounds(routedLatLngs); } else showUserLocationToast('Non ho trovato una strada pedonale affidabile tra queste tappe.'); }); if (boundsPoints.length > 0) fitAITourBounds(boundsPoints); } return true; }
 
   function setupEvents() { if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) { window.speechSynthesis.onvoiceschanged = function() { getPreferredSpeechVoice(); }; } document.addEventListener('touchstart', rememberRealUserGesture, { passive: true, capture: true }); document.addEventListener('pointerdown', rememberRealUserGesture, { passive: true, capture: true }); document.addEventListener('click', rememberRealUserGesture, true); if (isIOSDevice()) { searchInput.addEventListener('focus', function () { document.body.style.position = 'fixed'; }); searchInput.addEventListener('blur', function () { document.body.style.position = 'fixed'; }); } document.getElementById('btn-experiences').addEventListener('click', function () { window.location.href = 'experiences.html'; }); document.getElementById('btn-stories').addEventListener('click', function () { window.location.href = 'blog.html'; }); cardStoriesBtn.addEventListener('click', function (event) { event.stopPropagation(); window.location.href = 'blog.html'; }); cardExperiencesBtn.addEventListener('click', function (event) { event.stopPropagation(); window.location.href = 'experiences.html'; }); if (card) { card.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true }); card.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true }); card.addEventListener('click', unlockLiveFromRealGesture); } if (cardMedia) { cardMedia.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true }); cardMedia.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true }); cardMedia.addEventListener('click', unlockLiveFromRealGesture); } if (cardTourPlayBtn) { cardTourPlayBtn.addEventListener('touchstart', function(event) { event.stopPropagation(); }, { passive: true }); cardTourPlayBtn.addEventListener('click', function(event) { event.preventDefault(); event.stopPropagation(); renderVillageTourPanel(); }); } if (cardTourPanel) { cardTourPanel.addEventListener('touchstart', function(event) { event.stopPropagation(); }, { passive: true }); cardTourPanel.addEventListener('click', handleVillageTourPanelClick); } if (tourNav) tourNav.addEventListener('click', function(event) { var button = event.target.closest('[data-tour-action]'); var action; if (!button) return; action = button.getAttribute('data-tour-action'); if (action === 'audio') playActiveTourStopAudio(); if (action === 'next-stop') goToNextActiveTourStop(); }); if (tourExitTopBtn) tourExitTopBtn.addEventListener('click', endActiveTour); if (tourRecenterTopBtn) tourRecenterTopBtn.addEventListener('click', recenterActiveTour); if (poiAiBtn) poiAiBtn.addEventListener('click', handlePOIAI); if (poiClose) poiClose.addEventListener('click', function () { closePOICard(false); }); if (trailClose) trailClose.addEventListener('click', function () { closeTrailCard(false); }); if (trailMapExpandBtn) trailMapExpandBtn.addEventListener('click', function (event) { event.stopPropagation(); trailCard.classList.toggle('map-expanded'); trailMapExpandBtn.innerText = trailCard.classList.contains('map-expanded') ? '↙' : '↗'; window.setTimeout(fitTrailMiniMap, 80); window.setTimeout(fitTrailMiniMap, 360); }); if (readMoreBtn) readMoreBtn.addEventListener('click', function () { openCurrentPOIInCaptainGull(); }); if (poiDesc) poiDesc.addEventListener('click', function (event) { if (event.target && event.target.classList.contains('inline-read-more')) openCurrentPOIInCaptainGull(); }); loginBtn.addEventListener('click', function () { var baseOrigin = window.location.origin; window.location.href = baseOrigin + '/login.html'; }); if (userLocationBtn) userLocationBtn.addEventListener('click', function () { startUserLocationWatch(); }); searchInput.addEventListener('input', function () { renderSearchSuggestions(searchInput.value); }); searchInput.addEventListener('keydown', function (event) { var query, first; if (event.key !== 'Enter') return; query = searchInput.value.trim(); if (!query) return; first = getSearchResults(query)[0]; if (first && selectSearchResult(first.name)) { searchResults.style.display = 'none'; searchInput.blur(); return; } geocodeSearch(query).then(function () { searchResults.style.display = 'none'; searchInput.blur(); }); }); searchResults.addEventListener('click', function (event) { var item = event.target.closest('.search-item'); if (!item) return; selectSearchResult(item.getAttribute('data-name')); searchResults.style.display = 'none'; searchInput.blur(); }); document.addEventListener('click', function (event) { if (!searchResults.contains(event.target) && event.target !== searchInput) searchResults.style.display = 'none'; }); map.on('zoom zoomend moveend', function () { updateMapVisualByZoom(); updateTrailWidths(); }); map.on('dragstart zoomstart', disableTourFollowFromUserMove); map.on('moveend zoomend', function () { evaluateAutoCard(); updatePOIVisibility(); }); setupCardSwipe(card); setupCardSwipe(cardLiveTouchLayer); }
-  function runTests() { var sample, arc, aiText; console.assert(typeof distanceMeters === 'function', 'distanceMeters exists in main map scope'); console.assert(Number.isFinite(distanceMeters([44.1,9.7],[44.101,9.701])), 'distanceMeters returns a finite number'); console.assert(typeof isValidCoords === 'function', 'isValidCoords exists in main map scope'); console.assert(isValidCoords([44.1, 9.7]) === true, 'isValidCoords accepts valid lat/lng'); console.assert(Array.isArray(places), 'places must be an array'); console.assert(places.length === 5, '5 cities expected'); console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay fifth'); console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore fixed image expected'); console.assert(typeof setupEvents === 'function', 'setupEvents exists'); console.assert(typeof startUserLocationWatch === 'function', 'Realtime user location watcher exists'); console.assert(typeof resetUserLocationWatch === 'function', 'Location watcher can reset after permission errors'); console.assert(typeof getUserLocationButtonIcon === 'function', 'Compass button icon exists'); console.assert(getUserLocationButtonIcon('idle') === '🧭', 'Compass emoji renders'); console.assert(typeof updateUserLocationOnMap === 'function', 'User location map updater exists'); console.assert(document.getElementById('user-location-btn') !== null, 'User location button exists'); console.assert(document.getElementById('user-location-toast') !== null, 'User location toast exists'); console.assert(typeof loadTrails === 'function', 'Trail loader exists'); console.assert(typeof updateTrailWidths === 'function', 'Trail dynamic width exists'); console.assert(typeof destroyTrailMiniMap === 'function', 'Trail mini map destroy exists'); console.assert(typeof fitTrailMiniMap === 'function', 'Trail mini map fit exists'); console.assert(trailMiniMap === null, 'trailMiniMap is declared and starts null'); console.assert(trailMiniRoute === null, 'trailMiniRoute is declared and starts null'); console.assert(clampTrailImportance(-5) === 0, 'Trail importance clamps to 0'); console.assert(clampTrailImportance(120) === 100, 'Trail importance clamps to 100'); console.assert(clampTrailImportance(undefined) === 50, 'Trail importance defaults to 50'); console.assert(getMinZoomForTrailImportance(100) <= getMinZoomForTrailImportance(10), 'Trail importance controls visibility zoom'); console.assert(normalizeTrail({ name: 'Test trail', importance: 87 }).importance === 87, 'Trail importance is read from Supabase row'); console.assert(typeof handlePOIAI === 'function', 'AI POI handler exists'); console.assert(typeof generateAIText === 'function', 'AI text generator exists'); console.assert(typeof speakText === 'function', 'speech function exists'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPlaces === 'function', 'Floating AI can read places'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPOIs === 'function', 'Floating AI can read POIs'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getTrails === 'function', 'Floating AI can read trails'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.focusPOI === 'function', 'Floating AI can open POIs'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.focusTrail === 'function', 'Floating AI can open trails'); console.assert(typeof drawAITourRoute === 'function', 'AI can draw a visible tour route on map'); console.assert(typeof fetchTourRouteLatLngs === 'function', 'AI can request pedestrian routed tour geometry'); console.assert(typeof fetchValhallaLegLatLngs === 'function', 'AI can request Valhalla pedestrian route geometry'); console.assert(typeof decodeValhallaShape === 'function', 'AI can decode Valhalla route geometry'); console.assert(typeof drawAITourRouteLine === 'function', 'AI can draw routed tour geometry like trail geometry'); console.assert(typeof getLatLngDistanceSum === 'function', 'AI can measure routed geometry length'); console.assert(typeof clearAITourRoute === 'function', 'AI can clear visible tour route'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.drawTourRoute === 'function', 'Floating AI can ask map to draw tour route'); console.assert(document.getElementById('card-tour-play') !== null, 'Village card tour play button exists'); console.assert(typeof closeVillageTourPanel === 'function', 'Village tour panel can close and restore the play button'); console.assert(typeof renderVillageTourPanel === 'function', 'Village card can show tour start panel'); console.assert(typeof isCardInteractiveTarget === 'function', 'Card swipe ignores interactive controls'); console.assert(typeof startVillageTour === 'function', 'Village card can start local tour without remote AI'); console.assert(typeof getAllTouristicPOIsForVillage === 'function', 'Village tour can list all editable tour stops'); console.assert(typeof getSelectedTourPOIsForVillage === 'function', 'Village tour can start from selected stops'); console.assert(typeof renderVillageTourCustomizePanel === 'function', 'Village tour can show customize stops panel'); console.assert(typeof toggleTourStopSelection === 'function', 'Village tour can toggle stops'); console.assert(typeof isUserInsideVillage === 'function', 'Village tour checks that the user is inside the selected village'); console.assert(typeof getTourStartInstruction === 'function', 'Village tour can instruct user to go to the selected village'); console.assert(typeof renderTourLocationRequestPanel === 'function', 'Village tour can ask again for location permission inside the tour panel'); console.assert(typeof requestTourLocationAgain === 'function', 'Enable location button can retry geolocation and continue the tour flow'); console.assert(typeof beginActiveTour === 'function', 'Village tour can enter navigator mode'); console.assert(typeof checkActiveTourArrival === 'function', 'Village tour can detect arrival at stops'); console.assert(typeof playActiveTourStopAudio === 'function', 'Village tour can play stop audio'); console.assert(typeof stopTourAudio === 'function', 'Village tour can stop audio playback'); console.assert(typeof setTourAudioButtonState === 'function', 'Village tour audio button can toggle play/stop'); console.assert(document.getElementById('tour-nav-description') !== null, 'Tour navigator shows stop description text'); console.assert(document.getElementById('tour-nav') !== null, 'Tour navigator panel exists'); console.assert(document.getElementById('tour-exit-top') !== null, 'Tour mode top bar exit button exists'); console.assert(document.getElementById('tour-recenter-top') !== null, 'Tour mode top bar recenter button exists'); console.assert(typeof recenterActiveTour === 'function', 'Tour mode can recenter and resume following the user'); console.assert(typeof disableTourFollowFromUserMove === 'function', 'Tour mode can stop auto-follow when user moves the map'); console.assert(typeof centerMapOnTourUser === 'function', 'Tour mode can zoom to current user position'); console.assert(typeof updateActiveTourLegRoute === 'function', 'Tour mode can draw route to next stop'); console.assert(typeof getBearingDegrees === 'function', 'Tour compass can calculate bearing'); console.assert(typeof getCompassTargetOnRoute === 'function', 'Tour compass can follow the route polyline'); console.assert(typeof updateTourCompass === 'function', 'Tour compass can update arrow direction'); console.assert(document.getElementById('tour-nav-compass-arrow') !== null, 'Tour compass arrow exists'); console.assert(typeof getPreferredSpeechVoice === 'function', 'Tour mode can select a smoother male voice when available'); console.assert(typeof configureTourUtterance === 'function', 'Tour mode can configure deeper voice parameters'); console.assert(typeof getLocalTourPath === 'function', 'Tour mode can draw a local route when external pedestrian routing fails'); console.assert(typeof fetchOSMPedestrianRoute === 'function', 'Tour mode can build pedestrian routes from OSM footways/steps/paths'); console.assert(typeof buildPedestrianGraphFromOSM === 'function', 'Tour mode can build a local pedestrian graph'); console.assert(typeof dijkstraPedestrianPath === 'function', 'Tour mode can calculate shortest path on pedestrian graph'); console.assert(getOSRMLegUrl([44.1,9.7],[44.101,9.701]).indexOf('/foot/') !== -1, 'OSRM fallback uses foot routing, not driving'); console.assert(document.querySelector('[data-tour-action="next"]') === null, 'Tour mode has no always-visible manual next stop button'); console.assert(document.getElementById('tour-nav-next') !== null, 'Tour mode has a next stop button that appears only after arrival'); console.assert(document.querySelector('[data-tour-action="open"]') === null, 'Tour mode has no manual open stop button'); console.assert(document.querySelector('[data-tour-action="end"]') === null, 'Tour mode uses only the top exit button'); console.assert(document.body.classList.contains('village-tour-active') === false, 'Village tour overlay state starts inactive'); console.assert(document.body.classList.contains('city-card-active') === false, 'City card overlay state starts inactive'); console.assert(typeof isTouristicPOI === 'function', 'AI can filter non-touristic POIs'); console.assert(isTouristicPOI({ name: 'Ferry riomaggiore', type: 'ferry' }) === false, 'Ferry is excluded from tourist itineraries'); console.assert(isTouristicPOI({ name: 'Riomaggiore Castle', type: 'monumento' }) === true, 'Touristic POI is included'); console.assert(isTouristicPOI({ name: 'Stazione battelli', type: 'trasporto' }) === false, 'Boat station is excluded from tourist itineraries'); console.assert(document.getElementById('poi-ai') !== null, 'AI button exists on POI card'); console.assert(document.getElementById('card-experiences') !== null, 'Experiences button exists'); console.assert(document.getElementById('card-stories') !== null, 'Stories button exists'); sample = normalizePOI({ name: 'Ferry Test', coords: '44.2,9.8', type: 'ferry', description: 'A ferry stop.' }); console.assert(sample.symbol === '⛴️', 'Ferry emoji supported'); console.assert(sample.description === 'A ferry stop.', 'Description is preserved'); console.assert(isValidPOI(sample) === true, 'Normalized sample POI is valid'); console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'European decimal coords supported'); console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'Importance controls visibility zoom'); console.assert(getMinZoomForImportance(60) >= 15, 'Importance 60 does not appear too early'); arc = createSeaArc([44.1461, 9.6548], [44.1350, 9.6847], 8); console.assert(Array.isArray(arc) && arc.length === 9, 'Sea arc returns segments + 1 points'); aiText = generateAIText(sample, 'poi'); console.assert(aiText.indexOf('Ferry Test') !== -1, 'AI text includes POI name'); console.assert(getYouTubeEmbedUrl('abc123').indexOf('autoplay=1') !== -1, 'YouTube autoplay enabled'); console.assert(typeof unlockLiveFromRealGesture === 'function', 'iOS YouTube live can retry play from a real user gesture'); console.assert(typeof rememberRealUserGesture === 'function', 'Live player records trusted user gestures'); console.assert(typeof hasFreshRealUserGesture === 'function', 'Live player checks gesture freshness before iOS playback'); console.assert(getSearchResults('ver').some(function (result) { return result.name === 'Vernazza'; }), 'Search finds Vernazza'); }
+  function runTests() { var sample, arc, aiText; console.assert(typeof distanceMeters === 'function', 'distanceMeters exists in main map scope'); console.assert(Number.isFinite(distanceMeters([44.1,9.7],[44.101,9.701])), 'distanceMeters returns a finite number'); console.assert(typeof isValidCoords === 'function', 'isValidCoords exists in main map scope'); console.assert(isValidCoords([44.1, 9.7]) === true, 'isValidCoords accepts valid lat/lng'); console.assert(Array.isArray(places), 'places must be an array'); console.assert(places.length === 5, '5 cities expected'); console.assert(places[4].name === 'Riomaggiore', 'Riomaggiore must stay fifth'); console.assert(places[4].image === RIOMAGGIORE_IMAGE, 'Riomaggiore fixed image expected'); console.assert(typeof setupEvents === 'function', 'setupEvents exists'); console.assert(typeof startUserLocationWatch === 'function', 'Realtime user location watcher exists'); console.assert(typeof resetUserLocationWatch === 'function', 'Location watcher can reset after permission errors'); console.assert(typeof getUserLocationButtonIcon === 'function', 'Compass button icon exists'); console.assert(getUserLocationButtonIcon('idle') === '🧭', 'Compass emoji renders'); console.assert(typeof updateUserLocationOnMap === 'function', 'User location map updater exists'); console.assert(document.getElementById('user-location-btn') !== null, 'User location button exists'); console.assert(document.getElementById('user-location-toast') !== null, 'User location toast exists'); console.assert(typeof loadTrails === 'function', 'Trail loader exists'); console.assert(typeof updateTrailWidths === 'function', 'Trail dynamic width exists'); console.assert(typeof destroyTrailMiniMap === 'function', 'Trail mini map destroy exists'); console.assert(typeof fitTrailMiniMap === 'function', 'Trail mini map fit exists'); console.assert(trailMiniMap === null, 'trailMiniMap is declared and starts null'); console.assert(trailMiniRoute === null, 'trailMiniRoute is declared and starts null'); console.assert(clampTrailImportance(-5) === 0, 'Trail importance clamps to 0'); console.assert(clampTrailImportance(120) === 100, 'Trail importance clamps to 100'); console.assert(clampTrailImportance(undefined) === 50, 'Trail importance defaults to 50'); console.assert(getMinZoomForTrailImportance(100) <= getMinZoomForTrailImportance(10), 'Trail importance controls visibility zoom'); console.assert(normalizeTrail({ name: 'Test trail', importance: 87 }).importance === 87, 'Trail importance is read from Supabase row'); console.assert(typeof handlePOIAI === 'function', 'AI POI handler exists'); console.assert(typeof generateAIText === 'function', 'AI text generator exists'); console.assert(typeof speakText === 'function', 'speech function exists'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPlaces === 'function', 'Floating AI can read places'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getPOIs === 'function', 'Floating AI can read POIs'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.getTrails === 'function', 'Floating AI can read trails'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.focusPOI === 'function', 'Floating AI can open POIs'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.focusTrail === 'function', 'Floating AI can open trails'); console.assert(typeof drawAITourRoute === 'function', 'AI can draw a visible tour route on map'); console.assert(typeof fetchTourRouteLatLngs === 'function', 'AI can request pedestrian routed tour geometry'); console.assert(typeof fetchValhallaLegLatLngs === 'function', 'AI can request Valhalla pedestrian route geometry'); console.assert(typeof decodeValhallaShape === 'function', 'AI can decode Valhalla route geometry'); console.assert(typeof drawAITourRouteLine === 'function', 'AI can draw routed tour geometry like trail geometry'); console.assert(typeof getLatLngDistanceSum === 'function', 'AI can measure routed geometry length'); console.assert(typeof clearAITourRoute === 'function', 'AI can clear visible tour route'); console.assert(window.fiveTerreGoAI && typeof window.fiveTerreGoAI.drawTourRoute === 'function', 'Floating AI can ask map to draw tour route'); console.assert(document.getElementById('card-tour-play') !== null, 'Village card tour play button exists'); console.assert(typeof closeVillageTourPanel === 'function', 'Village tour panel can close and restore the play button'); console.assert(typeof renderVillageTourPanel === 'function', 'Village card can show tour start panel'); console.assert(typeof isCardInteractiveTarget === 'function', 'Card swipe ignores interactive controls'); console.assert(typeof startVillageTour === 'function', 'Village card can start local tour without remote AI'); console.assert(typeof getAllTouristicPOIsForVillage === 'function', 'Village tour can list all editable tour stops'); console.assert(typeof getSelectedTourPOIsForVillage === 'function', 'Village tour can start from selected stops'); console.assert(typeof renderVillageTourCustomizePanel === 'function', 'Village tour can show customize stops panel'); console.assert(typeof toggleTourStopSelection === 'function', 'Village tour can toggle stops'); console.assert(typeof isUserInsideVillage === 'function', 'Village tour checks that the user is inside the selected village'); console.assert(typeof getTourStartInstruction === 'function', 'Village tour can instruct user to go to the selected village'); console.assert(typeof renderTourLocationRequestPanel === 'function', 'Village tour can ask again for location permission inside the tour panel'); console.assert(typeof requestTourLocationAgain === 'function', 'Enable location button can retry geolocation and continue the tour flow'); console.assert(typeof beginActiveTour === 'function', 'Village tour can enter navigator mode'); console.assert(typeof checkActiveTourArrival === 'function', 'Village tour can detect arrival at stops'); console.assert(typeof playActiveTourStopAudio === 'function', 'Village tour can play stop audio'); console.assert(typeof stopTourAudio === 'function', 'Village tour can stop audio playback'); console.assert(typeof setTourAudioButtonState === 'function', 'Village tour audio button can toggle play/stop'); console.assert(document.getElementById('tour-nav-description') !== null, 'Tour navigator shows stop description text'); console.assert(document.getElementById('tour-nav') !== null, 'Tour navigator panel exists'); console.assert(document.getElementById('tour-exit-top') !== null, 'Tour mode top bar exit button exists'); console.assert(document.getElementById('tour-recenter-top') !== null, 'Tour mode top bar recenter button exists'); console.assert(typeof recenterActiveTour === 'function', 'Tour mode can recenter and resume following the user'); console.assert(typeof disableTourFollowFromUserMove === 'function', 'Tour mode can stop auto-follow when user moves the map'); console.assert(typeof centerMapOnTourUser === 'function', 'Tour mode can zoom to current user position'); console.assert(typeof updateActiveTourLegRoute === 'function', 'Tour mode can draw route to next stop'); console.assert(typeof getPointAlongLatLngs === 'function', 'Moving ferry can interpolate smoothly along a route'); console.assert(typeof startMovingFerries === 'function', 'Moving ferry animation can start'); console.assert(typeof loadFerryTimetable === 'function', 'Moving ferry can load timetable from Supabase'); console.assert(typeof getActiveFerryLegs === 'function', 'Moving ferry can calculate active timetable legs'); console.assert(typeof normalizeFerryPortName === 'function', 'Moving ferry can match timetable ports to ferry POIs'); console.assert(typeof stopMovingFerries === 'function', 'Moving ferry animation can stop'); console.assert(typeof createMovingFerryIcon === 'function', 'Moving ferry image icon exists'); console.assert(typeof shouldReverseFerryIcon === 'function', 'Moving ferry icon can be mirrored for opposite direction'); console.assert(typeof formatMinutesAsTime === 'function', 'Moving ferry can format arrival time'); console.assert(typeof getFerryPopupHTML === 'function', 'Moving ferry can show next arrival popup'); console.assert(typeof bindMovingFerryPopup === 'function', 'Moving ferry popup can be attached to marker'); console.assert(typeof getBearingDegrees === 'function', 'Tour compass can calculate bearing'); console.assert(typeof getCompassTargetOnRoute === 'function', 'Tour compass can follow the route polyline'); console.assert(typeof updateTourCompass === 'function', 'Tour compass can update arrow direction'); console.assert(document.getElementById('tour-nav-compass-arrow') !== null, 'Tour compass arrow exists'); console.assert(typeof getPreferredSpeechVoice === 'function', 'Tour mode can select a smoother male voice when available'); console.assert(typeof configureTourUtterance === 'function', 'Tour mode can configure deeper voice parameters'); console.assert(typeof getLocalTourPath === 'function', 'Tour mode can draw a local route when external pedestrian routing fails'); console.assert(typeof fetchOSMPedestrianRoute === 'function', 'Tour mode can build pedestrian routes from OSM footways/steps/paths'); console.assert(typeof buildPedestrianGraphFromOSM === 'function', 'Tour mode can build a local pedestrian graph'); console.assert(typeof dijkstraPedestrianPath === 'function', 'Tour mode can calculate shortest path on pedestrian graph'); console.assert(getOSRMLegUrl([44.1,9.7],[44.101,9.701]).indexOf('/foot/') !== -1, 'OSRM fallback uses foot routing, not driving'); console.assert(document.querySelector('[data-tour-action="next"]') === null, 'Tour mode has no always-visible manual next stop button'); console.assert(document.getElementById('tour-nav-next') !== null, 'Tour mode has a next stop button that appears only after arrival'); console.assert(document.querySelector('[data-tour-action="open"]') === null, 'Tour mode has no manual open stop button'); console.assert(document.querySelector('[data-tour-action="end"]') === null, 'Tour mode uses only the top exit button'); console.assert(document.body.classList.contains('village-tour-active') === false, 'Village tour overlay state starts inactive'); console.assert(document.body.classList.contains('city-card-active') === false, 'City card overlay state starts inactive'); console.assert(typeof isTouristicPOI === 'function', 'AI can filter non-touristic POIs'); console.assert(isTouristicPOI({ name: 'Ferry riomaggiore', type: 'ferry' }) === false, 'Ferry is excluded from tourist itineraries'); console.assert(isTouristicPOI({ name: 'Riomaggiore Castle', type: 'monumento' }) === true, 'Touristic POI is included'); console.assert(isTouristicPOI({ name: 'Stazione battelli', type: 'trasporto' }) === false, 'Boat station is excluded from tourist itineraries'); console.assert(document.getElementById('poi-ai') !== null, 'AI button exists on POI card'); console.assert(document.getElementById('card-experiences') !== null, 'Experiences button exists'); console.assert(document.getElementById('card-stories') !== null, 'Stories button exists'); sample = normalizePOI({ name: 'Ferry Test', coords: '44.2,9.8', type: 'ferry', description: 'A ferry stop.' }); console.assert(sample.symbol === '⛴️', 'Ferry emoji supported'); console.assert(sample.description === 'A ferry stop.', 'Description is preserved'); console.assert(isValidPOI(sample) === true, 'Normalized sample POI is valid'); console.assert(normalizePOI({ name: 'EU', coords: '44,1004926, 9,7396095' }).lat === 44.1004926, 'European decimal coords supported'); console.assert(getMinZoomForImportance(100) <= getMinZoomForImportance(10), 'Importance controls visibility zoom'); console.assert(getMinZoomForImportance(60) >= 15, 'Importance 60 does not appear too early'); arc = createSeaArc([44.1461, 9.6548], [44.1350, 9.6847], 8); console.assert(Array.isArray(arc) && arc.length === 9, 'Sea arc returns segments + 1 points'); aiText = generateAIText(sample, 'poi'); console.assert(aiText.indexOf('Ferry Test') !== -1, 'AI text includes POI name'); console.assert(getYouTubeEmbedUrl('abc123').indexOf('autoplay=1') !== -1, 'YouTube autoplay enabled'); console.assert(typeof unlockLiveFromRealGesture === 'function', 'iOS YouTube live can retry play from a real user gesture'); console.assert(typeof rememberRealUserGesture === 'function', 'Live player records trusted user gestures'); console.assert(typeof hasFreshRealUserGesture === 'function', 'Live player checks gesture freshness before iOS playback'); console.assert(getSearchResults('ver').some(function (result) { return result.name === 'Vernazza'; }), 'Search finds Vernazza'); }
   function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); loadPOIs(); loadTrails(); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
   start();
 }());
