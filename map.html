@@ -36,8 +36,9 @@ il c    .top-bar { position: fixed; top: calc(12px + env(safe-area-inset-top)); 
     body.tour-navigation-active .tour-top-actions { display: flex; }
     .label { color: white; font-weight: 800; font-size: 14px; text-shadow: 0 2px 6px rgba(0,0,0,0.9); white-space: nowrap; cursor: pointer; user-select: none; }
     .poi-label { min-width: 30px; min-height: 30px; display: grid; place-items: center; border-radius: 999px; background: rgba(0,0,0,0.55); color: white; font-size: 17px; border: 1px solid rgba(255,255,255,0.28); box-shadow: 0 8px 22px rgba(0,0,0,0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-    .moving-ferry-label { width: 54px; height: 36px; display: grid; place-items: center; background: transparent; border: 0; box-shadow: none; transform: translateZ(0); cursor: pointer; }
-    .moving-ferry-label img { width: 54px; height: auto; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; filter: drop-shadow(0 7px 12px rgba(0,0,0,0.32)); }
+    .moving-ferry-icon { width: 68px !important; height: 38px !important; background: transparent !important; border: 0 !important; overflow: visible !important; }
+    .moving-ferry-label { width: 68px !important; height: 38px !important; display: flex; align-items: center; justify-content: center; background: transparent; border: 0; box-shadow: none; transform: translateZ(0); cursor: pointer; overflow: visible; }
+    .moving-ferry-label img { width: 68px !important; max-width: 68px !important; min-width: 68px !important; height: auto !important; max-height: 38px !important; display: block; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; filter: drop-shadow(0 5px 9px rgba(0,0,0,0.32)); }
     .moving-ferry-label.is-reversed img { transform: scaleX(-1); }
     .ferry-popup { min-width: 170px; }
     .ferry-popup-title { font-size: 14px; font-weight: 950; color: #111; margin-bottom: 4px; }
@@ -977,7 +978,12 @@ il c    .top-bar { position: fixed; top: calc(12px + env(safe-area-inset-top)); 
     return Number(toPort.coords[1]) > Number(fromPort.coords[1]);
   }
   function createMovingFerryIcon(reverse) {
-    return L.divIcon({ className: 'moving-ferry-icon', html: '<div class="moving-ferry-label' + (reverse ? ' is-reversed' : '') + '"><img src="ferry.png" alt="Ferry"></div>', iconSize: [54, 36], iconAnchor: [27, 18] });
+    return L.divIcon({
+      className: 'moving-ferry-icon',
+      html: '<div class="moving-ferry-label' + (reverse ? ' is-reversed' : '') + '"><img src="ferry.png" alt="Ferry" style="width:68px!important;max-width:68px!important;min-width:68px!important;height:auto!important;max-height:38px!important;object-fit:contain;display:block;pointer-events:none;user-select:none;-webkit-user-drag:none;"></div>',
+      iconSize: [68, 38],
+      iconAnchor: [34, 19]
+    });
   }
   function formatMinutesAsTime(minutes) {
     var value = Math.round(Number(minutes || 0));
