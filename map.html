@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>5TerreGo | Map</title>
+  <meta name="application-name" content="5TerreGo" />
+  <meta name="apple-mobile-web-app-title" content="5TerreGo" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0b1116" />
+  <meta name="msapplication-TileColor" content="#0b1116" />
+  <link id="dynamic-favicon" rel="icon" type="image/png" href="app.png" />
+  <link id="dynamic-apple-icon" rel="apple-touch-icon" href="app.png" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -55,6 +64,10 @@
     .site-hero-section::after { content: ''; position: absolute; inset: 0; z-index: 1; background: radial-gradient(circle at 18% 18%, rgba(255,138,29,.28), transparent 34%), radial-gradient(circle at 82% 8%, rgba(30,155,255,.26), transparent 30%); pointer-events: none; }
     .site-hero-content { position: relative; z-index: 2; transform: translateY(-8px); }
     .site-view-kicker { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 12px; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.20); color: rgba(255,255,255,.86); font-size: 11px; letter-spacing: .13em; text-transform: uppercase; font-weight: 950; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .site-install-app { width: 100%; margin: 0 0 14px; display: flex; justify-content: center; }
+    .site-install-app-btn { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border: 0; border-radius: 999px; background: #111; color: #fff; font-family: inherit; font-size: 13px; line-height: 1; font-weight: 950; letter-spacing: -0.02em; box-shadow: 0 14px 34px rgba(0,0,0,.16); cursor: pointer; }
+    .site-install-app-btn img { width: 24px; height: 24px; border-radius: 8px; display: block; object-fit: cover; }
+    .site-install-app-btn:active { transform: translateY(1px); }
     .site-view-title { margin: 0 0 22px; max-width: 620px; font-size: clamp(38px, 11.4vw, 70px); line-height: .92; letter-spacing: -0.078em; font-weight: 950; }
     .site-view-text { max-width: 540px; margin: 0 0 30px; font-size: 16px; line-height: 1.48; color: rgba(255,255,255,.80); }
     .site-hero-actions { display: flex; flex-wrap: nowrap; gap: 10px; width: 100%; overflow: hidden; }
@@ -366,6 +379,30 @@
     body.trail-page-active #ai-chat-btn, body.village-tour-active #ai-chat-btn, body.city-card-active #ai-chat-btn, body.tour-navigation-active #ai-chat-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     body.poi-panel-active #ai-chat-btn video { transform: scale(1.22) scaleX(-1); }
   </style>
+  <script>
+    (function(){
+      var iconUrl = 'app.png';
+      var manifest = {
+        name: '5TerreGo',
+        short_name: '5TerreGo',
+        description: 'Interactive Cinque Terre guide with map, trails, ferries, weather and AI guide.',
+        start_url: './',
+        scope: './',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#f4efe4',
+        theme_color: '#0b1116',
+        icons: [
+          { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
+      };
+      var link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+      document.head.appendChild(link);
+    }());
+  </script>
 </head>
 <body>
 
@@ -377,7 +414,8 @@
     <section class="site-hero-section">
       <video class="site-hero-video" src="12.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
       <div class="site-hero-content">
-        <h1 class="site-view-title">Your complete interactive guide to the Cinque Terre.</h1>
+        <div class="site-install-app"><button id="site-install-app-btn" class="site-install-app-btn" type="button"><img src="app.png" alt=""><span class="site-install-app-text">Install the app</span></button></div>
+      <h1 class="site-view-title">Your complete interactive guide to the Cinque Terre.</h1>
         <p class="site-view-text">Explore the five villages with one guide for stories, trails, ferries, viewpoints, beaches, local places, live map tools and stays.</p>
         <div class="site-hero-actions"><a href="blog.html">Stories</a><a href="experiences.html">Experiences</a><a href="rooms.html">Book your stay</a></div>
       </div>
@@ -1774,6 +1812,7 @@
 (function(){
   var FLAGS = { en: 'gb', it: 'it', fr: 'fr', de: 'de', ru: 'ru', zh: 'cn', ar: 'sa' };
   var NAMES = { en: 'English', it: 'Italiano', fr: 'Français', de: 'Deutsch', ru: 'Русский', zh: '中文', ar: 'العربية' };
+  var EXTRA_UI = { en:{installApp:'Install the app', installHint:'On iPhone: Share → Add to Home Screen. On Android: use Install app from the browser menu.'}, it:{installApp:'Installa l’app', installHint:'Su iPhone: Condividi → Aggiungi alla schermata Home. Su Android: usa Installa app dal menu del browser.'}, fr:{installApp:'Installer l’app', installHint:'Sur iPhone : Partager → Ajouter à l’écran d’accueil. Sur Android : utilisez Installer l’app dans le menu du navigateur.'}, de:{installApp:'App installieren', installHint:'Auf iPhone: Teilen → Zum Home-Bildschirm. Auf Android: App installieren im Browser-Menü.'}, ru:{installApp:'Установить приложение', installHint:'На iPhone: Поделиться → На экран «Домой». На Android: используйте «Установить приложение» в меню браузера.'}, zh:{installApp:'安装应用', installHint:'iPhone：分享 → 添加到主屏幕。Android：在浏览器菜单中选择安装应用。'}, ar:{installApp:'تثبيت التطبيق', installHint:'على iPhone: مشاركة ← إضافة إلى الشاشة الرئيسية. على Android: استخدم تثبيت التطبيق من قائمة المتصفح.'} };
   var UI = {
     en: {
       login:'Login', map:'Map', site:'Site', search:'Search village, POI or trail...', all:'All', trails:'Trails', viewpoints:'Viewpoints', beaches:'Beaches', food:'Food', churches:'Churches', monuments:'Monuments', stations:'Stations', ferry:'Ferry', curiosities:'Curiosities', recenter:'Recenter', exitTour:'Exit tour', heroTitle:'Your complete interactive guide to the Cinque Terre.', heroText:'Explore the five villages with one guide for stories, trails, ferries, viewpoints, beaches, local places, live map tools and stays.', stories:'Stories', experiences:'Experiences', bookStay:'Book your stay', fiveVillages:'The five villages', tapMap:'tap to open map', startHere:'Start here', siteSections:'site sections', readBefore:'Read before you move.', storyText:'Random guide articles, village notes and practical ideas from 5TerreGo.', openStories:'Open Stories', thingsDoing:'Things worth doing.', expText:'Curated activities around the five villages, connected to the way people actually explore.', openExperiences:'Open Experiences', bookSmarter:'Book smarter. Pay one euro less.', stayText:'Our promise is simple: the same room, always €1 less than the lowest price you can find online. Found a better offer? Send it to us and we’ll sell it to you for one euro less.', openStay:'Open Book your stay', weather:'Weather', weatherNote:'Now and next hours', loadingWeather:'Loading weather data…', trailCopy:'Choose a route by difficulty and walking time. Trail cards scroll horizontally and open the full trail page on the map.', from:'From', difficulty:'Difficulty', time:'Time', elevation:'Elevation', openTrail:'Open trail', distance:'Distance', estimatedTime:'Estimated time', shoes:'Recommended shoes', price:'Price', gainLoss:'Elevation gain / loss', profile:'Elevation profile', directions:'Directions', aiGuide:'AI guide', readMore:'Read more', startTour:'Start village tour', tourActive:'Tour active', nextStop:'Next stop', moveNext:'Move toward the next stop.', followPath:'Follow the path', audio:'▶ Audio', contact:'Contact us', footerNote:'All rights reserved. Map, weather, ferry and local information are provided for guidance only and may change without notice.', aiSubtitle:'Your Cinque Terre guide', aiPlaceholder:'Ask the guide...', ai1:'what should I do today?', ai2:'best sunset?', ai3:'beaches and viewpoints?', ai4:'trails or ferry?', aiClose:'Close AI', aiOpen:'Open AI Guide', liveLoading:'Loading live stream'
@@ -1810,14 +1849,14 @@
     ar: { 'Hi, I’m Captain Gull. I can help you explore the Cinque Terre: villages, trails, ferries, beaches, viewpoints, stories, restaurants and practical ideas for today.':'مرحباً، أنا Captain Gull. أستطيع مساعدتك في استكشاف تشينكوي تيري: القرى والمسارات والعبّارات والشواطئ والإطلالات والقصص والمطاعم وأفكار عملية لليوم.', 'Tell me what you are interested in: villages, trails, ferries, beaches, viewpoints, restaurants, stories, or a sample day in the Cinque Terre.':'أخبرني بما يهمك: القرى، المسارات، العبّارات، الشواطئ، الإطلالات، المطاعم، القصص، أو برنامج يوم في تشينكوي تيري.', 'Typing...':'يكتب...', 'View':'عرض', 'Trail':'مسار', 'Article':'مقال', 'Result':'نتيجة', 'No description available.':'لا يوجد وصف متاح.', 'Description not added yet.':'لم تتم إضافة الوصف بعد.' }
   };
   function lang(){ return localStorage.getItem('5terrego_language') || 'en'; }
-  function t(key){ var l = lang(); return (UI[l] && UI[l][key]) || UI.en[key] || key; }
+  function t(key){ var l = lang(); return (UI[l] && UI[l][key]) || (EXTRA_UI[l] && EXTRA_UI[l][key]) || UI.en[key] || (EXTRA_UI.en && EXTRA_UI.en[key]) || key; }
   function setText(selector, value){ var el = document.querySelector(selector); if (el) el.textContent = value; }
   function setAllText(selector, values){ document.querySelectorAll(selector).forEach(function(el, i){ if (values[i] !== undefined) el.textContent = values[i]; }); }
   function setPlaceholder(selector, value){ var el = document.querySelector(selector); if (el) el.setAttribute('placeholder', value); }
   function translateText(text){ var l = lang(); var out = String(text || ''); var map = TEXT_REPLACE[l] || {}; Object.keys(map).forEach(function(k){ out = out.split(k).join(map[k]); }); return out; }
   function applyLanguage(next){ var l = next || lang(); var flag = document.getElementById('language-flag'); var flagImg = document.getElementById('language-flag-img'); localStorage.setItem('5terrego_language', l); document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; if (flag) flag.setAttribute('data-current-language', l); if (flagImg) { flagImg.src = 'https://hatscripts.github.io/circle-flags/flags/' + FLAGS[l] + '.svg'; flagImg.alt = NAMES[l]; }
     document.querySelectorAll('.language-option').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-lang') === l); });
-    setText('#login', t('login')); setText('#view-toggle-map', t('map')); setText('#view-toggle-site', t('site')); setPlaceholder('#search', t('search'));
+    setText('#login', t('login')); setText('.site-install-app-text', t('installApp')); setText('#view-toggle-map', t('map')); setText('#view-toggle-site', t('site')); setPlaceholder('#search', t('search'));
     setAllText('#map-filter-bar .mode-btn', [t('all'),t('trails'),t('viewpoints'),t('beaches'),t('food'),t('churches'),t('monuments'),t('stations'),t('ferry'),t('curiosities')]);
     setText('#tour-recenter-top', t('recenter')); setText('#tour-exit-top', t('exitTour'));
     setText('.site-view-title', t('heroTitle')); setText('.site-view-text', t('heroText')); setAllText('.site-hero-actions a', [t('stories'),t('experiences'),t('bookStay')]);
