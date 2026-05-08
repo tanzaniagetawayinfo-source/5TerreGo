@@ -593,8 +593,13 @@
       }
 
       async function updatePoiSettingsFallback(poiId, patch) {
-        var result = await partnerClient.from("pois").update(patch).eq("id", poiId);
+        var result = await partnerClient.rpc("update_partner_discount", {
+          target_poi_id: Number(poiId),
+          new_discount: Number(patch.discount || 0),
+          new_discount_info: String(patch.discount_info || "")
+        });
         if (result.error) throw new Error(result.error.message || "Could not update this POI.");
+        return result.data;
       }
 
       async function login() {
@@ -650,12 +655,7 @@
         setStatus(dashboardStatus, "Loading authorized activity...", "");
 
         try {
-          try {
-            var data = await callBackend({ action: "get_partner_pois" });
-            partnerPois = Array.isArray(data.pois) ? data.pois : [];
-          } catch (backendError) {
-            partnerPois = await loadPartnerPoisFallback();
-          }
+          partnerPois = await loadPartnerPoisFallback();
 
           if (!partnerPois.length) {
             setStatus(dashboardStatus, "This account is not authorized to manage discounts.", "error");
@@ -723,16 +723,7 @@
         setStatus(settingsStatus, "Saving...", "");
 
         try {
-          try {
-            await callBackend({
-              action: "update_discount",
-              poi_id: activePoi.id,
-              discount: discount,
-              discount_info: discountInfo
-            });
-          } catch (backendError) {
-            await updatePoiSettingsFallback(activePoi.id, { discount: discount, discount_info: discountInfo });
-          }
+          await updatePoiSettingsFallback(activePoi.id, { discount: discount, discount_info: discountInfo });
 
           activePoi.discount = discount;
           activePoi.discount_info = discountInfo;
@@ -759,9 +750,11 @@
         setStatus(dashboardStatus, "Validating code...", "");
 
         try {
-          var data = await callBackend({ action: "validate_code", code: code });
-          var poiName = data && data.poi && data.poi.name ? data.poi.name : "Activity";
-          var discount = data && data.code && data.code.discount ? data.code.discount : "";
+          var result = await partnerClient.rpc("validate_partner_discount_code", { target_code: code });
+          if (result.error) throw new Error(result.error.message || "Could not validate code.");
+          var data = result.data || {};
+          var poiName = data.poi_name || "Activity";
+          var discount = data.discount || "";
           codeInput.value = "";
           setStatus(dashboardStatus, "Validated: <strong>" + escapeHtml(poiName) + "</strong>" + (discount ? " · " + escapeHtml(discount) + "% discount" : "") + ".", "ok");
         } catch (error) {
@@ -826,6 +819,8 @@
         console.assert(parseAuthorizedEmails(' A@B.COM, c@d.com ,, ').join('|') === 'a@b.com|c@d.com', 'parseAuthorizedEmails should trim lowercase and remove empty values');
         console.assert(emailIsAuthorized({ emails: 'one@test.com, two@test.com' }, 'TWO@test.com') === true, 'emailIsAuthorized should match case-insensitively');
         console.assert(normalizeCode('https://5terrego.com/partner.html?code=5tg-test') === '5TG-TEST', 'normalizeCode should extract code from URL');
+        console.assert(typeof updatePoiSettingsFallback === 'function', 'Settings use update_partner_discount RPC instead of the old backend');
+        console.assert(typeof validateCurrentCode === 'function', 'Validation uses validate_partner_discount_code RPC instead of the old backend');
       }
 
       loginBtn.addEventListener("click", login);
