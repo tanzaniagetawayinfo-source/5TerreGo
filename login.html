@@ -268,6 +268,7 @@ button{
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   const REDIRECT_PATH = 'https://www.5terrego.com/map.html';
   const OWNER_CHECK_ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/backend?action=me';
+  const PARTNER_BACKEND_ENDPOINT = SUPABASE_URL + '/functions/v1/partner-backend';
 
   if(!window.supabase){
     throw new Error('Supabase SDK non caricato.');
@@ -597,7 +598,6 @@ button{
 
     panel.appendChild(bookingsBtn);
     panel.appendChild(profileBtn);
-    panel.appendChild(trailsBtn);
     panel.appendChild(logoutBtn);
 
     modal.appendChild(panel);
@@ -610,15 +610,22 @@ button{
       const token = session && session.access_token ? session.access_token : '';
       if(!token) return false;
 
-      const result = await client.functions.invoke('partner-backend', {
-        body:{ action:'get_partner_pois' }
+      const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'apikey':SUPABASE_ANON_KEY,
+          'Authorization':'Bearer ' + token
+        },
+        body:JSON.stringify({ action:'get_partner_pois' })
       });
 
-      if(result.error || !result.data || result.data.ok !== true){
+      if(!res.ok){
         return false;
       }
 
-      return Array.isArray(result.data.pois) && result.data.pois.length > 0;
+      const payload = await res.json();
+      return payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0;
     } catch(_err){
       return false;
     }
@@ -667,6 +674,33 @@ button{
         panel.insertBefore(poiBtn, firstButton);
       } else {
         panel.appendChild(poiBtn);
+      }
+    }
+
+    if(!document.getElementById('trails-editor')){
+      const trailsBtn = document.createElement('button');
+      trailsBtn.className = 'primary';
+      trailsBtn.id = 'trails-editor';
+      trailsBtn.type = 'button';
+      trailsBtn.textContent = 'Sentieri Editor';
+      trailsBtn.onclick = function(){
+        window.location.href = '/trakeditor.html';
+      };
+
+      const poiButton = document.getElementById('poi-dashboard');
+      const blogButton = document.getElementById('blog-dashboard');
+      if(blogButton && blogButton.nextSibling){
+        panel.insertBefore(trailsBtn, blogButton.nextSibling);
+      } else if(blogButton){
+        panel.appendChild(trailsBtn);
+      } else if(poiButton && poiButton.nextSibling){
+        panel.insertBefore(trailsBtn, poiButton.nextSibling);
+      } else if(poiButton){
+        panel.appendChild(trailsBtn);
+      } else if(firstButton){
+        panel.insertBefore(trailsBtn, firstButton);
+      } else {
+        panel.appendChild(trailsBtn);
       }
     }
 
