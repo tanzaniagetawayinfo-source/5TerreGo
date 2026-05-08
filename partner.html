@@ -3,161 +3,442 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>5TerreGo Partner Area</title>
+  <title>5TerreGo Partner Scanner</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
     * { box-sizing: border-box; }
+
     :root {
       --bg: #f6f1e8;
-      --card: rgba(255,255,255,.78);
       --text: #142033;
       --muted: rgba(20,32,51,.62);
       --line: rgba(20,32,51,.11);
       --blue: #1677ff;
       --orange: #ff8a00;
+      --green: #168a49;
       --red: #d93025;
-      --shadow: 0 22px 70px rgba(15, 23, 42, .16);
-      --radius: 28px;
+      --card: rgba(255,255,255,.78);
+      --shadow: 0 24px 80px rgba(15,23,42,.16);
     }
+
     body {
       margin: 0;
       min-height: 100vh;
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top left, rgba(22,119,255,.18), transparent 34%), radial-gradient(circle at top right, rgba(255,138,0,.18), transparent 32%), linear-gradient(180deg, #fffaf0 0%, var(--bg) 45%, #efe7d9 100%);
+      background: radial-gradient(circle at top left, rgba(22,119,255,.18), transparent 34%), radial-gradient(circle at top right, rgba(255,138,0,.18), transparent 32%), linear-gradient(180deg, #fffaf0 0%, var(--bg) 48%, #efe7d9 100%);
       overflow-x: hidden;
     }
-    button, input, textarea { font: inherit; }
+
+    button, input, textarea, select { font: inherit; }
     button { border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-    .app { width: min(1060px, 100%); margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 16px calc(34px + env(safe-area-inset-bottom)); }
-    .topbar { position: sticky; top: 0; z-index: 20; margin: -18px -16px 16px; padding: calc(14px + env(safe-area-inset-top)) 16px 12px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); background: rgba(246,241,232,.74); border-bottom: 1px solid rgba(20,32,51,.08); }
-    .topbar-inner { width: min(1060px, 100%); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .brand-mark { width: 42px; height: 42px; border-radius: 16px; display: grid; place-items: center; background: #fff; box-shadow: 0 10px 26px rgba(15, 23, 42, .12); font-size: 22px; flex: 0 0 auto; }
-    .brand-title { font-weight: 850; letter-spacing: -.04em; font-size: 21px; line-height: 1; white-space: nowrap; }
+
+    .hidden { display: none !important; }
+
+    .app {
+      min-height: 100vh;
+      width: min(560px, 100%);
+      margin: 0 auto;
+      padding: calc(18px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 14px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -.055em;
+      line-height: 1;
+    }
+
     .brand-title .blue { color: var(--blue); }
     .brand-title .orange { color: var(--orange); }
-    .brand-subtitle { margin-top: 3px; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-    .small-btn { min-height: 40px; border-radius: 999px; padding: 0 14px; background: rgba(255,255,255,.86); color: var(--text); border: 1px solid rgba(20,32,51,.1); box-shadow: 0 8px 24px rgba(15,23,42,.08); font-weight: 750; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
-    .hero { padding: 18px 2px 10px; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,.72); border: 1px solid rgba(20,32,51,.08); color: rgba(20,32,51,.72); font-size: 13px; font-weight: 750; }
-    h1 { margin: 15px 0 10px; font-size: clamp(34px, 9vw, 64px); line-height: .94; letter-spacing: -.07em; max-width: 780px; }
-    .hero p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.5; max-width: 680px; }
-    .auth-card, .panel, .poi-card { background: var(--card); border: 1px solid rgba(255,255,255,.64); box-shadow: var(--shadow); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border-radius: var(--radius); }
-    .auth-card { margin-top: 18px; padding: 18px; }
-    .auth-grid { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
-    .field { display: grid; gap: 8px; }
-    label { font-size: 13px; color: var(--muted); font-weight: 800; }
-    input, textarea { width: 100%; border: 1px solid rgba(20,32,51,.12); background: rgba(255,255,255,.88); color: var(--text); outline: none; border-radius: 18px; padding: 13px 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
-    textarea { min-height: 86px; resize: vertical; }
-    input:focus, textarea:focus { border-color: rgba(22,119,255,.55); box-shadow: 0 0 0 4px rgba(22,119,255,.12); }
-    .primary-btn { min-height: 48px; border-radius: 18px; padding: 0 18px; background: linear-gradient(135deg, var(--blue), #0f5bd7); color: #fff; font-weight: 850; box-shadow: 0 18px 34px rgba(22,119,255,.22); white-space: nowrap; }
-    .secondary-btn { min-height: 44px; border-radius: 16px; padding: 0 14px; background: rgba(255,255,255,.82); color: var(--text); border: 1px solid rgba(20,32,51,.1); font-weight: 800; }
-    .hidden { display: none !important; }
-    .status { margin-top: 12px; padding: 12px 14px; border-radius: 18px; background: rgba(255,255,255,.64); color: var(--muted); border: 1px solid rgba(20,32,51,.08); font-size: 14px; line-height: 1.35; }
-    .status.ok { color: #107c3e; background: rgba(24,160,88,.11); border-color: rgba(24,160,88,.16); }
+
+    .restaurant-name {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 290px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.86);
+      color: var(--text);
+      border: 1px solid rgba(20,32,51,.1);
+      box-shadow: 0 10px 26px rgba(15,23,42,.09);
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .auth-card, .scanner-card, .settings-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.66);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-radius: 30px;
+    }
+
+    .auth-card {
+      padding: 18px;
+    }
+
+    .auth-title {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: .95;
+      letter-spacing: -.065em;
+      font-weight: 950;
+    }
+
+    .auth-text {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 15px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid rgba(20,32,51,.12);
+      background: rgba(255,255,255,.9);
+      color: var(--text);
+      outline: none;
+      border-radius: 18px;
+      padding: 14px 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(22,119,255,.55);
+      box-shadow: 0 0 0 4px rgba(22,119,255,.12);
+    }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 19px;
+      padding: 0 18px;
+      background: linear-gradient(135deg, var(--blue), #0f5bd7);
+      color: #fff;
+      font-weight: 900;
+      box-shadow: 0 18px 34px rgba(22,119,255,.22);
+    }
+
+    .secondary-btn {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 18px;
+      padding: 0 16px;
+      background: rgba(255,255,255,.84);
+      color: var(--text);
+      border: 1px solid rgba(20,32,51,.1);
+      font-weight: 850;
+    }
+
+    .status {
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.64);
+      color: var(--muted);
+      border: 1px solid rgba(20,32,51,.08);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .status.ok { color: var(--green); background: rgba(24,160,88,.11); border-color: rgba(24,160,88,.16); }
     .status.error { color: var(--red); background: rgba(217,48,37,.08); border-color: rgba(217,48,37,.14); }
-    .panel { margin-top: 18px; padding: 16px; }
-    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-    .panel-title { font-size: 20px; font-weight: 900; letter-spacing: -.04em; margin: 0; }
-    .user-chip { max-width: 100%; display: inline-flex; align-items: center; gap: 8px; padding: 8px 11px; border-radius: 999px; background: rgba(255,255,255,.78); color: rgba(20,32,51,.74); border: 1px solid rgba(20,32,51,.08); font-size: 13px; font-weight: 750; overflow: hidden; }
-    .user-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .poi-list { display: grid; gap: 14px; }
-    .poi-card { padding: 16px; overflow: hidden; }
-    .poi-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-    .poi-name { margin: 0; font-size: 22px; line-height: 1.05; letter-spacing: -.045em; font-weight: 920; }
-    .poi-type { margin-top: 5px; color: var(--muted); font-size: 13px; font-weight: 750; }
-    .discount-pill { flex: 0 0 auto; min-width: 74px; text-align: center; border-radius: 20px; padding: 10px 11px; background: rgba(255,138,0,.14); border: 1px solid rgba(255,138,0,.18); color: #b55c00; font-weight: 950; line-height: 1; }
-    .discount-pill strong { display: block; font-size: 22px; letter-spacing: -.04em; }
-    .discount-pill span { display: block; margin-top: 4px; font-size: 11px; letter-spacing: .04em; }
-    .form-grid { margin-top: 15px; display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: start; }
-    .buttons-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-    .codes { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
-    .codes-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .codes-title { font-weight: 900; letter-spacing: -.025em; }
-    .code-list { display: grid; gap: 9px; }
-    .code-item { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 11px; border-radius: 18px; background: rgba(255,255,255,.64); border: 1px solid rgba(20,32,51,.08); }
-    .code-main { min-width: 0; }
-    .code-value { font-weight: 950; letter-spacing: .02em; font-size: 15px; }
-    .code-meta { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
-    .empty-state { padding: 24px 14px; text-align: center; color: var(--muted); border: 1px dashed rgba(20,32,51,.18); border-radius: 22px; background: rgba(255,255,255,.48); line-height: 1.45; }
-    .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: end center; background: rgba(15,23,42,.34); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 14px; }
-    .modal-card { width: min(560px, 100%); border-radius: 30px; background: rgba(255,255,255,.96); box-shadow: 0 28px 100px rgba(15,23,42,.28); padding: 18px; animation: sheetIn .22s ease-out; }
-    @keyframes sheetIn { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-title { margin: 0 0 8px; font-size: 24px; letter-spacing: -.05em; font-weight: 930; }
-    .modal-text { margin: 0 0 14px; color: var(--muted); line-height: 1.45; }
-    .validate-input { text-transform: uppercase; letter-spacing: .05em; font-weight: 850; }
-    @media (max-width: 640px) {
-      .auth-grid { grid-template-columns: 1fr; }
-      .primary-btn { width: 100%; }
-      .panel-head { align-items: flex-start; flex-direction: column; }
-      .poi-top { align-items: stretch; }
-      .form-grid { grid-template-columns: 1fr; }
-      .code-item { grid-template-columns: 1fr; }
-      .code-item .secondary-btn { width: 100%; }
+
+    .scanner-card {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .scanner-box {
+      position: relative;
+      width: min(100%, 360px);
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+      border-radius: 34px;
+      overflow: hidden;
+      background: #0d1624;
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 22px 58px rgba(15,23,42,.18);
+    }
+
+    #reader {
+      width: 100%;
+      height: 100%;
+      background: #0d1624;
+    }
+
+    #reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    #reader__dashboard_section, #reader__header_message, #reader__scan_region img {
+      display: none !important;
+    }
+
+    .scanner-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: rgba(255,255,255,.82);
+      padding: 22px;
+      pointer-events: none;
+    }
+
+    .camera-icon {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 12px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.12);
+      display: grid;
+      place-items: center;
+      font-size: 38px;
+      border: 1px solid rgba(255,255,255,.16);
+    }
+
+    .scan-frame {
+      position: absolute;
+      inset: 18px;
+      border-radius: 26px;
+      border: 2px solid rgba(255,255,255,.58);
+      pointer-events: none;
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 50%;
+      height: 2px;
+      background: rgba(255,255,255,.75);
+      box-shadow: 0 0 18px rgba(22,119,255,.7);
+      pointer-events: none;
+    }
+
+    .manual-area {
+      display: grid;
+      gap: 10px;
+    }
+
+    .manual-input {
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-weight: 900;
+      font-size: 17px;
+    }
+
+    .activity-select-wrap {
+      margin-top: 2px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: grid;
+      place-items: end center;
+      background: rgba(15,23,42,.34);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 14px;
+    }
+
+    .settings-card {
+      width: min(560px, 100%);
+      padding: 18px;
+      animation: sheetIn .22s ease-out;
+    }
+
+    @keyframes sheetIn {
+      from { transform: translateY(24px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .settings-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .settings-title {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -.055em;
+      font-weight: 950;
+    }
+
+    .settings-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .settings-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .login-actions, .settings-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (max-height: 720px) {
+      .screen { justify-content: flex-start; }
+      .scanner-box { width: min(100%, 310px); }
     }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="brand-mark">🌊</div>
-        <div>
-          <div class="brand-title"><span class="blue">5Terre</span><span class="orange">Go</span></div>
-          <div class="brand-subtitle">Partner discount management</div>
-        </div>
-      </div>
-      <button id="logoutBtn" class="small-btn hidden" type="button">Logout</button>
-    </div>
-  </div>
-
   <main class="app">
-    <section class="hero">
-      <div class="eyebrow">Partner area · QR validation · Discount settings</div>
-      <h1>Manage your local discount.</h1>
-      <p>Access is granted only to emails already listed inside the POI field <strong>emails</strong>. A discount becomes public only when the POI field <strong>discount</strong> is greater than zero.</p>
-    </section>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title"><span class="blue">5Terre</span><span class="orange">Go</span></div>
+        <div id="restaurantName" class="restaurant-name">Partner scanner</div>
+      </div>
+      <div class="top-actions">
+        <button id="settingsBtn" class="icon-btn hidden" type="button" aria-label="Settings">⚙️</button>
+        <button id="logoutBtn" class="icon-btn hidden" type="button" aria-label="Logout">↪</button>
+      </div>
+    </header>
 
-    <section id="authCard" class="auth-card">
-      <div class="auth-grid">
+    <section id="authScreen" class="screen">
+      <div class="auth-card">
+        <h1 class="auth-title">Partner access</h1>
+        <p class="auth-text">Use the email authorized in the restaurant POI. If you already logged in, the dashboard opens automatically.</p>
         <div class="field">
-          <label for="emailInput">Authorized email</label>
+          <label for="emailInput">Email</label>
           <input id="emailInput" type="email" autocomplete="email" placeholder="restaurant@email.com" />
         </div>
-        <button id="loginBtn" class="primary-btn" type="button">Send magic link</button>
+        <div class="login-actions">
+          <button id="loginBtn" class="primary-btn" type="button">Send magic link</button>
+        </div>
+        <div id="authStatus" class="status">Waiting for login.</div>
       </div>
-      <div id="authStatus" class="status">Use the same email that is written in the POI <strong>emails</strong> field.</div>
     </section>
 
-    <section id="dashboard" class="panel hidden">
-      <div class="panel-head">
-        <div>
-          <h2 class="panel-title">Your activities</h2>
-          <div id="userChip" class="user-chip"><span></span></div>
-        </div>
-        <button id="refreshBtn" class="secondary-btn" type="button">Refresh</button>
+    <section id="dashboardScreen" class="screen hidden">
+      <div id="activitySelectWrap" class="activity-select-wrap hidden">
+        <select id="activitySelect"></select>
       </div>
-      <div id="dashboardStatus" class="status">Loading partner POIs...</div>
-      <div id="poiList" class="poi-list"></div>
+
+      <div class="scanner-card">
+        <div class="scanner-box">
+          <div id="reader"></div>
+          <div id="scannerPlaceholder" class="scanner-placeholder">
+            <div>
+              <div class="camera-icon">📷</div>
+              <strong>QR scanner</strong><br />
+              <span>Allow camera access or insert the code below.</span>
+            </div>
+          </div>
+          <div class="scan-frame"></div>
+          <div class="scan-line"></div>
+        </div>
+
+        <div class="manual-area">
+          <input id="codeInput" class="manual-input" type="text" autocomplete="one-time-code" placeholder="5TG-XXXXXXXX" />
+          <button id="validateBtn" class="primary-btn" type="button">Validate QR</button>
+          <button id="startCameraBtn" class="secondary-btn" type="button">Start camera</button>
+        </div>
+      </div>
+
+      <div id="dashboardStatus" class="status">Loading dashboard...</div>
     </section>
   </main>
 
-  <div id="validateModal" class="modal hidden">
-    <div class="modal-card">
-      <h3 class="modal-title">Validate discount code</h3>
-      <p class="modal-text">Scan or paste the customer code. The backend will check that this code belongs to one of your authorized activities.</p>
-      <div class="field">
-        <label for="validateCodeInput">Code</label>
-        <input id="validateCodeInput" class="validate-input" type="text" placeholder="5TG-XXXXXXXX" />
+  <div id="settingsModal" class="modal hidden">
+    <div class="settings-card">
+      <div class="settings-head">
+        <div>
+          <h2 class="settings-title">Settings</h2>
+          <p class="settings-subtitle">Change only the public discount and the discount text.</p>
+        </div>
+        <button id="closeSettingsBtn" class="icon-btn" type="button" aria-label="Close">×</button>
       </div>
-      <div class="buttons-row">
-        <button id="confirmValidateBtn" class="primary-btn" type="button">Validate code</button>
-        <button id="closeValidateModalBtn" class="secondary-btn" type="button">Cancel</button>
+
+      <div class="settings-form">
+        <div class="field">
+          <label for="discountInput">Discount %</label>
+          <input id="discountInput" type="number" min="0" max="100" step="1" />
+        </div>
+        <div class="field">
+          <label for="discountInfoInput">Discount text</label>
+          <textarea id="discountInfoInput" placeholder="Show this QR code before ordering"></textarea>
+        </div>
+        <button id="saveSettingsBtn" class="primary-btn" type="button">Save</button>
+        <div id="settingsStatus" class="status hidden"></div>
       </div>
-      <div id="validateStatus" class="status hidden"></div>
     </div>
   </div>
 
@@ -177,37 +458,49 @@
       }
 
       var partnerClient = window[CLIENT_GLOBAL_KEY] || SupabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
       window[CLIENT_GLOBAL_KEY] = partnerClient;
 
-      var authCard = document.getElementById("authCard");
-      var dashboard = document.getElementById("dashboard");
+      var authScreen = document.getElementById("authScreen");
+      var dashboardScreen = document.getElementById("dashboardScreen");
       var emailInput = document.getElementById("emailInput");
       var loginBtn = document.getElementById("loginBtn");
       var logoutBtn = document.getElementById("logoutBtn");
-      var refreshBtn = document.getElementById("refreshBtn");
+      var settingsBtn = document.getElementById("settingsBtn");
       var authStatus = document.getElementById("authStatus");
       var dashboardStatus = document.getElementById("dashboardStatus");
-      var poiList = document.getElementById("poiList");
-      var userChip = document.getElementById("userChip").querySelector("span");
-      var validateModal = document.getElementById("validateModal");
-      var validateCodeInput = document.getElementById("validateCodeInput");
-      var validateStatus = document.getElementById("validateStatus");
-      var confirmValidateBtn = document.getElementById("confirmValidateBtn");
-      var closeValidateModalBtn = document.getElementById("closeValidateModalBtn");
+      var restaurantName = document.getElementById("restaurantName");
+      var codeInput = document.getElementById("codeInput");
+      var validateBtn = document.getElementById("validateBtn");
+      var startCameraBtn = document.getElementById("startCameraBtn");
+      var scannerPlaceholder = document.getElementById("scannerPlaceholder");
+      var settingsModal = document.getElementById("settingsModal");
+      var closeSettingsBtn = document.getElementById("closeSettingsBtn");
+      var discountInput = document.getElementById("discountInput");
+      var discountInfoInput = document.getElementById("discountInfoInput");
+      var saveSettingsBtn = document.getElementById("saveSettingsBtn");
+      var settingsStatus = document.getElementById("settingsStatus");
+      var activitySelectWrap = document.getElementById("activitySelectWrap");
+      var activitySelect = document.getElementById("activitySelect");
+
       var currentSession = null;
-      var currentPois = [];
+      var partnerPois = [];
+      var activePoi = null;
       var isLoadingSession = false;
+      var qrScanner = null;
+      var scannerRunning = false;
+      var lastScannedCode = "";
+      var lastScannedAt = 0;
 
       function setStatus(el, message, type) {
         el.innerHTML = message;
         el.className = "status" + (type ? " " + type : "");
         el.classList.remove("hidden");
+      }
+
+      function hideStatus(el) {
+        el.classList.add("hidden");
       }
 
       function escapeHtml(value) {
@@ -220,11 +513,14 @@
       }
 
       function normalizeCode(value) {
-        return String(value || "").trim().toUpperCase();
-      }
-
-      function parseCodes(poi) {
-        return Array.isArray(poi && poi.active_codes) ? poi.active_codes : [];
+        var raw = String(value || "").trim();
+        try {
+          if (raw.indexOf("http") === 0) {
+            var url = new URL(raw);
+            raw = url.searchParams.get("code") || raw;
+          }
+        } catch (err) {}
+        return raw.trim().toUpperCase();
       }
 
       function parseAuthorizedEmails(value) {
@@ -237,21 +533,24 @@
         return parseAuthorizedEmails(poi && poi.emails).indexOf(String(email || "").trim().toLowerCase()) !== -1;
       }
 
-      function isActiveCode(code) {
-        return !!(code && code.status === "active" && code.expires_at && new Date(code.expires_at).getTime() > Date.now());
-      }
-
-      function formatDateTime(value) {
-        if (!value) return "—";
-        try {
-          return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
-        } catch (err) {
-          return value;
-        }
-      }
-
       function delay(ms) {
         return new Promise(function (resolve) { setTimeout(resolve, ms); });
+      }
+
+      function showAuth() {
+        authScreen.classList.remove("hidden");
+        dashboardScreen.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+        settingsBtn.classList.add("hidden");
+        restaurantName.textContent = "Partner scanner";
+        stopScanner();
+      }
+
+      function showDashboard() {
+        authScreen.classList.add("hidden");
+        dashboardScreen.classList.remove("hidden");
+        logoutBtn.classList.remove("hidden");
+        settingsBtn.classList.remove("hidden");
       }
 
       async function getFreshAccessToken() {
@@ -261,6 +560,7 @@
 
       async function callBackend(body) {
         var token = await getFreshAccessToken();
+
         try {
           var invokeResult = await partnerClient.functions.invoke(FUNCTION_NAME, { body: body });
           if (!invokeResult.error && invokeResult.data && invokeResult.data.ok !== false) return invokeResult.data;
@@ -297,57 +597,35 @@
         if (result.error) throw new Error(result.error.message || "Could not update this POI.");
       }
 
-      async function validateCodeFallback(code) {
-        var email = currentSession && currentSession.user && currentSession.user.email ? currentSession.user.email.trim().toLowerCase() : "";
-        if (!email) throw new Error("You are not logged in.");
-        var result = await partnerClient.from("pois").select("*").not("active_codes", "is", null);
-        if (result.error) throw new Error(result.error.message || "Could not read active codes.");
-        var normalized = normalizeCode(code);
-        var now = Date.now();
-        var targetPoi = null;
-        var targetCode = null;
-        (result.data || []).forEach(function (poi) {
-          if (targetPoi) return;
-          var codes = parseCodes(poi);
-          var found = codes.find(function (item) { return normalizeCode(item.code) === normalized; });
-          if (found) { targetPoi = poi; targetCode = found; }
-        });
-        if (!targetPoi || !targetCode) throw new Error("Code not found.");
-        if (!emailIsAuthorized(targetPoi, email)) throw new Error("You are not authorized for this POI.");
-        if (targetCode.status === "used") throw new Error("Code already used.");
-        if (!targetCode.expires_at || new Date(targetCode.expires_at).getTime() <= now) throw new Error("Code expired.");
-        var updatedCode = Object.assign({}, targetCode, { status: "used", used_at: new Date().toISOString(), validated_by_email: email });
-        var updatedCodes = parseCodes(targetPoi).map(function (item) { return normalizeCode(item.code) === normalized ? updatedCode : item; });
-        await updatePoiSettingsFallback(targetPoi.id, { active_codes: updatedCodes });
-        return { ok: true, poi: { id: targetPoi.id, name: targetPoi.name || "Activity" }, code: updatedCode };
-      }
-
       async function login() {
         var email = emailInput.value.trim().toLowerCase();
-        if (!email) { setStatus(authStatus, "Insert the email authorized for this activity.", "error"); return; }
+        if (!email) { setStatus(authStatus, "Insert the authorized email.", "error"); return; }
+
         loginBtn.disabled = true;
         setStatus(authStatus, "Sending magic link...", "");
+
         var redirectTo = window.location.href.split("#")[0];
         var result = await partnerClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: redirectTo } });
+
         loginBtn.disabled = false;
         if (result.error) { setStatus(authStatus, escapeHtml(result.error.message), "error"); return; }
-        setStatus(authStatus, "Magic link sent. Open it from your email to access the partner area.", "ok");
+        setStatus(authStatus, "Magic link sent. Open it from your email.", "ok");
       }
 
       async function logout() {
+        await stopScanner();
         await partnerClient.auth.signOut();
         currentSession = null;
-        currentPois = [];
-        authCard.classList.remove("hidden");
-        dashboard.classList.add("hidden");
-        logoutBtn.classList.add("hidden");
-        poiList.innerHTML = "";
+        partnerPois = [];
+        activePoi = null;
+        showAuth();
         setStatus(authStatus, "Logged out.", "ok");
       }
 
       async function loadSession() {
         if (isLoadingSession) return;
         isLoadingSession = true;
+
         var session = null;
         for (var attempt = 0; attempt < 8; attempt++) {
           var result = await partnerClient.auth.getSession();
@@ -355,180 +633,217 @@
           if (session) break;
           await delay(180);
         }
+
         currentSession = session;
+        isLoadingSession = false;
+
         if (!currentSession) {
-          authCard.classList.remove("hidden");
-          dashboard.classList.add("hidden");
-          logoutBtn.classList.add("hidden");
-          isLoadingSession = false;
+          showAuth();
           return;
         }
-        authCard.classList.add("hidden");
-        dashboard.classList.remove("hidden");
-        logoutBtn.classList.remove("hidden");
-        userChip.textContent = currentSession.user.email || "Logged in";
-        isLoadingSession = false;
-        await loadPartnerPois();
+
+        await loadDashboard();
       }
 
-      async function loadPartnerPois() {
-        poiList.innerHTML = "";
-        setStatus(dashboardStatus, "Loading your authorized activities...", "");
+      async function loadDashboard() {
+        showDashboard();
+        setStatus(dashboardStatus, "Loading authorized activity...", "");
+
         try {
-          var data = null;
           try {
-            data = await callBackend({ action: "get_partner_pois" });
-            currentPois = Array.isArray(data.pois) ? data.pois : [];
+            var data = await callBackend({ action: "get_partner_pois" });
+            partnerPois = Array.isArray(data.pois) ? data.pois : [];
           } catch (backendError) {
-            currentPois = await loadPartnerPoisFallback();
-            if (currentPois.length > 0) setStatus(dashboardStatus, "Dashboard loaded with direct Supabase fallback. The backend should still be checked, but you can manage this activity now.", "ok");
-            else throw backendError;
+            partnerPois = await loadPartnerPoisFallback();
           }
-          if (currentPois.length === 0) {
-            setStatus(dashboardStatus, "No activity is linked to this email. Check that this exact email is present in the POI <strong>emails</strong> field.", "error");
-            poiList.innerHTML = '<div class="empty-state">No restaurants or partner POIs available for this account.</div>';
+
+          if (!partnerPois.length) {
+            setStatus(dashboardStatus, "This account is not authorized to manage discounts.", "error");
+            settingsBtn.classList.add("hidden");
             return;
           }
-          if (!dashboardStatus.classList.contains("ok")) setStatus(dashboardStatus, currentPois.length + " authorized activit" + (currentPois.length === 1 ? "y" : "ies") + " found.", "ok");
-          renderPois();
+
+          setActivePoi(partnerPois[0].id);
+          buildActivitySelect();
+          setStatus(dashboardStatus, "Ready to validate QR codes.", "ok");
         } catch (error) {
           setStatus(dashboardStatus, escapeHtml(error.message), "error");
-          poiList.innerHTML = '<div class="empty-state">You are logged in, but the dashboard could not load. Check that your email is inside the POI <strong>emails</strong> field and that <strong>partner-backend</strong> is deployed.</div>';
         }
       }
 
-      function renderPois() {
-        var html = currentPois.map(function (poi, index) { return renderPoiCard(poi, index); }).join("");
-        poiList.innerHTML = html;
-        currentPois.forEach(function (poi, index) {
-          var discountInput = document.getElementById("discount-" + index);
-          var infoInput = document.getElementById("discount-info-" + index);
-          var emailsInput = document.getElementById("emails-" + index);
-          var saveBtn = document.getElementById("save-" + index);
-          var validateBtn = document.getElementById("validate-" + index);
-          saveBtn.addEventListener("click", function () { savePoiSettings(index, discountInput, infoInput, emailsInput); });
-          validateBtn.addEventListener("click", function () { openValidateModal(); });
-          var btns = document.querySelectorAll('[data-code-validate][data-poi-index="' + index + '"]');
-          Array.prototype.forEach.call(btns, function (btn) {
-            btn.addEventListener("click", function () {
-              validateCodeInput.value = btn.getAttribute("data-code-validate") || "";
-              openValidateModal();
-            });
-          });
-        });
+      function buildActivitySelect() {
+        if (partnerPois.length <= 1) {
+          activitySelectWrap.classList.add("hidden");
+          return;
+        }
+
+        activitySelect.innerHTML = partnerPois.map(function (poi) {
+          return '<option value="' + escapeHtml(poi.id) + '">' + escapeHtml(poi.name || "Activity") + '</option>';
+        }).join("");
+        activitySelect.value = activePoi ? activePoi.id : partnerPois[0].id;
+        activitySelectWrap.classList.remove("hidden");
       }
 
-      function renderPoiCard(poi, index) {
-        var discount = Number(poi.discount || 0);
-        var codes = parseCodes(poi);
-        var activeCodes = codes.filter(isActiveCode);
-        var usedCodes = codes.filter(function (c) { return c.status === "used"; }).slice(-5).reverse();
-        var type = poi.type || "activity";
-        var publicActive = discount > 0;
-        var activeCodesHtml = activeCodes.length ? activeCodes.map(function (code) { return renderCodeItem(code, index, true); }).join("") : '<div class="empty-state">No active codes for this activity.</div>';
-        var usedCodesHtml = usedCodes.length ? usedCodes.map(function (code) { return renderCodeItem(code, index, false); }).join("") : '<div class="empty-state">No validated codes yet.</div>';
-        return '' +
-          '<article class="poi-card">' +
-            '<div class="poi-top">' +
-              '<div>' +
-                '<h3 class="poi-name">' + escapeHtml(poi.name || "Unnamed activity") + '</h3>' +
-                '<div class="poi-type">' + escapeHtml(type) + ' · ' + (publicActive ? "Public discount active" : "Discount not public") + '</div>' +
-              '</div>' +
-              '<div class="discount-pill"><strong>' + discount + '%</strong><span>OFF</span></div>' +
-            '</div>' +
-            '<div class="form-grid">' +
-              '<div class="field"><label for="discount-' + index + '">Discount %</label><input id="discount-' + index + '" type="number" min="0" max="100" step="1" value="' + discount + '" /></div>' +
-              '<div class="field"><label for="discount-info-' + index + '">Discount caption</label><textarea id="discount-info-' + index + '" placeholder="Show this QR code before ordering">' + escapeHtml(poi.discount_info || "") + '</textarea></div>' +
-            '</div>' +
-            '<div class="field" style="margin-top: 10px;"><label for="emails-' + index + '">Authorized emails, separated by comma</label><textarea id="emails-' + index + '" placeholder="restaurant@email.com,manager@email.com">' + escapeHtml(poi.emails || "") + '</textarea></div>' +
-            '<div class="buttons-row"><button id="save-' + index + '" class="primary-btn" type="button">Save settings</button><button id="validate-' + index + '" class="secondary-btn" type="button">Validate QR/code</button></div>' +
-            '<div id="status-' + index + '" class="status hidden"></div>' +
-            '<div class="codes"><div class="codes-head"><div class="codes-title">Active codes</div><div class="user-chip"><span>' + activeCodes.length + ' active</span></div></div><div class="code-list">' + activeCodesHtml + '</div></div>' +
-            '<div class="codes"><div class="codes-head"><div class="codes-title">Recently validated</div><div class="user-chip"><span>' + usedCodes.length + ' shown</span></div></div><div class="code-list">' + usedCodesHtml + '</div></div>' +
-          '</article>';
+      function setActivePoi(poiId) {
+        var found = partnerPois.find(function (poi) { return String(poi.id) === String(poiId); });
+        activePoi = found || partnerPois[0] || null;
+        restaurantName.textContent = activePoi ? (activePoi.name || "Partner activity") : "Partner scanner";
+        fillSettingsForm();
       }
 
-      function renderCodeItem(code, index, canValidate) {
-        var expiresLabel = code.status === "used" ? "Used: " + formatDateTime(code.used_at) : "Expires: " + formatDateTime(code.expires_at);
-        var actionHtml = canValidate ? '<button class="secondary-btn" type="button" data-poi-index="' + index + '" data-code-validate="' + escapeHtml(code.code) + '">Validate</button>' : '<div class="user-chip"><span>' + escapeHtml(code.status || "used") + '</span></div>';
-        return '' +
-          '<div class="code-item">' +
-            '<div class="code-main">' +
-              '<div class="code-value">' + escapeHtml(code.code) + '</div>' +
-              '<div class="code-meta">User: ' + escapeHtml(code.user_email || "—") + '<br />Discount: ' + escapeHtml(code.discount || 0) + '% · ' + escapeHtml(expiresLabel) + (code.validated_by_email ? '<br />Validated by: ' + escapeHtml(code.validated_by_email) : '') + '</div>' +
-            '</div>' + actionHtml +
-          '</div>';
+      function fillSettingsForm() {
+        if (!activePoi) return;
+        discountInput.value = Number(activePoi.discount || 0);
+        discountInfoInput.value = activePoi.discount_info || "";
       }
 
-      async function savePoiSettings(index, discountInput, infoInput, emailsInput) {
-        var poi = currentPois[index];
-        var statusEl = document.getElementById("status-" + index);
+      function openSettings() {
+        if (!activePoi) return;
+        fillSettingsForm();
+        hideStatus(settingsStatus);
+        settingsModal.classList.remove("hidden");
+      }
+
+      function closeSettings() {
+        settingsModal.classList.add("hidden");
+      }
+
+      async function saveSettings() {
+        if (!activePoi) return;
+
         var discount = Number(discountInput.value || 0);
-        var discountInfo = infoInput.value.trim();
-        var emails = emailsInput.value.trim();
-        if (!Number.isFinite(discount) || discount < 0 || discount > 100) { setStatus(statusEl, "Discount must be between 0 and 100.", "error"); return; }
-        setStatus(statusEl, "Saving settings...", "");
+        var discountInfo = discountInfoInput.value.trim();
+
+        if (!Number.isFinite(discount) || discount < 0 || discount > 100) {
+          setStatus(settingsStatus, "Discount must be between 0 and 100.", "error");
+          return;
+        }
+
+        saveSettingsBtn.disabled = true;
+        setStatus(settingsStatus, "Saving...", "");
+
         try {
           try {
-            await callBackend({ action: "update_partner_settings", poi_id: poi.id, discount: discount, discount_info: discountInfo, emails: emails });
+            await callBackend({
+              action: "update_discount",
+              poi_id: activePoi.id,
+              discount: discount,
+              discount_info: discountInfo
+            });
           } catch (backendError) {
-            await updatePoiSettingsFallback(poi.id, { discount: discount, discount_info: discountInfo, emails: emails });
+            await updatePoiSettingsFallback(activePoi.id, { discount: discount, discount_info: discountInfo });
           }
-          setStatus(statusEl, "Settings saved.", "ok");
-          await loadPartnerPois();
+
+          activePoi.discount = discount;
+          activePoi.discount_info = discountInfo;
+          partnerPois = partnerPois.map(function (poi) {
+            if (String(poi.id) === String(activePoi.id)) return activePoi;
+            return poi;
+          });
+          setStatus(settingsStatus, "Saved.", "ok");
         } catch (error) {
-          setStatus(statusEl, escapeHtml(error.message), "error");
-        }
-      }
-
-      function openValidateModal() {
-        validateStatus.classList.add("hidden");
-        validateModal.classList.remove("hidden");
-        setTimeout(function () { validateCodeInput.focus(); }, 80);
-      }
-
-      function closeValidateModal() {
-        validateModal.classList.add("hidden");
-        validateCodeInput.value = "";
-        validateStatus.classList.add("hidden");
-      }
-
-      async function validateCode() {
-        var code = normalizeCode(validateCodeInput.value);
-        if (!code) { setStatus(validateStatus, "Insert a code to validate.", "error"); return; }
-        setStatus(validateStatus, "Validating code...", "");
-        confirmValidateBtn.disabled = true;
-        try {
-          var data = null;
-          try { data = await callBackend({ action: "validate_code", code: code }); }
-          catch (backendError) { data = await validateCodeFallback(code); }
-          setStatus(validateStatus, "Validated: <strong>" + escapeHtml((data.poi && data.poi.name) || "Activity") + "</strong> · " + escapeHtml((data.code && data.code.discount) || 0) + "% discount.", "ok");
-          await loadPartnerPois();
-        } catch (error) {
-          setStatus(validateStatus, escapeHtml(error.message), "error");
+          setStatus(settingsStatus, escapeHtml(error.message), "error");
         } finally {
-          confirmValidateBtn.disabled = false;
+          saveSettingsBtn.disabled = false;
         }
+      }
+
+      async function validateCurrentCode() {
+        var code = normalizeCode(codeInput.value);
+        if (!code) {
+          setStatus(dashboardStatus, "Insert or scan a QR code.", "error");
+          return;
+        }
+
+        validateBtn.disabled = true;
+        setStatus(dashboardStatus, "Validating code...", "");
+
+        try {
+          var data = await callBackend({ action: "validate_code", code: code });
+          var poiName = data && data.poi && data.poi.name ? data.poi.name : "Activity";
+          var discount = data && data.code && data.code.discount ? data.code.discount : "";
+          codeInput.value = "";
+          setStatus(dashboardStatus, "Validated: <strong>" + escapeHtml(poiName) + "</strong>" + (discount ? " · " + escapeHtml(discount) + "% discount" : "") + ".", "ok");
+        } catch (error) {
+          setStatus(dashboardStatus, escapeHtml(error.message), "error");
+        } finally {
+          validateBtn.disabled = false;
+        }
+      }
+
+      async function startScanner() {
+        if (scannerRunning) return;
+
+        if (!window.Html5Qrcode) {
+          setStatus(dashboardStatus, "QR scanner library did not load. Insert the code manually.", "error");
+          return;
+        }
+
+        try {
+          qrScanner = qrScanner || new Html5Qrcode("reader");
+          var config = { fps: 10, qrbox: function (viewfinderWidth, viewfinderHeight) {
+            var minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            var size = Math.floor(minEdge * 0.78);
+            return { width: size, height: size };
+          }};
+
+          await qrScanner.start(
+            { facingMode: "environment" },
+            config,
+            function (decodedText) {
+              var code = normalizeCode(decodedText);
+              var now = Date.now();
+              if (!code) return;
+              if (code === lastScannedCode && now - lastScannedAt < 3500) return;
+              lastScannedCode = code;
+              lastScannedAt = now;
+              codeInput.value = code;
+              validateCurrentCode();
+            },
+            function () {}
+          );
+
+          scannerRunning = true;
+          scannerPlaceholder.classList.add("hidden");
+          startCameraBtn.textContent = "Camera active";
+          setStatus(dashboardStatus, "Camera active. Scan a customer QR code.", "ok");
+        } catch (error) {
+          setStatus(dashboardStatus, "Camera unavailable. Insert the code manually.", "error");
+        }
+      }
+
+      async function stopScanner() {
+        if (!qrScanner || !scannerRunning) return;
+        try { await qrScanner.stop(); } catch (err) {}
+        scannerRunning = false;
+        scannerPlaceholder.classList.remove("hidden");
+        startCameraBtn.textContent = "Start camera";
       }
 
       function runSelfTests() {
         console.assert(escapeHtml('<img src=x>').indexOf('&lt;img') === 0, 'escapeHtml should escape angle brackets');
         console.assert(normalizeCode(' 5tg-abcd ') === '5TG-ABCD', 'normalizeCode should trim and uppercase');
-        console.assert(parseCodes({ active_codes: [{ code: 'A' }] }).length === 1, 'parseCodes should read arrays');
-        console.assert(parseCodes({ active_codes: null }).length === 0, 'parseCodes should handle null');
         console.assert(parseAuthorizedEmails(' A@B.COM, c@d.com ,, ').join('|') === 'a@b.com|c@d.com', 'parseAuthorizedEmails should trim lowercase and remove empty values');
         console.assert(emailIsAuthorized({ emails: 'one@test.com, two@test.com' }, 'TWO@test.com') === true, 'emailIsAuthorized should match case-insensitively');
-        console.assert(isActiveCode({ status: 'active', expires_at: new Date(Date.now() + 60000).toISOString() }) === true, 'future active code should be active');
-        console.assert(isActiveCode({ status: 'active', expires_at: new Date(Date.now() - 60000).toISOString() }) === false, 'expired active code should not be active');
+        console.assert(normalizeCode('https://5terrego.com/partner.html?code=5tg-test') === '5TG-TEST', 'normalizeCode should extract code from URL');
       }
 
       loginBtn.addEventListener("click", login);
       logoutBtn.addEventListener("click", logout);
-      refreshBtn.addEventListener("click", loadPartnerPois);
-      confirmValidateBtn.addEventListener("click", validateCode);
-      closeValidateModalBtn.addEventListener("click", closeValidateModal);
-      validateModal.addEventListener("click", function (event) { if (event.target === validateModal) closeValidateModal(); });
-      validateCodeInput.addEventListener("keydown", function (event) { if (event.key === "Enter") validateCode(); });
+      settingsBtn.addEventListener("click", openSettings);
+      closeSettingsBtn.addEventListener("click", closeSettings);
+      saveSettingsBtn.addEventListener("click", saveSettings);
+      validateBtn.addEventListener("click", validateCurrentCode);
+      startCameraBtn.addEventListener("click", startScanner);
+      codeInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") validateCurrentCode();
+      });
+      activitySelect.addEventListener("change", function () {
+        setActivePoi(activitySelect.value);
+      });
+      settingsModal.addEventListener("click", function (event) {
+        if (event.target === settingsModal) closeSettings();
+      });
 
       if (!window.__fiveTerreGoPartnerAuthListenerStarted) {
         window.__fiveTerreGoPartnerAuthListenerStarted = true;
