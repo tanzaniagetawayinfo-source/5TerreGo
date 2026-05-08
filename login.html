@@ -604,31 +604,88 @@ button{
     return panel;
   }
 
-  async function fetchPartnerDiscountStatus(){
-    try{
-      const session = await getReliableSession();
-      const token = session && session.access_token ? session.access_token : '';
-      if(!token) return false;
+  function parseEmailsList(value){
+    return String(value || '')
+      .split(',')
+      .map(function(item){ return item.trim().toLowerCase(); })
+      .filter(Boolean);
+  }
 
-      const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
-        method:'POST',
+  async function fetchPartnerDiscountStatus(){
+    const session = await getReliableSession();
+    const token = session && session.access_token ? session.access_token : '';
+    const userEmail = session && session.user && session.user.email ? session.user.email.trim().toLowerCase() : '';
+
+    if(!userEmail) return false;
+
+    /*
+      First check: Edge Function.
+      This is the cleanest path because the backend already checks whether the logged-in email
+      appears inside the POI `emails` field.
+    */
+    if(token){
+      try{
+        const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'apikey':SUPABASE_ANON_KEY,
+            'Authorization':'Bearer ' + token
+          },
+          body:JSON.stringify({ action:'get_partner_pois' })
+        });
+
+        if(res.ok){
+          const payload = await res.json();
+          if(payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0){
+            return true;
+          }
+        }
+      } catch(_err){}
+    }
+
+    /*
+      Second check: direct Supabase JS query.
+      This keeps the menu working even if the Edge Function is not deployed yet.
+    */
+    try{
+      const result = await client
+        .from('pois')
+        .select('id,emails')
+        .not('emails','is',null);
+
+      if(!result.error && Array.isArray(result.data)){
+        const found = result.data.some(function(poi){
+          return parseEmailsList(poi.emails).includes(userEmail);
+        });
+        if(found) return true;
+      }
+    } catch(_err){}
+
+    /*
+      Third check: raw REST fallback.
+      This avoids problems caused by older SDK/session state on iPhone/Android browsers.
+    */
+    try{
+      const restRes = await fetch(SUPABASE_URL + '/rest/v1/pois?select=id,emails&emails=not.is.null', {
+        method:'GET',
         headers:{
-          'Content-Type':'application/json',
           'apikey':SUPABASE_ANON_KEY,
-          'Authorization':'Bearer ' + token
-        },
-        body:JSON.stringify({ action:'get_partner_pois' })
+          'Authorization':'Bearer ' + SUPABASE_ANON_KEY
+        }
       });
 
-      if(!res.ok){
-        return false;
+      if(restRes.ok){
+        const rows = await restRes.json();
+        if(Array.isArray(rows)){
+          return rows.some(function(poi){
+            return parseEmailsList(poi.emails).includes(userEmail);
+          });
+        }
       }
+    } catch(_err){}
 
-      const payload = await res.json();
-      return payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0;
-    } catch(_err){
-      return false;
-    }
+    return false;
   }
 
   async function maybeAddPartnerDiscountButton(panel){
