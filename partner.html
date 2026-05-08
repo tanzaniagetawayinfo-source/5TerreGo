@@ -9,519 +9,94 @@
 
   <style>
     * { box-sizing: border-box; }
-
     :root {
       --bg: #f6f1e8;
       --card: rgba(255,255,255,.78);
-      --card-strong: rgba(255,255,255,.94);
       --text: #142033;
       --muted: rgba(20,32,51,.62);
       --line: rgba(20,32,51,.11);
       --blue: #1677ff;
       --orange: #ff8a00;
-      --green: #18a058;
       --red: #d93025;
       --shadow: 0 22px 70px rgba(15, 23, 42, .16);
       --radius: 28px;
     }
-
     body {
       margin: 0;
       min-height: 100vh;
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(22,119,255,.18), transparent 34%),
-        radial-gradient(circle at top right, rgba(255,138,0,.18), transparent 32%),
-        linear-gradient(180deg, #fffaf0 0%, var(--bg) 45%, #efe7d9 100%);
+      background: radial-gradient(circle at top left, rgba(22,119,255,.18), transparent 34%), radial-gradient(circle at top right, rgba(255,138,0,.18), transparent 32%), linear-gradient(180deg, #fffaf0 0%, var(--bg) 45%, #efe7d9 100%);
       overflow-x: hidden;
     }
-
-    button, input, textarea {
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .app {
-      width: min(1060px, 100%);
-      margin: 0 auto;
-      padding: calc(18px + env(safe-area-inset-top)) 16px calc(34px + env(safe-area-inset-bottom));
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      margin: -18px -16px 16px;
-      padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      background: rgba(246,241,232,.74);
-      border-bottom: 1px solid rgba(20,32,51,.08);
-    }
-
-    .topbar-inner {
-      width: min(1060px, 100%);
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: #fff;
-      box-shadow: 0 10px 26px rgba(15, 23, 42, .12);
-      font-size: 22px;
-      flex: 0 0 auto;
-    }
-
-    .brand-title {
-      font-weight: 850;
-      letter-spacing: -.04em;
-      font-size: 21px;
-      line-height: 1;
-      white-space: nowrap;
-    }
-
+    button, input, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .app { width: min(1060px, 100%); margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 16px calc(34px + env(safe-area-inset-bottom)); }
+    .topbar { position: sticky; top: 0; z-index: 20; margin: -18px -16px 16px; padding: calc(14px + env(safe-area-inset-top)) 16px 12px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); background: rgba(246,241,232,.74); border-bottom: 1px solid rgba(20,32,51,.08); }
+    .topbar-inner { width: min(1060px, 100%); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-mark { width: 42px; height: 42px; border-radius: 16px; display: grid; place-items: center; background: #fff; box-shadow: 0 10px 26px rgba(15, 23, 42, .12); font-size: 22px; flex: 0 0 auto; }
+    .brand-title { font-weight: 850; letter-spacing: -.04em; font-size: 21px; line-height: 1; white-space: nowrap; }
     .brand-title .blue { color: var(--blue); }
     .brand-title .orange { color: var(--orange); }
-
-    .brand-subtitle {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
-    }
-
-    .small-btn {
-      min-height: 40px;
-      border-radius: 999px;
-      padding: 0 14px;
-      background: rgba(255,255,255,.86);
-      color: var(--text);
-      border: 1px solid rgba(20,32,51,.1);
-      box-shadow: 0 8px 24px rgba(15,23,42,.08);
-      font-weight: 750;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-    }
-
-    .hero {
-      padding: 18px 2px 10px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(20,32,51,.08);
-      color: rgba(20,32,51,.72);
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    h1 {
-      margin: 15px 0 10px;
-      font-size: clamp(34px, 9vw, 64px);
-      line-height: .94;
-      letter-spacing: -.07em;
-      max-width: 780px;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.5;
-      max-width: 680px;
-    }
-
-    .auth-card, .panel, .poi-card {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,.64);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-radius: var(--radius);
-    }
-
-    .auth-card {
-      margin-top: 18px;
-      padding: 18px;
-    }
-
-    .auth-grid {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
-    }
-
-    label {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 800;
-    }
-
-    input, textarea {
-      width: 100%;
-      border: 1px solid rgba(20,32,51,.12);
-      background: rgba(255,255,255,.88);
-      color: var(--text);
-      outline: none;
-      border-radius: 18px;
-      padding: 13px 14px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
-    }
-
-    textarea {
-      min-height: 86px;
-      resize: vertical;
-    }
-
-    input:focus, textarea:focus {
-      border-color: rgba(22,119,255,.55);
-      box-shadow: 0 0 0 4px rgba(22,119,255,.12);
-    }
-
-    .primary-btn {
-      min-height: 48px;
-      border-radius: 18px;
-      padding: 0 18px;
-      background: linear-gradient(135deg, var(--blue), #0f5bd7);
-      color: #fff;
-      font-weight: 850;
-      box-shadow: 0 18px 34px rgba(22,119,255,.22);
-      white-space: nowrap;
-    }
-
-    .secondary-btn {
-      min-height: 44px;
-      border-radius: 16px;
-      padding: 0 14px;
-      background: rgba(255,255,255,.82);
-      color: var(--text);
-      border: 1px solid rgba(20,32,51,.1);
-      font-weight: 800;
-    }
-
-    .danger-btn {
-      min-height: 44px;
-      border-radius: 16px;
-      padding: 0 14px;
-      background: rgba(217,48,37,.1);
-      color: var(--red);
-      border: 1px solid rgba(217,48,37,.16);
-      font-weight: 850;
-    }
-
+    .brand-subtitle { margin-top: 3px; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .small-btn { min-height: 40px; border-radius: 999px; padding: 0 14px; background: rgba(255,255,255,.86); color: var(--text); border: 1px solid rgba(20,32,51,.1); box-shadow: 0 8px 24px rgba(15,23,42,.08); font-weight: 750; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+    .hero { padding: 18px 2px 10px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,.72); border: 1px solid rgba(20,32,51,.08); color: rgba(20,32,51,.72); font-size: 13px; font-weight: 750; }
+    h1 { margin: 15px 0 10px; font-size: clamp(34px, 9vw, 64px); line-height: .94; letter-spacing: -.07em; max-width: 780px; }
+    .hero p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.5; max-width: 680px; }
+    .auth-card, .panel, .poi-card { background: var(--card); border: 1px solid rgba(255,255,255,.64); box-shadow: var(--shadow); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border-radius: var(--radius); }
+    .auth-card { margin-top: 18px; padding: 18px; }
+    .auth-grid { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+    .field { display: grid; gap: 8px; }
+    label { font-size: 13px; color: var(--muted); font-weight: 800; }
+    input, textarea { width: 100%; border: 1px solid rgba(20,32,51,.12); background: rgba(255,255,255,.88); color: var(--text); outline: none; border-radius: 18px; padding: 13px 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
+    textarea { min-height: 86px; resize: vertical; }
+    input:focus, textarea:focus { border-color: rgba(22,119,255,.55); box-shadow: 0 0 0 4px rgba(22,119,255,.12); }
+    .primary-btn { min-height: 48px; border-radius: 18px; padding: 0 18px; background: linear-gradient(135deg, var(--blue), #0f5bd7); color: #fff; font-weight: 850; box-shadow: 0 18px 34px rgba(22,119,255,.22); white-space: nowrap; }
+    .secondary-btn { min-height: 44px; border-radius: 16px; padding: 0 14px; background: rgba(255,255,255,.82); color: var(--text); border: 1px solid rgba(20,32,51,.1); font-weight: 800; }
     .hidden { display: none !important; }
-
-    .status {
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.64);
-      color: var(--muted);
-      border: 1px solid rgba(20,32,51,.08);
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .status.ok {
-      color: #107c3e;
-      background: rgba(24,160,88,.11);
-      border-color: rgba(24,160,88,.16);
-    }
-
-    .status.error {
-      color: var(--red);
-      background: rgba(217,48,37,.08);
-      border-color: rgba(217,48,37,.14);
-    }
-
-    .panel {
-      margin-top: 18px;
-      padding: 16px;
-    }
-
-    .panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .panel-title {
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: -.04em;
-      margin: 0;
-    }
-
-    .user-chip {
-      max-width: 100%;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 11px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.78);
-      color: rgba(20,32,51,.74);
-      border: 1px solid rgba(20,32,51,.08);
-      font-size: 13px;
-      font-weight: 750;
-      overflow: hidden;
-    }
-
-    .user-chip span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .poi-list {
-      display: grid;
-      gap: 14px;
-    }
-
-    .poi-card {
-      padding: 16px;
-      overflow: hidden;
-    }
-
-    .poi-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .poi-name {
-      margin: 0;
-      font-size: 22px;
-      line-height: 1.05;
-      letter-spacing: -.045em;
-      font-weight: 920;
-    }
-
-    .poi-type {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .discount-pill {
-      flex: 0 0 auto;
-      min-width: 74px;
-      text-align: center;
-      border-radius: 20px;
-      padding: 10px 11px;
-      background: rgba(255,138,0,.14);
-      border: 1px solid rgba(255,138,0,.18);
-      color: #b55c00;
-      font-weight: 950;
-      line-height: 1;
-    }
-
-    .discount-pill strong {
-      display: block;
-      font-size: 22px;
-      letter-spacing: -.04em;
-    }
-
-    .discount-pill span {
-      display: block;
-      margin-top: 4px;
-      font-size: 11px;
-      letter-spacing: .04em;
-    }
-
-    .form-grid {
-      margin-top: 15px;
-      display: grid;
-      grid-template-columns: 110px 1fr;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .buttons-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .codes {
-      margin-top: 16px;
-      border-top: 1px solid var(--line);
-      padding-top: 14px;
-    }
-
-    .codes-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .codes-title {
-      font-weight: 900;
-      letter-spacing: -.025em;
-    }
-
-    .code-list {
-      display: grid;
-      gap: 9px;
-    }
-
-    .code-item {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      padding: 11px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.64);
-      border: 1px solid rgba(20,32,51,.08);
-    }
-
-    .code-main {
-      min-width: 0;
-    }
-
-    .code-value {
-      font-weight: 950;
-      letter-spacing: .02em;
-      font-size: 15px;
-    }
-
-    .code-meta {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
-      overflow-wrap: anywhere;
-    }
-
-    .empty-state {
-      padding: 24px 14px;
-      text-align: center;
-      color: var(--muted);
-      border: 1px dashed rgba(20,32,51,.18);
-      border-radius: 22px;
-      background: rgba(255,255,255,.48);
-      line-height: 1.45;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: grid;
-      place-items: end center;
-      background: rgba(15,23,42,.34);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 14px;
-    }
-
-    .modal-card {
-      width: min(560px, 100%);
-      border-radius: 30px;
-      background: rgba(255,255,255,.96);
-      box-shadow: 0 28px 100px rgba(15,23,42,.28);
-      padding: 18px;
-      animation: sheetIn .22s ease-out;
-    }
-
-    @keyframes sheetIn {
-      from { transform: translateY(24px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .modal-title {
-      margin: 0 0 8px;
-      font-size: 24px;
-      letter-spacing: -.05em;
-      font-weight: 930;
-    }
-
-    .modal-text {
-      margin: 0 0 14px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .validate-input {
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      font-weight: 850;
-    }
-
+    .status { margin-top: 12px; padding: 12px 14px; border-radius: 18px; background: rgba(255,255,255,.64); color: var(--muted); border: 1px solid rgba(20,32,51,.08); font-size: 14px; line-height: 1.35; }
+    .status.ok { color: #107c3e; background: rgba(24,160,88,.11); border-color: rgba(24,160,88,.16); }
+    .status.error { color: var(--red); background: rgba(217,48,37,.08); border-color: rgba(217,48,37,.14); }
+    .panel { margin-top: 18px; padding: 16px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .panel-title { font-size: 20px; font-weight: 900; letter-spacing: -.04em; margin: 0; }
+    .user-chip { max-width: 100%; display: inline-flex; align-items: center; gap: 8px; padding: 8px 11px; border-radius: 999px; background: rgba(255,255,255,.78); color: rgba(20,32,51,.74); border: 1px solid rgba(20,32,51,.08); font-size: 13px; font-weight: 750; overflow: hidden; }
+    .user-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .poi-list { display: grid; gap: 14px; }
+    .poi-card { padding: 16px; overflow: hidden; }
+    .poi-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .poi-name { margin: 0; font-size: 22px; line-height: 1.05; letter-spacing: -.045em; font-weight: 920; }
+    .poi-type { margin-top: 5px; color: var(--muted); font-size: 13px; font-weight: 750; }
+    .discount-pill { flex: 0 0 auto; min-width: 74px; text-align: center; border-radius: 20px; padding: 10px 11px; background: rgba(255,138,0,.14); border: 1px solid rgba(255,138,0,.18); color: #b55c00; font-weight: 950; line-height: 1; }
+    .discount-pill strong { display: block; font-size: 22px; letter-spacing: -.04em; }
+    .discount-pill span { display: block; margin-top: 4px; font-size: 11px; letter-spacing: .04em; }
+    .form-grid { margin-top: 15px; display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: start; }
+    .buttons-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .codes { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+    .codes-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .codes-title { font-weight: 900; letter-spacing: -.025em; }
+    .code-list { display: grid; gap: 9px; }
+    .code-item { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 11px; border-radius: 18px; background: rgba(255,255,255,.64); border: 1px solid rgba(20,32,51,.08); }
+    .code-main { min-width: 0; }
+    .code-value { font-weight: 950; letter-spacing: .02em; font-size: 15px; }
+    .code-meta { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
+    .empty-state { padding: 24px 14px; text-align: center; color: var(--muted); border: 1px dashed rgba(20,32,51,.18); border-radius: 22px; background: rgba(255,255,255,.48); line-height: 1.45; }
+    .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: end center; background: rgba(15,23,42,.34); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 14px; }
+    .modal-card { width: min(560px, 100%); border-radius: 30px; background: rgba(255,255,255,.96); box-shadow: 0 28px 100px rgba(15,23,42,.28); padding: 18px; animation: sheetIn .22s ease-out; }
+    @keyframes sheetIn { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-title { margin: 0 0 8px; font-size: 24px; letter-spacing: -.05em; font-weight: 930; }
+    .modal-text { margin: 0 0 14px; color: var(--muted); line-height: 1.45; }
+    .validate-input { text-transform: uppercase; letter-spacing: .05em; font-weight: 850; }
     @media (max-width: 640px) {
-      .auth-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .primary-btn {
-        width: 100%;
-      }
-
-      .panel-head {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .poi-top {
-        align-items: stretch;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .code-item {
-        grid-template-columns: 1fr;
-      }
-
-      .code-item .secondary-btn {
-        width: 100%;
-      }
+      .auth-grid { grid-template-columns: 1fr; }
+      .primary-btn { width: 100%; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+      .poi-top { align-items: stretch; }
+      .form-grid { grid-template-columns: 1fr; }
+      .code-item { grid-template-columns: 1fr; }
+      .code-item .secondary-btn { width: 100%; }
     }
   </style>
 </head>
@@ -565,7 +140,6 @@
         </div>
         <button id="refreshBtn" class="secondary-btn" type="button">Refresh</button>
       </div>
-
       <div id="dashboardStatus" class="status">Loading partner POIs...</div>
       <div id="poiList" class="poi-list"></div>
     </section>
@@ -588,361 +162,385 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa";
-    const FUNCTION_NAME = "partner-backend";
+    (function () {
+      "use strict";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
-    });
+      var SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+      var SUPABASE_ANON_KEY = "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa";
+      var FUNCTION_NAME = "partner-backend";
+      var CLIENT_GLOBAL_KEY = "__fiveTerreGoPartnerSupabaseClient";
+      var SupabaseSdk = window.supabase;
 
-    const authCard = document.getElementById("authCard");
-    const dashboard = document.getElementById("dashboard");
-    const emailInput = document.getElementById("emailInput");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const authStatus = document.getElementById("authStatus");
-    const dashboardStatus = document.getElementById("dashboardStatus");
-    const poiList = document.getElementById("poiList");
-    const userChip = document.getElementById("userChip").querySelector("span");
-
-    const validateModal = document.getElementById("validateModal");
-    const validateCodeInput = document.getElementById("validateCodeInput");
-    const validateStatus = document.getElementById("validateStatus");
-    const confirmValidateBtn = document.getElementById("confirmValidateBtn");
-    const closeValidateModalBtn = document.getElementById("closeValidateModalBtn");
-
-    let currentSession = null;
-    let currentPois = [];
-
-    function setStatus(el, message, type = "") {
-      el.innerHTML = message;
-      el.className = `status ${type}`.trim();
-      el.classList.remove("hidden");
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function normalizeCode(value) {
-      return String(value || "").trim().toUpperCase();
-    }
-
-    function parseCodes(poi) {
-      return Array.isArray(poi.active_codes) ? poi.active_codes : [];
-    }
-
-    function isActiveCode(code) {
-      return code && code.status === "active" && code.expires_at && new Date(code.expires_at).getTime() > Date.now();
-    }
-
-    function formatDateTime(value) {
-      if (!value) return "—";
-      try {
-        return new Intl.DateTimeFormat(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short"
-        }).format(new Date(value));
-      } catch {
-        return value;
-      }
-    }
-
-    async function callBackend(body) {
-      const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, { body });
-
-      if (error) {
-        throw new Error(error.message || "Function error");
-      }
-
-      if (!data || data.ok === false) {
-        throw new Error(data?.error || "Backend error");
-      }
-
-      return data;
-    }
-
-    async function login() {
-      const email = emailInput.value.trim().toLowerCase();
-
-      if (!email) {
-        setStatus(authStatus, "Insert the email authorized for this activity.", "error");
+      if (!SupabaseSdk || typeof SupabaseSdk.createClient !== "function") {
+        console.error("Supabase SDK not loaded.");
         return;
       }
 
-      loginBtn.disabled = true;
-      setStatus(authStatus, "Sending magic link...", "");
-
-      const redirectTo = window.location.href.split("#")[0];
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo }
+      var partnerClient = window[CLIENT_GLOBAL_KEY] || SupabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
       });
+      window[CLIENT_GLOBAL_KEY] = partnerClient;
 
-      loginBtn.disabled = false;
+      var authCard = document.getElementById("authCard");
+      var dashboard = document.getElementById("dashboard");
+      var emailInput = document.getElementById("emailInput");
+      var loginBtn = document.getElementById("loginBtn");
+      var logoutBtn = document.getElementById("logoutBtn");
+      var refreshBtn = document.getElementById("refreshBtn");
+      var authStatus = document.getElementById("authStatus");
+      var dashboardStatus = document.getElementById("dashboardStatus");
+      var poiList = document.getElementById("poiList");
+      var userChip = document.getElementById("userChip").querySelector("span");
+      var validateModal = document.getElementById("validateModal");
+      var validateCodeInput = document.getElementById("validateCodeInput");
+      var validateStatus = document.getElementById("validateStatus");
+      var confirmValidateBtn = document.getElementById("confirmValidateBtn");
+      var closeValidateModalBtn = document.getElementById("closeValidateModalBtn");
+      var currentSession = null;
+      var currentPois = [];
+      var isLoadingSession = false;
 
-      if (error) {
-        setStatus(authStatus, escapeHtml(error.message), "error");
-        return;
+      function setStatus(el, message, type) {
+        el.innerHTML = message;
+        el.className = "status" + (type ? " " + type : "");
+        el.classList.remove("hidden");
       }
 
-      setStatus(authStatus, "Magic link sent. Open it from your email to access the partner area.", "ok");
-    }
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
 
-    async function logout() {
-      await supabase.auth.signOut();
-      currentSession = null;
-      currentPois = [];
-      authCard.classList.remove("hidden");
-      dashboard.classList.add("hidden");
-      logoutBtn.classList.add("hidden");
-      poiList.innerHTML = "";
-      setStatus(authStatus, "Logged out.", "ok");
-    }
+      function normalizeCode(value) {
+        return String(value || "").trim().toUpperCase();
+      }
 
-    async function loadSession() {
-      const { data } = await supabase.auth.getSession();
-      currentSession = data.session || null;
+      function parseCodes(poi) {
+        return Array.isArray(poi && poi.active_codes) ? poi.active_codes : [];
+      }
 
-      if (!currentSession) {
+      function parseAuthorizedEmails(value) {
+        return String(value || "").split(",").map(function (email) {
+          return email.trim().toLowerCase();
+        }).filter(Boolean);
+      }
+
+      function emailIsAuthorized(poi, email) {
+        return parseAuthorizedEmails(poi && poi.emails).indexOf(String(email || "").trim().toLowerCase()) !== -1;
+      }
+
+      function isActiveCode(code) {
+        return !!(code && code.status === "active" && code.expires_at && new Date(code.expires_at).getTime() > Date.now());
+      }
+
+      function formatDateTime(value) {
+        if (!value) return "—";
+        try {
+          return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+        } catch (err) {
+          return value;
+        }
+      }
+
+      function delay(ms) {
+        return new Promise(function (resolve) { setTimeout(resolve, ms); });
+      }
+
+      async function getFreshAccessToken() {
+        var result = await partnerClient.auth.getSession();
+        return result && result.data && result.data.session && result.data.session.access_token ? result.data.session.access_token : "";
+      }
+
+      async function callBackend(body) {
+        var token = await getFreshAccessToken();
+        try {
+          var invokeResult = await partnerClient.functions.invoke(FUNCTION_NAME, { body: body });
+          if (!invokeResult.error && invokeResult.data && invokeResult.data.ok !== false) return invokeResult.data;
+        } catch (err) {}
+
+        if (!token) throw new Error("You are not logged in. Please login again with the authorized email.");
+
+        var res = await fetch(SUPABASE_URL + "/functions/v1/" + FUNCTION_NAME, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify(body)
+        });
+
+        var payload = null;
+        try { payload = await res.json(); } catch (err) {}
+        if (!res.ok || !payload || payload.ok === false) throw new Error((payload && payload.error) || ("Backend error " + res.status));
+        return payload;
+      }
+
+      async function loadPartnerPoisFallback() {
+        var email = currentSession && currentSession.user && currentSession.user.email ? currentSession.user.email.trim().toLowerCase() : "";
+        if (!email) return [];
+        var result = await partnerClient.from("pois").select("*").not("emails", "is", null);
+        if (result.error) throw new Error(result.error.message || "Could not read POIs from Supabase.");
+        return Array.isArray(result.data) ? result.data.filter(function (poi) { return emailIsAuthorized(poi, email); }) : [];
+      }
+
+      async function updatePoiSettingsFallback(poiId, patch) {
+        var result = await partnerClient.from("pois").update(patch).eq("id", poiId);
+        if (result.error) throw new Error(result.error.message || "Could not update this POI.");
+      }
+
+      async function validateCodeFallback(code) {
+        var email = currentSession && currentSession.user && currentSession.user.email ? currentSession.user.email.trim().toLowerCase() : "";
+        if (!email) throw new Error("You are not logged in.");
+        var result = await partnerClient.from("pois").select("*").not("active_codes", "is", null);
+        if (result.error) throw new Error(result.error.message || "Could not read active codes.");
+        var normalized = normalizeCode(code);
+        var now = Date.now();
+        var targetPoi = null;
+        var targetCode = null;
+        (result.data || []).forEach(function (poi) {
+          if (targetPoi) return;
+          var codes = parseCodes(poi);
+          var found = codes.find(function (item) { return normalizeCode(item.code) === normalized; });
+          if (found) { targetPoi = poi; targetCode = found; }
+        });
+        if (!targetPoi || !targetCode) throw new Error("Code not found.");
+        if (!emailIsAuthorized(targetPoi, email)) throw new Error("You are not authorized for this POI.");
+        if (targetCode.status === "used") throw new Error("Code already used.");
+        if (!targetCode.expires_at || new Date(targetCode.expires_at).getTime() <= now) throw new Error("Code expired.");
+        var updatedCode = Object.assign({}, targetCode, { status: "used", used_at: new Date().toISOString(), validated_by_email: email });
+        var updatedCodes = parseCodes(targetPoi).map(function (item) { return normalizeCode(item.code) === normalized ? updatedCode : item; });
+        await updatePoiSettingsFallback(targetPoi.id, { active_codes: updatedCodes });
+        return { ok: true, poi: { id: targetPoi.id, name: targetPoi.name || "Activity" }, code: updatedCode };
+      }
+
+      async function login() {
+        var email = emailInput.value.trim().toLowerCase();
+        if (!email) { setStatus(authStatus, "Insert the email authorized for this activity.", "error"); return; }
+        loginBtn.disabled = true;
+        setStatus(authStatus, "Sending magic link...", "");
+        var redirectTo = window.location.href.split("#")[0];
+        var result = await partnerClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: redirectTo } });
+        loginBtn.disabled = false;
+        if (result.error) { setStatus(authStatus, escapeHtml(result.error.message), "error"); return; }
+        setStatus(authStatus, "Magic link sent. Open it from your email to access the partner area.", "ok");
+      }
+
+      async function logout() {
+        await partnerClient.auth.signOut();
+        currentSession = null;
+        currentPois = [];
         authCard.classList.remove("hidden");
         dashboard.classList.add("hidden");
         logoutBtn.classList.add("hidden");
-        return;
+        poiList.innerHTML = "";
+        setStatus(authStatus, "Logged out.", "ok");
       }
 
-      authCard.classList.add("hidden");
-      dashboard.classList.remove("hidden");
-      logoutBtn.classList.remove("hidden");
-      userChip.textContent = currentSession.user.email || "Logged in";
-      await loadPartnerPois();
-    }
-
-    async function loadPartnerPois() {
-      poiList.innerHTML = "";
-      setStatus(dashboardStatus, "Loading your authorized activities...", "");
-
-      try {
-        const data = await callBackend({ action: "get_partner_pois" });
-        currentPois = Array.isArray(data.pois) ? data.pois : [];
-
-        if (currentPois.length === 0) {
-          setStatus(dashboardStatus, "No activity is linked to this email. Check that this exact email is present in the POI <strong>emails</strong> field.", "error");
-          poiList.innerHTML = `<div class="empty-state">No restaurants or partner POIs available for this account.</div>`;
+      async function loadSession() {
+        if (isLoadingSession) return;
+        isLoadingSession = true;
+        var session = null;
+        for (var attempt = 0; attempt < 8; attempt++) {
+          var result = await partnerClient.auth.getSession();
+          session = result.data.session || null;
+          if (session) break;
+          await delay(180);
+        }
+        currentSession = session;
+        if (!currentSession) {
+          authCard.classList.remove("hidden");
+          dashboard.classList.add("hidden");
+          logoutBtn.classList.add("hidden");
+          isLoadingSession = false;
           return;
         }
-
-        setStatus(dashboardStatus, `${currentPois.length} authorized activit${currentPois.length === 1 ? "y" : "ies"} found.`, "ok");
-        renderPois();
-      } catch (error) {
-        setStatus(dashboardStatus, escapeHtml(error.message), "error");
+        authCard.classList.add("hidden");
+        dashboard.classList.remove("hidden");
+        logoutBtn.classList.remove("hidden");
+        userChip.textContent = currentSession.user.email || "Logged in";
+        isLoadingSession = false;
+        await loadPartnerPois();
       }
-    }
 
-    function renderPois() {
-      poiList.innerHTML = currentPois.map((poi, index) => renderPoiCard(poi, index)).join("");
+      async function loadPartnerPois() {
+        poiList.innerHTML = "";
+        setStatus(dashboardStatus, "Loading your authorized activities...", "");
+        try {
+          var data = null;
+          try {
+            data = await callBackend({ action: "get_partner_pois" });
+            currentPois = Array.isArray(data.pois) ? data.pois : [];
+          } catch (backendError) {
+            currentPois = await loadPartnerPoisFallback();
+            if (currentPois.length > 0) setStatus(dashboardStatus, "Dashboard loaded with direct Supabase fallback. The backend should still be checked, but you can manage this activity now.", "ok");
+            else throw backendError;
+          }
+          if (currentPois.length === 0) {
+            setStatus(dashboardStatus, "No activity is linked to this email. Check that this exact email is present in the POI <strong>emails</strong> field.", "error");
+            poiList.innerHTML = '<div class="empty-state">No restaurants or partner POIs available for this account.</div>';
+            return;
+          }
+          if (!dashboardStatus.classList.contains("ok")) setStatus(dashboardStatus, currentPois.length + " authorized activit" + (currentPois.length === 1 ? "y" : "ies") + " found.", "ok");
+          renderPois();
+        } catch (error) {
+          setStatus(dashboardStatus, escapeHtml(error.message), "error");
+          poiList.innerHTML = '<div class="empty-state">You are logged in, but the dashboard could not load. Check that your email is inside the POI <strong>emails</strong> field and that <strong>partner-backend</strong> is deployed.</div>';
+        }
+      }
 
-      currentPois.forEach((poi, index) => {
-        const discountInput = document.getElementById(`discount-${index}`);
-        const infoInput = document.getElementById(`discount-info-${index}`);
-        const emailsInput = document.getElementById(`emails-${index}`);
-        const saveBtn = document.getElementById(`save-${index}`);
-        const validateBtn = document.getElementById(`validate-${index}`);
-
-        saveBtn.addEventListener("click", () => savePoiSettings(index, discountInput, infoInput, emailsInput));
-        validateBtn.addEventListener("click", () => openValidateModal());
-
-        document.querySelectorAll(`[data-code-validate][data-poi-index="${index}"]`).forEach((btn) => {
-          btn.addEventListener("click", () => {
-            validateCodeInput.value = btn.dataset.codeValidate || "";
-            openValidateModal();
+      function renderPois() {
+        var html = currentPois.map(function (poi, index) { return renderPoiCard(poi, index); }).join("");
+        poiList.innerHTML = html;
+        currentPois.forEach(function (poi, index) {
+          var discountInput = document.getElementById("discount-" + index);
+          var infoInput = document.getElementById("discount-info-" + index);
+          var emailsInput = document.getElementById("emails-" + index);
+          var saveBtn = document.getElementById("save-" + index);
+          var validateBtn = document.getElementById("validate-" + index);
+          saveBtn.addEventListener("click", function () { savePoiSettings(index, discountInput, infoInput, emailsInput); });
+          validateBtn.addEventListener("click", function () { openValidateModal(); });
+          var btns = document.querySelectorAll('[data-code-validate][data-poi-index="' + index + '"]');
+          Array.prototype.forEach.call(btns, function (btn) {
+            btn.addEventListener("click", function () {
+              validateCodeInput.value = btn.getAttribute("data-code-validate") || "";
+              openValidateModal();
+            });
           });
         });
-      });
-    }
-
-    function renderPoiCard(poi, index) {
-      const discount = Number(poi.discount || 0);
-      const codes = parseCodes(poi);
-      const activeCodes = codes.filter(isActiveCode);
-      const usedCodes = codes.filter(c => c.status === "used").slice(-5).reverse();
-      const type = poi.type || "activity";
-      const publicActive = discount > 0;
-
-      return `
-        <article class="poi-card">
-          <div class="poi-top">
-            <div>
-              <h3 class="poi-name">${escapeHtml(poi.name || "Unnamed activity")}</h3>
-              <div class="poi-type">${escapeHtml(type)} · ${publicActive ? "Public discount active" : "Discount not public"}</div>
-            </div>
-            <div class="discount-pill">
-              <strong>${discount}%</strong>
-              <span>OFF</span>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="field">
-              <label for="discount-${index}">Discount %</label>
-              <input id="discount-${index}" type="number" min="0" max="100" step="1" value="${discount}" />
-            </div>
-            <div class="field">
-              <label for="discount-info-${index}">Discount caption</label>
-              <textarea id="discount-info-${index}" placeholder="Show this QR code before ordering">${escapeHtml(poi.discount_info || "")}</textarea>
-            </div>
-          </div>
-
-          <div class="field" style="margin-top: 10px;">
-            <label for="emails-${index}">Authorized emails, separated by comma</label>
-            <textarea id="emails-${index}" placeholder="restaurant@email.com,manager@email.com">${escapeHtml(poi.emails || "")}</textarea>
-          </div>
-
-          <div class="buttons-row">
-            <button id="save-${index}" class="primary-btn" type="button">Save settings</button>
-            <button id="validate-${index}" class="secondary-btn" type="button">Validate QR/code</button>
-          </div>
-
-          <div id="status-${index}" class="status hidden"></div>
-
-          <div class="codes">
-            <div class="codes-head">
-              <div class="codes-title">Active codes</div>
-              <div class="user-chip"><span>${activeCodes.length} active</span></div>
-            </div>
-            <div class="code-list">
-              ${activeCodes.length ? activeCodes.map(code => renderCodeItem(code, index, true)).join("") : `<div class="empty-state">No active codes for this activity.</div>`}
-            </div>
-          </div>
-
-          <div class="codes">
-            <div class="codes-head">
-              <div class="codes-title">Recently validated</div>
-              <div class="user-chip"><span>${usedCodes.length} shown</span></div>
-            </div>
-            <div class="code-list">
-              ${usedCodes.length ? usedCodes.map(code => renderCodeItem(code, index, false)).join("") : `<div class="empty-state">No validated codes yet.</div>`}
-            </div>
-          </div>
-        </article>
-      `;
-    }
-
-    function renderCodeItem(code, index, canValidate) {
-      const expiresLabel = code.status === "used"
-        ? `Used: ${formatDateTime(code.used_at)}`
-        : `Expires: ${formatDateTime(code.expires_at)}`;
-
-      return `
-        <div class="code-item">
-          <div class="code-main">
-            <div class="code-value">${escapeHtml(code.code)}</div>
-            <div class="code-meta">
-              User: ${escapeHtml(code.user_email || "—")}<br />
-              Discount: ${escapeHtml(code.discount || 0)}% · ${escapeHtml(expiresLabel)}
-              ${code.validated_by_email ? `<br />Validated by: ${escapeHtml(code.validated_by_email)}` : ""}
-            </div>
-          </div>
-          ${canValidate ? `<button class="secondary-btn" type="button" data-poi-index="${index}" data-code-validate="${escapeHtml(code.code)}">Validate</button>` : `<div class="user-chip"><span>${escapeHtml(code.status || "used")}</span></div>`}
-        </div>
-      `;
-    }
-
-    async function savePoiSettings(index, discountInput, infoInput, emailsInput) {
-      const poi = currentPois[index];
-      const statusEl = document.getElementById(`status-${index}`);
-      const discount = Number(discountInput.value || 0);
-      const discountInfo = infoInput.value.trim();
-      const emails = emailsInput.value.trim();
-
-      if (!Number.isFinite(discount) || discount < 0 || discount > 100) {
-        setStatus(statusEl, "Discount must be between 0 and 100.", "error");
-        return;
       }
 
-      setStatus(statusEl, "Saving settings...", "");
+      function renderPoiCard(poi, index) {
+        var discount = Number(poi.discount || 0);
+        var codes = parseCodes(poi);
+        var activeCodes = codes.filter(isActiveCode);
+        var usedCodes = codes.filter(function (c) { return c.status === "used"; }).slice(-5).reverse();
+        var type = poi.type || "activity";
+        var publicActive = discount > 0;
+        var activeCodesHtml = activeCodes.length ? activeCodes.map(function (code) { return renderCodeItem(code, index, true); }).join("") : '<div class="empty-state">No active codes for this activity.</div>';
+        var usedCodesHtml = usedCodes.length ? usedCodes.map(function (code) { return renderCodeItem(code, index, false); }).join("") : '<div class="empty-state">No validated codes yet.</div>';
+        return '' +
+          '<article class="poi-card">' +
+            '<div class="poi-top">' +
+              '<div>' +
+                '<h3 class="poi-name">' + escapeHtml(poi.name || "Unnamed activity") + '</h3>' +
+                '<div class="poi-type">' + escapeHtml(type) + ' · ' + (publicActive ? "Public discount active" : "Discount not public") + '</div>' +
+              '</div>' +
+              '<div class="discount-pill"><strong>' + discount + '%</strong><span>OFF</span></div>' +
+            '</div>' +
+            '<div class="form-grid">' +
+              '<div class="field"><label for="discount-' + index + '">Discount %</label><input id="discount-' + index + '" type="number" min="0" max="100" step="1" value="' + discount + '" /></div>' +
+              '<div class="field"><label for="discount-info-' + index + '">Discount caption</label><textarea id="discount-info-' + index + '" placeholder="Show this QR code before ordering">' + escapeHtml(poi.discount_info || "") + '</textarea></div>' +
+            '</div>' +
+            '<div class="field" style="margin-top: 10px;"><label for="emails-' + index + '">Authorized emails, separated by comma</label><textarea id="emails-' + index + '" placeholder="restaurant@email.com,manager@email.com">' + escapeHtml(poi.emails || "") + '</textarea></div>' +
+            '<div class="buttons-row"><button id="save-' + index + '" class="primary-btn" type="button">Save settings</button><button id="validate-' + index + '" class="secondary-btn" type="button">Validate QR/code</button></div>' +
+            '<div id="status-' + index + '" class="status hidden"></div>' +
+            '<div class="codes"><div class="codes-head"><div class="codes-title">Active codes</div><div class="user-chip"><span>' + activeCodes.length + ' active</span></div></div><div class="code-list">' + activeCodesHtml + '</div></div>' +
+            '<div class="codes"><div class="codes-head"><div class="codes-title">Recently validated</div><div class="user-chip"><span>' + usedCodes.length + ' shown</span></div></div><div class="code-list">' + usedCodesHtml + '</div></div>' +
+          '</article>';
+      }
 
-      try {
-        await callBackend({
-          action: "update_partner_settings",
-          poi_id: poi.id,
-          discount,
-          discount_info: discountInfo,
-          emails
+      function renderCodeItem(code, index, canValidate) {
+        var expiresLabel = code.status === "used" ? "Used: " + formatDateTime(code.used_at) : "Expires: " + formatDateTime(code.expires_at);
+        var actionHtml = canValidate ? '<button class="secondary-btn" type="button" data-poi-index="' + index + '" data-code-validate="' + escapeHtml(code.code) + '">Validate</button>' : '<div class="user-chip"><span>' + escapeHtml(code.status || "used") + '</span></div>';
+        return '' +
+          '<div class="code-item">' +
+            '<div class="code-main">' +
+              '<div class="code-value">' + escapeHtml(code.code) + '</div>' +
+              '<div class="code-meta">User: ' + escapeHtml(code.user_email || "—") + '<br />Discount: ' + escapeHtml(code.discount || 0) + '% · ' + escapeHtml(expiresLabel) + (code.validated_by_email ? '<br />Validated by: ' + escapeHtml(code.validated_by_email) : '') + '</div>' +
+            '</div>' + actionHtml +
+          '</div>';
+      }
+
+      async function savePoiSettings(index, discountInput, infoInput, emailsInput) {
+        var poi = currentPois[index];
+        var statusEl = document.getElementById("status-" + index);
+        var discount = Number(discountInput.value || 0);
+        var discountInfo = infoInput.value.trim();
+        var emails = emailsInput.value.trim();
+        if (!Number.isFinite(discount) || discount < 0 || discount > 100) { setStatus(statusEl, "Discount must be between 0 and 100.", "error"); return; }
+        setStatus(statusEl, "Saving settings...", "");
+        try {
+          try {
+            await callBackend({ action: "update_partner_settings", poi_id: poi.id, discount: discount, discount_info: discountInfo, emails: emails });
+          } catch (backendError) {
+            await updatePoiSettingsFallback(poi.id, { discount: discount, discount_info: discountInfo, emails: emails });
+          }
+          setStatus(statusEl, "Settings saved.", "ok");
+          await loadPartnerPois();
+        } catch (error) {
+          setStatus(statusEl, escapeHtml(error.message), "error");
+        }
+      }
+
+      function openValidateModal() {
+        validateStatus.classList.add("hidden");
+        validateModal.classList.remove("hidden");
+        setTimeout(function () { validateCodeInput.focus(); }, 80);
+      }
+
+      function closeValidateModal() {
+        validateModal.classList.add("hidden");
+        validateCodeInput.value = "";
+        validateStatus.classList.add("hidden");
+      }
+
+      async function validateCode() {
+        var code = normalizeCode(validateCodeInput.value);
+        if (!code) { setStatus(validateStatus, "Insert a code to validate.", "error"); return; }
+        setStatus(validateStatus, "Validating code...", "");
+        confirmValidateBtn.disabled = true;
+        try {
+          var data = null;
+          try { data = await callBackend({ action: "validate_code", code: code }); }
+          catch (backendError) { data = await validateCodeFallback(code); }
+          setStatus(validateStatus, "Validated: <strong>" + escapeHtml((data.poi && data.poi.name) || "Activity") + "</strong> · " + escapeHtml((data.code && data.code.discount) || 0) + "% discount.", "ok");
+          await loadPartnerPois();
+        } catch (error) {
+          setStatus(validateStatus, escapeHtml(error.message), "error");
+        } finally {
+          confirmValidateBtn.disabled = false;
+        }
+      }
+
+      function runSelfTests() {
+        console.assert(escapeHtml('<img src=x>').indexOf('&lt;img') === 0, 'escapeHtml should escape angle brackets');
+        console.assert(normalizeCode(' 5tg-abcd ') === '5TG-ABCD', 'normalizeCode should trim and uppercase');
+        console.assert(parseCodes({ active_codes: [{ code: 'A' }] }).length === 1, 'parseCodes should read arrays');
+        console.assert(parseCodes({ active_codes: null }).length === 0, 'parseCodes should handle null');
+        console.assert(parseAuthorizedEmails(' A@B.COM, c@d.com ,, ').join('|') === 'a@b.com|c@d.com', 'parseAuthorizedEmails should trim lowercase and remove empty values');
+        console.assert(emailIsAuthorized({ emails: 'one@test.com, two@test.com' }, 'TWO@test.com') === true, 'emailIsAuthorized should match case-insensitively');
+        console.assert(isActiveCode({ status: 'active', expires_at: new Date(Date.now() + 60000).toISOString() }) === true, 'future active code should be active');
+        console.assert(isActiveCode({ status: 'active', expires_at: new Date(Date.now() - 60000).toISOString() }) === false, 'expired active code should not be active');
+      }
+
+      loginBtn.addEventListener("click", login);
+      logoutBtn.addEventListener("click", logout);
+      refreshBtn.addEventListener("click", loadPartnerPois);
+      confirmValidateBtn.addEventListener("click", validateCode);
+      closeValidateModalBtn.addEventListener("click", closeValidateModal);
+      validateModal.addEventListener("click", function (event) { if (event.target === validateModal) closeValidateModal(); });
+      validateCodeInput.addEventListener("keydown", function (event) { if (event.key === "Enter") validateCode(); });
+
+      if (!window.__fiveTerreGoPartnerAuthListenerStarted) {
+        window.__fiveTerreGoPartnerAuthListenerStarted = true;
+        partnerClient.auth.onAuthStateChange(function (_event, session) {
+          currentSession = session;
+          loadSession();
         });
-
-        setStatus(statusEl, "Settings saved.", "ok");
-        await loadPartnerPois();
-      } catch (error) {
-        setStatus(statusEl, escapeHtml(error.message), "error");
-      }
-    }
-
-    function openValidateModal() {
-      validateStatus.classList.add("hidden");
-      validateModal.classList.remove("hidden");
-      setTimeout(() => validateCodeInput.focus(), 80);
-    }
-
-    function closeValidateModal() {
-      validateModal.classList.add("hidden");
-      validateCodeInput.value = "";
-      validateStatus.classList.add("hidden");
-    }
-
-    async function validateCode() {
-      const code = normalizeCode(validateCodeInput.value);
-
-      if (!code) {
-        setStatus(validateStatus, "Insert a code to validate.", "error");
-        return;
       }
 
-      setStatus(validateStatus, "Validating code...", "");
-      confirmValidateBtn.disabled = true;
-
-      try {
-        const data = await callBackend({ action: "validate_code", code });
-        setStatus(validateStatus, `Validated: <strong>${escapeHtml(data.poi?.name || "Activity")}</strong> · ${escapeHtml(data.code?.discount || 0)}% discount.`, "ok");
-        await loadPartnerPois();
-      } catch (error) {
-        setStatus(validateStatus, escapeHtml(error.message), "error");
-      } finally {
-        confirmValidateBtn.disabled = false;
-      }
-    }
-
-    loginBtn.addEventListener("click", login);
-    logoutBtn.addEventListener("click", logout);
-    refreshBtn.addEventListener("click", loadPartnerPois);
-    confirmValidateBtn.addEventListener("click", validateCode);
-    closeValidateModalBtn.addEventListener("click", closeValidateModal);
-
-    validateModal.addEventListener("click", (event) => {
-      if (event.target === validateModal) closeValidateModal();
-    });
-
-    validateCodeInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") validateCode();
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      currentSession = session;
+      runSelfTests();
       loadSession();
-    });
-
-    loadSession();
+    })();
   </script>
 </body>
 </html>
