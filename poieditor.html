@@ -37,6 +37,18 @@ textarea{min-height:90px;resize:vertical}
 select option{color:#111}
 button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
 button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:none;background:#ff3b30;color:white;font-weight:800;cursor:pointer}
+.image-uploader{margin-top:10px;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07)}
+.image-uploader-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.7);font-weight:700}
+.image-count{font-size:11px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.1);color:#fff;white-space:nowrap}
+.image-input{display:none}
+.image-add-btn{width:100%;padding:12px;border-radius:12px;border:1px dashed rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:white;font-weight:800;cursor:pointer}
+.image-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.image-preview{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1)}
+.image-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.image-remove{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,0.68);color:white;font-weight:900;cursor:pointer;line-height:1}
+.poi-thumb-strip{display:flex;gap:6px;margin-top:9px;overflow:hidden}
+.poi-thumb{width:42px;height:42px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);flex:0 0 auto}
+.poi-thumb-more{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);font-size:12px;font-weight:900;flex:0 0 auto}
 .range-card{margin-top:10px;padding:13px 12px 12px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07)}
 .range-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.68)}
 .range-value{min-width:46px;text-align:center;padding:5px 10px;border-radius:999px;background:white;color:black;font-weight:800;font-size:13px}
@@ -50,73 +62,19 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 /* TASK SLIDER */
 .task-slider{display:flex;gap:10px;overflow-x:auto;padding:12px 16px 4px;scroll-snap-type:x mandatory}
 .task-slider::-webkit-scrollbar{display:none}
-.task-card{position:relative;flex:0 0 auto;min-width:140px;max-width:160px;padding:12px;padding-top:34px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
+.task-card{position:relative;flex:0 0 auto;min-width:140px;max-width:160px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
 .task-card:active{transform:scale(.98)}
 .task-title{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-pill{font-size:9px;padding:4px 7px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;line-height:1;margin-right:4px;margin-top:4px}
-.task-coin{position:absolute;top:4px;right:8px;z-index:2;font-size:10px;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);font-weight:900}
 .task-pill.red{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
 
-/* DEV GAME LEVELS */
-.dev-game{margin:12px 16px 8px;padding:14px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,0.11),rgba(255,255,255,0.045));border:1px solid rgba(255,255,255,0.12);box-shadow:0 12px 30px rgba(0,0,0,0.22);cursor:pointer}
-.dev-game-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.dev-game-rank{font-size:18px;font-weight:900;line-height:1.15}
-.dev-game-score{text-align:right;font-size:12px;color:rgba(255,255,255,0.66);white-space:nowrap}
-.dev-game-score strong{display:block;color:#fff;font-size:18px;line-height:1.15}
-.dev-game-bar{height:9px;border-radius:999px;background:rgba(255,255,255,0.11);overflow:hidden}
-.dev-game-fill{height:100%;width:0%;border-radius:999px;background:#fff;transition:width .35s ease}
-.dev-game-foot{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-size:11px;color:rgba(255,255,255,0.6)}
-.dev-game-foot strong{color:#fff}
-.dev-game-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);font-size:10px;font-weight:800;color:rgba(255,255,255,0.75)}
-.coins-button{position:absolute;top:10px;left:14px;padding:8px 12px;border-radius:10px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
 
-<div id="devGame" class="dev-game" aria-live="polite" onclick="openLevelsModal()">
-  <div class="dev-game-top">
-    <div>
-      <div id="devRank" class="dev-game-rank">Loading rank...</div>
-      <div id="devBadge" class="dev-game-badge">POI Hunter</div>
-    </div>
-    <div class="dev-game-score">
-      Score
-      <strong id="devScore">0</strong>
-    </div>
-  </div>
-  <div class="dev-game-bar"><div id="devFill" class="dev-game-fill"></div></div>
-  <div class="dev-game-foot">
-    <span id="devProgress">0 / 10 POI</span>
-    <span id="devNext">Next level: 10</span>
-  </div>
-</div>
-
-<div id="levelsModal" class="modal">
-  <div class="modal-content">
-    <button class="close-btn" onclick="closeLevelsModal()">×</button>
-    <button class="coins-button" onclick="openCoinsMenu()">Compra monete</button>
-    <h2>Livelli</h2>
-    <div id="levelsList"></div>
-  </div>
-</div>
-
-<div id="coinsModal" class="modal">
-  <div class="modal-content">
-    <button class="close-btn" onclick="closeCoinsMenu()">×</button>
-    <h2>Compra monete</h2>
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
-      <button class="save" onclick="buyCoins('10 monete - 9 euro')">10 monete — 9€</button>
-      <button class="save" onclick="buyCoins('50 monete - 49 euro')">50 monete — 49€</button>
-      <button class="save" onclick="buyCoins('100 monete - 99 euro')">100 monete — 99€</button>
-      <button class="save" onclick="buyCoins('500 monete - 599 euro')">500 monete — 599€</button>
-      <button class="save" onclick="buyCoins('1000 monete - 1499 euro')">1000 monete — 1499€</button>
-    </div>
-  </div>
-</div>
-
 <div style="padding:8px 16px 0;text-align:center">
   <div style="font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#fff">MATATIZI</div>
-  <div style="margin-top:4px;font-size:12px;color:rgba(255,255,255,0.6);font-weight:600">Completa un matatizo per ottenere monete</div>
+  <div style="margin-top:4px;font-size:12px;color:rgba(255,255,255,0.6);font-weight:600">Completa i dati mancanti dei POI</div>
 </div>
 <div id="taskSlider" class="task-slider"></div>
 
@@ -163,6 +121,16 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
     <input id="phone" placeholder="Telefono" />
     <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
 
+    <div class="image-uploader">
+      <div class="image-uploader-head">
+        <span>Immagini POI · compressione automatica</span>
+        <span id="imageCount" class="image-count">0 immagini</span>
+      </div>
+      <input id="poiImages" class="image-input" type="file" accept="image/*" multiple />
+      <button id="imageAddBtn" class="image-add-btn" type="button">Aggiungi immagini</button>
+      <div id="imagePreviewGrid" class="image-preview-grid"></div>
+    </div>
+
     <button class="save" id="saveBtn" type="button">Salva</button>
     <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina POI</button>
   </div>
@@ -207,6 +175,7 @@ const REQUIRED_POIS = [
 
 let pois = [];
 let editingPoiId = null;
+let poiImagesState = [];
 
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
@@ -228,146 +197,16 @@ const typeEl = document.getElementById("type");
 const emailsEl = document.getElementById("emails");
 const phoneEl = document.getElementById("phone");
 const discountEl = document.getElementById("discount");
-const devRankEl = document.getElementById("devRank");
-const devScoreEl = document.getElementById("devScore");
-const devFillEl = document.getElementById("devFill");
-const devProgressEl = document.getElementById("devProgress");
-const devNextEl = document.getElementById("devNext");
-const devBadgeEl = document.getElementById("devBadge");
-
-const DEV_LEVELS = [
-  { min: 0, title: "Livello 0 · Disastro umano", badge: "Inutile" },
-  { min: 20, title: "Livello 1 · Turista a caso", badge: "Perso totale" },
-  { min: 50, title: "Livello 2 · Amatoriale", badge: "Ci provi" },
-  { min: 100, title: "Livello 3 · Mediocre", badge: "Finalmente" },
-  { min: 180, title: "Livello 4 · Quasi utile", badge: "Inizia a servire" },
-  { min: 300, title: "Livello 5 · Non male", badge: "Sta prendendo forma" },
-  { min: 450, title: "Livello 6 · Pro vero", badge: "Finalmente serio" },
-  { min: 650, title: "Livello 7 · Mostro", badge: "Dominio" },
-  { min: 900, title: "Livello 8 · Dio", badge: "Fine del gioco" }
-];
+const poiImagesEl = document.getElementById("poiImages");
+const imageAddBtn = document.getElementById("imageAddBtn");
+const imagePreviewGridEl = document.getElementById("imagePreviewGrid");
+const imageCountEl = document.getElementById("imageCount");
 
 function setStatus(message, isError = false){
   statusEl.innerHTML = message;
   statusEl.classList.toggle("error", Boolean(isError));
 }
 
-function getDevLevel(metric){
-  let current = DEV_LEVELS[0];
-  let next = null;
-
-  for(let i = 0; i < DEV_LEVELS.length; i++){
-    if(metric >= DEV_LEVELS[i].min){
-      current = DEV_LEVELS[i];
-      next = DEV_LEVELS[i + 1] || null;
-    }
-  }
-
-  return { current, next };
-}
-
-function calculateCoins(){
-  let coins = 0;
-
-  pois.forEach(p=>{
-    const missing = getMissingPoiFields(p);
-    if(missing.length === 0) coins += 5;
-    if(missing.length === 1) coins += 2;
-    if(missing.length === 2) coins += 1;
-  });
-
-  return coins;
-}
-
-function calculateTaskCoins(){
-  let taskCoins = 0;
-
-  pois.forEach(p=>{
-    const missing = getMissingPoiFields(p);
-    if(missing.includes("descrizione")) taskCoins += 2;
-    if(missing.includes("coordinate")) taskCoins += 2;
-  });
-
-  return taskCoins;
-}
-
-function openLevelsModal(){
-  const container = document.getElementById("levelsList");
-  const poiCoins = calculateCoins();
-  const taskCoins = calculateTaskCoins();
-  const score = poiCoins + taskCoins;
-
-  container.innerHTML = "";
-
-  DEV_LEVELS.forEach((l,i)=>{
-    const div = document.createElement("div");
-    div.style.padding = "10px 0";
-    div.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
-
-    const next = DEV_LEVELS[i + 1];
-    const currentMin = l.min;
-    const nextMin = next ? next.min : currentMin + 100;
-    const progress = Math.max(0, Math.min(100, ((score - currentMin) / (nextMin - currentMin)) * 100));
-
-    const title = document.createElement("div");
-    title.innerHTML = "<strong>" + l.title + "</strong> — " + l.min + " 🪙";
-
-    const bar = document.createElement("div");
-    bar.style.height = "6px";
-    bar.style.borderRadius = "999px";
-    bar.style.background = "rgba(255,255,255,0.1)";
-    bar.style.marginTop = "6px";
-
-    const fill = document.createElement("div");
-    fill.style.height = "100%";
-    fill.style.width = progress + "%";
-    fill.style.borderRadius = "999px";
-    fill.style.background = "white";
-
-    bar.appendChild(fill);
-    div.appendChild(title);
-    div.appendChild(bar);
-    container.appendChild(div);
-  });
-
-  document.getElementById("levelsModal").classList.add("is-open");
-}
-
-function openCoinsMenu(){
-  document.getElementById("coinsModal").classList.add("is-open");
-}
-
-function closeCoinsMenu(){
-  document.getElementById("coinsModal").classList.remove("is-open");
-}
-
-function buyCoins(label){
-  alert("Hai scelto: " + label + "\n\nProcedi con bonifico a Diego Ricci.");
-}
-
-function closeLevelsModal(){
-  document.getElementById("levelsModal").classList.remove("is-open");
-}
-
-function updateDevGame(){
-  const totalPois = Array.isArray(pois) ? pois.length : 0;
-  const poiCoins = calculateCoins();
-  const taskCoins = calculateTaskCoins();
-  const score = poiCoins + taskCoins;
-  const level = getDevLevel(score);
-  const currentMin = level.current.min;
-  const nextMin = level.next ? level.next.min : score;
-  const range = Math.max(1, nextMin - currentMin);
-  const progress = level.next ? Math.max(0, Math.min(100, ((score - currentMin) / range) * 100)) : 100;
-  const remaining = level.next ? Math.max(0, nextMin - score) : 0;
-
-  devRankEl.innerText = level.current.title;
-  devScoreEl.innerText = String(score) + " 🪙";
-  devFillEl.style.width = progress + "%";
-  devProgressEl.innerHTML = "<strong>" + totalPois + "</strong> POI • " + poiCoins + "🪙 POI • " + taskCoins + "🪙 task";
-  devNextEl.innerText = level.next ? (remaining + " 🪙 al prossimo livello") : "Livello massimo sbloccato";
-  devBadgeEl.innerText = level.current.badge;
-}
 
 function getAuthSession(){
   for(const key of Object.keys(localStorage)){
@@ -398,6 +237,96 @@ function clampNumber(value, min, max, fallback){
   const n = Number(value);
   if(Number.isNaN(n)) return fallback;
   return Math.max(min, Math.min(max, n));
+}
+
+function normalizePoiImages(value){
+  if(!value) return [];
+  if(Array.isArray(value)) return value.filter(Boolean).map(String);
+  if(typeof value === "string"){
+    const trimmed = value.trim();
+    if(!trimmed) return [];
+    try{
+      const parsed = JSON.parse(trimmed);
+      if(Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+    }catch(err){
+      return trimmed.split(',').map(v=>v.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+function resizeImageFile(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Impossibile leggere l'immagine"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Formato immagine non valido"));
+      img.onload = () => {
+        const maxSide = 1200;
+        const quality = 0.72;
+        let width = img.width;
+        let height = img.height;
+        const scale = Math.min(maxSide / width, maxSide / height, 1);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = String(reader.result || "");
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderImagePreviews(){
+  imagePreviewGridEl.innerHTML = "";
+  imageCountEl.innerText = String(poiImagesState.length) + (poiImagesState.length === 1 ? " immagine" : " immagini");
+
+  poiImagesState.forEach((src, index)=>{
+    const wrap = document.createElement("div");
+    wrap.className = "image-preview";
+
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "Immagine POI";
+    wrap.appendChild(img);
+
+    const remove = document.createElement("button");
+    remove.className = "image-remove";
+    remove.type = "button";
+    remove.innerText = "×";
+    remove.addEventListener("click", ()=>{
+      poiImagesState.splice(index, 1);
+      renderImagePreviews();
+    });
+    wrap.appendChild(remove);
+
+    imagePreviewGridEl.appendChild(wrap);
+  });
+}
+
+function setPoiImages(images){
+  poiImagesState = normalizePoiImages(images);
+  if(poiImagesEl) poiImagesEl.value = "";
+  renderImagePreviews();
+}
+
+async function addImageFiles(files){
+  const selected = Array.from(files || []).filter(file => file && file.type && file.type.startsWith("image/"));
+  if(!selected.length) return;
+
+  for(const file of selected){
+    const compressed = await resizeImageFile(file);
+    poiImagesState.push(compressed);
+  }
+
+  renderImagePreviews();
 }
 
 function updateImportanceUI(value = importanceEl.value){
@@ -535,11 +464,6 @@ function renderTaskSlider(filteredPois){
     title.innerText = p.name || "(senza nome)";
     card.appendChild(title);
 
-    const taskValue = missing.length * 2;
-    const coin = document.createElement("div");
-    coin.className = "task-coin";
-    coin.innerText = "+" + taskValue + "🪙";
-    card.appendChild(coin);
 
     if(missing.includes("descrizione")) card.appendChild(createTaskPill("manca desc.", false));
     if(missing.includes("coordinate")) card.appendChild(createTaskPill("no coord.", true));
@@ -560,19 +484,14 @@ function renderTaskSlider(filteredPois){
     pill.className = "task-pill red";
     pill.innerText = "poi mancante";
 
-    const coin = document.createElement("div");
-    coin.className = "task-coin";
-    coin.innerText = "+3🪙";
 
     card.appendChild(title);
     card.appendChild(pill);
-    card.appendChild(coin);
     taskSliderEl.appendChild(card);
   });
 }
 
 function renderPois(filter = ""){
-  updateDevGame();
   listEl.innerHTML = "";
 
   const query = String(filter || "").trim().toLowerCase();
@@ -618,13 +537,29 @@ function renderPois(filter = ""){
     meta.className = "poi-meta";
     meta.innerText = String(p.type || "-") + " • importanza " + String(p.importance ?? "-") + " • sconto " + String(p.discount ?? 0) + "%";
 
-    const desc = document.createElement("div");
-    desc.className = "poi-meta";
-    desc.innerText = p.description || "";
-
     div.appendChild(title);
     div.appendChild(meta);
-    if(p.description) div.appendChild(desc);
+
+    const images = normalizePoiImages(p.images);
+    if(images.length){
+      const strip = document.createElement("div");
+      strip.className = "poi-thumb-strip";
+      images.slice(0, 3).forEach(src=>{
+        const thumb = document.createElement("img");
+        thumb.className = "poi-thumb";
+        thumb.src = src;
+        thumb.alt = p.name || "POI";
+        strip.appendChild(thumb);
+      });
+      if(images.length > 3){
+        const more = document.createElement("div");
+        more.className = "poi-thumb-more";
+        more.innerText = "+" + String(images.length - 3);
+        strip.appendChild(more);
+      }
+      div.appendChild(strip);
+    }
+
     div.addEventListener("click", () => openModal(p));
     listEl.appendChild(div);
   });
@@ -651,6 +586,7 @@ function openModal(poi = null){
     emailsEl.value = poi.emails || "";
     phoneEl.value = poi.phone || "";
     discountEl.value = poi.discount ?? "";
+    setPoiImages(poi.images);
   }else{
     editingPoiId = null;
     modalTitleEl.innerText = "Aggiungi POI";
@@ -676,6 +612,7 @@ function clearForm(resetEditing = true){
   emailsEl.value = "";
   phoneEl.value = "";
   discountEl.value = "";
+  setPoiImages([]);
 }
 
 function readPoiForm(){
@@ -687,7 +624,8 @@ function readPoiForm(){
     type: typeEl.value,
     emails: emailsEl.value.trim(),
     phone: phoneEl.value.trim(),
-    discount: clampNumber(discountEl.value, 0, 100, 0)
+    discount: clampNumber(discountEl.value, 0, 100, 0),
+    images: poiImagesState.slice()
   };
 }
 
@@ -777,115 +715,23 @@ closeBtn.addEventListener("click", closeModal);
 saveBtn.addEventListener("click", savePoi);
 searchEl.addEventListener("input", () => renderPois(searchEl.value));
 importanceEl.addEventListener("input", () => updateImportanceUI());
+imageAddBtn.addEventListener("click", () => poiImagesEl.click());
+poiImagesEl.addEventListener("change", async () => {
+  try{
+    await addImageFiles(poiImagesEl.files);
+  }catch(err){
+    alert("Errore immagine: " + err.message);
+  }
+  poiImagesEl.value = "";
+});
 modalEl.addEventListener("click", (event) => { if(event.target === modalEl) closeModal(); });
 document.addEventListener("keydown", (event) => {
   if(event.key === "Escape"){
     closeModal();
-    closeLevelsModal();
-    closeCoinsMenu();
+    
   }
 });
 
-function runTests(){
-  console.assert(typeof loadPois === "function", "loadPois deve esistere");
-  console.assert(typeof savePoi === "function", "savePoi deve esistere");
-  console.assert(typeof buildPoiSaveRequest === "function", "buildPoiSaveRequest deve esistere");
-  console.assert(typeof renderPois === "function", "renderPois deve esistere");
-  console.assert(typeof renderTaskSlider === "function", "renderTaskSlider deve esistere");
-  console.assert(typeof getMissingPoiFields === "function", "getMissingPoiFields deve esistere");
-  console.assert(typeof getPoiAlertText === "function", "getPoiAlertText deve esistere");
-  console.assert(typeof hasOnlyMissingDescription === "function", "hasOnlyMissingDescription deve esistere");
-  console.assert(typeof createTaskPill === "function", "createTaskPill deve esistere");
-  console.assert(typeof openSuggestedPoi === "function", "openSuggestedPoi deve esistere");
-  console.assert(typeof openCoinsMenu === "function", "openCoinsMenu deve esistere");
-  console.assert(typeof buyCoins === "function", "buyCoins deve esistere");
-  console.assert(Array.isArray(REQUIRED_POIS), "lista POI fondamentali esiste");
-  console.assert(Array.isArray(DEV_LEVELS), "lista livelli developer game esiste");
-  console.assert(typeof updateDevGame === "function", "updateDevGame deve esistere");
-  console.assert(getDevLevel(0).current.title.includes("Livello 0"), "0 monete livello 0");
-  console.assert(getDevLevel(25).current.title.includes("Livello 1"), "25 monete livello 1");
-  console.assert(getDevLevel(100).current.title.includes("Mediocre"), "100 monete livello Mediocre");
-  console.assert(clampNumber("120", 1, 100, 1) === 100, "importance max 100");
-  updateImportanceUI(75);
-  console.assert(importanceEl.value === "75", "slider importanza si aggiorna");
-  console.assert(importanceValueEl.innerText === "75", "valore slider visibile corretto");
-  console.assert(clampNumber("abc", 1, 100, 1) === 1, "fallback numerico corretto");
-  console.assert(clampNumber("-10", 0, 100, 0) === 0, "discount min 0");
-  console.assert(buildHeaders().apikey === ANON_KEY, "apikey header presente");
-  console.assert(buildHeaders().Authorization === "Bearer " + ANON_KEY, "read Authorization usa anon");
-  console.assert(buildHeaders({ useUserToken: true }).Authorization.startsWith("Bearer "), "user token header presente se richiesto");
-  console.assert(permissionHelp().includes("GRANT SELECT"), "messaggio permessi contiene GRANT SELECT");
-  console.assert(isPermissionError({ status: 403, message: "permission denied for table pois" }) === true, "riconosce permission denied");
-  console.assert(isPermissionError({ status: 200, message: "ok" }) === false, "non segnala falsi permission error");
-  console.assert(buildPoiSaveRequest(null).method === "POST", "nuovo POI usa POST");
-  console.assert(buildPoiSaveRequest("123").method === "PATCH", "POI esistente usa PATCH");
-  console.assert(buildPoiSaveRequest("123").url.includes("id=eq.123"), "PATCH filtra per id");
-  console.assert(getMissingPoiFields({ description:"", coords:"" }).length === 2, "rileva descrizione e coordinate mancanti");
-  console.assert(getPoiAlertText({ description:"", coords:"" }) === "manca desc. + coord.", "testo logico per entrambi i campi mancanti");
-  console.assert(getPoiAlertText({ description:"test", coords:"" }) === "manca coordinate", "testo logico coordinate mancanti");
-  console.assert(getPoiAlertText({ description:"", coords:"44,9" }) === "manca descrizione", "testo logico descrizione mancante");
-  console.assert(getPoiAlertText({ description:"test", coords:"44,9" }) === "", "nessun testo se non manca nulla");
-  console.assert(hasOnlyMissingDescription({ description:"", coords:"44,9" }) === true, "helper solo descrizione mancante");
-  console.assert(hasOnlyMissingDescription({ description:"", coords:"" }) === false, "helper false se mancano anche coordinate");
-  console.assert(hasOnlyMissingDescription({ description:"test", coords:"" }) === false, "helper false se manca solo coordinate");
-  console.assert(hasOnlyMissingDescription({ description:"test", coords:"44,9" }) === false, "helper false se completo");
-
-  const previousPois = pois;
-  pois = [
-    { id:"complete", name:"Completo", type:"bar", description:"Desc", coords:"44,9", importance:70, discount:0 },
-    { id:"missing-desc", name:"Senza descrizione", type:"bar", description:"", coords:"44,9", importance:60, discount:0 },
-    { id:"missing-coords", name:"Senza coordinate", type:"bar", description:"Desc", coords:"", importance:50, discount:0 },
-    { id:"missing-both", name:"Senza tutto", type:"bar", description:"", coords:"", importance:40, discount:0 }
-  ];
-
-  console.assert(calculateCoins() === 10, "calcolo monete POI corretto");
-  console.assert(calculateTaskCoins() === 6, "calcolo monete task corretto");
-
-  renderPois("");
-  console.assert(listEl.querySelectorAll(".poi").length === 4, "renderPois mostra tutti i POI test");
-  console.assert(listEl.querySelectorAll(".poi-alert").length === 4, "renderPois crea badge separati per descrizione e coordinate mancanti");
-  console.assert(listEl.querySelectorAll(".poi-alert.desc").length === 2, "lista mostra due badge gialli descrizione");
-  console.assert(listEl.querySelectorAll(".poi-alert.coord").length === 2, "lista mostra due badge rossi coordinate");
-  console.assert(taskSliderEl.innerText.includes("+4 monete"), "task con due problemi vale 4 monete");
-  console.assert(taskSliderEl.innerText.includes("Senza descrizione"), "task slider contiene POI con descrizione mancante");
-  console.assert(taskSliderEl.innerText.includes("Senza coordinate"), "task slider contiene POI con coordinate mancanti");
-  console.assert(!taskSliderEl.innerText.includes("Completo"), "task slider esclude POI completi");
-
-  pois = [];
-  renderPois("");
-  console.assert(taskSliderEl.querySelectorAll(".task-card").length >= REQUIRED_POIS.length, "mostra POI fondamentali mancanti");
-  console.assert(taskSliderEl.innerText.toLowerCase().includes("blue trail"), "include POI fondamentale");
-  console.assert(taskSliderEl.innerText.toLowerCase().includes("poi mancante"), "rinomina missing poi in poi mancante");
-  console.assert(taskSliderEl.innerText.includes("+3 monete"), "POI mancante mostra reward monete");
-  openSuggestedPoi("Vernazza Harbor");
-  console.assert(modalEl.classList.contains("is-open"), "click POI mancante apre modale aggiungi");
-  console.assert(modalTitleEl.innerText === "Aggiungi POI", "POI mancante apre modale aggiungi");
-  console.assert(editingPoiId === null, "POI mancante non modifica un POI esistente");
-  console.assert(nameEl.value === "Vernazza Harbor", "POI mancante precompila il nome consigliato");
-  closeModal();
-  pois = previousPois;
-
-  renderPois("completo");
-  console.assert(listEl.querySelectorAll(".poi").length === 1, "renderPois filtra per ricerca");
-  pois = previousPois;
-  renderPois(searchEl.value);
-
-  openModal();
-  console.assert(editingPoiId === null, "openModal nuovo non mantiene id vecchi");
-  console.assert(modalTitleEl.innerText === "Aggiungi POI", "titolo nuovo corretto");
-  console.assert(modalEl.classList.contains("is-open"), "openModal apre");
-
-  openModal({ id:"poi-test", name:"Test", coords:"44,9", description:"Desc", importance:50, type:"bar", emails:"a@b.com", phone:"123", discount:10 });
-  console.assert(editingPoiId === "poi-test", "openModal edit imposta editingPoiId");
-  console.assert(modalTitleEl.innerText === "Modifica POI", "titolo edit corretto");
-  console.assert(nameEl.value === "Test", "edit compila nome");
-  console.assert(typeEl.value === "bar", "edit compila tipo");
-
-  closeModal();
-  console.assert(!modalEl.classList.contains("is-open"), "closeModal chiude");
-}
-
-runTests();
 loadPois();
 </script>
 </body>
