@@ -139,7 +139,6 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 <script>
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
-const OWNER_EMAIL = "5terrego.info@gmail.com";
 
 const REQUIRED_POIS = [
   "Blue Trail (Sentiero Azzurro)",
@@ -639,7 +638,6 @@ function buildPoiSaveRequest(poiId){
 
 async function savePoi(){
   const token = getToken();
-  const email = getUserEmail();
   const poi = readPoiForm();
   const saveTargetId = editingPoiId;
   const request = buildPoiSaveRequest(saveTargetId);
@@ -651,11 +649,6 @@ async function savePoi(){
 
   if(!token){
     alert("Devi essere loggato per salvare.");
-    return;
-  }
-
-  if(email !== OWNER_EMAIL){
-    alert("Utente non autorizzato: " + (email || "email non trovata"));
     return;
   }
 
@@ -682,15 +675,9 @@ async function deletePoi(){
   if(!confirm("Sei sicuro di voler eliminare questo POI?")) return;
 
   const token = getToken();
-  const email = getUserEmail();
 
   if(!token){
     alert("Devi essere loggato per eliminare.");
-    return;
-  }
-
-  if(email !== OWNER_EMAIL){
-    alert("Utente non autorizzato: " + (email || "email non trovata"));
     return;
   }
 
