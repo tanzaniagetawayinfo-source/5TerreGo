@@ -409,6 +409,7 @@
     #poi-circle .leaflet-container { display: none !important; }
     .poi-content { position: relative; z-index: 3; height: 100%; padding: 0 16px calc(18px + env(safe-area-inset-bottom)); color: #111; text-align: left; opacity: 0; transform: translateY(6px); transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1); overflow-y: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior: contain; }
     #poi-card.sheet-expanded .poi-content { overflow-y: auto; }
+    #poi-card.sheet-dragging .poi-content { overflow-y: hidden !important; }
     #poi-card.open .poi-content { opacity: 1; transform: translateY(0); }
     #poi-title { position: sticky; top: 0; z-index: 11; min-height: 66px; display: flex; align-items: flex-end; margin: 0 -16px 0; padding: 30px 58px 10px 20px; background: #fff; font-size: 25px; font-weight: 950; line-height: 1.02; letter-spacing: -0.06em; text-align: left; box-shadow: 0 1px 0 rgba(0,0,0,0.045), 0 12px 18px rgba(255,255,255,0.96); touch-action: none; overflow: hidden; }
     #poi-title::before { content: ''; position: absolute; left: 0; right: 0; top: -38px; height: 38px; background: #fff; pointer-events: none; }
@@ -836,8 +837,12 @@
   var poiTypeTimer = null;
   var startX = 0, startY = 0, currentX = 0, currentY = 0, isDragging = false, hasMoved = false, dragAxis = null;
   var poiSheetStartY = 0;
+  var poiSheetStartX = 0;
   var poiSheetStartHeight = 0;
   var poiSheetDragging = false;
+  var poiSheetPendingDrag = false;
+  var poiSheetDragSource = '';
+  var poiSheetStartScrollTop = 0;
   var lastRealUserGestureAt = 0;
   var lastRealUserGestureType = '';
 
@@ -1410,7 +1415,127 @@
   function closePOICard(immediate) { closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); document.body.classList.remove('poi-panel-active'); currentPOI = null; window.currentFiveTerrePOI = null; if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); } }, 360); }
   function setPOISheetHeight(percent, animated) { if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = percent + 'dvh'; poiCard.classList.toggle('sheet-expanded', percent >= 88); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
   function getPOISheetPercentFromHeight(px) { var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); return (Number(px) / vh) * 100; }
-  function setupPOISheetDrag() { var dragTargets; if (!poiCard || poiCard.getAttribute('data-sheet-ready') === '1') return; poiCard.setAttribute('data-sheet-ready', '1'); dragTargets = [document.getElementById('poi-sheet-handle'), poiTitle].filter(Boolean); dragTargets.forEach(function(target) { target.addEventListener('touchstart', function(event) { if (!poiCard.classList.contains('open')) return; if (event.touches.length !== 1) return; if (event.target && event.target.closest && event.target.closest('a, button, img')) return; poiSheetDragging = true; poiSheetStartY = event.touches[0].clientY; poiSheetStartHeight = poiCard.getBoundingClientRect().height; poiCard.style.transition = 'none'; }, { passive: true }); target.addEventListener('touchmove', function(event) { var y, delta, nextHeight, percent; if (!poiSheetDragging || event.touches.length !== 1) return; y = event.touches[0].clientY; delta = poiSheetStartY - y; nextHeight = poiSheetStartHeight + delta; percent = getPOISheetPercentFromHeight(nextHeight); setPOISheetHeight(percent, false); }, { passive: true }); target.addEventListener('touchend', function() { var percent; if (!poiSheetDragging) return; poiSheetDragging = false; poiCard.style.transition = ''; percent = getPOISheetPercentFromHeight(poiCard.getBoundingClientRect().height); if (percent <= 40) { closePOICard(false); return; } if (percent >= 72) setPOISheetHeight(95, true); else setPOISheetHeight(50, true); }); target.addEventListener('touchcancel', function() { poiSheetDragging = false; poiCard.style.transition = ''; }); }); }
+  function setupPOISheetDrag() {
+    var handle;
+    var content;
+
+    if (!poiCard || poiCard.getAttribute('data-sheet-ready') === '1') return;
+    poiCard.setAttribute('data-sheet-ready', '1');
+
+    handle = document.getElementById('poi-sheet-handle');
+    content = poiCard.querySelector('.poi-content');
+
+    function beginPendingDrag(event, source) {
+      if (!poiCard.classList.contains('open')) return;
+      if (!event.touches || event.touches.length !== 1) return;
+      poiSheetPendingDrag = true;
+      poiSheetDragging = false;
+      poiSheetDragSource = source || '';
+      poiSheetStartY = event.touches[0].clientY;
+      poiSheetStartX = event.touches[0].clientX;
+      poiSheetStartHeight = poiCard.getBoundingClientRect().height;
+      poiSheetStartScrollTop = content ? content.scrollTop : 0;
+    }
+
+    function startRealDrag() {
+      poiSheetPendingDrag = false;
+      poiSheetDragging = true;
+      poiCard.classList.add('sheet-dragging');
+      poiCard.style.transition = 'none';
+    }
+
+    function finishDrag() {
+      var percent;
+      poiSheetPendingDrag = false;
+      if (!poiSheetDragging) return;
+      poiSheetDragging = false;
+      poiCard.classList.remove('sheet-dragging');
+      poiCard.style.transition = '';
+      percent = getPOISheetPercentFromHeight(poiCard.getBoundingClientRect().height);
+      if (percent <= 40) {
+        closePOICard(false);
+        return;
+      }
+      if (percent >= 72) setPOISheetHeight(95, true);
+      else setPOISheetHeight(50, true);
+    }
+
+    function handleMove(event) {
+      var y;
+      var delta;
+      var nextHeight;
+      var percent;
+      var isExpanded;
+      var scrollTop;
+
+      if ((!poiSheetPendingDrag && !poiSheetDragging) || !event.touches || event.touches.length !== 1) return;
+
+      y = event.touches[0].clientY;
+      delta = poiSheetStartY - y;
+      isExpanded = poiCard.classList.contains('sheet-expanded');
+      scrollTop = content ? content.scrollTop : 0;
+
+      if (poiSheetPendingDrag) {
+        if (Math.abs(delta) < 6) return;
+
+        if (poiSheetDragSource === 'content' && event.target && event.target.closest && event.target.closest('#poi-images-preview')) {
+          if (Math.abs(event.touches[0].clientX - poiSheetStartX) > Math.abs(delta)) {
+            poiSheetPendingDrag = false;
+            return;
+          }
+        }
+
+        if (poiSheetDragSource === 'content' && isExpanded) {
+          if (delta > 0) {
+            poiSheetPendingDrag = false;
+            return;
+          }
+          if (delta < 0 && scrollTop > 0) {
+            poiSheetPendingDrag = false;
+            return;
+          }
+        }
+
+        startRealDrag();
+      }
+
+      if (!poiSheetDragging) return;
+      event.preventDefault();
+
+      nextHeight = poiSheetStartHeight + delta;
+      percent = getPOISheetPercentFromHeight(nextHeight);
+      setPOISheetHeight(percent, false);
+
+      if (poiSheetDragSource === 'content' && delta > 0 && percent >= 95) {
+        poiSheetDragging = false;
+        poiSheetPendingDrag = false;
+        poiCard.classList.remove('sheet-dragging');
+        poiCard.style.transition = '';
+        setPOISheetHeight(95, false);
+      }
+    }
+
+    function cancelDrag() {
+      poiSheetPendingDrag = false;
+      poiSheetDragging = false;
+      poiCard.classList.remove('sheet-dragging');
+      poiCard.style.transition = '';
+    }
+
+    [handle, poiTitle].filter(Boolean).forEach(function(target) {
+      target.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'header'); }, { passive: true });
+      target.addEventListener('touchmove', handleMove, { passive: false });
+      target.addEventListener('touchend', finishDrag);
+      target.addEventListener('touchcancel', cancelDrag);
+    });
+
+    if (content) {
+      content.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'content'); }, { passive: true });
+      content.addEventListener('touchmove', handleMove, { passive: false });
+      content.addEventListener('touchend', finishDrag);
+      content.addEventListener('touchcancel', cancelDrag);
+    }
+  }
   function renderPOIDescription(fullText) {
     var text = String(fullText || '').trim() || 'No description available';
     if (poiTypeTimer) {
