@@ -2023,7 +2023,61 @@
   function normalizeBlogPost(row) { row = row || {}; return { id: row.id || row.slug || row.title || '', title: row.title || 'Cinque Terre article', slug: row.slug || '', url: getBlogPostUrl(row), image: row.cover_image || row.image || row.photo_url || '', meta: row.category || row.author || 'Guide article', excerpt: row.excerpt || '', status: String(row.status || '').toLowerCase(), published_at: row.published_at || row.created_at || '' }; }
   function shuffleSiteItems(items) { return (items || []).slice().sort(function() { return Math.random() - 0.5; }); }
   function renderStoryPreviewSection() { var container = document.getElementById('site-story-list'); var articles; if (!container) return; if (!blogPostsLoaded) { container.innerHTML = '<div class="site-empty">Loading real stories from Supabase…</div>'; return; } articles = siteArticles || []; if (!articles.length) { container.innerHTML = '<div class="site-empty">No published stories found in Supabase yet.</div>'; return; } container.innerHTML = '<div class="site-article-slider">' + shuffleSiteItems(articles).slice(0, 6).map(function(article) { return '<a class="site-article-card" href="' + escapeHTML(article.url || 'blog.html') + '"><span class="site-article-thumb"><img src="' + escapeHTML(article.image || (places[3] ? places[3].image : '')) + '" alt=""></span><span class="site-article-content"><span class="site-article-meta">' + escapeHTML(article.meta || 'Guide article') + '</span><span class="site-article-title">' + escapeHTML(article.title || 'Cinque Terre story') + '</span></span></a>'; }).join('') + '</div>'; }
-  async function loadBlogPosts() { var response, rows, published; blogPostsLoaded = false; renderStoryPreviewSection(); if (!SUPABASE_READY || !supabaseClient) { blogPostsLoaded = true; siteArticles = []; renderStoryPreviewSection(); return; } response = await supabaseClient.from('blog_posts').select('id,title,slug,excerpt,cover_image,category,status,author,published_at,created_at,updated_at').order('updated_at', { ascending: false }); if (response.error) { console.warn('Supabase blog posts load failed:', response.error.message); blogPostsLoaded = true; siteArticles = []; renderStoryPreviewSection(); return; } rows = (response.data || []).map(normalizeBlogPost); published = rows.filter(function(post) { return post.status === 'published'; }); siteArticles = published.length ? published : rows; blogPostsLoaded = true; renderStoryPreviewSection(); }
+  async function loadBlogPosts() {
+    var response, fallbackResponse, rows, published, cached;
+    blogPostsLoaded = false;
+    renderStoryPreviewSection();
+
+    function readCachedStories() {
+      try { return JSON.parse(localStorage.getItem('5terrego_cached_stories') || '[]'); }
+      catch (error) { return []; }
+    }
+
+    function saveCachedStories(items) {
+      try { localStorage.setItem('5terrego_cached_stories', JSON.stringify((items || []).slice(0, 12))); }
+      catch (error) {}
+    }
+
+    function isPublishedStory(post) {
+      var status = String(post && post.status || '').trim().toLowerCase();
+      if (!status) return true;
+      return status === 'published' || status === 'publish' || status === 'pubblicato' || status === 'online' || status === 'public' || status === 'true';
+    }
+
+    if (!SUPABASE_READY || !supabaseClient) {
+      cached = readCachedStories();
+      blogPostsLoaded = true;
+      siteArticles = cached;
+      renderStoryPreviewSection();
+      return;
+    }
+
+    response = await supabaseClient
+      .from('blog_posts')
+      .select('id,title,slug,excerpt,cover_image,category,status,author,published_at,created_at,updated_at')
+      .order('updated_at', { ascending: false });
+
+    if (response.error || !response.data || !response.data.length) {
+      console.warn('Supabase blog posts main load failed or returned empty:', response.error ? response.error.message : 'empty result');
+      fallbackResponse = await supabaseClient
+        .from('blog_posts')
+        .select('*')
+        .limit(24);
+
+      if (fallbackResponse.error) console.warn('Supabase blog posts fallback load failed:', fallbackResponse.error.message);
+      if (fallbackResponse && fallbackResponse.data && fallbackResponse.data.length) response = fallbackResponse;
+    }
+
+    rows = (response && response.data ? response.data : []).map(normalizeBlogPost);
+    published = rows.filter(isPublishedStory);
+    siteArticles = published.length ? published : rows;
+
+    if (siteArticles.length) saveCachedStories(siteArticles);
+    else siteArticles = readCachedStories();
+
+    blogPostsLoaded = true;
+    renderStoryPreviewSection();
+  }
   function renderSiteViewFromMapData() {
     renderStoryPreviewSection();
     setupSiteTrailFilters();
