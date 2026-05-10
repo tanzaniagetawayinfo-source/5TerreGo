@@ -20,13 +20,13 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #cfe5f2; position: fixed; inset: 0; }
     #map { position: fixed; inset: 0; width: 100vw; height: 100dvh; }
-    .top-bar { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 6px; padding: 7px; border-radius: 20px; background: rgba(8,14,18,0.34); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 12px 30px rgba(0,0,0,0.18); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); }
-    .top-row { display: grid; grid-template-columns: minmax(60px, 1fr) auto minmax(60px, 1fr); align-items: center; gap: 7px; position: relative; }
-    .center-brand { justify-self: center; padding: 0; border-radius: 0; background: transparent; border: 0; box-shadow: none; font-weight: 900; font-size: 12.5px; line-height: 1; letter-spacing: -0.035em; text-decoration: none; white-space: nowrap; pointer-events: auto; cursor: pointer; text-shadow: 0 2px 6px rgba(0,0,0,0.42); opacity: .92; }
+    .top-bar { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 24px; background: rgba(8,12,16,0.58); border: 1px solid rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 34px rgba(0,0,0,0.24); backdrop-filter: blur(22px) saturate(1.22); -webkit-backdrop-filter: blur(22px) saturate(1.22); }
+    .top-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; position: relative; min-height: 36px; }
+    .center-brand { justify-self: center; padding: 0 2px; border-radius: 0; background: transparent; border: 0; box-shadow: none; font-weight: 950; font-size: 15px; line-height: 1; letter-spacing: -0.06em; text-decoration: none; white-space: nowrap; pointer-events: auto; cursor: pointer; text-shadow: 0 0 12px rgba(30,155,255,0.16), 0 3px 10px rgba(0,0,0,0.42); opacity: .98; }
     #weather { justify-self: start; min-height: 29px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.13); color: white; font-weight: 850; font-size: 13px; line-height: 1; white-space: nowrap; text-shadow: 0 2px 8px rgba(0,0,0,0.24); }
     .top-actions { justify-self: end; position: relative; display: inline-flex; align-items: center; justify-content: flex-end; min-width: 0; }
-    #app-menu-toggle { width: 34px; height: 34px; position: relative; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 8px; border: 1px solid rgba(255,255,255,0.16); border-radius: 13px; background: rgba(255,255,255,0.16); color: white; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); -webkit-tap-highlight-color: transparent; }
-    #app-menu-toggle span { display: block; border-radius: 4px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 7px rgba(0,0,0,0.12); transition: transform .26s cubic-bezier(.2,.9,.2,1), opacity .18s ease, width .24s ease, height .24s ease, left .24s ease, top .24s ease; }
+    #app-menu-toggle { width: 36px; height: 36px; position: relative; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 9px; border: 1px solid rgba(255,255,255,0.16); border-radius: 50%; background: rgba(255,255,255,0.13); color: white; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 18px rgba(0,0,0,0.18); backdrop-filter: blur(16px) saturate(1.18); -webkit-backdrop-filter: blur(16px) saturate(1.18); -webkit-tap-highlight-color: transparent; }
+    #app-menu-toggle span { display: block; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.92); box-shadow: 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(0,0,0,0.18); transition: transform .26s cubic-bezier(.2,.9,.2,1), opacity .18s ease, width .24s ease, height .24s ease, left .24s ease, top .24s ease; }
     #app-menu-toggle:active { transform: scale(0.94); }
     .app-menu { position: fixed; right: 10px; top: calc(56px + env(safe-area-inset-top)); z-index: 3500; width: min(292px, calc(100vw - 20px)); max-height: calc(100dvh - 76px - env(safe-area-inset-top)); overflow-y: auto; display: none; padding: 9px; border-radius: 22px; background: rgba(8,14,18,.68); color: #fff; border: 1px solid rgba(255,255,255,.18); box-shadow: 0 18px 46px rgba(0,0,0,.30); backdrop-filter: blur(22px) saturate(1.18); -webkit-backdrop-filter: blur(22px) saturate(1.18); }
     .top-actions.quick-menu-open .app-menu { display: block; }
@@ -88,16 +88,16 @@
     .app-menu-link.video-link .app-menu-icon, .app-menu-link.video-link .app-menu-title { position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(0,0,0,.42); }
     .app-menu-link .app-menu-title { margin-top: auto; }
     .app-menu-link.wide { grid-column: auto; }
-    .view-mode-toggle { justify-self: start; position: relative; z-index: 1; width: 112px; height: 30px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; border-radius: 999px; border: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.30); box-shadow: 0 8px 24px rgba(0,0,0,.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); overflow: hidden; }
-    .view-mode-toggle::before { content: ''; position: absolute; top: 3px; left: 3px; width: calc(50% - 3px); height: 24px; border-radius: 999px; background: rgba(255,255,255,0.96); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 6px 16px rgba(0,0,0,.10); transition: transform .28s cubic-bezier(.2,.9,.2,1); }
+    .view-mode-toggle { justify-self: start; position: relative; z-index: 1; width: 118px; height: 36px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 8px 20px rgba(0,0,0,.16); backdrop-filter: blur(14px) saturate(1.18); -webkit-backdrop-filter: blur(14px) saturate(1.18); overflow: hidden; }
+    .view-mode-toggle::before { content: ''; position: absolute; top: 3px; left: 3px; width: calc(50% - 3px); height: 30px; border-radius: 999px; background: rgba(255,255,255,0.96); box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 1px 4px rgba(0,0,0,.13), 0 7px 15px rgba(0,0,0,.10); transition: transform .28s cubic-bezier(.2,.9,.2,1); }
     .view-mode-toggle.site-active::before { transform: translateX(0); }
     .view-mode-toggle.map-active::before { transform: translateX(100%); }
-    .view-toggle-btn { position: relative; z-index: 1; height: 24px; border: 0; background: transparent; color: rgba(255,255,255,.78); font-size: 12px; font-weight: 900; letter-spacing: -.01em; font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .view-toggle-btn { position: relative; z-index: 1; height: 30px; border: 0; background: transparent; color: rgba(255,255,255,.70); font-size: 13px; font-weight: 900; letter-spacing: -0.03em; font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; text-shadow: 0 2px 8px rgba(0,0,0,.24); }
     .view-toggle-btn.active { color: #111; }
     .search-wrap { position: relative; }
-    .search-wrap::before { content: '⌕'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 2; color: rgba(255,255,255,0.72); font-size: 15px; font-weight: 900; pointer-events: none; }
-    #search { width: 100%; min-height: 34px; padding: 7px 12px 7px 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); outline: none; background: rgba(255,255,255,0.18); color: white; font-size: 14px; font-weight: 650; box-shadow: inset 0 1px 0 rgba(255,255,255,0.10); }
-    #search::placeholder { color: rgba(255,255,255,0.76); font-weight: 650; }
+    .search-wrap::before { content: '⌕'; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); z-index: 2; color: rgba(255,255,255,0.58); font-size: 17px; font-weight: 700; pointer-events: none; text-shadow: none; }
+    #search { width: 100%; min-height: 40px; padding: 9px 14px 9px 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.13); outline: none; background: rgba(255,255,255,0.12); color: white; font-size: 14.5px; font-weight: 650; letter-spacing: -0.02em; box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.12); backdrop-filter: blur(14px) saturate(1.16); -webkit-backdrop-filter: blur(14px) saturate(1.16); }
+    #search::placeholder { color: rgba(255,255,255,0.58); font-weight: 650; }
     #search-results { position: absolute; top: 100%; left: 0; right: 0; margin-top: 6px; background: rgba(0,0,0,0.62); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 14px; overflow: hidden; display: none; flex-direction: column; z-index: 1001; box-shadow: 0 14px 34px rgba(0,0,0,0.25); }
     .search-item { padding: 11px 12px; color: white; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
     .search-item:last-child { border-bottom: none; }
@@ -113,7 +113,7 @@
     .exclusive-discounts-filter { background: rgba(255,138,29,0.30); border-color: rgba(255,138,29,0.32); color: #fff; }
     .exclusive-discounts-filter.active { background: rgba(255,255,255,0.96); color: #111; border-color: rgba(255,138,29,0.54); }
     body.site-view-active #map-filter-bar { display: none; }
-    @media (max-width: 380px) { .mode-bar { gap: 7px; } .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; } #app-menu-toggle { width: 32px; height: 32px; padding: 7px; } .app-menu { right: 8px; width: min(292px, calc(100vw - 16px)); border-radius: 22px; } .app-menu-link { min-height: 68px; padding: 10px; } .top-bar.menu-expanded .app-menu { left: 20px; right: 20px; top: calc(88px + env(safe-area-inset-top)); bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; gap: 8px; grid-template-rows: auto minmax(0, 1fr) auto auto; align-items: stretch; } .top-bar.menu-expanded .app-menu-language { left: 28px; top: calc(34px + env(safe-area-inset-top)); max-width: calc(50vw - 42px); } .top-bar.menu-expanded .center-brand { top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded #app-menu-toggle { right: 19px; top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded .app-menu-head { padding-bottom: 6px; } .top-bar.menu-expanded #app-menu-username { font-size: 27px; line-height: 1.1; padding-bottom: 3px; } .top-bar.menu-expanded .app-menu-grid { gap: 10px; margin-top: 0; margin-bottom: 0; align-self: center; justify-self: stretch; padding: 0 calc((100% - 86%) / 2); scroll-padding-inline: calc((100% - 86%) / 2); } .top-bar.menu-expanded .app-menu-link { flex: 0 0 86%; width: 86%; aspect-ratio: 1 / 1; height: auto; min-height: 248px; max-height: 248px; padding: 14px; border-radius: 26px; } .top-bar.menu-expanded .app-menu-quick-row { gap: 7px; margin-top: 0; } .top-bar.menu-expanded .app-menu-quick-title { margin-top: 0; } .app-menu-quick-link { height: 38px; min-height: 38px; max-height: 38px; padding: 0 9px; font-size: 11px; } .view-mode-toggle { width: 106px; height: 29px; } .view-mode-toggle::before { height: 23px; } .view-toggle-btn { height: 23px; font-size: 11px; } }
+    @media (max-width: 380px) { .mode-bar { gap: 7px; } .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; } .top-bar { left: 8px; right: 8px; padding: 7px; border-radius: 22px; gap: 7px; } .top-row { grid-template-columns: auto 1fr auto; gap: 7px; min-height: 34px; } .center-brand { font-size: 12.5px; letter-spacing: -0.055em; } #app-menu-toggle { width: 34px; height: 34px; padding: 9px; gap: 4px; } #app-menu-toggle span { width: 6px; height: 6px; } .app-menu { right: 8px; width: min(292px, calc(100vw - 16px)); border-radius: 22px; } .app-menu-link { min-height: 68px; padding: 10px; } .top-bar.menu-expanded .app-menu { left: 20px; right: 20px; top: calc(88px + env(safe-area-inset-top)); bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; gap: 8px; grid-template-rows: auto minmax(0, 1fr) auto auto; align-items: stretch; } .top-bar.menu-expanded .app-menu-language { left: 28px; top: calc(34px + env(safe-area-inset-top)); max-width: calc(50vw - 42px); } .top-bar.menu-expanded .center-brand { top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded #app-menu-toggle { right: 19px; top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded .app-menu-head { padding-bottom: 6px; } .top-bar.menu-expanded #app-menu-username { font-size: 27px; line-height: 1.1; padding-bottom: 3px; } .top-bar.menu-expanded .app-menu-grid { gap: 10px; margin-top: 0; margin-bottom: 0; align-self: center; justify-self: stretch; padding: 0 calc((100% - 86%) / 2); scroll-padding-inline: calc((100% - 86%) / 2); } .top-bar.menu-expanded .app-menu-link { flex: 0 0 86%; width: 86%; aspect-ratio: 1 / 1; height: auto; min-height: 248px; max-height: 248px; padding: 14px; border-radius: 26px; } .top-bar.menu-expanded .app-menu-quick-row { gap: 7px; margin-top: 0; } .top-bar.menu-expanded .app-menu-quick-title { margin-top: 0; } .app-menu-quick-link { height: 38px; min-height: 38px; max-height: 38px; padding: 0 9px; font-size: 11px; } .view-mode-toggle { width: 108px; height: 34px; } .view-mode-toggle::before { top: 3px; left: 3px; height: 28px; width: calc(50% - 3px); } .view-toggle-btn { height: 28px; font-size: 12px; } #search { min-height: 38px; padding-left: 38px; font-size: 14px; } .search-wrap::before { left: 14px; font-size: 16px; } }
     .site-view-panel { position: fixed; inset: 0; z-index: 900; display: none; background: #f4efe4; color: #111; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .site-view-panel.open { display: block; }
     .site-view-inner { position: relative; z-index: 0; min-height: 100%; padding: 0 0 calc(38px + env(safe-area-inset-bottom)); background: #f4efe4; }
@@ -150,6 +150,8 @@
     .stay-video-section .site-feature-body, .experience-video-section .site-feature-body, .story-video-section .site-feature-body { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
     .stay-video-section .site-placeholder-card, .experience-video-section .site-placeholder-card, .story-video-section .site-placeholder-card { background: rgba(255,255,255,.84); }
     .site-feature-cover { min-height: 178px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(135deg, rgba(0,0,0,.74), rgba(0,0,0,.18)), var(--feature-bg, none); background-size: cover; background-position: center; color: #fff; }
+    .site-feature-label-row { display: inline-flex; align-items: center; gap: 7px; width: fit-content; }
+    .site-feature-step { min-width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: rgba(255,255,255,.92); color: #111; font-size: 11px; line-height: 1; letter-spacing: -.02em; font-weight: 950; box-shadow: 0 8px 18px rgba(0,0,0,.14); }
     .site-feature-kicker { width: fit-content; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,.16); color: rgba(255,255,255,.82); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 950; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .site-feature-title { margin: 0 0 7px; font-size: 32px; line-height: .92; letter-spacing: -0.07em; font-weight: 950; }
     .site-feature-text { margin: 0; max-width: 520px; font-size: 13px; line-height: 1.38; color: rgba(255,255,255,.72); }
@@ -255,7 +257,7 @@
     .site-weather-body { padding: 0; }
     .site-weather-current-layout { display: block; }
     .site-weather-main-card { min-height: 0; padding: 0; border-radius: 0; background: transparent; color: #111; box-shadow: none; display: block; }
-    .site-weather-main-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .site-weather-main-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; margin-bottom: 14px; }
     .site-weather-main-left { min-width: 0; display: contents; }
     .site-weather-emoji { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 24px; background: rgba(255,255,255,.58); box-shadow: 0 12px 32px rgba(0,0,0,.045); font-size: 42px; line-height: 1; }
     .site-weather-main-info { min-width: 0; }
@@ -263,6 +265,12 @@
     .site-weather-main-temp { margin: 0; font-size: 50px; line-height: .82; letter-spacing: -0.10em; font-weight: 950; color: #111; }
     .site-weather-main-desc { margin-top: 5px; font-size: 17px; line-height: 1.04; letter-spacing: -0.045em; font-weight: 950; color: #111; }
     .site-weather-main-desc span { display: block; margin-bottom: 2px; font-size: 8px; line-height: 1; letter-spacing: .12em; text-transform: uppercase; font-weight: 950; color: rgba(0,0,0,.34); }
+    .site-weather-sun-inline { grid-column: 3; width: 124px; min-width: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; align-self: center; }
+    .site-weather-sun-status { display: none; }
+    .site-weather-sun-arc { position: relative; width: 118px; height: 58px; margin-top: 1px; }
+    .site-weather-sun-arc svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .site-weather-sun-times { width: 118px; display: flex; justify-content: space-between; align-items: center; margin-top: -4px; font-size: 10px; line-height: 1; font-weight: 950; color: rgba(0,0,0,.44); }
+    .site-weather-sun-times span { display: inline-flex; align-items: center; white-space: nowrap; }
     .site-weather-main-note { display: none; }
     .site-weather-hourly { margin-top: 14px; margin-bottom: 10px; }
     .site-weather-hourly-title { margin-bottom: 8px; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; font-weight: 950; color: rgba(0,0,0,.34); }
@@ -281,7 +289,7 @@
     .site-footer-note { max-width: 420px; margin: 10px auto 0; font-size: 11px; line-height: 1.42; color: rgba(0,0,0,.38); }
     .site-footer-actions { margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
     .site-footer-contact-btn { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; background: #111; color: #fff; text-decoration: none; font-size: 12px; line-height: 1; font-weight: 950; box-shadow: 0 10px 26px rgba(0,0,0,.08); }
-    @media (max-width: 380px) { .site-weather-main-row { gap: 12px; } .site-weather-emoji { width: 70px; height: 70px; border-radius: 24px; font-size: 42px; } .site-weather-main-temp { font-size: 50px; } .site-weather-main-desc { font-size: 16px; } .site-weather-data-grid { gap: 6px; } .site-weather-data-card { padding: 9px 7px; } .site-weather-data-value { font-size: 13px; } }
+    @media (max-width: 380px) { .site-weather-main-row { grid-template-columns: 62px minmax(0, 1fr) 108px; gap: 9px; } .site-weather-emoji { width: 62px; height: 62px; border-radius: 22px; font-size: 37px; } .site-weather-main-temp { font-size: 46px; } .site-weather-main-desc { font-size: 15px; } .site-weather-sun-inline { width: 108px; min-width: 100px; } .site-weather-sun-arc { width: 104px; height: 52px; } .site-weather-sun-times { width: 104px; font-size: 9px; } .site-weather-data-grid { gap: 6px; } .site-weather-data-card { padding: 9px 7px; } .site-weather-data-value { font-size: 13px; } }
     @media (max-width: 380px) { .site-hero-section { padding-left: 22px; padding-right: 22px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); } .site-view-title { font-size: clamp(36px, 10.8vw, 62px); } .site-hero-primary-action { margin-bottom: 10px; } .site-hero-primary-action a { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-hero-actions { gap: 8px; } .site-hero-actions a, .site-hero-actions button { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-section { margin-left: 12px; margin-right: 12px; } .site-guide-band { margin-left: 12px; margin-right: 12px; } .site-page-card.primary h3 { font-size: 28px; } .site-village-tile { flex-basis: 82%; } }
     .tour-top-actions { display: none; gap: 8px; }
     #tour-exit-top, #tour-recenter-top { width: 100%; padding: 12px 14px; border: 0; border-radius: 999px; font-size: 14px; font-weight: 950; cursor: pointer; }
@@ -513,7 +521,7 @@
         <section id="site-stories-section" class="site-feature-section dark story-video-section" aria-label="Stories section">
           <video class="site-feature-video-bg" src="stories.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
           <div class="site-feature-cover">
-            <div class="site-feature-kicker">Stories</div>
+            <div class="site-feature-label-row"><span class="site-feature-step">01</span><div class="site-feature-kicker">Stories</div></div>
             <div><h3 class="site-feature-title">Read before you move.</h3><p class="site-feature-text">Random guide articles, village notes and practical ideas from 5TerreGo.</p></div>
           </div>
           <div class="site-feature-body">
@@ -525,7 +533,7 @@
         <section id="site-experiences-section" class="site-feature-section experience-video-section" aria-label="Experiences section">
           <video class="site-feature-video-bg" src="tours.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
           <div class="site-feature-cover">
-            <div class="site-feature-kicker">Experiences</div>
+            <div class="site-feature-label-row"><span class="site-feature-step">02</span><div class="site-feature-kicker">Experiences</div></div>
             <div><h3 class="site-feature-title">Things worth doing.</h3><p class="site-feature-text">Curated activities around the five villages, connected to the way people actually explore.</p></div>
           </div>
           <div class="site-feature-body">
@@ -541,7 +549,7 @@
         <section id="site-stay-section" class="site-feature-section stay-video-section" aria-label="Book your stay section">
           <video class="site-feature-video-bg" src="hotel.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
           <div class="site-feature-cover">
-            <div class="site-feature-kicker">Book your stay</div>
+            <div class="site-feature-label-row"><span class="site-feature-step">03</span><div class="site-feature-kicker">Book your stay</div></div>
             <div><h3 class="site-feature-title">Book smarter. Pay one euro less.</h3><p class="site-feature-text">Our promise is simple: the same room, always €1 less than the lowest price you can find online. Found a better offer? Send it to us and we’ll sell it to you for one euro less.</p></div>
           </div>
           <div class="site-feature-body">
@@ -1845,6 +1853,71 @@
       return '<article class="site-weather-hour ' + (item.isNow ? 'is-now' : '') + '"><span class="site-weather-hour-time">' + escapeHTML(item.isNow ? getUILabel('now', 'Now') : item.time) + '</span><span class="site-weather-hour-icon">' + escapeHTML(getWeatherEmoji(item.code)) + '</span><span class="site-weather-hour-temp">' + escapeHTML(formatWeatherValue(item.temp, '°')) + '</span><span class="site-weather-hour-rain">' + escapeHTML(formatWeatherValue(item.rain, '%')) + '</span><span class="site-weather-hour-wind">' + escapeHTML(formatWeatherValue(item.wind, ' km/h')) + '</span></article>';
     }).join('') + '</div></div>';
   }
+  function getWeatherMinuteValue(value) {
+    var timePart;
+    var pieces;
+    var date;
+    value = String(value || '');
+    if (value.indexOf('T') !== -1) {
+      timePart = value.split('T')[1] || '';
+      pieces = timePart.split(':');
+      if (pieces.length >= 2) return Number(pieces[0]) * 60 + Number(pieces[1]);
+    }
+    date = new Date(value);
+    if (Number.isFinite(date.getTime())) {
+      pieces = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hour12: false }).format(date).split(':');
+      return Number(pieces[0] || 0) * 60 + Number(pieces[1] || 0);
+    }
+    return null;
+  }
+  function getCurrentItalyMinuteValue() {
+    var parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()).split(':');
+    return Number(parts[0] || 0) * 60 + Number(parts[1] || 0);
+  }
+  function formatWeatherSunTime(value) {
+    var minutes = getWeatherMinuteValue(value);
+    if (minutes === null) return '—';
+    return String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0');
+  }
+  function getWeatherSunInfo(daily, index, isToday) {
+    var sunrise = daily && daily.sunrise ? daily.sunrise[index] : '';
+    var sunset = daily && daily.sunset ? daily.sunset[index] : '';
+    var sunriseMin = getWeatherMinuteValue(sunrise);
+    var sunsetMin = getWeatherMinuteValue(sunset);
+    var nowMin = isToday ? getCurrentItalyMinuteValue() : sunriseMin;
+    var progress;
+    var status;
+    if (sunriseMin === null || sunsetMin === null || sunsetMin <= sunriseMin) return null;
+    if (!isToday) progress = 0;
+    else progress = Math.max(0, Math.min(1, (nowMin - sunriseMin) / (sunsetMin - sunriseMin)));
+    if (!isToday) status = getUILabel('sunTomorrow', 'Sun path');
+    else if (nowMin < sunriseMin) status = getUILabel('beforeSunrise', 'Before sunrise');
+    else if (nowMin > sunsetMin) status = getUILabel('afterSunset', 'After sunset');
+    else status = Math.round(progress * 100) + '% ' + getUILabel('sunDone', 'of the day');
+    return { sunrise: formatWeatherSunTime(sunrise), sunset: formatWeatherSunTime(sunset), progress: Math.round(progress * 100), status: status };
+  }
+  function renderWeatherSunHTML(daily, index, isToday) {
+    var sun = getWeatherSunInfo(daily, index, isToday);
+    var progress;
+    var angle;
+    var radians;
+    var cx = 60;
+    var cy = 52;
+    var r = 40;
+    var startX = cx - r;
+    var startY = cy;
+    var endX = cx + r;
+    var endY = cy;
+    var sunX;
+    var sunY;
+    if (!sun) return '';
+    progress = Math.max(0, Math.min(100, Number(sun.progress || 0))) / 100;
+    angle = 180 - (180 * progress);
+    radians = angle * Math.PI / 180;
+    sunX = cx + (r * Math.cos(radians));
+    sunY = cy - (r * Math.sin(radians));
+    return '<div class="site-weather-sun-inline"><div class="site-weather-sun-arc"><svg viewBox="0 0 120 62" aria-hidden="true"><path d="M ' + startX + ' ' + startY + ' A ' + r + ' ' + r + ' 0 0 1 ' + endX + ' ' + endY + '" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="4" stroke-linecap="round"></path><path d="M ' + startX + ' ' + startY + ' A ' + r + ' ' + r + ' 0 0 1 ' + sunX + ' ' + sunY + '" fill="none" stroke="rgba(255,166,42,.95)" stroke-width="4" stroke-linecap="round"></path><text x="' + sunX + '" y="' + (sunY + 5) + '" text-anchor="middle" font-size="16">☀️</text></svg></div><div class="site-weather-sun-times"><span>' + escapeHTML(sun.sunrise) + '</span><span>' + escapeHTML(sun.sunset) + '</span></div></div>';
+  }
   function renderSiteWeatherSection() {
     var container = document.getElementById('site-weather-body');
     var current;
@@ -1867,7 +1940,7 @@
     weatherCode = isToday && current.weathercode !== undefined ? current.weathercode : daily.weathercode && daily.weathercode[i];
     dateLabel = getWeatherDayLabel(daily.time[i], i) + ' · ' + formatWeatherDate(daily.time[i]);
     hourlyHTML = renderHourlyWeatherHTML(daily.time[i], isToday);
-    container.innerHTML = '<div class="site-weather-current-layout"><article class="site-weather-main-card"><div class="site-weather-main-row"><div class="site-weather-main-left"><span class="site-weather-emoji">' + escapeHTML(getWeatherEmoji(weatherCode)) + '</span><div class="site-weather-main-info"><div class="site-weather-main-date">' + escapeHTML(dateLabel) + '</div><div class="site-weather-main-temp">' + escapeHTML(formatWeatherValue(mainTemp, '°')) + '</div><div class="site-weather-main-desc"><span>' + escapeHTML(getUILabel('humidity', 'Humidity')) + '</span>' + escapeHTML(formatWeatherValue(getCurrentHumidityValue(current, siteWeatherData.hourly), '%')) + '</div></div></div></article>' + hourlyHTML + '</div>'; 
+    container.innerHTML = '<div class="site-weather-current-layout"><article class="site-weather-main-card"><div class="site-weather-main-row"><div class="site-weather-main-left"><span class="site-weather-emoji">' + escapeHTML(getWeatherEmoji(weatherCode)) + '</span><div class="site-weather-main-info"><div class="site-weather-main-date">' + escapeHTML(dateLabel) + '</div><div class="site-weather-main-temp">' + escapeHTML(formatWeatherValue(mainTemp, '°')) + '</div><div class="site-weather-main-desc"><span>' + escapeHTML(getUILabel('humidity', 'Humidity')) + '</span>' + escapeHTML(formatWeatherValue(getCurrentHumidityValue(current, siteWeatherData.hourly), '%')) + '</div></div></div>' + renderWeatherSunHTML(daily, i, isToday) + '</div></article>' + hourlyHTML + '</div>'; 
   }
   function getCurrentHumidityValue(current, hourly) { var nowHour; var nowDate; var foundIndex; if (current && current.relative_humidity_2m !== undefined) return current.relative_humidity_2m; if (!hourly || !hourly.time || !hourly.relative_humidity_2m) return undefined; nowHour = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', hour: '2-digit', hour12: false }).format(new Date()); nowDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); foundIndex = hourly.time.findIndex(function(time) { return String(time).slice(0, 10) === nowDate && String(time).slice(11, 13) === nowHour; }); return foundIndex >= 0 ? hourly.relative_humidity_2m[foundIndex] : undefined; }
   async function updateWeather(lat, lng) { try { var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7'; var response = await fetch(url); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; siteWeatherData = data || null; document.getElementById('weather').innerText = temperature === undefined ? '--' : getWeatherEmoji(data && data.current_weather ? data.current_weather.weathercode : null) + ' ' + temperature + '°'; renderSiteWeatherSection(); } catch (error) { siteWeatherData = null; document.getElementById('weather').innerText = '--'; renderSiteWeatherSection(); } }
