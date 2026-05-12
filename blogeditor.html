@@ -22,7 +22,10 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,san
 .top-title h1{margin:0;font-size:26px;letter-spacing:-.04em}
 .top-title p{margin:6px 0 0;color:rgba(255,255,255,.62);font-size:13px;line-height:1.4}
 .list{padding:16px}
-.post{position:relative;padding:14px;padding-right:124px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease;overflow:hidden}
+.post{position:relative;min-height:108px;padding:14px;padding-left:106px;padding-right:124px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease;overflow:hidden}
+.post-thumb{position:absolute;left:10px;top:10px;width:82px;height:82px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.1)}
+.post-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.post-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;color:rgba(255,255,255,.5)}
 .post:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
 .post-title{font-weight:800;margin-bottom:5px;line-height:1.25}
 .post-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
@@ -54,6 +57,8 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 .slug-preview{margin-top:8px;font-size:12px;color:rgba(255,255,255,.58);word-break:break-all}
 .slug-preview strong{color:#fff}
 .preview-card{margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08)}
+.preview-image{display:none;margin-bottom:10px;width:100%;height:170px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09)}
+.preview-image img{width:100%;height:100%;object-fit:cover;display:block}
 .preview-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);font-weight:800;margin-bottom:8px}
 .preview-title{font-weight:900;font-size:18px;line-height:1.15;letter-spacing:-.03em}
 .preview-excerpt{margin-top:6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.68)}
@@ -75,7 +80,7 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 .selected-poi button{width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;line-height:18px;padding:0;cursor:pointer}
 .linked-pois-line{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
 .linked-poi-mini{font-size:10px;font-weight:800;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.74)}
-@media(max-width:520px){.row{grid-template-columns:1fr}.post{padding-right:100px}.header{padding:12px}.add-btn{padding-left:14px;padding-right:14px}}
+@media(max-width:520px){.row{grid-template-columns:1fr}.post{padding-left:94px;padding-right:100px}.post-thumb{width:72px;height:72px}.header{padding:12px}.add-btn{padding-left:14px;padding-right:14px}}
 </style>
 </head>
 <body>
@@ -158,6 +163,9 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 
     <div class="preview-card">
       <div class="preview-label">Anteprima card</div>
+      <div id="previewImage" class="preview-image">
+        <img id="previewImageImg" alt="Anteprima copertina articolo" />
+      </div>
       <div id="previewTitle" class="preview-title">Titolo articolo</div>
       <div id="previewExcerpt" class="preview-excerpt">Estratto breve dell’articolo...</div>
     </div>
@@ -214,6 +222,8 @@ const authorEl = document.getElementById("author");
 const publishedAtEl = document.getElementById("publishedAt");
 const previewTitleEl = document.getElementById("previewTitle");
 const previewExcerptEl = document.getElementById("previewExcerpt");
+const previewImageEl = document.getElementById("previewImage");
+const previewImageImgEl = document.getElementById("previewImageImg");
 const poiSearchEl = document.getElementById("poiSearch");
 const poiResultsEl = document.getElementById("poiResults");
 const selectedPoisEl = document.getElementById("selectedPois");
@@ -555,6 +565,22 @@ function renderPosts(filter = ""){
     const div = document.createElement("div");
     div.className = "post";
 
+    const thumb = document.createElement("div");
+    thumb.className = "post-thumb";
+    const coverValue = String(post.cover_image || "").trim();
+    if(coverValue){
+      const img = document.createElement("img");
+      img.alt = post.title || "Anteprima articolo";
+      img.src = coverValue;
+      img.onerror = function(){
+        thumb.innerHTML = '<div class="post-thumb-placeholder">🖼️</div>';
+      };
+      thumb.appendChild(img);
+    } else {
+      thumb.innerHTML = '<div class="post-thumb-placeholder">📝</div>';
+    }
+    div.appendChild(thumb);
+
     if(post.status !== "published"){
       const badge = document.createElement("div");
       badge.className = "post-alert draft";
@@ -632,11 +658,23 @@ function updateCoverImagePreview(){
     coverImagePreviewEl.style.display = "none";
     coverImagePreviewImgEl.removeAttribute("src");
     coverImagePreviewMetaEl.innerText = "";
+    previewImageEl.style.display = "none";
+    previewImageImgEl.removeAttribute("src");
     return;
   }
 
   coverImagePreviewEl.style.display = "block";
   coverImagePreviewImgEl.src = value;
+  previewImageEl.style.display = "block";
+  previewImageImgEl.src = value;
+
+  coverImagePreviewImgEl.onerror = function(){
+    coverImagePreviewMetaEl.innerText = "Anteprima non disponibile: controlla che l’URL immagine sia corretto.";
+  };
+
+  previewImageImgEl.onerror = function(){
+    previewImageEl.style.display = "none";
+  };
 
   if(value.startsWith("data:image/")){
     coverImagePreviewMetaEl.innerText = "Immagine compressa salvata nel campo cover_image • circa " + bytesToReadableSize(dataUrlToBytes(value));
@@ -921,6 +959,7 @@ function runTests(){
   console.assert(Array.isArray(normalizeRelatedPois(['a','b'])), "related_pois array corretto");
   console.assert(typeof compressImageFile === "function", "compressImageFile deve esistere");
   console.assert(typeof updateCoverImagePreview === "function", "updateCoverImagePreview deve esistere");
+  console.assert(Boolean(previewImageEl), "preview immagine card deve esistere");
   console.assert(normalizeRelatedPois('["a","b"]').length === 2, "related_pois json string corretto");
   console.assert(normalizeSearchText('Vernazzà') === 'vernazza', 'ricerca senza accenti corretta');
 }
