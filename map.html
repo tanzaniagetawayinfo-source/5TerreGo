@@ -600,7 +600,7 @@
     #trail-mini-map .leaflet-control-attribution,#trail-mini-map .leaflet-control-zoom{display:none!important}
     body.poi-panel-active #ai-chat-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     body.trail-page-active #ai-chat-btn, body.village-tour-active #ai-chat-btn, body.city-card-active #ai-chat-btn, body.tour-navigation-active #ai-chat-btn, body.quick-menu-expanded #ai-chat-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
-    body.poi-panel-active #ai-chat-btn video { transform: scale(1.22); }
+    body.poi-panel-active #ai-chat-btn video { transform: none; }
   </style>
   <script>
     (function(){
@@ -3017,15 +3017,15 @@
 
 <!-- FLOATING AI CHAT -->
 <style>
-  #ai-chat-btn { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 3000; width: 72px; height: 72px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.78); overflow: hidden; cursor: pointer; box-shadow: 0 18px 42px rgba(0,0,0,0.24); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); transition: left 0.42s cubic-bezier(.2,.9,.2,1), right 0.42s cubic-bezier(.2,.9,.2,1), bottom 0.42s cubic-bezier(.2,.9,.2,1), transform 0.42s cubic-bezier(.2,.9,.2,1), box-shadow 0.22s ease; }
+  #ai-chat-btn { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 3000; width: 92px; height: 92px; padding: 0; border: 0; border-radius: 0; background: transparent; overflow: visible; cursor: pointer; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; transition: left 0.42s cubic-bezier(.2,.9,.2,1), right 0.42s cubic-bezier(.2,.9,.2,1), bottom 0.42s cubic-bezier(.2,.9,.2,1), transform 0.42s cubic-bezier(.2,.9,.2,1), filter 0.22s ease; }
   #ai-chat-btn:active { transform: scale(0.94); }
-  #ai-chat-btn video { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 8%; transform: scale(1.22); transform-origin: center center; pointer-events: none; }
+  #ai-chat-btn video { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center center; transform: none; transform-origin: center center; pointer-events: none; filter: drop-shadow(0 14px 24px rgba(0,0,0,0.24)); }
   #ai-chat { position: fixed; left: 12px; right: 12px; top: calc(92px + env(safe-area-inset-top)); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 3000; width: auto; height: auto; display: none; flex-direction: column; overflow: hidden; border-radius: 26px; border: 1px solid rgba(255,255,255,0.34); background: rgba(255,255,255,0.78); box-shadow: 0 24px 70px rgba(0,0,0,0.28); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); color: #111; }
   #ai-chat.ai-open { display: flex; }
   .ai-head { padding: 14px 14px 12px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .ai-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
-  .ai-avatar { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; flex: 0 0 42px; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
-  .ai-avatar video { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 8%; transform: scale(1.22); transform-origin: center center; pointer-events: none; }
+  .ai-avatar { width: 54px; height: 54px; border-radius: 0; overflow: visible; flex: 0 0 54px; background: transparent; border: 0; box-shadow: none; }
+  .ai-avatar video { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center center; transform: none; transform-origin: center center; pointer-events: none; filter: drop-shadow(0 8px 14px rgba(0,0,0,0.16)); }
   .ai-title-wrap { min-width: 0; flex: 1; }
   .ai-title { font-size: 15px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; color: #111; }
   .ai-subtitle { margin-top: 3px; font-size: 12px; color: rgba(0,0,0,0.52); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
@@ -3058,9 +3058,9 @@
   body.ai-chat-active .top-bar, body.ai-chat-active #ai-chat-btn, body.ai-chat-active .bottom-card { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
 </style>
 
-<button id="ai-chat-btn" type="button" aria-label="Open AI Guide"><video id="ai-mascot-video" src="mascotterelax.mp4.mp4" autoplay muted loop playsinline preload="auto"></video></button>
+<button id="ai-chat-btn" type="button" aria-label="Open AI Guide"><video id="ai-mascot-video" src="mascotterelax.webm" autoplay muted loop playsinline preload="auto"></video></button>
 <div id="ai-chat" aria-hidden="true">
-  <div class="ai-head"><div class="ai-head-left"><div class="ai-avatar"><video id="ai-header-video" src="mascotterelax.mp4.mp4" autoplay muted loop playsinline preload="auto"></video></div><div class="ai-title-wrap"><div class="ai-title">Captain Gull</div><div class="ai-subtitle">Your Cinque Terre guide</div></div></div><button id="ai-close" type="button" aria-label="Close AI">×</button></div>
+  <div class="ai-head"><div class="ai-head-left"><div class="ai-avatar"><video id="ai-header-video" src="mascotterelax.webm" autoplay muted loop playsinline preload="auto"></video></div><div class="ai-title-wrap"><div class="ai-title">Captain Gull</div><div class="ai-subtitle">Your Cinque Terre guide</div></div></div><button id="ai-close" type="button" aria-label="Close AI">×</button></div>
   <div id="ai-messages"></div>
   <div class="ai-suggestions"><button class="ai-suggestion" type="button">what should I do today?</button><button class="ai-suggestion" type="button">best sunset?</button><button class="ai-suggestion" type="button">beaches and viewpoints?</button><button class="ai-suggestion" type="button">trails or ferry?</button></div>
   <div class="ai-input-row"><input id="ai-input" placeholder="Ask the guide..." autocomplete="off" /><button id="ai-send" type="button">→</button></div>
