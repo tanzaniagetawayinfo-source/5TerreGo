@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>POI Editor</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQKYEb21Cvf6bGf9UjJkZ1nXcXb2fM=" crossorigin="" />
 
 <style>
 *{box-sizing:border-box}
@@ -28,11 +29,15 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,san
 .poi-title{font-weight:700;margin-bottom:4px}
 .poi-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
 .empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
-.modal.is-open{display:flex}
-.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;padding-top:60px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
-.close-btn{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:18px;cursor:pointer}
+.modal{position:fixed;inset:0;background:#05070a;display:none;align-items:stretch;justify-content:stretch;padding:0;z-index:50}
+.modal.is-open{display:block}
+.modal-content{position:relative;background:#05070a;border-radius:0;padding:18px;padding-top:72px;width:100%;max-width:none;border:none;height:100vh;max-height:none;overflow:auto;-webkit-overflow-scrolling:touch}
+.close-btn{position:fixed;right:16px;top:16px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:white;font-size:22px;cursor:pointer;z-index:80;box-shadow:0 10px 24px rgba(0,0,0,0.3)}
+#modalTitle{position:fixed;left:16px;right:70px;top:0;height:72px;margin:0;display:flex;align-items:center;background:linear-gradient(180deg,#05070a 72%,rgba(5,7,10,0));z-index:70;font-size:22px}
 input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none}
+.name-type-row{display:grid;grid-template-columns:1fr 138px;gap:8px;align-items:center}
+.name-type-row input,.name-type-row select{margin-top:0;height:48px;min-width:0}
+.name-type-row select{font-weight:800}
 textarea{min-height:90px;resize:vertical}
 select option{color:#111}
 button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
@@ -42,6 +47,19 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 .image-count{font-size:11px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.1);color:#fff;white-space:nowrap}
 .image-input{display:none}
 .image-add-btn{width:100%;padding:12px;border-radius:12px;border:1px dashed rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:white;font-weight:800;cursor:pointer}
+.image-suggestions{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1)}
+.image-suggestions.is-open{display:block}
+.image-suggestions-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:12px;color:rgba(255,255,255,0.62);font-weight:800}
+.image-suggestions-status{font-size:11px;color:rgba(255,255,255,0.45);text-align:right;line-height:1.2}
+.image-suggestion-grid{display:flex;gap:9px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 8px;margin:0 -2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.image-suggestion-grid::-webkit-scrollbar{display:none}
+.image-suggestion{position:relative;flex:0 0 128px;width:128px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);cursor:pointer;padding:0;scroll-snap-align:start;overflow:hidden;text-align:left;color:white}
+.image-suggestion-photo{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:rgba(255,255,255,0.08)}
+.image-suggestion img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .18s ease}
+.image-suggestion:active img{transform:scale(.96)}
+.image-suggestion-photo::after{content:"+";position:absolute;right:6px;bottom:6px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.92);color:#05070a;font-size:18px;font-weight:950;box-shadow:0 6px 18px rgba(0,0,0,0.28)}
+.image-suggestion-caption{min-height:36px;padding:7px 8px 8px;font-size:10px;font-weight:750;line-height:1.22;color:rgba(255,255,255,0.72);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.image-suggestion-credit{margin-top:8px;font-size:10px;color:rgba(255,255,255,0.38);line-height:1.3}
 .image-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .image-preview{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1)}
 .image-preview img{width:100%;height:100%;object-fit:cover;display:block}
@@ -50,6 +68,25 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 .poi-thumb{width:42px;height:42px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);flex:0 0 auto}
 .poi-thumb-more{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);font-size:12px;font-weight:900;flex:0 0 auto}
 .range-card{margin-top:10px;padding:13px 12px 12px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07)}
+.location-picker{margin-top:10px;padding:12px;border-radius:18px;border:1px solid rgba(255,255,255,0.12);background:linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.045));box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}
+.location-picker-head{display:flex;align-items:center;justify-content:flex-start;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.76);font-weight:800}
+.location-topline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mini-map{position:relative;height:236px;width:100%;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;box-shadow:0 12px 34px rgba(0,0,0,0.22)}
+.village-pills{display:flex;gap:7px;overflow-x:auto;padding:10px 0 0;margin:0 -2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.village-pills::-webkit-scrollbar{display:none}
+.village-pill{flex:0 0 auto;height:34px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.09);color:rgba(255,255,255,0.76);font-size:12px;font-weight:900;cursor:pointer;scroll-snap-align:start;white-space:nowrap}
+.village-pill:active{transform:scale(.96)}
+.map-floating-style{position:absolute;right:10px;bottom:10px;z-index:500;height:34px;padding:0 13px;border:none;border-radius:999px;background:rgba(255,255,255,0.92);color:#05070a;font-size:12px;font-weight:950;box-shadow:0 8px 22px rgba(0,0,0,0.32);cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.coords-row{display:flex;gap:8px;align-items:center}
+.coords-row input{margin-top:0;min-width:0;flex:1;height:48px;border-radius:14px;font-weight:750;letter-spacing:.01em;background:rgba(255,255,255,0.1)}
+.coords-clear-inline{width:48px;height:48px;flex:0 0 48px;margin-top:0;border-radius:14px;border:1px solid rgba(255,255,255,0.14);background:white;color:black;font-size:20px;font-weight:900;cursor:pointer;line-height:1;box-shadow:0 8px 20px rgba(0,0,0,0.18)}
+.leaflet-container{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#202328}
+.leaflet-container img,.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important}
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-control-attribution{font-size:9px}
+.poi-map-pin{width:34px;height:34px;border-radius:50% 50% 50% 6px;background:#ff3b30;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 8px 22px rgba(0,0,0,0.42);display:flex;align-items:center;justify-content:center}
+.poi-map-pin::after{content:"";width:11px;height:11px;border-radius:50%;background:#fff;display:block}
+.poi-map-pin-wrap{background:transparent;border:none}
 .range-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,0.68)}
 .range-value{min-width:46px;text-align:center;padding:5px 10px;border-radius:999px;background:white;color:black;font-weight:800;font-size:13px}
 .apple-range{appearance:none;-webkit-appearance:none;width:100%;height:30px;margin:0;padding:0;border:none;background:transparent;outline:none;cursor:pointer}
@@ -93,8 +130,60 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
     <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
     <h2 id="modalTitle">Aggiungi POI</h2>
 
-    <input id="name" placeholder="Nome" />
-    <input id="coords" placeholder="Coordinate" />
+    <div class="name-type-row">
+      <input id="name" placeholder="Nome" />
+      <select id="type">
+        <option value="chiesa">chiesa</option>
+        <option value="monumento">monumento</option>
+        <option value="sentiero">sentiero</option>
+        <option value="spiaggia">spiaggia</option>
+        <option value="stazione">stazione</option>
+        <option value="ristorante">ristorante</option>
+        <option value="bar">bar</option>
+        <option value="punto panoramico">punto panoramico</option>
+        <option value="curiosity">curiosity</option>
+        <option value="ferry">ferry</option>
+      </select>
+    </div>
+    <div class="location-picker">
+      <div class="location-picker-head">
+        <div class="location-topline">
+          <span>Posizione</span>
+        </div>
+      </div>
+      <div class="coords-row">
+        <input id="coords" placeholder="44.146120, 9.654320" />
+        <button id="clearCoordsBtn" class="coords-clear-inline" type="button" aria-label="Svuota coordinate">×</button>
+      </div>
+      <div class="village-pills" aria-label="Centra villaggio">
+        <button class="village-pill" type="button" data-village="monterosso">Monterosso</button>
+        <button class="village-pill" type="button" data-village="vernazza">Vernazza</button>
+        <button class="village-pill" type="button" data-village="corniglia">Corniglia</button>
+        <button class="village-pill" type="button" data-village="manarola">Manarola</button>
+        <button class="village-pill" type="button" data-village="riomaggiore">Riomaggiore</button>
+      </div>
+      <div id="miniMap" class="mini-map">
+        <button id="mapStyleFloatingBtn" class="map-floating-style" type="button">Mappa</button>
+      </div>
+    </div>
+    <div class="image-uploader">
+      <div class="image-uploader-head">
+        <span>Immagini POI · compressione automatica</span>
+        <span id="imageCount" class="image-count">0 immagini</span>
+      </div>
+      <input id="poiImages" class="image-input" type="file" accept="image/*" multiple />
+      <button id="imageAddBtn" class="image-add-btn" type="button">Carica immagini</button>
+      <div id="imageSuggestions" class="image-suggestions">
+        <div class="image-suggestions-head">
+          <span>Immagini suggerite</span>
+          <span id="imageSuggestionsStatus" class="image-suggestions-status">Da Wikimedia Commons</span>
+        </div>
+        <div id="imageSuggestionGrid" class="image-suggestion-grid"></div>
+        <div class="image-suggestion-credit">Le immagini suggerite arrivano da Wikimedia Commons: prima di pubblicarle verifica licenza e attribuzione se richieste.</div>
+      </div>
+      <div id="imagePreviewGrid" class="image-preview-grid"></div>
+    </div>
+
     <textarea id="description" placeholder="Descrizione"></textarea>
     <div class="range-card">
       <div class="range-head">
@@ -104,38 +193,17 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
       <input id="importance" class="apple-range" type="range" min="1" max="100" step="1" value="50" />
     </div>
 
-    <select id="type">
-      <option value="chiesa">chiesa</option>
-      <option value="monumento">monumento</option>
-      <option value="sentiero">sentiero</option>
-      <option value="spiaggia">spiaggia</option>
-      <option value="stazione">stazione</option>
-      <option value="ristorante">ristorante</option>
-      <option value="bar">bar</option>
-      <option value="punto panoramico">punto panoramico</option>
-      <option value="curiosity">curiosity</option>
-      <option value="ferry">ferry</option>
-    </select>
 
     <input id="emails" placeholder="Email autorizzate" />
     <input id="phone" placeholder="Telefono" />
     <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
-
-    <div class="image-uploader">
-      <div class="image-uploader-head">
-        <span>Immagini POI · compressione automatica</span>
-        <span id="imageCount" class="image-count">0 immagini</span>
-      </div>
-      <input id="poiImages" class="image-input" type="file" accept="image/*" multiple />
-      <button id="imageAddBtn" class="image-add-btn" type="button">Aggiungi immagini</button>
-      <div id="imagePreviewGrid" class="image-preview-grid"></div>
-    </div>
 
     <button class="save" id="saveBtn" type="button">Salva</button>
     <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina POI</button>
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
@@ -198,12 +266,192 @@ const phoneEl = document.getElementById("phone");
 const discountEl = document.getElementById("discount");
 const poiImagesEl = document.getElementById("poiImages");
 const imageAddBtn = document.getElementById("imageAddBtn");
+const imageSuggestionsEl = document.getElementById("imageSuggestions");
+const imageSuggestionGridEl = document.getElementById("imageSuggestionGrid");
+const imageSuggestionsStatusEl = document.getElementById("imageSuggestionsStatus");
 const imagePreviewGridEl = document.getElementById("imagePreviewGrid");
 const imageCountEl = document.getElementById("imageCount");
+const miniMapEl = document.getElementById("miniMap");
+const clearCoordsBtn = document.getElementById("clearCoordsBtn");
+const mapStyleFloatingBtn = document.getElementById("mapStyleFloatingBtn");
+const villagePillEls = document.querySelectorAll(".village-pill");
+
+let miniMap = null;
+let miniMapMarker = null;
+let miniMapPoiIcon = null;
+let miniMapStreetLayer = null;
+let miniMapSatelliteLayer = null;
+let miniMapLabelsLayer = null;
+let miniMapCurrentStyle = "satellite";
+let miniMapPressTimer = null;
+let miniMapStartPoint = null;
+let imageSuggestTimer = null;
+let lastImageSuggestionQuery = "";
+const CINQUE_TERRE_CENTER = [44.1278, 9.7121];
+const MINI_MAP_START_ZOOM = 10;
+const VILLAGE_ZOOM = 15;
+const VILLAGE_CENTERS = {
+  monterosso: [44.1461, 9.6548],
+  vernazza: [44.1350, 9.6846],
+  corniglia: [44.1197, 9.7089],
+  manarola: [44.1076, 9.7297],
+  riomaggiore: [44.0998, 9.7387]
+};
 
 function setStatus(message, isError = false){
   statusEl.innerHTML = message;
   statusEl.classList.toggle("error", Boolean(isError));
+}
+
+function parseCoordsValue(value){
+  const raw = String(value || "").trim();
+  if(!raw) return null;
+  const cleaned = raw.replaceAll(";", ",").replaceAll(" ", ",");
+  const parts = cleaned.split(",").map(v => Number(String(v).trim())).filter(v => Number.isFinite(v));
+  if(parts.length < 2) return null;
+  const lat = parts[0];
+  const lng = parts[1];
+  if(lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
+function formatCoords(lat, lng){
+  return Number(lat).toFixed(6) + ", " + Number(lng).toFixed(6);
+}
+
+function setMiniMapMarker(lat, lng, shouldPan = true){
+  if(!miniMap || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+  const point = [Number(lat), Number(lng)];
+  if(!miniMapPoiIcon){
+    miniMapPoiIcon = L.divIcon({
+      className: "poi-map-pin-wrap",
+      html: '<div class="poi-map-pin"></div>',
+      iconSize: [34, 34],
+      iconAnchor: [17, 34]
+    });
+  }
+  if(!miniMapMarker){
+    miniMapMarker = L.marker(point, { draggable: true, icon: miniMapPoiIcon }).addTo(miniMap);
+    miniMapMarker.on("dragend", () => {
+      const pos = miniMapMarker.getLatLng();
+      coordsEl.value = formatCoords(pos.lat, pos.lng);
+    });
+  }else{
+    miniMapMarker.setLatLng(point);
+  }
+  if(shouldPan) miniMap.setView(point, Math.max(miniMap.getZoom(), 15));
+}
+
+function setCoordsFromMap(latlng){
+  coordsEl.value = formatCoords(latlng.lat, latlng.lng);
+  setMiniMapMarker(latlng.lat, latlng.lng, false);
+}
+
+function stopMiniMapPress(){
+  if(miniMapPressTimer){
+    clearTimeout(miniMapPressTimer);
+    miniMapPressTimer = null;
+  }
+  miniMapStartPoint = null;
+}
+
+function updateMapStyleButtons(){
+  if(mapStyleFloatingBtn){
+    mapStyleFloatingBtn.innerText = miniMapCurrentStyle === "satellite" ? "Mappa" : "Satellite";
+    mapStyleFloatingBtn.setAttribute("aria-label", miniMapCurrentStyle === "satellite" ? "Passa a mappa" : "Passa a satellite");
+  }
+}
+
+function setMiniMapStyle(style){
+  if(!miniMap) return;
+  miniMapCurrentStyle = style === "satellite" ? "satellite" : "street";
+  if(miniMapStreetLayer) miniMap.removeLayer(miniMapStreetLayer);
+  if(miniMapSatelliteLayer) miniMap.removeLayer(miniMapSatelliteLayer);
+  if(miniMapLabelsLayer) miniMap.removeLayer(miniMapLabelsLayer);
+
+  if(miniMapCurrentStyle === "satellite"){
+    miniMapSatelliteLayer.addTo(miniMap);
+    miniMapLabelsLayer.addTo(miniMap);
+  }else{
+    miniMapStreetLayer.addTo(miniMap);
+  }
+  updateMapStyleButtons();
+  setTimeout(() => miniMap.invalidateSize(true), 80);
+}
+
+function initMiniMap(){
+  if(miniMap || !miniMapEl || typeof L === "undefined") return;
+  miniMap = L.map("miniMap", {
+    center: CINQUE_TERRE_CENTER,
+    zoom: MINI_MAP_START_ZOOM,
+    zoomControl: false,
+    attributionControl: true
+  });
+
+  miniMapEl.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+  });
+
+  miniMapStreetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap"
+  });
+
+  miniMapSatelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    maxZoom: 19,
+    attribution: "Tiles &copy; Esri"
+  });
+
+  miniMapLabelsLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+    maxZoom: 19,
+    attribution: "Labels &copy; Esri"
+  });
+
+  setMiniMapStyle(miniMapCurrentStyle);
+
+  miniMap.on("click", (event) => {
+    setCoordsFromMap(event.latlng);
+  });
+
+  miniMap.on("contextmenu", (event) => {
+    if(event && event.originalEvent) event.originalEvent.preventDefault();
+    setCoordsFromMap(event.latlng);
+  });
+
+  miniMap.on("mousedown touchstart", (event) => {
+    stopMiniMapPress();
+    miniMapStartPoint = miniMap.latLngToContainerPoint(event.latlng);
+    miniMapPressTimer = setTimeout(() => {
+      setCoordsFromMap(event.latlng);
+      stopMiniMapPress();
+    }, 650);
+  });
+
+  miniMap.on("mousemove touchmove", (event) => {
+    if(!miniMapStartPoint || !event.latlng) return;
+    const currentPoint = miniMap.latLngToContainerPoint(event.latlng);
+    if(currentPoint.distanceTo(miniMapStartPoint) > 12) stopMiniMapPress();
+  });
+
+  miniMap.on("mouseup mouseout touchend touchcancel dragstart zoomstart", stopMiniMapPress);
+}
+
+function syncMiniMapFromCoords(){
+  initMiniMap();
+  if(!miniMap) return;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      miniMap.invalidateSize(true);
+      const parsed = parseCoordsValue(coordsEl.value);
+      if(parsed){
+        setMiniMapMarker(parsed.lat, parsed.lng, true);
+      }else{
+        miniMap.setView(CINQUE_TERRE_CENTER, MINI_MAP_START_ZOOM, { animate: false });
+      }
+      setTimeout(() => miniMap.invalidateSize(true), 180);
+    });
+  });
 }
 
 
@@ -281,6 +529,168 @@ function resizeImageFile(file){
     };
     reader.readAsDataURL(file);
   });
+}
+
+function buildImageSearchQuery(){
+  const name = String(nameEl.value || "").trim();
+  const type = String(typeEl.value || "").trim();
+  const base = name || "Cinque Terre";
+  const extra = base.toLowerCase().includes("cinque terre") ? "" : " Cinque Terre";
+  return String(base + " " + type + extra).split(/ +/).join(" ").trim();
+}
+
+function cleanCommonsFileTitle(title){
+  return String(title || "").replace("File:", "").replace("file:", "");
+}
+
+function getCommonsThumbUrl(title, width = 420){
+  return "https://commons.wikimedia.org/wiki/Special:Redirect/file/" + encodeURIComponent(cleanCommonsFileTitle(title)) + "?width=" + String(width);
+}
+
+function renderImageSuggestions(items){
+  imageSuggestionGridEl.innerHTML = "";
+  imageSuggestionGridEl.scrollLeft = 0;
+
+  if(!items.length){
+    imageSuggestionsStatusEl.innerText = "Nessun risultato";
+    imageSuggestionsEl.classList.add("is-open");
+    return;
+  }
+
+  items.slice(0, 30).forEach((item) => {
+    const title = item.title || "";
+    const url = getCommonsThumbUrl(title, 1200);
+    const thumb = getCommonsThumbUrl(title, 420);
+
+    const btn = document.createElement("button");
+    btn.className = "image-suggestion";
+    btn.type = "button";
+    btn.title = "Aggiungi " + cleanCommonsFileTitle(title);
+
+    const photo = document.createElement("div");
+    photo.className = "image-suggestion-photo";
+
+    const img = document.createElement("img");
+    img.src = thumb;
+    img.alt = cleanCommonsFileTitle(title);
+    img.loading = "lazy";
+    photo.appendChild(img);
+    btn.appendChild(photo);
+
+    const caption = document.createElement("div");
+    caption.className = "image-suggestion-caption";
+    caption.innerText = cleanCommonsFileTitle(title);
+    btn.appendChild(caption);
+
+    btn.addEventListener("click", () => {
+      if(!poiImagesState.includes(url)){
+        poiImagesState.push(url);
+        renderImagePreviews();
+      }
+    });
+
+    imageSuggestionGridEl.appendChild(btn);
+  });
+
+  imageSuggestionsStatusEl.innerText = String(Math.min(items.length, 30)) + " ordinate per rilevanza";
+  imageSuggestionsEl.classList.add("is-open");
+}
+
+async function searchFreePoiImages(force = false){
+  const query = buildImageSearchQuery();
+  if(!force && query === lastImageSuggestionQuery) return;
+  lastImageSuggestionQuery = query;
+  imageSuggestionsEl.classList.add("is-open");
+  imageSuggestionGridEl.innerHTML = "";
+  imageSuggestionsStatusEl.innerText = "Cerco: " + query;
+
+  try{
+    const poiName = String(nameEl.value || "").trim();
+    const poiType = String(typeEl.value || "").trim();
+    const nameWords = poiName.split(" ").filter(Boolean);
+    const shortName = nameWords.slice(0, 3).join(" ");
+
+    const searches = [
+      poiName + " " + poiType + " Cinque Terre Liguria Italy",
+      poiName + " Cinque Terre Liguria",
+      poiName + " Cinque Terre",
+      poiName + " Liguria Italy",
+      poiName + " Italy",
+      poiName,
+      shortName + " Cinque Terre",
+      shortName + " Liguria",
+      "Cinque Terre " + poiType,
+      "Cinque Terre villages",
+      "Cinque Terre Liguria Italy",
+      "Liguria coast Italy"
+    ].map(v => String(v || "").split(" ").filter(Boolean).join(" ").trim()).filter(Boolean);
+
+    const uniqueSearches = [...new Set(searches)];
+    const imageMap = new Map();
+
+    for(let i = 0; i < uniqueSearches.length; i++){
+      const searchText = uniqueSearches[i];
+      const params = new URLSearchParams({
+        origin: "*",
+        action: "query",
+        generator: "search",
+        gsrsearch: searchText,
+        gsrnamespace: "6",
+        gsrlimit: "30",
+        prop: "imageinfo",
+        iiprop: "url|mime|size",
+        iiurlwidth: "420",
+        format: "json"
+      });
+
+      imageSuggestionsStatusEl.innerText = "Cerco: " + searchText;
+      const res = await fetch("https://commons.wikimedia.org/w/api.php?" + params.toString());
+      const data = await res.json();
+      const pages = data && data.query && data.query.pages ? Object.values(data.query.pages) : [];
+
+      pages.forEach((page, pageIndex) => {
+        const info = page.imageinfo && page.imageinfo[0];
+        const title = String(page.title || "").toLowerCase();
+        if(!info || !String(info.mime || "").startsWith("image/")) return;
+        if(title.includes(".svg") || title.includes(".gif") || title.includes("logo") || title.includes("map") || title.includes("icon")) return;
+
+        const key = String(page.title || "");
+        if(!key) return;
+
+        const existing = imageMap.get(key);
+        const width = Number(info.width || 0);
+        const height = Number(info.height || 0);
+        const sizeBoost = Math.min(width * height / 1000000, 4);
+        const score = (uniqueSearches.length - i) * 1000 - pageIndex + sizeBoost;
+
+        if(!existing || score > existing._score){
+          imageMap.set(key, { ...page, _score: score });
+        }
+      });
+    }
+
+    const images = Array.from(imageMap.values()).sort((a, b) => b._score - a._score);
+    renderImageSuggestions(images);
+  }catch(err){
+    console.error("IMAGE SEARCH ERROR", err);
+    imageSuggestionsStatusEl.innerText = "Errore ricerca";
+    imageSuggestionGridEl.innerHTML = "";
+  }
+}
+
+function scheduleAutomaticImageSuggestions(){
+  if(imageSuggestTimer) clearTimeout(imageSuggestTimer);
+  imageSuggestTimer = setTimeout(() => {
+    const name = String(nameEl.value || "").trim();
+    if(name.length < 3){
+      imageSuggestionsEl.classList.remove("is-open");
+      imageSuggestionGridEl.innerHTML = "";
+      imageSuggestionsStatusEl.innerText = "Scrivi il nome POI";
+      lastImageSuggestionQuery = "";
+      return;
+    }
+    searchFreePoiImages(false);
+  }, 650);
 }
 
 function renderImagePreviews(){
@@ -570,9 +980,13 @@ function openSuggestedPoi(name){
   nameEl.value = name || "";
   modalTitleEl.innerText = "Aggiungi POI";
   deleteBtn.style.display = "none";
+  scheduleAutomaticImageSuggestions();
 }
 
 function openModal(poi = null){
+  if(imageSuggestionsEl) imageSuggestionsEl.classList.remove("is-open");
+  if(imageSuggestionGridEl) imageSuggestionGridEl.innerHTML = "";
+  if(imageSuggestionsStatusEl) imageSuggestionsStatusEl.innerText = "Da Wikimedia Commons";
   deleteBtn.style.display = poi ? "block" : "none";
   if(poi){
     editingPoiId = poi.id;
@@ -594,6 +1008,8 @@ function openModal(poi = null){
 
   modalEl.classList.add("is-open");
   modalEl.setAttribute("aria-hidden", "false");
+  syncMiniMapFromCoords();
+  scheduleAutomaticImageSuggestions();
 }
 
 function closeModal(){
@@ -603,6 +1019,10 @@ function closeModal(){
 
 function clearForm(resetEditing = true){
   if(resetEditing) editingPoiId = null;
+  if(imageSuggestionsEl) imageSuggestionsEl.classList.remove("is-open");
+  if(imageSuggestionGridEl) imageSuggestionGridEl.innerHTML = "";
+  if(imageSuggestionsStatusEl) imageSuggestionsStatusEl.innerText = "Da Wikimedia Commons";
+  lastImageSuggestionQuery = "";
   nameEl.value = "";
   coordsEl.value = "";
   descriptionEl.value = "";
@@ -703,6 +1123,38 @@ saveBtn.addEventListener("click", savePoi);
 searchEl.addEventListener("input", () => renderPois(searchEl.value));
 importanceEl.addEventListener("input", () => updateImportanceUI());
 imageAddBtn.addEventListener("click", () => poiImagesEl.click());
+nameEl.addEventListener("input", scheduleAutomaticImageSuggestions);
+typeEl.addEventListener("change", () => {
+  lastImageSuggestionQuery = "";
+  scheduleAutomaticImageSuggestions();
+});
+mapStyleFloatingBtn.addEventListener("click", (event) => {
+  event.stopPropagation();
+  initMiniMap();
+  setMiniMapStyle(miniMapCurrentStyle === "satellite" ? "street" : "satellite");
+});
+villagePillEls.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    initMiniMap();
+    const center = VILLAGE_CENTERS[btn.dataset.village];
+    if(center && miniMap) miniMap.setView(center, VILLAGE_ZOOM, { animate: true });
+  });
+});
+coordsEl.addEventListener("input", () => {
+  const parsed = parseCoordsValue(coordsEl.value);
+  if(parsed) syncMiniMapFromCoords();
+});
+coordsEl.addEventListener("change", syncMiniMapFromCoords);
+coordsEl.addEventListener("keydown", (event) => {
+  if(event.key === "Enter") syncMiniMapFromCoords();
+});
+clearCoordsBtn.addEventListener("click", () => {
+  coordsEl.value = "";
+  if(miniMapMarker){
+    miniMap.removeLayer(miniMapMarker);
+    miniMapMarker = null;
+  }
+});
 poiImagesEl.addEventListener("change", async () => {
   try{
     await addImageFiles(poiImagesEl.files);
