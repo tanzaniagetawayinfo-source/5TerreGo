@@ -3183,5 +3183,32 @@
 }());
 </script>
 
+<script>
+(function(){
+  function isAppleMobileSafari(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+  function switchAIMascotForIOS(){
+    if (!isAppleMobileSafari()) return;
+    document.querySelectorAll('#ai-mascot-video, #ai-header-video').forEach(function(video){
+      if (!video) return;
+      video.setAttribute('playsinline', '');
+      video.setAttribute('muted', '');
+      video.muted = true;
+      video.style.background = 'transparent';
+      video.style.mixBlendMode = 'normal';
+      if (video.getAttribute('data-ios-alpha-ready') === '1') return;
+      video.setAttribute('data-ios-alpha-ready', '1');
+      video.src = 'mascotterelax.mov';
+      video.load();
+      var playPromise = video.play();
+      if (playPromise && playPromise.catch) playPromise.catch(function(){});
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', switchAIMascotForIOS);
+  else switchAIMascotForIOS();
+}());
+</script>
+
 </body>
 </html>
