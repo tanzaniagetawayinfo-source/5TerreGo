@@ -268,6 +268,7 @@ button{
   const SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   const REDIRECT_PATH = 'https://www.5terrego.com/map.html';
   const OWNER_CHECK_ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/backend?action=me';
+  const OWNER_EMAILS = ['5terrego.info@gmail.com', 'verofili96@gmail.com'];
   const PARTNER_BACKEND_ENDPOINT = SUPABASE_URL + '/functions/v1/partner-backend';
 
   if(!window.supabase){
@@ -416,6 +417,12 @@ button{
     try{
       const session = await getReliableSession();
       const token = session && session.access_token ? session.access_token : '';
+      const userEmail = session && session.user && session.user.email ? session.user.email.trim().toLowerCase() : '';
+
+      if(userEmail && OWNER_EMAILS.includes(userEmail)){
+        return true;
+      }
+
       if(!token) return false;
 
       const res = await fetch(OWNER_CHECK_ENDPOINT, {
