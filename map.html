@@ -31,38 +31,7 @@
         #user-location-btn { bottom: 102px !important; }
       }
     }
-    .top-bar { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 24px; background: rgba(8,12,16,0.58); border: 1px solid rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 34px rgba(0,0,0,0.24); backdrop-filter: blur(22px) saturate(1.22); -webkit-backdrop-filter: blur(22px) saturate(1.22); }
-    .top-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; position: relative; min-height: 36px; }
-    .center-brand { justify-self: center; padding: 0 2px; border-radius: 0; background: transparent; border: 0; box-shadow: none; font-weight: 950; font-size: 15px; line-height: 1; letter-spacing: -0.06em; text-decoration: none; white-space: nowrap; pointer-events: auto; cursor: pointer; text-shadow: 0 0 12px rgba(30,155,255,0.16), 0 3px 10px rgba(0,0,0,0.42); opacity: .98; }
-    #weather { justify-self: start; min-height: 29px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.13); color: white; font-weight: 850; font-size: 13px; line-height: 1; white-space: nowrap; text-shadow: 0 2px 8px rgba(0,0,0,0.24); }
-    .top-actions { justify-self: end; position: relative; display: inline-flex; align-items: center; justify-content: flex-end; gap: 7px; min-width: 0; }
-    #app-menu-toggle { width: 36px; height: 36px; position: relative; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 9px; border: 1px solid rgba(255,255,255,0.16); border-radius: 50%; background: rgba(255,255,255,0.13); color: white; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 18px rgba(0,0,0,0.18); backdrop-filter: blur(16px) saturate(1.18); -webkit-backdrop-filter: blur(16px) saturate(1.18); -webkit-tap-highlight-color: transparent; }
-    #app-menu-toggle span { display: block; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.92); box-shadow: 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(0,0,0,0.18); transition: transform .26s cubic-bezier(.2,.9,.2,1), opacity .18s ease, width .24s ease, height .24s ease, left .24s ease, top .24s ease; }
-    #app-menu-toggle:active { transform: scale(0.94); }
-    .app-menu { position: fixed; right: 10px; top: calc(56px + env(safe-area-inset-top)); z-index: 3500; width: min(292px, calc(100vw - 20px)); max-height: calc(100dvh - 76px - env(safe-area-inset-top)); overflow-y: auto; display: none; padding: 9px; border-radius: 22px; background: rgba(8,14,18,.68); color: #fff; border: 1px solid rgba(255,255,255,.18); box-shadow: 0 18px 46px rgba(0,0,0,.30); backdrop-filter: blur(22px) saturate(1.18); -webkit-backdrop-filter: blur(22px) saturate(1.18); }
-    .top-actions.quick-menu-open .app-menu { display: block; }
-    .top-bar.menu-expanded { bottom: calc(8px + env(safe-area-inset-bottom)); max-height: none; overflow: hidden; padding: 9px; border-radius: 24px; background: rgba(8,14,18,.72); backdrop-filter: blur(24px) saturate(1.18); -webkit-backdrop-filter: blur(24px) saturate(1.18); }
-    .top-bar.menu-expanded .search-wrap, .top-bar.menu-expanded #map-filter-bar { display: none !important; }
-    .top-bar.menu-expanded .view-mode-toggle { display: none !important; }
-    .top-bar.menu-expanded .top-row { align-items: center; grid-template-columns: auto 1fr auto; min-height: 58px; position: sticky; top: 0; z-index: 3700; }
-    .top-bar.menu-expanded .center-brand { position: fixed; left: 50%; top: calc(34px + env(safe-area-inset-top)); transform: translate(-50%, -50%); z-index: 3720; }
-    .top-bar.menu-expanded #app-menu-toggle { position: fixed; right: 19px; top: calc(34px + env(safe-area-inset-top)); transform: translateY(-50%); z-index: 3730; }
-    .top-bar.menu-expanded #app-menu-toggle:active { transform: translateY(-50%) scale(.94); }
-    .top-bar.menu-expanded #app-menu-toggle span { position: absolute; left: 50%; top: 50%; width: 17px; height: 3px; margin: 0; border-radius: 999px; transform-origin: center; }
-    .top-bar.menu-expanded #app-menu-toggle span:nth-child(1) { transform: translate(-50%, -50%) rotate(45deg); }
-    .top-bar.menu-expanded #app-menu-toggle span:nth-child(4) { transform: translate(-50%, -50%) rotate(-45deg); }
-    .top-bar.menu-expanded #app-menu-toggle span:nth-child(2), .top-bar.menu-expanded #app-menu-toggle span:nth-child(3) { opacity: 0; transform: translate(-50%, -50%) scale(.25); }
-    .top-bar.menu-expanded .app-menu { position: fixed; left: 21px; right: 21px; top: calc(94px + env(safe-area-inset-top)); bottom: calc(17px + env(safe-area-inset-bottom)); width: auto; max-height: none; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 9px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; align-items: stretch; }
-    .top-bar.menu-expanded .app-menu-language { position: fixed; left: 24px; top: calc(34px + env(safe-area-inset-top)); transform: translateY(-50%); z-index: 3740; width: 44px; max-width: 44px; min-height: 40px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 10px 26px rgba(0,0,0,.18); backdrop-filter: blur(18px) saturate(1.18); -webkit-backdrop-filter: blur(18px) saturate(1.18); overflow: hidden; }
-    .top-bar.menu-expanded .app-menu-head { margin: 0; text-align: center; align-self: start; padding-bottom: 2px; }
-    .top-bar.menu-expanded .app-menu-grid { display: flex; flex-wrap: nowrap; gap: 12px; padding: 0 calc((100% - 84%) / 2); min-height: 0; align-self: center; margin-top: 0; margin-bottom: 0; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: calc((100% - 84%) / 2); }
-    .top-bar.menu-expanded .app-menu-grid::-webkit-scrollbar { display: none; }
-    .top-bar.menu-expanded .app-menu-link { flex: 0 0 84%; width: 84%; aspect-ratio: 1 / 1; height: auto; min-height: 250px; max-height: 250px; border-radius: 28px; padding: 16px; scroll-snap-align: center; }
-    .top-bar.menu-expanded .app-menu-link.wide { grid-column: auto; }
-    .app-menu-quick-title { display: none; }
-    .top-bar.menu-expanded .app-menu-quick-title { display: block; margin: 0 2px -1px; color: rgba(255,255,255,.48); font-size: 10px; line-height: 1; letter-spacing: .14em; text-transform: uppercase; font-weight: 950; }
-    .app-menu-quick-row { display: none; }
-    .top-bar.menu-expanded .app-menu-quick-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; overflow: visible; padding: 0 1px 2px; margin-top: 0; }
+    .top-bar { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius:0;background:transparent;overflow:visible; padding: 0 1px 2px; margin-top: 0; }
     .top-bar.menu-expanded .app-menu-quick-row::-webkit-scrollbar { display: none; }
     .app-menu-quick-link { height: 40px; min-height: 40px; max-height: 40px; min-width: 0; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.12); color: #fff; text-decoration: none; font-size: 12px; line-height: 1; font-weight: 950; white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,.07); }
     .app-menu-quick-link.highlight { background: rgba(255,138,29,.95); color: #111; border-color: rgba(255,138,29,.46); }
@@ -652,27 +621,27 @@
     <section id="site-welcome-section" class="site-hero-section">
       <video class="site-hero-video" src="12.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
       <div class="site-hero-content">
-        <h1 class="site-view-title">Una guida gratuita per vivere le Cinque Terre con rispetto.</h1>
-        <p class="site-view-text">5TerreGo è una mappa interattiva gratuita creata da giovani del territorio per orientare i visitatori, valorizzare i borghi, distribuire meglio i flussi e promuovere un turismo più consapevole.</p>
+        <h1 class="site-view-title">Cinque Terre, senza perdere l’orientamento.</h1>
+        <p class="site-view-text">Mappa interattiva, sentieri, meteo, traghetti, storie locali e luoghi utili: tutto in un’unica guida mobile pensata per aiutarti a visitare meglio e rispettare di più il territorio.</p>
         <div class="site-hero-primary-action"><a href="#" id="open-interactive-map-btn" data-site-action="map">Apri la mappa interattiva</a></div>
         <div class="site-hero-actions"><a href="#site-stories-section">Storie locali</a><a href="#site-experiences-section">Sconti esclusivi</a><a href="#site-trails-section">Sentieri</a></div>
       </div>
     </section>
 
     <section class="site-section">
-      <div class="site-section-head"><span>The five villages</span><small>tap to open map</small></div>
+      <div class="site-section-head"><span>I cinque borghi</span><small>tocca per esplorare</small></div>
       <div id="site-villages" class="site-horizontal-list"></div>
     </section>
 
 
     <section class="site-section site-pages-section">
-      <div class="site-section-head"><span>Start here</span><small>site sections</small></div>
+      <div class="site-section-head"><span>Inizia da qui</span><small>scopri cosa ti serve</small></div>
       <div class="site-feature-stack">
         <section id="site-stories-section" class="site-feature-section dark story-video-section" aria-label="Stories section">
           <img class="site-feature-video-bg" src="https://images.pexels.com/photos/5198272/pexels-photo-5198272.jpeg" alt="" loading="lazy" aria-hidden="true">
           <div class="site-feature-cover">
             <div class="site-feature-label-row"><span class="site-feature-step">01</span><div class="site-feature-kicker">Stories</div></div>
-            <div><h3 class="site-feature-title">Scoprire prima di arrivare.</h3><p class="site-feature-text">Guide brevi, storie locali e informazioni essenziali per aiutare chi visita le Cinque Terre a capire i luoghi, rispettarli e muoversi con più consapevolezza.</p></div>
+            <div><h3 class="site-feature-title">Capisci i luoghi prima di attraversarli.</h3><p class="site-feature-text">Storie brevi, contesto locale e consigli pratici per non vivere le Cinque Terre come una semplice cartolina, ma come un territorio fragile e reale.</p></div>
           </div>
           <div class="site-feature-body">
             <div id="site-story-list"></div>
@@ -683,7 +652,7 @@
         <section id="site-places-section" class="site-feature-section site-places-section" aria-label="Luoghi utili">
           <div class="site-places-cover">
             <h3 class="site-places-title">Luoghi utili</h3>
-            <p class="site-places-copy">Punti selezionati dalla mappa con immagini: panorami, spiagge, monumenti, stazioni e luoghi utili per orientarsi meglio nei borghi.</p>
+            <p class="site-places-copy">Panorami, spiagge, monumenti, stazioni e punti pratici selezionati dalla mappa per capire subito cosa hai intorno.</p>
           </div>
           <div class="site-places-body">
             <div id="site-poi-filters" class="site-poi-filters" aria-label="Filtra luoghi"></div>
@@ -695,10 +664,10 @@
           <img class="site-feature-video-bg" src="https://images.pexels.com/photos/12445261/pexels-photo-12445261.jpeg" alt="" loading="lazy" aria-hidden="true">
           <div class="site-feature-cover">
             <div class="site-feature-label-row"><span class="site-feature-step">03</span><div class="site-feature-kicker">Trails</div></div>
-            <div><h3 class="site-feature-title">Sentieri chiari, prima del passo.</h3><p class="site-feature-text">Percorsi consultabili da mobile con difficoltà, durata e profilo altimetrico, per scegliere itinerari adatti e prepararsi meglio prima di partire.</p></div>
+            <div><h3 class="site-feature-title">Scegli il sentiero giusto, prima di partire.</h3><p class="site-feature-text">Difficoltà, durata, partenza, arrivo e profilo altimetrico in schede rapide, così cammini preparato e senza improvvisare.</p></div>
           </div>
           <div class="site-feature-body">
-            <p class="site-section-copy">Ogni scheda aiuta a valutare il percorso prima di camminare: punto di partenza, difficoltà, tempi indicativi e dettagli utili direttamente sulla mappa.</p>
+            <p class="site-section-copy">Ogni scheda ti aiuta a scegliere con buon senso: tempi indicativi, dislivello, difficoltà e dettagli utili prima di metterti in cammino.</p>
             <div class="site-trails-panel">
               <div class="site-trails-filters" aria-label="Trail filters">
                 <label class="site-trail-filter"><span>From</span><select id="site-trail-from-filter"><option value="all">All</option></select></label>
@@ -713,13 +682,13 @@
           <video class="site-feature-video-bg" src="tours.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
           <div class="site-feature-cover">
             <div class="site-feature-label-row"><span class="site-feature-step">02</span><div class="site-feature-kicker">Discounts</div></div>
-            <div><h3 class="site-feature-title">Valore diretto per chi visita.</h3><p class="site-feature-text">Vantaggi gratuiti presso attività selezionate del territorio, pensati per creare un rapporto più semplice tra visitatori e realtà locali.</p></div>
+            <div><h3 class="site-feature-title">Sconti veri, senza commissioni.</h3><p class="site-feature-text">Attività locali selezionate possono offrire vantaggi gratuiti ai visitatori: più valore per chi arriva, più visibilità per chi lavora sul territorio.</p></div>
           </div>
           <div class="site-feature-body">
             <div class="site-placeholder-slider">
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/20184673/pexels-photo-20184673.jpeg?_gl=1*1fzrqit*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNTMyJGo0JGwwJGgw');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Promuovi qui la tua attività offrendo sconti agli utenti. Non chiediamo commissioni!</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com">Diventa partner</a></div></article>
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/5060895/pexels-photo-5060895.jpeg?_gl=1*jdo6uo*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNjE2JGo1MiRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Promuovi qui la tua attività offrendo sconti agli utenti. Non chiediamo commissioni!</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com">Diventa partner</a></div></article>
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/35474391/pexels-photo-35474391.jpeg?_gl=1*1jkfday*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNzc5JGo1OSRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Promuovi qui la tua attività offrendo sconti agli utenti. Non chiediamo commissioni!</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/20184673/pexels-photo-20184673.jpeg?_gl=1*1fzrqit*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNTMyJGo0JGwwJGgw');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Offri uno sconto ai visitatori e compari nella mappa interattiva. Nessuna commissione sulle vendite.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/5060895/pexels-photo-5060895.jpeg?_gl=1*jdo6uo*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNjE2JGo1MiRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Offri uno sconto ai visitatori e compari nella mappa interattiva. Nessuna commissione sulle vendite.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/35474391/pexels-photo-35474391.jpeg?_gl=1*1jkfday*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNzc5JGo1OSRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Offri uno sconto ai visitatori e compari nella mappa interattiva. Nessuna commissione sulle vendite.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com">Diventa partner</a></div></article>
             </div>
           </div>
         </section>
@@ -730,9 +699,9 @@
       <div class="site-official-card">
         <div class="site-official-kicker">Area istituzionale</div>
         <h3 class="site-official-title">Comunicazioni ufficiali</h3>
-        <p class="site-official-text">Avvisi, aggiornamenti e comunicazioni utili provenienti da fonti istituzionali, sempre con rimando alla pagina ufficiale.</p>
+        <p class="site-official-text">Avvisi e aggiornamenti raccolti da fonti istituzionali, organizzati per una consultazione rapida e sempre collegati alla pagina originale.</p>
         <div id="site-official-list" class="site-official-list" aria-label="Lista comunicazioni ufficiali"><div class="site-empty">Caricamento comunicazioni ufficiali…</div></div>
-        <p class="site-official-disclaimer">Aggiornamenti istituzionali raccolti e organizzati da 5TerreGo.com per facilitare la consultazione. Ogni comunicazione mantiene il collegamento alla fonte originale per la verifica e il testo completo.</p>
+        <p class="site-official-disclaimer">5TerreGo.com organizza gli aggiornamenti per renderli più facili da consultare. La fonte ufficiale resta sempre il riferimento per verifica, validità e testo completo.</p>
       </div>
     </section>
 
@@ -752,7 +721,7 @@
     <footer class="site-footer" aria-label="Copyright">
       <div class="site-footer-brand">© 2026 5TerreGo.com</div>
       <div class="site-footer-company">by Rosetta Ventures FZ-LLC</div>
-      <p class="site-footer-note">Informazioni, mappa, meteo, sentieri e traghetti sono forniti come supporto gratuito all’orientamento dei visitatori e possono cambiare senza preavviso.</p>
+      <p class="site-footer-note">Mappa, meteo, sentieri, traghetti e informazioni locali sono strumenti gratuiti di orientamento. Verifica sempre condizioni, orari e avvisi ufficiali prima di partire.</p>
       <div class="site-footer-actions" aria-label="Contact links">
         <a class="site-footer-contact-btn" href="mailto:5terrego.info@gmail.com">Contact us</a>
       </div>
@@ -2904,10 +2873,10 @@
   var EXTRA_UI = { en:{installApp:'Install the app', installHint:'On iPhone: Share → Add to Home Screen. On Android: use Install app from the browser menu.', userGreeting:'Hi, ', menuHi:'Hi', guest:'Guest', preferences:'Preferences', bookings:'Bookings', myBookings:'Bookings', editProfile:'Edit profile', logout:'Log out', quickLinks:'Links', meteo:'Weather', exclusiveDiscounts:'Exclusive discounts', today:'Today', tomorrow:'Tomorrow', day:'Day', nextHours:'Next hours', hourlyForecast:'Hourly forecast', humidity:'Humidity', now:'Now', weatherUnavailable:'Weather forecast not available right now.'}, it:{installApp:'Installa l’app', installHint:'Su iPhone: Condividi → Aggiungi alla schermata Home. Su Android: usa Installa app dal menu del browser.', userGreeting:'Ciao, ', menuHi:'Ciao', guest:'Ospite', preferences:'Preferenze', bookings:'Prenotazioni', myBookings:'Prenotazioni', editProfile:'Modifica profilo', logout:'Esci', quickLinks:'Collegamenti', meteo:'Meteo', exclusiveDiscounts:'Sconti esclusivi', today:'Oggi', tomorrow:'Domani', day:'Giorno', nextHours:'Prossime ore', hourlyForecast:'Previsioni orarie', humidity:'Umidità', now:'Ora', weatherUnavailable:'Previsioni meteo non disponibili al momento.'}, fr:{installApp:'Installer l’app', installHint:'Sur iPhone : Partager → Ajouter à l’écran d’accueil. Sur Android : utilisez Installer l’app dans le menu du navigateur.', userGreeting:'Salut, ', menuHi:'Salut', guest:'Invité', preferences:'Préférences', bookings:'Réservations', myBookings:'Réservations', editProfile:'Modifier le profil', logout:'Déconnexion', quickLinks:'Liens rapides', meteo:'Météo', exclusiveDiscounts:'Réductions exclusives', today:'Aujourd’hui', tomorrow:'Demain', day:'Jour', nextHours:'Prochaines heures', hourlyForecast:'Prévision horaire', humidity:'Humidité', now:'Maintenant', weatherUnavailable:'Prévisions météo indisponibles pour le moment.'}, de:{installApp:'App installieren', installHint:'Auf iPhone: Teilen → Zum Home-Bildschirm. Auf Android: App installieren im Browser-Menü.', userGreeting:'Hallo, ', menuHi:'Hallo', guest:'Gast', preferences:'Einstellungen', bookings:'Buchungen', myBookings:'Buchungen', editProfile:'Profil bearbeiten', logout:'Abmelden', quickLinks:'Schnelllinks', meteo:'Wetter', exclusiveDiscounts:'Exklusive Rabatte', today:'Heute', tomorrow:'Morgen', day:'Tag', nextHours:'Nächste Stunden', hourlyForecast:'Stündliche Vorhersage', humidity:'Luftfeuchtigkeit', now:'Jetzt', weatherUnavailable:'Wettervorhersage derzeit nicht verfügbar.'}, ru:{installApp:'Установить приложение', installHint:'На iPhone: Поделиться → На экран «Домой». На Android: используйте «Установить приложение» в меню браузера.', userGreeting:'Привет, ', menuHi:'Привет', guest:'Гость', preferences:'Настройки', bookings:'Бронирования', myBookings:'Бронирования', editProfile:'Изменить профиль', logout:'Выйти', quickLinks:'Быстрые ссылки', meteo:'Погода', exclusiveDiscounts:'Эксклюзивные скидки', today:'Сегодня', tomorrow:'Завтра', day:'День', nextHours:'Ближайшие часы', hourlyForecast:'Почасовой прогноз', humidity:'Влажность', now:'Сейчас', weatherUnavailable:'Прогноз погоды сейчас недоступен.'}, zh:{installApp:'安装应用', installHint:'iPhone：分享 → 添加到主屏幕。Android：在浏览器菜单中选择安装应用。', userGreeting:'你好，', menuHi:'你好', guest:'访客', preferences:'偏好设置', bookings:'预订', myBookings:'预订', editProfile:'编辑资料', logout:'退出登录', quickLinks:'快捷链接', meteo:'天气', exclusiveDiscounts:'专属优惠', today:'今天', tomorrow:'明天', day:'第', nextHours:'未来几小时', hourlyForecast:'逐小时预报', humidity:'湿度', now:'现在', weatherUnavailable:'目前无法获取天气预报。'}, ar:{installApp:'تثبيت التطبيق', installHint:'على iPhone: مشاركة ← إضافة إلى الشاشة الرئيسية. على Android: استخدم تثبيت التطبيق من قائمة المتصفح.', userGreeting:'مرحباً، ', menuHi:'مرحباً', guest:'ضيف', preferences:'التفضيلات', bookings:'الحجوزات', myBookings:'الحجوزات', editProfile:'تعديل الملف', logout:'تسجيل الخروج', quickLinks:'روابط سريعة', meteo:'الطقس', exclusiveDiscounts:'خصومات حصرية', today:'اليوم', tomorrow:'غداً', day:'اليوم', nextHours:'الساعات القادمة', hourlyForecast:'توقعات كل ساعة', humidity:'الرطوبة', now:'الآن', weatherUnavailable:'توقعات الطقس غير متاحة حالياً.'} };
   var UI = {
     en: {
-      login:'Login', map:'Map', site:'Site', search:'Search everywhere on the site', all:'All', trails:'Trails', viewpoints:'Viewpoints', beaches:'Beaches', food:'Food', churches:'Churches', monuments:'Monuments', stations:'Stations', ferry:'Ferry', curiosities:'Curiosities', recenter:'Recenter', exitTour:'Exit tour', heroTitle:'A free guide to explore the Cinque Terre with respect.', heroText:'5TerreGo is a free interactive map created by young local builders to help visitors orient themselves, discover the villages, spread flows more intelligently and promote more conscious tourism.', openInteractiveMap:'Open the interactive map', stories:'Local stories', experiences:'Exclusive discounts', bookStay:'Trails', fiveVillages:'The five villages', tapMap:'tap to open map', startHere:'Start here', siteSections:'site sections', readBefore:'Discover before you arrive.', storyText:'Short guides, local stories and essential information to help visitors understand the Cinque Terre, respect the places and move with more awareness.', openStories:'Open local stories', thingsDoing:'Direct value for visitors.', expText:'Free benefits at selected local businesses, designed to create a simpler connection between visitors and the local area.', openExperiences:'See exclusive discounts', bookSmarter:'Clear trails before the first step.', stayText:'Mobile trail cards with difficulty, duration and elevation profile, so visitors can choose suitable routes and prepare before walking.', openStay:'Open trail', weather:'Weather', weatherNote:'Now and next hours', placesSection:'Useful places', placesNote:'map', placesCopy:'Selected points from the map: viewpoints, beaches, monuments, stations and useful places to move more consciously through the villages.', anchorStories:'Stories', anchorDiscounts:'Discounts', anchorTrails:'Trails', anchorPlaces:'Places', anchorWeather:'Weather', officialKicker:'Institutional area', officialTitle:'Official communications', officialText:'Official notices, public updates and institutional alerts collected with a direct link to the original source.', institutionalNotice:'Institutional notice', loadingWeather:'Loading weather data…', trailCopy:'Each card helps visitors evaluate the route before walking: starting point, difficulty, estimated time and useful details directly on the map.', from:'From', difficulty:'Difficulty', time:'Time', elevation:'Elevation', openTrail:'Open trail', distance:'Distance', estimatedTime:'Estimated time', shoes:'Recommended shoes', price:'Price', gainLoss:'Elevation gain / loss', profile:'Elevation profile', directions:'Directions', aiGuide:'AI guide', readMore:'Read more', startTour:'Start village tour', tourActive:'Tour active', nextStop:'Next stop', moveNext:'Move toward the next stop.', followPath:'Follow the path', audio:'▶ Audio', contact:'Contact us', footerNote:'All rights reserved. Map, weather, ferry and local information are provided for guidance only and may change without notice.', aiSubtitle:'Your Cinque Terre guide', aiPlaceholder:'Ask the guide...', ai1:'what should I do today?', ai2:'best sunset?', ai3:'beaches and viewpoints?', ai4:'trails or ferry?', aiClose:'Close AI', aiOpen:'Open AI Guide', liveLoading:'Loading live stream'
+      login:'Login', map:'Map', site:'Site', search:'Search everywhere on the site', all:'All', trails:'Trails', viewpoints:'Viewpoints', beaches:'Beaches', food:'Food', churches:'Churches', monuments:'Monuments', stations:'Stations', ferry:'Ferry', curiosities:'Curiosities', recenter:'Recenter', exitTour:'Exit tour', heroTitle:'Cinque Terre, without losing your way.', heroText:'Interactive map, trails, weather, ferries, local stories and useful places: one mobile guide designed to help you visit better and respect the territory more.', openInteractiveMap:'Open the interactive map', stories:'Local stories', experiences:'Exclusive discounts', bookStay:'Trails', fiveVillages:'The five villages', tapMap:'tap to explore', startHere:'Start here', siteSections:'what you need first', readBefore:'Understand the places before crossing them.', storyText:'Short stories, local context and practical advice so the Cinque Terre feel less like a postcard and more like a fragile, real territory.', openStories:'Open local stories', thingsDoing:'Real discounts, no commissions.', expText:'Selected local businesses can offer free benefits to visitors: more value for travellers, more visibility for the people who work here.', openExperiences:'See exclusive discounts', bookSmarter:'Choose the right trail before you start.', stayText:'Difficulty, duration, start, finish and elevation profile in quick mobile cards, so you walk prepared instead of improvising.', openStay:'Open trail', weather:'Weather', weatherNote:'Now and next hours', placesSection:'Useful places', placesNote:'map', placesCopy:'Viewpoints, beaches, monuments, stations and practical points selected from the map so you immediately understand what is around you.', anchorStories:'Stories', anchorDiscounts:'Discounts', anchorTrails:'Trails', anchorPlaces:'Places', anchorWeather:'Weather', officialKicker:'Institutional area', officialTitle:'Official communications', officialText:'Public notices and institutional updates collected for quick consultation, always linked to the original source.', institutionalNotice:'Institutional notice', loadingWeather:'Loading weather data…', trailCopy:'Each card helps visitors evaluate the route before walking: starting point, difficulty, estimated time and useful details directly on the map.', from:'From', difficulty:'Difficulty', time:'Time', elevation:'Elevation', openTrail:'Open trail', distance:'Distance', estimatedTime:'Estimated time', shoes:'Recommended shoes', price:'Price', gainLoss:'Elevation gain / loss', profile:'Elevation profile', directions:'Directions', aiGuide:'AI guide', readMore:'Read more', startTour:'Start village tour', tourActive:'Tour active', nextStop:'Next stop', moveNext:'Move toward the next stop.', followPath:'Follow the path', audio:'▶ Audio', contact:'Contact us', footerNote:'Map, weather, trails, ferries and local information are free orientation tools. Always check conditions, schedules and official notices before leaving.', aiSubtitle:'Your Cinque Terre guide', aiPlaceholder:'Ask the guide...', ai1:'what should I do today?', ai2:'best sunset?', ai3:'beaches and viewpoints?', ai4:'trails or ferry?', aiClose:'Close AI', aiOpen:'Open AI Guide', liveLoading:'Loading live stream'
     },
     it: {
-      login:'Accedi', map:'Mappa', site:'Sito', search:'Cerca ovunque nel sito', all:'Tutti', trails:'Sentieri', viewpoints:'Panorami', beaches:'Spiagge', food:'Cibo', churches:'Chiese', monuments:'Monumenti', stations:'Stazioni', ferry:'Traghetti', curiosities:'Curiosità', recenter:'Ricentra', exitTour:'Esci dal tour', heroTitle:'Una guida gratuita per vivere le Cinque Terre con rispetto.', heroText:'5TerreGo è una mappa interattiva gratuita creata da giovani del territorio per orientare i visitatori, valorizzare i borghi, distribuire meglio i flussi e promuovere un turismo più consapevole.', openInteractiveMap:'Apri la mappa interattiva', stories:'Storie locali', experiences:'Sconti esclusivi', bookStay:'Sentieri', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni del sito', readBefore:'Scoprire prima di arrivare.', storyText:'Guide brevi, storie locali e informazioni essenziali per aiutare chi visita le Cinque Terre a capire i luoghi, rispettarli e muoversi con più consapevolezza.', openStories:'Apri le storie locali', thingsDoing:'Valore diretto per chi visita.', expText:'Vantaggi gratuiti presso attività selezionate del territorio, pensati per creare un rapporto più semplice tra visitatori e realtà locali.', openExperiences:'Vedi sconti esclusivi', bookSmarter:'Sentieri chiari, prima del passo.', stayText:'Percorsi consultabili da mobile con difficoltà, durata e profilo altimetrico, per scegliere itinerari adatti e prepararsi meglio prima di partire.', openStay:'Apri sentiero', weather:'Meteo', weatherNote:'Ora e prossime ore', placesSection:'Luoghi utili', placesNote:'mappa', placesCopy:'Punti selezionati dalla mappa: panorami, spiagge, monumenti, stazioni e luoghi utili per orientarsi meglio nei borghi.', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo', officialKicker:'Area istituzionale', officialTitle:'Comunicazioni ufficiali', officialText:'Avvisi, aggiornamenti pubblici e comunicazioni istituzionali raccolti con link diretto alla fonte originale.', institutionalNotice:'Comunicazione istituzionale', loadingWeather:'Caricamento meteo…', trailCopy:'Ogni scheda aiuta a valutare il percorso prima di camminare: punto di partenza, difficoltà, tempi indicativi e dettagli utili direttamente sulla mappa.', from:'Da', difficulty:'Difficoltà', time:'Tempo', elevation:'Altimetria', openTrail:'Apri sentiero', distance:'Distanza', estimatedTime:'Tempo stimato', shoes:'Scarpe consigliate', price:'Prezzo', gainLoss:'Dislivello salita / discesa', profile:'Profilo altimetrico', directions:'Indicazioni', aiGuide:'Guida AI', readMore:'Leggi di più', startTour:'Avvia tour del borgo', tourActive:'Tour attivo', nextStop:'Prossima tappa', moveNext:'Muoviti verso la prossima tappa.', followPath:'Segui il percorso', audio:'▶ Audio', contact:'Contattaci', footerNote:'Tutti i diritti riservati. Mappa, meteo, traghetti e informazioni locali sono indicativi e possono cambiare senza preavviso.', aiSubtitle:'La tua guida delle Cinque Terre', aiPlaceholder:'Chiedi alla guida...', ai1:'cosa fare oggi?', ai2:'miglior tramonto?', ai3:'spiagge e panorami?', ai4:'sentieri o traghetto?', aiClose:'Chiudi AI', aiOpen:'Apri guida AI', liveLoading:'Caricamento live'
+      login:'Accedi', map:'Mappa', site:'Sito', search:'Cerca ovunque nel sito', all:'Tutti', trails:'Sentieri', viewpoints:'Panorami', beaches:'Spiagge', food:'Cibo', churches:'Chiese', monuments:'Monumenti', stations:'Stazioni', ferry:'Traghetti', curiosities:'Curiosità', recenter:'Ricentra', exitTour:'Esci dal tour', heroTitle:'Cinque Terre, senza perdere l’orientamento.', heroText:'Mappa interattiva, sentieri, meteo, traghetti, storie locali e luoghi utili: tutto in un’unica guida mobile pensata per aiutarti a visitare meglio e rispettare di più il territorio.', openInteractiveMap:'Apri la mappa interattiva', stories:'Storie locali', experiences:'Sconti esclusivi', bookStay:'Sentieri', fiveVillages:'I cinque borghi', tapMap:'tocca per esplorare', startHere:'Inizia da qui', siteSections:'scopri cosa ti serve', readBefore:'Capisci i luoghi prima di attraversarli.', storyText:'Storie brevi, contesto locale e consigli pratici per non vivere le Cinque Terre come una semplice cartolina, ma come un territorio fragile e reale.', openStories:'Apri le storie locali', thingsDoing:'Sconti veri, senza commissioni.', expText:'Attività locali selezionate possono offrire vantaggi gratuiti ai visitatori: più valore per chi arriva, più visibilità per chi lavora sul territorio.', openExperiences:'Vedi sconti esclusivi', bookSmarter:'Scegli il sentiero giusto, prima di partire.', stayText:'Difficoltà, durata, partenza, arrivo e profilo altimetrico in schede rapide, così cammini preparato e senza improvvisare.', openStay:'Apri sentiero', weather:'Meteo', weatherNote:'Ora e prossime ore', placesSection:'Luoghi utili', placesNote:'mappa', placesCopy:'Panorami, spiagge, monumenti, stazioni e punti pratici selezionati dalla mappa per capire subito cosa hai intorno.', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo', officialKicker:'Area istituzionale', officialTitle:'Comunicazioni ufficiali', officialText:'Avvisi e aggiornamenti raccolti da fonti istituzionali, organizzati per una consultazione rapida e sempre collegati alla pagina originale.', institutionalNotice:'Comunicazione istituzionale', loadingWeather:'Caricamento meteo…', trailCopy:'Ogni scheda ti aiuta a scegliere con buon senso: tempi indicativi, dislivello, difficoltà e dettagli utili prima di metterti in cammino.', from:'Da', difficulty:'Difficoltà', time:'Tempo', elevation:'Altimetria', openTrail:'Apri sentiero', distance:'Distanza', estimatedTime:'Tempo stimato', shoes:'Scarpe consigliate', price:'Prezzo', gainLoss:'Dislivello salita / discesa', profile:'Profilo altimetrico', directions:'Indicazioni', aiGuide:'Guida AI', readMore:'Leggi di più', startTour:'Avvia tour del borgo', tourActive:'Tour attivo', nextStop:'Prossima tappa', moveNext:'Muoviti verso la prossima tappa.', followPath:'Segui il percorso', audio:'▶ Audio', contact:'Contattaci', footerNote:'Mappa, meteo, sentieri, traghetti e informazioni locali sono strumenti gratuiti di orientamento. Verifica sempre condizioni, orari e avvisi ufficiali prima di partire.', aiSubtitle:'La tua guida delle Cinque Terre', aiPlaceholder:'Chiedi alla guida...', ai1:'cosa fare oggi?', ai2:'miglior tramonto?', ai3:'spiagge e panorami?', ai4:'sentieri o traghetto?', aiClose:'Chiudi AI', aiOpen:'Apri guida AI', liveLoading:'Caricamento live'
     },
     fr: { login:'Connexion', map:'Carte', site:'Site', search:'Rechercher partout sur le site', all:'Tout', trails:'Sentiers', viewpoints:'Points de vue', beaches:'Plages', food:'Cuisine', churches:'Églises', monuments:'Monuments', stations:'Gares', ferry:'Ferry', curiosities:'Curiosités', recenter:'Recentrer', exitTour:'Quitter le tour', heroTitle:'Votre guide interactif complet des Cinque Terre.', heroText:'Orientez-vous avec la carte interactive, lisez des histoires locales, débloquez des réductions exclusives, vivez des expériences inoubliables et réservez des séjours au meilleur prix garanti.', openInteractiveMap:'Ouvrir la carte interactive', stories:'Histoires', experiences:'Expériences', bookStay:'Séjours', fiveVillages:'Les cinq villages', tapMap:'touchez pour ouvrir la carte', startHere:'Commencez ici', siteSections:'sections du site', readBefore:'À lire avant de partir.', storyText:'Articles de guide, notes sur les villages et idées pratiques de 5TerreGo.', openStories:'Ouvrir les Histoires', thingsDoing:'Des choses qui valent le détour.', expText:'Activités sélectionnées autour des cinq villages, pensées pour une vraie façon d’explorer.', openExperiences:'Ouvrir les Expériences', bookSmarter:'Réservez mieux. Payez un euro de moins.', stayText:'Notre promesse est simple : la même chambre, toujours 1 € de moins que le prix le plus bas trouvé en ligne. Vous trouvez une meilleure offre ? Envoyez-la-nous et nous vous la vendrons un euro de moins.', openStay:'Ouvrir Réserver votre séjour', weather:'Météo', weatherNote:'Maintenant et prochaines heures', loadingWeather:'Chargement de la météo…', trailCopy:'Choisissez un itinéraire par difficulté et temps de marche. Les cartes des sentiers défilent horizontalement et ouvrent la page complète sur la carte.', from:'De', difficulty:'Difficulté', time:'Temps', elevation:'Altitude', openTrail:'Ouvrir le sentier', distance:'Distance', estimatedTime:'Temps estimé', shoes:'Chaussures conseillées', price:'Prix', gainLoss:'Dénivelé montée / descente', profile:'Profil d’altitude', directions:'Itinéraire', aiGuide:'Guide IA', readMore:'Lire plus', startTour:'Démarrer le tour du village', tourActive:'Tour actif', nextStop:'Prochain arrêt', moveNext:'Avancez vers le prochain arrêt.', followPath:'Suivre le parcours', audio:'▶ Audio', contact:'Contactez-nous', footerNote:'Tous droits réservés. La carte, la météo, les ferries et les informations locales sont indicatifs et peuvent changer sans préavis.', aiSubtitle:'Votre guide des Cinque Terre', aiPlaceholder:'Demandez au guide...', ai1:'que faire aujourd’hui ?', ai2:'meilleur coucher de soleil ?', ai3:'plages et points de vue ?', ai4:'sentiers ou ferry ?', aiClose:'Fermer l’IA', aiOpen:'Ouvrir le guide IA', liveLoading:'Chargement du direct'
     },
@@ -3033,9 +3002,10 @@
 
 <!-- FLOATING AI CHAT -->
 <style>
-  #ai-chat-btn { position: fixed; right: 14px; bottom: env(safe-area-inset-bottom); z-index: 3000; width: 112px; height: 112px; padding: 0; border: 0; border-radius: 0; background: transparent; overflow: visible; cursor: pointer; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; transition: left 0.42s cubic-bezier(.2,.9,.2,1), right 0.42s cubic-bezier(.2,.9,.2,1), bottom 0.42s cubic-bezier(.2,.9,.2,1), transform 0.42s cubic-bezier(.2,.9,.2,1), filter 0.22s ease; }
+  #ai-chat-btn { position: fixed; right: 14px; bottom: env(safe-area-inset-bottom); z-index: 6100; width: 112px; height: 112px; padding: 0; border: 0; border-radius: 0; background: transparent; overflow: visible; cursor: pointer; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; transition: left 0.42s cubic-bezier(.2,.9,.2,1), right 0.42s cubic-bezier(.2,.9,.2,1), bottom 0.42s cubic-bezier(.2,.9,.2,1), transform 0.42s cubic-bezier(.2,.9,.2,1), filter 0.22s ease; }
   #ai-chat-btn:active { transform: scale(0.94); }
-  #ai-chat-btn video { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center bottom; transform: none; transform-origin: center center; pointer-events: none; filter: drop-shadow(0 14px 24px rgba(0,0,0,0.24)); }
+  #ai-chat-btn video { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center bottom; transform: none; transform-origin: center center; pointer-events: none; background: transparent !important; filter: drop-shadow(0 14px 24px rgba(0,0,0,0.24)); }
+  body.site-view-active:not(.ai-chat-active):not(.quick-menu-expanded) #ai-chat-btn { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; display: block !important; }
   #ai-chat { position: fixed; left: 12px; right: 12px; top: calc(92px + env(safe-area-inset-top)); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 3000; width: auto; height: auto; display: none; flex-direction: column; overflow: hidden; border-radius: 26px; border: 1px solid rgba(255,255,255,0.34); background: rgba(255,255,255,0.78); box-shadow: 0 24px 70px rgba(0,0,0,0.28); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); color: #111; }
   #ai-chat.ai-open { display: flex; }
   .ai-head { padding: 14px 14px 12px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -3074,9 +3044,9 @@
   body.ai-chat-active .top-bar, body.ai-chat-active #ai-chat-btn, body.ai-chat-active .bottom-card { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
 </style>
 
-<button id="ai-chat-btn" type="button" aria-label="Open AI Guide"><video id="ai-mascot-video" src="mascotterelax.webm" autoplay muted loop playsinline preload="auto"></video></button>
+<button id="ai-chat-btn" type="button" aria-label="Open AI Guide"><video id="ai-mascot-video" autoplay muted loop playsinline preload="auto"><source src="mascotterelax.mov.mp4" type='video/mp4; codecs="hvc1"'><source src="mascotterelax.webm" type="video/webm"></video></button>
 <div id="ai-chat" aria-hidden="true">
-  <div class="ai-head"><div class="ai-head-left"><div class="ai-avatar"><video id="ai-header-video" src="mascotterelax.webm" autoplay muted loop playsinline preload="auto"></video></div><div class="ai-title-wrap"><div class="ai-title">Captain Gull</div><div class="ai-subtitle">Your Cinque Terre guide</div></div></div><button id="ai-close" type="button" aria-label="Close AI">×</button></div>
+  <div class="ai-head"><div class="ai-head-left"><div class="ai-avatar"><video id="ai-header-video" autoplay muted loop playsinline preload="auto"><source src="mascotterelax.mov.mp4" type='video/mp4; codecs="hvc1"'><source src="mascotterelax.webm" type="video/webm"></video></div><div class="ai-title-wrap"><div class="ai-title">Captain Gull</div><div class="ai-subtitle">Your Cinque Terre guide</div></div></div><button id="ai-close" type="button" aria-label="Close AI">×</button></div>
   <div id="ai-messages"></div>
   <div class="ai-suggestions"><button class="ai-suggestion" type="button">what should I do today?</button><button class="ai-suggestion" type="button">best sunset?</button><button class="ai-suggestion" type="button">beaches and viewpoints?</button><button class="ai-suggestion" type="button">trails or ferry?</button></div>
   <div class="ai-input-row"><input id="ai-input" placeholder="Ask the guide..." autocomplete="off" /><button id="ai-send" type="button">→</button></div>
@@ -3188,25 +3158,74 @@
   function isAppleMobileSafari(){
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
-  function switchAIMascotForIOS(){
-    if (!isAppleMobileSafari()) return;
-    document.querySelectorAll('#ai-mascot-video, #ai-header-video').forEach(function(video){
-      if (!video) return;
-      video.setAttribute('playsinline', '');
-      video.setAttribute('muted', '');
+  function safePlay(video){
+    if (!video) return;
+    try {
       video.muted = true;
-      video.style.background = 'transparent';
-      video.style.mixBlendMode = 'normal';
-      if (video.getAttribute('data-ios-alpha-ready') === '1') return;
-      video.setAttribute('data-ios-alpha-ready', '1');
-      video.src = 'mascotterelax.mov';
-      video.load();
+      video.setAttribute('muted', '');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('webkit-playsinline', '');
       var playPromise = video.play();
       if (playPromise && playPromise.catch) playPromise.catch(function(){});
+    } catch (error) {}
+  }
+  function clearVideoSources(video){
+    if (!video) return;
+    Array.prototype.slice.call(video.querySelectorAll('source')).forEach(function(source){ source.remove(); });
+  }
+  function useVideoSrc(video, src){
+    if (!video || !src) return;
+    if (video.getAttribute('src') === src) { safePlay(video); return; }
+    clearVideoSources(video);
+    video.setAttribute('src', src);
+    video.load();
+    safePlay(video);
+  }
+  function keepAIMascotVisible(){
+    var btn = document.getElementById('ai-chat-btn');
+    if (!btn) return;
+    btn.style.opacity = '1';
+    btn.style.visibility = 'visible';
+    btn.style.pointerEvents = 'auto';
+    btn.style.display = 'block';
+  }
+  function switchAIMascotForIOS(){
+    keepAIMascotVisible();
+    if (!isAppleMobileSafari()) return;
+    document.querySelectorAll('#ai-mascot-video, #ai-header-video').forEach(function(video){
+      var iosSources = ['mascotterelax.mov.mp4', 'mascotte.mp4', 'mascotte.mov', 'mascotterelax.mov'];
+      var sourceIndex = 0;
+      if (!video) return;
+      video.style.background = 'transparent';
+      video.style.mixBlendMode = 'normal';
+      video.style.opacity = '1';
+      video.setAttribute('data-ios-alpha-ready', '1');
+      function tryNextIOSSource(){
+        sourceIndex += 1;
+        if (sourceIndex < iosSources.length) {
+          useVideoSrc(video, iosSources[sourceIndex]);
+          return;
+        }
+        useVideoSrc(video, 'mascotterelax.webm');
+      }
+      video.onerror = function(){
+        tryNextIOSSource();
+        keepAIMascotVisible();
+      };
+      video.onloadeddata = function(){
+        safePlay(video);
+        keepAIMascotVisible();
+      };
+      useVideoSrc(video, iosSources[0]);
+      window.setTimeout(function(){
+        if (!video.readyState || video.readyState < 2) tryNextIOSSource();
+        keepAIMascotVisible();
+      }, 1600);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', switchAIMascotForIOS);
   else switchAIMascotForIOS();
+  window.addEventListener('pageshow', switchAIMascotForIOS);
 }());
 </script>
 
