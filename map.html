@@ -140,11 +140,11 @@
     .site-view-panel { position: relative; z-index: 2; display: block; min-height: 100dvh; margin-top: -50dvh; padding-top: 0; background: transparent; color: #111; overflow: visible; -webkit-overflow-scrolling: touch; }
     .site-view-panel.site-hidden-by-zoom { display: none !important; }
     .site-view-panel.open { display: block; }
-    .site-view-panel::before { content: ''; position: absolute; left: 0; right: 0; top: -24dvh; height: 62dvh; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,43,64,0) 0%, rgba(8,43,64,0.10) 28%, rgba(8,43,64,0.56) 62%, #082b40 100%); }
+    .site-view-panel::before { content: ''; position: absolute; left: 0; right: 0; top: -24dvh; height: 88dvh; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,43,64,0) 0%, rgba(8,43,64,0.04) 26%, rgba(8,43,64,0.22) 50%, rgba(8,43,64,0.58) 72%, #082b40 100%); }
     .site-view-inner { position: relative; z-index: 1; min-height: 100%; padding: 0 0 calc(38px + env(safe-area-inset-bottom)); background: transparent; }
-    .site-hero-section { position: relative; overflow: visible; min-height: 100dvh; display: flex; flex-direction: column; justify-content: flex-start; padding: calc(18px + env(safe-area-inset-top)) 28px calc(108px + env(safe-area-inset-bottom)); border-radius: 0; color: #fff; background: transparent; box-shadow: none; isolation: isolate; }
+    .site-hero-section { position: relative; overflow: visible; min-height: 100dvh; display: flex; flex-direction: column; justify-content: flex-start; padding: calc(98px + env(safe-area-inset-top)) 28px calc(108px + env(safe-area-inset-bottom)); border-radius: 0; color: #fff; background: transparent; box-shadow: none; isolation: isolate; }
     .site-hero-video { display: none !important; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center center; transform: none; z-index: 0; pointer-events: none; will-change: auto; }
-    .site-hero-section::before { content: ''; position: absolute; left: 0; right: 0; top: 18dvh; bottom: -1px; z-index: 1; background: linear-gradient(180deg, rgba(8,43,64,0) 0%, rgba(8,43,64,0.88) 18%, #082b40 34%, #082b40 100%); pointer-events: none; transform: none; will-change: auto; }
+    .site-hero-section::before { content: none; position: absolute; left: 0; right: 0; top: auto; bottom: auto; z-index: 1; background: transparent; pointer-events: none; transform: none; will-change: auto; }
     .site-hero-section::after { content: none; }
     .site-hero-section h1 { font-size: clamp(46px, 13.2vw, 68px) !important; line-height: .92 !important; letter-spacing: -0.075em !important; max-width: 92vw; }
     .site-hero-content { position: relative; z-index: 4; transform: none; opacity: 1; text-shadow: none; will-change: auto; pointer-events: auto; }
@@ -419,7 +419,7 @@
     .site-footer-actions { margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
     .site-footer-contact-btn { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; background: #111; color: #fff; text-decoration: none; font-size: 12px; line-height: 1; font-weight: 950; box-shadow: 0 10px 26px rgba(0,0,0,.08); }
     @media (max-width: 380px) { .site-weather-main-row { grid-template-columns: 62px minmax(0, 1fr) 108px; gap: 9px; } .site-weather-emoji { width: 62px; height: 62px; border-radius: 22px; font-size: 37px; } .site-weather-main-temp { font-size: 46px; } .site-weather-main-desc { font-size: 15px; } .site-weather-sun-inline { width: 108px; min-width: 100px; } .site-weather-sun-arc { width: 104px; height: 52px; } .site-weather-sun-times { width: 104px; font-size: 9px; } .site-weather-data-grid { gap: 6px; } .site-weather-data-card { padding: 9px 7px; } .site-weather-data-value { font-size: 13px; } }
-    @media (max-width: 380px) { .site-hero-section { padding-top: calc(20px + env(safe-area-inset-top)); padding-left: 22px; padding-right: 22px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); } .site-view-title { font-size: clamp(34px, 10.2vw, 58px); } .site-hero-primary-action { margin-bottom: 10px; } .site-hero-primary-action a { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-hero-actions { gap: 8px; } .site-hero-actions a, .site-hero-actions button { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-section { margin-left: 12px; margin-right: 12px; } .site-guide-band { margin-left: 12px; margin-right: 12px; } .site-page-card.primary h3 { font-size: 28px; } .site-village-tile { flex-basis: 82%; } }
+    @media (max-width: 380px) { .site-hero-section { padding-top: calc(100px + env(safe-area-inset-top)); padding-left: 22px; padding-right: 22px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); } .site-view-title { font-size: clamp(34px, 10.2vw, 58px); } .site-hero-primary-action { margin-bottom: 10px; } .site-hero-primary-action a { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-hero-actions { gap: 8px; } .site-hero-actions a, .site-hero-actions button { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-section { margin-left: 12px; margin-right: 12px; } .site-guide-band { margin-left: 12px; margin-right: 12px; } .site-page-card.primary h3 { font-size: 28px; } .site-village-tile { flex-basis: 82%; } }
     .tour-top-actions { display: none; gap: 8px; }
     #tour-exit-top, #tour-recenter-top { width: 100%; padding: 12px 14px; border: 0; border-radius: 999px; font-size: 14px; font-weight: 950; cursor: pointer; }
     #tour-exit-top { background: rgba(255,138,29,0.92); color: #111; }
@@ -622,6 +622,333 @@
     body.poi-panel-active #ai-chat-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     body.trail-page-active #ai-chat-btn, body.village-tour-active #ai-chat-btn, body.city-card-active #ai-chat-btn, body.tour-navigation-active #ai-chat-btn, body.quick-menu-expanded #ai-chat-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     body.poi-panel-active #ai-chat-btn video { transform: none; }
+    /* Site mode: white text + no boxed section containers */
+    .site-view-panel,
+    .site-view-inner,
+    .site-section,
+    .site-feature-section,
+    .site-feature-section.dark,
+    .site-feature-section.stay-video-section,
+    .site-feature-section.experience-video-section,
+    .site-feature-section.story-video-section,
+    .site-places-section,
+    .site-weather-panel,
+    .site-official-card,
+    .site-guide-band,
+    .site-footer {
+      color: #fff !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .site-feature-section,
+    .site-places-section,
+    .site-official-card {
+      overflow: visible !important;
+      border-radius: 0 !important;
+      isolation: auto !important;
+    }
+
+    .site-feature-cover,
+    .site-feature-body,
+    .site-places-cover,
+    .site-places-body,
+    .site-weather-top,
+    .site-weather-body {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      color: #fff !important;
+    }
+
+    .site-feature-video-bg,
+    .site-hero-video,
+    .app-menu-link-video {
+      display: none !important;
+    }
+
+    .site-feature-title,
+    .site-feature-text,
+    .site-section-copy,
+    .site-places-title,
+    .site-places-copy,
+    .site-weather-title,
+    .site-weather-text,
+    .site-official-kicker,
+    .site-official-title,
+    .site-official-text,
+    .site-official-disclaimer,
+    .site-footer-brand,
+    .site-footer-company,
+    .site-footer-note,
+    .site-view-title,
+    .site-view-text,
+    .site-section-head span,
+    .site-section-head small {
+      color: #fff !important;
+      text-shadow: none !important;
+    }
+
+    .site-feature-text,
+    .site-section-copy,
+    .site-places-copy,
+    .site-weather-text,
+    .site-official-text,
+    .site-official-disclaimer,
+    .site-footer-company,
+    .site-footer-note {
+      color: rgba(255,255,255,.76) !important;
+    }
+
+    .site-placeholder-card,
+    .site-quick-card,
+    .site-category-card,
+    .site-data-card,
+    .site-trail-card,
+    .site-official-item,
+    .site-empty {
+      background: #fff !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      color: #111 !important;
+    }
+
+    .site-placeholder-body,
+    .site-poi-content,
+    .site-trail-body,
+    .site-placeholder-meta-item,
+    .site-trail-meta,
+    .site-weather-hour,
+    .site-weather-hour.is-now,
+    .site-weather-emoji {
+      background: #fff !important;
+      color: #111 !important;
+      box-shadow: none !important;
+    }
+
+    .site-placeholder-title,
+    .site-placeholder-text,
+    .site-placeholder-meta-label,
+    .site-placeholder-meta-value,
+    .site-trail-title,
+    .site-trail-route,
+    .site-trail-meta-label,
+    .site-trail-meta-value,
+    .site-weather-main-date,
+    .site-weather-main-temp,
+    .site-weather-main-desc,
+    .site-weather-main-desc span,
+    .site-weather-hour-time,
+    .site-weather-hour-temp,
+    .site-weather-hour-rain,
+    .site-weather-hour-wind,
+    .site-official-card-label,
+    .site-official-card-label strong,
+    .site-official-card-label .site-official-date,
+    .site-official-category,
+    .site-official-item-title,
+    .site-official-item-excerpt,
+    .site-official-date,
+    .site-empty {
+      color: #111 !important;
+    }
+
+    .site-placeholder-text,
+    .site-trail-route,
+    .site-trail-meta-label,
+    .site-weather-main-date,
+    .site-weather-main-desc span,
+    .site-weather-hour-time,
+    .site-weather-hour-rain,
+    .site-weather-hour-wind,
+    .site-official-card-label,
+    .site-official-card-label .site-official-date,
+    .site-official-category,
+    .site-official-item-excerpt,
+    .site-official-date,
+    .site-empty {
+      color: rgba(0,0,0,.62) !important;
+    }
+
+    .site-village-tile,
+    .site-article-card,
+    .site-poi-card {
+      box-shadow: none !important;
+      border: 0 !important;
+    }
+    .site-official-item::before,
+    .site-official-card::before,
+    .site-official-face::before,
+    .site-placeholder-image::before,
+    .site-placeholder-image::after {
+      content: none !important;
+      background: transparent !important;
+    }
+
+    /* Keep unboxed site cards inside the mobile viewport */
+    .site-view-panel,
+    .site-view-inner,
+    .site-section,
+    .site-feature-stack,
+    .site-feature-section,
+    .site-feature-cover,
+    .site-feature-body,
+    .site-places-section,
+    .site-places-cover,
+    .site-places-body,
+    .site-weather-panel,
+    .site-official-card,
+    .site-footer {
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+    }
+
+    .site-feature-cover,
+    .site-feature-body,
+    .site-places-cover,
+    .site-places-body,
+    .site-weather-top,
+    .site-weather-body,
+    .site-official-card,
+    .site-footer {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .site-feature-title,
+    .site-feature-text,
+    .site-section-copy,
+    .site-places-title,
+    .site-places-copy,
+    .site-weather-title,
+    .site-weather-text,
+    .site-official-title,
+    .site-official-text,
+    .site-official-disclaimer,
+    .site-footer-brand,
+    .site-footer-company,
+    .site-footer-note,
+    .site-placeholder-title,
+    .site-placeholder-text,
+    .site-trail-title,
+    .site-trail-route,
+    .site-official-item-title,
+    .site-official-item-excerpt {
+      max-width: 100% !important;
+      overflow-wrap: anywhere !important;
+      word-break: normal !important;
+    }
+
+    .site-placeholder-card,
+    .site-trail-card,
+    .site-official-item {
+      overflow: hidden !important;
+    }
+
+    .site-placeholder-slider,
+    .site-article-slider,
+    .site-poi-slider,
+    .site-trail-slider,
+    .site-official-list,
+    .site-horizontal-list,
+    .site-poi-filters,
+    .site-trails-filters,
+    .site-weather-date-tabs,
+    .site-weather-hourly-strip {
+      max-width: 100% !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+    }
+
+    .site-placeholder-card,
+    .site-article-card,
+    .site-poi-card,
+    .site-trail-card,
+    .site-official-item,
+    .site-village-tile {
+      flex-shrink: 0 !important;
+      max-width: calc(100vw - 48px) !important;
+    }
+
+    .site-poi-card {
+      overflow: hidden !important;
+      background: #fff !important;
+      color: #111 !important;
+      border-radius: 26px !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .site-poi-content {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      background: #fff !important;
+      color: #111 !important;
+      box-shadow: none !important;
+    }
+
+    .site-poi-title {
+      color: #111 !important;
+      max-width: 100% !important;
+      overflow-wrap: anywhere !important;
+      word-break: normal !important;
+    }
+
+    .site-poi-card p,
+    .site-poi-card span,
+    .site-poi-card small,
+    .site-poi-card strong,
+    .site-poi-card h3,
+    .site-poi-card h4 {
+      color: #111 !important;
+    }
+
+    /* Meteo: testo principale bianco su sfondo scuro, card orarie chiare leggibili */
+    .site-weather-main-card,
+    .site-weather-main-info,
+    .site-weather-main-date,
+    .site-weather-main-temp,
+    .site-weather-main-desc,
+    .site-weather-main-desc span,
+    .site-weather-hourly-title,
+    .site-weather-sun-times,
+    .site-weather-sun-times span {
+      color: #fff !important;
+    }
+
+    .site-weather-main-date,
+    .site-weather-main-desc span,
+    .site-weather-hourly-title,
+    .site-weather-sun-times {
+      color: rgba(255,255,255,.72) !important;
+    }
+
+    .site-weather-tab:not(.active) {
+      background: rgba(255,255,255,.16) !important;
+      color: rgba(255,255,255,.88) !important;
+    }
+
+    .site-weather-tab.active,
+    .site-weather-hour,
+    .site-weather-hour.is-now,
+    .site-weather-hour-time,
+    .site-weather-hour-temp,
+    .site-weather-hour-rain,
+    .site-weather-hour-wind {
+      color: #111 !important;
+    }
+
+    .site-weather-hour-time,
+    .site-weather-hour-rain,
+    .site-weather-hour-wind {
+      color: rgba(0,0,0,.58) !important;
+    }
   </style>
   <script>
     (function(){
@@ -1410,7 +1737,7 @@
   function normalizeTourText(value) { var text = String(value || '').toLowerCase(); var output = ''; var lastWasSpace = false; var i; var code; var ch; try { text = text.normalize('NFD'); } catch (error) {} for (i = 0; i < text.length; i += 1) { ch = text.charAt(i); code = text.charCodeAt(i); if (code >= 768 && code <= 879) continue; if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) { output += ch; lastWasSpace = false; } else if (!lastWasSpace) { output += ' '; lastWasSpace = true; } } return output.trim(); }
   function isTouristicPOI(poi) { var type = normalizeTourText(poi && poi.type ? poi.type : ''); var name = normalizeTourText(poi && poi.name ? poi.name : ''); if (!poi) return false; if (type === 'ferry') return false; if (type === 'stazione') return false; if (type === 'station') return false; if (type === 'transport') return false; if (type === 'trasporto') return false; if (name.indexOf('ferry') !== -1) return false; if (name.indexOf('battelli') !== -1) return false; if (name.indexOf('traghetti') !== -1) return false; if (name.indexOf('boat station') !== -1) return false; if (name.indexOf('train station') !== -1) return false; if (name.indexOf('stazione') !== -1) return false; if (name.indexOf('station') !== -1) return false; return true; }
 
-  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 10.5, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.115, 9.82], 10.5); satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([43.99, 9.55], [44.22, 10.06])); }
+  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 10.5, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.084, 9.82], 10.5); satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([43.99, 9.55], [44.22, 10.06])); }
   function updateMapVisualByZoom() { var z, raw, t; if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return; z = map.getZoom(); raw = Math.min(1, Math.max(0, (z - 17.1) / 1.35)); t = raw * raw * (3 - 2 * raw); satelliteLayer.setOpacity(1); roadsLayer.setOpacity(0.42 * t); detailedRoadsLayer.setOpacity(0.78 * t); whiteLayer.setOpacity(0); labelsLayer.setOpacity(0); }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function bringCityLabelsToFront() { cityMarkers.forEach(function(marker) { if (marker && marker.bringToFront) marker.bringToFront(); }); }
