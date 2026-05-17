@@ -1169,6 +1169,62 @@
   } catch (e) {}
 })();
 </script>
+  <style id="hero-spacing-blue-line-fix">
+    /* Fix mirato: rimuove la linea blu/orfana sotto il testo hero e avvicina la prima sezione */
+    .hero,
+    .home-hero,
+    .site-hero,
+    .welcome-hero,
+    #hero,
+    #homeHero,
+    #siteHero,
+    #welcomeHero {
+      margin-bottom: 0 !important;
+      padding-bottom: clamp(18px, 4vh, 34px) !important;
+      border-bottom: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .hero::after,
+    .home-hero::after,
+    .site-hero::after,
+    .welcome-hero::after,
+    #hero::after,
+    #homeHero::after,
+    #siteHero::after,
+    #welcomeHero::after,
+    .hero-divider,
+    .section-divider,
+    .blue-divider,
+    .intro-divider {
+      display: none !important;
+      content: none !important;
+    }
+
+    .hero p,
+    .home-hero p,
+    .site-hero p,
+    .welcome-hero p,
+    #hero p,
+    #homeHero p,
+    #siteHero p,
+    #welcomeHero p {
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+      border-bottom: 0 !important;
+      box-shadow: none !important;
+      background-image: none !important;
+    }
+
+    main > section:first-of-type,
+    .site-page > section:first-of-type,
+    .site-content > section:first-of-type,
+    .sections-wrap > section:first-of-type,
+    .content-sections > section:first-of-type {
+      margin-top: 0 !important;
+      padding-top: clamp(22px, 5vh, 42px) !important;
+    }
+  </style>
 </head>
 <body class="park-presentation-mode">
 
@@ -3978,120 +4034,61 @@
 </script>
 
 <script>
-/* 5TerreGo iOS structural repair - non cambia grafica, mappa o contenuti */
+/* 5TerreGo cleanup: elimina solo i vecchi CTA orfani rimasti nel DOM */
 (function () {
   'use strict';
 
-  function ready(fn) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn);
-    } else {
-      fn();
-    }
+  var OLD_CTA_TEXTS = [
+    'apri la mappa interattiva',
+    'apri la mappainterattiva',
+    'storie locali',
+    'sconti esclusivi',
+    'sentieri'
+  ];
+
+  function norm(v) {
+    return String(v || '')
+      .toLowerCase()
+      .split(String.fromCharCode(10)).join(' ')
+      .split(String.fromCharCode(13)).join(' ')
+      .split(String.fromCharCode(9)).join(' ')
+      .replace(new RegExp(' +', 'g'), ' ')
+      .trim();
   }
 
-  function textOf(el) {
-    return el ? String(el.textContent || '').trim().toLowerCase() : '';
+  function isOnlyOldCTA(el) {
+    if (!el || !el.textContent) return false;
+    var t = norm(el.textContent);
+    if (!t) return false;
+    for (var i = 0; i < OLD_CTA_TEXTS.length; i++) {
+      if (t === OLD_CTA_TEXTS[i]) return true;
+    }
+    return false;
   }
 
-  function setFirstTitle(section, title) {
-    if (!section) return;
-    var titleEl = section.querySelector('h1, h2, h3, .section-title, .site-section-title, [data-section-title]');
-    if (titleEl && textOf(titleEl) !== title.toLowerCase()) {
-      titleEl.textContent = title;
-    }
-  }
+  function cleanupOldHeroButtons() {
+    var nodes = document.querySelectorAll('a, button, .hero-cta, .hero-button, .quick-cta, .legacy-cta');
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (!isOnlyOldCTA(el)) continue;
 
-  function findSectionByNeedles(needles) {
-    var sections = document.querySelectorAll('section, [data-section], .site-section, .home-section, .content-section');
-    for (var i = 0; i < sections.length; i++) {
-      var s = sections[i];
-      var hay = [s.id, s.getAttribute('data-section'), s.getAttribute('data-target'), s.className, s.getAttribute('aria-label')].join(' ').toLowerCase();
-      for (var n = 0; n < needles.length; n++) {
-        if (hay.indexOf(needles[n]) !== -1) return s;
-      }
-    }
-    return null;
-  }
+      var parent = el.parentElement;
+      el.remove();
 
-  function repairTitles() {
-    setFirstTitle(findSectionByNeedles(['comunic', 'official', 'avvisi', 'updates']), 'Comunicazioni ufficiali');
-    setFirstTitle(findSectionByNeedles(['spiagge', 'beach', 'beaches']), 'Spiagge');
-    setFirstTitle(findSectionByNeedles(['meteo', 'weather']), 'Meteo');
-    setFirstTitle(findSectionByNeedles(['sentieri', 'trail', 'trails']), 'Sentieri');
-    setFirstTitle(findSectionByNeedles(['storie', 'stories']), 'Storie locali');
-    setFirstTitle(findSectionByNeedles(['sconti', 'discount']), 'Sconti esclusivi');
-  }
-
-  function repairOfficialCards() {
-    var official = findSectionByNeedles(['comunic', 'official', 'avvisi', 'updates']);
-    if (!official) return;
-
-    var orphanText = [];
-    for (var i = 0; i < official.childNodes.length; i++) {
-      var node = official.childNodes[i];
-      if (node.nodeType === 3 && String(node.nodeValue || '').trim().length > 20) {
-        orphanText.push(node);
-      }
-    }
-
-    if (!orphanText.length) return;
-
-    var wrap = official.querySelector('.official-inline-repair');
-    if (!wrap) {
-      wrap = document.createElement('div');
-      wrap.className = 'official-inline-repair';
-      official.appendChild(wrap);
-    }
-
-    for (var j = 0; j < orphanText.length; j++) {
-      var p = document.createElement('p');
-      p.textContent = String(orphanText[j].nodeValue || '').trim();
-      wrap.appendChild(p);
-      orphanText[j].nodeValue = '';
-    }
-  }
-
-  function repairBrokenSectionPills() {
-    var pills = document.querySelectorAll('[data-section-target], [data-scroll-target], .section-pill, .site-pill');
-    for (var i = 0; i < pills.length; i++) {
-      var pill = pills[i];
-      var label = textOf(pill);
-      if (label.indexOf('comunic') !== -1 || label.indexOf('avvisi') !== -1 || label.indexOf('official') !== -1) {
-        pill.setAttribute('data-section-target', 'official-updates');
-      }
-      if (label.indexOf('spiag') !== -1 || label.indexOf('beach') !== -1) {
-        pill.setAttribute('data-section-target', 'beaches');
+      if (parent && !norm(parent.textContent) && parent.children.length === 0) {
+        parent.remove();
       }
     }
   }
 
-  ready(function () {
-    repairTitles();
-    repairOfficialCards();
-    repairBrokenSectionPills();
-    setTimeout(repairTitles, 400);
-    setTimeout(repairOfficialCards, 400);
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', cleanupOldHeroButtons);
+  } else {
+    cleanupOldHeroButtons();
+  }
+
+  setTimeout(cleanupOldHeroButtons, 300);
+  setTimeout(cleanupOldHeroButtons, 1200);
 })();
-</script>
-
-<style>
-/* Ripara solo testo orfano negli avvisi ufficiali su Safari iOS */
-.official-inline-repair {
-  display: grid;
-  gap: 10px;
-  margin-top: 12px;
-}
-.official-inline-repair p {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.82);
-  color: #13202b;
-  font-size: 14px;
-  line-height: 1.45;
-}
-</style>
-</body>
+</script></body>
 </html>
