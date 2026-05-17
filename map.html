@@ -991,7 +991,108 @@
     .site-weather-hour-wind {
       color: rgba(0,0,0,.58) !important;
     }
-  </style>
+  
+
+/* iPhone / Safari text stability fix for Site mode */
+@supports (-webkit-touch-callout: none) {
+  body:not(.map-mode),
+  body.site-mode,
+  .site-mode,
+  .site-page,
+  .site-content,
+  .site-section,
+  .section-card,
+  .hero-content,
+  .welcome-content,
+  .stories-section,
+  .experiences-section,
+  .discounts-section,
+  .trails-section {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body:not(.map-mode) h1,
+  body:not(.map-mode) h2,
+  body:not(.map-mode) h3,
+  body:not(.map-mode) p,
+  body:not(.map-mode) span,
+  body:not(.map-mode) a,
+  body:not(.map-mode) button,
+  body.site-mode h1,
+  body.site-mode h2,
+  body.site-mode h3,
+  body.site-mode p,
+  body.site-mode span,
+  body.site-mode a,
+  body.site-mode button,
+  .site-mode h1,
+  .site-mode h2,
+  .site-mode h3,
+  .site-mode p,
+  .site-mode span,
+  .site-mode a,
+  .site-mode button {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.18;
+    letter-spacing: normal;
+  }
+
+  body:not(.map-mode) h1,
+  body.site-mode h1,
+  .site-mode h1,
+  .hero-title,
+  .site-title {
+    font-size: clamp(2rem, 10vw, 4.4rem);
+    line-height: 0.95;
+  }
+
+  body:not(.map-mode) h2,
+  body.site-mode h2,
+  .site-mode h2,
+  .section-title {
+    font-size: clamp(1.45rem, 6.6vw, 2.8rem);
+    line-height: 1.02;
+  }
+
+  body:not(.map-mode) p,
+  body.site-mode p,
+  .site-mode p,
+  .section-text,
+  .card-text,
+  .hero-subtitle {
+    font-size: clamp(0.95rem, 4vw, 1.08rem);
+    line-height: 1.35;
+  }
+
+  .site-mode .horizontal-scroll,
+  .site-mode .cards-row,
+  .site-mode .quick-links-row,
+  body.site-mode .horizontal-scroll,
+  body.site-mode .cards-row,
+  body.site-mode .quick-links-row {
+    min-width: 0;
+    max-width: 100vw;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .site-mode .card,
+  .site-mode .story-card,
+  .site-mode .experience-card,
+  .site-mode .section-card,
+  body.site-mode .card,
+  body.site-mode .story-card,
+  body.site-mode .experience-card,
+  body.site-mode .section-card {
+    min-width: 0;
+    contain: layout paint;
+  }
+}
+</style>
   <script>
     (function(){
       var iconUrl = 'app.png';
@@ -1016,6 +1117,58 @@
       document.head.appendChild(link);
     }());
   </script>
+
+<script>
+(function () {
+  if (window.__fiveTerreGoLeafletCaptureInstalled) return;
+  window.__fiveTerreGoLeafletCaptureInstalled = true;
+  window.__fiveTerreGoLeafletMaps = window.__fiveTerreGoLeafletMaps || [];
+
+  function rememberMap(map) {
+    if (!map || typeof map.setZoom !== 'function') return map;
+    if (!window.__fiveTerreGoLeafletMaps.includes(map)) {
+      window.__fiveTerreGoLeafletMaps.push(map);
+    }
+    window.__fiveTerreGoMainMap = map;
+    try {
+      window.__fiveTerreGoMapMinZoom = typeof map.getMinZoom === 'function' ? map.getMinZoom() : 0;
+    } catch (e) {
+      window.__fiveTerreGoMapMinZoom = 0;
+    }
+    window.dispatchEvent(new CustomEvent('fiveTerreGo:map-ready', { detail: { map: map } }));
+    return map;
+  }
+
+  function patchLeaflet(L) {
+    if (!L || !L.map || L.__fiveTerreGoCaptured) return L;
+    const originalMap = L.map;
+    L.map = function () {
+      return rememberMap(originalMap.apply(this, arguments));
+    };
+    L.__fiveTerreGoCaptured = true;
+    return L;
+  }
+
+  if (window.L) {
+    patchLeaflet(window.L);
+    return;
+  }
+
+  let internalLeaflet;
+  try {
+    Object.defineProperty(window, 'L', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return internalLeaflet;
+      },
+      set: function (value) {
+        internalLeaflet = patchLeaflet(value);
+      }
+    });
+  } catch (e) {}
+})();
+</script>
 </head>
 <body class="park-presentation-mode">
 
@@ -3651,5 +3804,134 @@
 }());
 </script>
 
+
+<script>
+(function () {
+  const BUTTON_ID = 'five-terre-zoom-min-rocket';
+
+  function getMap() {
+    if (window.__fiveTerreGoMainMap && typeof window.__fiveTerreGoMainMap.setZoom === 'function') {
+      return window.__fiveTerreGoMainMap;
+    }
+    const maps = window.__fiveTerreGoLeafletMaps || [];
+    for (let i = maps.length - 1; i >= 0; i -= 1) {
+      if (maps[i] && typeof maps[i].setZoom === 'function') return maps[i];
+    }
+    return null;
+  }
+
+  function getMinZoom(map) {
+    const stored = Number(window.__fiveTerreGoMapMinZoom);
+    if (Number.isFinite(stored)) return stored;
+    try {
+      if (map && typeof map.getMinZoom === 'function') return map.getMinZoom();
+    } catch (e) {}
+    return 0;
+  }
+
+  function ensureButton() {
+    let button = document.getElementById(BUTTON_ID);
+    if (button) return button;
+
+    button = document.createElement('button');
+    button.id = BUTTON_ID;
+    button.type = 'button';
+    button.setAttribute('aria-label', 'Torna allo zoom minimo');
+    button.textContent = '🚀';
+    button.style.cssText = 'position:fixed;left:14px;bottom:calc(96px + env(safe-area-inset-bottom));width:48px;height:48px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(8,16,24,.74);color:#fff;font-size:24px;line-height:1;z-index:999999;display:none;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(0,0,0,.28);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease;';
+
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const map = getMap();
+      if (!map) return;
+
+      const minZoom = getMinZoom(map);
+      try { if (typeof map.stop === 'function') map.stop(); } catch (e) {}
+      try { if (typeof map.closePopup === 'function') map.closePopup(); } catch (e) {}
+      try { map.setZoom(minZoom, { animate: true }); } catch (e) { try { map.setZoom(minZoom); } catch (_) {} }
+
+      setTimeout(function () {
+        try { map.setZoom(minZoom, { animate: false }); } catch (e) {}
+        try { if (typeof map.invalidateSize === 'function') map.invalidateSize(); } catch (e) {}
+        updateVisibility();
+      }, 260);
+
+      setTimeout(function () {
+        try { map.setZoom(minZoom, { animate: false }); } catch (e) {}
+        updateVisibility();
+      }, 620);
+    }, true);
+
+    document.body.appendChild(button);
+    return button;
+  }
+
+  function setVisible(button, visible) {
+    if (!button) return;
+    if (visible) {
+      button.style.display = 'flex';
+      requestAnimationFrame(function () {
+        button.style.opacity = '1';
+        button.style.transform = 'translateY(0)';
+      });
+    } else {
+      button.style.opacity = '0';
+      button.style.transform = 'translateY(8px)';
+      setTimeout(function () {
+        if (button.style.opacity === '0') button.style.display = 'none';
+      }, 190);
+    }
+  }
+
+  function updateVisibility() {
+    const button = ensureButton();
+    const map = getMap();
+    if (!map || typeof map.getZoom !== 'function') {
+      setVisible(button, false);
+      return;
+    }
+    const currentZoom = map.getZoom();
+    const minZoom = getMinZoom(map);
+    setVisible(button, currentZoom > minZoom + 0.25);
+  }
+
+  function bindMap() {
+    const map = getMap();
+    if (!map || map.__fiveTerreGoRocketBound) return;
+    map.__fiveTerreGoRocketBound = true;
+    if (typeof map.on === 'function') {
+      map.on('zoomend moveend resize load', updateVisibility);
+    }
+    updateVisibility();
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    ensureButton();
+    bindMap();
+    updateVisibility();
+  });
+
+  window.addEventListener('load', function () {
+    ensureButton();
+    bindMap();
+    updateVisibility();
+  });
+
+  window.addEventListener('fiveTerreGo:map-ready', function () {
+    bindMap();
+    updateVisibility();
+  });
+
+  let attempts = 0;
+  const timer = setInterval(function () {
+    attempts += 1;
+    bindMap();
+    updateVisibility();
+    if (attempts > 100) clearInterval(timer);
+  }, 150);
+})();
+</script>
 </body>
 </html>
