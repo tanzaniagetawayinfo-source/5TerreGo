@@ -1225,6 +1225,163 @@
       padding-top: clamp(22px, 5vh, 42px) !important;
     }
   </style>
+  <style id="hero-tight-spacing-fix">
+    /* Avvicina titolo, sottotitolo e prima sezione senza toccare funzioni o markup */
+    .hero,
+    .home-hero,
+    .site-hero,
+    .welcome-hero,
+    #hero,
+    #homeHero,
+    #siteHero,
+    #welcomeHero {
+      padding-bottom: 8px !important;
+      margin-bottom: 0 !important;
+      min-height: auto !important;
+      gap: 10px !important;
+    }
+
+    .hero h1,
+    .home-hero h1,
+    .site-hero h1,
+    .welcome-hero h1,
+    #hero h1,
+    #homeHero h1,
+    #siteHero h1,
+    #welcomeHero h1 {
+      margin-bottom: 10px !important;
+      padding-bottom: 0 !important;
+    }
+
+    .hero .badge,
+    .home-hero .badge,
+    .site-hero .badge,
+    .welcome-hero .badge,
+    .hero .pill,
+    .home-hero .pill,
+    .site-hero .pill,
+    .welcome-hero .pill,
+    #hero .badge,
+    #homeHero .badge,
+    #siteHero .badge,
+    #welcomeHero .badge,
+    #hero .pill,
+    #homeHero .pill,
+    #siteHero .pill,
+    #welcomeHero .pill {
+      margin-top: 0 !important;
+      margin-bottom: 14px !important;
+    }
+
+    .hero p,
+    .home-hero p,
+    .site-hero p,
+    .welcome-hero p,
+    #hero p,
+    #homeHero p,
+    #siteHero p,
+    #welcomeHero p {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    main > section:first-of-type,
+    .site-page > section:first-of-type,
+    .site-content > section:first-of-type,
+    .sections-wrap > section:first-of-type,
+    .content-sections > section:first-of-type,
+    #villages,
+    .villages,
+    .villages-section {
+      margin-top: 0 !important;
+      padding-top: 10px !important;
+    }
+  </style>
+  <style id="remove-welcome-dead-gap-fix">
+    /* Elimina il vuoto enorme tra la action bar / Welcome e il titolo iniziale */
+    .site-page,
+    .site-content,
+    .page-content,
+    .home-content,
+    main {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    .hero,
+    .home-hero,
+    .site-hero,
+    .welcome-hero,
+    #hero,
+    #homeHero,
+    #siteHero,
+    #welcomeHero {
+      min-height: 0 !important;
+      height: auto !important;
+      padding-top: 18px !important;
+      padding-bottom: 18px !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      transform: none !important;
+    }
+
+    .hero::before,
+    .home-hero::before,
+    .site-hero::before,
+    .welcome-hero::before,
+    #hero::before,
+    #homeHero::before,
+    #siteHero::before,
+    #welcomeHero::before,
+    .hero::after,
+    .home-hero::after,
+    .site-hero::after,
+    .welcome-hero::after,
+    #hero::after,
+    #homeHero::after,
+    #siteHero::after,
+    #welcomeHero::after {
+      min-height: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .hero-spacer,
+    .welcome-spacer,
+    .site-spacer,
+    .intro-spacer,
+    .section-spacer,
+    .top-spacer,
+    .scroll-spacer,
+    [data-spacer],
+    [aria-hidden="true"].spacer {
+      display: none !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    #villages,
+    .villages,
+    .villages-section,
+    section[data-section="villages"],
+    section[id*="village" i],
+    section[class*="village" i] {
+      margin-top: 0 !important;
+      padding-top: 18px !important;
+      transform: translateY(0) !important;
+    }
+
+    .section-selector,
+    .site-section-pills,
+    .section-pills,
+    .actionbar-pills {
+      margin-bottom: 0 !important;
+    }
+  </style>
 </head>
 <body class="park-presentation-mode">
 
