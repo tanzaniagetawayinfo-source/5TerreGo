@@ -830,6 +830,93 @@
     .site-weather-sun-arc path:first-child {
       stroke: rgba(255,255,255,.18) !important;
     }
+
+    /* Desktop blocker: 5TerreGo is designed for mobile use */
+    #desktop-mobile-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(30,155,255,.18), transparent 34%),
+        linear-gradient(180deg, #071424 0%, #0b2a3d 52%, #071424 100%);
+      color: #fff;
+      text-align: center;
+    }
+    .desktop-mobile-gate-card {
+      width: min(440px, 100%);
+      padding: 28px 24px 24px;
+      border-radius: 34px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 28px 80px rgba(0,0,0,.34);
+      backdrop-filter: blur(24px) saturate(1.15);
+      -webkit-backdrop-filter: blur(24px) saturate(1.15);
+    }
+    .desktop-mobile-gate-brand {
+      margin-bottom: 18px;
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: -.055em;
+      font-weight: 950;
+    }
+    .desktop-mobile-gate-card h1 {
+      margin: 0 auto 10px;
+      max-width: 360px;
+      font-size: clamp(34px, 4.8vw, 52px);
+      line-height: .92;
+      letter-spacing: -.075em;
+      font-weight: 950;
+    }
+    .desktop-mobile-gate-card p {
+      margin: 0 auto 20px;
+      max-width: 340px;
+      font-size: 15px;
+      line-height: 1.42;
+      color: rgba(255,255,255,.72);
+      font-weight: 720;
+    }
+    .desktop-mobile-gate-qr {
+      width: 214px;
+      height: 214px;
+      display: block;
+      margin: 0 auto 14px;
+      padding: 10px;
+      border-radius: 26px;
+      background: #fff;
+      box-shadow: 0 18px 46px rgba(0,0,0,.24);
+    }
+    .desktop-mobile-gate-url {
+      display: inline-flex;
+      max-width: 100%;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.13);
+      color: rgba(255,255,255,.82);
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 850;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (min-width: 700px) {
+      html, body { overflow: hidden !important; }
+      #desktop-mobile-gate { display: flex !important; }
+      body > *:not(#desktop-mobile-gate) {
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+      #desktop-mobile-gate,
+      #desktop-mobile-gate * {
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+    }
   </style>
   <script>
     (function(){
@@ -857,6 +944,16 @@
   </script>
 </head>
 <body class="park-presentation-mode">
+
+<div id="desktop-mobile-gate" aria-label="Mobile only notice">
+  <div class="desktop-mobile-gate-card">
+    <div class="desktop-mobile-gate-brand"><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></div>
+    <h1>Scoprilo dal telefono.</h1>
+    <p>Questa guida è pensata per essere usata in verticale sul telefono, direttamente mentre ti muovi tra le Cinque Terre.</p>
+    <img id="desktop-mobile-gate-qr" class="desktop-mobile-gate-qr" src="" alt="QR code per aprire 5TerreGo.com su mobile">
+    <div id="desktop-mobile-gate-url" class="desktop-mobile-gate-url">5TerreGo.com</div>
+  </div>
+</div>
 
 <div id="map"></div>
 <div id="site-map-tips" aria-live="polite"><div class="site-map-tip-bubble"><span class="site-map-tip-title">Consiglio</span><span class="site-map-tip-text">Zoomma per entrare in modalità mappa</span></div></div>
@@ -1051,6 +1148,15 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var qr = document.getElementById('desktop-mobile-gate-qr');
+  var urlLabel = document.getElementById('desktop-mobile-gate-url');
+  var mobileUrl = 'https://www.5terrego.com/';
+  if (qr) qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=' + encodeURIComponent(mobileUrl);
+  if (urlLabel) urlLabel.textContent = '5TerreGo.com';
+}());
+</script>
 
 <script>
 (function () {
