@@ -686,16 +686,17 @@
     .site-official-item { flex-basis: min(82%, 360px) !important; }
     .site-village-tile { flex-basis: min(76%, 360px) !important; }
 
-    /* Hide satellite tile seams/sub-pixel squares */
+    /* Safe satellite seam softener: do not resize or move Leaflet tiles */
     #map .leaflet-tile-pane,
     #trail-mini-map .leaflet-tile-pane {
-      filter: saturate(1.012) contrast(1.006) blur(.18px);
       transform: translate3d(0,0,0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
     #map .leaflet-tile-container,
-    #trail-mini-map .leaflet-tile-container {
+    #trail-mini-map .leaflet-tile-container,
+    #map .leaflet-layer,
+    #trail-mini-map .leaflet-layer {
       transform-origin: 0 0 !important;
       will-change: transform;
       backface-visibility: hidden;
@@ -709,16 +710,18 @@
       image-rendering: auto !important;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      width: 260px !important;
-      height: 260px !important;
-      margin-left: -2px !important;
-      margin-top: -2px !important;
-      transform: translate3d(0,0,0);
-      transform-origin: center center;
     }
-    #map .leaflet-layer,
-    #trail-mini-map .leaflet-layer {
-      transform: translate3d(0,0,0);
+    #map::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 400;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(7,20,36,.028), rgba(255,255,255,.012) 48%, rgba(7,20,36,.028)),
+        linear-gradient(180deg, rgba(255,255,255,.010), rgba(7,20,36,.026));
+      opacity: .72;
+      mix-blend-mode: soft-light;
     }
     #map::after {
       content: '';
