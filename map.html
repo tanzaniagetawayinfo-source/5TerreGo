@@ -1625,7 +1625,33 @@
   function createPOIClusters(items) { var clusters = []; var threshold = 34; if (!map) return []; items.forEach(function(item) { var point; var cluster; var best = null; var bestDistance = Infinity; if (!item || !item.poi || !isValidCoords(item.poi.coords)) return; point = map.latLngToLayerPoint(item.poi.coords); clusters.forEach(function(candidate) { var dx = candidate.point.x - point.x; var dy = candidate.point.y - point.y; var distance = Math.sqrt(dx * dx + dy * dy); if (distance < threshold && distance < bestDistance) { bestDistance = distance; best = candidate; } }); if (best) { best.items.push(item); best.point.x = (best.point.x * (best.items.length - 1) + point.x) / best.items.length; best.point.y = (best.point.y * (best.items.length - 1) + point.y) / best.items.length; return; } cluster = { point: point, items: [item] }; clusters.push(cluster); }); return clusters; }
   function addPOIClusterToLayer(cluster) { var center; var marker; if (!cluster || !cluster.items || !cluster.items.length || !poiLayer) return; if (cluster.items.length === 1) { cluster.items[0].marker.addTo(poiLayer); return; } center = getClusterCenterFromItems(cluster.items); if (!center) return; marker = L.marker(center, { title: cluster.items.length + ' places', zIndexOffset: 2450, icon: createPOIClusterIcon(cluster.items.length, cluster.items[0] && cluster.items[0].poi ? cluster.items[0].poi.symbol : '📌') }).on('click', function(event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } if (map && map.getZoom() < 18) { map.flyTo(center, Math.min(18, map.getZoom() + 1.5), { duration: 0.55 }); return; } openPOIWithMapMove(cluster.items[0].poi, null); }); marker.addTo(poiLayer); }
   function updateFerryVisibilityForFilter() { var showFerries = currentMapFilter === 'all' || currentMapFilter === 'ferry'; if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
-  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; document.querySelectorAll('#map-filter-bar .mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.getAttribute('data-map-filter') === currentMapFilter); }); updateFerryVisibilityForFilter(); if (typeof updatePOIVisibility === 'function') updatePOIVisibility(); if (typeof updateTrailWidths === 'function') updateTrailWidths(); }
+  function getMapFilterLabels() {
+    var i18n = window.FTG_I18N;
+    var t = i18n && typeof i18n.t === 'function' ? i18n.t : function(key) { return key; };
+    return {
+      all: '✨ ' + t('all'),
+      discounts: '🔥 ' + t('exclusiveDiscounts'),
+      trails: '🥾 ' + t('trails'),
+      viewpoint: '📍 ' + t('viewpoints'),
+      beach: '🏖️ ' + t('beaches'),
+      food: '🍽️ ' + t('food'),
+      church: '⛪ ' + t('churches'),
+      monument: '🏛️ ' + t('monuments'),
+      station: '🚉 ' + t('stations'),
+      ferry: '⛴️ ' + t('ferry'),
+      curiosity: '✨ ' + t('curiosities')
+    };
+  }
+  function stabilizeMapFilterButtons() {
+    var labels = getMapFilterLabels();
+    document.querySelectorAll('#map-filter-bar [data-map-filter]').forEach(function(btn) {
+      var filter = btn.getAttribute('data-map-filter') || 'all';
+      if (labels[filter]) btn.textContent = labels[filter];
+      btn.removeAttribute('data-i18n-static-original');
+      btn.setAttribute('data-public-fixed-label', 'map-filter');
+    });
+  }
+  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; stabilizeMapFilterButtons(); document.querySelectorAll('#map-filter-bar .mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.getAttribute('data-map-filter') === currentMapFilter); }); updateFerryVisibilityForFilter(); if (typeof updatePOIVisibility === 'function') updatePOIVisibility(); if (typeof updateTrailWidths === 'function') updateTrailWidths(); }
   function parseCoords(raw) { var lat, lng, str, parts; raw = raw || {}; if (typeof raw.coords === 'string') { str = raw.coords.trim(); parts = str.split(','); if (parts.length > 2) { lat = Number(String(parts[0]).trim() + '.' + String(parts[1]).trim()); lng = Number(String(parts[2]).trim() + '.' + String(parts[3]).trim()); } else { lat = Number(String(parts[0]).trim()); lng = Number(String(parts[1]).trim()); } return { lat: lat, lng: lng }; } lat = Number(readValue(raw.lat, raw.latitude)); lng = Number(readValue(raw.lng, raw.longitude)); return { lat: lat, lng: lng }; }
   function getFirstImageField(raw) {
     var direct;
@@ -3170,10 +3196,22 @@
     var villageSmall = document.querySelector('.site-section:not(.site-pages-section) .site-section-head small');
     var pagesTitle = document.querySelector('.site-pages-section .site-section-head span');
     var pagesSmall = document.querySelector('.site-pages-section .site-section-head small');
+    var storyTitle = document.querySelector('#site-stories-section .site-feature-title');
+    var storyText = document.querySelector('#site-stories-section .site-feature-text');
+    var trailTitle = document.querySelector('#site-trails-section .site-feature-title');
+    var trailText = document.querySelector('#site-trails-section .site-feature-text');
+    var discountTitle = document.querySelector('#site-experiences-section .site-feature-title');
+    var discountText = document.querySelector('#site-experiences-section .site-feature-text');
     if (villageTitle) villageTitle.textContent = i18n && i18n.t ? i18n.t('fiveVillages') : 'I cinque borghi';
     if (villageSmall) villageSmall.textContent = i18n && i18n.t ? i18n.t('tapMap') : 'tocca per aprire la mappa';
     if (pagesTitle) pagesTitle.textContent = i18n && i18n.t ? i18n.t('startHere') : 'Inizia da qui';
     if (pagesSmall) pagesSmall.textContent = i18n && i18n.t ? i18n.t('siteSections') : 'sezioni';
+    if (storyTitle) storyTitle.textContent = i18n && i18n.t ? i18n.t('readBefore') : 'Storie utili.';
+    if (storyText) storyText.textContent = i18n && i18n.t ? i18n.t('storyText') : 'Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.';
+    if (trailTitle) trailTitle.textContent = i18n && i18n.t ? i18n.t('bookSmarter') : 'Sentieri chiari.';
+    if (trailText) trailText.textContent = i18n && i18n.t ? i18n.t('stayText') : 'Difficoltà, durata e altimetria per scegliere il percorso giusto prima di partire.';
+    if (discountTitle) discountTitle.textContent = i18n && i18n.t ? i18n.t('thingsDoing') : 'Sconti locali.';
+    if (discountText) discountText.textContent = i18n && i18n.t ? i18n.t('expText') : 'Offerte gratuite da attività selezionate. Nessuna commissione per i partner.';
   }
   function renderSiteViewFromMapData() {
     stabilizePublicSectionTitles();
@@ -3304,11 +3342,10 @@
   function getUserDisplayNameForI18N(user){ var meta; if (!user) return ''; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return ''; }
   function getLoginText(user){ var name = getUserDisplayNameForI18N(user || window.FTG_CURRENT_USER); if (!name) return t('login'); return t('userGreeting') + name; }
   function translateRemainingStaticUI() {
+    if (typeof stabilizeMapFilterButtons === 'function') stabilizeMapFilterButtons();
     var l = lang();
     var selectors = [
       '.site-institutional-badge > span:first-child',
-      '.site-feature-title',
-      '.site-feature-text',
       '.site-feature-cta-row a',
       '.site-places-copy',
       '.site-section-copy',
@@ -3330,7 +3367,6 @@
       '.site-footer-note',
       '.site-footer-contact-btn',
       '#site-section-bar .mode-btn',
-      '#map-filter-bar .mode-btn',
       '.app-menu-title',
       '.app-menu-quick-link',
       '.app-menu-quick-title',
@@ -3352,6 +3388,7 @@
         var original;
         var current;
         if (!el) return;
+        if (el.closest && el.closest('#map-filter-bar')) return;
         if (el.children.length > 0 && el.tagName !== 'BUTTON' && el.tagName !== 'A' && el.tagName !== 'OPTION') return;
         current = String(el.textContent || '').trim();
         if (!current || current === '—' || current.length < 2) return;
@@ -3370,12 +3407,12 @@
   function applyLanguage(next, options){ var l = next || lang(); var flag = document.getElementById('language-flag'); var flagImg = document.getElementById('language-flag-img'); options = options || {}; localStorage.setItem('5terrego_language', l); document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; if (flag) flag.setAttribute('data-current-language', l); if (flagImg) { flagImg.src = 'https://hatscripts.github.io/circle-flags/flags/' + FLAGS[l] + '.svg'; flagImg.alt = NAMES[l]; }
     document.querySelectorAll('.language-option').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-lang') === l); });
     setText('#login', t('preferences')); var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest'); setText('.app-menu-kicker', t('menuHi')); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search'));
-    setText('#map-filter-bar [data-map-filter="all"]', '✨ ' + t('all')); setText('#map-filter-bar [data-map-filter="trails"]', '🥾 ' + t('trails')); setText('#map-filter-bar [data-map-filter="viewpoint"]', '📍 ' + t('viewpoints')); setText('#map-filter-bar [data-map-filter="beach"]', '🏖️ ' + t('beaches')); setText('#map-filter-bar [data-map-filter="food"]', '🍽️ ' + t('food')); setText('#map-filter-bar [data-map-filter="church"]', '⛪ ' + t('churches')); setText('#map-filter-bar [data-map-filter="monument"]', '🏛️ ' + t('monuments')); setText('#map-filter-bar [data-map-filter="station"]', '🚉 ' + t('stations')); setText('#map-filter-bar [data-map-filter="ferry"]', '⛴️ ' + t('ferry')); setText('#map-filter-bar [data-map-filter="curiosity"]', '✨ ' + t('curiosities')); setText('#map-filter-bar [data-map-filter="discounts"]', '🔥 ' + t('exclusiveDiscounts'));
+    if (typeof stabilizeMapFilterButtons === 'function') stabilizeMapFilterButtons();
     setText('#tour-recenter-top', t('recenter')); setText('#tour-exit-top', t('exitTour'));
     setText('.site-view-title', t('heroTitle')); setText('.site-view-text', t('heroText')); setText('#open-interactive-map-btn', t('openInteractiveMap')); setAllText('.site-hero-actions a', [t('stories'),t('experiences'),t('bookStay')]);
     setText('.site-section:not(.site-pages-section) .site-section-head span', t('fiveVillages')); setText('.site-section:not(.site-pages-section) .site-section-head small', t('tapMap'));
     setText('.site-pages-section .site-section-head span', t('startHere')); setText('.site-pages-section .site-section-head small', t('siteSections')); 
-    setAllText('.site-feature-title', [t('readBefore'),t('bookSmarter'),t('thingsDoing')]); setAllText('.site-feature-text', [t('storyText'),t('stayText'),t('expText')]); setAllText('.site-feature-cta-row a', [t('openStories'),t('openStay'),t('openExperiences')]);
+    setText('#site-stories-section .site-feature-title', t('readBefore')); setText('#site-stories-section .site-feature-text', t('storyText')); setText('#site-trails-section .site-feature-title', t('bookSmarter')); setText('#site-trails-section .site-feature-text', t('stayText')); setText('#site-experiences-section .site-feature-title', t('thingsDoing')); setText('#site-experiences-section .site-feature-text', t('expText')); setAllText('.site-feature-cta-row a', [t('openStories'),t('openStay'),t('openExperiences')]);
     setText('.site-places-title', t('placesSection')); setText('.site-places-copy', t('placesCopy')); setText('.site-weather-title', t('weather')); setText('.site-weather-text', t('weatherNote')); setText('.site-official-kicker', t('officialKicker')); setText('.site-official-title', t('officialTitle')); setText('.site-official-text', t('officialText')); if (window.FTG_RENDER_OFFICIAL_COMMUNICATIONS) window.FTG_RENDER_OFFICIAL_COMMUNICATIONS(); document.querySelectorAll('.site-empty').forEach(function(el){ if (/Loading weather|Caricamento meteo|正在加载天气|جارٍ تحميل الطقس|Chargement de la météo|Wetterdaten|Загрузка погоды/.test(el.textContent)) el.textContent = t('loadingWeather'); }); if (typeof renderSiteWeatherSection === 'function') renderSiteWeatherSection();
     setText('.site-trails-section .site-section-head span', t('trails')); setText('.site-trails-section .site-section-copy', t('trailCopy')); setAllText('.site-trail-filter span', [t('from'),t('difficulty')]);
     setAllText('.trail-info-label', [t('difficulty'),t('distance'),t('estimatedTime'),t('shoes'),t('price'),t('gainLoss')]); setText('.trail-section-title', t('profile'));
