@@ -1055,7 +1055,105 @@
     .village-calendar-event-list,
     .village-calendar-event,
     .village-calendar-event-note { display: none !important; }
-  </style>
+  
+
+/* === Language popup overlay === */
+.lang-popup-overlay{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483647 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:22px !important;
+  background:rgba(3, 10, 18, .52) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%) !important;
+  backdrop-filter:blur(18px) saturate(140%) !important;
+}
+.lang-popup-overlay.is-open{display:flex !important;}
+.lang-popup-panel{
+  width:min(340px, calc(100vw - 34px)) !important;
+  max-height:min(76vh, 620px) !important;
+  overflow:hidden !important;
+  border-radius:28px !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.72) !important;
+  box-shadow:0 28px 90px rgba(0,0,0,.42) !important;
+  color:#102033 !important;
+  transform:scale(.96) translateY(10px) !important;
+  animation:langPopupIn .18s ease-out forwards !important;
+}
+@keyframes langPopupIn{to{transform:scale(1) translateY(0);}}
+.lang-popup-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  padding:18px 18px 10px !important;
+  font-weight:900 !important;
+  font-size:16px !important;
+  letter-spacing:-.02em !important;
+}
+.lang-popup-close{
+  appearance:none !important;
+  border:0 !important;
+  width:34px !important;
+  height:34px !important;
+  border-radius:999px !important;
+  background:rgba(15,35,55,.08) !important;
+  color:#102033 !important;
+  font-size:24px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+}
+.lang-popup-list{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  padding:10px 14px 16px !important;
+  overflow:auto !important;
+  max-height:calc(76vh - 70px) !important;
+}
+.lang-popup-option{
+  appearance:none !important;
+  border:0 !important;
+  min-height:78px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  padding:12px 10px !important;
+  border-radius:20px !important;
+  background:rgba(7,31,52,.07) !important;
+  color:#102033 !important;
+  font-size:13px !important;
+  font-weight:850 !important;
+  text-align:center !important;
+  cursor:pointer !important;
+}
+.lang-popup-option:active{transform:scale(.975) !important;}
+.lang-popup-option.is-current{
+  background:rgba(0,122,255,.15) !important;
+  color:#075eb8 !important;
+}
+.lang-popup-flag{font-size:28px !important; line-height:1 !important;}
+.lang-popup-name{line-height:1.1 !important;}
+.lang-popup-code{display:none !important;}
+body.lang-popup-open{overflow:hidden !important;}
+body.lang-popup-open .language-menu,
+body.lang-popup-open .lang-menu,
+body.lang-popup-open .language-dropdown,
+body.lang-popup-open .lang-dropdown,
+body.lang-popup-open .translations-menu,
+body.lang-popup-open [class*="language-options"],
+body.lang-popup-open [class*="lang-options"]{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+</style>
   <script>
     (function(){
       var iconUrl = 'app.png';
@@ -4404,5 +4502,140 @@
     observer.observe(document.documentElement, { childList: true, subtree: true });
   })();
 </script>
+
+
+<script>
+(function(){
+  window.__languagePopupInstalled = true;
+
+  const LANGS = [
+    { code:'en', flag:'🇬🇧', name:'English' },
+    { code:'it', flag:'🇮🇹', name:'Italiano' },
+    { code:'fr', flag:'🇫🇷', name:'Français' },
+    { code:'de', flag:'🇩🇪', name:'Deutsch' },
+    { code:'ru', flag:'🇷🇺', name:'Русский' },
+    { code:'zh', flag:'🇨🇳', name:'中文' },
+    { code:'ar', flag:'🇦🇪', name:'العربية' }
+  ];
+
+  function getCurrentLang(){
+    return (localStorage.getItem('selectedLang') || document.documentElement.getAttribute('lang') || 'en').toLowerCase();
+  }
+
+  function closeOldLanguageMenus(){
+    document.querySelectorAll('.language-menu,.lang-menu,.language-dropdown,.lang-dropdown,.translations-menu,[class*="language-options"],[class*="lang-options"]').forEach(function(el){
+      if (!el.closest('#langPopupOverlay')) {
+        el.style.setProperty('display','none','important');
+        el.style.setProperty('visibility','hidden','important');
+        el.style.setProperty('pointer-events','none','important');
+      }
+    });
+  }
+
+  function isLanguageTrigger(el){
+    if (!el) return false;
+    const trigger = el.closest('[data-lang-trigger], .lang-trigger, .language-trigger, .language-btn, .language-button, .lang-btn, .lang-pill, .language-pill, #languageBtn, #langBtn, #languageSelector, .language-selector');
+    if (trigger) return true;
+    const text = (el.innerText || el.textContent || '').trim();
+    return /🇬🇧|🇮🇹|🇫🇷|🇩🇪|🇷🇺|🇨🇳|🇦🇪|English|Italiano|Français|Deutsch|Русский|中文|العربية/i.test(text) && !!el.closest('button,div,span,a');
+  }
+
+  function buildPopup(){
+    let overlay = document.getElementById('langPopupOverlay');
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.id = 'langPopupOverlay';
+    overlay.className = 'lang-popup-overlay';
+    overlay.setAttribute('aria-hidden','true');
+    overlay.innerHTML = `
+      <div class="lang-popup-panel" role="dialog" aria-modal="true" aria-label="Choose language">
+        <div class="lang-popup-head">
+          <span>Scegli lingua</span>
+          <button type="button" class="lang-popup-close" aria-label="Chiudi">×</button>
+        </div>
+        <div class="lang-popup-list"></div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function(e){
+      if (e.target === overlay || e.target.closest('.lang-popup-close')) closePopup();
+    }, true);
+
+    return overlay;
+  }
+
+  function renderOptions(){
+    const overlay = buildPopup();
+    const list = overlay.querySelector('.lang-popup-list');
+    const current = getCurrentLang();
+    list.innerHTML = LANGS.map(function(lang){
+      return `<button type="button" class="lang-popup-option ${current === lang.code ? 'is-current' : ''}" data-lang-code="${lang.code}">
+        <span class="lang-popup-flag">${lang.flag}</span>
+        <span class="lang-popup-name">${lang.name}</span>
+        <span class="lang-popup-code">${lang.code.toUpperCase()}</span>
+      </button>`;
+    }).join('');
+  }
+
+  function openPopup(){
+    closeOldLanguageMenus();
+    renderOptions();
+    const overlay = buildPopup();
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden','false');
+    document.body.classList.add('lang-popup-open');
+  }
+
+  function closePopup(){
+    const overlay = document.getElementById('langPopupOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden','true');
+    document.body.classList.remove('lang-popup-open');
+  }
+
+  function setLanguage(code){
+    const select = document.querySelector('select[id*="lang"], select[class*="lang"], select[id*="language"], select[class*="language"]');
+    document.documentElement.setAttribute('lang', code);
+    localStorage.setItem('selectedLang', code);
+
+    if (select) {
+      select.value = code;
+      select.dispatchEvent(new Event('change', { bubbles:true }));
+    }
+    if (typeof window.setLanguage === 'function') window.setLanguage(code);
+    if (typeof window.changeLanguage === 'function') window.changeLanguage(code);
+    if (typeof window.applyLanguage === 'function') window.applyLanguage(code);
+    document.dispatchEvent(new CustomEvent('language:change', { detail:{ lang:code } }));
+    closePopup();
+  }
+
+  document.addEventListener('click', function(e){
+    const option = e.target.closest('.lang-popup-option');
+    if (option) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setLanguage(option.dataset.langCode);
+      return false;
+    }
+
+    if (e.target.closest('#langPopupOverlay')) return;
+
+    if (isLanguageTrigger(e.target)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openPopup();
+      return false;
+    }
+  }, true);
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closePopup();
+  });
+})();
+</script>
+
 </body>
 </html>
