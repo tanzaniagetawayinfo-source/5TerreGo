@@ -4518,8 +4518,24 @@ body.lang-popup-open [class*="lang-options"]{
     { code:'ar', flag:'🇦🇪', name:'العربية' }
   ];
 
+  function normalizeLang(code){
+    code = String(code || 'en').toLowerCase();
+    if (code.startsWith('zh')) return 'zh';
+    if (code.startsWith('ar')) return 'ar';
+    if (code.startsWith('it')) return 'it';
+    if (code.startsWith('fr')) return 'fr';
+    if (code.startsWith('de')) return 'de';
+    if (code.startsWith('ru')) return 'ru';
+    return 'en';
+  }
+
+  function getLang(code){
+    const normalized = normalizeLang(code);
+    return LANGS.find(function(lang){ return lang.code === normalized; }) || LANGS[0];
+  }
+
   function getCurrentLang(){
-    return (localStorage.getItem('selectedLang') || document.documentElement.getAttribute('lang') || 'en').toLowerCase();
+    return normalizeLang(localStorage.getItem('selectedLang') || document.documentElement.getAttribute('lang') || 'en');
   }
 
   function closeOldLanguageMenus(){
@@ -4528,16 +4544,28 @@ body.lang-popup-open [class*="lang-options"]{
         el.style.setProperty('display','none','important');
         el.style.setProperty('visibility','hidden','important');
         el.style.setProperty('pointer-events','none','important');
+        el.classList.remove('open','show','active','is-open');
       }
     });
   }
 
+  function isInsideActionBar(el){
+    return !!(el && el.closest('.action-bar,.actionbar,#actionBar,.top-action-bar,.mobile-action-bar,.search-action-bar'));
+  }
+
   function isLanguageTrigger(el){
     if (!el) return false;
-    const trigger = el.closest('[data-lang-trigger], .lang-trigger, .language-trigger, .language-btn, .language-button, .lang-btn, .lang-pill, .language-pill, #languageBtn, #langBtn, #languageSelector, .language-selector');
-    if (trigger) return true;
-    const text = (el.innerText || el.textContent || '').trim();
-    return /🇬🇧|🇮🇹|🇫🇷|🇩🇪|🇷🇺|🇨🇳|🇦🇪|English|Italiano|Français|Deutsch|Русский|中文|العربية/i.test(text) && !!el.closest('button,div,span,a');
+    const explicit = el.closest('[data-lang-trigger], .lang-trigger, .language-trigger, .language-btn, .language-button, .lang-btn, .lang-pill, .language-pill, #languageBtn, #langBtn, #languageSelector, .language-selector, [aria-label*="language" i], [aria-label*="lingua" i]');
+    if (explicit) return explicit;
+
+    const clickable = el.closest('button,a,[role="button"],.chip,.pill,div,span');
+    if (!clickable) return false;
+
+    const text = (clickable.innerText || clickable.textContent || '').trim();
+    const hasLanguageText = /🇬🇧|🇮🇹|🇫🇷|🇩🇪|🇷🇺|🇨🇳|🇦🇪|English|Italiano|Français|Deutsch|Русский|中文|العربية/i.test(text);
+    if (!hasLanguageText) return false;
+
+    return isInsideActionBar(clickable) ? clickable : false;
   }
 
   function buildPopup(){
@@ -4596,21 +4624,58 @@ body.lang-popup-open [class*="lang-options"]{
     document.body.classList.remove('lang-popup-open');
   }
 
+  function updateLanguageTriggers(code){
+    const lang = getLang(code);
+    const label = `${lang.flag} ${lang.name}`;
+    document.querySelectorAll('[data-lang-trigger], .lang-trigger, .language-trigger, .language-btn, .language-button, .lang-btn, .lang-pill, .language-pill, #languageBtn, #langBtn, #languageSelector, .language-selector').forEach(function(btn){
+      if (btn.tagName === 'SELECT') return;
+      btn.setAttribute('data-current-lang', lang.code);
+      btn.setAttribute('aria-label', 'Lingua: ' + lang.name);
+
+      const flagEl = btn.querySelector('.flag,.lang-flag,.language-flag,[data-lang-flag]');
+      const nameEl = btn.querySelector('.lang-name,.language-name,[data-lang-name]');
+
+      if (flagEl) flagEl.textContent = lang.flag;
+      if (nameEl) nameEl.textContent = lang.name;
+
+      if (!flagEl && !nameEl) {
+        const plainText = (btn.textContent || '').trim();
+        if (/🇬🇧|🇮🇹|🇫🇷|🇩🇪|🇷🇺|🇨🇳|🇦🇪|English|Italiano|Français|Deutsch|Русский|中文|العربية/i.test(plainText)) {
+          btn.textContent = label;
+        }
+      }
+    });
+  }
+
   function setLanguage(code){
+    const lang = getLang(code);
     const select = document.querySelector('select[id*="lang"], select[class*="lang"], select[id*="language"], select[class*="language"]');
-    document.documentElement.setAttribute('lang', code);
-    localStorage.setItem('selectedLang', code);
+
+    document.documentElement.setAttribute('lang', lang.code);
+    localStorage.setItem('selectedLang', lang.code);
+    updateLanguageTriggers(lang.code);
 
     if (select) {
-      select.value = code;
+      select.value = lang.code;
       select.dispatchEvent(new Event('change', { bubbles:true }));
     }
-    if (typeof window.setLanguage === 'function') window.setLanguage(code);
-    if (typeof window.changeLanguage === 'function') window.changeLanguage(code);
-    if (typeof window.applyLanguage === 'function') window.applyLanguage(code);
-    document.dispatchEvent(new CustomEvent('language:change', { detail:{ lang:code } }));
+    if (typeof window.setLanguage === 'function') window.setLanguage(lang.code);
+    if (typeof window.changeLanguage === 'function') window.changeLanguage(lang.code);
+    if (typeof window.applyLanguage === 'function') window.applyLanguage(lang.code);
+    document.dispatchEvent(new CustomEvent('language:change', { detail:{ lang:lang.code, flag:lang.flag, name:lang.name } }));
     closePopup();
+    setTimeout(function(){ updateLanguageTriggers(lang.code); closeOldLanguageMenus(); }, 0);
   }
+
+  document.addEventListener('pointerdown', function(e){
+    const trigger = isLanguageTrigger(e.target);
+    if (trigger && !e.target.closest('#langPopupOverlay')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openPopup();
+      return false;
+    }
+  }, true);
 
   document.addEventListener('click', function(e){
     const option = e.target.closest('.lang-popup-option');
@@ -4623,7 +4688,8 @@ body.lang-popup-open [class*="lang-options"]{
 
     if (e.target.closest('#langPopupOverlay')) return;
 
-    if (isLanguageTrigger(e.target)) {
+    const trigger = isLanguageTrigger(e.target);
+    if (trigger) {
       e.preventDefault();
       e.stopImmediatePropagation();
       openPopup();
@@ -4634,6 +4700,17 @@ body.lang-popup-open [class*="lang-options"]{
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape') closePopup();
   });
+
+  document.addEventListener('DOMContentLoaded', function(){
+    updateLanguageTriggers(getCurrentLang());
+    closeOldLanguageMenus();
+  });
+
+  const observer = new MutationObserver(function(){
+    updateLanguageTriggers(getCurrentLang());
+    if (document.body.classList.contains('lang-popup-open')) closeOldLanguageMenus();
+  });
+  observer.observe(document.documentElement, { childList:true, subtree:true });
 })();
 </script>
 
