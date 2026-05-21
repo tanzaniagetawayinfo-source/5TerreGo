@@ -23,6 +23,41 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; min-height: 100%; height: auto; overflow-x: hidden; overflow-y: auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: linear-gradient(180deg, #0b2a3d 0%, #082033 18%, #071424 46%, #071424 100%); position: relative; }
     #map { position: relative; z-index: 1; width: 100vw; height: 58dvh; min-height: 430px; background: #071424; touch-action: pan-y; }
+    .village-page-intro { display: none; }
+    body.village-page-mode .village-page-intro { display: block; }
+    body.village-page-mode #site-villages-section { display: none; }
+    .village-page-card { padding: 0; color: #fff; }
+    .village-page-kicker { display: inline-flex; align-items: center; margin-bottom: 10px; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.68); font-size: 10px; line-height: 1; letter-spacing: .14em; text-transform: uppercase; font-weight: 950; }
+    .village-page-title { margin: 0 0 10px; font-size: clamp(38px, 11vw, 62px); line-height: .9; letter-spacing: -.078em; font-weight: 950; }
+    body.village-page-mode #site-welcome-section { display: none !important; }
+    body.village-page-mode #site-stories-section { display: none !important; }
+    .village-calendar-section { display: none; }
+    body.village-page-mode .village-calendar-section { display: block; }
+    .village-calendar-card { position: relative; overflow: hidden; border-radius: 34px; padding: 16px; background: rgba(255,255,255,.92); color: #111; border: 1px solid rgba(255,255,255,.62); box-shadow: 0 18px 46px rgba(0,0,0,.12); }
+    .village-calendar-card::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 18% 0%, rgba(30,155,255,.16), transparent 34%), radial-gradient(circle at 84% 12%, rgba(255,138,29,.14), transparent 30%); }
+    .village-calendar-head, .village-calendar-days, .village-calendar-grid, .village-calendar-events { position: relative; z-index: 1; }
+    .village-calendar-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .village-calendar-kicker { display: block; margin-bottom: 5px; font-size: 10px; line-height: 1; letter-spacing: .14em; text-transform: uppercase; font-weight: 950; color: rgba(0,0,0,.42); }
+    .village-calendar-title { margin: 0; font-size: 31px; line-height: .92; letter-spacing: -.07em; font-weight: 950; color: #111; }
+    .village-calendar-month { flex: 0 0 auto; min-height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 8px 11px; border-radius: 999px; background: rgba(0,0,0,.065); color: rgba(0,0,0,.62); font-size: 11px; line-height: 1; font-weight: 950; }
+    .village-calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 7px; color: rgba(0,0,0,.34); font-size: 9px; line-height: 1; text-align: center; letter-spacing: .08em; text-transform: uppercase; font-weight: 950; }
+    .village-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .village-calendar-day { aspect-ratio: 1 / 1; min-width: 0; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.045); color: rgba(0,0,0,.76); font-size: 13px; line-height: 1; font-weight: 900; }
+    .village-calendar-day.is-muted { opacity: .26; }
+    .village-calendar-day.is-today { background: #111; color: #fff; box-shadow: 0 10px 24px rgba(0,0,0,.16); }
+    .village-calendar-day.has-event { background: rgba(255,138,29,.22); color: #111; position: relative; }
+    .village-calendar-day.has-event::after { content: ''; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; border-radius: 999px; background: #ff8a1d; transform: translateX(-50%); }
+    .village-calendar-events { margin-top: 13px; display: grid; gap: 8px; }
+    .village-calendar-event { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; padding: 10px 11px; border-radius: 20px; background: rgba(0,0,0,.055); }
+    .village-calendar-event-date { min-width: 46px; min-height: 38px; display: grid; place-items: center; border-radius: 15px; background: rgba(255,255,255,.78); color: #111; font-size: 12px; line-height: 1; font-weight: 950; box-shadow: inset 0 1px 0 rgba(255,255,255,.5); }
+    .village-calendar-event-title { font-size: 13px; line-height: 1.15; font-weight: 950; letter-spacing: -.035em; color: #111; }
+    .village-calendar-event-note { margin-top: 3px; font-size: 11px; line-height: 1.24; font-weight: 760; color: rgba(0,0,0,.50); }
+    .village-page-text { margin: 0; max-width: 620px; font-size: 15px; line-height: 1.52; color: rgba(255,255,255,.74); font-weight: 720; }
+    .village-page-stats { display: flex; gap: 8px; overflow-x: auto; padding: 14px 0 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .village-page-stats::-webkit-scrollbar { display: none; }
+    .village-page-stat { flex: 0 0 auto; min-width: 106px; padding: 10px 12px; border-radius: 20px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.10); }
+    .village-page-stat strong { display: block; font-size: 20px; line-height: 1; letter-spacing: -.05em; font-weight: 950; color: #fff; }
+    .village-page-stat span { display: block; margin-top: 5px; font-size: 10px; line-height: 1; letter-spacing: .11em; text-transform: uppercase; font-weight: 950; color: rgba(255,255,255,.46); }
     #site-map-tips { position: absolute; left: 18px; right: 50vw; top: clamp(274px, 45dvh, 372px); z-index: 930; display: flex; justify-content: center; pointer-events: none; opacity: 1; transform: translateY(0); transition: opacity .25s ease, transform .25s ease; }
     .site-map-tip-bubble { width: 100%; max-width: calc(50vw - 36px); height: 96px; min-height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 13px 14px; border-radius: 28px; background: rgba(7,20,36,.42); color: #fff; border: 1px solid rgba(255,255,255,.20); box-shadow: 0 16px 34px rgba(0,0,0,.16); backdrop-filter: blur(18px) saturate(1.12); -webkit-backdrop-filter: blur(18px) saturate(1.12); text-align: center; overflow: hidden; }
     .site-map-tip-title { display: block; width: 100%; font-size: 10px; line-height: 1; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.62); }
@@ -236,7 +271,7 @@
     .site-quick-value { margin-top: 8px; font-size: 24px; line-height: 1; font-weight: 950; letter-spacing: -0.055em; color: #111; }
     .site-quick-note { margin-top: 7px; font-size: 11px; line-height: 1.25; color: rgba(0,0,0,.50); }
     .site-horizontal-list { display: flex; gap: 11px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 1px 2px 5px; }
-    .site-village-tile { flex: 0 0 76%; min-height: 252px; border-radius: 32px; overflow: hidden; position: relative; border: 1px solid rgba(0,0,0,.08); background: #ddd; color: #fff; box-shadow: 0 20px 55px rgba(0,0,0,.14); }
+    .site-village-tile { flex: 0 0 76%; min-height: 252px; border-radius: 32px; overflow: hidden; position: relative; border: 1px solid rgba(0,0,0,.08); background: #ddd; color: #fff; box-shadow: 0 20px 55px rgba(0,0,0,.14); cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .site-village-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease; }
     .site-village-tile:active img { transform: scale(1.04); }
     .site-village-tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,.72)); }
@@ -463,6 +498,7 @@
     body.poi-panel-active #user-location-btn, body.trail-page-active #user-location-btn, body.ai-chat-active #user-location-btn, body.village-tour-active #user-location-btn, body.city-card-active #user-location-btn, body.tour-navigation-active #user-location-btn, body:not(.map-focus-mode) #user-location-btn, body.quick-menu-expanded #user-location-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     body.poi-panel-active #map-home-btn, body.trail-page-active #map-home-btn, body.ai-chat-active #map-home-btn, body.village-tour-active #map-home-btn, body.city-card-active #map-home-btn, body.tour-navigation-active #map-home-btn, body:not(.map-focus-mode) #map-home-btn, body.quick-menu-expanded #map-home-btn { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     .bottom-card { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 1000; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; opacity: 0; transform: translateY(40px); transition: opacity 0.4s ease, transform 0.4s ease; touch-action: none; -webkit-user-select: none; user-select: none; }
+    body:not(.map-focus-mode) #card, body.village-page-mode #card { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
     .bottom-card.is-visible { opacity: 1; transform: translateY(0); }
     .card-media { position: relative; width: 100%; height: 140px; overflow: hidden; background: rgba(255,255,255,0.08); }
     .bottom-card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; transition: opacity 0.35s ease; }
@@ -917,6 +953,108 @@
         pointer-events: auto !important;
       }
     }
+  
+    /* Calendario borgo: minimal, senza eventi finti/debug */
+    .village-calendar-section { display: none; }
+    body.village-page-mode .village-calendar-section { display: block; }
+    .village-calendar-section .site-section-head span { font-size: 26px; letter-spacing: -0.05em; }
+    .village-calendar-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      padding: 18px 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: none;
+    }
+    .village-calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .village-calendar-kicker {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 900;
+      color: rgba(255,255,255,.50);
+    }
+    .village-calendar-title {
+      margin: 0;
+      font-size: 30px;
+      line-height: .95;
+      letter-spacing: -.06em;
+      font-weight: 950;
+      color: #fff;
+    }
+    .village-calendar-month {
+      flex: 0 0 auto;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.13);
+      color: rgba(255,255,255,.76);
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 900;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .village-calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 7px;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,.38);
+      font-size: 9px;
+      line-height: 1;
+      text-align: center;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+    .village-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 7px;
+    }
+    .village-calendar-day {
+      aspect-ratio: 1 / 1;
+      min-width: 0;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.11);
+      border: 1px solid rgba(255,255,255,.11);
+      color: rgba(255,255,255,.72);
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 850;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: none;
+    }
+    .village-calendar-day.is-muted { opacity: .28; }
+    .village-calendar-day.is-today {
+      background: rgba(255,255,255,.82);
+      color: #081520;
+      border-color: rgba(255,255,255,.68);
+    }
+    .village-calendar-day.has-event::after,
+    .village-calendar-event-list,
+    .village-calendar-event,
+    .village-calendar-event-note { display: none !important; }
   </style>
   <script>
     (function(){
@@ -970,7 +1108,37 @@
       </div>
     </section>
 
-    <section class="site-section">
+    <section id="village-page-intro" class="site-section village-page-intro" aria-label="Pagina borgo">
+      <div class="village-page-card">
+        <div id="village-page-kicker" class="village-page-kicker">Borgo</div>
+        <h2 id="village-page-title" class="village-page-title"></h2>
+        <p id="village-page-text" class="village-page-text"></p>
+        <div id="village-page-stats" class="village-page-stats" aria-label="Dati rapidi borgo"></div>
+      </div>
+    </section>
+
+    <section id="village-calendar-section" class="site-section village-calendar-section" aria-label="Calendario borgo">
+      <div class="site-section-head"><span>Calendario</span><small>eventi</small></div>
+      <div class="village-calendar-card">
+        <div class="village-calendar-head">
+          <div>
+            <span class="village-calendar-kicker">Eventi del borgo</span>
+            <h3 class="village-calendar-title">Calendario</h3>
+          </div>
+          <div class="village-calendar-month">Giugno</div>
+        </div>
+        <div class="village-calendar-days"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span></div>
+        <div class="village-calendar-grid" aria-label="Calendario eventi">
+          <div class="village-calendar-day is-muted">26</div><div class="village-calendar-day is-muted">27</div><div class="village-calendar-day is-muted">28</div><div class="village-calendar-day is-muted">29</div><div class="village-calendar-day is-muted">30</div><div class="village-calendar-day">1</div><div class="village-calendar-day">2</div>
+          <div class="village-calendar-day">3</div><div class="village-calendar-day">4</div><div class="village-calendar-day">5</div><div class="village-calendar-day">6</div><div class="village-calendar-day">7</div><div class="village-calendar-day">8</div><div class="village-calendar-day">9</div>
+          <div class="village-calendar-day">10</div><div class="village-calendar-day">11</div><div class="village-calendar-day is-today">12</div><div class="village-calendar-day">13</div><div class="village-calendar-day">14</div><div class="village-calendar-day">15</div><div class="village-calendar-day">16</div>
+          <div class="village-calendar-day">17</div><div class="village-calendar-day">18</div><div class="village-calendar-day">19</div><div class="village-calendar-day">20</div><div class="village-calendar-day">21</div><div class="village-calendar-day">22</div><div class="village-calendar-day">23</div>
+          <div class="village-calendar-day">24</div><div class="village-calendar-day">25</div><div class="village-calendar-day">26</div><div class="village-calendar-day">27</div><div class="village-calendar-day">28</div><div class="village-calendar-day">29</div><div class="village-calendar-day">30</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="site-villages-section" class="site-section">
       <div class="site-section-head"><span>I cinque borghi</span><small>tocca per aprire la mappa</small></div>
       <div id="site-villages" class="site-horizontal-list"></div>
     </section>
@@ -1184,6 +1352,36 @@
     { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' }
   ];
 
+  function normalizeVillageSlug(value) { return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  function getVillagePageSlugFromURL() {
+    var params;
+    var path;
+    var hash;
+    try {
+      params = new URLSearchParams(window.location.search || '');
+      if (params.get('village')) return normalizeVillageSlug(params.get('village'));
+      if (params.get('borgo')) return normalizeVillageSlug(params.get('borgo'));
+    } catch (error) {}
+    hash = String(window.location.hash || '').replace(/^#/, '');
+    if (hash.indexOf('village=') === 0) return normalizeVillageSlug(hash.split('=')[1]);
+    path = String(window.location.pathname || '').split('/').pop().replace(/\.html?$/i, '');
+    if (path && path !== 'index' && path !== 'map') return normalizeVillageSlug(path);
+    return '';
+  }
+  function getVillagePageContext() {
+    var slug = getVillagePageSlugFromURL();
+    if (!slug) return null;
+    return places.find(function(place) { return normalizeVillageSlug(place.name) === slug; }) || null;
+  }
+  var villagePageContext = getVillagePageContext();
+  var villagePageAppliedMapCenter = false;
+  var villagePageDescriptions = {
+    monterosso: 'Monterosso è il borgo più ampio delle Cinque Terre e il più semplice per chi cerca mare, servizi e una passeggiata comoda. La pagina raccoglie luoghi utili, storie, sentieri e informazioni collegate a Monterosso.',
+    vernazza: 'Vernazza è uno dei borghi più scenografici delle Cinque Terre, con il piccolo porto, le case colorate e i punti panoramici sopra il paese. Qui trovi contenuti e luoghi filtrati per Vernazza.',
+    corniglia: 'Corniglia è il borgo sospeso sopra il mare: più tranquillo, panoramico e diverso dagli altri perché non nasce direttamente sul porto. Questa pagina mostra contenuti utili collegati a Corniglia.',
+    manarola: 'Manarola è il borgo dei tramonti e delle viste iconiche sulle case colorate affacciate sulla roccia. In questa pagina trovi POI, storie e percorsi collegati a Manarola.',
+    riomaggiore: 'Riomaggiore è la porta sud delle Cinque Terre, con vicoli ripidi, il piccolo porto e collegamenti verso Manarola e La Spezia. Qui trovi contenuti filtrati per Riomaggiore.'
+  };
   var map, satelliteLayer, roadsLayer, detailedRoadsLayer, whiteLayer, labelsLayer, ferryRoutesLayer, ferryVehiclesLayer, poiLayer, trailsLayer;
   var card = document.getElementById('card');
   var cardTitle = document.getElementById('card-title');
@@ -3065,7 +3263,7 @@
   function stopSiteMapTips() { if (!siteMapTipTimer) return; window.clearInterval(siteMapTipTimer); siteMapTipTimer = null; }
   function updateSiteHeroPinnedVideo() { var storySection = document.getElementById('site-stories-section'); var rect; var panelCenter; var parallaxY; if (!storySection) return; rect = storySection.getBoundingClientRect(); panelCenter = window.innerHeight / 2; parallaxY = (panelCenter - (rect.top + rect.height / 2)) * 0.08; parallaxY = Math.max(-30, Math.min(30, parallaxY)); storySection.style.setProperty('--story-parallax-y', parallaxY.toFixed(1) + 'px'); }
   function setUnifiedMapInteractions(mapFocus) { if (!map) return; if (mapFocus) { if (map.dragging) map.dragging.enable(); if (map.scrollWheelZoom) map.scrollWheelZoom.enable(); if (map.touchZoom) map.touchZoom.enable(); if (map.doubleClickZoom) map.doubleClickZoom.enable(); if (map.boxZoom) map.boxZoom.enable(); if (map.keyboard) map.keyboard.enable(); return; } if (map.dragging) map.dragging.disable(); if (map.scrollWheelZoom) map.scrollWheelZoom.disable(); if (map.touchZoom) map.touchZoom.enable(); if (map.doubleClickZoom) map.doubleClickZoom.enable(); if (map.boxZoom) map.boxZoom.disable(); if (map.keyboard) map.keyboard.disable(); }
-  function syncUnifiedMapPageMode(forceMapFocus) { var mapFocus; if (!map || !siteViewPanel) return; mapFocus = isReturningToPageMode ? false : (forceMapFocus === undefined ? map.getZoom() > map.getMinZoom() + 0.15 : Boolean(forceMapFocus)); document.body.classList.toggle('map-focus-mode', mapFocus); document.body.classList.toggle('site-view-active', !mapFocus); setUnifiedMapInteractions(mapFocus); siteViewPanel.classList.add('open'); siteViewPanel.setAttribute('aria-hidden', mapFocus ? 'true' : 'false'); if (mapFocus) stopSiteMapTips(); else startSiteMapTips(); window.setTimeout(function(){ if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 80); }
+  function syncUnifiedMapPageMode(forceMapFocus) { var mapFocus; if (!map || !siteViewPanel) return; mapFocus = isReturningToPageMode ? false : (forceMapFocus === undefined ? map.getZoom() > map.getMinZoom() + 0.15 : Boolean(forceMapFocus)); if (document.body.classList.contains('village-page-mode') && forceMapFocus !== true) mapFocus = false; document.body.classList.toggle('map-focus-mode', mapFocus); document.body.classList.toggle('site-view-active', !mapFocus); setUnifiedMapInteractions(mapFocus); siteViewPanel.classList.add('open'); siteViewPanel.setAttribute('aria-hidden', mapFocus ? 'true' : 'false'); if (mapFocus) stopSiteMapTips(); else startSiteMapTips(); window.setTimeout(function(){ if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 80); }
   function setSiteViewMode(open) { if (!siteViewPanel || !map) return; if (open) { closeMapOverlaysBeforeSiteMode(); isProgrammaticMove = true; isReturningToPageMode = true; syncUnifiedMapPageMode(false); map.flyTo([44.12, 9.71], map.getMinZoom(), { duration: 0.55 }); window.setTimeout(function(){ if (map) map.setView([44.12, 9.71], map.getMinZoom(), { animate: false }); syncUnifiedMapPageMode(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }, 620); window.setTimeout(function(){ isProgrammaticMove = false; isReturningToPageMode = false; syncUnifiedMapPageMode(false); }, 980); renderSiteViewFromMapData(); return; } isReturningToPageMode = false; syncUnifiedMapPageMode(true); }
   function returnMapToPageMode() {
     if (mapHomeBtn) {
@@ -3088,7 +3286,69 @@
   function getOfficialCommunicationType(item) { var category = normalizeTourText(item && item.category ? item.category : ''); if (category.indexOf('sentier') !== -1 || category.indexOf('trail') !== -1 || category.indexOf('trek') !== -1 || category.indexOf('percor') !== -1) return 'Sentieri'; if (category.indexOf('meteo') !== -1 || category.indexOf('weather') !== -1 || category.indexOf('allerta') !== -1 || category.indexOf('temporale') !== -1 || category.indexOf('vento') !== -1 || category.indexOf('mareggiata') !== -1 || category.indexOf('pioggia') !== -1) return 'Meteo'; if (category.indexOf('carta') !== -1 || category.indexOf('mappa') !== -1 || category.indexOf('map') !== -1 || category.indexOf('regol') !== -1 || category.indexOf('ordinanza') !== -1 || category.indexOf('access') !== -1) return 'Carta'; return 'Altro'; }
   function renderOfficialCommunications() { var container = document.getElementById('site-official-list'); var placesTitle = document.querySelector('.site-places-title'); var items; if (placesTitle && /caricamento comunicazioni ufficiali/i.test(String(placesTitle.textContent || ''))) placesTitle.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesSection') : 'Luoghi utili'); if (!container) return; if (!officialCommunicationsLoaded) { container.innerHTML = '<div class="site-empty">Caricamento comunicazioni ufficiali…</div>'; return; } items = (officialCommunications || []).filter(function(item) { return item && item.is_active !== false && item.status !== 'archived' && item.status !== 'hidden'; }).slice(0, 12); if (!items.length) { container.innerHTML = '<div class="site-empty">Le comunicazioni ufficiali appariranno qui quando saranno disponibili da Supabase.</div>'; return; } container.innerHTML = items.map(function(item) { var href = item.source_url || '#'; var title = item.title || 'Comunicazione ufficiale'; var fullText = item.excerpt || 'Apri la comunicazione sul sito ufficiale per leggere il testo completo e aggiornato.'; var source = item.source || 'Fonte ufficiale'; var type = getOfficialCommunicationType(item); return '<article class="site-official-item' + (String(fullText || '').length > 520 ? ' is-long' : '') + '" role="button" tabindex="0" aria-label="Apri avviso: ' + escapeHTML(title) + '"><div class="site-official-flip"><div class="site-official-face site-official-front"><div><span class="site-official-card-label">Fonte:<strong>' + escapeHTML(source) + '</strong></span><div class="site-official-item-top"><span class="site-official-category">' + escapeHTML(type) + '</span></div><h4 class="site-official-item-title">' + escapeHTML(title) + '</h4></div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span></div></div><div class="site-official-face site-official-back"><div class="site-official-full-text">' + escapeHTML(fullText) + '</div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span><a class="site-official-read" href="' + escapeHTML(href) + '" target="_blank" rel="noopener noreferrer">Apri fonte</a></div></div></div></article>';  }).join(''); }
   async function loadOfficialCommunications() { var response, rows; officialCommunicationsLoaded = false; renderOfficialCommunications(); if (!SUPABASE_READY || !supabaseClient) { officialCommunications = []; officialCommunicationsLoaded = true; renderOfficialCommunications(); return; } response = await supabaseClient.from('official_communications').select('id,source,source_url,title,excerpt,category,published_at,fetched_at,is_active,status').eq('is_active', true).order('published_at', { ascending: false, nullsFirst: false }).limit(12); if (response.error) { console.warn('Supabase official communications load failed:', response.error.message); officialCommunications = []; officialCommunicationsLoaded = true; renderOfficialCommunications(); return; } rows = response.data || []; officialCommunications = rows.map(normalizeOfficialCommunication); officialCommunicationsLoaded = true; renderOfficialCommunications(); requestDynamicContentTranslation('official communications loaded'); }
-  function siteOpenMapItem(kind, name, id) { setSiteViewMode(false); window.setTimeout(function() { var poiItem; if (kind === 'place') focusAIPlace(name); if (kind === 'poi') { poiItem = poiMarkers.find(function(entry) { return entry && entry.poi && String(entry.poi.id) === String(id || ''); }); if (poiItem && poiItem.poi) openPOIWithMapMove(poiItem.poi, null); else focusAIPOI(name); } if (kind === 'trail') focusAITrail(name); }, 80); }
+  function openVillagePageFromTile(name) {
+    var slug = normalizeVillageSlug(name);
+    var place;
+    if (!slug) return;
+
+    place = places.find(function(item) {
+      return normalizeVillageSlug(item.name) === slug;
+    }) || null;
+
+    if (!place) return;
+
+    villagePageContext = place;
+    villagePageAppliedMapCenter = false;
+    document.body.classList.add('village-page-mode');
+    document.title = '5TerreGo | ' + place.name;
+
+    try {
+      if (window.history && window.history.pushState) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('village', slug);
+        url.hash = '';
+        window.history.pushState({ village: slug }, '', url.toString());
+      }
+    } catch (error) {}
+
+    closeMapOverlaysBeforeSiteMode();
+    applyVillagePageMode();
+    renderSiteViewFromMapData();
+    syncUnifiedMapPageMode(false);
+
+    if (map && isValidCoords(place.coords)) {
+      isProgrammaticMove = true;
+      map.setView(place.coords, 15, { animate: false });
+      window.setTimeout(function(){ isProgrammaticMove = false; }, 180);
+    }
+
+    window.setTimeout(function() {
+      var intro = document.getElementById('village-page-intro');
+      var targetTop = 0;
+      if (intro) targetTop = Math.max(0, window.scrollY + intro.getBoundingClientRect().top - 96);
+      try { window.scrollTo({ top: targetTop, behavior: 'smooth' }); }
+      catch (error) { window.scrollTo(0, targetTop); }
+    }, 80);
+  }
+  function setupVillageTileDirectClicks() {
+    document.querySelectorAll('.site-village-tile[data-site-kind="place"][data-site-name]').forEach(function(tile) {
+      if (tile.getAttribute('data-village-tile-ready') === '1') return;
+      tile.setAttribute('data-village-tile-ready', '1');
+      tile.addEventListener('click', function(event) {
+        if (event.target && event.target.closest && event.target.closest('[data-village-action], button, a')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        openVillagePageFromTile(tile.getAttribute('data-site-name'));
+      });
+      tile.addEventListener('touchend', function(event) {
+        if (event.target && event.target.closest && event.target.closest('[data-village-action], button, a')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        openVillagePageFromTile(tile.getAttribute('data-site-name'));
+      }, { passive: false });
+    });
+  }
+  function siteOpenMapItem(kind, name, id) { if (kind === 'place') { openVillagePageFromTile(name); return; } setSiteViewMode(false); window.setTimeout(function() { var poiItem; if (kind === 'poi') { poiItem = poiMarkers.find(function(entry) { return entry && entry.poi && String(entry.poi.id) === String(id || ''); }); if (poiItem && poiItem.poi) openPOIWithMapMove(poiItem.poi, null); else focusAIPOI(name); } if (kind === 'trail') focusAITrail(name); }, 80); }
   function siteOpenCaptainGull(prompt) { setSiteViewMode(false); window.setTimeout(function() { var aiBtn = document.getElementById('ai-chat-btn'); var aiInput = document.getElementById('ai-input'); var aiSend = document.getElementById('ai-send'); if (aiBtn) aiBtn.click(); if (prompt && aiInput && aiSend) { aiInput.value = prompt; aiSend.click(); } }, 120); }
   function siteSearchCategory(type) { setSiteViewMode(false); window.setTimeout(function() { if (searchInput) { searchInput.value = type; renderSearchSuggestions(type); searchInput.focus(); } }, 120); }
   function handleVillageSiteAction(villageAction, event) {
@@ -3119,12 +3379,39 @@
   function getSitePOIImage(poi) { var images = getPOIImages(poi); return images && images.length ? images[0] : ''; }
   function getSitePOIGroup(poi) { var type = normalizePOIType(poi && poi.type); if (type === 'punto panoramico') return 'viewpoint'; if (type === 'spiaggia') return 'beach'; if (type === 'chiesa') return 'church'; if (type === 'monumento') return 'monument'; if (type === 'stazione') return 'station'; if (type === 'ristorante' || type === 'bar') return 'food'; if (type === 'curiosity') return 'curiosity'; return type || 'other'; }
   function getSitePOIGroupLabel(group) { var labels = { all: 'Tutti', viewpoint: 'Panorami', beach: 'Spiagge', church: 'Chiese', monument: 'Monumenti', station: 'Stazioni', food: 'Food', curiosity: 'Curiosità', other: 'Altro' }; return labels[group] || group; }
+  function getVillageScopedPOIs(pois) {
+    if (!villagePageContext) return pois || [];
+    return (pois || []).filter(function(poi) {
+      return poi && isValidCoords(poi.coords) && getClosestPlaceNameForCoords(poi.coords) === villagePageContext.name && distanceMeters(villagePageContext.coords, poi.coords) <= 1250;
+    });
+  }
+  function isTrailRelatedToVillage(trail) {
+    var villageName;
+    var text;
+    var latLngs;
+    if (!villagePageContext || !trail) return true;
+    villageName = normalizeTourText(villagePageContext.name);
+    text = normalizeTourText([trail.name, trail.start_name, trail.end_name, trail.description].filter(Boolean).join(' '));
+    if (text.indexOf(villageName) !== -1) return true;
+    latLngs = getTrailLatLngs(trail);
+    return latLngs.some(function(point) { return distanceMeters(villagePageContext.coords, point) <= 1250; });
+  }
+  function getVillageScopedArticles(articles) {
+    var villageName;
+    var filtered;
+    if (!villagePageContext) return articles || [];
+    villageName = normalizeTourText(villagePageContext.name);
+    filtered = (articles || []).filter(function(article) {
+      return normalizeTourText([article.title, article.excerpt, article.meta, article.slug].filter(Boolean).join(' ')).indexOf(villageName) !== -1;
+    });
+    return filtered;
+  }
   function getSiteImagePOIs() { return poiMarkers.map(function(item) { return item.poi; }).filter(function(poi) { return poi && isValidPOI(poi) && String(poi.type || '').toLowerCase() !== 'ferry' && getSitePOIImage(poi); }).sort(function(a, b) { return Number(b.relevance || 0) - Number(a.relevance || 0); }); }
   function renderSitePOIFilters(pois) { var container = document.getElementById('site-poi-filters'); var groups; if (!container) return; groups = ['all'].concat((pois || []).map(getSitePOIGroup).filter(Boolean).filter(function(group, index, list) { return list.indexOf(group) === index; })); if (groups.indexOf(currentSitePOIFilter) === -1) currentSitePOIFilter = 'all'; container.innerHTML = groups.map(function(group) { return '<button class="site-poi-filter ' + (group === currentSitePOIFilter ? 'active' : '') + '" type="button" data-site-poi-filter="' + escapeHTML(group) + '">' + escapeHTML(getSitePOIGroupLabel(group)) + '</button>'; }).join(''); }
-  function renderSitePOISection() { var allPOIs = getSiteImagePOIs(); var filtered = currentSitePOIFilter === 'all' ? allPOIs : allPOIs.filter(function(poi) { return getSitePOIGroup(poi) === currentSitePOIFilter; }); var placesTitle = document.querySelector('.site-places-title'); var placesCopy = document.querySelector('.site-places-copy'); if (placesTitle) placesTitle.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesSection') : 'Luoghi utili'); if (placesCopy) placesCopy.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesCopy') : 'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.'); renderSitePOIFilters(allPOIs); renderSiteCards('site-pois', filtered.slice(0, 12), 'Nessun luogo disponibile al momento.', function(poi) { return '<article class="site-poi-card" role="button" tabindex="0" aria-label="Apri ' + escapeHTML(poi.name) + ' sulla mappa" data-site-kind="poi" data-site-poi-id="' + escapeHTML(String(poi.id || '')) + '" data-site-name="' + escapeHTML(poi.name) + '">' + '<img src="' + escapeHTML(getSitePOIImage(poi)) + '" alt="' + escapeHTML(poi.name) + '" loading="lazy">' + '<div class="site-poi-content"><h4 class="site-poi-title">' + escapeHTML(poi.name) + '</h4></div>' + '</article>';  }); }
+  function renderSitePOISection() { var allPOIs = getVillageScopedPOIs(getSiteImagePOIs()); var filtered = currentSitePOIFilter === 'all' ? allPOIs : allPOIs.filter(function(poi) { return getSitePOIGroup(poi) === currentSitePOIFilter; }); var placesTitle = document.querySelector('.site-places-title'); var placesCopy = document.querySelector('.site-places-copy'); if (placesTitle) placesTitle.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesSection') : 'Luoghi utili'); if (placesCopy) placesCopy.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesCopy') : 'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.'); renderSitePOIFilters(allPOIs); renderSiteCards('site-pois', filtered.slice(0, 12), 'Nessun luogo disponibile al momento.', function(poi) { return '<article class="site-poi-card" role="button" tabindex="0" aria-label="Apri ' + escapeHTML(poi.name) + ' sulla mappa" data-site-kind="poi" data-site-poi-id="' + escapeHTML(String(poi.id || '')) + '" data-site-name="' + escapeHTML(poi.name) + '">' + '<img src="' + escapeHTML(getSitePOIImage(poi)) + '" alt="' + escapeHTML(poi.name) + '" loading="lazy">' + '<div class="site-poi-content"><h4 class="site-poi-title">' + escapeHTML(poi.name) + '</h4></div>' + '</article>';  }); }
   function parseTrailDurationMinutes(value) { var text = String(value || '').toLowerCase(); var h = 0; var m = 0; var match; var compact; if (!text) return 0; match = text.match(/([0-9]+(?:[.,][0-9]+)?)[ ]*h/); if (match) h = Number(String(match[1]).replace(',', '.')) || 0; match = text.match(/([0-9]+)[ ]*(?:m|min)/); if (match) m = Number(match[1]) || 0; if (!h && !m) { compact = text.match(/([0-9]+)[ ]*[:.][ ]*([0-9]+)/); if (compact) return (Number(compact[1]) || 0) * 60 + (Number(compact[2]) || 0); match = text.match(/[0-9]+/); if (match) return Number(match[0]) || 0; } return Math.round(h * 60 + m); }
   function getSiteTrailFilterValues() { var difficultyEl = document.getElementById('site-trail-difficulty-filter'); var fromEl = document.getElementById('site-trail-from-filter'); return { from: fromEl ? String(fromEl.value || 'all') : 'all', difficulty: difficultyEl ? String(difficultyEl.value || 'all') : 'all' }; }
-  function getFilteredSiteTrails() { var filters = getSiteTrailFilterValues(); return trailItems.map(function(item) { return item.trail; }).filter(Boolean).filter(function(trail) { var difficulty = getDisplayDifficulty(trail); var fromName = String(trail.start_name || '').trim(); if (filters.from !== 'all' && fromName !== filters.from) return false; if (filters.difficulty !== 'all' && difficulty !== filters.difficulty) return false; return true; }); }
+  function getFilteredSiteTrails() { var filters = getSiteTrailFilterValues(); return trailItems.map(function(item) { return item.trail; }).filter(Boolean).filter(isTrailRelatedToVillage).filter(function(trail) { var difficulty = getDisplayDifficulty(trail); var fromName = String(trail.start_name || '').trim(); if (filters.from !== 'all' && fromName !== filters.from) return false; if (filters.difficulty !== 'all' && difficulty !== filters.difficulty) return false; return true; }); }
   function drawSiteTrailMiniChart(canvas, trail) { var ctx; var rect; var dpr; var width; var height; var profile; var values; var min; var max; var range; var visualMin; var visualMax; var visualRange; var padX; var padY; var bottom; var x; var y; if (!canvas || !trail) return; ctx = canvas.getContext('2d'); rect = canvas.getBoundingClientRect(); dpr = window.devicePixelRatio || 1; width = Math.max(220, Math.round(rect.width || 260)); height = Math.max(82, Math.round(rect.height || 104)); canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height); profile = Array.isArray(trail.elevation_profile) ? trail.elevation_profile : []; values = profile.map(function(p) { return sanitizeElevationValue(p.elevation); }).filter(function(n) { return Number.isFinite(n); }); if (values.length < 2) values = [1, Math.max(2, Number(trail.elevation_gain_m || 80)), Math.max(1, Number(trail.elevation_gain_m || 80) - Number(trail.elevation_loss_m || 35))]; min = Math.min.apply(null, values); max = Math.max.apply(null, values); range = Math.max(1, max - min); visualRange = Math.max(range, 85); visualMin = min - Math.max(0, (visualRange - range) * 0.48); visualMax = visualMin + visualRange; padX = 8; padY = 14; bottom = height - 14; ctx.strokeStyle = 'rgba(0,0,0,.10)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(padX, bottom); ctx.lineTo(width - padX, bottom); ctx.stroke(); ctx.beginPath(); var minPoint = null; var maxPoint = null; values.forEach(function(value, index) { x = padX + (index / Math.max(1, values.length - 1)) * (width - padX * 2); y = bottom - ((value - visualMin) / Math.max(1, visualMax - visualMin)) * (bottom - padY); if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); if (value === min && !minPoint) minPoint = { x: x, y: y }; if (value === max && !maxPoint) maxPoint = { x: x, y: y }; }); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = getDisplayTrailColor(trail); ctx.stroke(); [minPoint, maxPoint].forEach(function(point) { if (!point) return; ctx.beginPath(); ctx.arc(point.x, point.y, 4.5, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = getDisplayTrailColor(trail); ctx.stroke(); }); ctx.fillStyle = 'rgba(0,0,0,.44)'; ctx.font = '800 10px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif'; ctx.textAlign = 'left'; ctx.fillText(Math.round(min) + 'm', padX, height - 2); ctx.textAlign = 'right'; ctx.fillText(Math.round(max) + 'm', width - padX, 12); }
   function drawSiteTrailCharts() { document.querySelectorAll('[data-site-trail-chart]').forEach(function(canvas) { var id = canvas.getAttribute('data-site-trail-chart'); var item = trailItems.find(function(entry) { return entry && entry.trail && String(entry.trail.id) === String(id); }); if (item && item.trail) drawSiteTrailMiniChart(canvas, item.trail); }); }
   function renderSiteTrailsSection() { var container = document.getElementById('site-trails'); var trails = getFilteredSiteTrails(); var i18n = window.FTG_I18N; var labelElevation = i18n ? i18n.t('elevation') : 'Elevation'; var labelDifficulty = i18n ? i18n.t('difficulty') : 'Difficulty'; var labelTime = i18n ? i18n.t('time') : 'Time'; var labelOpen = i18n ? i18n.t('openTrail') : 'Open trail'; if (!container) return; if (!trails.length) { container.innerHTML = '<div class="site-empty">No trails match these filters yet.</div>'; return; } container.innerHTML = trails.map(function(trail) { var difficulty = getDisplayDifficulty(trail); return '<article class="site-trail-card" data-site-kind="trail" data-site-name="' + escapeHTML(trail.name) + '"><div class="site-trail-chart"><span class="site-trail-badge">' + escapeHTML(labelElevation) + '</span><canvas data-site-trail-chart="' + escapeHTML(String(trail.id)) + '"></canvas></div><div class="site-trail-body"><h4 class="site-trail-title">' + escapeHTML(trail.name || 'Trail') + '</h4><p class="site-trail-route">' + escapeHTML((trail.start_name || '?') + ' → ' + (trail.end_name || '?')) + '</p><div class="site-trail-meta-grid"><div class="site-trail-meta"><span class="site-trail-meta-label">' + escapeHTML(labelDifficulty) + '</span><span class="site-trail-meta-value">' + escapeHTML(difficulty) + '</span></div><div class="site-trail-meta"><span class="site-trail-meta-label">' + escapeHTML(labelTime) + '</span><span class="site-trail-meta-value">' + escapeHTML(trail.estimated_duration || '—') + '</span></div></div><span class="site-trail-open">' + escapeHTML(labelOpen) + '</span></div></article>'; }).join(''); window.requestAnimationFrame(drawSiteTrailCharts); }
@@ -3133,7 +3420,7 @@
   function getBlogPostUrl(post) { var slug = post && post.slug ? String(post.slug) : ''; if (!slug) return 'blog.html'; return 'blog.html?slug=' + encodeURIComponent(slug); }
   function normalizeBlogPost(row) { row = row || {}; return { id: row.id || row.slug || row.title || '', title: row.title || 'Cinque Terre article', slug: row.slug || '', url: getBlogPostUrl(row), image: row.cover_image || row.coverImage || row.image_url || row.imageUrl || row.thumbnail_url || row.thumbnail || row.image || row.photo_url || row.photoUrl || '', meta: row.category || row.author || 'Guide article', excerpt: row.excerpt || '', status: String(row.status || '').toLowerCase(), published_at: row.published_at || row.created_at || '' }; }
   function shuffleSiteItems(items) { return (items || []).slice().sort(function() { return Math.random() - 0.5; }); }
-  function renderStoryPreviewSection() { var container = document.getElementById('site-story-list'); var articles; if (!container) return; if (!blogPostsLoaded) { container.innerHTML = '<div class="site-empty">Caricamento storie…</div>'; return; } articles = siteArticles || []; if (!articles.length) { container.innerHTML = '<div class="site-empty">Nessuna storia disponibile al momento.</div>';  return; } container.innerHTML = '<div class="site-article-slider">' + shuffleSiteItems(articles).slice(0, 6).map(function(article) { return '<a class="site-article-card" href="' + escapeHTML(article.url || 'blog.html') + '"><span class="site-article-thumb"><img src="' + escapeHTML(article.image || (places[3] ? places[3].image : '')) + '" alt=""></span><span class="site-article-content"><span class="site-article-meta">' + escapeHTML(article.meta || 'Guide article') + '</span><span class="site-article-title">' + escapeHTML(article.title || 'Cinque Terre story') + '</span></span></a>'; }).join('') + '</div>'; }
+  function renderStoryPreviewSection() { var container = document.getElementById('site-story-list'); var articles; if (!container) return; if (!blogPostsLoaded) { container.innerHTML = '<div class="site-empty">Caricamento storie…</div>'; return; } articles = getVillageScopedArticles(siteArticles || []); if (!articles.length) { container.innerHTML = '<div class="site-empty">Nessuna storia disponibile al momento.</div>';  return; } container.innerHTML = '<div class="site-article-slider">' + shuffleSiteItems(articles).slice(0, 6).map(function(article) { return '<a class="site-article-card" href="' + escapeHTML(article.url || 'blog.html') + '"><span class="site-article-thumb"><img src="' + escapeHTML(article.image || (places[3] ? places[3].image : '')) + '" alt=""></span><span class="site-article-content"><span class="site-article-meta">' + escapeHTML(article.meta || 'Guide article') + '</span><span class="site-article-title">' + escapeHTML(article.title || 'Cinque Terre story') + '</span></span></a>'; }).join('') + '</div>'; }
   async function loadBlogPosts() {
     var response, fallbackResponse, rows, published, cached;
     blogPostsLoaded = false;
@@ -3192,8 +3479,8 @@
   }
   function stabilizePublicSectionTitles() {
     var i18n = window.FTG_I18N;
-    var villageTitle = document.querySelector('.site-section:not(.site-pages-section) .site-section-head span');
-    var villageSmall = document.querySelector('.site-section:not(.site-pages-section) .site-section-head small');
+    var villageTitle = document.querySelector('#site-villages-section .site-section-head span');
+    var villageSmall = document.querySelector('#site-villages-section .site-section-head small');
     var pagesTitle = document.querySelector('.site-pages-section .site-section-head span');
     var pagesSmall = document.querySelector('.site-pages-section .site-section-head small');
     var storyTitle = document.querySelector('#site-stories-section .site-feature-title');
@@ -3213,7 +3500,37 @@
     if (discountTitle) discountTitle.textContent = i18n && i18n.t ? i18n.t('thingsDoing') : 'Sconti locali.';
     if (discountText) discountText.textContent = i18n && i18n.t ? i18n.t('expText') : 'Offerte gratuite da attività selezionate. Nessuna commissione per i partner.';
   }
+  function renderVillagePageIntro() {
+    var titleEl = document.getElementById('village-page-title');
+    var textEl = document.getElementById('village-page-text');
+    var kickerEl = document.getElementById('village-page-kicker');
+    var statsEl = document.getElementById('village-page-stats');
+    var slug;
+    var poiCount;
+    var trailCount;
+    var articleCount;
+    if (!villagePageContext) return;
+    slug = normalizeVillageSlug(villagePageContext.name);
+    poiCount = getVillageScopedPOIs(getSiteImagePOIs()).length;
+    trailCount = trailItems.map(function(item) { return item.trail; }).filter(Boolean).filter(isTrailRelatedToVillage).length;
+    articleCount = getVillageScopedArticles(siteArticles || []).length;
+    if (kickerEl) kickerEl.textContent = 'Guida borgo';
+    if (titleEl) titleEl.textContent = villagePageContext.name;
+    if (textEl) textEl.textContent = villagePageDescriptions[slug] || villagePageContext.description || '';
+    if (statsEl) statsEl.innerHTML = '<div class="village-page-stat"><strong>' + poiCount + '</strong><span>luoghi</span></div><div class="village-page-stat"><strong>' + trailCount + '</strong><span>sentieri</span></div><div class="village-page-stat"><strong>' + articleCount + '</strong><span>storie</span></div>';
+  }
+  function applyVillagePageMode() {
+    if (!villagePageContext) return;
+    document.body.classList.add('village-page-mode');
+    document.title = '5TerreGo | ' + villagePageContext.name;
+    renderVillagePageIntro();
+    if (map && !villagePageAppliedMapCenter) {
+      villagePageAppliedMapCenter = true;
+      map.setView(villagePageContext.coords, 15, { animate: false });
+    }
+  }
   function renderSiteViewFromMapData() {
+    applyVillagePageMode();
     stabilizePublicSectionTitles();
     renderStoryPreviewSection();
     renderOfficialCommunications();
@@ -3248,8 +3565,9 @@
     }
     if (villageEl) {
       villageEl.innerHTML = places.map(function(place) {
-        return '<article class="site-village-tile" data-site-kind="place" data-site-name="' + escapeHTML(place.name) + '"><img src="' + escapeHTML(place.image) + '" alt="' + escapeHTML(place.name) + '"><div class="site-village-content"><h3>' + escapeHTML(place.name) + '</h3><div class="site-village-actions"><button class="site-village-action-btn" type="button" data-village-action="events" data-village-name="' + escapeHTML(place.name) + '">Eventi</button><button class="site-village-action-btn secondary" type="button" data-village-action="articles" data-village-name="' + escapeHTML(place.name) + '">Storie</button><button class="site-village-action-btn secondary" type="button" data-village-action="official" data-village-name="' + escapeHTML(place.name) + '">Avvisi</button></div></div></article>';
+        return '<article class="site-village-tile" role="button" tabindex="0" data-site-kind="place" data-site-name="' + escapeHTML(place.name) + '"><img src="' + escapeHTML(place.image) + '" alt="' + escapeHTML(place.name) + '"><div class="site-village-content"><h3>' + escapeHTML(place.name) + '</h3><div class="site-village-actions"><button class="site-village-action-btn" type="button" data-village-action="events" data-village-name="' + escapeHTML(place.name) + '">Eventi</button><button class="site-village-action-btn secondary" type="button" data-village-action="articles" data-village-name="' + escapeHTML(place.name) + '">Storie</button><button class="site-village-action-btn secondary" type="button" data-village-action="official" data-village-name="' + escapeHTML(place.name) + '">Avvisi</button></div></div></article>';
       }).join('');
+      setupVillageTileDirectClicks();
     }
     renderSitePOISection();
     stabilizePublicSectionTitles();
@@ -3283,7 +3601,7 @@
       if (villageAction) { handleVillageSiteAction(villageAction, event); return; }
       if (siteItem) { event.preventDefault(); event.stopPropagation(); siteOpenMapItem(siteItem.getAttribute('data-site-kind'), siteItem.getAttribute('data-site-name'), siteItem.getAttribute('data-site-poi-id')); return; } if (siteCategory) { siteSearchCategory(siteCategory.getAttribute('data-site-category')); return; } if (siteAction) { if (siteAction.getAttribute('data-site-action') === 'map') setSiteViewMode(false); if (siteAction.getAttribute('data-site-action') === 'ai') siteOpenCaptainGull('Help me explore Cinque Terre today.'); if (siteAction.getAttribute('data-site-action') === 'plan') siteOpenCaptainGull('Give me practical ideas for my first day in the Cinque Terre: villages, views, beaches, ferries or trails.'); return; } if (!searchResults.contains(event.target) && event.target !== searchInput) searchResults.style.display = 'none'; }); map.on('zoom zoomend moveend', function () { updateMapVisualByZoom(); updateTrailWidths(); updateMovingFerryIconSizes(); syncUnifiedMapPageMode(); }); map.on('dragstart zoomstart', disableTourFollowFromUserMove); map.on('moveend zoomend', function () { evaluateAutoCard(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); setupCardSwipe(card); setupCardSwipe(cardLiveTouchLayer); setupPOISheetDrag(); }
   function runTests() { }
-  function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); renderSiteViewFromMapData(); syncUnifiedMapPageMode(false); applyMapFilterUI(currentMapFilter); loadOfficialCommunications(); loadBlogPosts(); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
+  function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(villagePageContext ? villagePageContext.coords[0] : 44.12, villagePageContext ? villagePageContext.coords[1] : 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); applyVillagePageMode(); renderSiteViewFromMapData(); syncUnifiedMapPageMode(false); applyMapFilterUI(currentMapFilter); loadOfficialCommunications(); loadBlogPosts(); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
   start();
 }());
 </script>
@@ -3410,7 +3728,7 @@
     if (typeof stabilizeMapFilterButtons === 'function') stabilizeMapFilterButtons();
     setText('#tour-recenter-top', t('recenter')); setText('#tour-exit-top', t('exitTour'));
     setText('.site-view-title', t('heroTitle')); setText('.site-view-text', t('heroText')); setText('#open-interactive-map-btn', t('openInteractiveMap')); setAllText('.site-hero-actions a', [t('stories'),t('experiences'),t('bookStay')]);
-    setText('.site-section:not(.site-pages-section) .site-section-head span', t('fiveVillages')); setText('.site-section:not(.site-pages-section) .site-section-head small', t('tapMap'));
+    setText('#site-villages-section .site-section-head span', t('fiveVillages')); setText('#site-villages-section .site-section-head small', t('tapMap'));
     setText('.site-pages-section .site-section-head span', t('startHere')); setText('.site-pages-section .site-section-head small', t('siteSections')); 
     setText('#site-stories-section .site-feature-title', t('readBefore')); setText('#site-stories-section .site-feature-text', t('storyText')); setText('#site-trails-section .site-feature-title', t('bookSmarter')); setText('#site-trails-section .site-feature-text', t('stayText')); setText('#site-experiences-section .site-feature-title', t('thingsDoing')); setText('#site-experiences-section .site-feature-text', t('expText')); setAllText('.site-feature-cta-row a', [t('openStories'),t('openStay'),t('openExperiences')]);
     setText('.site-places-title', t('placesSection')); setText('.site-places-copy', t('placesCopy')); setText('.site-weather-title', t('weather')); setText('.site-weather-text', t('weatherNote')); setText('.site-official-kicker', t('officialKicker')); setText('.site-official-title', t('officialTitle')); setText('.site-official-text', t('officialText')); if (window.FTG_RENDER_OFFICIAL_COMMUNICATIONS) window.FTG_RENDER_OFFICIAL_COMMUNICATIONS(); document.querySelectorAll('.site-empty').forEach(function(el){ if (/Loading weather|Caricamento meteo|正在加载天气|جارٍ تحميل الطقس|Chargement de la météo|Wetterdaten|Загрузка погоды/.test(el.textContent)) el.textContent = t('loadingWeather'); }); if (typeof renderSiteWeatherSection === 'function') renderSiteWeatherSection();
@@ -3422,7 +3740,122 @@
     setText('.ai-subtitle', t('aiSubtitle')); setPlaceholder('#ai-input', t('aiPlaceholder')); setAllText('.ai-suggestion', [t('ai1'),t('ai2'),t('ai3'),t('ai4')]); var aiClose = document.getElementById('ai-close'); if (aiClose) aiClose.setAttribute('aria-label', t('aiClose')); var aiBtn = document.getElementById('ai-chat-btn'); if (aiBtn) aiBtn.setAttribute('aria-label', t('aiOpen')); setText('.card-live-loading-text', t('liveLoading'));
     window.setTimeout(translateRemainingStaticUI, 60);
   }
-  function setup(){ var flag = document.getElementById('language-flag'); var actions = document.querySelector('.top-actions'); var topBar = document.querySelector('.top-bar'); var menu = document.getElementById('language-menu'); var appToggle = document.getElementById('app-menu-toggle'); var appMenu = document.getElementById('app-menu'); function setMenuOpen(open){ if (!actions) return; actions.classList.toggle('quick-menu-open', open); if (topBar) topBar.classList.toggle('menu-expanded', open); document.body.classList.toggle('quick-menu-expanded', open); if (appToggle) appToggle.setAttribute('aria-expanded', open ? 'true' : 'false'); if (!open && appMenu) appMenu.classList.remove('language-expanded'); if (!open && menu) menu.classList.remove('language-expanded'); if (open) window.setTimeout(function(){ var slider = document.querySelector('.top-bar.menu-expanded .app-menu-grid'); var middle = slider ? slider.querySelectorAll('.app-menu-link')[1] : null; if (slider && middle) { try { middle.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (error) { slider.scrollLeft = middle.offsetLeft - ((slider.clientWidth - middle.clientWidth) / 2); } } }, 80); } if (appToggle && actions) appToggle.addEventListener('click', function(e){ e.stopPropagation(); setMenuOpen(!actions.classList.contains('quick-menu-open')); }); if (flag && actions) flag.addEventListener('click', function(e){ e.stopPropagation(); setMenuOpen(!actions.classList.contains('quick-menu-open')); }); if (menu) menu.addEventListener('click', function(e){ var btn = e.target.closest('[data-lang]'); var panel = document.getElementById('site-view-panel'); var currentScroll = panel ? panel.scrollTop : 0; if (!btn) return; e.preventDefault(); e.stopPropagation(); if (btn.classList.contains('active') && !menu.classList.contains('language-expanded')) { menu.classList.add('language-expanded'); if (appMenu) appMenu.classList.add('language-expanded'); return; } applyLanguage(btn.getAttribute('data-lang'), { source: 'manual' }); if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('manual language change'); panel = document.getElementById('site-view-panel'); if (panel) window.requestAnimationFrame(function(){ panel.scrollTop = currentScroll; }); menu.classList.remove('language-expanded'); if (appMenu) appMenu.classList.remove('language-expanded'); }); if (appMenu) appMenu.addEventListener('click', function(e){ var filterLink = e.target.closest('[data-open-filter]'); var siteSectionLink = e.target.closest('[data-open-site-section]'); if (e.target.closest('[data-lang]')) return; if (filterLink) { e.preventDefault(); var filterName = filterLink.getAttribute('data-open-filter'); setMenuOpen(false); window.setTimeout(function(){ var btn = document.querySelector('#map-filter-bar [data-map-filter="' + filterName + '"]'); if (btn) btn.click(); }, 80); return; } if (siteSectionLink) { e.preventDefault(); var sectionId = siteSectionLink.getAttribute('data-open-site-section'); setMenuOpen(false); window.setTimeout(function(){ if (window.FTG_OPEN_SITE_SECTION) window.FTG_OPEN_SITE_SECTION(sectionId); }, 80); return; } if (e.target.closest('a')) setMenuOpen(false); e.stopPropagation(); }); var logoutBtn = document.getElementById('app-menu-logout'); if (logoutBtn) logoutBtn.addEventListener('click', async function(e){ e.preventDefault(); e.stopPropagation(); if (window.fiveTerreSupabaseClient && window.fiveTerreSupabaseClient.auth) { try { await window.fiveTerreSupabaseClient.auth.signOut(); } catch (error) {} } window.FTG_CURRENT_USER = null; document.body.classList.remove('user-logged-in'); var menuName = document.getElementById('app-menu-username'); if (menuName) menuName.textContent = window.FTG_I18N && typeof window.FTG_I18N.t === 'function' ? window.FTG_I18N.t('guest') : 'Guest'; setMenuOpen(false); }); document.addEventListener('click', function(){ setMenuOpen(false); }); applyLanguage(lang()); if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('initial language'); }
+  function setup(){
+    var flag = document.getElementById('language-flag');
+    var actions = document.querySelector('.top-actions');
+    var topBar = document.querySelector('.top-bar');
+    var menu = document.getElementById('language-menu');
+    var appToggle = document.getElementById('app-menu-toggle');
+    var appMenu = document.getElementById('app-menu');
+
+    function setMenuOpen(open){
+      if (!actions) return;
+      actions.classList.toggle('quick-menu-open', open);
+      if (topBar) topBar.classList.toggle('menu-expanded', open);
+      document.body.classList.toggle('quick-menu-expanded', open);
+      if (appToggle) appToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open && appMenu) appMenu.classList.remove('language-expanded');
+      if (!open && menu) menu.classList.remove('language-expanded');
+      if (open) {
+        window.setTimeout(function(){
+          var slider = document.querySelector('.top-bar.menu-expanded .app-menu-grid');
+          var middle = slider ? slider.querySelectorAll('.app-menu-link')[1] : null;
+          if (slider && middle) {
+            try { middle.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }
+            catch (error) { slider.scrollLeft = middle.offsetLeft - ((slider.clientWidth - middle.clientWidth) / 2); }
+          }
+        }, 80);
+      }
+    }
+
+    if (appToggle && actions) {
+      appToggle.addEventListener('click', function(e){
+        e.stopPropagation();
+        setMenuOpen(!actions.classList.contains('quick-menu-open'));
+      });
+    }
+
+    if (flag && actions) {
+      flag.addEventListener('click', function(e){
+        e.stopPropagation();
+        setMenuOpen(!actions.classList.contains('quick-menu-open'));
+      });
+    }
+
+    if (menu) {
+      menu.addEventListener('click', function(e){
+        var btn = e.target.closest('[data-lang]');
+        var panel = document.getElementById('site-view-panel');
+        var currentScroll = panel ? panel.scrollTop : 0;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (btn.classList.contains('active') && !menu.classList.contains('language-expanded')) {
+          menu.classList.add('language-expanded');
+          if (appMenu) appMenu.classList.add('language-expanded');
+          return;
+        }
+        applyLanguage(btn.getAttribute('data-lang'), { source: 'manual' });
+        if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('manual language change');
+        panel = document.getElementById('site-view-panel');
+        if (panel) window.requestAnimationFrame(function(){ panel.scrollTop = currentScroll; });
+        menu.classList.remove('language-expanded');
+        if (appMenu) appMenu.classList.remove('language-expanded');
+      });
+    }
+
+    if (appMenu) {
+      appMenu.addEventListener('click', function(e){
+        var filterLink = e.target.closest('[data-open-filter]');
+        var siteSectionLink = e.target.closest('[data-open-site-section]');
+        var sectionId;
+        var filterName;
+        if (e.target.closest('[data-lang]')) return;
+        if (filterLink) {
+          e.preventDefault();
+          filterName = filterLink.getAttribute('data-open-filter');
+          setMenuOpen(false);
+          window.setTimeout(function(){
+            var btn = document.querySelector('#map-filter-bar [data-map-filter="' + filterName + '"]');
+            if (btn) btn.click();
+          }, 80);
+          return;
+        }
+        if (siteSectionLink) {
+          e.preventDefault();
+          sectionId = siteSectionLink.getAttribute('data-open-site-section');
+          setMenuOpen(false);
+          window.setTimeout(function(){
+            if (window.FTG_OPEN_SITE_SECTION) window.FTG_OPEN_SITE_SECTION(sectionId);
+          }, 80);
+          return;
+        }
+        if (e.target.closest('a')) setMenuOpen(false);
+        e.stopPropagation();
+      });
+    }
+
+    var logoutBtn = document.getElementById('app-menu-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async function(e){
+        var menuName;
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.fiveTerreSupabaseClient && window.fiveTerreSupabaseClient.auth) {
+          try { await window.fiveTerreSupabaseClient.auth.signOut(); } catch (error) {}
+        }
+        window.FTG_CURRENT_USER = null;
+        document.body.classList.remove('user-logged-in');
+        menuName = document.getElementById('app-menu-username');
+        if (menuName) menuName.textContent = window.FTG_I18N && typeof window.FTG_I18N.t === 'function' ? window.FTG_I18N.t('guest') : 'Guest';
+        setMenuOpen(false);
+      });
+    }
+
+    document.addEventListener('click', function(){ setMenuOpen(false); });
+    applyLanguage(lang());
+    if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('initial language');
+  }
   window.FTG_I18N = { t:t, setLanguage:function(next, options){ applyLanguage(next, options); if (typeof renderSiteMapTip === 'function') renderSiteMapTip(); if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('language changed'); }, getLanguage:lang, translateText:translateText, getLoginText:getLoginText, apply:applyLanguage };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
 }());
@@ -3578,5 +4011,16 @@
 }());
 </script>
 
+<script>
+    // Sposta il calendario come penultima sezione, senza dipendere dal nome dell'ultima sezione.
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendar = document.getElementById('village-calendar-section');
+      if (!calendar || !calendar.parentElement) return;
+      const parent = calendar.parentElement;
+      const sections = Array.from(parent.children).filter(el => el.tagName === 'SECTION' && el.id !== 'village-calendar-section');
+      const lastSection = sections[sections.length - 1];
+      if (lastSection) parent.insertBefore(calendar, lastSection);
+    });
+  </script>
 </body>
 </html>
