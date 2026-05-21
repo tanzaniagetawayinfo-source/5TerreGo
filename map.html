@@ -3408,7 +3408,7 @@
   }
   function getSiteImagePOIs() { return poiMarkers.map(function(item) { return item.poi; }).filter(function(poi) { return poi && isValidPOI(poi) && String(poi.type || '').toLowerCase() !== 'ferry' && getSitePOIImage(poi); }).sort(function(a, b) { return Number(b.relevance || 0) - Number(a.relevance || 0); }); }
   function renderSitePOIFilters(pois) { var container = document.getElementById('site-poi-filters'); var groups; if (!container) return; groups = ['all'].concat((pois || []).map(getSitePOIGroup).filter(Boolean).filter(function(group, index, list) { return list.indexOf(group) === index; })); if (groups.indexOf(currentSitePOIFilter) === -1) currentSitePOIFilter = 'all'; container.innerHTML = groups.map(function(group) { return '<button class="site-poi-filter ' + (group === currentSitePOIFilter ? 'active' : '') + '" type="button" data-site-poi-filter="' + escapeHTML(group) + '">' + escapeHTML(getSitePOIGroupLabel(group)) + '</button>'; }).join(''); }
-  function renderSitePOISection() { var allPOIs = getVillageScopedPOIs(getSiteImagePOIs()); var filtered = currentSitePOIFilter === 'all' ? allPOIs : allPOIs.filter(function(poi) { return getSitePOIGroup(poi) === currentSitePOIFilter; }); var placesTitle = document.querySelector('.site-places-title'); var placesCopy = document.querySelector('.site-places-copy'); if (placesTitle) placesTitle.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesSection') : 'Luoghi utili'); if (placesCopy) placesCopy.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesCopy') : 'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.'); renderSitePOIFilters(allPOIs); renderSiteCards('site-pois', filtered.slice(0, 12), 'Nessun luogo disponibile al momento.', function(poi) { return '<article class="site-poi-card" role="button" tabindex="0" aria-label="Apri ' + escapeHTML(poi.name) + ' sulla mappa" data-site-kind="poi" data-site-poi-id="' + escapeHTML(String(poi.id || '')) + '" data-site-name="' + escapeHTML(poi.name) + '">' + '<img src="' + escapeHTML(getSitePOIImage(poi)) + '" alt="' + escapeHTML(poi.name) + '" loading="lazy">' + '<div class="site-poi-content"><h4 class="site-poi-title">' + escapeHTML(poi.name) + '</h4></div>' + '</article>';  }); }
+  function renderSitePOISection() { var allPOIs = getVillageScopedPOIs(getSiteImagePOIs()); var filtered = currentSitePOIFilter === 'all' ? allPOIs : allPOIs.filter(function(poi) { return getSitePOIGroup(poi) === currentSitePOIFilter; }); var placesTitle = document.querySelector('.site-places-title'); var placesCopy = document.querySelector('.site-places-copy'); var activeVillageName = getActiveVillagePageName ? getActiveVillagePageName() : ''; if (placesTitle) placesTitle.textContent = activeVillageName ? ('Luoghi utili a ' + activeVillageName) : (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesSection') : 'Luoghi utili'); if (placesCopy) placesCopy.textContent = activeVillageName ? ('Panorami, spiagge, monumenti, stazioni e punti pratici collegati solo a ' + activeVillageName + '.') : (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesCopy') : 'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.'); renderSitePOIFilters(allPOIs); applyVillageScopedSectionTitles(); renderSiteCards('site-pois', filtered.slice(0, 12), 'Nessun luogo disponibile al momento.', function(poi) { return '<article class="site-poi-card" role="button" tabindex="0" aria-label="Apri ' + escapeHTML(poi.name) + ' sulla mappa" data-site-kind="poi" data-site-poi-id="' + escapeHTML(String(poi.id || '')) + '" data-site-name="' + escapeHTML(poi.name) + '">' + '<img src="' + escapeHTML(getSitePOIImage(poi)) + '" alt="' + escapeHTML(poi.name) + '" loading="lazy">' + '<div class="site-poi-content"><h4 class="site-poi-title">' + escapeHTML(poi.name) + '</h4></div>' + '</article>';  }); }
   function parseTrailDurationMinutes(value) { var text = String(value || '').toLowerCase(); var h = 0; var m = 0; var match; var compact; if (!text) return 0; match = text.match(/([0-9]+(?:[.,][0-9]+)?)[ ]*h/); if (match) h = Number(String(match[1]).replace(',', '.')) || 0; match = text.match(/([0-9]+)[ ]*(?:m|min)/); if (match) m = Number(match[1]) || 0; if (!h && !m) { compact = text.match(/([0-9]+)[ ]*[:.][ ]*([0-9]+)/); if (compact) return (Number(compact[1]) || 0) * 60 + (Number(compact[2]) || 0); match = text.match(/[0-9]+/); if (match) return Number(match[0]) || 0; } return Math.round(h * 60 + m); }
   function getSiteTrailFilterValues() { var difficultyEl = document.getElementById('site-trail-difficulty-filter'); var fromEl = document.getElementById('site-trail-from-filter'); return { from: fromEl ? String(fromEl.value || 'all') : 'all', difficulty: difficultyEl ? String(difficultyEl.value || 'all') : 'all' }; }
   function getFilteredSiteTrails() { var filters = getSiteTrailFilterValues(); return trailItems.map(function(item) { return item.trail; }).filter(Boolean).filter(isTrailRelatedToVillage).filter(function(trail) { var difficulty = getDisplayDifficulty(trail); var fromName = String(trail.start_name || '').trim(); if (filters.from !== 'all' && fromName !== filters.from) return false; if (filters.difficulty !== 'all' && difficulty !== filters.difficulty) return false; return true; }); }
@@ -3519,6 +3519,49 @@
     if (textEl) textEl.textContent = villagePageDescriptions[slug] || villagePageContext.description || '';
     if (statsEl) statsEl.innerHTML = '<div class="village-page-stat"><strong>' + poiCount + '</strong><span>luoghi</span></div><div class="village-page-stat"><strong>' + trailCount + '</strong><span>sentieri</span></div><div class="village-page-stat"><strong>' + articleCount + '</strong><span>storie</span></div>';
   }
+  function setVillageScopedText(selector, text) {
+    var el = document.querySelector(selector);
+    if (el) el.textContent = text;
+  }
+  function getActiveVillagePageName() {
+    var titleEl;
+    if (villagePageContext && villagePageContext.name) return villagePageContext.name;
+    titleEl = document.getElementById('village-page-title');
+    if (titleEl && titleEl.textContent && titleEl.textContent.trim()) return titleEl.textContent.trim();
+    return '';
+  }
+  function applyVillageScopedSectionTitles() {
+    var villageName;
+    villageName = getActiveVillagePageName();
+    if (!villageName) return;
+
+    setVillageScopedText('#village-calendar-section .site-section-head span', 'Eventi a ' + villageName);
+    setVillageScopedText('#village-calendar-section .site-section-head small', 'solo borgo');
+    setVillageScopedText('.village-calendar-kicker', 'Calendario di ' + villageName);
+    setVillageScopedText('.village-calendar-title', 'Eventi locali');
+
+    setVillageScopedText('.site-pages-section .site-section-head span', 'Scopri ' + villageName);
+    setVillageScopedText('.site-pages-section .site-section-head small', 'solo questo borgo');
+
+    setVillageScopedText('#site-stories-section .site-feature-title', 'Storie di ' + villageName);
+    setVillageScopedText('#site-stories-section .site-feature-text', 'Articoli e guide collegati a ' + villageName + ', per capire meglio il borgo prima di arrivare.');
+
+    setVillageScopedText('#site-places-section .site-places-title', 'Luoghi utili a ' + villageName);
+    setVillageScopedText('#site-places-section .site-places-copy', 'Panorami, spiagge, monumenti, stazioni e punti pratici collegati solo a ' + villageName + '.');
+
+    setVillageScopedText('#site-trails-section .site-feature-title', 'Sentieri da ' + villageName);
+    setVillageScopedText('#site-trails-section .site-feature-text', 'Percorsi e camminate collegati a ' + villageName + ', con difficoltà, durata e altimetria.');
+    setVillageScopedText('#site-trails-section .site-section-copy', 'Scegli un sentiero legato a ' + villageName + ', controlla i dati principali e aprilo sulla mappa.');
+
+    setVillageScopedText('#site-experiences-section .site-feature-title', 'Sconti a ' + villageName);
+    setVillageScopedText('#site-experiences-section .site-feature-text', 'Offerte gratuite e attività locali collegate a ' + villageName + '. Nessuna commissione per i partner.');
+
+    setVillageScopedText('#site-weather-section .site-weather-title', 'Meteo a ' + villageName);
+    setVillageScopedText('#site-weather-section .site-weather-text', 'ora e prossime ore');
+
+    setVillageScopedText('#site-official-communications-section .site-official-title', 'Avvisi per ' + villageName);
+    setVillageScopedText('#site-official-communications-section .site-official-text', 'Comunicazioni ufficiali e aggiornamenti utili da controllare prima di visitare ' + villageName + '.');
+  }
   function applyVillagePageMode() {
     if (!villagePageContext) return;
     document.body.classList.add('village-page-mode');
@@ -3532,6 +3575,7 @@
   function renderSiteViewFromMapData() {
     applyVillagePageMode();
     stabilizePublicSectionTitles();
+    applyVillageScopedSectionTitles();
     renderStoryPreviewSection();
     renderOfficialCommunications();
     setupSiteTrailFilters();
@@ -3571,6 +3615,7 @@
     }
     renderSitePOISection();
     stabilizePublicSectionTitles();
+    applyVillageScopedSectionTitles();
     renderSiteCards('site-ferries', sortedFerries, 'Nessun punto traghetto disponibile al momento.', function(poi) {
       return '<article class="site-data-card" data-site-kind="poi" data-site-name="' + escapeHTML(poi.name) + '"><div class="site-data-icon">⛴️</div><div class="site-data-main"><div class="site-data-title">' + escapeHTML(poi.name) + '</div><div class="site-data-subtitle">Ferry stop · Italian time ' + escapeHTML(getItalyTimeLabel()) + '</div></div><button class="site-data-cta" type="button">Map</button></article>';
     });
@@ -4022,5 +4067,259 @@
       if (lastSection) parent.insertBefore(calendar, lastSection);
     });
   </script>
+<script>
+(function(){
+  if (window.__FTG_FORCE_VILLAGE_TITLES__) return;
+  window.__FTG_FORCE_VILLAGE_TITLES__ = true;
+
+  function cleanVillageName(txt){
+    return String(txt || '')
+      .replace(/^\s*(scopri|guida|borgo|villaggio)\s+/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getVillageName(){
+    var candidates = [
+      window.villagePageContext && window.villagePageContext.name,
+      window.currentVillageName,
+      window.activeVillageName,
+      window.selectedVillageName,
+      document.querySelector('#village-page-title') && document.querySelector('#village-page-title').textContent,
+      document.querySelector('.village-page-title') && document.querySelector('.village-page-title').textContent,
+      document.querySelector('[data-village-name]') && document.querySelector('[data-village-name]').getAttribute('data-village-name'),
+      document.body && document.body.getAttribute('data-village-name')
+    ];
+
+    for (var i = 0; i < candidates.length; i++) {
+      var name = cleanVillageName(candidates[i]);
+      if (name && !/luoghi utili|panorami|spiagge|monumenti|stazioni|punti|tutti|curiosit|chiese/i.test(name)) return name;
+    }
+    return '';
+  }
+
+  function forceVillagePlaceTitle(){
+    var name = getVillageName();
+    if (!name) return;
+
+    var title = document.querySelector('#site-places-section .site-places-title, .site-places-title');
+    var copy = document.querySelector('#site-places-section .site-places-copy, .site-places-copy');
+
+    if (title && title.textContent.trim() !== ('Luoghi utili a ' + name)) {
+      title.textContent = 'Luoghi utili a ' + name;
+    }
+    if (copy && copy.textContent.trim() !== ('Panorami, spiagge, monumenti, stazioni e punti pratici collegati solo a ' + name + '.')) {
+      copy.textContent = 'Panorami, spiagge, monumenti, stazioni e punti pratici collegati solo a ' + name + '.';
+    }
+  }
+
+  window.forceVillagePlaceTitle = forceVillagePlaceTitle;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    forceVillagePlaceTitle();
+    setTimeout(forceVillagePlaceTitle, 80);
+    setTimeout(forceVillagePlaceTitle, 300);
+    setTimeout(forceVillagePlaceTitle, 900);
+  });
+
+  document.addEventListener('click', function(){
+    setTimeout(forceVillagePlaceTitle, 60);
+    setTimeout(forceVillagePlaceTitle, 250);
+  }, true);
+
+  var obs = new MutationObserver(function(){
+    forceVillagePlaceTitle();
+  });
+
+  if (document.body) {
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      if (document.body) obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  if (window.__FTG_HIDE_VILLAGE_ALERTS_WEATHER__) return;
+  window.__FTG_HIDE_VILLAGE_ALERTS_WEATHER__ = true;
+
+  function normalizeText(value){
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(new RegExp('[\u0300-\u036f]', 'g'), '')
+      .replace(new RegExp('\\s+', 'g'), ' ')
+      .trim();
+  }
+
+  function isVillagePageActive(){
+    return !!(
+      document.querySelector('#village-page, .village-page, [data-village-page]') ||
+      document.body.classList.contains('village-page-active') ||
+      document.body.classList.contains('is-village-page') ||
+      document.body.getAttribute('data-page') === 'village'
+    );
+  }
+
+  function hideVillageAlertsAndWeather(){
+    if (!isVillagePageActive()) return;
+
+    var sections = document.querySelectorAll('section, .site-section, .village-section, .content-section, article, [data-section], [id], [class]');
+
+    sections.forEach(function(section){
+      if (!section || section === document.body || section === document.documentElement) return;
+
+      var idClass = normalizeText((section.id || '') + ' ' + (section.className || '') + ' ' + (section.getAttribute('data-section') || ''));
+      var heading = section.querySelector('h1,h2,h3,.section-title,.site-section-title,.village-section-title,.card-title');
+      var headingText = normalizeText(heading ? heading.textContent : '');
+
+      var isOfficialAlerts =
+        /avvisi ufficiali|comunicazioni ufficiali|official communications|official notices|official alerts/.test(headingText) ||
+        /official[-_ ]?communications|official[-_ ]?notices|official[-_ ]?alerts|avvisi[-_ ]?ufficiali|comunicazioni[-_ ]?ufficiali/.test(idClass);
+
+      var isWeather =
+        /(^| )meteo( |$)|weather|previsioni/.test(headingText) ||
+        /(^| )weather( |$)|(^| )meteo( |$)|forecast|previsioni/.test(idClass);
+
+      if (isOfficialAlerts || isWeather) {
+        section.style.display = 'none';
+        section.setAttribute('aria-hidden', 'true');
+        section.setAttribute('data-ftg-hidden-village-block', 'true');
+      }
+    });
+  }
+
+  window.hideVillageAlertsAndWeather = hideVillageAlertsAndWeather;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    hideVillageAlertsAndWeather();
+    setTimeout(hideVillageAlertsAndWeather, 100);
+    setTimeout(hideVillageAlertsAndWeather, 500);
+    setTimeout(hideVillageAlertsAndWeather, 1200);
+  });
+
+  document.addEventListener('click', function(){
+    setTimeout(hideVillageAlertsAndWeather, 80);
+    setTimeout(hideVillageAlertsAndWeather, 350);
+  }, true);
+
+  var obs = new MutationObserver(function(){
+    hideVillageAlertsAndWeather();
+  });
+
+  if (document.body) {
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      if (document.body) obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  if (window.__FTG_FORCE_REMOVE_VILLAGE_METEO_AVVISI__) return;
+  window.__FTG_FORCE_REMOVE_VILLAGE_METEO_AVVISI__ = true;
+
+  function cleanText(v){
+    return String(v || '')
+      .toLowerCase()
+      .replace(new RegExp(String.fromCharCode(768) + '-' + String.fromCharCode(879), 'g'), '')
+      .replace(new RegExp('\s+', 'g'), ' ')
+      .trim();
+  }
+
+  function isVillageContext(){
+    var bodyText = cleanText(document.body ? document.body.textContent : '');
+    return !!(
+      document.querySelector('#village-page, .village-page, [data-village-page], .village-detail, .village-sheet, .village-modal, [data-village]') ||
+      document.body.classList.contains('village-page-active') ||
+      document.body.classList.contains('is-village-page') ||
+      document.body.getAttribute('data-page') === 'village' ||
+      /monterosso|vernazza|corniglia|manarola|riomaggiore/.test(bodyText)
+    );
+  }
+
+  function findBlock(el){
+    var cur = el;
+    for (var i = 0; cur && i < 8; i++) {
+      if (
+        cur.tagName === 'SECTION' ||
+        cur.tagName === 'ARTICLE' ||
+        cur.classList.contains('section') ||
+        cur.classList.contains('site-section') ||
+        cur.classList.contains('village-section') ||
+        cur.classList.contains('village-card') ||
+        cur.classList.contains('info-card') ||
+        cur.classList.contains('weather-card') ||
+        cur.classList.contains('official-card') ||
+        cur.classList.contains('card') ||
+        cur.getAttribute('data-section')
+      ) return cur;
+      cur = cur.parentElement;
+    }
+    return el;
+  }
+
+  function removeVillageMeteoAvvisi(){
+    if (!document.body || !isVillageContext()) return;
+
+    var nodes = document.querySelectorAll('h1,h2,h3,h4,h5,h6,button,a,span,p,div,section,article,[id],[class],[data-section]');
+
+    nodes.forEach(function(node){
+      if (!node || node === document.body || node === document.documentElement) return;
+
+      var text = cleanText(node.textContent).slice(0, 220);
+      var attrs = cleanText((node.id || '') + ' ' + (node.className || '') + ' ' + (node.getAttribute('data-section') || '') + ' ' + (node.getAttribute('aria-label') || ''));
+
+      var matchAvvisi =
+        /avvisi ufficiali|comunicazioni ufficiali|comunicati ufficiali|official communications|official notices|official alerts/.test(text) ||
+        /avvisi[-_ ]?ufficiali|comunicazioni[-_ ]?ufficiali|comunicati[-_ ]?ufficiali|official[-_ ]?communications|official[-_ ]?notices|official[-_ ]?alerts/.test(attrs);
+
+      var matchMeteo =
+        /(^| )meteo( |$)|(^| )weather( |$)|previsioni meteo|meteo oggi|weather today/.test(text) ||
+        /(^| )meteo( |$)|(^| )weather( |$)|forecast|previsioni/.test(attrs);
+
+      if (matchAvvisi || matchMeteo) {
+        var block = findBlock(node);
+        if (block && block !== document.body && block !== document.documentElement) {
+          block.style.setProperty('display', 'none', 'important');
+          block.style.setProperty('visibility', 'hidden', 'important');
+          block.style.setProperty('height', '0', 'important');
+          block.style.setProperty('min-height', '0', 'important');
+          block.style.setProperty('margin', '0', 'important');
+          block.style.setProperty('padding', '0', 'important');
+          block.style.setProperty('overflow', 'hidden', 'important');
+          block.setAttribute('aria-hidden', 'true');
+          block.setAttribute('data-ftg-force-hidden-village', 'true');
+        }
+      }
+    });
+  }
+
+  window.removeVillageMeteoAvvisi = removeVillageMeteoAvvisi;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    removeVillageMeteoAvvisi();
+    [50,150,350,700,1200,2000].forEach(function(ms){ setTimeout(removeVillageMeteoAvvisi, ms); });
+  });
+
+  document.addEventListener('click', function(){
+    [50,150,350,700].forEach(function(ms){ setTimeout(removeVillageMeteoAvvisi, ms); });
+  }, true);
+
+  var observer = new MutationObserver(function(){ removeVillageMeteoAvvisi(); });
+
+  if (document.body) {
+    observer.observe(document.body, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style','data-page','data-section'] });
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      if (document.body) observer.observe(document.body, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style','data-page','data-section'] });
+    });
+  }
+})();
+</script>
 </body>
 </html>
