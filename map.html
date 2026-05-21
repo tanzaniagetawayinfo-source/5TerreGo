@@ -4220,105 +4220,124 @@
 </script>
 <script>
 (function(){
-  if (window.__FTG_FORCE_REMOVE_VILLAGE_METEO_AVVISI__) return;
-  window.__FTG_FORCE_REMOVE_VILLAGE_METEO_AVVISI__ = true;
+  if (window.__FTG_VILLAGE_CARDS_CLICK_ONLY__) return;
+  window.__FTG_VILLAGE_CARDS_CLICK_ONLY__ = true;
 
-  function cleanText(v){
+  var villageNames = ['monterosso','vernazza','corniglia','manarola','riomaggiore'];
+  var touchStartX = 0;
+  var touchStartY = 0;
+  var touchMoved = false;
+  var accentsReg = new RegExp('[' + String.fromCharCode(768) + '-' + String.fromCharCode(879) + ']', 'g');
+  var spacesReg = new RegExp('\\s+', 'g');
+
+  function clean(v){
     return String(v || '')
       .toLowerCase()
-      .replace(new RegExp(String.fromCharCode(768) + '-' + String.fromCharCode(879), 'g'), '')
-      .replace(new RegExp('\s+', 'g'), ' ')
+      .normalize('NFD')
+      .replace(accentsReg, '')
+      .replace(spacesReg, ' ')
       .trim();
   }
 
-  function isVillageContext(){
-    var bodyText = cleanText(document.body ? document.body.textContent : '');
-    return !!(
-      document.querySelector('#village-page, .village-page, [data-village-page], .village-detail, .village-sheet, .village-modal, [data-village]') ||
-      document.body.classList.contains('village-page-active') ||
-      document.body.classList.contains('is-village-page') ||
-      document.body.getAttribute('data-page') === 'village' ||
-      /monterosso|vernazza|corniglia|manarola|riomaggiore/.test(bodyText)
-    );
+  function toElement(node){
+    if (!node) return null;
+    if (node.nodeType === 1) return node;
+    if (node.parentElement) return node.parentElement;
+    if (node.parentNode && node.parentNode.nodeType === 1) return node.parentNode;
+    return null;
   }
 
-  function findBlock(el){
-    var cur = el;
+  function safeAttr(el, name){
+    return el && typeof el.getAttribute === 'function' ? el.getAttribute(name) : '';
+  }
+
+  function safeMatches(el, selector){
+    return el && typeof el.matches === 'function' ? el.matches(selector) : false;
+  }
+
+  function isVillageHomeCard(target){
+    var cur = toElement(target);
+
     for (var i = 0; cur && i < 8; i++) {
+      if (cur === document.body || cur === document.documentElement) return null;
+      if (cur.nodeType !== 1 || typeof cur.getAttribute !== 'function') {
+        cur = toElement(cur.parentNode);
+        continue;
+      }
+
+      var classValue = '';
+      if (typeof cur.className === 'string') {
+        classValue = cur.className;
+      } else if (cur.className && typeof cur.className.baseVal === 'string') {
+        classValue = cur.className.baseVal;
+      }
+
+      var data = clean(
+        safeAttr(cur, 'data-village') + ' ' +
+        safeAttr(cur, 'data-borgo') + ' ' +
+        safeAttr(cur, 'data-town') + ' ' +
+        safeAttr(cur, 'aria-label') + ' ' +
+        (cur.id || '') + ' ' +
+        classValue
+      );
+
+      var text = clean(cur.textContent).slice(0, 180);
+      var haystack = data + ' ' + text;
+      var hasVillageName = villageNames.some(function(name){ return haystack.indexOf(name) !== -1; });
+
       if (
-        cur.tagName === 'SECTION' ||
-        cur.tagName === 'ARTICLE' ||
-        cur.classList.contains('section') ||
-        cur.classList.contains('site-section') ||
-        cur.classList.contains('village-section') ||
-        cur.classList.contains('village-card') ||
-        cur.classList.contains('info-card') ||
-        cur.classList.contains('weather-card') ||
-        cur.classList.contains('official-card') ||
-        cur.classList.contains('card') ||
-        cur.getAttribute('data-section')
+        hasVillageName &&
+        (
+          /village|borgo|borghi|town|card|tile|slide|swiper|carousel/.test(data) ||
+          safeMatches(cur, 'article,section,button,a,[role="button"],.card,.tile')
+        )
       ) return cur;
+
       cur = cur.parentElement;
     }
-    return el;
+    return null;
   }
 
-  function removeVillageMeteoAvvisi(){
-    if (!document.body || !isVillageContext()) return;
+  function blockOpenByTouchOrHover(e){
+    var card = isVillageHomeCard(e.target);
+    if (!card) return;
 
-    var nodes = document.querySelectorAll('h1,h2,h3,h4,h5,h6,button,a,span,p,div,section,article,[id],[class],[data-section]');
-
-    nodes.forEach(function(node){
-      if (!node || node === document.body || node === document.documentElement) return;
-
-      var text = cleanText(node.textContent).slice(0, 220);
-      var attrs = cleanText((node.id || '') + ' ' + (node.className || '') + ' ' + (node.getAttribute('data-section') || '') + ' ' + (node.getAttribute('aria-label') || ''));
-
-      var matchAvvisi =
-        /avvisi ufficiali|comunicazioni ufficiali|comunicati ufficiali|official communications|official notices|official alerts/.test(text) ||
-        /avvisi[-_ ]?ufficiali|comunicazioni[-_ ]?ufficiali|comunicati[-_ ]?ufficiali|official[-_ ]?communications|official[-_ ]?notices|official[-_ ]?alerts/.test(attrs);
-
-      var matchMeteo =
-        /(^| )meteo( |$)|(^| )weather( |$)|previsioni meteo|meteo oggi|weather today/.test(text) ||
-        /(^| )meteo( |$)|(^| )weather( |$)|forecast|previsioni/.test(attrs);
-
-      if (matchAvvisi || matchMeteo) {
-        var block = findBlock(node);
-        if (block && block !== document.body && block !== document.documentElement) {
-          block.style.setProperty('display', 'none', 'important');
-          block.style.setProperty('visibility', 'hidden', 'important');
-          block.style.setProperty('height', '0', 'important');
-          block.style.setProperty('min-height', '0', 'important');
-          block.style.setProperty('margin', '0', 'important');
-          block.style.setProperty('padding', '0', 'important');
-          block.style.setProperty('overflow', 'hidden', 'important');
-          block.setAttribute('aria-hidden', 'true');
-          block.setAttribute('data-ftg-force-hidden-village', 'true');
-        }
+    if (e.type === 'touchstart') {
+      touchMoved = false;
+      if (e.touches && e.touches[0]) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
       }
-    });
+    }
+
+    if (e.type === 'touchmove') {
+      if (e.touches && e.touches[0]) {
+        var dx = Math.abs(e.touches[0].clientX - touchStartX);
+        var dy = Math.abs(e.touches[0].clientY - touchStartY);
+        if (dx > 6 || dy > 6) touchMoved = true;
+      }
+    }
+
+    e.stopImmediatePropagation();
   }
 
-  window.removeVillageMeteoAvvisi = removeVillageMeteoAvvisi;
-
-  document.addEventListener('DOMContentLoaded', function(){
-    removeVillageMeteoAvvisi();
-    [50,150,350,700,1200,2000].forEach(function(ms){ setTimeout(removeVillageMeteoAvvisi, ms); });
+  ['mouseover','mouseenter','pointerover','pointerenter','touchstart','touchmove','touchend'].forEach(function(type){
+    document.addEventListener(type, blockOpenByTouchOrHover, true);
   });
 
-  document.addEventListener('click', function(){
-    [50,150,350,700].forEach(function(ms){ setTimeout(removeVillageMeteoAvvisi, ms); });
+  document.addEventListener('click', function(e){
+    var card = isVillageHomeCard(e.target);
+    if (!card) return;
+
+    if (touchMoved) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      touchMoved = false;
+      return;
+    }
+
+    card.setAttribute('data-ftg-click-open-allowed', 'true');
   }, true);
-
-  var observer = new MutationObserver(function(){ removeVillageMeteoAvvisi(); });
-
-  if (document.body) {
-    observer.observe(document.body, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style','data-page','data-section'] });
-  } else {
-    document.addEventListener('DOMContentLoaded', function(){
-      if (document.body) observer.observe(document.body, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style','data-page','data-section'] });
-    });
-  }
 })();
 </script>
 </body>
