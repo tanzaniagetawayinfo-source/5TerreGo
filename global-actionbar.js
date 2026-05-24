@@ -9,6 +9,7 @@
 
   var GLOBAL_ACTIONBAR_ID = 'ftg-global-actionbar';
   var GLOBAL_ACTIONBAR_STYLE_ID = 'ftg-global-actionbar-style';
+  var GLOBAL_AI_BUTTON_ID = 'ai-chat-btn';
 
   var GLOBAL_ACTIONBAR_TEXTS = {
     en: {
@@ -209,7 +210,11 @@
       '.ftg-global-legal{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;color:rgba(255,255,255,.38);font-size:12px;font-weight:850;}\n' +
       '.ftg-global-legal a{color:rgba(255,255,255,.58);text-decoration:underline;text-underline-offset:3px;}\n' +
       '.ftg-global-search{position:relative;}.ftg-global-search input{width:100%;min-height:40px;padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.13);outline:none;background:rgba(255,255,255,.12);color:#fff;font-size:14.5px;font-weight:650;}\n' +
-      '@media (max-width:380px){.ftg-global-actionbar{left:8px;right:8px;padding:7px;border-radius:22px}.ftg-global-brand{font-size:12.5px}.ftg-global-username{font-size:27px}}\n';
+      '#ai-chat-btn{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:7998;width:72px;height:72px;border-radius:50%;border:1px solid rgba(255,255,255,.20);background:rgba(8,14,18,.38);box-shadow:0 18px 44px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;}\n' +
+      '#ai-chat-btn:active{transform:scale(.94);}#ai-chat-btn:hover{box-shadow:0 22px 54px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.18);}\n' +
+      '#ai-mascot-video{width:112%;height:112%;object-fit:cover;display:block;pointer-events:none;transform:translateY(2px);}\n' +
+      'body.ftg-global-menu-open #ai-chat-btn{opacity:0;pointer-events:none;transform:scale(.86);}\n' +
+      '@media (max-width:380px){.ftg-global-actionbar{left:8px;right:8px;padding:7px;border-radius:22px}.ftg-global-brand{font-size:12.5px}.ftg-global-username{font-size:27px}#ai-chat-btn{right:14px;width:68px;height:68px}}\n';
 
     document.head.appendChild(style);
   }
@@ -302,6 +307,7 @@
     langMenu = bar.querySelector('.ftg-global-language');
 
     bar.classList.remove('is-open');
+    document.body.classList.remove('ftg-global-menu-open');
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
     if (langMenu) langMenu.classList.remove('is-open');
   }
@@ -349,6 +355,70 @@
     window.location.href = 'index.html#captain-gull';
   }
 
+  function ensureCaptainGullButton() {
+    var existingButton = document.getElementById(GLOBAL_AI_BUTTON_ID);
+    var button;
+    var video;
+    var sourceGithubPages;
+    var sourceGithubRaw;
+    var sourceLocal;
+
+    if (existingButton) {
+      existingButton.setAttribute('data-ftg-global-ai-adopted', 'true');
+      return existingButton;
+    }
+
+    button = document.createElement('button');
+    button.id = GLOBAL_AI_BUTTON_ID;
+    button.type = 'button';
+    button.setAttribute('aria-label', 'Captain Gull');
+    button.setAttribute('data-ai-chat-btn', 'true');
+    button.setAttribute('data-ftg-global-ai-button', 'true');
+
+    video = document.createElement('video');
+    video.id = 'ai-mascot-video';
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('muted', '');
+    video.preload = 'auto';
+
+    sourceGithubPages = document.createElement('source');
+    sourceGithubPages.src = 'https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm';
+    sourceGithubPages.type = 'video/webm';
+
+    sourceGithubRaw = document.createElement('source');
+    sourceGithubRaw.src = 'https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm';
+    sourceGithubRaw.type = 'video/webm';
+
+    sourceLocal = document.createElement('source');
+    sourceLocal.src = 'mascotterelax.webm';
+    sourceLocal.type = 'video/webm';
+
+    video.appendChild(sourceGithubPages);
+    video.appendChild(sourceGithubRaw);
+    video.appendChild(sourceLocal);
+    button.appendChild(video);
+    document.body.appendChild(button);
+
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openCaptainGullFromAnyPage();
+    });
+
+    try {
+      video.muted = true;
+      video.playsInline = true;
+      video.play().catch(function () {});
+    } catch (error) {}
+
+    return button;
+  }
+
   function wireGlobalActionbar(bar) {
     var toggle;
     var langMenu;
@@ -368,6 +438,7 @@
         event.preventDefault();
         event.stopPropagation();
         bar.classList.toggle('is-open');
+        document.body.classList.toggle('ftg-global-menu-open', bar.classList.contains('is-open'));
         toggle.setAttribute('aria-expanded', bar.classList.contains('is-open') ? 'true' : 'false');
         if (!bar.classList.contains('is-open') && langMenu) langMenu.classList.remove('is-open');
       });
@@ -495,6 +566,7 @@
 
     applyGlobalActionbarCopy(bar);
     wireGlobalActionbar(bar);
+    ensureCaptainGullButton();
 
     return bar;
   }
@@ -507,13 +579,18 @@
   window.FTG_OPEN_CAPTAIN_GULL_FALLBACK = openCaptainGullFromAnyPage;
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountGlobalActionbar);
+    document.addEventListener('DOMContentLoaded', function () {
+      mountGlobalActionbar();
+      ensureCaptainGullButton();
+    });
   } else {
     mountGlobalActionbar();
+    ensureCaptainGullButton();
   }
 
   window.addEventListener('load', function () {
     var bar = document.getElementById(GLOBAL_ACTIONBAR_ID);
     if (bar) applyGlobalActionbarCopy(bar);
+    ensureCaptainGullButton();
   });
 }());
