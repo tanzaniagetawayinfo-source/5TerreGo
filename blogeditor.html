@@ -185,7 +185,10 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 */
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const SUPABASE_ANON_REST_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
-const OWNER_EMAIL = "5terrego.info@gmail.com";
+const OWNER_EMAILS = [
+  "5terrego.info@gmail.com",
+  "verofili96@icloud.com"
+];
 const BLOG_TABLE = "blog_posts";
 const POIS_TABLE = "pois";
 
@@ -868,7 +871,7 @@ async function assertOwner(){
     return false;
   }
 
-  if(email !== OWNER_EMAIL){
+  if(!OWNER_EMAILS.includes(email)){
     alert("Utente non autorizzato: " + (email || "email non trovata"));
     return false;
   }
