@@ -386,6 +386,51 @@
       gap: 12px;
     }
 
+    .settings-divider {
+      height: 1px;
+      background: rgba(20,32,51,.1);
+      margin: 6px 0;
+    }
+
+    .operators-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .operator-chip {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.74);
+      border: 1px solid rgba(20,32,51,.1);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .operator-add-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mini-btn {
+      min-height: 48px;
+      border-radius: 18px;
+      padding: 0 16px;
+      background: rgba(20,32,51,.92);
+      color: #fff;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .login-actions, .settings-actions {
       display: grid;
       gap: 10px;
@@ -462,7 +507,7 @@
       <div class="settings-head">
         <div>
           <h2 class="settings-title">Settings</h2>
-          <p class="settings-subtitle">Change only the public discount and the discount text.</p>
+          <p class="settings-subtitle">Change the public discount, discount text and authorized operator emails.</p>
         </div>
         <button id="closeSettingsBtn" class="icon-btn" type="button" aria-label="Close">×</button>
       </div>
@@ -476,7 +521,23 @@
           <label for="discountInfoInput">Discount text</label>
           <textarea id="discountInfoInput" placeholder="Show this QR code before ordering"></textarea>
         </div>
-        <button id="saveSettingsBtn" class="primary-btn" type="button">Save</button>
+        <button id="saveSettingsBtn" class="primary-btn" type="button">Save discount</button>
+
+        <div class="settings-divider"></div>
+
+        <div class="field">
+          <label>Authorized operators</label>
+          <div id="operatorsList" class="operators-list"></div>
+        </div>
+
+        <div class="field">
+          <label for="operatorEmailInput">Add operator email</label>
+          <div class="operator-add-row">
+            <input id="operatorEmailInput" type="email" autocomplete="email" placeholder="operator@email.com" />
+            <button id="addOperatorBtn" class="mini-btn" type="button">Add</button>
+          </div>
+        </div>
+
         <div id="settingsStatus" class="status hidden"></div>
       </div>
     </div>
@@ -521,6 +582,9 @@
       var discountInput = document.getElementById("discountInput");
       var discountInfoInput = document.getElementById("discountInfoInput");
       var saveSettingsBtn = document.getElementById("saveSettingsBtn");
+      var operatorsList = document.getElementById("operatorsList");
+      var operatorEmailInput = document.getElementById("operatorEmailInput");
+      var addOperatorBtn = document.getElementById("addOperatorBtn");
       var settingsStatus = document.getElementById("settingsStatus");
       var activitySelectWrap = document.getElementById("activitySelectWrap");
       var activitySelect = document.getElementById("activitySelect");
@@ -624,6 +688,15 @@
 
       function emailIsAuthorized(poi, email) {
         return parseAuthorizedEmails(poi && poi.emails).indexOf(String(email || "").trim().toLowerCase()) !== -1;
+      }
+
+      function normalizeEmail(value) {
+        return String(value || "").trim().toLowerCase();
+      }
+
+      function isValidEmail(value) {
+        var email = normalizeEmail(value);
+        return email.indexOf("@") > 0 && email.indexOf(".", email.indexOf("@")) > email.indexOf("@") + 1;
       }
 
       function delay(ms) {
@@ -790,6 +863,15 @@
         if (!activePoi) return;
         discountInput.value = Number(activePoi.discount || 0);
         discountInfoInput.value = activePoi.discount_info || "";
+        renderOperatorsList();
+      }
+
+      function renderOperatorsList() {
+        if (!operatorsList || !activePoi) return;
+        var emails = parseAuthorizedEmails(activePoi.emails);
+        operatorsList.innerHTML = emails.length ? emails.map(function (email) {
+          return '<span class="operator-chip">' + escapeHtml(email) + '</span>';
+        }).join("") : '<span class="operator-chip">No operator emails yet</span>';
       }
 
       function openSettings() {
@@ -831,6 +913,53 @@
           setStatus(settingsStatus, escapeHtml(error.message), "error");
         } finally {
           saveSettingsBtn.disabled = false;
+        }
+      }
+
+      async function addOperatorEmail() {
+        if (!activePoi) return;
+
+        var email = normalizeEmail(operatorEmailInput.value);
+        if (!email) {
+          setStatus(settingsStatus, "Insert the operator email.", "error");
+          return;
+        }
+        if (!isValidEmail(email)) {
+          setStatus(settingsStatus, "Insert a valid email address.", "error");
+          return;
+        }
+
+        var currentEmails = parseAuthorizedEmails(activePoi.emails);
+        if (currentEmails.indexOf(email) !== -1) {
+          setStatus(settingsStatus, "This operator is already authorized.", "ok");
+          operatorEmailInput.value = "";
+          return;
+        }
+
+        addOperatorBtn.disabled = true;
+        setStatus(settingsStatus, "Adding operator...", "");
+
+        try {
+          await callBackend({
+            action: "update_emails",
+            poi_id: activePoi.id,
+            add_emails: [email]
+          });
+
+          currentEmails.push(email);
+          activePoi.emails = currentEmails.join(", ");
+          partnerPois = partnerPois.map(function (poi) {
+            if (String(poi.id) === String(activePoi.id)) return activePoi;
+            return poi;
+          });
+
+          operatorEmailInput.value = "";
+          renderOperatorsList();
+          setStatus(settingsStatus, "Operator added: <strong>" + escapeHtml(email) + "</strong>", "ok");
+        } catch (error) {
+          setStatus(settingsStatus, escapeHtml(error.message), "error");
+        } finally {
+          addOperatorBtn.disabled = false;
         }
       }
 
@@ -917,6 +1046,9 @@
         console.assert(normalizeCode('https://5terrego.com/partner.html?code=5tg-test') === '5TG-TEST', 'normalizeCode should extract code from URL');
         console.assert(typeof updatePoiSettingsFallback === 'function', 'Settings use update_partner_discount RPC instead of the old backend');
         console.assert(typeof validateCurrentCode === 'function', 'Validation uses validate_partner_discount_code RPC instead of the old backend');
+        console.assert(isValidEmail('operator@test.com') === true, 'isValidEmail should accept valid emails');
+        console.assert(isValidEmail('bad-email') === false, 'isValidEmail should reject invalid emails');
+        console.assert(typeof addOperatorEmail === 'function', 'Dashboard can add operator emails through update_emails');
       }
 
       loginBtn.addEventListener("click", login);
@@ -924,6 +1056,10 @@
       settingsBtn.addEventListener("click", openSettings);
       closeSettingsBtn.addEventListener("click", closeSettings);
       saveSettingsBtn.addEventListener("click", saveSettings);
+      addOperatorBtn.addEventListener("click", addOperatorEmail);
+      operatorEmailInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") addOperatorEmail();
+      });
       validateBtn.addEventListener("click", validateCurrentCode);
       startCameraBtn.addEventListener("click", startScanner);
       codeInput.addEventListener("keydown", function (event) {
