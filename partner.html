@@ -507,21 +507,22 @@
       <div class="settings-head">
         <div>
           <h2 class="settings-title">Settings</h2>
-          <p class="settings-subtitle">Change the public discount, discount text and authorized operator emails.</p>
+          <p class="settings-subtitle">Change the public offer text and authorized operator emails.</p>
         </div>
         <button id="closeSettingsBtn" class="icon-btn" type="button" aria-label="Close">×</button>
       </div>
 
       <div class="settings-form">
+        <input id="discountInput" type="hidden" value="1" />
         <div class="field">
-          <label for="discountInput">Discount %</label>
-          <input id="discountInput" type="number" min="0" max="100" step="1" />
+          <label for="discountTitleInput">Offer title</label>
+          <input id="discountTitleInput" type="text" maxlength="80" placeholder="Example: Free limoncino" />
         </div>
         <div class="field">
-          <label for="discountInfoInput">Discount text</label>
-          <textarea id="discountInfoInput" placeholder="Show this QR code before ordering"></textarea>
+          <label for="discountInfoInput">Offer description</label>
+          <textarea id="discountInfoInput" placeholder="Example: Show this QR code before ordering. Valid with dinner only."></textarea>
         </div>
-        <button id="saveSettingsBtn" class="primary-btn" type="button">Save discount</button>
+        <button id="saveSettingsBtn" class="primary-btn" type="button">Save offer</button>
 
         <div class="settings-divider"></div>
 
@@ -580,6 +581,7 @@
       var settingsModal = document.getElementById("settingsModal");
       var closeSettingsBtn = document.getElementById("closeSettingsBtn");
       var discountInput = document.getElementById("discountInput");
+      var discountTitleInput = document.getElementById("discountTitleInput");
       var discountInfoInput = document.getElementById("discountInfoInput");
       var saveSettingsBtn = document.getElementById("saveSettingsBtn");
       var operatorsList = document.getElementById("operatorsList");
@@ -701,6 +703,38 @@
 
       function delay(ms) {
         return new Promise(function (resolve) { setTimeout(resolve, ms); });
+      }
+
+      function encodeOfferText(title, description) {
+        title = String(title || "").trim();
+        description = String(description || "").trim();
+        if (!title && !description) return "";
+        return JSON.stringify({ title: title, description: description });
+      }
+
+      function decodeOfferText(value) {
+        var raw = String(value || "").trim();
+        if (!raw) return { title: "", description: "" };
+        try {
+          var parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            return {
+              title: String(parsed.title || parsed.discount_title || parsed.offer_title || "").trim(),
+              description: String(parsed.description || parsed.discount_description || parsed.offer_description || parsed.text || "").trim()
+            };
+          }
+        } catch (err) {}
+        return { title: raw, description: "" };
+      }
+
+      function buildOfferFeedbackHtml(data) {
+        data = data || {};
+        var decoded = decodeOfferText(data.discount_text || data.discount_info || data.offer_text || data.offer || "");
+        var title = String(data.discount_title || data.offer_title || decoded.title || "").trim();
+        var description = String(data.discount_description || data.offer_description || decoded.description || "").trim();
+        var discount = data.discount || "";
+        if (!title && discount) title = String(discount) + "% discount";
+        return (title ? "<br><strong>" + escapeHtml(title) + "</strong>" : "") + (description ? "<br>" + escapeHtml(description) : "");
       }
 
       function showAuth() {
@@ -861,8 +895,10 @@
 
       function fillSettingsForm() {
         if (!activePoi) return;
-        discountInput.value = Number(activePoi.discount || 0);
-        discountInfoInput.value = activePoi.discount_info || "";
+        discountInput.value = Number(activePoi.discount || 1) || 1;
+        var offer = decodeOfferText(activePoi.discount_info || "");
+        discountTitleInput.value = offer.title;
+        discountInfoInput.value = offer.description;
         renderOperatorsList();
       }
 
@@ -888,16 +924,22 @@
       async function saveSettings() {
         if (!activePoi) return;
 
-        var discount = Number(discountInput.value || 0);
-        var discountInfo = discountInfoInput.value.trim();
+        var discount = 1;
+        var offerTitle = discountTitleInput.value.trim();
+        var offerDescription = discountInfoInput.value.trim();
+        var discountInfo = encodeOfferText(offerTitle, offerDescription);
 
-        if (!Number.isFinite(discount) || discount < 0 || discount > 100) {
-          setStatus(settingsStatus, "Discount must be between 0 and 100.", "error");
+        if (!offerTitle) {
+          setStatus(settingsStatus, "Insert the offer title.", "error");
+          return;
+        }
+        if (!offerDescription) {
+          setStatus(settingsStatus, "Insert the offer description.", "error");
           return;
         }
 
         saveSettingsBtn.disabled = true;
-        setStatus(settingsStatus, "Saving...", "");
+        setStatus(settingsStatus, "Saving offer...", "");
 
         try {
           await updatePoiSettingsFallback(activePoi.id, { discount: discount, discount_info: discountInfo });
@@ -908,7 +950,7 @@
             if (String(poi.id) === String(activePoi.id)) return activePoi;
             return poi;
           });
-          setStatus(settingsStatus, "Saved.", "ok");
+          setStatus(settingsStatus, "Offer saved.", "ok");
         } catch (error) {
           setStatus(settingsStatus, escapeHtml(error.message), "error");
         } finally {
@@ -978,9 +1020,8 @@
           if (result.error) throw new Error(result.error.message || "Could not validate code.");
           var data = result.data || {};
           var poiName = data.poi_name || "Activity";
-          var discount = data.discount || "";
           codeInput.value = "";
-          setScannerFeedback("Validated<br><strong>" + escapeHtml(poiName) + "</strong>" + (discount ? "<br>" + escapeHtml(discount) + "% discount" : ""), "ok");
+          setScannerFeedback("Validated<br><strong>" + escapeHtml(poiName) + "</strong>" + buildOfferFeedbackHtml(data), "ok");
         } catch (error) {
           setScannerFeedback(escapeHtml(error.message), "error");
         } finally {
@@ -1049,6 +1090,8 @@
         console.assert(isValidEmail('operator@test.com') === true, 'isValidEmail should accept valid emails');
         console.assert(isValidEmail('bad-email') === false, 'isValidEmail should reject invalid emails');
         console.assert(typeof addOperatorEmail === 'function', 'Dashboard can add operator emails through update_emails');
+        console.assert(decodeOfferText(encodeOfferText('Title', 'Description')).title === 'Title', 'Offer title should roundtrip');
+        console.assert(decodeOfferText(encodeOfferText('Title', 'Description')).description === 'Description', 'Offer description should roundtrip');
       }
 
       loginBtn.addEventListener("click", login);
