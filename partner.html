@@ -441,6 +441,171 @@
       .screen { justify-content: flex-start; }
       .scanner-box { width: min(100%, 310px); }
     }
+
+    /* Operational mode: no decorative boxes, no glass, no gradients. */
+    :root {
+      --bg: #f7f7f7;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --blue: #111827;
+      --orange: #111827;
+      --green: #15803d;
+      --red: #b91c1c;
+      --card: #ffffff;
+      --shadow: none;
+    }
+
+    body {
+      background: var(--bg) !important;
+    }
+
+    .app {
+      padding: calc(12px + env(safe-area-inset-top)) 12px calc(18px + env(safe-area-inset-bottom));
+    }
+
+    .brand-title {
+      font-size: 20px;
+      letter-spacing: -.04em;
+    }
+
+    .brand-title .blue,
+    .brand-title .orange {
+      color: var(--text);
+    }
+
+    .auth-card,
+    .scanner-card,
+    .settings-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .auth-title {
+      font-size: 28px;
+      letter-spacing: -.04em;
+    }
+
+    .icon-btn,
+    .secondary-btn,
+    input,
+    textarea,
+    select,
+    .status,
+    .operator-chip {
+      border-radius: 8px;
+      box-shadow: none;
+      background: #ffffff;
+      border-color: var(--line);
+    }
+
+    input,
+    textarea,
+    select {
+      padding: 13px 12px;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--text);
+      box-shadow: 0 0 0 2px rgba(17,24,39,.12);
+    }
+
+    .primary-btn,
+    .mini-btn {
+      border-radius: 8px;
+      background: var(--text);
+      box-shadow: none;
+    }
+
+    .status.ok {
+      color: var(--green);
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .status.error {
+      color: var(--red);
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .scanner-card {
+      padding: 12px;
+      gap: 12px;
+    }
+
+    .scanner-box {
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .camera-icon,
+    .scan-frame,
+    .scan-line {
+      display: none !important;
+    }
+
+    .scanner-feedback {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 14px 12px;
+      border-radius: 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(255,255,255,.96);
+    }
+
+    .scanner-feedback.ok {
+      color: var(--green);
+      background: #f0fdf4;
+    }
+
+    .scanner-feedback.error {
+      color: var(--red);
+      background: #fef2f2;
+    }
+
+    .scanner-feedback.loading {
+      color: var(--text);
+      background: #f9fafb;
+    }
+
+    .modal {
+      background: rgba(17,24,39,.28);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 10px;
+    }
+
+    .settings-card {
+      padding: 16px;
+    }
+
+    .settings-title {
+      font-size: 24px;
+      letter-spacing: -.04em;
+    }
+
+    .settings-divider {
+      background: var(--line);
+      margin: 4px 0;
+    }
+
+    .operator-chip {
+      background: #f9fafb;
+      padding: 7px 9px;
+    }
   </style>
 </head>
 <body>
@@ -481,7 +646,6 @@
           <div id="reader"></div>
           <div id="scannerPlaceholder" class="scanner-placeholder">
             <div>
-              <div class="camera-icon">📷</div>
               <strong>QR scanner</strong><br />
               <span>Allow camera access or insert the code below.</span>
             </div>
@@ -1094,24 +1258,29 @@
         console.assert(decodeOfferText(encodeOfferText('Title', 'Description')).description === 'Description', 'Offer description should roundtrip');
       }
 
-      loginBtn.addEventListener("click", login);
-      logoutBtn.addEventListener("click", logout);
-      settingsBtn.addEventListener("click", openSettings);
-      closeSettingsBtn.addEventListener("click", closeSettings);
-      saveSettingsBtn.addEventListener("click", saveSettings);
-      addOperatorBtn.addEventListener("click", addOperatorEmail);
-      operatorEmailInput.addEventListener("keydown", function (event) {
+      function bindEvent(el, eventName, handler) {
+        if (!el || typeof el.addEventListener !== "function") return;
+        el.addEventListener(eventName, handler);
+      }
+
+      bindEvent(loginBtn, "click", login);
+      bindEvent(logoutBtn, "click", logout);
+      bindEvent(settingsBtn, "click", openSettings);
+      bindEvent(closeSettingsBtn, "click", closeSettings);
+      bindEvent(saveSettingsBtn, "click", saveSettings);
+      bindEvent(addOperatorBtn, "click", addOperatorEmail);
+      bindEvent(operatorEmailInput, "keydown", function (event) {
         if (event.key === "Enter") addOperatorEmail();
       });
-      validateBtn.addEventListener("click", validateCurrentCode);
-      startCameraBtn.addEventListener("click", startScanner);
-      codeInput.addEventListener("keydown", function (event) {
+      bindEvent(validateBtn, "click", validateCurrentCode);
+      bindEvent(startCameraBtn, "click", startScanner);
+      bindEvent(codeInput, "keydown", function (event) {
         if (event.key === "Enter") validateCurrentCode();
       });
-      activitySelect.addEventListener("change", function () {
+      bindEvent(activitySelect, "change", function () {
         setActivePoi(activitySelect.value);
       });
-      settingsModal.addEventListener("click", function (event) {
+      bindEvent(settingsModal, "click", function (event) {
         if (event.target === settingsModal) closeSettings();
       });
 
