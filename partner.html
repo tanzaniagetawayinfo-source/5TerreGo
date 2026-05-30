@@ -280,6 +280,45 @@
       pointer-events: none;
     }
 
+    .scanner-feedback {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      z-index: 8;
+      padding: 13px 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.92);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: 0 16px 44px rgba(15,23,42,.28);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 850;
+      pointer-events: none;
+    }
+
+    .scanner-feedback.ok {
+      color: var(--green);
+      background: rgba(241,255,247,.95);
+      border-color: rgba(24,160,88,.22);
+    }
+
+    .scanner-feedback.error {
+      color: var(--red);
+      background: rgba(255,246,245,.95);
+      border-color: rgba(217,48,37,.2);
+    }
+
+    .scanner-feedback.loading {
+      color: var(--blue);
+      background: rgba(244,249,255,.95);
+      border-color: rgba(22,119,255,.2);
+    }
+
     .manual-area {
       display: grid;
       gap: 10px;
@@ -404,6 +443,7 @@
           </div>
           <div class="scan-frame"></div>
           <div class="scan-line"></div>
+          <div id="scannerFeedback" class="scanner-feedback hidden"></div>
         </div>
 
         <div class="manual-area">
@@ -475,6 +515,7 @@
       var validateBtn = document.getElementById("validateBtn");
       var startCameraBtn = document.getElementById("startCameraBtn");
       var scannerPlaceholder = document.getElementById("scannerPlaceholder");
+      var scannerFeedback = document.getElementById("scannerFeedback");
       var settingsModal = document.getElementById("settingsModal");
       var closeSettingsBtn = document.getElementById("closeSettingsBtn");
       var discountInput = document.getElementById("discountInput");
@@ -492,6 +533,8 @@
       var scannerRunning = false;
       var lastScannedCode = "";
       var lastScannedAt = 0;
+      var pendingIncomingCode = "";
+      var PENDING_CODE_STORAGE_KEY = "5terrego_pending_partner_qr_code";
 
       function setStatus(el, message, type) {
         el.innerHTML = message;
@@ -501,6 +544,18 @@
 
       function hideStatus(el) {
         el.classList.add("hidden");
+      }
+
+      function setScannerFeedback(message, type) {
+        if (!scannerFeedback) return;
+        scannerFeedback.innerHTML = message;
+        scannerFeedback.className = "scanner-feedback" + (type ? " " + type : "");
+        scannerFeedback.classList.remove("hidden");
+      }
+
+      function hideScannerFeedback() {
+        if (!scannerFeedback) return;
+        scannerFeedback.classList.add("hidden");
       }
 
       function escapeHtml(value) {
@@ -517,10 +572,48 @@
         try {
           if (raw.indexOf("http") === 0) {
             var url = new URL(raw);
-            raw = url.searchParams.get("code") || raw;
+            raw = url.searchParams.get("code") || url.searchParams.get("qr") || url.searchParams.get("discount") || raw;
           }
         } catch (err) {}
         return raw.trim().toUpperCase();
+      }
+
+      function readIncomingCodeFromUrl() {
+        try {
+          var url = new URL(window.location.href);
+          var fromQuery = url.searchParams.get("code") || url.searchParams.get("qr") || url.searchParams.get("discount") || "";
+          if (fromQuery) return normalizeCode(fromQuery);
+        } catch (err) {}
+        return "";
+      }
+
+      function rememberIncomingCodeFromUrl() {
+        var code = readIncomingCodeFromUrl();
+        if (!code) return "";
+        pendingIncomingCode = code;
+        try { sessionStorage.setItem(PENDING_CODE_STORAGE_KEY, code); } catch (err) {}
+        return code;
+      }
+
+      function getPendingIncomingCode() {
+        if (pendingIncomingCode) return pendingIncomingCode;
+        try { return normalizeCode(sessionStorage.getItem(PENDING_CODE_STORAGE_KEY) || ""); } catch (err) {}
+        return "";
+      }
+
+      function clearPendingIncomingCode() {
+        pendingIncomingCode = "";
+        try { sessionStorage.removeItem(PENDING_CODE_STORAGE_KEY); } catch (err) {}
+      }
+
+      async function applyPendingIncomingCode(autoValidate) {
+        var code = getPendingIncomingCode();
+        if (!code || !codeInput) return false;
+        codeInput.value = code;
+        setScannerFeedback("QR detected<br><strong>" + escapeHtml(code) + "</strong>", "ok");
+        clearPendingIncomingCode();
+        if (autoValidate) await validateCurrentCode();
+        return true;
       }
 
       function parseAuthorizedEmails(value) {
@@ -666,6 +759,8 @@
           setActivePoi(partnerPois[0].id);
           buildActivitySelect();
           setStatus(dashboardStatus, "Ready to validate QR codes.", "ok");
+          hideScannerFeedback();
+          await applyPendingIncomingCode(true);
         } catch (error) {
           setStatus(dashboardStatus, escapeHtml(error.message), "error");
         }
@@ -742,12 +837,12 @@
       async function validateCurrentCode() {
         var code = normalizeCode(codeInput.value);
         if (!code) {
-          setStatus(dashboardStatus, "Insert or scan a QR code.", "error");
+          setScannerFeedback("Insert or scan a QR code.", "error");
           return;
         }
 
         validateBtn.disabled = true;
-        setStatus(dashboardStatus, "Validating code...", "");
+        setScannerFeedback("Validating code...", "loading");
 
         try {
           var result = await partnerClient.rpc("validate_partner_discount_code", { target_code: code });
@@ -756,9 +851,9 @@
           var poiName = data.poi_name || "Activity";
           var discount = data.discount || "";
           codeInput.value = "";
-          setStatus(dashboardStatus, "Validated: <strong>" + escapeHtml(poiName) + "</strong>" + (discount ? " · " + escapeHtml(discount) + "% discount" : "") + ".", "ok");
+          setScannerFeedback("Validated<br><strong>" + escapeHtml(poiName) + "</strong>" + (discount ? "<br>" + escapeHtml(discount) + "% discount" : ""), "ok");
         } catch (error) {
-          setStatus(dashboardStatus, escapeHtml(error.message), "error");
+          setScannerFeedback(escapeHtml(error.message), "error");
         } finally {
           validateBtn.disabled = false;
         }
@@ -799,9 +894,10 @@
           scannerRunning = true;
           scannerPlaceholder.classList.add("hidden");
           startCameraBtn.textContent = "Camera active";
-          setStatus(dashboardStatus, "Camera active. Scan a customer QR code.", "ok");
+          setStatus(dashboardStatus, "Camera active.", "ok");
+          setScannerFeedback("Camera active<br>Scan a customer QR code.", "ok");
         } catch (error) {
-          setStatus(dashboardStatus, "Camera unavailable. Insert the code manually.", "error");
+          setScannerFeedback("Camera unavailable.<br>Insert the code manually.", "error");
         }
       }
 
@@ -848,6 +944,7 @@
         });
       }
 
+      rememberIncomingCodeFromUrl();
       runSelfTests();
       loadSession();
     })();
