@@ -606,6 +606,45 @@
       background: #f9fafb;
       padding: 7px 9px;
     }
+
+    .stats-panel {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .stats-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .stats-label {
+      font-size: 14px;
+      font-weight: 850;
+      color: var(--muted);
+    }
+
+    .stats-value {
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 950;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
@@ -659,6 +698,22 @@
           <input id="codeInput" class="manual-input" type="text" autocomplete="one-time-code" placeholder="5TG-XXXXXXXX" />
           <button id="validateBtn" class="primary-btn" type="button">Validate QR</button>
           <button id="startCameraBtn" class="secondary-btn" type="button">Start camera</button>
+        </div>
+      </div>
+
+      <div id="partnerStats" class="stats-panel hidden">
+        <h3 class="stats-title">Validated codes</h3>
+        <div class="stats-row">
+          <div class="stats-label">Last 365 days</div>
+          <div id="stats365" class="stats-value">0</div>
+        </div>
+        <div class="stats-row">
+          <div class="stats-label">Last 30 days</div>
+          <div id="stats30" class="stats-value">0</div>
+        </div>
+        <div class="stats-row">
+          <div class="stats-label">Last 7 days</div>
+          <div id="stats7" class="stats-value">0</div>
         </div>
       </div>
 
@@ -754,6 +809,10 @@
       var settingsStatus = document.getElementById("settingsStatus");
       var activitySelectWrap = document.getElementById("activitySelectWrap");
       var activitySelect = document.getElementById("activitySelect");
+      var partnerStats = document.getElementById("partnerStats");
+      var stats365 = document.getElementById("stats365");
+      var stats30 = document.getElementById("stats30");
+      var stats7 = document.getElementById("stats7");
 
       var currentSession = null;
       var partnerPois = [];
@@ -899,6 +958,69 @@
         var discount = data.discount || "";
         if (!title && discount) title = String(discount) + "% discount";
         return (title ? "<br><strong>" + escapeHtml(title) + "</strong>" : "") + (description ? "<br>" + escapeHtml(description) : "");
+      }
+
+      function parseActiveCodes(value) {
+        if (Array.isArray(value)) return value;
+        if (!value) return [];
+        if (typeof value === "string") {
+          try {
+            var parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (err) {
+            return [];
+          }
+        }
+        return [];
+      }
+
+      function codeWasValidated(code) {
+        if (!code || typeof code !== "object") return false;
+        var status = String(code.status || "").toLowerCase();
+        return status === "used" || status === "validated" || !!code.used_at || !!code.validated_at;
+      }
+
+      function getValidatedAt(code) {
+        var raw = code && (code.used_at || code.validated_at || code.updated_at || code.created_at);
+        var date = raw ? new Date(raw) : null;
+        return date && !isNaN(date.getTime()) ? date : null;
+      }
+
+      function countValidatedCodes(days) {
+        if (!activePoi) return 0;
+        var codes = parseActiveCodes(activePoi.active_codes);
+        var now = Date.now();
+        var minTime = now - days * 24 * 60 * 60 * 1000;
+        return codes.filter(function (code) {
+          if (!codeWasValidated(code)) return false;
+          var date = getValidatedAt(code);
+          if (!date) return false;
+          return date.getTime() >= minTime && date.getTime() <= now;
+        }).length;
+      }
+
+      function renderStats() {
+        if (!partnerStats || !activePoi) return;
+        stats365.textContent = String(countValidatedCodes(365));
+        stats30.textContent = String(countValidatedCodes(30));
+        stats7.textContent = String(countValidatedCodes(7));
+        partnerStats.classList.remove("hidden");
+      }
+
+      function addValidatedCodeToLocalStats(codeValue) {
+        if (!activePoi) return;
+        var codes = parseActiveCodes(activePoi.active_codes);
+        codes.push({
+          code: String(codeValue || ""),
+          status: "used",
+          used_at: new Date().toISOString()
+        });
+        activePoi.active_codes = codes;
+        partnerPois = partnerPois.map(function (poi) {
+          if (String(poi.id) === String(activePoi.id)) return activePoi;
+          return poi;
+        });
+        renderStats();
       }
 
       function showAuth() {
@@ -1055,6 +1177,7 @@
         activePoi = found || partnerPois[0] || null;
         restaurantName.textContent = activePoi ? (activePoi.name || "Partner activity") : "Partner scanner";
         fillSettingsForm();
+        renderStats();
       }
 
       function fillSettingsForm() {
@@ -1186,6 +1309,7 @@
           var poiName = data.poi_name || "Activity";
           codeInput.value = "";
           setScannerFeedback("Validated<br><strong>" + escapeHtml(poiName) + "</strong>" + buildOfferFeedbackHtml(data), "ok");
+          addValidatedCodeToLocalStats(code);
         } catch (error) {
           setScannerFeedback(escapeHtml(error.message), "error");
         } finally {
@@ -1256,6 +1380,7 @@
         console.assert(typeof addOperatorEmail === 'function', 'Dashboard can add operator emails through update_emails');
         console.assert(decodeOfferText(encodeOfferText('Title', 'Description')).title === 'Title', 'Offer title should roundtrip');
         console.assert(decodeOfferText(encodeOfferText('Title', 'Description')).description === 'Description', 'Offer description should roundtrip');
+        console.assert(parseActiveCodes('[{"status":"used"}]').length === 1, 'parseActiveCodes should parse JSON active_codes');
       }
 
       function bindEvent(el, eventName, handler) {
