@@ -19,7 +19,24 @@
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <style>
+  <script>
+(function(){
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var isIframe = window.self !== window.top;
+    var embed = isIframe || params.get('embed') === '1' || params.get('preview') === '1';
+    var screen = (params.get('screen') || params.get('previewScreen') || 'home').toLowerCase();
+    if (embed) document.documentElement.classList.add('embed-preview');
+    document.documentElement.setAttribute('data-preview-screen', screen);
+    window.FTG_EMBED_PREVIEW = embed;
+    window.FTG_PREVIEW_SCREEN = screen;
+  } catch (error) {
+    window.FTG_EMBED_PREVIEW = false;
+    window.FTG_PREVIEW_SCREEN = 'home';
+  }
+}());
+</script>
+<style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; min-height: 100%; height: auto; overflow-x: hidden; overflow-y: auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: linear-gradient(180deg, #0b2a3d 0%, #082033 18%, #071424 46%, #071424 100%); position: relative; }
     #map { position: relative; z-index: 1; width: 100vw; height: 58dvh; min-height: 430px; background: #071424; touch-action: pan-y; }
@@ -966,17 +983,97 @@
       text-overflow: ellipsis;
     }
     @media (min-width: 700px) {
-      html, body { overflow: hidden !important; }
-      #desktop-mobile-gate { display: flex !important; }
-      body > *:not(#desktop-mobile-gate) {
+      html:not(.embed-preview),
+      html:not(.embed-preview) body {
+        overflow: hidden !important;
+      }
+      html:not(.embed-preview) #desktop-mobile-gate {
+        display: flex !important;
+      }
+      html:not(.embed-preview) body > *:not(#desktop-mobile-gate) {
         visibility: hidden !important;
         pointer-events: none !important;
       }
-      #desktop-mobile-gate,
-      #desktop-mobile-gate * {
+      html:not(.embed-preview) #desktop-mobile-gate,
+      html:not(.embed-preview) #desktop-mobile-gate * {
         visibility: visible !important;
         pointer-events: auto !important;
       }
+    }
+
+    html.embed-preview,
+    html.embed-preview body {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      height: auto !important;
+      min-height: 100% !important;
+    }
+    html.embed-preview #desktop-mobile-gate {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    html.embed-preview #map {
+      height: 46dvh !important;
+      min-height: 300px !important;
+      margin-bottom: -88px !important;
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 68%, rgba(0,0,0,.78) 84%, rgba(0,0,0,0) 100%) !important;
+      mask-image: linear-gradient(180deg, #000 0%, #000 68%, rgba(0,0,0,.78) 84%, rgba(0,0,0,0) 100%) !important;
+    }
+    html.embed-preview .site-view-panel {
+      padding-top: 98px !important;
+    }
+    html.embed-preview .site-view-inner {
+      padding-bottom: 28px !important;
+    }
+    html.embed-preview .top-bar {
+      top: 8px !important;
+    }
+    html.embed-preview #ai-chat-btn {
+      right: 12px !important;
+      bottom: 12px !important;
+      width: 58px !important;
+      height: 58px !important;
+    }
+    html.embed-preview #ai-chat-btn video,
+    html.embed-preview .ai-avatar video {
+      transform: scale(1.08) !important;
+      object-position: center 8% !important;
+    }
+    html.embed-preview #user-location-btn {
+      bottom: 76px !important;
+      right: 12px !important;
+    }
+    html.embed-preview #map-home-btn {
+      bottom: 12px !important;
+      left: 12px !important;
+    }
+    html.embed-preview #tour-nav {
+      left: 10px !important;
+      right: 10px !important;
+      bottom: 10px !important;
+    }
+    html.embed-preview .site-hero-section {
+      padding-bottom: 18px !important;
+    }
+    html.embed-preview .site-view-title {
+      font-size: clamp(34px, 8vw, 56px) !important;
+    }
+    html.embed-preview .site-horizontal-list,
+    html.embed-preview .site-poi-slider,
+    html.embed-preview .site-trail-slider,
+    html.embed-preview .site-article-slider,
+    html.embed-preview .site-placeholder-slider,
+    html.embed-preview .site-official-list {
+      scroll-padding-inline: 14px !important;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+    }
+    html.embed-preview[data-preview-screen="trails"] .site-view-panel,
+    html.embed-preview[data-preview-screen="weather"] .site-view-panel,
+    html.embed-preview[data-preview-screen="official"] .site-view-panel,
+    html.embed-preview[data-preview-screen="places"] .site-view-panel {
+      padding-top: 32px !important;
     }
   </style>
   <script>
@@ -3374,7 +3471,32 @@
       if (villageAction) { handleVillageSiteAction(villageAction, event); return; }
       if (siteItem) { event.preventDefault(); event.stopPropagation(); siteOpenMapItem(siteItem.getAttribute('data-site-kind'), siteItem.getAttribute('data-site-name'), siteItem.getAttribute('data-site-poi-id')); return; } if (siteCategory) { siteSearchCategory(siteCategory.getAttribute('data-site-category')); return; } if (siteAction) { if (siteAction.getAttribute('data-site-action') === 'map') setSiteViewMode(false); if (siteAction.getAttribute('data-site-action') === 'ai') siteOpenCaptainGull('Help me explore Cinque Terre today.'); if (siteAction.getAttribute('data-site-action') === 'plan') siteOpenCaptainGull('Give me practical ideas for my first day in the Cinque Terre: villages, views, beaches, ferries or trails.'); return; } if (!searchResults.contains(event.target) && event.target !== searchInput) searchResults.style.display = 'none'; }); map.on('zoom zoomend moveend', function () { updateMapVisualByZoom(); updateTrailWidths(); updateMovingFerryIconSizes(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); map.on('dragstart zoomstart', disableTourFollowFromUserMove); map.on('moveend zoomend', function () { evaluateAutoCard(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); setupCardSwipe(card); setupCardSwipe(cardLiveTouchLayer); setupPOISheetDrag(); }
   function runTests() { }
-  function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); renderSiteViewFromMapData(); syncUnifiedMapPageMode(false); applyMapFilterUI(currentMapFilter); loadOfficialCommunications(); loadBlogPosts(); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
+  function openPreviewScreenIfNeeded() {
+    var screen = String(window.FTG_PREVIEW_SCREEN || 'home').toLowerCase();
+    var targetId = '';
+    if (!window.FTG_EMBED_PREVIEW) return;
+    if (screen === 'home') {
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (screen === 'places') targetId = 'site-places-section';
+    if (screen === 'trails') targetId = 'site-trails-section';
+    if (screen === 'weather') targetId = 'site-weather-section';
+    if (screen === 'official') targetId = 'site-official-communications-section';
+    if (!targetId) return;
+    window.setTimeout(function() {
+      var section = document.getElementById(targetId);
+      if (!section) return;
+      try {
+        section.scrollIntoView({ behavior: 'instant', block: 'start' });
+      } catch (error) {
+        section.scrollIntoView(true);
+      }
+    }, 220);
+  }
+
+  function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); renderSiteViewFromMapData(); syncUnifiedMapPageMode(false); applyMapFilterUI(currentMapFilter); loadOfficialCommunications(); loadBlogPosts(); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250);
+    openPreviewScreenIfNeeded(); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
   start();
 }());
 </script>
