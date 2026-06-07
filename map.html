@@ -49,10 +49,19 @@
     .offline-popup-meta { display: block; font-size: 12px; line-height: 1.35; font-weight: 820; color: rgba(255,255,255,.54); }
     #delete-offline-btn { appearance: none; border: 0; border-radius: 999px; min-height: 44px; padding: 11px 16px; background: rgba(255,59,48,.16); color: #fff; font-size: 13px; line-height: 1; font-weight: 900; cursor: pointer; display: none; }
     .offline-popup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    #download-offline-btn { appearance: none; border: 0; border-radius: 999px; min-height: 44px; padding: 11px 16px; background: rgba(255,255,255,.94); color: #111; font-size: 13px; line-height: 1; font-weight: 950; letter-spacing: -.02em; cursor: pointer; box-shadow: 0 12px 30px rgba(0,0,0,.20); }
+    .offline-progress-wrap { position: relative; width: 100%; min-height: 48px; display: flex; align-items: center; }
+    #download-offline-btn { position: relative; appearance: none; width: 100%; border: 0; border-radius: 999px; min-height: 48px; padding: 0 16px; background: rgba(255,255,255,.12); color: #fff; font-size: 13px; line-height: 1; font-weight: 950; letter-spacing: -.02em; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); overflow: hidden; }
+    #download-offline-btn::before { content: ''; position: absolute; inset: 0; width: var(--offline-progress, 0%); background: linear-gradient(90deg, rgba(255,255,255,.94), rgba(255,138,29,.94)); transition: width .22s ease; }
+    #download-offline-btn .offline-progress-label { position: relative; z-index: 1; display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; }
+    #download-offline-btn .offline-progress-text { display: inline-flex; align-items: center; min-width: 0; }
+    #download-offline-btn .offline-progress-percent { display: inline-flex; align-items: center; justify-content: flex-end; min-width: 42px; }
+    #download-offline-btn.is-idle { background: rgba(255,255,255,.94); color: #111; box-shadow: 0 12px 30px rgba(0,0,0,.20); }
+    #download-offline-btn.is-idle::before { width: 0 !important; }
+    #download-offline-btn.is-active { color: #111; }
+    #download-offline-btn.is-complete { background: rgba(255,255,255,.94); color: #111; box-shadow: 0 12px 30px rgba(0,0,0,.20); }
+    #download-offline-btn.is-complete::before { width: 100%; }
     #download-offline-btn:active { transform: scale(.97); }
     #offline-popup-close { appearance: none; width: 36px; height: 36px; flex: 0 0 36px; border: 0; border-radius: 999px; background: rgba(255,255,255,.10); color: #fff; font-size: 24px; line-height: 1; cursor: pointer; }
-    #offline-popup-later { appearance: none; border: 0; border-radius: 999px; min-height: 44px; padding: 11px 16px; background: rgba(255,255,255,.10); color: #fff; font-size: 13px; line-height: 1; font-weight: 900; cursor: pointer; }
     body.map-focus-mode { width: 100%; height: 100%; overflow: hidden; position: fixed; inset: 0; }
     body.map-focus-mode #map { position: fixed; inset: 0; z-index: 1; width: 100vw; height: 100dvh; min-height: 100dvh; touch-action: none; }
     body.map-focus-mode #site-view-panel { display: none !important; }
@@ -174,7 +183,7 @@
     body:not(.map-focus-mode) #map-filter-bar { display: none; }
     body.map-focus-mode #site-section-bar { display: none; }
     body:not(.map-focus-mode) #site-section-bar { display: none; }
-    @media (max-width: 380px) { .mode-bar { gap: 7px; } .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; } .top-bar { left: 8px; right: 8px; padding: 7px; border-radius: 22px; gap: 7px; } .top-row { grid-template-columns: auto 1fr auto; gap: 7px; min-height: 34px; } .center-brand { font-size: 12.5px; letter-spacing: -0.055em; } #app-menu-toggle { width: 34px; height: 34px; padding: 9px; gap: 4px; } #app-menu-toggle span { width: 6px; height: 6px; } .app-menu { right: 8px; width: min(292px, calc(100vw - 16px)); border-radius: 22px; } .app-menu-link { min-height: 68px; padding: 10px; } .top-bar.menu-expanded .app-menu { left: 20px; right: 20px; top: calc(88px + env(safe-area-inset-top)); bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; gap: 8px; grid-template-rows: auto minmax(0, 1fr) auto auto; align-items: stretch; } .top-bar.menu-expanded .app-menu-language { left: 20px; top: calc(34px + env(safe-area-inset-top)); width: 42px; max-width: 42px; } .top-bar.menu-expanded .app-menu-language.language-expanded { left: 18px; right: 68px; top: calc(64px + env(safe-area-inset-top)); max-width: none; } .top-bar.menu-expanded .center-brand { top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded #app-menu-toggle { right: 19px; top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded .app-menu-head { padding-bottom: 6px; } .top-bar.menu-expanded #app-menu-username { font-size: 27px; line-height: 1.1; padding-bottom: 3px; } .top-bar.menu-expanded .app-menu-grid { gap: 10px; margin-top: 0; margin-bottom: 0; align-self: center; justify-self: stretch; padding: 0 calc((100% - 86%) / 2); scroll-padding-inline: calc((100% - 86%) / 2); } .top-bar.menu-expanded .app-menu-link { flex: 0 0 86%; width: 86%; aspect-ratio: 1 / 1; height: auto; min-height: 248px; max-height: 248px; padding: 14px; border-radius: 26px; } .top-bar.menu-expanded .app-menu-quick-row { gap: 7px; margin-top: 0; } .top-bar.menu-expanded .app-menu-quick-title { margin-top: 0; } .app-menu-quick-link { height: 38px; min-height: 38px; max-height: 38px; padding: 0 9px; font-size: 11px; } #search { min-height: 38px; padding-left: 38px; font-size: 14px; } .search-wrap::before { left: 14px; font-size: 16px; } #offline-popup { padding: 14px; } .offline-popup-card { width: min(100%, 360px); padding: 16px; border-radius: 26px; gap: 10px; } .offline-popup-title { font-size: 24px; } .offline-popup-text { font-size: 13px; line-height: 1.34; } #download-offline-btn, #offline-popup-later { min-height: 42px; padding: 10px 14px; } }
+    @media (max-width: 380px) { .mode-bar { gap: 7px; } .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; } .top-bar { left: 8px; right: 8px; padding: 7px; border-radius: 22px; gap: 7px; } .top-row { grid-template-columns: auto 1fr auto; gap: 7px; min-height: 34px; } .center-brand { font-size: 12.5px; letter-spacing: -0.055em; } #app-menu-toggle { width: 34px; height: 34px; padding: 9px; gap: 4px; } #app-menu-toggle span { width: 6px; height: 6px; } .app-menu { right: 8px; width: min(292px, calc(100vw - 16px)); border-radius: 22px; } .app-menu-link { min-height: 68px; padding: 10px; } .top-bar.menu-expanded .app-menu { left: 20px; right: 20px; top: calc(88px + env(safe-area-inset-top)); bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; gap: 8px; grid-template-rows: auto minmax(0, 1fr) auto auto; align-items: stretch; } .top-bar.menu-expanded .app-menu-language { left: 20px; top: calc(34px + env(safe-area-inset-top)); width: 42px; max-width: 42px; } .top-bar.menu-expanded .app-menu-language.language-expanded { left: 18px; right: 68px; top: calc(64px + env(safe-area-inset-top)); max-width: none; } .top-bar.menu-expanded .center-brand { top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded #app-menu-toggle { right: 19px; top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded .app-menu-head { padding-bottom: 6px; } .top-bar.menu-expanded #app-menu-username { font-size: 27px; line-height: 1.1; padding-bottom: 3px; } .top-bar.menu-expanded .app-menu-grid { gap: 10px; margin-top: 0; margin-bottom: 0; align-self: center; justify-self: stretch; padding: 0 calc((100% - 86%) / 2); scroll-padding-inline: calc((100% - 86%) / 2); } .top-bar.menu-expanded .app-menu-link { flex: 0 0 86%; width: 86%; aspect-ratio: 1 / 1; height: auto; min-height: 248px; max-height: 248px; padding: 14px; border-radius: 26px; } .top-bar.menu-expanded .app-menu-quick-row { gap: 7px; margin-top: 0; } .top-bar.menu-expanded .app-menu-quick-title { margin-top: 0; } .app-menu-quick-link { height: 38px; min-height: 38px; max-height: 38px; padding: 0 9px; font-size: 11px; } #search { min-height: 38px; padding-left: 38px; font-size: 14px; } .search-wrap::before { left: 14px; font-size: 16px; } #offline-popup { padding: 14px; } .offline-popup-card { width: min(100%, 360px); padding: 16px; border-radius: 26px; gap: 10px; } .offline-popup-title { font-size: 24px; } .offline-popup-text { font-size: 13px; line-height: 1.34; } #download-offline-btn { min-height: 44px; padding: 0 14px; } }
     .site-view-panel { position: relative; inset: auto; z-index: 2; display: block; background: linear-gradient(180deg, #0b2a3d 0%, #082033 12%, #071424 38%, #071424 100%); color: #fff; overflow: visible; -webkit-overflow-scrolling: touch; }
     .site-view-panel.open { display: block; }
     .site-view-inner { position: relative; z-index: 0; min-height: 100%; padding: 18px 0 calc(38px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(14,57,82,.96) 0%, rgba(8,32,51,.98) 16%, #071424 42%, #071424 100%); }
@@ -1114,7 +1123,7 @@
 </div>
 
 <div id="map"></div>
-<div id="offline-popup" aria-hidden="true"><div class="offline-popup-card"><div class="offline-popup-head"><span class="offline-popup-title">Alle 5 Terre è facile ritrovarsi senza connessione</span><button id="offline-popup-close" type="button" aria-label="Chiudi">×</button></div><span class="offline-popup-text">Scarica in anticipo la mappa essenziale dell’area 5 Terre e gli articoli utili. In genere richiede meno di 1 minuto con una buona connessione.</span><span id="offline-popup-meta" class="offline-popup-meta">Copertura: area 5 Terre · dettaglio essenziale · download stimato leggero</span><div class="offline-popup-actions"><button id="download-offline-btn" type="button">Scarica offline</button><button id="delete-offline-btn" type="button">Elimina download</button><button id="offline-popup-later" type="button">Dopo</button></div></div></div>
+<div id="offline-popup" aria-hidden="true"><div class="offline-popup-card"><div class="offline-popup-head"><span class="offline-popup-title">Alle 5 Terre è facile ritrovarsi senza connessione</span><button id="offline-popup-close" type="button" aria-label="Chiudi">×</button></div><span class="offline-popup-text">Scarica in anticipo la mappa essenziale dell’area 5 Terre e gli articoli utili. In genere richiede meno di 1 minuto con una buona connessione.</span><span id="offline-popup-meta" class="offline-popup-meta">Copertura: area 5 Terre · dettaglio essenziale · download stimato leggero</span><div class="offline-popup-actions"><div class="offline-progress-wrap"><button id="download-offline-btn" class="is-idle" type="button"><span class="offline-progress-label"><span class="offline-progress-text">Scarica offline</span><span class="offline-progress-percent">0%</span></span></button></div><button id="delete-offline-btn" type="button">Elimina download</button></div></div></div>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
 <button id="map-home-btn" type="button" aria-label="Return to page mode" title="Return to page mode"><img src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/gohome.png" alt=""></button>
 <div id="user-location-toast" aria-live="polite"></div>
@@ -1324,12 +1333,14 @@
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var TRANSLATION_API_URL = SUPABASE_URL + '/functions/v1/translate';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
-  var OFFLINE_CACHE_NAME = '5terrego-offline-v1';
+  var OFFLINE_CACHE_NAME = '5terrego-offline-v2';
   var OFFLINE_DATA_KEY = '5terrego_offline_data_v1';
   var OFFLINE_META_KEY = '5terrego_offline_meta_v1';
   var OFFLINE_TILE_BOUNDS = [[44.07, 9.58], [44.17, 9.80]];
-  var OFFLINE_MIN_ZOOM = 11;
-  var OFFLINE_MAX_ZOOM = 18;
+  var OFFLINE_FAST_MIN_ZOOM = 11;
+  var OFFLINE_FAST_MAX_ZOOM = 15;
+  var OFFLINE_DETAIL_MIN_ZOOM = 16;
+  var OFFLINE_DETAIL_MAX_ZOOM = 17;
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
@@ -1416,6 +1427,8 @@
   var offlineDownloadReady = false;
   var offlineDownloadRunning = false;
   var offlineDownloadCompleted = false;
+  var offlineDownloadPercent = 0;
+  var offlineDownloadLabel = 'Offline mode';
   var poiMarkers = [];
   var trailItems = [];
   var currentMapFilter = 'all';
@@ -1679,21 +1692,98 @@
   function writeOfflineData(payload) { try { localStorage.setItem(OFFLINE_DATA_KEY, JSON.stringify(payload || {})); } catch (error) {} }
   function readOfflineMeta() { try { return JSON.parse(localStorage.getItem(OFFLINE_META_KEY) || '{}'); } catch (error) { return {}; } }
   function writeOfflineMeta(payload) { try { localStorage.setItem(OFFLINE_META_KEY, JSON.stringify(payload || {})); } catch (error) {} }
-  function getOfflineManifestEstimate() { var manifest = getOfflineTileManifest(); var total = manifest.length; var estimatedMB = Math.max(18, Math.round(total * 0.065)); return { total: total, estimatedMB: estimatedMB }; }
+  function getOfflineAssetManifest() {
+    return [
+      getGithubAssetUrl('church.png'),
+      getGithubAssetUrl('monument.png'),
+      getGithubAssetUrl('sentiero.png'),
+      getGithubAssetUrl('beach.png'),
+      getGithubAssetUrl('station.png'),
+      'fountan.png',
+      'https://tanzaniagetawayinfo-source.github.io/5TerreGo/fountan.png',
+      getGithubAssetUrl('ferrystation.png'),
+      getGithubAssetUrl('viewpoint.png'),
+      getGithubAssetUrl('ferry.png'),
+      getGithubAssetUrl('gohome.png'),
+      'app.png',
+      'https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/app.png',
+      'https://tanzaniagetawayinfo-source.github.io/5TerreGo/app.png',
+      'https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm',
+      'https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm',
+      'mascotterelax.webm'
+    ].filter(Boolean).filter(function(item, index, list) {
+      return list.indexOf(item) === index;
+    }).map(function(url) {
+      return { url: url, kind: 'asset' };
+    });
+  }
+  function getOfflineManifestEstimate() {
+    var fastManifest = getOfflineTileManifest('fast');
+    var detailManifest = getOfflineTileManifest('detail');
+    var assetManifest = getOfflineAssetManifest();
+    var total = fastManifest.length + detailManifest.length + assetManifest.length;
+    var estimatedMB = Math.max(10, Math.round((fastManifest.length + detailManifest.length) * 0.05 + assetManifest.length * 0.35));
+    return {
+      total: total,
+      fastTotal: fastManifest.length,
+      detailTotal: detailManifest.length,
+      assetTotal: assetManifest.length,
+      estimatedMB: estimatedMB,
+      fastEstimatedMB: Math.max(4, Math.round(fastManifest.length * 0.05)),
+      detailEstimatedMB: Math.max(3, Math.round(detailManifest.length * 0.05)),
+      assetEstimatedMB: Math.max(1, Math.round(assetManifest.length * 0.35))
+    };
+  }
   function updateOfflineButtonsVisibility() { var deleteBtn = document.getElementById('delete-offline-btn'); var meta = readOfflineMeta(); var hasOffline = Boolean(meta && meta.ready); if (deleteBtn) deleteBtn.style.display = hasOffline ? 'inline-flex' : 'none'; }
-  function setOfflinePopupState(title, text, buttonText, disabled) { var titleEl = document.querySelector('.offline-popup-title'); var textEl = document.querySelector('.offline-popup-text'); var metaEl = document.getElementById('offline-popup-meta'); var btn = document.getElementById('download-offline-btn'); var estimate = getOfflineManifestEstimate(); var meta = readOfflineMeta(); if (titleEl && title) titleEl.textContent = title; if (textEl && text) textEl.textContent = text; if (btn && buttonText) btn.textContent = buttonText; if (btn) btn.disabled = Boolean(disabled); if (metaEl) {
-      if (meta && meta.ready) metaEl.textContent = 'Salvato su questo dispositivo · area completa 5 Terre · zoom ' + OFFLINE_MIN_ZOOM + '–' + OFFLINE_MAX_ZOOM + ' · circa ' + estimate.estimatedMB + ' MB';
-      else metaEl.textContent = 'Copertura: area completa 5 Terre · zoom ' + OFFLINE_MIN_ZOOM + '–' + OFFLINE_MAX_ZOOM + ' · ' + estimate.total + ' tile circa · circa ' + estimate.estimatedMB + ' MB';
-    } updateOfflineButtonsVisibility(); }
+  function setOfflineDownloadVisualState(percent, label, mode) {
+    var btn = document.getElementById('download-offline-btn');
+    var textEl = btn ? btn.querySelector('.offline-progress-text') : null;
+    var percentEl = btn ? btn.querySelector('.offline-progress-percent') : null;
+    var value = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+    offlineDownloadPercent = value;
+    if (label) offlineDownloadLabel = label;
+    if (!btn) {
+      syncAppMenuOfflineButton();
+      return;
+    }
+    btn.style.setProperty('--offline-progress', value + '%');
+    btn.classList.remove('is-idle', 'is-active', 'is-complete');
+    btn.classList.add(mode === 'active' ? 'is-active' : mode === 'complete' ? 'is-complete' : 'is-idle');
+    if (textEl) textEl.textContent = label || offlineDownloadLabel || 'Offline mode';
+    if (percentEl) percentEl.textContent = value + '%';
+    syncAppMenuOfflineButton();
+  }
+  function setOfflinePopupState(title, text, buttonText, disabled) {
+    var titleEl = document.querySelector('.offline-popup-title');
+    var textEl = document.querySelector('.offline-popup-text');
+    var metaEl = document.getElementById('offline-popup-meta');
+    var btn = document.getElementById('download-offline-btn');
+    var estimate = getOfflineManifestEstimate();
+    var meta = readOfflineMeta();
+    var totalMB = Math.max(1, estimate.estimatedMB || 0);
+    if (titleEl && title) titleEl.textContent = title;
+    if (textEl && text) textEl.textContent = text;
+    if (btn) btn.disabled = Boolean(disabled);
+    if (metaEl) {
+      if (meta && meta.ready) metaEl.textContent = 'Peso stimato salvato su questo dispositivo: circa ' + totalMB + ' MB · area 5 Terre · zoom completi.';
+      else metaEl.textContent = 'Peso stimato download completo: circa ' + totalMB + ' MB · area 5 Terre · zoom completi.';
+    }
+    if (buttonText === 'Chiudi') setOfflineDownloadVisualState(100, 'Offline pronta', 'complete');
+    else if (disabled || offlineDownloadRunning) setOfflineDownloadVisualState(offlineDownloadPercent, buttonText || 'Scaricamento', 'active');
+    else setOfflineDownloadVisualState(0, buttonText || 'Scarica offline', 'idle');
+    updateOfflineButtonsVisibility();
+  }
   function buildTileUrl(template, coords, options) { var subdomains = options && options.subdomains ? options.subdomains : 'abc'; var subdomain = Array.isArray(subdomains) ? subdomains[Math.abs(coords.x + coords.y) % subdomains.length] : String(subdomains).charAt(Math.abs(coords.x + coords.y) % String(subdomains).length); return template.replace('{s}', subdomain).replace('{z}', String(coords.z)).replace('{x}', String(coords.x)).replace('{y}', String(coords.y)).replace('{r}', ''); }
   function lng2tile(lng, z) { return Math.floor((lng + 180) / 360 * Math.pow(2, z)); }
   function lat2tile(lat, z) { return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z)); }
-  function getOfflineTileManifest() {
+  function getOfflineTileManifest(mode) {
     var sources = [
       { key: 'satellite', template: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', options: {}, priority: 1 },
       { key: 'labels', template: 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', options: { subdomains: 'abcd' }, priority: 2 }
     ];
     var urls = [];
+    var zStart = mode === 'detail' ? OFFLINE_DETAIL_MIN_ZOOM : OFFLINE_FAST_MIN_ZOOM;
+    var zEnd = mode === 'detail' ? OFFLINE_DETAIL_MAX_ZOOM : OFFLINE_FAST_MAX_ZOOM;
     var z;
     var sourceIndex;
     var source;
@@ -1703,21 +1793,29 @@
     var yMax;
     var x;
     var y;
+    var xStep;
+    var yStep;
+    var maxIndex;
 
-    for (z = OFFLINE_MIN_ZOOM; z <= OFFLINE_MAX_ZOOM; z += 1) {
-      xMin = lng2tile(OFFLINE_TILE_BOUNDS[0][1], z);
-      xMax = lng2tile(OFFLINE_TILE_BOUNDS[1][1], z);
-      yMin = lat2tile(OFFLINE_TILE_BOUNDS[1][0], z);
-      yMax = lat2tile(OFFLINE_TILE_BOUNDS[0][0], z);
+    for (z = zStart; z <= zEnd; z += 1) {
+      maxIndex = Math.pow(2, z) - 1;
+      xMin = Math.max(0, Math.min(maxIndex, lng2tile(OFFLINE_TILE_BOUNDS[0][1], z)));
+      xMax = Math.max(0, Math.min(maxIndex, lng2tile(OFFLINE_TILE_BOUNDS[1][1], z)));
+      yMin = Math.max(0, Math.min(maxIndex, lat2tile(OFFLINE_TILE_BOUNDS[1][0], z)));
+      yMax = Math.max(0, Math.min(maxIndex, lat2tile(OFFLINE_TILE_BOUNDS[0][0], z)));
+      xStep = mode === 'detail' ? (z === OFFLINE_DETAIL_MAX_ZOOM ? 3 : 2) : 1;
+      yStep = mode === 'detail' ? (z === OFFLINE_DETAIL_MAX_ZOOM ? 3 : 2) : 1;
 
       for (sourceIndex = 0; sourceIndex < sources.length; sourceIndex += 1) {
         source = sources[sourceIndex];
-        for (x = xMin; x <= xMax; x += 1) {
-          for (y = yMin; y <= yMax; y += 1) {
+        if (mode === 'detail' && source.key === 'labels') continue;
+        for (x = Math.min(xMin, xMax); x <= Math.max(xMin, xMax); x += xStep) {
+          for (y = Math.min(yMin, yMax); y <= Math.max(yMin, yMax); y += yStep) {
             urls.push({
               url: buildTileUrl(source.template, { x: x, y: y, z: z }, source.options),
               z: z,
-              priority: source.priority
+              priority: source.priority,
+              mode: mode || 'fast'
             });
           }
         }
@@ -1793,23 +1891,19 @@
     });
   }
   async function downloadOfflineBundle() {
-    var manifest = getOfflineTileManifest();
+    var manifest = getOfflineTileManifest('fast').concat(getOfflineTileManifest('detail')).concat(getOfflineAssetManifest());
     var total = manifest.length;
     var completed = 0;
     var failed = 0;
     var cache = await caches.open(OFFLINE_CACHE_NAME);
-    var concurrency = 14;
+    var concurrency = 12;
     var index = 0;
 
     function updateProgress(force) {
       var percent = Math.round((completed / Math.max(1, total)) * 100);
-      if (!force && completed !== total && completed % 28 !== 0) return;
-      setOfflinePopupState(
-        'Download offline in corso',
-        'Sto salvando tutta la mappa dell’area 5 Terre a più livelli di zoom, più articoli e dati utili. ' + percent + '% completato.',
-        'Scaricamento…',
-        true
-      );
+      if (!force && completed !== total && completed % 24 !== 0) return;
+      setOfflineDownloadVisualState(percent, 'Scaricamento offline', 'active');
+      setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali e gli articoli utili.', 'Scaricamento offline', true);
     }
 
     async function fetchOne(entry) {
@@ -1827,12 +1921,9 @@
       updateProgress(false);
     }
 
-    setOfflinePopupState(
-      'Download offline in corso',
-      'Sto salvando tutta la mappa dell’area 5 Terre a più livelli di zoom, più articoli e dati utili. 0% completato.',
-      'Scaricamento…',
-      true
-    );
+    offlineDownloadPercent = 0;
+    setOfflineDownloadVisualState(0, 'Scaricamento offline', 'active');
+    setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali e gli articoli utili.', 'Scaricamento offline', true);
 
     await Promise.all(Array.from({ length: Math.min(concurrency, total) }).map(async function() {
       while (index < total) {
@@ -1845,14 +1936,16 @@
     await snapshotOfflineData();
     writeOfflineMeta({
       savedAt: new Date().toISOString(),
+      assetsRequested: getOfflineAssetManifest().length,
       tilesRequested: total,
       completed: completed,
       failed: failed,
       ready: failed < Math.max(12, Math.round(total * 0.015)),
-      profile: 'full-area-multi-zoom',
-      minZoom: OFFLINE_MIN_ZOOM,
-      maxZoom: OFFLINE_MAX_ZOOM,
-      coverage: 'full-5terre-area'
+      profile: 'full-area-full-zoom-with-assets',
+      minZoom: OFFLINE_FAST_MIN_ZOOM,
+      maxZoom: OFFLINE_DETAIL_MAX_ZOOM,
+      coverage: 'full-5terre-area-full',
+      estimatedMB: getOfflineManifestEstimate().estimatedMB
     });
     offlineDownloadCompleted = failed < Math.max(12, Math.round(total * 0.015));
     updateProgress(true);
@@ -1864,6 +1957,8 @@
     try { localStorage.removeItem(OFFLINE_META_KEY); } catch (error) {}
     offlineDownloadCompleted = false;
     offlineDownloadReady = false;
+    offlineDownloadRunning = false;
+    offlineDownloadPercent = 0;
     setOfflinePopupState('Download offline rimosso', 'La mappa e i contenuti offline sono stati eliminati da questo dispositivo.', 'Scarica offline', false);
   }
   function isIOSDevice() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
@@ -3399,7 +3494,17 @@
   function openOfflinePopup() { var popup = document.getElementById('offline-popup'); if (!popup) return; popup.classList.add('open'); popup.setAttribute('aria-hidden', 'false'); popup.style.display = 'flex'; }
   function closeOfflinePopup() { var popup = document.getElementById('offline-popup'); if (!popup) return; popup.classList.remove('open'); popup.setAttribute('aria-hidden', 'true'); popup.style.display = ''; }
   function updateOfflineCTAVisibility() { var popup = document.getElementById('offline-popup'); if (!popup) return; if (document.body.classList.contains('map-focus-mode')) closeOfflinePopup(); }
-  function syncAppMenuOfflineButton() { var btn = document.getElementById('app-menu-offline'); var meta = readOfflineMeta(); var ready = Boolean(meta && meta.ready); if (!btn) return; btn.textContent = ready ? 'Offline mode · attivo' : 'Offline mode'; }
+  function syncAppMenuOfflineButton() {
+    var btn = document.getElementById('app-menu-offline');
+    var meta = readOfflineMeta();
+    var ready = Boolean(meta && meta.ready);
+    if (!btn) return;
+    if (offlineDownloadRunning) {
+      btn.textContent = 'Scaricamento ' + Math.max(0, Math.min(100, Math.round(offlineDownloadPercent || 0))) + '%';
+      return;
+    }
+    btn.textContent = ready ? 'Offline mode · attivo' : 'Offline mode';
+  }
   window.syncAppMenuOfflineButton = syncAppMenuOfflineButton;
   window.openOfflinePopup = openOfflinePopup;
   window.closeOfflinePopup = closeOfflinePopup;
@@ -3413,14 +3518,17 @@
     }
     offlineDownloadReady = true;
     offlineDownloadRunning = true;
+    syncAppMenuOfflineButton();
     try {
-      var result = await downloadOfflineBundle();
-      setOfflinePopupState('Offline pronto', 'Mappa completa dell’area 5 Terre salvata a più livelli di zoom, con articoli e dati utili. Tile richieste: ' + result.total + '. Errori: ' + result.failed + '.', 'Chiudi', false);
+      await downloadOfflineBundle();
+      setOfflinePopupState('Offline pronta', 'La mappa completa delle 5 Terre è stata salvata offline con articoli e dati utili.', 'Chiudi', false);
     } catch (error) {
-      setOfflinePopupState('Download offline non completato', 'Qualcosa è andato storto durante il salvataggio della mappa completa offline. Riprova con una connessione stabile.', 'Riprova', false);
+      setOfflinePopupState('Download offline non completato', 'Qualcosa è andato storto durante il salvataggio della mappa completa offline. Riprova con una connessione stabile.', 'Scarica offline', false);
       offlineDownloadCompleted = false;
+      offlineDownloadPercent = 0;
     }
     offlineDownloadRunning = false;
+    syncAppMenuOfflineButton();
   }
   function updateSiteHeroPinnedVideo() { var storySection = document.getElementById('site-stories-section'); var rect; var panelCenter; var parallaxY; if (!storySection) return; rect = storySection.getBoundingClientRect(); panelCenter = window.innerHeight / 2; parallaxY = (panelCenter - (rect.top + rect.height / 2)) * 0.08; parallaxY = Math.max(-30, Math.min(30, parallaxY)); storySection.style.setProperty('--story-parallax-y', parallaxY.toFixed(1) + 'px'); }
   function setUnifiedMapInteractions(mapFocus) { if (!map) return; if (mapFocus) { if (map.dragging) map.dragging.enable(); if (map.scrollWheelZoom) map.scrollWheelZoom.enable(); if (map.touchZoom) map.touchZoom.enable(); if (map.doubleClickZoom) map.doubleClickZoom.enable(); if (map.boxZoom) map.boxZoom.enable(); if (map.keyboard) map.keyboard.enable(); return; } if (map.dragging) map.dragging.disable(); if (map.scrollWheelZoom) map.scrollWheelZoom.disable(); if (map.touchZoom) map.touchZoom.enable(); if (map.doubleClickZoom) map.doubleClickZoom.enable(); if (map.boxZoom) map.boxZoom.disable(); if (map.keyboard) map.keyboard.disable(); }
@@ -3639,7 +3747,7 @@
   function setupPWAInstallButton() { window.addEventListener('beforeinstallprompt', function() { }); }
   function setupEvents() { setupPWAInstallButton(); if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) { window.speechSynthesis.onvoiceschanged = function() { getPreferredSpeechVoice(); }; } document.addEventListener('touchstart', rememberRealUserGesture, { passive: true, capture: true }); document.addEventListener('pointerdown', rememberRealUserGesture, { passive: true, capture: true }); document.addEventListener('click', rememberRealUserGesture, true); if (isIOSDevice()) { searchInput.addEventListener('focus', function () { document.body.style.position = 'fixed'; }); searchInput.addEventListener('blur', function () { document.body.style.position = 'fixed'; }); } if (siteViewPanel) { window.addEventListener('scroll', function() { updateSiteHeroPinnedVideo(); updateActiveSiteSectionFromScroll(); }, { passive: true }); siteViewPanel.addEventListener('keydown', function(event) { var siteItem; if (event.key !== 'Enter' && event.key !== ' ') return; siteItem = event.target && event.target.closest ? event.target.closest('[data-site-kind][data-site-name]') : null; if (!siteItem) return; event.preventDefault(); event.stopPropagation(); siteOpenMapItem(siteItem.getAttribute('data-site-kind'), siteItem.getAttribute('data-site-name'), siteItem.getAttribute('data-site-poi-id')); }); window.addEventListener('resize', updateSiteHeroPinnedVideo); } document.querySelectorAll('#map-filter-bar [data-map-filter]').forEach(function(btn) { btn.addEventListener('click', function() { setSiteViewMode(false); applyMapFilterUI(btn.getAttribute('data-map-filter')); }); });
       document.querySelectorAll('#site-section-bar [data-site-section-target]').forEach(function(btn) { btn.addEventListener('click', function() { openSiteSectionFromMenu(btn.getAttribute('data-site-section-target')); }); }); cardStoriesBtn.addEventListener('click', function (event) { event.stopPropagation(); window.location.href = 'blog.html'; }); cardExperiencesBtn.addEventListener('click', function (event) { event.stopPropagation(); window.location.href = 'experiences.html'; }); if (card) { card.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true }); card.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true }); card.addEventListener('click', unlockLiveFromRealGesture); } if (cardMedia) { cardMedia.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true }); cardMedia.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true }); cardMedia.addEventListener('click', unlockLiveFromRealGesture); } if (cardLiveBadge) { cardLiveBadge.addEventListener('click', function(event) { event.stopPropagation(); }); } if (cardTourPlayBtn) { cardTourPlayBtn.addEventListener('touchstart', function(event) { event.stopPropagation(); }, { passive: true }); cardTourPlayBtn.addEventListener('click', function(event) { event.preventDefault(); event.stopPropagation(); renderVillageTourPanel(); }); } if (cardTourPanel) { cardTourPanel.addEventListener('touchstart', function(event) { event.stopPropagation(); }, { passive: true }); cardTourPanel.addEventListener('click', handleVillageTourPanelClick); } if (tourNav) tourNav.addEventListener('click', function(event) { var button = event.target.closest('[data-tour-action]'); var action; if (!button) return; action = button.getAttribute('data-tour-action'); if (action === 'audio') playActiveTourStopAudio(); if (action === 'next-stop') goToNextActiveTourStop(); }); if (tourExitTopBtn) tourExitTopBtn.addEventListener('click', endActiveTour); if (tourRecenterTopBtn) tourRecenterTopBtn.addEventListener('click', recenterActiveTour); if (poiAiBtn) poiAiBtn.addEventListener('click', handlePOIAI); if (poiDiscountBtn) poiDiscountBtn.addEventListener('click', handleGenerateDiscount); if (discountModalClose) discountModalClose.addEventListener('click', closeDiscountModal); if (discountModal) discountModal.addEventListener('click', function(event) { if (event.target === discountModal) closeDiscountModal(); }); if (poiClose) poiClose.addEventListener('click', function () { closePOICard(false); }); if (trailClose) trailClose.addEventListener('click', function () { closeTrailCard(false); }); if (trailMapExpandBtn) trailMapExpandBtn.addEventListener('click', function (event) { event.stopPropagation(); trailCard.classList.toggle('map-expanded'); trailMapExpandBtn.innerText = trailCard.classList.contains('map-expanded') ? '↙' : '↗'; window.setTimeout(fitTrailMiniMap, 80); window.setTimeout(fitTrailMiniMap, 360); }); if (readMoreBtn) readMoreBtn.addEventListener('click', function () { if (typeof readMoreBtn.onclick === 'function') readMoreBtn.onclick(); }); if (poiDesc) poiDesc.addEventListener('click', function (event) { if (event.target && event.target.classList.contains('inline-read-more') && typeof readMoreBtn.onclick === 'function') readMoreBtn.onclick(); }); if (loginBtn) loginBtn.addEventListener('click', function () { var baseOrigin = window.location.origin; window.location.href = baseOrigin + '/login.html'; }); if (userLocationBtn) userLocationBtn.addEventListener('click', function () { requestPlainUserLocation(); }); if (mapHomeBtn) mapHomeBtn.addEventListener('click', function () { returnMapToPageMode(); });
-      var offlineBtn = document.getElementById('download-offline-btn'); var deleteOfflineBtn = document.getElementById('delete-offline-btn'); var offlinePopupClose = document.getElementById('offline-popup-close'); var offlinePopupLater = document.getElementById('offline-popup-later'); if (offlineBtn) offlineBtn.addEventListener('click', async function(){ await handleOfflineDownloadClick(); if (typeof window.syncAppMenuOfflineButton === 'function') window.syncAppMenuOfflineButton(); }); if (deleteOfflineBtn) deleteOfflineBtn.addEventListener('click', async function(){ await deleteOfflineBundle(); if (typeof window.syncAppMenuOfflineButton === 'function') window.syncAppMenuOfflineButton(); }); if (offlinePopupClose) offlinePopupClose.addEventListener('click', closeOfflinePopup); if (offlinePopupLater) offlinePopupLater.addEventListener('click', closeOfflinePopup); searchInput.addEventListener('input', function () { renderSearchSuggestions(searchInput.value); }); searchInput.addEventListener('keydown', function (event) { var query, first; if (event.key !== 'Enter') return; query = searchInput.value.trim(); if (!query) return; first = getSearchResults(query)[0]; if (first && selectSearchResult(first)) { searchResults.style.display = 'none'; searchInput.blur(); return; } geocodeSearch(query).then(function () { searchResults.style.display = 'none'; searchInput.blur(); }); }); searchResults.addEventListener('click', function (event) { var item = event.target.closest('.search-item'); var index; if (!item) return; index = Number(item.getAttribute('data-search-index')); selectSearchResult(universalSearchResults[index] || item.getAttribute('data-name')); searchResults.style.display = 'none'; searchInput.blur(); }); document.addEventListener('click', function (event) { var weatherDay = event.target.closest('[data-weather-day]'); var villageAction = event.target.closest('[data-village-action]'); var siteItem = event.target.closest('[data-site-kind][data-site-name]'); var siteAction = event.target.closest('[data-site-action]'); var siteCategory = event.target.closest('[data-site-category]'); if (weatherDay) { selectedSiteWeatherIndex = Number(weatherDay.getAttribute('data-weather-day') || 0); renderSiteWeatherSection(); return; }
+      var offlineBtn = document.getElementById('download-offline-btn'); var deleteOfflineBtn = document.getElementById('delete-offline-btn'); var offlinePopupClose = document.getElementById('offline-popup-close'); if (offlineBtn) offlineBtn.addEventListener('click', async function(){ await handleOfflineDownloadClick(); if (typeof window.syncAppMenuOfflineButton === 'function') window.syncAppMenuOfflineButton(); }); if (deleteOfflineBtn) deleteOfflineBtn.addEventListener('click', async function(){ await deleteOfflineBundle(); if (typeof window.syncAppMenuOfflineButton === 'function') window.syncAppMenuOfflineButton(); }); if (offlinePopupClose) offlinePopupClose.addEventListener('click', closeOfflinePopup); searchInput.addEventListener('input', function () { renderSearchSuggestions(searchInput.value); }); searchInput.addEventListener('keydown', function (event) { var query, first; if (event.key !== 'Enter') return; query = searchInput.value.trim(); if (!query) return; first = getSearchResults(query)[0]; if (first && selectSearchResult(first)) { searchResults.style.display = 'none'; searchInput.blur(); return; } geocodeSearch(query).then(function () { searchResults.style.display = 'none'; searchInput.blur(); }); }); searchResults.addEventListener('click', function (event) { var item = event.target.closest('.search-item'); var index; if (!item) return; index = Number(item.getAttribute('data-search-index')); selectSearchResult(universalSearchResults[index] || item.getAttribute('data-name')); searchResults.style.display = 'none'; searchInput.blur(); }); document.addEventListener('click', function (event) { var weatherDay = event.target.closest('[data-weather-day]'); var villageAction = event.target.closest('[data-village-action]'); var siteItem = event.target.closest('[data-site-kind][data-site-name]'); var siteAction = event.target.closest('[data-site-action]'); var siteCategory = event.target.closest('[data-site-category]'); if (weatherDay) { selectedSiteWeatherIndex = Number(weatherDay.getAttribute('data-weather-day') || 0); renderSiteWeatherSection(); return; }
       if (event.target.closest('.site-official-read')) { event.stopPropagation(); return; }
       if (event.target.closest('.site-official-item')) {
         var officialCard = event.target.closest('.site-official-item');
@@ -3672,10 +3780,19 @@
       console.assert(isValidCoords([44.1, NaN]) === false, 'isValidCoords should reject invalid coords');
       console.assert(normalizePOIType(' Punto Panoramico ') === 'punto panoramico', 'normalizePOIType should trim and lowercase');
       console.assert(getMinZoomForImportance(95) === 11, 'getMinZoomForImportance should map 95 to zoom 11');
-      console.assert(OFFLINE_MIN_ZOOM === 11, 'OFFLINE_MIN_ZOOM should be 11');
-      console.assert(OFFLINE_MAX_ZOOM === 18, 'OFFLINE_MAX_ZOOM should be 18');
-      console.assert(getOfflineTileManifest().some(function(item){ return item && item.z === OFFLINE_MIN_ZOOM; }), 'offline manifest should include min zoom');
-      console.assert(getOfflineTileManifest().some(function(item){ return item && item.z === OFFLINE_MAX_ZOOM; }), 'offline manifest should include max zoom');
+      console.assert(OFFLINE_FAST_MIN_ZOOM === 11, 'OFFLINE_FAST_MIN_ZOOM should be 11');
+      console.assert(OFFLINE_FAST_MAX_ZOOM === 15, 'OFFLINE_FAST_MAX_ZOOM should be 15');
+      console.assert(OFFLINE_DETAIL_MIN_ZOOM === 16, 'OFFLINE_DETAIL_MIN_ZOOM should be 16');
+      console.assert(OFFLINE_DETAIL_MAX_ZOOM === 17, 'OFFLINE_DETAIL_MAX_ZOOM should be 17');
+      console.assert(typeof syncAppMenuOfflineButton === 'function', 'syncAppMenuOfflineButton should exist');
+      console.assert(typeof setOfflineDownloadVisualState === 'function', 'setOfflineDownloadVisualState should exist');
+      console.assert(getOfflineTileManifest('fast').some(function(item){ return item && item.z === OFFLINE_FAST_MIN_ZOOM; }), 'fast manifest should include fast min zoom');
+      console.assert(getOfflineTileManifest('fast').some(function(item){ return item && item.z === OFFLINE_FAST_MAX_ZOOM; }), 'fast manifest should include fast max zoom');
+      console.assert(getOfflineTileManifest('detail').some(function(item){ return item && item.z === OFFLINE_DETAIL_MIN_ZOOM; }), 'detail manifest should include detail min zoom');
+      console.assert(getOfflineTileManifest('detail').some(function(item){ return item && item.z === OFFLINE_DETAIL_MAX_ZOOM; }), 'detail manifest should include detail max zoom');
+      console.assert(getOfflineAssetManifest().some(function(item){ return /church\.png/i.test(String(item.url || '')); }), 'asset manifest should include church icon');
+      console.assert(getOfflineAssetManifest().some(function(item){ return /ferry\.png/i.test(String(item.url || '')); }), 'asset manifest should include ferry icon');
+      console.assert(getOfflineAssetManifest().some(function(item){ return /app\.png/i.test(String(item.url || '')); }), 'asset manifest should include app icon');
     } catch (error) {
       console.warn('runTests failed:', error);
     }
@@ -3705,7 +3822,7 @@
   }
 
   function start() { var offlineMeta = readOfflineMeta(); offlineDownloadCompleted = Boolean(offlineMeta && offlineMeta.ready); updateOfflineButtonsVisibility(); if (typeof window.syncAppMenuOfflineButton === 'function') window.syncAppMenuOfflineButton(); initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); renderSiteViewFromMapData(); syncUnifiedMapPageMode(false); applyMapFilterUI(currentMapFilter); loadOfficialCommunications(); loadBlogPosts(); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250);
-    openPreviewScreenIfNeeded(); if (!offlineDownloadCompleted) { setOfflinePopupState('Alle 5 Terre è facile ritrovarsi senza connessione', 'Scarica in anticipo tutta la mappa dell’area 5 Terre a più livelli di zoom, insieme agli articoli utili. Il download può richiedere qualche minuto.', 'Scarica offline', false); } else { setOfflinePopupState('Offline già disponibile', 'La mappa completa delle 5 Terre a più livelli di zoom e gli articoli utili sono già salvati su questo dispositivo. Puoi eliminarli quando vuoi.', 'Chiudi', false); } if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
+    openPreviewScreenIfNeeded(); if (!offlineDownloadCompleted) { setOfflinePopupState('Alle 5 Terre è facile ritrovarsi senza connessione', 'Scarica in anticipo la mappa completa delle 5 Terre a tutti i livelli di zoom, insieme agli articoli utili.', 'Scarica offline', false); } else { setOfflinePopupState('Offline già disponibile', 'La mappa completa delle 5 Terre è già salvata su questo dispositivo.', 'Chiudi', false); } if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
   start();
 }());
 </script>
