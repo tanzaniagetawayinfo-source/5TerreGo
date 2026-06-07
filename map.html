@@ -3793,6 +3793,7 @@
       console.assert(getOfflineAssetManifest().some(function(item){ return /church\.png/i.test(String(item.url || '')); }), 'asset manifest should include church icon');
       console.assert(getOfflineAssetManifest().some(function(item){ return /ferry\.png/i.test(String(item.url || '')); }), 'asset manifest should include ferry icon');
       console.assert(getOfflineAssetManifest().some(function(item){ return /app\.png/i.test(String(item.url || '')); }), 'asset manifest should include app icon');
+      console.assert(typeof window.registerFiveTerreServiceWorker === 'function', 'registerFiveTerreServiceWorker should exist on window');
     } catch (error) {
       console.warn('runTests failed:', error);
     }
@@ -3946,6 +3947,27 @@
   send.addEventListener('click', function(){ handleSend(); });
   input.addEventListener('keydown', function(e){ if(e.key === 'Enter') handleSend(); });
   suggestions.forEach(function(button){ button.addEventListener('click', function(){ handleSend(button.innerText); }); });
+}());
+</script>
+
+<script>
+(function(){
+  function registerFiveTerreServiceWorker() {
+    if (!('serviceWorker' in navigator)) return Promise.resolve(false);
+    return navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function(registration) {
+      console.log('5TerreGo service worker registered:', registration.scope);
+      return registration;
+    }).catch(function(error) {
+      console.warn('5TerreGo service worker registration failed:', error);
+      return false;
+    });
+  }
+
+  window.registerFiveTerreServiceWorker = registerFiveTerreServiceWorker;
+
+  window.addEventListener('load', function() {
+    registerFiveTerreServiceWorker();
+  });
 }());
 </script>
 
