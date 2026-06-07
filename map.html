@@ -1893,19 +1893,50 @@
     var completed = 0;
     var failed = 0;
     var cache = await caches.open(OFFLINE_CACHE_NAME);
-    var concurrency = 10;
+    var concurrency = 12;
     var index = 0;
+    var lastProgressUpdateAt = 0;
+    var startedAt = Date.now();
+    var progressStats = {
+      fast: { total: 0, completed: 0 },
+      detail: { total: 0, completed: 0 },
+      asset: { total: 0, completed: 0 }
+    };
+
+    manifest.forEach(function(entry) {
+      if (entry && (entry.kind === 'asset' || entry.kind === 'page-shell')) progressStats.asset.total += 1;
+      else if (entry && entry.mode === 'detail') progressStats.detail.total += 1;
+      else progressStats.fast.total += 1;
+    });
+
+    async function fetchWithTimeout(input, init, timeoutMs) {
+      var controller;
+      var timer;
+      var finalInit = Object.assign({}, init || {});
+      if (typeof AbortController === 'function') {
+        controller = new AbortController();
+        finalInit.signal = controller.signal;
+        timer = window.setTimeout(function() { try { controller.abort(); } catch (error) {} }, timeoutMs || 12000);
+      }
+      try {
+        return await fetch(input, finalInit);
+      } finally {
+        if (timer) window.clearTimeout(timer);
+      }
+    }
 
     async function fetchAndCacheEntry(entry) {
       var existing;
       var response;
       var request;
+      var timeoutMs;
       try {
         existing = await cache.match(entry.url, { ignoreVary: true, ignoreSearch: false });
         if (existing) return true;
       } catch (error) {}
+      timeoutMs = entry && entry.mode === 'detail' ? 8000 : 6000;
       try {
-        response = await fetch(entry.url, { mode: 'cors', credentials: 'omit', cache: 'force-cache' });
+        response = await fetchWithTimeout(entry.url, { mode: 'cors', credentials: 'omit', cache: 'force-cache' }, timeoutMs);
         if (response && (response.ok || response.type === 'opaque')) {
           await cache.put(entry.url, response.clone());
           return true;
@@ -1913,7 +1944,7 @@
       } catch (error) {}
       try {
         request = new Request(entry.url, { mode: 'no-cors', credentials: 'omit', cache: 'force-cache' });
-        response = await fetch(request);
+        response = await fetchWithTimeout(request, {}, timeoutMs);
         if (response) {
           await cache.put(entry.url, response.clone());
           return true;
@@ -1922,24 +1953,50 @@
       return false;
     }
 
+    function getEntryBucket(entry) {
+      if (entry && (entry.kind === 'asset' || entry.kind === 'page-shell')) return 'asset';
+      if (entry && entry.mode === 'detail') return 'detail';
+      return 'fast';
+    }
+
+    function formatEta(seconds) {
+      var value = Math.max(0, Math.round(seconds || 0));
+      var mins = Math.floor(value / 60);
+      var secs = value % 60;
+      if (mins <= 0) return secs + 's';
+      return mins + 'm ' + String(secs).padStart(2, '0') + 's';
+    }
+
     function updateProgress(force) {
       var percent = Math.round((completed / Math.max(1, total)) * 100);
-      if (!force && completed !== total && completed % 20 !== 0) return;
-      setOfflineDownloadVisualState(percent, 'Scaricamento offline', 'active');
-      setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali, le pagine base e gli articoli utili.', 'Scaricamento offline', true);
+      var now = Date.now();
+      var elapsedSeconds = Math.max(1, (now - startedAt) / 1000);
+      var speed = completed / elapsedSeconds;
+      var remaining = Math.max(0, total - completed);
+      var etaSeconds = speed > 0 ? remaining / speed : 0;
+      var progressLabel = 'Scaricamento offline';
+      var progressText = 'Scaricati ' + completed + ' di ' + total + ' file · base ' + progressStats.fast.completed + '/' + progressStats.fast.total + ' · zoom alti ' + progressStats.detail.completed + '/' + progressStats.detail.total + ' · asset ' + progressStats.asset.completed + '/' + progressStats.asset.total + ' · ETA ' + formatEta(etaSeconds);
+      var metaEl = document.getElementById('offline-popup-meta');
+      if (!force && now - lastProgressUpdateAt < 180) return;
+      lastProgressUpdateAt = now;
+      setOfflineDownloadVisualState(percent, progressLabel, 'active');
+      setOfflinePopupState('Download offline in corso', progressText, progressLabel, true);
+      if (metaEl) metaEl.textContent = 'Completamento ' + percent + '% · ' + completed + '/' + total + ' file · errori ' + failed;
     }
 
     async function fetchOne(entry) {
       var ok = false;
+      var bucket = getEntryBucket(entry);
       try { ok = await fetchAndCacheEntry(entry); } catch (error) { ok = false; }
       if (!ok) failed += 1;
+      progressStats[bucket].completed += 1;
       completed += 1;
       updateProgress(false);
     }
 
     offlineDownloadPercent = 0;
     setOfflineDownloadVisualState(0, 'Scaricamento offline', 'active');
-    setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali, le pagine base e gli articoli utili.', 'Scaricamento offline', true);
+    setOfflinePopupState('Download offline in corso', 'Sto preparando il download offline completo.', 'Scaricamento offline', true);
 
     await Promise.all(Array.from({ length: Math.min(concurrency, total) }).map(async function() {
       while (index < total) {
@@ -3846,6 +3903,7 @@
       console.assert(getOfflineAssetManifest().some(function(item){ return /ferry\.png/i.test(String(item.url || '')); }), 'asset manifest should include ferry icon');
       console.assert(getOfflineAssetManifest().some(function(item){ return /app\.png/i.test(String(item.url || '')); }), 'asset manifest should include app icon');
       console.assert(getOfflineAssetManifest().some(function(item){ return /blog\.html/i.test(String(item.url || '')); }), 'asset manifest should include blog page shell');
+      console.assert(getOfflineManifestEstimate().total > 0, 'offline manifest estimate should expose a positive total');
       console.assert(typeof window.registerFiveTerreServiceWorker === 'function', 'registerFiveTerreServiceWorker should exist on window');
     } catch (error) {
       console.warn('runTests failed:', error);
