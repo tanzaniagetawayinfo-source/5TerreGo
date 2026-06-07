@@ -1333,7 +1333,7 @@
   var OFFLINE_DATA_KEY = '5terrego_offline_data_v1';
   var OFFLINE_META_KEY = '5terrego_offline_meta_v1';
   var OFFLINE_TILE_BOUNDS = [[44.07, 9.58], [44.17, 9.80]];
-  var OFFLINE_TILE_ZOOMS = [11, 12, 13, 14, 15];
+  var OFFLINE_TILE_ZOOMS = [11, 12, 13, 14];
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
@@ -1687,11 +1687,10 @@
   function buildTileUrl(template, coords, options) { var subdomains = options && options.subdomains ? options.subdomains : 'abc'; var subdomain = Array.isArray(subdomains) ? subdomains[Math.abs(coords.x + coords.y) % subdomains.length] : String(subdomains).charAt(Math.abs(coords.x + coords.y) % String(subdomains).length); return template.replace('{s}', subdomain).replace('{z}', String(coords.z)).replace('{x}', String(coords.x)).replace('{y}', String(coords.y)).replace('{r}', ''); }
   function lng2tile(lng, z) { return Math.floor((lng + 180) / 360 * Math.pow(2, z)); }
   function lat2tile(lat, z) { return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z)); }
-  function getOfflineTileManifest() { var sources = [
-      { key: 'satellite', template: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', options: {} },
-      { key: 'roads', template: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', options: {} },
-      { key: 'white', template: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', options: { subdomains: 'abcd' } },
-      { key: 'labels', template: 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', options: { subdomains: 'abcd' } }
+  function getOfflineTileManifest() {
+    var sources = [
+      { key: 'satellite', template: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', options: {}, priority: 1 },
+      { key: 'labels', template: 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', options: { subdomains: 'abcd' }, priority: 2 }
     ];
     var urls = [];
     OFFLINE_TILE_ZOOMS.forEach(function(z) {
@@ -1702,12 +1701,21 @@
       sources.forEach(function(source) {
         for (var x = xMin; x <= xMax; x += 1) {
           for (var y = yMin; y <= yMax; y += 1) {
-            urls.push(buildTileUrl(source.template, { x: x, y: y, z: z }, source.options));
+            urls.push({
+              url: buildTileUrl(source.template, { x: x, y: y, z: z }, source.options),
+              z: z,
+              priority: source.priority
+            });
           }
         }
       });
     });
-    return urls.filter(function(url, index, list) { return list.indexOf(url) === index; });
+    return urls.filter(function(item, index, list) {
+      return list.findIndex(function(other) { return other.url === item.url; }) === index;
+    }).sort(function(a, b) {
+      if (a.z !== b.z) return a.z - b.z;
+      return a.priority - b.priority;
+    });
   }
   function createOfflineAwareTileLayer(template, options) {
     var safeOptions = Object.assign({}, options || {});
@@ -1771,29 +1779,53 @@
     });
   }
   async function downloadOfflineBundle() {
-    var urls = getOfflineTileManifest();
-    var total = urls.length;
+    var manifest = getOfflineTileManifest();
+    var total = manifest.length;
     var completed = 0;
     var failed = 0;
     var cache = await caches.open(OFFLINE_CACHE_NAME);
-    setOfflinePopupState('Download offline in corso', 'Sto salvando la mappa dell’area delle 5 Terre e gli articoli essenziali. 0% completato.', 'Scaricamento…', true);
-    for (var i = 0; i < urls.length; i += 1) {
+    var concurrency = 12;
+    var index = 0;
+
+    function updateProgress(force) {
+      if (!force && completed !== total && completed % 24 !== 0) return;
+      setOfflinePopupState(
+        'Download offline in corso',
+        'Sto salvando la mappa essenziale delle 5 Terre e gli articoli. ' + Math.round((completed / Math.max(1, total)) * 100) + '% completato.',
+        'Scaricamento…',
+        true
+      );
+    }
+
+    async function fetchOne(entry) {
       try {
-        var existing = await cache.match(urls[i], { ignoreVary: true });
+        var existing = await cache.match(entry.url, { ignoreVary: true });
         if (!existing) {
-          var response = await fetch(urls[i], { mode: 'cors', credentials: 'omit' });
-          if (response && response.ok) await cache.put(urls[i], response.clone());
+          var response = await fetch(entry.url, { mode: 'cors', credentials: 'omit', cache: 'force-cache' });
+          if (response && response.ok) await cache.put(entry.url, response.clone());
           else failed += 1;
         }
-      } catch (error) { failed += 1; }
-      completed += 1;
-      if (completed === 1 || completed === total || completed % 20 === 0) {
-        setOfflinePopupState('Download offline in corso', 'Sto salvando la mappa dell’area delle 5 Terre e gli articoli essenziali. ' + Math.round((completed / Math.max(1, total)) * 100) + '% completato.', 'Scaricamento…', true);
+      } catch (error) {
+        failed += 1;
       }
+      completed += 1;
+      updateProgress(false);
     }
+
+    setOfflinePopupState('Download offline in corso', 'Sto salvando la mappa essenziale delle 5 Terre e gli articoli. 0% completato.', 'Scaricamento…', true);
+
+    await Promise.all(Array.from({ length: Math.min(concurrency, total) }).map(async function() {
+      while (index < total) {
+        var current = manifest[index];
+        index += 1;
+        await fetchOne(current);
+      }
+    }));
+
     await snapshotOfflineData();
-    writeOfflineMeta({ savedAt: new Date().toISOString(), tilesRequested: total, completed: completed, failed: failed, ready: true });
+    writeOfflineMeta({ savedAt: new Date().toISOString(), tilesRequested: total, completed: completed, failed: failed, ready: true, profile: 'fast-essential' });
     offlineDownloadCompleted = true;
+    updateProgress(true);
     return { total: total, completed: completed, failed: failed };
   }
   function isIOSDevice() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
@@ -3347,7 +3379,7 @@
     offlineDownloadRunning = true;
     try {
       var result = await downloadOfflineBundle();
-      setOfflinePopupState('Offline pronto', 'Mappa dell’area delle 5 Terre, articoli e dati essenziali salvati. Tessere richieste: ' + result.total + '. Errori: ' + result.failed + '.', 'Chiudi', false);
+      setOfflinePopupState('Offline pronto', 'Mappa essenziale delle 5 Terre, articoli e dati utili salvati. Tile richieste: ' + result.total + '. Errori: ' + result.failed + '.', 'Chiudi', false);
     } catch (error) {
       setOfflinePopupState('Download offline non completato', 'Qualcosa è andato storto durante il salvataggio offline. Riprova con una connessione stabile.', 'Riprova', false);
       offlineDownloadCompleted = false;
