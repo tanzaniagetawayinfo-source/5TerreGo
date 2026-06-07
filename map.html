@@ -1704,6 +1704,11 @@
       });
     });
     urls.push({ url: './index.html', kind: 'page-shell', file: 'index.html' });
+    urls.push({ url: './blog.html', kind: 'page-shell', file: 'blog.html' });
+    urls.push({ url: './privacy.html', kind: 'page-shell', file: 'privacy.html' });
+    urls.push({ url: './cookie.html', kind: 'page-shell', file: 'cookie.html' });
+    urls.push({ url: './terms.html', kind: 'page-shell', file: 'terms.html' });
+    urls.push({ url: './copyright.html', kind: 'page-shell', file: 'copyright.html' });
     urls.push({ url: './', kind: 'page-shell', file: 'root' });
     return urls.filter(Boolean).filter(function(item, index, list) {
       return list.findIndex(function(other) { return other.url === item.url; }) === index;
@@ -1888,34 +1893,53 @@
     var completed = 0;
     var failed = 0;
     var cache = await caches.open(OFFLINE_CACHE_NAME);
-    var concurrency = 12;
+    var concurrency = 10;
     var index = 0;
+
+    async function fetchAndCacheEntry(entry) {
+      var existing;
+      var response;
+      var request;
+      try {
+        existing = await cache.match(entry.url, { ignoreVary: true, ignoreSearch: false });
+        if (existing) return true;
+      } catch (error) {}
+      try {
+        response = await fetch(entry.url, { mode: 'cors', credentials: 'omit', cache: 'force-cache' });
+        if (response && (response.ok || response.type === 'opaque')) {
+          await cache.put(entry.url, response.clone());
+          return true;
+        }
+      } catch (error) {}
+      try {
+        request = new Request(entry.url, { mode: 'no-cors', credentials: 'omit', cache: 'force-cache' });
+        response = await fetch(request);
+        if (response) {
+          await cache.put(entry.url, response.clone());
+          return true;
+        }
+      } catch (error) {}
+      return false;
+    }
 
     function updateProgress(force) {
       var percent = Math.round((completed / Math.max(1, total)) * 100);
-      if (!force && completed !== total && completed % 24 !== 0) return;
+      if (!force && completed !== total && completed % 20 !== 0) return;
       setOfflineDownloadVisualState(percent, 'Scaricamento offline', 'active');
-      setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali e gli articoli utili.', 'Scaricamento offline', true);
+      setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali, le pagine base e gli articoli utili.', 'Scaricamento offline', true);
     }
 
     async function fetchOne(entry) {
-      try {
-        var existing = await cache.match(entry.url, { ignoreVary: true });
-        if (!existing) {
-          var response = await fetch(entry.url, { mode: 'cors', credentials: 'omit', cache: 'force-cache' });
-          if (response && response.ok) await cache.put(entry.url, response.clone());
-          else failed += 1;
-        }
-      } catch (error) {
-        failed += 1;
-      }
+      var ok = false;
+      try { ok = await fetchAndCacheEntry(entry); } catch (error) { ok = false; }
+      if (!ok) failed += 1;
       completed += 1;
       updateProgress(false);
     }
 
     offlineDownloadPercent = 0;
     setOfflineDownloadVisualState(0, 'Scaricamento offline', 'active');
-    setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali e gli articoli utili.', 'Scaricamento offline', true);
+    setOfflinePopupState('Download offline in corso', 'Sto scaricando la mappa completa delle 5 Terre, le icone principali, le pagine base e gli articoli utili.', 'Scaricamento offline', true);
 
     await Promise.all(Array.from({ length: Math.min(concurrency, total) }).map(async function() {
       while (index < total) {
@@ -1932,14 +1956,14 @@
       tilesRequested: total,
       completed: completed,
       failed: failed,
-      ready: failed < Math.max(12, Math.round(total * 0.015)),
+      ready: failed < Math.max(12, Math.round(total * 0.02)),
       profile: 'full-area-full-zoom-with-assets',
       minZoom: OFFLINE_FAST_MIN_ZOOM,
       maxZoom: OFFLINE_DETAIL_MAX_ZOOM,
       coverage: 'full-5terre-area-full',
       estimatedMB: getOfflineManifestEstimate().estimatedMB
     });
-    offlineDownloadCompleted = failed < Math.max(12, Math.round(total * 0.015));
+    offlineDownloadCompleted = failed < Math.max(12, Math.round(total * 0.02));
     updateProgress(true);
     return { total: total, completed: completed, failed: failed };
   }
@@ -2769,7 +2793,7 @@
     }, 80);
   }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } isProgrammaticMove = true; if (isIOSDevice()) { map.setView(poi.coords, 17, { animate: true }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 300); } else { map.flyTo(poi.coords, 17, { duration: 1.2 }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 400); } }
-  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) { rows = readOfflineData().trails || []; } else { response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); rows = readOfflineData().trails || []; } else rows = response.data || []; } rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker, color; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; color = getDisplayTrailColor(trail); marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img data-offline-asset="sentiero.png" src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); renderSearchSuggestions(searchInput.value); renderSiteViewFromMapData(); refreshOfflineUIState(); requestDynamicContentTranslation('trails loaded'); }
+  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) { rows = readOfflineData().trails || []; } else { response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); rows = readOfflineData().trails || []; } else rows = response.data || []; } rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker, color; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; color = getDisplayTrailColor(trail); marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img data-offline-asset="sentiero.png" src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); writeLocalBackup('5terrego_trails_backup', trailItems.map(function(item) { return item && item.trail ? item.trail : null; }).filter(Boolean)); updateTrailWidths(); renderSearchSuggestions(searchInput.value); renderSiteViewFromMapData(); refreshOfflineUIState(); snapshotOfflineData(); requestDynamicContentTranslation('trails loaded'); }
   function updatePOIVisibility() { updateMapSymbolVisibility(); }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
   function createSeaArc(p1, p2, segments) { var lat1 = p1[0], lng1 = p1[1], lat2 = p2[0], lng2 = p2[1], midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2, distance = Math.abs(lng2 - lng1), offset = 0.018 + distance * 0.45, control = [midLat - 0.003, midLng - offset], points = [], i, t, lat, lng; for (i = 0; i <= segments; i += 1) { t = i / segments; lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2; lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2; points.push([lat, lng]); } return points; }
@@ -3144,9 +3168,12 @@
     ferryTimetableRefreshTimer = window.setTimeout(refreshMovingFerriesFromTimetable, 60000);
   }
   function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; stopMovingFerryRefresh(); stopMovingFerries(); ferryRoutesLayer.clearLayers(); ferryRouteArcs = []; ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 48); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: false }); L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.62, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } startMovingFerries(); }
-  async function loadFerryTimetable() { var response; if (!SUPABASE_READY || !supabaseClient) { ferryTimetableRows = readOfflineData().ferryTimetable || []; startMovingFerries(); return; } response = await supabaseClient.from('ferry_timetable').select('*').order('trip_id', { ascending: true }).order('stop_sequence', { ascending: true }); if (response.error) { console.warn('Supabase ferry timetable load failed:', response.error.message); ferryTimetableRows = readOfflineData().ferryTimetable || []; startMovingFerries(); return; } ferryTimetableRows = response.data || []; startMovingFerries(); }
+  async function loadFerryTimetable() { var response; if (!SUPABASE_READY || !supabaseClient) { ferryTimetableRows = readOfflineData().ferryTimetable || []; startMovingFerries(); return; } response = await supabaseClient.from('ferry_timetable').select('*').order('trip_id', { ascending: true }).order('stop_sequence', { ascending: true }); if (response.error) { console.warn('Supabase ferry timetable load failed:', response.error.message); ferryTimetableRows = readOfflineData().ferryTimetable || []; startMovingFerries(); return; } ferryTimetableRows = response.data || []; writeLocalBackup('5terrego_ferry_timetable_backup', ferryTimetableRows); snapshotOfflineData(); startMovingFerries(); }
   function readLocalPOIs() { try { return JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]'); } catch (error) { return []; } }
-  async function loadPOIs() { var response, rows = []; poiLayer.clearLayers(); poiMarkers = []; if (SUPABASE_READY && supabaseClient) { response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }); if (response.error) { console.warn('Supabase POI load failed:', response.error.message); rows = readOfflineData().pois || readLocalPOIs(); } else rows = response.data || []; } else rows = (readOfflineData().pois || []).length ? readOfflineData().pois : readLocalPOIs(); rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) { var marker = L.marker(poi.coords, { title: poi.name, zIndexOffset: 2400, icon: createPOIFullIcon(poi) }).on('click', function (event) { openPOIWithMapMove(poi, event); }); poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi }); }); updateExclusiveDiscountFilterVisibility(); updatePOIVisibility(); addFerryRoutes(); await loadFerryTimetable(); renderSearchSuggestions(searchInput.value); renderSiteViewFromMapData(); refreshOfflineUIState(); requestDynamicContentTranslation('pois loaded'); }
+  function writeLocalPOIs(items) { try { localStorage.setItem(LOCAL_POI_KEY, JSON.stringify(items || [])); } catch (error) {} }
+  function writeLocalBackup(key, items) { try { localStorage.setItem(key, JSON.stringify(items || [])); } catch (error) {} }
+  function readLocalBackup(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (error) { return []; } }
+  async function loadPOIs() { var response, rows = []; poiLayer.clearLayers(); poiMarkers = []; if (SUPABASE_READY && supabaseClient) { response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }); if (response.error) { console.warn('Supabase POI load failed:', response.error.message); rows = readOfflineData().pois || readLocalPOIs(); } else rows = response.data || []; } else rows = (readOfflineData().pois || []).length ? readOfflineData().pois : readLocalPOIs(); rows.map(normalizePOI).filter(isValidPOI).forEach(function (poi) { var marker = L.marker(poi.coords, { title: poi.name, zIndexOffset: 2400, icon: createPOIFullIcon(poi) }).on('click', function (event) { openPOIWithMapMove(poi, event); }); poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi }); }); writeLocalPOIs(poiMarkers.map(function(item) { return item && item.poi ? item.poi : null; }).filter(Boolean)); updateExclusiveDiscountFilterVisibility(); updatePOIVisibility(); addFerryRoutes(); await loadFerryTimetable(); renderSearchSuggestions(searchInput.value); renderSiteViewFromMapData(); refreshOfflineUIState(); snapshotOfflineData(); requestDynamicContentTranslation('pois loaded'); }
   function getCurrentUILanguage() { return window.FTG_I18N && typeof window.FTG_I18N.getLanguage === 'function' ? window.FTG_I18N.getLanguage() : 'en'; }
   function getCurrentUILocale() { var l = getCurrentUILanguage(); if (l === 'it') return 'it-IT'; if (l === 'fr') return 'fr-FR'; if (l === 'de') return 'de-DE'; if (l === 'ru') return 'ru-RU'; if (l === 'zh') return 'zh-CN'; if (l === 'ar') return 'ar-SA'; return 'en-GB'; }
   function getUILabel(key, fallback) { return window.FTG_I18N && typeof window.FTG_I18N.t === 'function' ? window.FTG_I18N.t(key) : fallback; }
@@ -3282,7 +3309,7 @@
     container.innerHTML = '<div class="site-weather-current-layout"><article class="site-weather-main-card"><div class="site-weather-main-row"><div class="site-weather-main-left"><span class="site-weather-emoji">' + escapeHTML(getWeatherEmoji(weatherCode)) + '</span><div class="site-weather-main-info"><div class="site-weather-main-date">' + escapeHTML(dateLabel) + '</div><div class="site-weather-main-temp">' + escapeHTML(formatWeatherValue(mainTemp, '°')) + '</div><div class="site-weather-main-desc"><span>' + escapeHTML(getUILabel('humidity', 'Humidity')) + '</span>' + escapeHTML(formatWeatherValue(getCurrentHumidityValue(current, siteWeatherData.hourly), '%')) + '</div></div></div>' + renderWeatherSunHTML(daily, i, isToday) + '</div></article>' + hourlyHTML + '</div>'; 
   }
   function getCurrentHumidityValue(current, hourly) { var nowHour; var nowDate; var foundIndex; if (current && current.relative_humidity_2m !== undefined) return current.relative_humidity_2m; if (!hourly || !hourly.time || !hourly.relative_humidity_2m) return undefined; nowHour = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', hour: '2-digit', hour12: false }).format(new Date()); nowDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); foundIndex = hourly.time.findIndex(function(time) { return String(time).slice(0, 10) === nowDate && String(time).slice(11, 13) === nowHour; }); return foundIndex >= 0 ? hourly.relative_humidity_2m[foundIndex] : undefined; }
-  async function updateWeather(lat, lng) { try { var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7'; var response = await fetch(url); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; siteWeatherData = data || null; document.getElementById('weather').innerText = temperature === undefined ? '--' : getWeatherEmoji(data && data.current_weather ? data.current_weather.weathercode : null) + ' ' + temperature + '°'; renderSiteWeatherSection(); } catch (error) { var offline = readOfflineData(); siteWeatherData = offline.weather || null; if (siteWeatherData && siteWeatherData.current_weather) document.getElementById('weather').innerText = getWeatherEmoji(siteWeatherData.current_weather.weathercode) + ' ' + siteWeatherData.current_weather.temperature + '°'; else document.getElementById('weather').innerText = '--'; renderSiteWeatherSection(); } }
+  async function updateWeather(lat, lng) { try { var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7'; var response = await fetch(url); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; siteWeatherData = data || null; document.getElementById('weather').innerText = temperature === undefined ? '--' : getWeatherEmoji(data && data.current_weather ? data.current_weather.weathercode : null) + ' ' + temperature + '°'; renderSiteWeatherSection(); snapshotOfflineData(); } catch (error) { var offline = readOfflineData(); siteWeatherData = offline.weather || null; if (siteWeatherData && siteWeatherData.current_weather) document.getElementById('weather').innerText = getWeatherEmoji(siteWeatherData.current_weather.weathercode) + ' ' + siteWeatherData.current_weather.temperature + '°'; else document.getElementById('weather').innerText = '--'; renderSiteWeatherSection(); } }
   function getUserDisplayName(user) { var meta; if (!user) return 'User'; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return 'User'; }
   function getUserPreferredLanguage(user) { var meta; var language; if (!user) return ''; meta = user.user_metadata || {}; language = String(meta.language || meta.lang || '').trim().toLowerCase(); if (language.indexOf('-') !== -1) language = language.split('-')[0]; return ['en','it','fr','de','ru','zh','ar'].indexOf(language) !== -1 ? language : ''; }
   function syncLanguageFromUser(user) { var language = getUserPreferredLanguage(user); if (!language || !window.FTG_I18N || typeof window.FTG_I18N.setLanguage !== 'function') return; if (window.FTG_I18N.getLanguage && window.FTG_I18N.getLanguage() === language) return; window.FTG_I18N.setLanguage(language, { source: 'supabase' }); }
@@ -3597,7 +3624,7 @@
   function formatOfficialDate(value) { var date = new Date(String(value || '')); if (!Number.isFinite(date.getTime())) return ''; try { return new Intl.DateTimeFormat(getCurrentUILocale(), { day: '2-digit', month: 'short', year: 'numeric' }).format(date); } catch (error) { return String(value || '').slice(0, 10); } }
   function getOfficialCommunicationType(item) { var category = normalizeTourText(item && item.category ? item.category : ''); if (category.indexOf('sentier') !== -1 || category.indexOf('trail') !== -1 || category.indexOf('trek') !== -1 || category.indexOf('percor') !== -1) return 'Sentieri'; if (category.indexOf('meteo') !== -1 || category.indexOf('weather') !== -1 || category.indexOf('allerta') !== -1 || category.indexOf('temporale') !== -1 || category.indexOf('vento') !== -1 || category.indexOf('mareggiata') !== -1 || category.indexOf('pioggia') !== -1) return 'Meteo'; if (category.indexOf('carta') !== -1 || category.indexOf('mappa') !== -1 || category.indexOf('map') !== -1 || category.indexOf('regol') !== -1 || category.indexOf('ordinanza') !== -1 || category.indexOf('access') !== -1) return 'Carta'; return 'Altro'; }
   function renderOfficialCommunications() { var container = document.getElementById('site-official-list'); var placesTitle = document.querySelector('.site-places-title'); var items; if (placesTitle && /caricamento comunicazioni ufficiali/i.test(String(placesTitle.textContent || ''))) placesTitle.textContent = (window.FTG_I18N && window.FTG_I18N.t ? window.FTG_I18N.t('placesSection') : 'Luoghi utili'); if (!container) return; if (!officialCommunicationsLoaded) { container.innerHTML = '<div class="site-empty">Caricamento comunicazioni ufficiali…</div>'; return; } items = (officialCommunications || []).filter(function(item) { return item && item.is_active !== false && item.status !== 'archived' && item.status !== 'hidden'; }).slice(0, 12); if (!items.length) { container.innerHTML = '<div class="site-empty">Le comunicazioni ufficiali appariranno qui quando saranno disponibili da Supabase.</div>'; return; } container.innerHTML = items.map(function(item) { var href = item.source_url || '#'; var title = item.title || 'Comunicazione ufficiale'; var fullText = item.excerpt || 'Apri la comunicazione sul sito ufficiale per leggere il testo completo e aggiornato.'; var source = item.source || 'Fonte ufficiale'; var type = getOfficialCommunicationType(item); return '<article class="site-official-item' + (String(fullText || '').length > 520 ? ' is-long' : '') + '" role="button" tabindex="0" aria-label="Apri avviso: ' + escapeHTML(title) + '"><div class="site-official-flip"><div class="site-official-face site-official-front"><div><span class="site-official-card-label">Fonte:<strong>' + escapeHTML(source) + '</strong></span><div class="site-official-item-top"><span class="site-official-category">' + escapeHTML(type) + '</span></div><h4 class="site-official-item-title">' + escapeHTML(title) + '</h4></div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span></div></div><div class="site-official-face site-official-back"><div class="site-official-full-text">' + escapeHTML(fullText) + '</div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span><a class="site-official-read" href="' + escapeHTML(href) + '" target="_blank" rel="noopener noreferrer">Apri fonte</a></div></div></div></article>';  }).join(''); }
-  async function loadOfficialCommunications() { var response, rows; officialCommunicationsLoaded = false; renderOfficialCommunications(); if (!SUPABASE_READY || !supabaseClient) { officialCommunications = readOfflineData().officialCommunications || []; officialCommunicationsLoaded = true; renderOfficialCommunications(); return; } response = await supabaseClient.from('official_communications').select('id,source,source_url,title,excerpt,category,published_at,fetched_at,is_active,status').eq('is_active', true).order('published_at', { ascending: false, nullsFirst: false }).limit(12); if (response.error) { console.warn('Supabase official communications load failed:', response.error.message); officialCommunications = readOfflineData().officialCommunications || []; officialCommunicationsLoaded = true; renderOfficialCommunications(); return; } rows = response.data || []; officialCommunications = rows.map(normalizeOfficialCommunication); officialCommunicationsLoaded = true; renderOfficialCommunications(); requestDynamicContentTranslation('official communications loaded'); }
+  async function loadOfficialCommunications() { var response, rows; officialCommunicationsLoaded = false; renderOfficialCommunications(); if (!SUPABASE_READY || !supabaseClient) { officialCommunications = readOfflineData().officialCommunications || []; officialCommunicationsLoaded = true; renderOfficialCommunications(); return; } response = await supabaseClient.from('official_communications').select('id,source,source_url,title,excerpt,category,published_at,fetched_at,is_active,status').eq('is_active', true).order('published_at', { ascending: false, nullsFirst: false }).limit(12); if (response.error) { console.warn('Supabase official communications load failed:', response.error.message); officialCommunications = readOfflineData().officialCommunications || []; officialCommunicationsLoaded = true; renderOfficialCommunications(); return; } rows = response.data || []; officialCommunications = rows.map(normalizeOfficialCommunication); writeLocalBackup('5terrego_official_backup', officialCommunications); officialCommunicationsLoaded = true; renderOfficialCommunications(); snapshotOfflineData(); requestDynamicContentTranslation('official communications loaded'); }
   function openVillageFromSite(name) { var place; var index; var zoomLevel; var mapEl; if (!map) return false; place = findByLooseName(places, name, function(item) { return item.name; }); if (!place) return false; index = places.indexOf(place); if (index < 0) return false; cityCardManuallyClosed = false; currentDataset = 'places'; currentIndex = index; currentPOI = null; closePOICard(true); closeTrailCard(true); closeVillageTourPanel(); searchResults.style.display = 'none'; searchInput.blur(); isReturningToPageMode = false; isProgrammaticMove = true; zoomLevel = place.name === 'Monterosso' ? 16.75 : 17.25; forceMapFocusUntil = Date.now() + 3200; villageFocusLock = { place: place, zoom: zoomLevel, until: Date.now() + 3200 }; mapEl = document.getElementById('map'); document.body.classList.add('map-focus-mode'); document.body.classList.remove('site-view-active'); if (siteViewPanel) { siteViewPanel.setAttribute('aria-hidden', 'true'); siteViewPanel.classList.add('open'); } if (mapEl) { mapEl.style.position = 'fixed'; mapEl.style.inset = '0'; mapEl.style.width = '100vw'; mapEl.style.height = '100dvh'; mapEl.style.minHeight = '100dvh'; mapEl.style.marginBottom = '0'; mapEl.style.webkitMaskImage = 'none'; mapEl.style.maskImage = 'none'; } setUnifiedMapInteractions(true); window.scrollTo(0, 0); syncUnifiedMapPageMode(true); showCityCard(place); function forceVillageView(animated) { if (!map || !villageFocusLock) return; document.body.classList.add('map-focus-mode'); document.body.classList.remove('site-view-active'); map.stop(); map.invalidateSize(true); map.setView(place.coords, zoomLevel, { animate: Boolean(animated) }); updateMapVisualByZoom(); updatePOIVisibility(); updateTrailWidths(); } forceVillageView(false); window.requestAnimationFrame(function() { forceVillageView(false); window.requestAnimationFrame(function() { forceVillageView(false); }); }); [80, 180, 360, 720, 1200].forEach(function(delay) { window.setTimeout(function() { forceVillageView(false); }, delay); }); window.setTimeout(function() { if (!map) return; forceVillageView(false); forceMapFocusUntil = 0; villageFocusLock = null; if (mapEl) { mapEl.style.position = ''; mapEl.style.inset = ''; mapEl.style.width = ''; mapEl.style.height = ''; mapEl.style.minHeight = ''; mapEl.style.marginBottom = ''; mapEl.style.webkitMaskImage = ''; mapEl.style.maskImage = ''; } syncUnifiedMapPageMode(true); isProgrammaticMove = false; updatePOIVisibility(); updateTrailWidths(); }, 1500); return true; }
   function siteOpenMapItem(kind, name, id) { if (kind === 'place') { openVillageFromSite(name); return; } setSiteViewMode(false); window.setTimeout(function() { var poiItem; if (kind === 'poi') { poiItem = poiMarkers.find(function(entry) { return entry && entry.poi && String(entry.poi.id) === String(id || ''); }); if (poiItem && poiItem.poi) openPOIWithMapMove(poiItem.poi, null); else focusAIPOI(name); } if (kind === 'trail') focusAITrail(name); }, 80); }
   function siteOpenCaptainGull(prompt) { setSiteViewMode(false); window.setTimeout(function() { var aiBtn = document.getElementById('ai-chat-btn'); var aiInput = document.getElementById('ai-input'); var aiSend = document.getElementById('ai-send'); if (aiBtn) aiBtn.click(); if (prompt && aiInput && aiSend) { aiInput.value = prompt; aiSend.click(); } }, 120); }
@@ -3699,6 +3726,7 @@
 
     blogPostsLoaded = true;
     renderStoryPreviewSection();
+    snapshotOfflineData();
     requestDynamicContentTranslation('blog posts loaded');
   }
   function stabilizePublicSectionTitles() {
@@ -3817,6 +3845,7 @@
       console.assert(getOfflineAssetManifest().some(function(item){ return /church\.png/i.test(String(item.url || '')); }), 'asset manifest should include church icon');
       console.assert(getOfflineAssetManifest().some(function(item){ return /ferry\.png/i.test(String(item.url || '')); }), 'asset manifest should include ferry icon');
       console.assert(getOfflineAssetManifest().some(function(item){ return /app\.png/i.test(String(item.url || '')); }), 'asset manifest should include app icon');
+      console.assert(getOfflineAssetManifest().some(function(item){ return /blog\.html/i.test(String(item.url || '')); }), 'asset manifest should include blog page shell');
       console.assert(typeof window.registerFiveTerreServiceWorker === 'function', 'registerFiveTerreServiceWorker should exist on window');
     } catch (error) {
       console.warn('runTests failed:', error);
