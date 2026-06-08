@@ -343,6 +343,33 @@
     .site-places-title { margin: 0 0 7px; font-size: 32px; line-height: .92; letter-spacing: -.07em; font-weight: 950; color: #fff; }
     .site-places-copy { margin: 0; max-width: 520px; font-size: 13px; line-height: 1.38; color: rgba(255,255,255,.72); }
     .site-places-body { padding: 13px; }
+    .site-poi-location-row { display: flex; gap: 8px; padding: 1px 2px 10px; }
+    .site-poi-location-select {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      color: rgba(255,255,255,.94);
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 900;
+      font-family: inherit;
+      outline: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,.82) 50%), linear-gradient(135deg, rgba(255,255,255,.82) 50%, transparent 50%);
+      background-position: calc(100% - 22px) calc(50% - 3px), calc(100% - 16px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+    }
+    .site-poi-location-select option {
+      color: #111;
+      background: #fff;
+    }
     .site-poi-filters { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 1px 2px 10px; }
     .site-poi-filters::-webkit-scrollbar { display: none; }
     .site-poi-filter { flex: 0 0 auto; min-height: 34px; padding: 8px 11px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; background: rgba(255,255,255,.14); color: rgba(255,255,255,.86); font-size: 11px; line-height: 1; font-weight: 950; font-family: inherit; cursor: pointer; white-space: nowrap; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
@@ -1135,6 +1162,11 @@
             <p class="site-places-copy">Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.</p>
           </div>
           <div class="site-places-body">
+            <div class="site-poi-location-row">
+              <select id="site-poi-location-filter" class="site-poi-location-select" aria-label="Filtra per località">
+                <option value="all">All</option>
+              </select>
+            </div>
             <div id="site-poi-filters" class="site-poi-filters" aria-label="Filtra luoghi"></div>
             <div id="site-pois" class="site-poi-slider"></div>
           </div>
@@ -1403,6 +1435,7 @@
   var trailItems = [];
   var currentMapFilter = 'all';
   var currentSitePOIFilter = 'all';
+  var currentSitePOILocationFilter = 'all';
   var siteArticles = [];
   var blogPostsLoaded = false;
   var universalSearchResults = [];
@@ -3310,15 +3343,47 @@
   function renderSiteCards(containerId, items, emptyText, renderItem) { var container = document.getElementById(containerId); if (!container) return; if (!items || !items.length) { container.innerHTML = '<div class="site-empty">' + escapeHTML(emptyText) + '</div>'; return; } container.innerHTML = items.map(renderItem).join(''); }
   function getSitePOIImage(poi) { var images = getPOIImages(poi); return images && images.length ? images[0] : ''; }
   function getSitePOIGroup(poi) { var type = normalizePOIType(poi && poi.type); if (type === 'punto panoramico') return 'viewpoint'; if (type === 'spiaggia') return 'beach'; if (type === 'chiesa') return 'church'; if (type === 'monumento') return 'monument'; if (type === 'stazione') return 'station'; if (type === 'ristorante' || type === 'bar') return 'food'; if (type === 'curiosity') return 'curiosity'; return type || 'other'; }
-  function getSitePOIGroupLabel(group) { var labels = { all: 'Tutti', viewpoint: 'Panorami', beach: 'Spiagge', church: 'Chiese', monument: 'Monumenti', station: 'Stazioni', food: 'Food', curiosity: 'Curiosità', other: 'Altro' }; return labels[group] || group; }
+  function getSitePOIGroupLabel(group) {
+    var labels = { all: 'Tutti', viewpoint: 'Panorami', beach: 'Spiagge', church: 'Chiese', monument: 'Monumenti', station: 'Stazioni', food: 'Food', curiosity: 'Curiosità', other: 'Altro' };
+    return labels[group] || group;
+  }
+  function getSitePOILocationLabel(value) {
+    if (!value || value === 'all') return 'All';
+    return String(value);
+  }
+  function getSitePOILocation(poi) {
+    var explicit = String((poi && (poi.village || poi.villaggio || poi.location || poi.localita || poi.località)) || '').trim();
+    var nearest;
+    if (explicit) return explicit;
+    if (poi && isValidCoords(poi.coords)) {
+      nearest = getClosestPlaceNameForCoords(poi.coords);
+      if (nearest) return nearest;
+    }
+    return 'Other';
+  }
   function getSiteImagePOIs() { return poiMarkers.map(function(item) { return item.poi; }).filter(function(poi) { return poi && isValidPOI(poi) && String(poi.type || '').toLowerCase() !== 'ferry' && getSitePOIImage(poi); }).sort(function(a, b) { return Number(b.relevance || 0) - Number(a.relevance || 0); }); }
   function renderSitePOIFilters(pois) {
     var container = document.getElementById('site-poi-filters');
+    var locationSelect = document.getElementById('site-poi-location-filter');
     var groups;
+    var locations;
     if (!container) return;
     if (!sitePOIsLoaded) {
       container.innerHTML = '<span class="site-poi-filter is-skeleton">Loading</span><span class="site-poi-filter is-skeleton">Loading</span><span class="site-poi-filter is-skeleton">Loading</span>';
+      if (locationSelect) locationSelect.innerHTML = '<option value="all">All</option>';
       return;
+    }
+    locations = ['all'].concat((pois || []).map(getSitePOILocation).filter(Boolean).filter(function(location, index, list) {
+      return list.indexOf(location) === index;
+    }).sort(function(a, b) {
+      return a.localeCompare(b);
+    }));
+    if (locations.indexOf(currentSitePOILocationFilter) === -1) currentSitePOILocationFilter = 'all';
+    if (locationSelect) {
+      locationSelect.innerHTML = locations.map(function(location) {
+        return '<option value="' + escapeHTML(location) + '">' + escapeHTML(getSitePOILocationLabel(location)) + '</option>';
+      }).join('');
+      locationSelect.value = currentSitePOILocationFilter;
     }
     groups = ['all'].concat((pois || []).map(getSitePOIGroup).filter(Boolean).filter(function(group, index, list) {
       return list.indexOf(group) === index;
@@ -3330,7 +3395,10 @@
   }
   function renderSitePOISection() {
     var allPOIs = getSiteImagePOIs();
-    var filtered = currentSitePOIFilter === 'all' ? allPOIs : allPOIs.filter(function(poi) {
+    var filteredByLocation = currentSitePOILocationFilter === 'all' ? allPOIs : allPOIs.filter(function(poi) {
+      return getSitePOILocation(poi) === currentSitePOILocationFilter;
+    });
+    var filtered = currentSitePOIFilter === 'all' ? filteredByLocation : filteredByLocation.filter(function(poi) {
       return getSitePOIGroup(poi) === currentSitePOIFilter;
     });
     var placesTitle = document.querySelector('.site-places-title');
@@ -3531,7 +3599,16 @@
       }
       if (event.target.closest('[data-site-poi-filter]')) { event.preventDefault(); event.stopPropagation(); currentSitePOIFilter = event.target.closest('[data-site-poi-filter]').getAttribute('data-site-poi-filter') || 'all'; renderSitePOISection(); return; }
       if (villageAction) { handleVillageSiteAction(villageAction, event); return; }
-      if (siteItem) { event.preventDefault(); event.stopPropagation(); siteOpenMapItem(siteItem.getAttribute('data-site-kind'), siteItem.getAttribute('data-site-name'), siteItem.getAttribute('data-site-poi-id')); return; } if (siteCategory) { siteSearchCategory(siteCategory.getAttribute('data-site-category')); return; } if (siteAction) { if (siteAction.getAttribute('data-site-action') === 'map') setSiteViewMode(false); if (siteAction.getAttribute('data-site-action') === 'ai') siteOpenCaptainGull('Help me explore Cinque Terre today.'); if (siteAction.getAttribute('data-site-action') === 'plan') siteOpenCaptainGull('Give me practical ideas for my first day in the Cinque Terre: villages, views, beaches, ferries or trails.'); return; } if (!searchResults.contains(event.target) && event.target !== searchInput) searchResults.style.display = 'none'; }); map.on('zoom zoomend moveend', function () { updateMapVisualByZoom(); updateTrailWidths(); updateMovingFerryIconSizes(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); map.on('dragstart zoomstart', disableTourFollowFromUserMove); map.on('moveend zoomend', function () { evaluateAutoCard(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); setupCardSwipe(card); setupCardSwipe(cardLiveTouchLayer); setupPOISheetDrag(); }
+      if (siteItem) { event.preventDefault(); event.stopPropagation(); siteOpenMapItem(siteItem.getAttribute('data-site-kind'), siteItem.getAttribute('data-site-name'), siteItem.getAttribute('data-site-poi-id')); return; } if (siteCategory) { siteSearchCategory(siteCategory.getAttribute('data-site-category')); return; } if (siteAction) { if (siteAction.getAttribute('data-site-action') === 'map') setSiteViewMode(false); if (siteAction.getAttribute('data-site-action') === 'ai') siteOpenCaptainGull('Help me explore Cinque Terre today.'); if (siteAction.getAttribute('data-site-action') === 'plan') siteOpenCaptainGull('Give me practical ideas for my first day in the Cinque Terre: villages, views, beaches, ferries or trails.'); return; } if (!searchResults.contains(event.target) && event.target !== searchInput) searchResults.style.display = 'none'; }); map.on('zoom zoomend moveend', function () { updateMapVisualByZoom(); updateTrailWidths(); updateMovingFerryIconSizes(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); map.on('dragstart zoomstart', disableTourFollowFromUserMove); map.on('moveend zoomend', function () { evaluateAutoCard(); updatePOIVisibility(); syncUnifiedMapPageMode(); }); setupCardSwipe(card); setupCardSwipe(cardLiveTouchLayer); setupPOISheetDrag();
+      var sitePoiLocationFilter = document.getElementById('site-poi-location-filter');
+      if (sitePoiLocationFilter && sitePoiLocationFilter.getAttribute('data-site-poi-location-ready') !== '1') {
+        sitePoiLocationFilter.setAttribute('data-site-poi-location-ready', '1');
+        sitePoiLocationFilter.addEventListener('change', function() {
+          currentSitePOILocationFilter = sitePoiLocationFilter.value || 'all';
+          renderSitePOISection();
+        });
+      }
+    }
   function runTests() { }
   function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); renderSiteViewFromMapData(); syncUnifiedMapPageMode(false); applyMapFilterUI(currentMapFilter); loadOfficialCommunications(); loadBlogPosts(); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); updateActiveSiteSectionFromScroll(); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
   start();
