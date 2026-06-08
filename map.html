@@ -213,6 +213,21 @@
     .site-article-thumb::before { content: ''; position: absolute; top: 0; bottom: 0; left: 18px; width: 1px; background: rgba(90, 68, 42, 0.10); z-index: 2; pointer-events: none; }
     .site-article-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; filter: none; border-radius: 0; box-shadow: none; }
     .site-article-card::after { content: ''; position: absolute; top: 8px; bottom: 8px; left: 2px; width: 18px; pointer-events: none; z-index: 3; background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04)), radial-gradient(circle at 9px 14px, #062846 0 4.8px, rgba(255,255,255,0.22) 5.3px 6.1px, transparent 6.2px) 0 0 / 18px 28px repeat-y; border-right: 1px solid rgba(90, 68, 42, 0.14); }
+    .site-article-card.is-skeleton { pointer-events: none; cursor: default; }
+    .site-article-card.is-skeleton .site-article-meta,
+    .site-article-card.is-skeleton .site-article-title,
+    .site-article-card.is-skeleton .site-article-excerpt { color: transparent !important; text-shadow: none !important; }
+    .site-article-card.is-skeleton .site-article-thumb,
+    .site-article-card.is-skeleton .site-article-thumb img,
+    .site-article-card.is-skeleton .site-article-meta,
+    .site-article-card.is-skeleton .site-article-title,
+    .site-article-card.is-skeleton .site-article-excerpt { background: linear-gradient(90deg, rgba(225,225,225,.92) 0%, rgba(244,244,244,.98) 50%, rgba(225,225,225,.92) 100%); background-size: 200% 100%; animation: siteSkeletonShimmer 1.15s linear infinite; }
+    .site-article-card.is-skeleton .site-article-thumb::before,
+    .site-article-card.is-skeleton::after { opacity: .55; }
+    .site-article-card.is-skeleton .site-article-content { gap: 10px; }
+    .site-article-card.is-skeleton .site-article-meta { width: 34%; min-height: 10px; border-radius: 999px; }
+    .site-article-card.is-skeleton .site-article-title { width: 74%; min-height: 26px; border-radius: 10px; }
+    .site-article-card.is-skeleton .site-article-excerpt { width: calc(100% - 28px); min-height: 88px; border-radius: 12px; display: block; -webkit-line-clamp: unset; }
     .site-article-content { position: relative; z-index: 2; padding: 14px 14px 14px 28px; display: grid; gap: 8px; }
     .site-article-title { display: block; font-size: 22px; line-height: .98; letter-spacing: -.055em; font-weight: 950; color: #111; text-wrap: balance; }
     .site-article-meta { display: inline-flex; width: fit-content; margin-bottom: 0; padding: 0; border-radius: 0; background: transparent; color: rgba(88, 68, 44, 0.72); font-size: 10px; line-height: 1; letter-spacing: .14em; text-transform: uppercase; font-weight: 950; }
@@ -1138,14 +1153,7 @@
 
       </div>
     </section>
-
-    <section class="site-section">
-      <div class="site-section-head"><span>I cinque borghi</span><small>tocca per aprire la mappa</small></div>
-      <div id="site-villages" class="site-horizontal-list"></div>
-    </section>
-
-
-    <section class="site-section site-pages-section">
+<section class="site-section site-pages-section">
       <div class="site-feature-stack">
         <section id="site-stories-section" class="site-feature-section dark story-video-section" aria-label="Stories section">
           <div class="site-feature-cover">
@@ -1202,12 +1210,14 @@
               </div>
               <div id="site-trails" class="site-trail-slider"></div>
             </div>
-          </div>
-        </section>
-      </div>
+          </div></section>
+
+    <section class="site-section">
+      <div class="site-section-head"><span>I cinque borghi</span><small>tocca per aprire la mappa</small></div>
+      <div id="site-villages" class="site-horizontal-list"></div>
     </section>
 
-    <section id="site-weather-section" class="site-section site-weather-section" aria-label="Open-Meteo weather section">
+    <section class="site-section site-weather-section" aria-label="Open-Meteo weather section">
       <div class="site-weather-panel">
         <div class="site-weather-top">
           <h3 class="site-weather-title">Meteo</h3>
@@ -3434,7 +3444,16 @@
     var articles;
     if (!container) return;
     if (!blogPostsLoaded) {
-      container.innerHTML = '<div class="site-empty">Caricamento storie…</div>';
+      container.innerHTML = '<div class="site-article-slider">' + [1, 2, 3].map(function() {
+        return '<article class="site-article-card is-skeleton" aria-hidden="true">' +
+          '<span class="site-article-content">' +
+            '<span class="site-article-meta">Loading</span>' +
+            '<span class="site-article-title">Loading</span>' +
+          '</span>' +
+          '<span class="site-article-thumb"><img alt="" loading="lazy" decoding="async"></span>' +
+          '<span><span class="site-article-excerpt">Loading</span></span>' +
+        '</article>';
+      }).join('') + '</div>';
       return;
     }
     articles = siteArticles || [];
@@ -3930,4 +3949,3 @@
 
 </body>
 </html>
-  
