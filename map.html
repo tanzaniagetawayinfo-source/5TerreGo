@@ -224,6 +224,71 @@
     .site-feature-section.dark .site-feature-cta-row a, .site-feature-section.dark .site-feature-cta-row button { background: #ff8a1d; color: #111; }
     #site-stories-section .site-feature-cta-row { width: 100%; }
     #site-stories-section .site-feature-cta-row a { width: 100%; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 12px 16px; background: #fff; color: #111; font-size: 15px; font-weight: 950; box-shadow: 0 12px 28px rgba(0,0,0,.16); }
+    #site-stories-section .site-feature-title,
+    #site-trails-section .site-feature-title,
+    #site-experiences-section .site-feature-title,
+    #site-places-section .site-places-title,
+    .site-section-head span,
+    .site-weather-title,
+    .site-official-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 0 0 7px;
+      width: 100%;
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -.02em;
+      color: #fff;
+      text-align: center;
+    }
+    #site-stories-section .site-feature-title::before,
+    #site-stories-section .site-feature-title::after,
+    #site-trails-section .site-feature-title::before,
+    #site-trails-section .site-feature-title::after,
+    #site-experiences-section .site-feature-title::before,
+    #site-experiences-section .site-feature-title::after,
+    #site-places-section .site-places-title::before,
+    #site-places-section .site-places-title::after,
+    .site-section-head span::before,
+    .site-section-head span::after,
+    .site-weather-title::before,
+    .site-weather-title::after,
+    .site-official-title::before,
+    .site-official-title::after {
+      content: '';
+      flex: 1 1 auto;
+      height: 1px;
+      background: rgba(255,255,255,.32);
+      min-width: 24px;
+    }
+    .site-section-head {
+      display: block;
+      margin-bottom: 12px;
+    }
+    .site-section-head small {
+      display: block;
+      margin-top: 7px;
+      text-align: center;
+    }
+    .site-weather-top,
+    .site-official-card {
+      text-align: center;
+    }
+    .site-official-kicker,
+    .site-official-text,
+    .site-official-disclaimer,
+    .site-weather-text {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .site-official-title {
+      justify-content: center;
+      max-width: none;
+    }
     .site-placeholder-slider { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 1px 2px 6px; scroll-snap-type: x proximity; }
     .site-placeholder-slider::-webkit-scrollbar { display: none; }
     .site-placeholder-card { position: relative; flex: 0 0 76%; min-height: 292px; overflow: hidden; border-radius: 26px; color: #111; background: rgba(255,255,255,.88); text-decoration: none; box-shadow: 0 14px 34px rgba(0,0,0,.08); scroll-snap-align: start; }
@@ -1052,12 +1117,11 @@
 
 
     <section class="site-section site-pages-section">
-      <div class="site-section-head"><span>Inizia da qui</span><small>sezioni</small></div>
       <div class="site-feature-stack">
         <section id="site-stories-section" class="site-feature-section dark story-video-section" aria-label="Stories section">
           <div class="site-feature-cover">
             <div class="site-feature-label-row"><span class="site-feature-step">01</span><div class="site-feature-kicker">Stories</div></div>
-            <div><h3 class="site-feature-title">Storie utili.</h3><p class="site-feature-text">Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.</p></div>
+            <div><h3 class="site-feature-title">Storie Utili</h3><p class="site-feature-text">Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.</p></div>
           </div>
           <div class="site-feature-body">
             <div id="site-story-list"></div>
@@ -1076,6 +1140,20 @@
           </div>
         </section>
 
+        <section id="site-experiences-section" class="site-feature-section experience-video-section" aria-label="Exclusive discounts section">
+          <div class="site-feature-cover">
+            <div class="site-feature-label-row"><span class="site-feature-step">02</span><div class="site-feature-kicker">Discounts</div></div>
+            <div><h3 class="site-feature-title">Sconti locali.</h3><p class="site-feature-text">Offerte gratuite da attività selezionate. Nessuna commissione per i partner.</p></div>
+          </div>
+          <div class="site-feature-body">
+            <div class="site-placeholder-slider">
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/20184673/pexels-photo-20184673.jpeg?_gl=1*1fzrqit*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNTMyJGo0JGwwJGgw');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/5060895/pexels-photo-5060895.jpeg?_gl=1*jdo6uo*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNjE2JGo1MiRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/35474391/pexels-photo-35474391.jpeg?_gl=1*1jkfday*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNzc5JGo1OSRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
+            </div>
+          </div>
+        </section>
+
         <section id="site-trails-section" class="site-feature-section stay-video-section" aria-label="Trails section">
           <div class="site-feature-cover">
             <div class="site-feature-label-row"><span class="site-feature-step">03</span><div class="site-feature-kicker">Trails</div></div>
@@ -1089,20 +1167,6 @@
                 <label class="site-trail-filter"><span>Difficulty</span><select id="site-trail-difficulty-filter"><option value="all">All</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="expert">Expert</option></select></label>
               </div>
               <div id="site-trails" class="site-trail-slider"></div>
-            </div>
-          </div>
-        </section>
-
-        <section id="site-experiences-section" class="site-feature-section experience-video-section" aria-label="Exclusive discounts section">
-          <div class="site-feature-cover">
-            <div class="site-feature-label-row"><span class="site-feature-step">02</span><div class="site-feature-kicker">Discounts</div></div>
-            <div><h3 class="site-feature-title">Sconti locali.</h3><p class="site-feature-text">Offerte gratuite da attività selezionate. Nessuna commissione per i partner.</p></div>
-          </div>
-          <div class="site-feature-body">
-            <div class="site-placeholder-slider">
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/20184673/pexels-photo-20184673.jpeg?_gl=1*1fzrqit*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNTMyJGo0JGwwJGgw');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/5060895/pexels-photo-5060895.jpeg?_gl=1*jdo6uo*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNjE2JGo1MiRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/35474391/pexels-photo-35474391.jpeg?_gl=1*1jkfday*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNzc5JGo1OSRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
             </div>
           </div>
         </section>
@@ -3498,8 +3562,8 @@
     }
   };
   var SIMPLE_COPY = {
-    en: { heroTitle:'Cinque Terre, made simple.', heroText:'Map, villages, trails, weather, ferries and useful alerts. One free guide to move better and respect the territory.', openInteractiveMap:'Open the guide', fiveVillages:'The five villages', tapMap:'tap to open map', startHere:'Start here', siteSections:'sections', readBefore:'Useful stories.', storyText:'Short local guides and articles to understand the villages before you arrive.', openStories:'Read stories', thingsDoing:'Local discounts.', expText:'Free offers from selected local businesses. No commission for partners.', bookSmarter:'Clear trails.', stayText:'Difficulty, time and elevation to choose the right route before you start.', openStay:'Open trail', placesSection:'Useful places', placesCopy:'Viewpoints, beaches, monuments, stations and practical places to open on the map.', weather:'Weather', weatherNote:'Now and next hours', officialKicker:'Official sources', officialTitle:'Official updates', officialText:'Alerts and public updates from official sources, always linked to the original page.', officialDisclaimer:'5TerreGo.com organizes these updates to make them easier to read. For important decisions, always check the official source.', trailCopy:'Choose a trail, check the key details and open it on the map.', footerNote:'All rights reserved. Texts, visual design, code, maps, database structure, itineraries and original editorial content may not be copied, reproduced, scraped, adapted or reused without written permission.', contact:'Contact us', anchorStories:'Stories', anchorDiscounts:'Discounts', anchorTrails:'Trails', anchorPlaces:'Places', anchorWeather:'Weather' },
-    it: { heroTitle:'Cinque Terre, semplice.', heroText:'Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.', openInteractiveMap:'Apri la guida', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni', readBefore:'Storie utili.', storyText:'Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.', openStories:'Leggi le storie', thingsDoing:'Sconti locali.', expText:'Offerte gratuite da attività selezionate. Nessuna commissione per i partner.', bookSmarter:'Sentieri chiari.', stayText:'Difficoltà, durata e altimetria per scegliere il percorso giusto prima di partire.', openStay:'Apri sentiero', placesSection:'Luoghi utili', placesCopy:'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.', weather:'Meteo', weatherNote:'Ora e prossime ore', officialKicker:'Fonti ufficiali', officialTitle:'Avvisi ufficiali', officialText:'Avvisi e aggiornamenti da fonti ufficiali, sempre con link alla pagina originale.', officialDisclaimer:'5TerreGo.com organizza questi avvisi per renderli più facili da consultare. Per decisioni importanti verifica sempre la fonte ufficiale.', trailCopy:'Scegli un sentiero, controlla i dati principali e aprilo sulla mappa.', footerNote:'Tutti i diritti riservati. Testi, grafica, codice, mappe, struttura dati, itinerari e contenuti editoriali originali non possono essere copiati, riprodotti, estratti, adattati o riutilizzati senza autorizzazione scritta.', contact:'Contattaci', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo' },
+    en: { heroTitle:'Cinque Terre, made simple.', heroText:'Map, villages, trails, weather, ferries and useful alerts. One free guide to move better and respect the territory.', openInteractiveMap:'Open the guide', fiveVillages:'The five villages', tapMap:'tap to open map', startHere:'Start here', siteSections:'sections', readBefore:'Useful Stories', storyText:'Short local guides and articles to understand the villages before you arrive.', openStories:'Read stories', thingsDoing:'Local discounts.', expText:'Free offers from selected local businesses. No commission for partners.', bookSmarter:'Clear trails.', stayText:'Difficulty, time and elevation to choose the right route before you start.', openStay:'Open trail', placesSection:'Useful places', placesCopy:'Viewpoints, beaches, monuments, stations and practical places to open on the map.', weather:'Weather', weatherNote:'Now and next hours', officialKicker:'Official sources', officialTitle:'Official updates', officialText:'Alerts and public updates from official sources, always linked to the original page.', officialDisclaimer:'5TerreGo.com organizes these updates to make them easier to read. For important decisions, always check the official source.', trailCopy:'Choose a trail, check the key details and open it on the map.', footerNote:'All rights reserved. Texts, visual design, code, maps, database structure, itineraries and original editorial content may not be copied, reproduced, scraped, adapted or reused without written permission.', contact:'Contact us', anchorStories:'Stories', anchorDiscounts:'Discounts', anchorTrails:'Trails', anchorPlaces:'Places', anchorWeather:'Weather' },
+    it: { heroTitle:'Cinque Terre, semplice.', heroText:'Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.', openInteractiveMap:'Apri la guida', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni', readBefore:'Storie Utili', storyText:'Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.', openStories:'Leggi le storie', thingsDoing:'Sconti locali.', expText:'Offerte gratuite da attività selezionate. Nessuna commissione per i partner.', bookSmarter:'Sentieri chiari.', stayText:'Difficoltà, durata e altimetria per scegliere il percorso giusto prima di partire.', openStay:'Apri sentiero', placesSection:'Luoghi utili', placesCopy:'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.', weather:'Meteo', weatherNote:'Ora e prossime ore', officialKicker:'Fonti ufficiali', officialTitle:'Avvisi ufficiali', officialText:'Avvisi e aggiornamenti da fonti ufficiali, sempre con link alla pagina originale.', officialDisclaimer:'5TerreGo.com organizza questi avvisi per renderli più facili da consultare. Per decisioni importanti verifica sempre la fonte ufficiale.', trailCopy:'Scegli un sentiero, controlla i dati principali e aprilo sulla mappa.', footerNote:'Tutti i diritti riservati. Testi, grafica, codice, mappe, struttura dati, itinerari e contenuti editoriali originali non possono essere copiati, riprodotti, estratti, adattati o riutilizzati senza autorizzazione scritta.', contact:'Contattaci', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo' },
     fr: { heroTitle:'Cinque Terre, en simple.', heroText:'Carte, villages, sentiers, météo, ferries et alertes utiles. Un guide gratuit pour mieux se déplacer et respecter le territoire.', openInteractiveMap:'Ouvrir le guide', fiveVillages:'Les cinq villages', tapMap:'touchez pour ouvrir la carte', startHere:'Commencez ici', siteSections:'sections', readBefore:'Histoires utiles.', storyText:'Guides courts et articles locaux pour mieux comprendre les villages avant d’arriver.', openStories:'Lire les histoires', thingsDoing:'Réductions locales.', expText:'Offres gratuites de commerces sélectionnés. Aucune commission pour les partenaires.', bookSmarter:'Sentiers clairs.', stayText:'Difficulté, durée et altitude pour choisir le bon itinéraire avant de partir.', openStay:'Ouvrir le sentier', placesSection:'Lieux utiles', placesCopy:'Points de vue, plages, monuments, gares et lieux pratiques à ouvrir sur la carte.', weather:'Météo', weatherNote:'Maintenant et prochaines heures', officialKicker:'Sources officielles', officialTitle:'Mises à jour officielles', officialText:'Alertes et mises à jour publiques de sources officielles, toujours liées à la page originale.', officialDisclaimer:'5TerreGo.com organise ces informations pour les rendre plus faciles à consulter. Pour les décisions importantes, vérifiez toujours la source officielle.', trailCopy:'Choisissez un sentier, vérifiez les informations principales et ouvrez-le sur la carte.', footerNote:'Tous droits réservés. Textes, design, code, cartes, structure de données, itinéraires et contenus éditoriaux originaux ne peuvent pas être copiés, reproduits, extraits, adaptés ou réutilisés sans autorisation écrite.', contact:'Contact', anchorStories:'Histoires', anchorDiscounts:'Réductions', anchorTrails:'Sentiers', anchorPlaces:'Lieux', anchorWeather:'Météo' },
     de: { heroTitle:'Cinque Terre, einfach.', heroText:'Karte, Dörfer, Wege, Wetter, Fähren und nützliche Hinweise. Ein kostenloser Guide, um sich besser zu bewegen und die Region zu respektieren.', openInteractiveMap:'Guide öffnen', fiveVillages:'Die fünf Dörfer', tapMap:'tippen, um die Karte zu öffnen', startHere:'Hier starten', siteSections:'Bereiche', readBefore:'Nützliche Stories.', storyText:'Kurze lokale Guides und Artikel, um die Dörfer vor der Ankunft besser zu verstehen.', openStories:'Stories lesen', thingsDoing:'Lokale Rabatte.', expText:'Kostenlose Angebote von ausgewählten lokalen Partnern. Keine Provision für Partner.', bookSmarter:'Klare Wege.', stayText:'Schwierigkeit, Zeit und Höhenprofil, um vor dem Start die richtige Route zu wählen.', openStay:'Weg öffnen', placesSection:'Nützliche Orte', placesCopy:'Aussichtspunkte, Strände, Denkmäler, Bahnhöfe und praktische Orte direkt auf der Karte.', weather:'Wetter', weatherNote:'Jetzt und nächste Stunden', officialKicker:'Offizielle Quellen', officialTitle:'Offizielle Updates', officialText:'Hinweise und öffentliche Updates aus offiziellen Quellen, immer mit Link zur Originalseite.', officialDisclaimer:'5TerreGo.com ordnet diese Hinweise, damit sie leichter lesbar sind. Für wichtige Entscheidungen immer die offizielle Quelle prüfen.', trailCopy:'Wähle einen Weg, prüfe die wichtigsten Daten und öffne ihn auf der Karte.', footerNote:'Alle Rechte vorbehalten. Texte, visuelles Design, Code, Karten, Datenstruktur, Routen und originale redaktionelle Inhalte dürfen ohne schriftliche Genehmigung nicht kopiert, reproduziert, ausgelesen, angepasst oder wiederverwendet werden.', contact:'Kontakt', anchorStories:'Stories', anchorDiscounts:'Rabatte', anchorTrails:'Wege', anchorPlaces:'Orte', anchorWeather:'Wetter' },
     ru: { heroTitle:'Чинкве-Терре проще.', heroText:'Карта, деревни, маршруты, погода, паромы и важные уведомления. Бесплатный гид, чтобы легче ориентироваться и уважать территорию.', openInteractiveMap:'Открыть гид', fiveVillages:'Пять деревень', tapMap:'нажмите, чтобы открыть карту', startHere:'Начните здесь', siteSections:'разделы', readBefore:'Полезные истории.', storyText:'Короткие местные гиды и статьи, чтобы лучше понять деревни до приезда.', openStories:'Читать истории', thingsDoing:'Местные скидки.', expText:'Бесплатные предложения от выбранных местных заведений. Без комиссии для партнёров.', bookSmarter:'Понятные маршруты.', stayText:'Сложность, время и высота помогут выбрать маршрут до старта.', openStay:'Открыть маршрут', placesSection:'Полезные места', placesCopy:'Смотровые точки, пляжи, памятники, станции и удобные места на карте.', weather:'Погода', weatherNote:'Сейчас и ближайшие часы', officialKicker:'Официальные источники', officialTitle:'Официальные обновления', officialText:'Уведомления и публичные обновления из официальных источников, всегда со ссылкой на оригинал.', officialDisclaimer:'5TerreGo.com упорядочивает эти уведомления для удобного просмотра. Для важных решений всегда проверяйте официальный источник.', trailCopy:'Выберите маршрут, проверьте главные данные и откройте его на карте.', footerNote:'Все права защищены. Тексты, визуальный дизайн, код, карты, структура данных, маршруты и оригинальные редакционные материалы нельзя копировать, воспроизводить, извлекать, адаптировать или повторно использовать без письменного разрешения.', contact:'Связаться', anchorStories:'Истории', anchorDiscounts:'Скидки', anchorTrails:'Маршруты', anchorPlaces:'Места', anchorWeather:'Погода' },
