@@ -16,6 +16,8 @@
   <meta name="msapplication-TileColor" content="#0b1116" />
   <link id="dynamic-favicon" rel="icon" type="image/png" href="app.png" />
   <link id="dynamic-apple-icon" rel="apple-touch-icon" href="app.png" />
+  <link rel="preconnect" href="https://images.pexels.com" crossorigin>
+  <link rel="dns-prefetch" href="https://images.pexels.com">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -154,7 +156,11 @@
     .site-view-panel.ftg-section-paging .site-view-inner.ftg-is-dragging {
       transition: none !important;
     }
-    .site-view-panel.ftg-section-paging .ftg-page-frame { position: absolute; left: 0; right: 0; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; display: flex; align-items: flex-start; justify-content: flex-start; padding: 0 14px calc(104px + env(safe-area-inset-bottom)); overflow: hidden; }
+    .site-view-panel.ftg-section-paging .ftg-page-frame { position: absolute; left: 0; right: 0; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; display: flex; align-items: flex-start; justify-content: flex-start; padding: 0 14px calc(104px + env(safe-area-inset-bottom)); overflow: hidden; contain: layout paint style; }
+    .site-view-panel.ftg-section-paging .ftg-page-frame:not([data-ftg-page-index="0"]) {
+      content-visibility: auto;
+      contain-intrinsic-size: 100dvh;
+    }
     .site-view-panel.ftg-section-paging .ftg-page-frame[data-ftg-page-index="0"] {
       padding-left: 0;
       padding-right: 0;
@@ -188,10 +194,12 @@
     }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title {
       margin-bottom: 14px;
+      padding-left: 14px;
     }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
       max-width: 92%;
       margin: 0;
+      padding-left: 14px;
     }
     .site-hero-quicknav {
       position: absolute;
@@ -239,6 +247,11 @@
       background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.48));
       pointer-events: none;
     }
+    .site-hero-quicknav-card.video-card {
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+    }
     .site-hero-quicknav-card video {
       position: absolute;
       inset: 0;
@@ -249,6 +262,11 @@
       z-index: -2;
       pointer-events: none;
       transform: scale(1.04);
+      opacity: 0;
+      transition: opacity .24s ease;
+    }
+    .site-hero-quicknav-card.video-ready video {
+      opacity: 1;
     }
     .site-hero-quicknav-kicker { display: none !important; }
     .site-hero-quicknav-title {
@@ -270,6 +288,10 @@
       background: linear-gradient(135deg, rgba(30,155,255,.18), rgba(255,138,29,.12));
     }
     @media (max-width: 380px) {
+      .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
+      .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
+        padding-left: 12px;
+      }
       .site-hero-video-wrap {
         inset: 0;
         height: 100%;
@@ -554,7 +576,7 @@
     .site-data-subtitle { margin-top: 3px; font-size: 12px; line-height: 1.3; color: rgba(0,0,0,.56); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .site-data-cta { border: 0; border-radius: 999px; padding: 8px 10px; background: #111; color: #fff; font-size: 11px; font-weight: 900; cursor: pointer; }
     .site-places-section { position: relative; overflow: hidden; border-radius: 32px; background: #111; color: #fff; box-shadow: 0 16px 42px rgba(0,0,0,.08); }
-    .site-places-cover { min-height: 168px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.72)), url('https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg'); background-size: cover; background-position: center center; }
+    .site-places-cover { min-height: 168px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.72)), url('https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg?auto=compress&cs=tinysrgb&w=960&fit=crop&dpr=1&q=70'); background-size: cover; background-position: center center; }
     .site-places-title { margin: 0 0 7px; font-size: 32px; line-height: .92; letter-spacing: -.07em; font-weight: 950; color: #fff; }
     .site-places-copy { margin: 0; max-width: 520px; font-size: 13px; line-height: 1.38; color: rgba(255,255,255,.72); }
     .site-places-body { padding: 13px; }
@@ -1046,6 +1068,14 @@
       padding-left: 2px !important;
       padding-right: 2px !important;
       scroll-padding-inline: 2px !important;
+      touch-action: pan-x !important;
+      overscroll-behavior-x: contain;
+    }
+    .site-official-full-text,
+    .poi-content,
+    .trail-page {
+      touch-action: pan-y;
+      overscroll-behavior-y: contain;
     }
     .site-village-tile,
     .site-article-card,
@@ -1357,9 +1387,9 @@
   <main class="site-view-inner">
     <section id="site-welcome-section" class="site-hero-section">
       <div class="site-hero-slider" aria-hidden="true">
-        <div class="site-hero-slide" style="background-image:url('https://images.pexels.com/photos/36998433/pexels-photo-36998433.jpeg?_gl=1*ysyqdt*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODExOTcyMTYkbzM2JGcxJHQxNzgxMTk4ODk0JGozNSRsMCRoMA..');"></div>
-        <div class="site-hero-slide" style="background-image:url('https://images.pexels.com/photos/14085348/pexels-photo-14085348.jpeg?_gl=1*nebpwd*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODExOTcyMTYkbzM2JGcxJHQxNzgxMTk5MTI3JGo0MSRsMCRoMA..');"></div>
-        <div class="site-hero-slide" style="background-image:url('https://images.pexels.com/photos/17454329/pexels-photo-17454329.jpeg?_gl=1*j8mq51*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODExOTcyMTYkbzM2JGcxJHQxNzgxMTk5MTcyJGo1OSRsMCRoMA..');"></div>
+        <div class="site-hero-slide" data-bg="https://images.pexels.com/photos/36998433/pexels-photo-36998433.jpeg?auto=compress&cs=tinysrgb&w=960&fit=crop&dpr=1&q=70"></div>
+        <div class="site-hero-slide" data-bg="https://images.pexels.com/photos/14085348/pexels-photo-14085348.jpeg?auto=compress&cs=tinysrgb&w=960&fit=crop&dpr=1&q=70"></div>
+        <div class="site-hero-slide" data-bg="https://images.pexels.com/photos/17454329/pexels-photo-17454329.jpeg?auto=compress&cs=tinysrgb&w=960&fit=crop&dpr=1&q=70"></div>
       </div>
       <div class="site-hero-content">
         <h1 class="site-view-title">Cinque Terre, semplice.</h1>
@@ -1367,9 +1397,9 @@
       </div>
       <div class="site-hero-quicknav" aria-label="Accessi rapidi hero">
         <div class="site-hero-quicknav-track">
-          <a class="site-hero-quicknav-card" href="#site-stories-section" data-open-site-section="site-stories-section">
-            <video autoplay muted loop playsinline preload="metadata">
-              <source src="videohome.mp4" type="video/mp4">
+          <a class="site-hero-quicknav-card video-card" href="#site-stories-section" data-open-site-section="site-stories-section" style="background-image:url('https://images.pexels.com/photos/36998433/pexels-photo-36998433.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70')">
+            <video muted loop playsinline preload="none" data-autoplay-when-visible="true">
+              <source data-src="videohome.mp4" type="video/mp4">
             </video>
             <span class="site-hero-quicknav-title">Guide</span>
           </a>
@@ -1426,9 +1456,9 @@
           </div>
           <div class="site-feature-body">
             <div class="site-placeholder-slider">
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/20184673/pexels-photo-20184673.jpeg?_gl=1*1fzrqit*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNTMyJGo0JGwwJGgw');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/5060895/pexels-photo-5060895.jpeg?_gl=1*jdo6uo*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNjE2JGo1MiRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
-              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/35474391/pexels-photo-35474391.jpeg?_gl=1*1jkfday*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3Nzg2ODA0NzYkbzIwJGcxJHQxNzc4NjgwNzc5JGo1OSRsMCRoMA..');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/20184673/pexels-photo-20184673.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&dpr=1&q=70');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/5060895/pexels-photo-5060895.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&dpr=1&q=70');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
+              <article class="site-placeholder-card"><div class="site-placeholder-image" style="background-image:url('https://images.pexels.com/photos/35474391/pexels-photo-35474391.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&dpr=1&q=70');"></div><div class="site-placeholder-body"><h4 class="site-placeholder-title">La tua attività qui</h4><p class="site-placeholder-text">Mostra qui la tua attività con uno sconto per i visitatori. Nessuna commissione.</p><a class="site-partner-card-btn" href="mailto:5terrego.info@gmail.com?subject=Diventa%20partner%205TerreGo">Diventa partner</a></div></article>
             </div>
           </div>
         </section>
@@ -1585,13 +1615,16 @@ window.FTG_ACTIONBAR_CONFIG = {
   var currentSitePOIFilter = 'all';
   var currentSitePOILocationFilter = 'all';
   var currentMapFilter = 'all';
+  var siteDeferredLoadState = { stories: false, pois: false, trails: false, weather: false, official: false };
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
   window.fiveTerreSupabaseClient = supabaseClient;
   window.FTG_CURRENT_USER = null;
 
-  if (qr) qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=' + encodeURIComponent(mobileUrl);
+  if (window.matchMedia && window.matchMedia('(min-width: 700px)').matches && qr) {
+    qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=' + encodeURIComponent(mobileUrl);
+  }
   if (urlLabel) urlLabel.textContent = '5TerreGo.com';
 
   function escapeHTML(value) {
@@ -2301,6 +2334,118 @@ window.FTG_ACTIONBAR_CONFIG = {
     };
   }
 
+  function setupHeroSlidePerformance() {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.site-hero-slide[data-bg]'));
+    function applySlide(slide) {
+      var url;
+      if (!slide || slide.getAttribute('data-bg-loaded') === 'true') return;
+      url = slide.getAttribute('data-bg');
+      if (!url) return;
+      slide.style.backgroundImage = 'url("' + url.replace(/"/g, '%22') + '")';
+      slide.setAttribute('data-bg-loaded', 'true');
+    }
+    function loadRemainingSlides() {
+      slides.slice(1).forEach(applySlide);
+    }
+    if (!slides.length) return;
+    applySlide(slides[0]);
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(loadRemainingSlides, { timeout: 1400 });
+    } else {
+      window.setTimeout(loadRemainingSlides, 280);
+    }
+  }
+
+  function runWhenIdle(task, timeout) {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(function(){ task(); }, { timeout: timeout || 1200 });
+    } else {
+      window.setTimeout(task, Math.min(timeout || 1200, 320));
+    }
+  }
+
+  function queueDeferredLoad(key, loader, delay) {
+    if (siteDeferredLoadState[key]) return;
+    siteDeferredLoadState[key] = true;
+    window.setTimeout(function() {
+      runWhenIdle(function() {
+        Promise.resolve().then(loader).catch(function() {});
+      }, 1200);
+    }, delay || 0);
+  }
+
+  function setupHeroQuicknavMedia() {
+    var videos = Array.prototype.slice.call(document.querySelectorAll('.site-hero-quicknav-card video[data-autoplay-when-visible]'));
+    function hydrate(video) {
+      var source;
+      var parent;
+      if (!video || video.getAttribute('data-video-loaded') === 'true') return;
+      source = video.querySelector('source[data-src]');
+      if (!source) return;
+      source.src = source.getAttribute('data-src');
+      video.load();
+      video.setAttribute('data-video-loaded', 'true');
+      parent = video.closest('.site-hero-quicknav-card');
+      if (parent) parent.classList.add('video-ready');
+      if (video.getAttribute('data-autoplay-when-visible') === 'true') {
+        var playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(function() {});
+      }
+    }
+    if (!videos.length) return;
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          hydrate(entry.target);
+          observer.unobserve(entry.target);
+        });
+      }, { root: null, rootMargin: '180px 0px' });
+      videos.forEach(function(video) { observer.observe(video); });
+    } else {
+      window.setTimeout(function(){ hydrate(videos[0]); }, 600);
+    }
+  }
+
+  function scheduleDeferredDataLoads() {
+    var observed = [];
+    var fallbackPlan = [
+      ['stories', loadBlogPosts, 260],
+      ['pois', loadPOIs, 820],
+      ['trails', loadTrails, 1380],
+      ['weather', updateWeather, 1940],
+      ['official', loadOfficialCommunications, 2500]
+    ];
+
+    queueDeferredLoad('stories', loadBlogPosts, 220);
+
+    if (!('IntersectionObserver' in window)) {
+      fallbackPlan.forEach(function(step) {
+        queueDeferredLoad(step[0], step[1], step[2]);
+      });
+      return;
+    }
+
+    observed = [
+      { element: document.getElementById('site-places-section'), key: 'pois', loader: loadPOIs },
+      { element: document.getElementById('site-trails-section'), key: 'trails', loader: loadTrails },
+      { element: document.getElementById('site-weather-section') || document.querySelector('.site-weather-section'), key: 'weather', loader: updateWeather },
+      { element: document.getElementById('site-official-communications-section'), key: 'official', loader: loadOfficialCommunications }
+    ].filter(function(entry) { return !!entry.element; });
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var match = observed.find(function(item) { return item.element === entry.target; });
+        if (!match) return;
+        queueDeferredLoad(match.key, match.loader, 80);
+        observer.unobserve(entry.target);
+      });
+    }, { root: null, rootMargin: '240px 0px' });
+
+    observed.forEach(function(entry) { observer.observe(entry.element); });
+  }
+
   function setupInteractions() {
     var locationSelect = document.getElementById('site-poi-location-filter');
     var trailFrom = document.getElementById('site-trail-from-filter');
@@ -2353,16 +2498,14 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   function start() {
+    setupHeroSlidePerformance();
+    setupHeroQuicknavMedia();
     setupSectionPaging();
     setupMenu();
     setupInteractions();
     checkUser();
     renderSiteViewFromMapData();
-    updateWeather();
-    loadBlogPosts();
-    loadPOIs();
-    loadTrails();
-    loadOfficialCommunications();
+    scheduleDeferredDataLoads();
   }
 
   start();
@@ -2418,7 +2561,15 @@ window.FTG_ACTIONBAR_CONFIG = {
   function setText(selector, value){ var el = document.querySelector(selector); if (el) el.textContent = value; }
   function setAllText(selector, values){ document.querySelectorAll(selector).forEach(function(el, i){ if (values[i] !== undefined) el.textContent = values[i]; }); }
   function setPlaceholder(selector, value){ var el = document.querySelector(selector); if (el) el.setAttribute('placeholder', value); }
-  function translateText(text){ var l = lang(); var out = String(text || '');  Object.keys(map).forEach(function(k){ out = out.split(k).join(map[k]); }); return out; }
+  function translateText(text){
+    var l = lang();
+    var out = String(text || '');
+    var replacements = TEXT_REPLACE[l] || {};
+    Object.keys(replacements).forEach(function(key){
+      out = out.split(key).join(replacements[key]);
+    });
+    return out;
+  }
   function getUserDisplayNameForI18N(user){ var meta; if (!user) return ''; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return ''; }
   function getLoginText(user){ var name = getUserDisplayNameForI18N(user || window.FTG_CURRENT_USER); if (!name) return t('login'); return t('userGreeting') + name; }
   function translateRemainingStaticUI() {
@@ -2532,7 +2683,7 @@ window.FTG_ACTIONBAR_CONFIG = {
 (function(){
   var host = document.getElementById('ftg-global-actionbar-host');
   if (!host) return;
-  fetch('global-actionbar.html')
+  (function(){ return new Promise(function(resolve){ if ('requestIdleCallback' in window) { window.requestIdleCallback(resolve, { timeout: 1400 }); } else { window.setTimeout(resolve, 420); } }).then(function(){ return fetch('global-actionbar.html'); }); }())
     .then(function(response){
       if (!response.ok) throw new Error('HTTP ' + response.status);
       return response.text();
