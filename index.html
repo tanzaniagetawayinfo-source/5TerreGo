@@ -151,23 +151,23 @@
     .site-view-panel { position: fixed; inset: 0; z-index: 2; display: block; height: 100dvh; background: linear-gradient(180deg, #0b2a3d 0%, #082033 12%, #071424 38%, #071424 100%); color: #fff; overflow: hidden; -webkit-overflow-scrolling: touch; }
     .site-view-panel.ftg-section-paging { overflow: hidden; }
     .site-view-panel.ftg-section-paging .site-view-inner { position: relative; height: 100dvh; min-height: 100dvh; overflow: hidden; transition: transform .58s cubic-bezier(.2,.9,.2,1); will-change: transform; }
-    .site-view-panel.ftg-section-paging .ftg-page-frame { position: absolute; left: 0; right: 0; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 18px 14px calc(104px + env(safe-area-inset-bottom)); overflow: hidden; }
-    .site-view-panel.ftg-section-paging .ftg-page-shell { width: 100%; max-width: 100%; max-height: calc(100dvh - 22px - 104px - env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: center; overflow: visible; }
+    .site-view-panel.ftg-section-paging .ftg-page-frame { position: absolute; left: 0; right: 0; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; display: flex; align-items: flex-start; justify-content: flex-start; padding: 0 14px calc(104px + env(safe-area-inset-bottom)); overflow: hidden; }
+    .site-view-panel.ftg-section-paging .ftg-page-shell { width: 100%; max-width: 100%; max-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); display: flex; align-items: flex-start; justify-content: flex-start; overflow: visible; }
     .site-view-panel.ftg-section-paging #site-welcome-section { margin: 0 !important; width: 100%; }
-    .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content { width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); }
+    .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content { width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; min-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); padding-top: 18px; }
     .site-view-panel.ftg-section-paging #site-stories-section,
     .site-view-panel.ftg-section-paging #site-places-section,
     .site-view-panel.ftg-section-paging #site-experiences-section,
     .site-view-panel.ftg-section-paging #site-trails-section,
     .site-view-panel.ftg-section-paging .site-weather-section,
     .site-view-panel.ftg-section-paging #site-official-communications-section,
-    .site-view-panel.ftg-section-paging .site-footer { position: relative; margin: 0 !important; width: 100%; max-width: 100%; }
+    .site-view-panel.ftg-section-paging .site-footer { position: relative; margin: 0 !important; width: 100%; max-width: 100%; padding-top: 18px; }
     .site-view-panel.ftg-section-paging #site-stories-section,
     .site-view-panel.ftg-section-paging #site-places-section,
     .site-view-panel.ftg-section-paging #site-experiences-section,
     .site-view-panel.ftg-section-paging #site-trails-section,
     .site-view-panel.ftg-section-paging .site-weather-section,
-    .site-view-panel.ftg-section-paging #site-official-communications-section { display: flex; flex-direction: column; justify-content: center; }
+    .site-view-panel.ftg-section-paging #site-official-communications-section { display: flex; flex-direction: column; justify-content: flex-start; }
     .site-view-panel.ftg-section-paging .site-feature-stack { display: contents !important; }
     .site-view-panel.ftg-section-paging .site-feature-section,
     .site-view-panel.ftg-section-paging .site-places-section,
@@ -957,7 +957,7 @@
     }
     body:not(.map-focus-mode) .site-view-panel {
       margin-top: 0;
-      padding-top: 154px;
+      padding-top: 0 !important;
       background:
         linear-gradient(180deg, rgba(7,20,36,0) 0%, rgba(12,56,84,.18) 14%, rgba(13,62,91,.56) 30%, rgba(9,39,61,.88) 50%, #071424 78%, #071424 100%) !important;
     }
@@ -966,7 +966,7 @@
         linear-gradient(180deg, rgba(7,20,36,0) 0%, rgba(11,51,77,.22) 10%, rgba(8,32,51,.74) 24%, #071424 48%, #071424 100%) !important;
     }
     body:not(.map-focus-mode) .site-hero-section {
-      padding-top: 16px !important;
+      padding-top: 0 !important;
       background: transparent !important;
     }
 
