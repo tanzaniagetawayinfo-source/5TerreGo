@@ -667,13 +667,21 @@
 
     function navigateToPage(pageId) {
       var page = pages[pageId] || {};
+      var href = String(page.href || '').trim();
       closeProfileDrawer();
       syncActiveButton(pageId);
+
+      if (href && href !== '#' && href.charAt(0) !== '#') {
+        window.location.href = href;
+        return;
+      }
+
       if (typeof config.onNavigate === 'function') {
         config.onNavigate(pageId, page);
         return;
       }
-      if (page.href) window.location.href = page.href;
+
+      if (href) window.location.href = href;
     }
 
     navButtons.forEach(function (button) {
