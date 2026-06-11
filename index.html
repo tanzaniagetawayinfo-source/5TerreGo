@@ -1246,14 +1246,75 @@
   </main>
 </div>
 
-<div class="top-bar">
-  <div class="top-row">
-    <a href="https://www.5terrego.com" class="center-brand" target="_blank" rel="noopener noreferrer" aria-label="Open 5TerreGo.com"><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></a>
-    <div class="top-actions"><div id="language-menu" class="app-menu-language" aria-label="Choose language"><button class="language-option active" type="button" data-lang="en"><img src="https://hatscripts.github.io/circle-flags/flags/gb.svg" alt="">English</button><button class="language-option" type="button" data-lang="it"><img src="https://hatscripts.github.io/circle-flags/flags/it.svg" alt="">Italiano</button><button class="language-option" type="button" data-lang="fr"><img src="https://hatscripts.github.io/circle-flags/flags/fr.svg" alt="">Français</button><button class="language-option" type="button" data-lang="de"><img src="https://hatscripts.github.io/circle-flags/flags/de.svg" alt="">Deutsch</button><button class="language-option" type="button" data-lang="ru"><img src="https://hatscripts.github.io/circle-flags/flags/ru.svg" alt="">Русский</button><button class="language-option" type="button" data-lang="zh"><img src="https://hatscripts.github.io/circle-flags/flags/cn.svg" alt="">中文</button><button class="language-option" type="button" data-lang="ar"><img src="https://hatscripts.github.io/circle-flags/flags/sa.svg" alt="">العربية</button></div><button id="app-menu-toggle" type="button" aria-label="Open quick menu" aria-expanded="false"><span></span><span></span><span></span><span></span></button><div id="app-menu" class="app-menu" aria-label="Quick menu"><div class="app-menu-head"><div class="app-menu-hi"><div class="app-menu-kicker">Ciao</div><div id="app-menu-username">Ospite</div><div class="app-menu-auth-actions"><button id="login" class="app-menu-auth-btn guest-only" type="button">Login</button><a id="app-menu-account" class="app-menu-auth-btn user-only" href="profile.html">Area personale</a><button id="app-menu-logout" class="app-menu-auth-btn logout user-only" type="button">Logout</button></div></div></div><nav class="app-menu-main" aria-label="Menu principale"><a class="app-menu-pill" href="blog.html">Leggi il blog</a><button class="app-menu-pill" type="button" data-app-menu-action="map">Esplora la mappa interattiva</button><button class="app-menu-pill" type="button" data-app-menu-action="ai">Parla con Captain Gull</button><a class="app-menu-pill" href="mailto:5terrego.info@gmail.com?subject=Contatto%205TerreGo">Contattaci</a></nav><div class="app-menu-legal-links" aria-label="Link legali"><a class="app-menu-legal-link" href="privacy.html">Privacy</a><span aria-hidden="true">·</span><a class="app-menu-legal-link" href="cookie.html">Cookie</a><span aria-hidden="true">·</span><a class="app-menu-legal-link" href="terms.html">Termini</a><span aria-hidden="true">·</span><a class="app-menu-legal-link" href="copyright.html">Copyright</a></div></div></div>
-  </div>
-  <div class="search-wrap"><input id="search" placeholder="Cerca ovunque nel sito" autocomplete="off" /><div id="search-results"></div></div>
-  <div class="tour-top-actions"><button id="tour-recenter-top" type="button">Recenter</button><button id="tour-exit-top" type="button">Exit tour</button></div>
-</div>
+<script>
+window.FTG_ACTIONBAR_CONFIG = {
+  activePage: 'home',
+  isLoggedIn: false,
+  userName: 'Utente',
+  aiTitle: 'Captain Gull',
+  aiSubtitle: '5TerreGo',
+  aiWelcome: 'Benvenuto su 5TerreGo. Posso aiutarti con borghi, sentieri, meteo, luoghi utili e storie locali.',
+  pages: {
+    map: { label: 'Mappa', emoji: '🗺️', href: '#map' },
+    home: { label: 'Home', emoji: '🏠', href: '#site-welcome-section' },
+    guide: { label: 'Guide', emoji: '📖', href: 'blog.html' },
+    profile: { label: 'More', emoji: '', href: '#profile', drawer: true, iconType: 'grid' }
+  },
+  profileLinks: [
+    { label: 'Mi piace', href: '#likes' },
+    { label: 'Le mie experience', href: '#experiences' },
+    { label: 'Modifica profilo', href: 'profile.html' },
+    { label: 'Preferenze', href: '#preferences' }
+  ],
+  legalLinks: [
+    { label: 'Privacy', href: 'privacy.html' },
+    { label: 'Policy', href: 'cookie.html' }
+  ],
+  languages: [
+    { code: 'it', label: '🇮🇹 Italiano' },
+    { code: 'en', label: '🇬🇧 English' },
+    { code: 'fr', label: '🇫🇷 Français' },
+    { code: 'de', label: '🇩🇪 Deutsch' }
+  ],
+  language: 'it',
+  onNavigate: function(pageId, page) {
+    if (pageId === 'map') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (pageId === 'home') {
+      var hero = document.getElementById('site-welcome-section');
+      if (hero) hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (page && page.href && page.href.charAt(0) === '#') {
+      var target = document.querySelector(page.href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+    if (page && page.href) window.location.href = page.href;
+  },
+  onLoginClick: function() {
+    var loginBtn = document.getElementById('login');
+    if (loginBtn) {
+      loginBtn.click();
+      return;
+    }
+    window.location.href = 'profile.html';
+  },
+  onOpenPreferences: function() {
+    window.location.href = 'profile.html';
+  },
+  onLanguageChange: function(nextLanguage) {
+    if (window.FTG_I18N && typeof window.FTG_I18N.setLanguage === 'function') {
+      window.FTG_I18N.setLanguage(nextLanguage, { source: 'global-actionbar' });
+    }
+  }
+};
+</script>
+<div id="ftg-global-actionbar-host"></div>
 <div id="weather" style="display:none">--</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1941,155 +2002,31 @@
 }());
 </script>
 
-<!-- FLOATING AI CHAT -->
-<style>
-  #ai-chat-btn { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 3000; width: 72px; height: 72px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.78); overflow: hidden; cursor: pointer; box-shadow: 0 18px 42px rgba(0,0,0,0.24); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); transition: left 0.42s cubic-bezier(.2,.9,.2,1), right 0.42s cubic-bezier(.2,.9,.2,1), bottom 0.42s cubic-bezier(.2,.9,.2,1), transform 0.42s cubic-bezier(.2,.9,.2,1), box-shadow 0.22s ease; }
-  #ai-chat-btn:active { transform: scale(0.94); }
-  #ai-chat-btn video { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 0%; transform: scale(1.22); transform-origin: center center; pointer-events: none; background: transparent; }
-  #ai-chat-btn video::-webkit-media-controls { display: none !important; }
-  #ai-chat { position: fixed; left: 12px; right: 12px; top: calc(92px + env(safe-area-inset-top)); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 3000; width: auto; height: auto; display: none; flex-direction: column; overflow: hidden; border-radius: 26px; border: 1px solid rgba(255,255,255,0.34); background: rgba(255,255,255,0.78); box-shadow: 0 24px 70px rgba(0,0,0,0.28); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); color: #111; }
-  #ai-chat.ai-open { display: flex; }
-  .ai-head { padding: 14px 14px 12px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .ai-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
-  .ai-avatar { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; flex: 0 0 42px; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
-  .ai-avatar video { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 0%; transform: scale(1.22); transform-origin: center center; pointer-events: none; background: transparent; }
-  .ai-avatar video::-webkit-media-controls { display: none !important; }
-  .ai-title-wrap { min-width: 0; flex: 1; }
-  .ai-title { font-size: 15px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; color: #111; }
-  .ai-subtitle { margin-top: 3px; font-size: 12px; color: rgba(0,0,0,0.52); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
-  #ai-close { width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(0,0,0,0.07); color: #111; font-size: 18px; font-weight: 800; cursor: pointer; }
-  #ai-messages { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; overflow-y: auto; overflow-x: hidden; padding: 12px; font-size: 14px; line-height: 1.35; -webkit-overflow-scrolling: touch; }
-  .ai-msg { max-width: 84%; word-break: break-word; margin-bottom: 8px; padding: 10px 12px; border-radius: 18px; white-space: pre-line; }
-  .ai-msg.user { margin-left: auto; background: #111; color: #fff; border-bottom-right-radius: 6px; }
-  .ai-msg.bot { margin-right: auto; background: rgba(0,0,0,0.07); color: #111; border-bottom-left-radius: 6px; }
-  .ai-result-card { width: min(86%, 340px); margin: 0 auto 8px 0; padding: 11px; border-radius: 18px; background: rgba(255,255,255,0.76); border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 10px 24px rgba(0,0,0,0.08); color: #111; }
-  .ai-result-kicker { margin-bottom: 5px; font-size: 10px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,0.42); }
-  .ai-result-title { font-size: 15px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 950; margin-bottom: 8px; }
-  .ai-result-subtitle { margin-top: -3px; margin-bottom: 9px; font-size: 12px; line-height: 1.3; color: rgba(0,0,0,0.56); }
-  .ai-result-btn { border: 0; border-radius: 999px; padding: 8px 12px; background: #111; color: #fff; font-size: 12px; font-weight: 900; font-family: inherit; cursor: pointer; }
-  .ai-suggestions { display: flex; gap: 7px; padding: 0 12px 10px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .ai-suggestions::-webkit-scrollbar { display: none; }
-  .ai-suggestion { flex: 0 0 auto; border: 0; border-radius: 999px; padding: 8px 10px; background: rgba(0,0,0,0.07); color: #111; font-size: 12px; font-weight: 700; cursor: pointer; }
-  .ai-input-row { padding: 10px; display: flex; gap: 8px; border-top: 1px solid rgba(0,0,0,0.07); background: rgba(255,255,255,0.36); }
-  #ai-input { flex: 1; min-width: 0; max-width: 100%; border: 0; outline: 0; border-radius: 999px; background: rgba(0,0,0,0.07); color: #111; padding: 11px 13px; font-size: 15px; }
-  #ai-input::placeholder { color: rgba(0,0,0,0.44); }
-  #ai-send { width: 42px; height: 42px; border: 0; border-radius: 50%; background: #111; color: #fff; font-weight: 900; cursor: pointer; }
-  body.ai-chat-active .top-bar, body.ai-chat-active #ai-chat-btn, body.ai-chat-active .bottom-card { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
-</style>
-
-<button id="ai-chat-btn" type="button" aria-label="Open AI Guide"><video id="ai-mascot-video" autoplay muted loop playsinline preload="auto"><source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm"><source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm"><source src="mascotterelax.webm" type="video/webm"></video></button>
-<div id="ai-chat" aria-hidden="true">
-  <div class="ai-head"><div class="ai-head-left"><div class="ai-avatar"><video id="ai-header-video" autoplay muted loop playsinline preload="auto"><source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm"><source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm"><source src="mascotterelax.webm" type="video/webm"></video></div><div class="ai-title-wrap"><div class="ai-title">Captain Gull</div><div class="ai-subtitle">Your Cinque Terre guide</div></div></div><button id="ai-close" type="button" aria-label="Close AI">×</button></div>
-  <div id="ai-messages"></div>
-  <div class="ai-suggestions"><button class="ai-suggestion" type="button">what should I do today?</button><button class="ai-suggestion" type="button">best sunset?</button><button class="ai-suggestion" type="button">beaches and viewpoints?</button><button class="ai-suggestion" type="button">trails or ferry?</button></div>
-  <div class="ai-input-row"><input id="ai-input" placeholder="Ask the guide..." autocomplete="off" /><button id="ai-send" type="button">→</button></div>
-</div>
-
 <script>
 (function(){
-  function forceMascotVideos(){
-    ['ai-mascot-video','ai-header-video'].forEach(function(id){
-      var video = document.getElementById(id);
-      if (!video) return;
-      video.muted = true;
-      video.loop = true;
-      video.playsInline = true;
-      video.setAttribute('muted', '');
-      video.setAttribute('playsinline', '');
-      video.setAttribute('webkit-playsinline', '');
-      video.load();
-      var playPromise = video.play();
-      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(function(){});
+  var host = document.getElementById('ftg-global-actionbar-host');
+  if (!host) return;
+  fetch('global-actionbar.html')
+    .then(function(response){ return response.text(); })
+    .then(function(html){
+      host.innerHTML = html;
+      document.querySelectorAll('#ftg-global-actionbar-host script').forEach(function(oldScript){
+        var script = document.createElement('script');
+        if (oldScript.src) {
+          script.src = oldScript.src;
+        } else {
+          script.text = oldScript.textContent;
+        }
+        Array.prototype.slice.call(oldScript.attributes).forEach(function(attr){
+          if (attr.name !== 'src') script.setAttribute(attr.name, attr.value);
+        });
+        oldScript.parentNode.replaceChild(script, oldScript);
+      });
+    })
+    .catch(function(error){
+      console.error('Unable to load global-actionbar.html', error);
     });
-  }
-  forceMascotVideos();
-  window.addEventListener('load', forceMascotVideos);
-  document.addEventListener('touchstart', forceMascotVideos, { passive: true, once: true });
-  document.addEventListener('click', forceMascotVideos, { passive: true, once: true });
-  var btn = document.getElementById('ai-chat-btn');
-  var panel = document.getElementById('ai-chat');
-  var input = document.getElementById('ai-input');
-  var send = document.getElementById('ai-send');
-  var closeBtn = document.getElementById('ai-close');
-  var messages = document.getElementById('ai-messages');
-  var suggestions = Array.prototype.slice.call(document.querySelectorAll('.ai-suggestion'));
-  var hasWelcomed = false;
-  var lastAIIntent = '';
-  var lastAIPlace = '';
-  var lastAIAnswer = '';
-  var lastAITopic = '';
-  var pendingAICards = [];
-  var AI_TRAINING_KEY = '5terrego_ai_training';
-  var AI_TRAINING = [
-    { q: 'monterosso vernazza piedi sentiero trail walk', a: 'Yes. You can walk from Monterosso to Vernazza on the Blue Trail. Plan about 1h30–2h, wear comfortable shoes and always check that the section is open before starting.' },
-    { q: 'vernazza monterosso piedi sentiero trail walk', a: 'Yes, you can also walk from Vernazza to Monterosso. It is panoramic but has climbs, so bring water and check the trail status first.' },
-    { q: 'manarola tramonto sunset', a: 'For sunset in Manarola, go toward the viewpoint above the small harbour. It is one of the most iconic viewpoints in the Cinque Terre.' },
-    { q: 'riomaggiore manarola piedi via dell amore trail walk', a: "Between Riomaggiore and Manarola, the historic route is Via dell'Amore. Always check opening status and ticket rules before going." },
-    { q: 'corniglia mare spiaggia beach sea', a: 'Corniglia is not directly at sea level like the other villages. It sits higher and feels more panoramic. For an easier beach day, Monterosso is usually the most practical choice.' },
-    { q: 'miglior borgo prima volta cinque terre first village', a: 'For a first visit, choose Vernazza or Manarola: they are scenic, easy to understand and perfect for photos and a short walk.' }
-  ];
-  function toggleChat(open){ var shouldOpen = typeof open === 'boolean' ? open : !panel.classList.contains('ai-open'); panel.classList.toggle('ai-open', shouldOpen); panel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true'); document.body.classList.toggle('ai-chat-active', shouldOpen); if (shouldOpen && !hasWelcomed) { hasWelcomed = true; addMessage('Hi, I’m Captain Gull. I can help you explore the Cinque Terre: villages, trails, ferries, beaches, viewpoints, stories, restaurants and practical ideas for today.', false, true); } }
-  window.openCaptainGullForPOI = function(poi){ var name = poi && poi.name ? String(poi.name) : 'POI'; var description = poi && poi.description && String(poi.description).trim().length > 0 ? String(poi.description).trim() : 'No description available.'; panel.classList.add('ai-open'); panel.setAttribute('aria-hidden', 'false'); document.body.classList.add('ai-chat-active'); messages.innerHTML = ''; hasWelcomed = true; addMessage(name + String.fromCharCode(10) + String.fromCharCode(10) + description, false, true); };
-  function typeMessage(div, text, keepTop) { var fullText = String(text || ''), index = 0, speed = fullText.length > 260 ? 7 : 14; div.innerText = ''; function step() { index += 1; div.innerText = fullText.slice(0, index); messages.scrollTop = keepTop ? 0 : messages.scrollHeight; if (index < fullText.length) window.setTimeout(step, speed); } step(); }
-  function addMessage(text, isUser, keepTop, instant){ var div = document.createElement('div'); div.className = 'ai-msg ' + (isUser ? 'user' : 'bot'); if (!isUser && window.FTG_I18N && typeof window.FTG_I18N.translateText === 'function') text = window.FTG_I18N.translateText(text); messages.appendChild(div); if (instant || isUser) { div.innerText = text; if (keepTop) { requestAnimationFrame(function(){ messages.scrollTop = 0; }); return div; } messages.scrollTop = messages.scrollHeight; return div; } typeMessage(div, text, keepTop); return div; }
-  function normalizeText(value){ var text = String(value || '').toLowerCase().normalize('NFD'), output = '', lastWasSpace = false, i, code, ch; for (i = 0; i < text.length; i += 1) { ch = text.charAt(i); code = text.charCodeAt(i); if (code >= 768 && code <= 879) continue; if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) { output += ch; lastWasSpace = false; } else if (!lastWasSpace) { output += ' '; lastWasSpace = true; } } return output.trim(); }
-  function readSavedTraining(){ try { return JSON.parse(localStorage.getItem(AI_TRAINING_KEY) || '[]'); } catch (error) { return []; } }
-  function getAllTraining(){ return AI_TRAINING.concat(readSavedTraining()); }
-  function countTrainingScore(question, trainingQuestion){ var q = normalizeText(question), tq = normalizeText(trainingQuestion), words = tq.split(' '), score = 0; words.forEach(function(word){ if (word.length >= 3 && q.indexOf(word) !== -1) score += 1; }); return score; }
-  function findTrainingAnswer(question){ var all = getAllTraining(), best = null, bestScore = 0; all.forEach(function(item){ var score = countTrainingScore(question, item.q); if (score > bestScore) { bestScore = score; best = item; } }); if (best && bestScore >= 2) return best.a; return ''; }
-  function getAIData(){ var api = window.fiveTerreGoAI; return { places: api && typeof api.getPlaces === 'function' ? api.getPlaces() : [], pois: api && typeof api.getPOIs === 'function' ? api.getPOIs() : [], trails: api && typeof api.getTrails === 'function' ? api.getTrails() : [], articles: api && typeof api.getArticles === 'function' ? api.getArticles() : [], ferryPorts: api && typeof api.getFerryPorts === 'function' ? api.getFerryPorts() : [], ferryTimetable: api && typeof api.getFerryTimetable === 'function' ? api.getFerryTimetable() : [], nextFerries: api && typeof api.getNextFerries === 'function' ? api.getNextFerries() : [], weatherText: api && typeof api.getWeatherText === 'function' ? api.getWeatherText() : '', italyTime: api && typeof api.getItalyTime === 'function' ? api.getItalyTime() : '' }; }
-  function getNearestPOIsForPlace(place, pois, limit){ var api = window.fiveTerreGoAI; var measure = api && typeof api.distanceMeters === 'function' ? api.distanceMeters : null; return (pois || []).filter(function(poi){ return poi && poi.name && Array.isArray(poi.coords); }).map(function(poi){ return { poi: poi, distance: measure ? measure(place.coords, poi.coords) : 999999 }; }).filter(function(item){ return item.distance <= 1100; }).sort(function(a,b){ return a.distance - b.distance; }).slice(0, limit || 4).map(function(item){ return item.poi; }); }
-  function wantsTour(q){ return q.indexOf('tour') !== -1 || q.indexOf('giro guidato') !== -1 || q.indexOf('visita guidata') !== -1 || q.indexOf('itinerario guidato') !== -1; }
-  function wantsTrails(q){ return q.indexOf('sentier') !== -1 || q.indexOf('trail') !== -1 || q.indexOf('trek') !== -1 || q.indexOf('cammin') !== -1; }
-  function wantsFerry(q){ return q.indexOf('traghett') !== -1 || q.indexOf('battell') !== -1 || q.indexOf('ferry') !== -1 || q.indexOf('barca') !== -1; }
-  function wantsBeach(q){ return q.indexOf('spiagg') !== -1 || q.indexOf('mare') !== -1 || q.indexOf('bagno') !== -1 || q.indexOf('beach') !== -1; }
-  function wantsSunset(q){ return q.indexOf('tramonto') !== -1 || q.indexOf('tramonta') !== -1 || q.indexOf('sole') !== -1 || q.indexOf('sunset') !== -1 || q.indexOf('sera') !== -1; }
-  function wantsWeather(q){ return q.indexOf('meteo') !== -1 || q.indexOf('tempo') !== -1 || q.indexOf('pioggia') !== -1 || q.indexOf('temperatura') !== -1 || q.indexOf('weather') !== -1; }
-  function hasAIWord(q, word){ return (' ' + String(q || '') + ' ').indexOf(' ' + word + ' ') !== -1; }
-  function wantsStories(q){ return q.indexOf('storie') !== -1 || q.indexOf('stories') !== -1 || q.indexOf('articol') !== -1 || q.indexOf('blog') !== -1 || hasAIWord(q, 'post') || q.indexOf('leggere') !== -1; }
-  function scoreArticleForQuestion(article, q){ var haystack = normalizeText((article.title || '') + ' ' + (article.excerpt || '') + ' ' + (article.meta || '')); var score = 0; q.split(' ').forEach(function(word){ if (word.length >= 4 && haystack.indexOf(word) !== -1) score += 2; }); if ((q.indexOf('tramonto') !== -1 || q.indexOf('tramonta') !== -1 || q.indexOf('sunset') !== -1 || q.indexOf('sole') !== -1) && (haystack.indexOf('tramonto') !== -1 || haystack.indexOf('sunset') !== -1 || haystack.indexOf('sole') !== -1)) score += 8; if ((q.indexOf('vernazza') !== -1 || q.indexOf('manarola') !== -1 || q.indexOf('riomaggiore') !== -1 || q.indexOf('monterosso') !== -1 || q.indexOf('corniglia') !== -1) && haystack.indexOf(q.split(' ').find(function(w){ return ['vernazza','manarola','riomaggiore','monterosso','corniglia'].indexOf(w) !== -1; }) || '___') !== -1) score += 5; return score; }
-  function asksFerryTime(q){ return wantsFerry(q) && (q.indexOf('ora') !== -1 || q.indexOf('orari') !== -1 || q.indexOf('quando') !== -1 || q.indexOf('prossim') !== -1 || q.indexOf('parte') !== -1 || q.indexOf('depart') !== -1); }
-  function asksPOIData(q){ return q.indexOf('poi') !== -1 || q.indexOf('cosa vedere') !== -1 || q.indexOf('vicino') !== -1 || q.indexOf('viewpoint') !== -1 || q.indexOf('panoram') !== -1 || q.indexOf('spot') !== -1 || q.indexOf('posto') !== -1 || q.indexOf('luogo') !== -1 || q.indexOf('vederlo') !== -1 || q.indexOf('monument') !== -1 || q.indexOf('chiesa') !== -1 || q.indexOf('ristorant') !== -1; }
-  function asksSunsetSpot(q){ return (wantsSunset(q) || lastAIIntent === 'sunset' || lastAITopic.indexOf('sunset') !== -1) && (q.indexOf('spot') !== -1 || q.indexOf('posto') !== -1 || q.indexOf('punto') !== -1 || q.indexOf('viewpoint') !== -1 || q.indexOf('panoram') !== -1 || q.indexOf('vederlo') !== -1 || q.indexOf('dove') !== -1); }
-  function isPlaceOnlyFollowup(q, place){ if (!place || !q) return false; return normalizeText(place.name) === q || q === 'a ' + normalizeText(place.name) || q === 'in ' + normalizeText(place.name) || q === 'da ' + normalizeText(place.name); }
-  function asksArrivalTime(q){ return q.indexOf('a che ora') !== -1 || q.indexOf('che ora') !== -1 || q.indexOf('quando') !== -1 || q.indexOf('quanto prima') !== -1 || q.indexOf('arrivare') !== -1 || q.indexOf('orario') !== -1; }
-  function asksSunsetTime(q){ return wantsSunset(q) && (q.indexOf('a che ora') !== -1 || q.indexOf('che ora') !== -1 || q.indexOf('orario') !== -1 || q.indexOf('sara') !== -1 || q.indexOf('tramonta') !== -1 || q.indexOf('domani') !== -1 || q.indexOf('oggi') !== -1); }
-  function getItalyDateOffset(offsetDays){ var now = new Date(); var italyParts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now); var out = {}; italyParts.forEach(function(part){ if (part.type !== 'literal') out[part.type] = part.value; }); return new Date(Date.UTC(Number(out.year), Number(out.month) - 1, Number(out.day) + Number(offsetDays || 0), 12, 0, 0)); }
-  function getDayOfYear(date){ var start = new Date(Date.UTC(date.getUTCFullYear(), 0, 0)); return Math.floor((date - start) / 86400000); }
-  function padTimeNumber(value){ return String(Math.floor(value)).padStart(2, '0'); }
-  function formatSunTimeLocal(decimalHour){ var h = Math.floor(decimalHour); var m = Math.round((decimalHour - h) * 60); if (m >= 60) { h += 1; m -= 60; } while (h < 0) h += 24; h = h % 24; return padTimeNumber(h) + ':' + padTimeNumber(m); }
-  function getItalyUtcOffsetHours(date){ var dtf = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Rome', timeZoneName: 'shortOffset', hour: '2-digit' }); var part = dtf.formatToParts(date).find(function(item){ return item.type === 'timeZoneName'; }); var match = part && part.value ? part.value.match(/GMT([+-][0-9]+)/) : null; return match ? Number(match[1]) : 1; }
-  function calculateSunsetTime(date, lat, lng){ var zenith = 90.833; var N = getDayOfYear(date); var lngHour = lng / 15; var t = N + ((18 - lngHour) / 24); var M = (0.9856 * t) - 3.289; var L = M + (1.916 * Math.sin(M * Math.PI / 180)) + (0.020 * Math.sin(2 * M * Math.PI / 180)) + 282.634; L = ((L % 360) + 360) % 360; var RA = Math.atan(0.91764 * Math.tan(L * Math.PI / 180)) * 180 / Math.PI; RA = ((RA % 360) + 360) % 360; RA += (Math.floor(L / 90) * 90) - (Math.floor(RA / 90) * 90); RA = RA / 15; var sinDec = 0.39782 * Math.sin(L * Math.PI / 180); var cosDec = Math.cos(Math.asin(sinDec)); var cosH = (Math.cos(zenith * Math.PI / 180) - (sinDec * Math.sin(lat * Math.PI / 180))) / (cosDec * Math.cos(lat * Math.PI / 180)); if (cosH > 1 || cosH < -1) return ''; var H = Math.acos(cosH) * 180 / Math.PI; H = H / 15; var T = H + RA - (0.06571 * t) - 6.622; var UT = T - lngHour; return formatSunTimeLocal(UT + getItalyUtcOffsetHours(date)); }
-  function getSunsetTimeAnswer(q){ var isTomorrow = q.indexOf('domani') !== -1; var time = calculateSunsetTime(getItalyDateOffset(isTomorrow ? 1 : 0), 44.12, 9.71); var label = isTomorrow ? 'tomorrow' : 'today'; var hour; if (!time) return 'I can’t calculate the exact sunset time right now. As a practical rule, arrive 60–90 minutes before sunset.'; hour = Number(time.slice(0,2)) + Number(time.slice(3,5)) / 60; return 'Sunset ' + label + ' in the Cinque Terre is around ' + time + '. To enjoy it properly, arrive around ' + formatSunTimeLocal(hour - 1.25) + ' / ' + formatSunTimeLocal(hour - 1) + ', especially if you go to Manarola or Vernazza.'; }
-  function inferAITopicFromText(q){ if (wantsSunset(q)) return 'sunset tramonto sole'; if (wantsBeach(q)) return 'beach spiaggia mare'; if (wantsTrails(q)) return 'trail sentiero trekking'; if (wantsFerry(q)) return 'ferry traghetto battello'; if (wantsWeather(q)) return 'weather meteo'; return ''; }
-  function updateAIContext(intent, place, answer, question){ var q = normalizeText(question || answer || ''); var topic = inferAITopicFromText(q); lastAIIntent = intent || lastAIIntent || ''; lastAIPlace = place || lastAIPlace || ''; if (topic) lastAITopic = topic; if (intent === 'sunset') lastAITopic = 'sunset tramonto sole'; if (intent === 'beach') lastAITopic = 'beach spiaggia mare'; if (intent === 'trails') lastAITopic = 'trail sentiero trekking'; if (intent === 'ferry') lastAITopic = 'ferry traghetto battello'; lastAIAnswer = answer || ''; return answer; }
-  function getSunsetArrivalAnswer(){ return 'For sunset, arrive about 60–90 minutes early. For a calm photo in Manarola, 90 minutes is better; for Riomaggiore or Vernazza, allow at least 45–60 minutes. In high season, go even earlier because viewpoints fill up quickly.'; }
-  function formatNames(items, fallback){ items = (items || []).filter(Boolean).slice(0, 5); if (!items.length) return fallback || 'I do not have loaded data yet'; return items.map(function(item){ return item.name || item.title || ''; }).filter(Boolean).join(', '); }
-  function clearAICards(){ pendingAICards = []; }
-  function queueAICard(kind, item){ if (!item) return; pendingAICards.push({ kind: kind, title: item.name || item.title || 'Result', subtitle: item.description || item.excerpt || item.meta || '', url: item.url || '', name: item.name || item.title || '' }); }
-  function queueAICards(kind, items, limit){ (items || []).slice(0, limit || 3).forEach(function(item){ queueAICard(kind, item); }); }
-  function getAICardKindLabel(kind){ if (kind === 'poi') return 'POI'; if (kind === 'trail') return 'Trail'; if (kind === 'article') return 'Article'; return 'Result'; }
-  function addAICards(){ var cards = pendingAICards.slice(); pendingAICards = []; cards.forEach(function(card){ var div = document.createElement('div'); div.className = 'ai-result-card'; var cardButtonLabel = window.FTG_I18N && typeof window.FTG_I18N.translateText === 'function' ? window.FTG_I18N.translateText('View') : 'View'; div.innerHTML = '<div class="ai-result-kicker">' + escapeCardHTML(getAICardKindLabel(card.kind)) + '</div><div class="ai-result-title">' + escapeCardHTML(card.title) + '</div>' + (card.subtitle ? '<div class="ai-result-subtitle">' + escapeCardHTML(cleanAIDescription(card.subtitle, 92)) + '</div>' : '') + '<button class="ai-result-btn" type="button" data-ai-card-kind="' + escapeCardHTML(card.kind) + '" data-ai-card-name="' + escapeCardHTML(card.name) + '" data-ai-card-url="' + escapeCardHTML(card.url) + '">' + escapeCardHTML(cardButtonLabel) + '</button>'; messages.appendChild(div); messages.scrollTop = messages.scrollHeight; }); }
-  function escapeCardHTML(value){ return String(value || '').replace(/[&<>"]/g, function(char){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]; }); }
-  function formatNextFerries(rows){ rows = (rows || []).slice(0, 4); if (!rows.length) return 'I do not see upcoming departures loaded in the ferry timetable right now.'; return rows.map(function(row){ return (row.scheduled_time || '--:--') + ' · ' + (row.port_name || 'port') + (row.direction ? ' · ' + row.direction : ''); }).join(String.fromCharCode(10)); }
-  function getWeatherAnswer(data){ var weather = data.weatherText && data.weatherText !== '--' ? data.weatherText : ''; if (!weather) return 'I can read the Open-Meteo data, but I do not see a weather value loaded on the map yet. Try again in a few seconds.'; return 'Weather now in the Cinque Terre: ' + weather + '. This is the same Open-Meteo data used by the map.'; }
-  function cleanAIDescription(value, maxChars){ var text = String(value || '').trim(); while (text.indexOf('  ') !== -1) text = text.replace('  ', ' '); if (!text) return ''; if (text.length <= (maxChars || 180)) return text; return text.slice(0, maxChars || 180).split(' ').slice(0, -1).join(' ') + '…'; }
-  function getPOITypeLabel(poi){ var type = String(poi && poi.type || '').toLowerCase(); if (type === 'punto panoramico') return 'viewpoint'; if (type === 'monumento') return 'monument'; if (type === 'spiaggia') return 'beach'; if (type === 'chiesa') return 'church'; if (type === 'ristorante' || type === 'bar') return 'food'; if (type === 'ferry') return 'ferry'; return type || 'POI'; }
-  function formatPOIWithDescription(poi){ var desc = cleanAIDescription(poi && poi.description, 170); return (poi && poi.name ? poi.name : 'POI') + ' · ' + getPOITypeLabel(poi) + (desc ? String.fromCharCode(10) + desc : String.fromCharCode(10) + 'Description not added yet.'); }
-  function getPOIAnswer(data, place){ var pois = data.pois || []; var filtered = pois; if (place) filtered = getNearestPOIsForPlace(place, pois, 6); if (!filtered.length) return 'I do not see loaded POIs' + (place ? ' near ' + place.name : '') + ' right now.'; queueAICards('poi', filtered, 4); return (place ? 'Near ' + place.name + ', I see these POIs from the map:' : 'I see these POIs from the map:') + String.fromCharCode(10) + String.fromCharCode(10) + filtered.slice(0, 4).map(formatPOIWithDescription).join(String.fromCharCode(10) + String.fromCharCode(10)); }
-  function getSunsetSpotAnswer(data, place){ var pois = data.pois || []; var candidates; if (!place && lastAIPlace) place = data.places.find(function(p){ return normalizeText(p.name) === normalizeText(lastAIPlace); }) || null; if (!place) return 'For sunset, choose Manarola for the most iconic view, or Vernazza around the castle/harbour side. Tell me a village and I’ll suggest a precise point from the map.'; candidates = getNearestPOIsForPlace(place, pois, 12).filter(function(poi){ var type = String(poi.type || '').toLowerCase(); var name = normalizeText(poi.name || ''); return type === 'punto panoramico' || type === 'monumento' || type === 'curiosity' || name.indexOf('view') !== -1 || name.indexOf('panoram') !== -1 || name.indexOf('castle') !== -1 || name.indexOf('doria') !== -1 || name.indexOf('harbor') !== -1 || name.indexOf('porto') !== -1; }); if (!candidates.length) candidates = getNearestPOIsForPlace(place, pois, 4); if (!candidates.length) return 'For ' + place.name + ', I do not see enough described POIs on the map yet. Add a viewpoint or monument and Captain Gull will use that description.'; queueAICards('poi', candidates, 3); return 'For sunset in ' + place.name + ', I recommend:' + String.fromCharCode(10) + String.fromCharCode(10) + candidates.slice(0, 3).map(formatPOIWithDescription).join(String.fromCharCode(10) + String.fromCharCode(10)) + String.fromCharCode(10) + String.fromCharCode(10) + 'Arrive 60–90 minutes early if you want space and calm photos.'; }
-  function getTrailDataAnswer(data){ var trails = data.trails || []; if (!trails.length) return 'Non vedo ancora sentieri disponibili in questa pagina.'; queueAICards('trail', trails, 5); return 'I can read the trails and their data. Right now I see: ' + trails.slice(0, 5).map(function(trail){ return (trail.name || 'Trail') + ' · ' + (trail.distance_km ? trail.distance_km + ' km' : 'distance n/a') + ' · ' + (trail.estimated_duration || trail.difficulty || 'time n/a'); }).join(String.fromCharCode(10)); }
-  function getArticleAnswer(data, question){ var articles = data.articles || []; var q = normalizeText(question || ''); var contextualQ; var ranked; if (!articles.length) return 'Non vedo ancora storie disponibili in questa pagina.'; contextualQ = q + ' ' + (lastAITopic || '') + ' ' + (lastAIPlace || ''); ranked = articles.map(function(article){ return { article: article, score: scoreArticleForQuestion(article, contextualQ) }; }).sort(function(a, b){ return b.score - a.score; }); if (ranked[0] && ranked[0].score > 0) articles = ranked.filter(function(item){ return item.score > 0; }).map(function(item){ return item.article; }); queueAICards('article', articles, 5); return 'Yes. Staying on the topic we were discussing, in Stories I suggest:' + String.fromCharCode(10) + String.fromCharCode(10) + articles.slice(0, 5).map(function(article){ return article.title || 'Articolo'; }).join(String.fromCharCode(10)); }
-  function simpleAI(question){ clearAICards(); var data = getAIData(); var q = normalizeText(question); var trained = findTrainingAnswer(question); var place = data.places.find(function(p){ return q.indexOf(normalizeText(p.name)) !== -1; }); var pois = data.pois || []; var trails = data.trails || []; var nearby; var answer; if (trained) return updateAIContext('trained', place ? place.name : '', trained, question); if (place && isPlaceOnlyFollowup(q, place) && (lastAIIntent === 'sunset' || lastAITopic.indexOf('sunset') !== -1)) return updateAIContext('sunset', place.name, getSunsetSpotAnswer(data, place), question); if (wantsStories(q)) return updateAIContext('article', place ? place.name : lastAIPlace, getArticleAnswer(data, question), question); if (asksSunsetTime(q)) return updateAIContext('sunset', place ? place.name : lastAIPlace, getSunsetTimeAnswer(q), question); if (asksSunsetSpot(q)) return updateAIContext('sunset', place ? place.name : lastAIPlace, getSunsetSpotAnswer(data, place), question); if (wantsWeather(q)) return updateAIContext('weather', place ? place.name : '', getWeatherAnswer(data), question); if (asksFerryTime(q)) return updateAIContext('ferry', place ? place.name : '', 'Next ferries I see in the timetable:' + String.fromCharCode(10) + formatNextFerries(data.nextFerries)); if (wantsTrails(q) && (q.indexOf('dati') !== -1 || q.indexOf('lista') !== -1 || q.indexOf('quali') !== -1 || q.indexOf('quanto') !== -1)) return updateAIContext('trails', place ? place.name : '', getTrailDataAnswer(data)); if (asksPOIData(q)) return updateAIContext('poi', place ? place.name : '', getPOIAnswer(data, place)); if (asksArrivalTime(q) && lastAIIntent === 'sunset') return updateAIContext('sunset', lastAIPlace, getSunsetArrivalAnswer()); if (wantsTour(q)) return updateAIContext('tour', place ? place.name : '', 'Yes, you can use the guided function from the village card. You can also ask me anything: I can help with places, trails, ferries, beaches, viewpoints and ideas for the day.'); if (wantsTrails(q)) { answer = 'For trails, I can help you choose by difficulty, distance and area. Right now the map shows: ' + formatNames(trails, 'no trails loaded') + '. You can also use the Trails filter on the map.'; return updateAIContext('trails', place ? place.name : '', answer); } if (wantsFerry(q)) { answer = 'For ferries, I can help with ferry stops, routes and connections visible on the map. Use the Ferry filter or ask me about a specific village, for example “ferries from Vernazza”.'; return updateAIContext('ferry', place ? place.name : '', answer); } if (wantsBeach(q)) { answer = 'For beaches and the sea: Monterosso is the easiest choice for a beach day. Riomaggiore and Manarola are more scenic but less comfortable for lying on the beach. I can also open the beach POIs saved on the map.'; return updateAIContext('beach', place ? place.name : '', answer); } if (wantsSunset(q)) { answer = 'For sunset, choose Manarola for the most iconic view, Riomaggiore for a more intimate atmosphere, or Vernazza for harbour colours. Arrive about 60–90 minutes early, especially in high season.'; return updateAIContext('sunset', place ? place.name : '', answer); } if (place) { nearby = getNearestPOIsForPlace(place, pois, 4); answer = place.name + ': ' + (place.description || 'Cinque Terre village.') + String.fromCharCode(10) + String.fromCharCode(10) + 'Nearby you can look for: ' + formatNames(nearby, 'viewpoints, beaches, churches, monuments and restaurants saved on the map') + '.' + String.fromCharCode(10) + String.fromCharCode(10) + 'I can help you choose what to see, where to go for sunset, whether to use a trail or ferry, or open a point on the map.'; return updateAIContext('place', place.name, answer); } if (asksArrivalTime(q) && lastAIIntent) { if (lastAIIntent === 'sunset') return updateAIContext('sunset', lastAIPlace, getSunsetArrivalAnswer()); return updateAIContext(lastAIIntent, lastAIPlace, 'It depends on what you want to do. To avoid rushing and crowds, allow at least 45–60 minutes; for photos or sunset, 60–90 minutes is better.'); } answer = 'Tell me what you are interested in: villages, trails, ferries, beaches, viewpoints, restaurants, stories, or a sample day in the Cinque Terre.'; return updateAIContext('general', '', answer); }
-  async function handleSend(textFromButton){ var text = String(textFromButton || input.value || '').trim(); var reply; if(!text) return; addMessage(text, true); input.value = ''; addMessage('Typing...', false, false, true); reply = simpleAI(text); if (messages.lastChild && messages.lastChild.innerText === 'Typing...') messages.removeChild(messages.lastChild); window.setTimeout(function(){ addMessage(reply, false); window.setTimeout(addAICards, Math.min(900, Math.max(220, String(reply || '').length * 9))); }, 120); }
-  btn.addEventListener('click', function(){ if (window.currentFiveTerrePOI && typeof window.openCaptainGullForPOI === 'function') { window.openCaptainGullForPOI(window.currentFiveTerrePOI); return; } toggleChat(); });
-  closeBtn.addEventListener('click', function(){ toggleChat(false); });
-  send.addEventListener('click', function(){ handleSend(); });
-  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') handleSend(); });
-  suggestions.forEach(function(button){ button.addEventListener('click', function(){ handleSend(button.innerText); }); });
-  messages.addEventListener('click', function(event){ var button = event.target.closest('[data-ai-card-kind]'); var kind; var name; var url; var api; if (!button) return; kind = button.getAttribute('data-ai-card-kind'); name = button.getAttribute('data-ai-card-name'); url = button.getAttribute('data-ai-card-url'); api = window.fiveTerreGoAI; if (kind === 'article') { window.location.href = url || 'blog.html'; return; } toggleChat(false); window.setTimeout(function(){ if (kind === 'poi' && api && typeof api.focusPOI === 'function') api.focusPOI(name); if (kind === 'trail' && api && typeof api.focusTrail === 'function') api.focusTrail(name); }, 80); });
 }());
 </script>
-
 </body>
 </html>
