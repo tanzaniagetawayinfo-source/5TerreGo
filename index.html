@@ -745,6 +745,7 @@
       grid-template-rows: auto auto;
       align-content: start;
       gap: 16px;
+      padding-top: 10px;
       padding-bottom: 2px !important;
     }
     #site-stories-section .site-guide-topline {
@@ -754,7 +755,8 @@
       gap: 10px;
       width: fit-content;
       margin: 0;
-      padding-bottom: 2px;
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
     #site-stories-section .site-guide-search {
       position: relative;
@@ -798,19 +800,17 @@
       font-weight: 750;
     }
     #site-stories-section .site-guide-topline .site-feature-step {
-      display: inline-flex !important;
-      align-items: center;
-      justify-content: center;
-      min-height: 28px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.86);
-      font-size: 11px;
+      display: block !important;
+      min-height: auto;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      color: rgba(255,255,255,.70);
+      font-size: 18px;
       line-height: 1;
       font-weight: 950;
-      letter-spacing: .04em;
+      letter-spacing: -.03em;
       white-space: nowrap;
     }
     #site-stories-section .site-guide-topline .site-feature-kicker {
@@ -1087,8 +1087,8 @@
       overflow: hidden;
     }
     .site-guide-rail-default .site-guide-mini-card.is-leading {
-      height: 190px;
-      min-height: 190px;
+      height: 212px;
+      min-height: 212px;
       background: rgba(255,255,255,.14);
       border-color: rgba(255,255,255,.18);
       box-shadow: 0 22px 44px rgba(0,0,0,.18);
@@ -1153,9 +1153,9 @@
         gap: 8px;
       }
       #site-stories-section .site-guide-topline .site-feature-step {
-        min-height: 26px;
-        padding: 5px 9px;
-        font-size: 10px;
+        min-height: auto;
+        padding: 0;
+        font-size: 17px;
       }
       #site-stories-section .site-guide-topline .site-feature-kicker {
         font-size: 17px;
@@ -1199,8 +1199,8 @@
         grid-template-rows: 74px minmax(0, 1fr);
       }
       .site-guide-rail-default .site-guide-mini-card.is-leading {
-        height: 177px;
-        min-height: 177px;
+        height: 198px;
+        min-height: 198px;
       }
       .site-guide-rail.site-guide-rail-default {
         padding-right: calc(100% - min(66vw, 214px));
@@ -2186,7 +2186,7 @@
         <section id="site-stories-section" class="site-feature-section dark story-guide-section" aria-label="Stories section">
           <div class="site-guide-page-shell">
             <div class="site-feature-cover site-guide-page-head">
-              <div class="site-feature-label-row site-guide-topline"><span class="site-feature-step" id="site-guide-step">1/1</span><div class="site-feature-kicker">Free Guide</div></div>
+              <div class="site-feature-label-row site-guide-topline"><span class="site-feature-step" id="site-guide-step">1</span><div class="site-feature-kicker">Free Guide</div></div>
               <div class="site-guide-search"><div class="site-guide-search-field"><input id="site-guide-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search articles" aria-label="Search guide articles"></div></div>
             </div>
             <div id="site-story-list" class="site-guide-page-content"></div>
@@ -2667,7 +2667,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     if (!step) return;
     if (filters.indexOf(currentSiteGuideFilter) === -1) currentSiteGuideFilter = 'all';
     index = Math.max(0, filters.indexOf(currentSiteGuideFilter));
-    step.textContent = String(index + 1) + '/' + String(filters.length || 1);
+    step.textContent = String(index + 1);
   }
 
   function getGuideCountLabel(count) {
