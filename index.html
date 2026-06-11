@@ -154,99 +154,19 @@
     .site-view-panel.ftg-section-paging .ftg-page-frame { position: absolute; left: 0; right: 0; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; display: flex; align-items: flex-start; justify-content: flex-start; padding: 0 14px calc(104px + env(safe-area-inset-bottom)); overflow: hidden; }
     .site-view-panel.ftg-section-paging .ftg-page-shell { width: 100%; max-width: 100%; max-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); display: flex; align-items: flex-start; justify-content: flex-start; overflow: visible; }
     .site-view-panel.ftg-section-paging #site-welcome-section { margin: 0 !important; width: 100%; }
-    .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content { width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; min-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); padding-top: 0; }
-    .site-view-panel.ftg-section-paging #site-stories-section,
-    .site-view-panel.ftg-section-paging #site-places-section,
-    .site-view-panel.ftg-section-paging #site-experiences-section,
-    .site-view-panel.ftg-section-paging #site-trails-section,
-    .site-view-panel.ftg-section-paging .site-weather-section,
-    .site-view-panel.ftg-section-paging #site-official-communications-section,
-    .site-view-panel.ftg-section-paging .site-footer { position: relative; margin: 0 !important; width: 100%; max-width: 100%; padding-top: 18px; }
-    .site-view-panel.ftg-section-paging #site-stories-section,
-    .site-view-panel.ftg-section-paging #site-places-section,
-    .site-view-panel.ftg-section-paging #site-experiences-section,
-    .site-view-panel.ftg-section-paging #site-trails-section,
-    .site-view-panel.ftg-section-paging .site-weather-section,
-    .site-view-panel.ftg-section-paging #site-official-communications-section { display: flex; flex-direction: column; justify-content: flex-start; }
-    .site-view-panel.ftg-section-paging .site-feature-stack { display: contents !important; }
-    .site-view-panel.ftg-section-paging .site-feature-section,
-    .site-view-panel.ftg-section-paging .site-places-section,
-    .site-view-panel.ftg-section-paging .site-weather-section,
-    .site-view-panel.ftg-section-paging .site-official-section { overflow: visible !important; }
-    .site-view-panel.ftg-section-paging .site-article-slider,
-    .site-view-panel.ftg-section-paging #site-pois,
-    .site-view-panel.ftg-section-paging #site-trails,
-    .site-view-panel.ftg-section-paging #site-official-list,
-    .site-view-panel.ftg-section-paging .site-weather-hourly-strip { scrollbar-width: none; }
-    .site-view-panel.ftg-section-paging .site-article-slider::-webkit-scrollbar,
-    .site-view-panel.ftg-section-paging #site-pois::-webkit-scrollbar,
-    .site-view-panel.ftg-section-paging #site-trails::-webkit-scrollbar,
-    .site-view-panel.ftg-section-paging #site-official-list::-webkit-scrollbar,
-    .site-view-panel.ftg-section-paging .site-weather-hourly-strip::-webkit-scrollbar { display: none; }
-    .site-view-panel.open { display: block; }
-    .site-view-inner { position: relative; z-index: 0; min-height: 100%; padding: 0; background: linear-gradient(180deg, rgba(14,57,82,.96) 0%, rgba(8,32,51,.98) 16%, #071424 42%, #071424 100%); }
-    .site-hero-section {
-      position: relative;
-      overflow: hidden;
-      min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      padding: 0;
-      border-radius: 0;
-      color: #fff;
-      background: transparent;
-      box-shadow: none;
-      isolation: isolate;
-    }
-    .site-hero-video-wrap {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100vw;
-      height: 50dvh;
-      overflow: hidden;
-      background: transparent;
-      z-index: 1;
-      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.92) 72%, rgba(0,0,0,.52) 86%, rgba(0,0,0,0) 100%);
-      mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.92) 72%, rgba(0,0,0,.52) 86%, rgba(0,0,0,0) 100%);
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-size: 100% 100%;
-      mask-size: 100% 100%;
-    }
-    .site-hero-video-wrap video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      object-position: center center;
-      background: transparent;
-    }
-    .site-hero-video-wrap::after {
-      content: none;
-    }
-    .site-view-panel.ftg-section-paging #site-welcome-section {
-      position: relative;
-      width: calc(100% + 28px);
-      margin: 0 -14px !important;
-      min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
-    }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
       position: absolute;
       left: 0;
       right: 0;
       top: 0;
-      height: 50dvh;
+      min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
       z-index: 3;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
       padding: 112px 22px 0;
-    }
-    .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
+    }me-section .site-view-title,
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
       position: relative;
       z-index: 3;
@@ -339,10 +259,11 @@
     }
     @media (max-width: 380px) {
       .site-hero-video-wrap {
-        height: 50dvh;
+        inset: 0;
+        height: 100%;
       }
       .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
-        height: 50dvh;
+        min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
         padding: 96px 20px 0;
       }
       .site-hero-quicknav {
