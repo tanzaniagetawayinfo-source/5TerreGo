@@ -1272,6 +1272,14 @@
   var officialCommunicationsLoaded = false;
   var sitePOIs = [];
   var sitePOIsLoaded = false;
+  var FALLBACK_SITE_POIS = [
+    { name: 'Belvedere di Manarola', type: 'punto panoramico', image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', location: 'Manarola' },
+    { name: 'Spiaggia di Monterosso', type: 'spiaggia', image: 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg', location: 'Monterosso' },
+    { name: 'Castello Doria', type: 'monumento', image: 'https://images.pexels.com/photos/1619569/pexels-photo-1619569.jpeg', location: 'Vernazza' },
+    { name: 'Stazione di Riomaggiore', type: 'station', image: 'https://images.pexels.com/photos/302428/pexels-photo-302428.jpeg', location: 'Riomaggiore' },
+    { name: 'Scalinata di Corniglia', type: 'curiosity', image: 'https://images.pexels.com/photos/1005417/pexels-photo-1005417.jpeg', location: 'Corniglia' },
+    { name: 'Marina di Vernazza', type: 'viewpoint', image: 'https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg', location: 'Vernazza' }
+  ];
   var siteTrails = [];
   var currentSitePOIFilter = 'all';
   var currentSitePOILocationFilter = 'all';
@@ -1541,16 +1549,25 @@
 
   async function loadPOIs() {
     var response;
+    var rows;
     sitePOIsLoaded = false;
     renderSitePOISection();
     if (!supabaseClient) {
-      sitePOIs = [];
+      sitePOIs = FALLBACK_SITE_POIS.map(normalizePOI).filter(function(poi){ return poi.name; });
       sitePOIsLoaded = true;
       renderSitePOISection();
       return;
     }
-    response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }).limit(200);
-    sitePOIs = ((response && response.data) || []).map(normalizePOI).filter(function(poi){ return poi.name; });
+    try {
+      response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }).limit(200);
+      rows = (response && response.data) || [];
+      sitePOIs = rows.map(normalizePOI).filter(function(poi){ return poi.name; });
+      if (!sitePOIs.length) {
+        sitePOIs = FALLBACK_SITE_POIS.map(normalizePOI).filter(function(poi){ return poi.name; });
+      }
+    } catch (error) {
+      sitePOIs = FALLBACK_SITE_POIS.map(normalizePOI).filter(function(poi){ return poi.name; });
+    }
     sitePOIsLoaded = true;
     renderSitePOISection();
   }
