@@ -201,6 +201,137 @@
       margin: 0;
       padding-left: 14px;
     }
+    .site-hero-search-wrap {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      margin-top: 16px;
+      padding: 0 12px;
+    }
+    .site-hero-search-field {
+      position: relative;
+    }
+    .site-hero-search-field::before {
+      content: '⌕';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      color: rgba(255,255,255,.58);
+      font-size: 18px;
+      font-weight: 800;
+      pointer-events: none;
+    }
+    #hero-universal-search-input {
+      width: 100%;
+      min-height: 46px;
+      padding: 12px 16px 12px 43px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: -.02em;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 12px 28px rgba(0,0,0,.12);
+      backdrop-filter: blur(14px) saturate(1.14);
+      -webkit-backdrop-filter: blur(14px) saturate(1.14);
+    }
+    #hero-universal-search-input::placeholder {
+      color: rgba(255,255,255,.62);
+      font-weight: 750;
+    }
+    .site-hero-search-results {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: calc(100% + 8px);
+      z-index: 8;
+      display: none;
+      flex-direction: column;
+      max-height: min(42dvh, 320px);
+      overflow-y: auto;
+      border-radius: 26px;
+      background: rgba(7,20,36,.82);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 20px 52px rgba(0,0,0,.26);
+      backdrop-filter: blur(22px) saturate(1.14);
+      -webkit-backdrop-filter: blur(22px) saturate(1.14);
+    }
+    .site-hero-search-results.is-open {
+      display: flex;
+    }
+    .site-hero-search-result {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      text-align: left;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .site-hero-search-result + .site-hero-search-result {
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .site-hero-search-result:active {
+      background: rgba(255,255,255,.08);
+    }
+    .site-hero-search-result-main {
+      min-width: 0;
+    }
+    .site-hero-search-result-title {
+      display: block;
+      font-size: 14px;
+      line-height: 1.14;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .site-hero-search-result-meta {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      line-height: 1.28;
+      font-weight: 750;
+      color: rgba(255,255,255,.62);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .site-hero-search-result-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .site-hero-search-empty {
+      padding: 14px 15px;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 760;
+      color: rgba(255,255,255,.68);
+    }
     .site-hero-quicknav {
       position: absolute;
       left: 0;
@@ -383,6 +514,24 @@
       .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
       .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
         padding-left: 12px;
+      }
+      .site-hero-search-wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      #hero-universal-search-input {
+        min-height: 44px;
+        padding-left: 40px;
+        font-size: 13px;
+      }
+      .site-hero-search-field::before {
+        left: 15px;
+        font-size: 17px;
+      }
+      .site-hero-search-results {
+        left: 10px;
+        right: 10px;
+        border-radius: 24px;
       }
       .site-hero-video-wrap {
         inset: 0;
@@ -1513,6 +1662,12 @@
       <div class="site-hero-content">
         <h1 class="site-view-title">Cinque Terre, semplice.</h1>
         <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
+        <div class="site-hero-search-wrap" id="site-hero-search-wrap">
+          <div class="site-hero-search-field">
+            <input id="hero-universal-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search everywhere on the site" aria-label="Universal search">
+          </div>
+          <div class="site-hero-search-results" id="hero-universal-search-results" aria-live="polite"></div>
+        </div>
       </div>
       <div class="site-hero-quicknav" aria-label="Accessi rapidi hero">
         <div class="site-hero-quicknav-track">
@@ -2165,6 +2320,111 @@ window.FTG_ACTIONBAR_CONFIG = {
     renderOfficialCommunications();
   }
 
+  function normalizeSearchText(value) {
+    return String(value || '').toLowerCase().trim();
+  }
+
+  function getHeroSearchCardTitle(sectionId, fallback) {
+    var el = document.querySelector('[data-open-site-section="' + sectionId + '"] .site-hero-quicknav-title');
+    return el && el.textContent ? String(el.textContent).trim() : fallback;
+  }
+
+  function buildHeroUniversalSearchItems() {
+    var items = [
+      { kind: 'section', title: getHeroSearchCardTitle('site-stories-section', 'Free guide'), meta: getUILabel('stories', 'Stories'), keywords: 'free guide stories local guide blog articolo guida gratuita', tag: getUILabel('stories', 'Stories'), action: function() { openSiteSectionFromMenu('site-stories-section'); } },
+      { kind: 'section', title: getHeroSearchCardTitle('site-places-section', getUILabel('placesSection', 'Places')), meta: getUILabel('placesSection', 'Places'), keywords: 'places luoghi utili viewpoints beaches monuments stations map mappa', tag: getUILabel('placesSection', 'Places'), action: function() { openSiteSectionFromMenu('site-places-section'); } },
+      { kind: 'section', title: getHeroSearchCardTitle('site-experiences-section', 'Local discounts'), meta: getUILabel('experiences', 'Experiences'), keywords: 'discounts local discounts offerte sconti deals locali', tag: getUILabel('experiences', 'Experiences'), action: function() { openSiteSectionFromMenu('site-experiences-section'); } },
+      { kind: 'section', title: getHeroSearchCardTitle('site-trails-section', getUILabel('trails', 'Trails')), meta: getUILabel('trails', 'Trails'), keywords: 'trails sentieri trekking hiking routes percorsi', tag: getUILabel('trails', 'Trails'), action: function() { openSiteSectionFromMenu('site-trails-section'); } },
+      { kind: 'section', title: getUILabel('weather', 'Weather'), meta: WEATHER_CONFIG.label, keywords: 'weather meteo forecast now open-meteo la spezia cinque terre', tag: getUILabel('weather', 'Weather'), action: function() { openSiteSectionFromMenu('site-weather-section'); } },
+      { kind: 'section', title: getUILabel('officialTitle', 'Official communications'), meta: getUILabel('officialKicker', 'Official sources'), keywords: 'official communications alerts notices avvisi comunicazioni ufficiali enti', tag: getUILabel('officialTitle', 'Official'), action: function() { openSiteSectionFromMenu('site-official-communications-section'); } }
+    ];
+
+    siteArticles.forEach(function(article) {
+      items.push({ kind: 'story', title: article.title || getUILabel('stories', 'Stories'), meta: article.meta || getUILabel('stories', 'Stories'), keywords: [article.excerpt || '', article.slug || ''].join(' '), tag: getUILabel('stories', 'Stories'), action: function() { window.location.href = article.url || 'blog.html'; } });
+    });
+
+    sitePOIs.forEach(function(poi) {
+      items.push({ kind: 'poi', title: poi.name || getUILabel('placesSection', 'Places'), meta: [poi.location || '', getSitePOIGroupLabel(getSitePOIGroup(poi))].filter(Boolean).join(' · '), keywords: [poi.type || '', poi.description || '', poi.location || ''].join(' '), tag: getUILabel('placesSection', 'Places'), action: function() { currentSitePOILocationFilter = poi.location || 'all'; currentSitePOIFilter = getSitePOIGroup(poi) || 'all'; renderSitePOISection(); openSiteSectionFromMenu('site-places-section'); } });
+    });
+
+    siteTrails.forEach(function(trail) {
+      items.push({ kind: 'trail', title: trail.name || getUILabel('trails', 'Trails'), meta: [trail.start_name || '', trail.end_name || ''].filter(Boolean).join(' → '), keywords: [trail.description || '', trail.difficulty || '', trail.estimated_duration || ''].join(' '), tag: getUILabel('trails', 'Trails'), action: function() { var fromEl = document.getElementById('site-trail-from-filter'); if (fromEl && trail.start_name) fromEl.value = trail.start_name; renderSiteTrailsSection(); openSiteSectionFromMenu('site-trails-section'); } });
+    });
+
+    officialCommunications.forEach(function(item) {
+      items.push({ kind: 'official', title: item.title || getUILabel('officialTitle', 'Official communications'), meta: item.source || getUILabel('officialKicker', 'Official sources'), keywords: [item.excerpt || '', item.category || '', item.source || ''].join(' '), tag: getUILabel('officialTitle', 'Official'), action: function() { openSiteSectionFromMenu('site-official-communications-section'); } });
+    });
+
+    return items;
+  }
+
+  function getHeroUniversalSearchResults(query) {
+    var normalizedQuery = normalizeSearchText(query);
+    var items = buildHeroUniversalSearchItems();
+    if (!normalizedQuery) return items.filter(function(item) { return item.kind === 'section'; }).slice(0, 6);
+    return items.map(function(item) {
+      var title = normalizeSearchText(item.title);
+      var meta = normalizeSearchText(item.meta);
+      var haystack = normalizeSearchText([item.title, item.meta, item.keywords, item.tag].join(' '));
+      var score = 0;
+      normalizedQuery.split(' ').filter(Boolean).forEach(function(term) {
+        if (title.indexOf(term) === 0) score += 48;
+        else if (title.indexOf(term) !== -1) score += 26;
+        else if (haystack.indexOf(term) !== -1) score += 11;
+      });
+      if (title === normalizedQuery) score += 180;
+      if (title.indexOf(normalizedQuery) === 0) score += 120;
+      else if (title.indexOf(normalizedQuery) !== -1) score += 80;
+      if (meta.indexOf(normalizedQuery) !== -1) score += 34;
+      if (haystack.indexOf(normalizedQuery) !== -1) score += 42;
+      if (item.kind === 'section') score += 8;
+      return { item: item, score: score };
+    }).filter(function(result) {
+      return result.score > 0;
+    }).sort(function(a, b) {
+      return b.score - a.score;
+    }).slice(0, 8).map(function(result) {
+      return result.item;
+    });
+  }
+
+  function renderHeroUniversalSearchResults(query) {
+    var panel = document.getElementById('hero-universal-search-results');
+    var results = getHeroUniversalSearchResults(query);
+    window.FTG_HERO_SEARCH_RESULTS = results;
+    if (!panel) return;
+    if (!results.length) {
+      panel.innerHTML = query ? '<div class="site-hero-search-empty">No matching results yet.</div>' : '';
+      panel.classList.toggle('is-open', !!query);
+      return;
+    }
+    panel.innerHTML = results.map(function(result, index) {
+      return '<button class="site-hero-search-result" type="button" data-hero-search-result="' + index + '"><span class="site-hero-search-result-main"><span class="site-hero-search-result-title">' + escapeHTML(result.title) + '</span><span class="site-hero-search-result-meta">' + escapeHTML(result.meta || '') + '</span></span><span class="site-hero-search-result-tag">' + escapeHTML(result.tag || '') + '</span></button>';
+    }).join('');
+    panel.classList.add('is-open');
+  }
+
+  function closeHeroUniversalSearchResults(clearInput) {
+    var input = document.getElementById('hero-universal-search-input');
+    var panel = document.getElementById('hero-universal-search-results');
+    if (clearInput && input) input.value = '';
+    if (panel) {
+      panel.classList.remove('is-open');
+      panel.innerHTML = '';
+    }
+    window.FTG_HERO_SEARCH_RESULTS = [];
+  }
+
+  function executeHeroUniversalSearchResult(index) {
+    var input = document.getElementById('hero-universal-search-input');
+    var results = Array.isArray(window.FTG_HERO_SEARCH_RESULTS) ? window.FTG_HERO_SEARCH_RESULTS : [];
+    var result = results[index];
+    if (!result) return;
+    closeHeroUniversalSearchResults(true);
+    if (input) input.blur();
+    if (typeof result.action === 'function') result.action();
+  }
+
   function renderSiteViewFromMapData() {
     renderStoryPreviewSection();
     renderSitePOISection();
@@ -2607,6 +2867,42 @@ window.FTG_ACTIONBAR_CONFIG = {
     observed.forEach(function(entry) { observer.observe(entry.element); });
   }
 
+  function setupHeroUniversalSearch() {
+    var wrap = document.getElementById('site-hero-search-wrap');
+    var input = document.getElementById('hero-universal-search-input');
+    var panel = document.getElementById('hero-universal-search-results');
+    if (!wrap || !input || !panel) return;
+    input.addEventListener('focus', function() {
+      renderHeroUniversalSearchResults(input.value);
+    });
+    input.addEventListener('input', function() {
+      renderHeroUniversalSearchResults(input.value);
+    });
+    input.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        if (Array.isArray(window.FTG_HERO_SEARCH_RESULTS) && window.FTG_HERO_SEARCH_RESULTS.length) {
+          event.preventDefault();
+          executeHeroUniversalSearchResult(0);
+        }
+        return;
+      }
+      if (event.key === 'Escape') {
+        closeHeroUniversalSearchResults(false);
+        input.blur();
+      }
+    });
+    panel.addEventListener('click', function(event) {
+      var resultBtn = event.target.closest('[data-hero-search-result]');
+      if (!resultBtn) return;
+      event.preventDefault();
+      executeHeroUniversalSearchResult(Number(resultBtn.getAttribute('data-hero-search-result') || 0));
+    });
+    document.addEventListener('click', function(event) {
+      if (wrap.contains(event.target)) return;
+      closeHeroUniversalSearchResults(false);
+    });
+  }
+
   function setupInteractions() {
     var locationSelect = document.getElementById('site-poi-location-filter');
     var trailFrom = document.getElementById('site-trail-from-filter');
@@ -2662,6 +2958,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     setupHeroSlidePerformance();
     setupHeroQuicknavMedia();
     setupSectionPaging();
+    setupHeroUniversalSearch();
     setupMenu();
     setupInteractions();
     checkUser();
@@ -2799,7 +3096,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
   function applyLanguage(next, options){ var l = next || lang(); var flag = document.getElementById('language-flag'); var flagImg = document.getElementById('language-flag-img'); options = options || {}; localStorage.setItem('5terrego_language', l); document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; if (flag) flag.setAttribute('data-current-language', l); if (flagImg) { flagImg.src = 'https://hatscripts.github.io/circle-flags/flags/' + FLAGS[l] + '.svg'; flagImg.alt = NAMES[l]; }
     document.querySelectorAll('.language-option').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-lang') === l); });
-    var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest') || 'Ospite'; setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search'));
+    var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest') || 'Ospite'; setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search')); setPlaceholder('#hero-universal-search-input', t('search'));
     if (typeof stabilizeMapFilterButtons === 'function') stabilizeMapFilterButtons();
     setText('#tour-recenter-top', t('recenter')); setText('#tour-exit-top', t('exitTour'));
     setText('.site-view-title', t('heroTitle')); setText('.site-view-text', t('heroText')); setText('#open-interactive-map-btn', t('openInteractiveMap')); setAllText('.site-hero-actions a', [t('stories'),t('experiences'),t('bookStay')]);
