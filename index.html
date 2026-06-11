@@ -741,11 +741,98 @@
       min-height: 0;
     }
     #site-stories-section .site-guide-page-head {
+      display: grid;
+      grid-template-rows: auto auto;
+      align-content: start;
+      gap: 10px;
       padding-bottom: 2px !important;
+    }
+    #site-stories-section .site-guide-topline {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      width: fit-content;
+      margin: 0;
+    }
+    #site-stories-section .site-guide-search {
+      position: relative;
+      width: 100%;
+    }
+    #site-stories-section .site-guide-search-field {
+      position: relative;
+    }
+    #site-stories-section .site-guide-search-field::before {
+      content: '⌕';
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      color: rgba(255,255,255,.58);
+      font-size: 17px;
+      font-weight: 800;
+      pointer-events: none;
+    }
+    #site-guide-search-input {
+      width: 100%;
+      min-height: 44px;
+      padding: 11px 15px 11px 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: -.02em;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 26px rgba(0,0,0,.10);
+      backdrop-filter: blur(12px) saturate(1.08);
+      -webkit-backdrop-filter: blur(12px) saturate(1.08);
+    }
+    #site-guide-search-input::placeholder {
+      color: rgba(255,255,255,.62);
+      font-weight: 750;
+    }
+    #site-stories-section .site-guide-topline .site-feature-step {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.86);
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    #site-stories-section .site-guide-topline .site-feature-kicker {
+      display: block !important;
+      margin: 0;
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: -.035em;
+      font-weight: 950;
+      text-transform: none;
+    }
+    #site-stories-section .site-guide-page-copy {
+      display: none !important;
+    }
+    #site-stories-section .site-feature-title {
+      display: none !important;
+    }
+    #site-stories-section .site-feature-text {
+      display: none !important;
     }
     #site-story-list.site-guide-page-content {
       display: grid;
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto 1fr;
       gap: 10px;
       min-height: 0;
     }
@@ -817,6 +904,12 @@
       display: grid;
       grid-template-rows: auto auto;
       gap: 10px;
+    }
+    .site-guide-stage.is-search-mode {
+      grid-template-rows: 1fr;
+    }
+    .site-guide-stage.is-search-mode .site-guide-rail {
+      padding-top: 1px;
     }
     .site-guide-featured {
       position: relative;
@@ -1016,6 +1109,17 @@
       border-radius: 24px;
     }
     @media (max-width: 380px) {
+      #site-stories-section .site-guide-topline {
+        gap: 8px;
+      }
+      #site-stories-section .site-guide-topline .site-feature-step {
+        min-height: 26px;
+        padding: 5px 9px;
+        font-size: 10px;
+      }
+      #site-stories-section .site-guide-topline .site-feature-kicker {
+        font-size: 17px;
+      }
       .site-guide-toolbar {
         gap: 8px;
       }
@@ -2034,8 +2138,8 @@
         <section id="site-stories-section" class="site-feature-section dark story-guide-section" aria-label="Stories section">
           <div class="site-guide-page-shell">
             <div class="site-feature-cover site-guide-page-head">
-              <div class="site-feature-label-row"><span class="site-feature-step">01</span><div class="site-feature-kicker">Guide</div></div>
-              <div><h3 class="site-feature-title">Sfoglia la guida gratuita</h3><p class="site-feature-text">Tutti gli articoli utili in un'unica pagina: scegli un tema e scorri in orizzontale senza cambiare sezione.</p></div>
+              <div class="site-feature-label-row site-guide-topline"><span class="site-feature-step" id="site-guide-step">1/1</span><div class="site-feature-kicker">Free Guide</div></div>
+              <div class="site-guide-search"><div class="site-guide-search-field"><input id="site-guide-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search articles" aria-label="Search guide articles"></div></div>
             </div>
             <div id="site-story-list" class="site-guide-page-content"></div>
           </div>
@@ -2223,7 +2327,8 @@ window.FTG_ACTIONBAR_CONFIG = {
   var currentSitePOIFilter = 'all';
   var currentSitePOILocationFilter = 'all';
   var currentMapFilter = 'all';
-  var currentSiteGuideFilter = 'start';
+  var currentSiteGuideFilter = 'all';
+  var currentSiteGuideSearch = '';
   var WEATHER_CONFIG = {
     label: 'Cinque Terre',
     latitude: 44.1275,
@@ -2390,6 +2495,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     var weatherCode;
     var dateLabel;
     if (!container) return;
+    updateGuideTopline();
     if (!siteWeatherData) {
       renderSiteWeatherTabs(null);
       renderHeroWeatherQuickCard();
@@ -2459,15 +2565,60 @@ window.FTG_ACTIONBAR_CONFIG = {
     };
   }
 
-  function getGuideFilterLabel(key) {
-    var labels = {
-      en: { start: 'Start here', villages: 'Villages', trails: 'Trails', food: 'Food', transport: 'Transport', save: 'Save money', today: 'Today', all: 'All' },
-      it: { start: 'Inizia da qui', villages: 'Borghi', trails: 'Sentieri', food: 'Food', transport: 'Trasporti', save: 'Risparmia', today: 'Oggi', all: 'Tutti' },
-      fr: { start: 'Commencer', villages: 'Villages', trails: 'Sentiers', food: 'Food', transport: 'Transports', save: 'Économiser', today: 'Aujourd’hui', all: 'Tout' },
-      de: { start: 'Start', villages: 'Dörfer', trails: 'Wege', food: 'Food', transport: 'Transport', save: 'Sparen', today: 'Heute', all: 'Alle' }
-    };
+  function getGuideAllLabel() {
     var current = getCurrentUILanguage();
-    return (labels[current] && labels[current][key]) || (labels.en[key]) || key;
+    if (current === 'it') return 'Tutti';
+    if (current === 'fr') return 'Tout';
+    if (current === 'de') return 'Alle';
+    return 'All';
+  }
+
+  function getGuideNoResultsLabel() {
+    var current = getCurrentUILanguage();
+    if (current === 'it') return 'Nessun articolo corrisponde alla ricerca.';
+    if (current === 'fr') return 'Aucun article ne correspond à la recherche.';
+    if (current === 'de') return 'Kein Artikel passt zur Suche.';
+    return 'No articles match this search.';
+  }
+
+  function getGuideCategories() {
+    var seen = {};
+    var categories = [];
+    siteArticles.forEach(function(article) {
+      var label = String(article && article.category || '').trim();
+      var key;
+      if (!label) return;
+      key = normalizeSearchText(label);
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      categories.push({ key: key, label: label });
+    });
+    return categories;
+  }
+
+  function getGuideFilterLabel(key) {
+    var match;
+    if (key === 'all') return getGuideAllLabel();
+    match = getGuideCategories().find(function(category) {
+      return category.key === key;
+    });
+    return match ? match.label : key;
+  }
+
+  function getGuideFilterKeys() {
+    return ['all'].concat(getGuideCategories().map(function(category) {
+      return category.key;
+    }));
+  }
+
+  function updateGuideTopline() {
+    var step = document.getElementById('site-guide-step');
+    var filters = getGuideFilterKeys();
+    var index;
+    if (!step) return;
+    if (filters.indexOf(currentSiteGuideFilter) === -1) currentSiteGuideFilter = 'all';
+    index = Math.max(0, filters.indexOf(currentSiteGuideFilter));
+    step.textContent = String(index + 1) + '/' + String(filters.length || 1);
   }
 
   function getGuideCountLabel(count) {
@@ -2484,33 +2635,60 @@ window.FTG_ACTIONBAR_CONFIG = {
 
   function renderStoryPreviewSection() {
     var container = document.getElementById('site-story-list');
-    var filters = ['start', 'villages', 'trails', 'food', 'transport', 'save', 'today', 'all'];
+    var guideSearchInput = document.getElementById('site-guide-search-input');
+    var filters = getGuideFilterKeys();
     var filtered;
     var featured;
     var railItems;
+    var searchValue = normalizeSearchText(currentSiteGuideSearch);
     if (!container) return;
+    if (guideSearchInput && guideSearchInput.value !== currentSiteGuideSearch) guideSearchInput.value = currentSiteGuideSearch;
+    updateGuideTopline();
     if (!blogPostsLoaded) {
-      container.innerHTML = '<div class="site-guide-loading"><div class="site-guide-skeleton-row"></div><div class="site-guide-skeleton-chips"><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div></div><div><div class="site-guide-skeleton-card"></div><div class="site-guide-skeleton-minis"><div class="site-guide-skeleton-mini"></div><div class="site-guide-skeleton-mini"></div></div></div></div>';
+      container.innerHTML = '<div class="site-guide-loading"><div class="site-guide-skeleton-chips"><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div></div><div><div class="site-guide-skeleton-card"></div><div class="site-guide-skeleton-minis"><div class="site-guide-skeleton-mini"></div><div class="site-guide-skeleton-mini"></div></div></div></div>';
       return;
     }
     if (!siteArticles.length) {
       container.innerHTML = '<div class="site-empty">Nessun articolo disponibile al momento.</div>';
       return;
     }
-    filtered = currentSiteGuideFilter === 'all' ? siteArticles.slice() : siteArticles.filter(function(article) {
-      return article.guideGroup === currentSiteGuideFilter;
-    });
-    if (!filtered.length) filtered = siteArticles.slice();
+    if (filters.indexOf(currentSiteGuideFilter) === -1) currentSiteGuideFilter = 'all';
+    filtered = siteArticles.slice();
+    if (currentSiteGuideFilter !== 'all') {
+      filtered = filtered.filter(function(article) {
+        return normalizeSearchText(article.category) === currentSiteGuideFilter;
+      });
+    }
+    if (searchValue) {
+      filtered = filtered.filter(function(article) {
+        var haystack = normalizeSearchText([article.title || '', article.excerpt || '', article.meta || '', article.category || '', article.tags || '', article.slug || ''].join(' '));
+        return haystack.indexOf(searchValue) !== -1;
+      });
+    }
     filtered.sort(function(a, b) {
-      return (Number(b.featured) - Number(a.featured));
+      return Number(b.featured) - Number(a.featured);
     });
+    if (!filtered.length) {
+      container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
+        return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
+      }).join('') + '</div><div class="site-empty">' + escapeHTML(getGuideNoResultsLabel()) + '</div>';
+      return;
+    }
     featured = filtered[0];
     railItems = filtered.slice(1, 9);
     if (!railItems.length && featured) railItems = [featured];
-    container.innerHTML = '<div class="site-guide-toolbar"><span class="site-guide-count">' + escapeHTML(getGuideCountLabel(filtered.length)) + '</span><span class="site-guide-hint">Swipe horizontally</span></div><div class="site-guide-filters">' + filters.map(function(filterKey) {
+    if (searchValue) {
+      container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
+        return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
+      }).join('') + '</div><div class="site-guide-stage is-search-mode"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
+        return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '"><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
+      }).join('') + '</div></div>';
+      return;
+    }
+    container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
       return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
-    }).join('') + '</div><div class="site-guide-stage"><a class="site-guide-featured" href="' + escapeHTML(featured.url) + '"><div class="site-guide-featured-content"><span class="site-guide-featured-badge">' + escapeHTML(getGuideFilterLabel(featured.guideGroup || 'start')) + '</span><div><h4 class="site-guide-featured-title">' + escapeHTML(featured.title) + '</h4><p class="site-guide-featured-text">' + escapeHTML(featured.excerpt || 'Apri l’articolo per leggere la guida completa.') + '</p></div><div class="site-guide-featured-meta"><span>' + escapeHTML(featured.meta || 'Guida') + '</span><span>Open article</span></div></div><div class="site-guide-featured-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(featured)) + "'" + ')"></div></a><div class="site-guide-rail">' + railItems.map(function(article) {
-      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '"><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.meta || getGuideFilterLabel(article.guideGroup || 'start')) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
+    }).join('') + '</div><div class="site-guide-stage"><a class="site-guide-featured" href="' + escapeHTML(featured.url) + '"><div class="site-guide-featured-content"><span class="site-guide-featured-badge">' + escapeHTML(featured.category || getGuideFilterLabel(currentSiteGuideFilter)) + '</span><div><h4 class="site-guide-featured-title">' + escapeHTML(featured.title) + '</h4><p class="site-guide-featured-text">' + escapeHTML(featured.excerpt || 'Apri l’articolo per leggere la guida completa.') + '</p></div><div class="site-guide-featured-meta"><span>' + escapeHTML(featured.meta || 'Guida') + '</span><span>Open article</span></div></div><div class="site-guide-featured-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(featured)) + "'" + ')"></div></a><div class="site-guide-rail">' + railItems.map(function(article) {
+      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '"><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
     }).join('') + '</div></div>';
   }
 
@@ -3297,6 +3475,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   function setupInteractions() {
+    var guideSearchInput = document.getElementById('site-guide-search-input');
     var locationSelect = document.getElementById('site-poi-location-filter');
     var trailFrom = document.getElementById('site-trail-from-filter');
     var trailDifficulty = document.getElementById('site-trail-difficulty-filter');
@@ -3341,6 +3520,10 @@ window.FTG_ACTIONBAR_CONFIG = {
           if (aiBtn) aiBtn.click();
         }
       }
+    });
+    if (guideSearchInput) guideSearchInput.addEventListener('input', function() {
+      currentSiteGuideSearch = guideSearchInput.value || '';
+      renderStoryPreviewSection();
     });
     if (locationSelect) locationSelect.addEventListener('change', function() { currentSitePOILocationFilter = locationSelect.value || 'all'; renderSitePOISection(); });
     if (trailFrom) {
@@ -3495,7 +3678,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
   function applyLanguage(next, options){ var l = next || lang(); var flag = document.getElementById('language-flag'); var flagImg = document.getElementById('language-flag-img'); options = options || {}; localStorage.setItem('5terrego_language', l); document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; if (flag) flag.setAttribute('data-current-language', l); if (flagImg) { flagImg.src = 'https://hatscripts.github.io/circle-flags/flags/' + FLAGS[l] + '.svg'; flagImg.alt = NAMES[l]; }
     document.querySelectorAll('.language-option').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-lang') === l); });
-    var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest') || 'Ospite'; setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search')); setPlaceholder('#hero-universal-search-input', t('search'));
+    var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest') || 'Ospite'; setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search')); setPlaceholder('#hero-universal-search-input', t('search')); setPlaceholder('#site-guide-search-input', t('search'));
     if (typeof stabilizeMapFilterButtons === 'function') stabilizeMapFilterButtons();
     setText('#tour-recenter-top', t('recenter')); setText('#tour-exit-top', t('exitTour'));
     setText('.site-view-title', t('heroTitle')); setText('.site-view-text', t('heroText')); setText('#open-interactive-map-btn', t('openInteractiveMap')); setAllText('.site-hero-actions a', [t('stories'),t('experiences'),t('bookStay')]);
