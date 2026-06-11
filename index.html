@@ -727,8 +727,336 @@
     .site-feature-cta-row { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
     .site-feature-cta-row a, .site-feature-cta-row button { border: 0; border-radius: 999px; padding: 10px 13px; background: #111; color: #fff; font-size: 12px; font-weight: 950; text-decoration: none; font-family: inherit; cursor: pointer; }
     .site-feature-section.dark .site-feature-cta-row a, .site-feature-section.dark .site-feature-cta-row button { background: #ff8a1d; color: #111; }
-    #site-stories-section .site-feature-cta-row { width: 100%; }
-    #site-stories-section .site-feature-cta-row a { width: 100%; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 12px 16px; background: #fff; color: #111; font-size: 15px; font-weight: 950; box-shadow: 0 12px 28px rgba(0,0,0,.16); }
+    #site-stories-section.story-guide-section {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+    #site-stories-section .site-guide-page-shell {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      height: 100%;
+      min-height: 0;
+    }
+    #site-stories-section .site-guide-page-head {
+      padding-bottom: 2px !important;
+    }
+    #site-story-list.site-guide-page-content {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 10px;
+      min-height: 0;
+    }
+    .site-guide-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .site-guide-count,
+    .site-guide-hint {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.82);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .site-guide-hint {
+      color: rgba(255,255,255,.58);
+    }
+    .site-guide-filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 1px 0 2px;
+      touch-action: pan-x;
+    }
+    .site-guide-filters::-webkit-scrollbar {
+      display: none;
+    }
+    .site-guide-filter {
+      flex: 0 0 auto;
+      min-height: 36px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.84);
+      font-family: inherit;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      cursor: pointer;
+      white-space: nowrap;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .site-guide-filter.active {
+      background: rgba(255,255,255,.94);
+      color: #111;
+      border-color: rgba(255,255,255,.58);
+      box-shadow: 0 10px 26px rgba(0,0,0,.12);
+    }
+    .site-guide-stage {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 10px;
+    }
+    .site-guide-featured {
+      position: relative;
+      min-height: 162px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(132px, .92fr);
+      overflow: hidden;
+      border-radius: 30px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 16px 40px rgba(0,0,0,.14);
+      color: #fff;
+      text-decoration: none;
+    }
+    .site-guide-featured-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 15px;
+      background: linear-gradient(180deg, rgba(6,16,28,.22), rgba(6,16,28,.78));
+    }
+    .site-guide-featured-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 26px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.84);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .site-guide-featured-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: .96;
+      letter-spacing: -.055em;
+      font-weight: 950;
+      text-wrap: balance;
+    }
+    .site-guide-featured-text {
+      margin: 7px 0 0;
+      font-size: 13px;
+      line-height: 1.34;
+      color: rgba(255,255,255,.72);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .site-guide-featured-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 850;
+      color: rgba(255,255,255,.70);
+    }
+    .site-guide-featured-media {
+      position: relative;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+    }
+    .site-guide-featured-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.22));
+    }
+    .site-guide-rail {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 1px 1px 4px;
+      scroll-snap-type: x proximity;
+      touch-action: pan-x;
+    }
+    .site-guide-rail::-webkit-scrollbar {
+      display: none;
+    }
+    .site-guide-mini-card {
+      flex: 0 0 min(63vw, 236px);
+      min-height: 142px;
+      display: grid;
+      grid-template-rows: 78px auto;
+      overflow: hidden;
+      border-radius: 24px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      color: #fff;
+      text-decoration: none;
+      scroll-snap-align: start;
+      box-shadow: 0 12px 28px rgba(0,0,0,.12);
+    }
+    .site-guide-mini-media {
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+    .site-guide-mini-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.00), rgba(0,0,0,.24));
+    }
+    .site-guide-mini-body {
+      display: grid;
+      gap: 6px;
+      padding: 11px 11px 12px;
+      background: linear-gradient(180deg, rgba(8,20,34,.20), rgba(8,20,34,.72));
+    }
+    .site-guide-mini-kicker {
+      font-size: 9px;
+      line-height: 1;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      font-weight: 950;
+      color: rgba(255,255,255,.58);
+    }
+    .site-guide-mini-title {
+      margin: 0;
+      font-size: 17px;
+      line-height: .98;
+      letter-spacing: -.04em;
+      font-weight: 950;
+      text-wrap: balance;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .site-guide-mini-text {
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.3;
+      color: rgba(255,255,255,.66);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .site-guide-loading {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 10px;
+      min-height: 0;
+    }
+    .site-guide-skeleton-row,
+    .site-guide-skeleton-chip,
+    .site-guide-skeleton-card,
+    .site-guide-skeleton-mini {
+      background: linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.16) 50%, rgba(255,255,255,.08) 100%);
+      background-size: 200% 100%;
+      animation: siteSkeletonShimmer 1.15s linear infinite;
+    }
+    .site-guide-skeleton-row {
+      width: 100%;
+      min-height: 30px;
+      border-radius: 999px;
+    }
+    .site-guide-skeleton-chips {
+      display: flex;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .site-guide-skeleton-chip {
+      flex: 0 0 108px;
+      min-height: 36px;
+      border-radius: 999px;
+    }
+    .site-guide-skeleton-card {
+      min-height: 162px;
+      border-radius: 30px;
+    }
+    .site-guide-skeleton-minis {
+      display: flex;
+      gap: 10px;
+    }
+    .site-guide-skeleton-mini {
+      flex: 0 0 min(63vw, 236px);
+      min-height: 142px;
+      border-radius: 24px;
+    }
+    @media (max-width: 380px) {
+      .site-guide-toolbar {
+        gap: 8px;
+      }
+      .site-guide-count,
+      .site-guide-hint {
+        min-height: 28px;
+        padding: 6px 8px;
+        font-size: 9px;
+      }
+      .site-guide-filter {
+        min-height: 34px;
+        padding: 8px 11px;
+        font-size: 11px;
+      }
+      .site-guide-featured {
+        min-height: 150px;
+        grid-template-columns: minmax(0, 1fr) 108px;
+        border-radius: 26px;
+      }
+      .site-guide-featured-content {
+        padding: 13px;
+      }
+      .site-guide-featured-title {
+        font-size: 21px;
+      }
+      .site-guide-featured-text {
+        font-size: 12px;
+      }
+      .site-guide-mini-card,
+      .site-guide-skeleton-mini {
+        flex-basis: min(66vw, 214px);
+        min-height: 132px;
+        border-radius: 22px;
+      }
+      .site-guide-mini-card {
+        grid-template-rows: 72px auto;
+      }
+      .site-guide-mini-title {
+        font-size: 16px;
+      }
+    }
     #site-stories-section .site-feature-title,
     #site-trails-section .site-feature-title,
     #site-experiences-section .site-feature-title,
@@ -1703,14 +2031,13 @@
       </div>
     </section>
 <div class="site-feature-stack">
-        <section id="site-stories-section" class="site-feature-section dark story-video-section" aria-label="Stories section">
-          <div class="site-feature-cover">
-            <div class="site-feature-label-row"><span class="site-feature-step">01</span><div class="site-feature-kicker">Stories</div></div>
-            <div><h3 class="site-feature-title">Sfoglia la guida gratuita</h3><p class="site-feature-text">Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.</p></div>
-          </div>
-          <div class="site-feature-body">
-            <div id="site-story-list"></div>
-            <div class="site-feature-cta-row"><a href="blog.html">Leggi le storie</a></div>
+        <section id="site-stories-section" class="site-feature-section dark story-guide-section" aria-label="Stories section">
+          <div class="site-guide-page-shell">
+            <div class="site-feature-cover site-guide-page-head">
+              <div class="site-feature-label-row"><span class="site-feature-step">01</span><div class="site-feature-kicker">Guide</div></div>
+              <div><h3 class="site-feature-title">Sfoglia la guida gratuita</h3><p class="site-feature-text">Tutti gli articoli utili in un'unica pagina: scegli un tema e scorri in orizzontale senza cambiare sezione.</p></div>
+            </div>
+            <div id="site-story-list" class="site-guide-page-content"></div>
           </div>
         </section>
 
@@ -1896,6 +2223,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   var currentSitePOIFilter = 'all';
   var currentSitePOILocationFilter = 'all';
   var currentMapFilter = 'all';
+  var currentSiteGuideFilter = 'start';
   var WEATHER_CONFIG = {
     label: 'Cinque Terre',
     latitude: 44.1275,
@@ -2102,23 +2430,88 @@ window.FTG_ACTIONBAR_CONFIG = {
     }
   }
 
+  function getGuideArticleGroup(article) {
+    var raw = [article && article.category || '', article && article.title || '', article && article.excerpt || '', article && article.slug || '', article && article.tags || ''].join(' ').toLowerCase();
+    var villages = ['riomaggiore', 'manarola', 'corniglia', 'vernazza', 'monterosso'];
+    if (raw.indexOf('today') !== -1 || raw.indexOf('oggi') !== -1 || raw.indexOf('meteo') !== -1 || raw.indexOf('weather') !== -1 || raw.indexOf('alert') !== -1 || raw.indexOf('update') !== -1 || raw.indexOf('chius') !== -1 || raw.indexOf('closure') !== -1 || raw.indexOf('open now') !== -1) return 'today';
+    if (raw.indexOf('trail') !== -1 || raw.indexOf('sentier') !== -1 || raw.indexOf('trek') !== -1 || raw.indexOf('hike') !== -1 || raw.indexOf('path') !== -1) return 'trails';
+    if (raw.indexOf('train') !== -1 || raw.indexOf('ferry') !== -1 || raw.indexOf('traghett') !== -1 || raw.indexOf('transport') !== -1 || raw.indexOf('station') !== -1 || raw.indexOf('bus') !== -1 || raw.indexOf('muoversi') !== -1 || raw.indexOf('move') !== -1 || raw.indexOf('arrivare') !== -1) return 'transport';
+    if (raw.indexOf('food') !== -1 || raw.indexOf('restaurant') !== -1 || raw.indexOf('eat') !== -1 || raw.indexOf('mang') !== -1 || raw.indexOf('bar') !== -1 || raw.indexOf('drink') !== -1 || raw.indexOf('aperitivo') !== -1) return 'food';
+    if (raw.indexOf('save') !== -1 || raw.indexOf('budget') !== -1 || raw.indexOf('cheap') !== -1 || raw.indexOf('free') !== -1 || raw.indexOf('discount') !== -1 || raw.indexOf('scont') !== -1) return 'save';
+    if (villages.some(function(name) { return raw.indexOf(name) !== -1; })) return 'villages';
+    return 'start';
+  }
+
   function normalizeBlogPost(row) {
     row = row || {};
-    return { id: row.id || row.slug || row.title || '', title: row.title || 'Articolo', slug: row.slug || '', url: row.slug ? ('blog.html?slug=' + encodeURIComponent(row.slug)) : 'blog.html', image: row.cover_image || row.image_url || row.thumbnail_url || row.image || '', meta: row.category || row.author || 'Guida', excerpt: row.excerpt || '' };
+    return {
+      id: row.id || row.slug || row.title || '',
+      title: row.title || 'Articolo',
+      slug: row.slug || '',
+      url: row.slug ? ('blog.html?slug=' + encodeURIComponent(row.slug)) : 'blog.html',
+      image: row.cover_image || row.image_url || row.thumbnail_url || row.image || '',
+      meta: row.category || row.author || 'Guida',
+      category: row.category || '',
+      excerpt: row.excerpt || '',
+      tags: row.tags || '',
+      guideGroup: getGuideArticleGroup(row),
+      featured: !!(row.is_featured || row.featured || row.priority === 'high')
+    };
+  }
+
+  function getGuideFilterLabel(key) {
+    var labels = {
+      en: { start: 'Start here', villages: 'Villages', trails: 'Trails', food: 'Food', transport: 'Transport', save: 'Save money', today: 'Today', all: 'All' },
+      it: { start: 'Inizia da qui', villages: 'Borghi', trails: 'Sentieri', food: 'Food', transport: 'Trasporti', save: 'Risparmia', today: 'Oggi', all: 'Tutti' },
+      fr: { start: 'Commencer', villages: 'Villages', trails: 'Sentiers', food: 'Food', transport: 'Transports', save: 'Économiser', today: 'Aujourd’hui', all: 'Tout' },
+      de: { start: 'Start', villages: 'Dörfer', trails: 'Wege', food: 'Food', transport: 'Transport', save: 'Sparen', today: 'Heute', all: 'Alle' }
+    };
+    var current = getCurrentUILanguage();
+    return (labels[current] && labels[current][key]) || (labels.en[key]) || key;
+  }
+
+  function getGuideCountLabel(count) {
+    var current = getCurrentUILanguage();
+    if (current === 'it') return count + ' articoli';
+    if (current === 'fr') return count + ' articles';
+    if (current === 'de') return count + ' artikel';
+    return count + ' articles';
+  }
+
+  function getGuideCardImage(article) {
+    return article && article.image ? article.image : 'https://images.pexels.com/photos/7545061/pexels-photo-7545061.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70';
   }
 
   function renderStoryPreviewSection() {
     var container = document.getElementById('site-story-list');
+    var filters = ['start', 'villages', 'trails', 'food', 'transport', 'save', 'today', 'all'];
+    var filtered;
+    var featured;
+    var railItems;
     if (!container) return;
     if (!blogPostsLoaded) {
-      container.innerHTML = '<div class="site-article-slider">' + [1,2,3].map(function(){ return '<article class="site-article-card is-skeleton" aria-hidden="true"><span class="site-article-content"><span class="site-article-meta">Loading</span><span class="site-article-title">Loading</span></span><span class="site-article-thumb"><img alt="" loading="lazy"></span><span><span class="site-article-excerpt">Loading</span></span></article>'; }).join('') + '</div>';
+      container.innerHTML = '<div class="site-guide-loading"><div class="site-guide-skeleton-row"></div><div class="site-guide-skeleton-chips"><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div></div><div><div class="site-guide-skeleton-card"></div><div class="site-guide-skeleton-minis"><div class="site-guide-skeleton-mini"></div><div class="site-guide-skeleton-mini"></div></div></div></div>';
       return;
     }
     if (!siteArticles.length) {
-      container.innerHTML = '<div class="site-empty">Nessuna storia disponibile al momento.</div>';
+      container.innerHTML = '<div class="site-empty">Nessun articolo disponibile al momento.</div>';
       return;
     }
-    container.innerHTML = '<div class="site-article-slider">' + siteArticles.slice(0, 6).map(function(article) { return '<a class="site-article-card" href="' + escapeHTML(article.url) + '"><span class="site-article-content"><span class="site-article-meta">' + escapeHTML(article.meta) + '</span><span class="site-article-title">' + escapeHTML(article.title) + '</span></span><span class="site-article-thumb"><img src="' + escapeHTML(article.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg') + '" alt="' + escapeHTML(article.title) + '" loading="lazy" decoding="async"></span><span><span class="site-article-excerpt">' + escapeHTML(article.excerpt || 'Guida breve pensata per aiutarti a capire meglio il luogo prima di arrivare.') + '</span></span></a>'; }).join('') + '</div>';
+    filtered = currentSiteGuideFilter === 'all' ? siteArticles.slice() : siteArticles.filter(function(article) {
+      return article.guideGroup === currentSiteGuideFilter;
+    });
+    if (!filtered.length) filtered = siteArticles.slice();
+    filtered.sort(function(a, b) {
+      return (Number(b.featured) - Number(a.featured));
+    });
+    featured = filtered[0];
+    railItems = filtered.slice(1, 9);
+    if (!railItems.length && featured) railItems = [featured];
+    container.innerHTML = '<div class="site-guide-toolbar"><span class="site-guide-count">' + escapeHTML(getGuideCountLabel(filtered.length)) + '</span><span class="site-guide-hint">Swipe horizontally</span></div><div class="site-guide-filters">' + filters.map(function(filterKey) {
+      return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
+    }).join('') + '</div><div class="site-guide-stage"><a class="site-guide-featured" href="' + escapeHTML(featured.url) + '"><div class="site-guide-featured-content"><span class="site-guide-featured-badge">' + escapeHTML(getGuideFilterLabel(featured.guideGroup || 'start')) + '</span><div><h4 class="site-guide-featured-title">' + escapeHTML(featured.title) + '</h4><p class="site-guide-featured-text">' + escapeHTML(featured.excerpt || 'Apri l’articolo per leggere la guida completa.') + '</p></div><div class="site-guide-featured-meta"><span>' + escapeHTML(featured.meta || 'Guida') + '</span><span>Open article</span></div></div><div class="site-guide-featured-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(featured)) + "'" + ')"></div></a><div class="site-guide-rail">' + railItems.map(function(article) {
+      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '"><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.meta || getGuideFilterLabel(article.guideGroup || 'start')) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
+    }).join('') + '</div></div>';
   }
 
   async function loadBlogPosts() {
@@ -2131,7 +2524,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       renderStoryPreviewSection();
       return;
     }
-    response = await supabaseClient.from('blog_posts').select('*').order('updated_at', { ascending: false }).limit(12);
+    response = await supabaseClient.from('blog_posts').select('*').order('updated_at', { ascending: false }).limit(40);
     siteArticles = ((response && response.data) || []).map(normalizeBlogPost);
     blogPostsLoaded = true;
     renderStoryPreviewSection();
@@ -2908,11 +3301,17 @@ window.FTG_ACTIONBAR_CONFIG = {
     var trailFrom = document.getElementById('site-trail-from-filter');
     var trailDifficulty = document.getElementById('site-trail-difficulty-filter');
     document.addEventListener('click', function(event) {
+      var guideFilter = event.target.closest('[data-site-guide-filter]');
       var weatherDay = event.target.closest('[data-weather-day]');
       var filterBtn = event.target.closest('[data-site-poi-filter]');
       var officialCard = event.target.closest('.site-official-item');
       var quickSection = event.target.closest('[data-open-site-section]');
       var appAction = event.target.closest('[data-app-menu-action]');
+      if (guideFilter) {
+        currentSiteGuideFilter = guideFilter.getAttribute('data-site-guide-filter') || 'start';
+        renderStoryPreviewSection();
+        return;
+      }
       if (weatherDay) {
         selectedSiteWeatherIndex = Number(weatherDay.getAttribute('data-weather-day') || 0);
         renderSiteWeatherSection();
