@@ -238,6 +238,9 @@
       backdrop-filter: blur(14px) saturate(1.08);
       -webkit-backdrop-filter: blur(14px) saturate(1.08);
       isolation: isolate;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
     }
     .site-hero-quicknav-card::before {
       content: '';
@@ -277,6 +280,65 @@
       font-weight: 950;
       text-wrap: balance;
     }
+    .site-hero-weather-card {
+      justify-content: flex-end;
+    }
+    .site-hero-weather-mini {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .site-hero-weather-kicker {
+      display: block;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-weight: 950;
+      color: rgba(255,255,255,.68);
+    }
+    .site-hero-weather-main {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .site-hero-weather-emoji {
+      font-size: 30px;
+      line-height: 1;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.18));
+    }
+    .site-hero-weather-temp {
+      font-size: 34px;
+      line-height: .88;
+      letter-spacing: -.08em;
+      font-weight: 950;
+      color: #fff;
+    }
+    .site-hero-weather-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .site-hero-weather-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
     .site-hero-quicknav-card.plain {
       background: rgba(255,255,255,.10);
     }
@@ -312,6 +374,16 @@
       }
       .site-hero-quicknav-title {
         font-size: 20px;
+      }
+      .site-hero-weather-emoji {
+        font-size: 28px;
+      }
+      .site-hero-weather-temp {
+        font-size: 31px;
+      }
+      .site-hero-weather-pill {
+        font-size: 10px;
+        padding: 5px 7px;
       }
     }
     .site-hero-video { display: none !important; }
@@ -1397,23 +1469,30 @@
       </div>
       <div class="site-hero-quicknav" aria-label="Accessi rapidi hero">
         <div class="site-hero-quicknav-track">
-          <a class="site-hero-quicknav-card video-card" href="#site-stories-section" data-open-site-section="site-stories-section" style="background-image:url('https://images.pexels.com/photos/36998433/pexels-photo-36998433.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70')">
-            <video muted loop playsinline preload="none" data-autoplay-when-visible="true">
-              <source data-src="videohome.mp4" type="video/mp4">
-            </video>
+          <a class="site-hero-quicknav-card" href="#site-stories-section" data-open-site-section="site-stories-section" style="background-image:url('https://images.pexels.com/photos/7545061/pexels-photo-7545061.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70')">
             <span class="site-hero-quicknav-title">Guide</span>
           </a>
-          <a class="site-hero-quicknav-card plain" href="#site-places-section" data-open-site-section="site-places-section">
+          <a class="site-hero-quicknav-card" href="#site-places-section" data-open-site-section="site-places-section" style="background-image:url('https://images.pexels.com/photos/7118987/pexels-photo-7118987.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70')">
             <span class="site-hero-quicknav-title">Places</span>
           </a>
-          <a class="site-hero-quicknav-card plain" href="#site-experiences-section" data-open-site-section="site-experiences-section">
+          <a class="site-hero-quicknav-card" href="#site-experiences-section" data-open-site-section="site-experiences-section" style="background-image:url('https://images.pexels.com/photos/34342746/pexels-photo-34342746.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70')">
             <span class="site-hero-quicknav-title">Local discounts</span>
           </a>
-          <a class="site-hero-quicknav-card plain" href="#site-trails-section" data-open-site-section="site-trails-section">
+          <a class="site-hero-quicknav-card" href="#site-trails-section" data-open-site-section="site-trails-section" style="background-image:url('https://images.pexels.com/photos/13368981/pexels-photo-13368981.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70')">
             <span class="site-hero-quicknav-title">Sentieri</span>
           </a>
-          <a class="site-hero-quicknav-card plain" href="#site-weather-section" data-open-site-section="site-weather-section">
-            <span class="site-hero-quicknav-title">Meteo</span>
+          <a class="site-hero-quicknav-card site-hero-weather-card plain" href="#site-weather-section" data-open-site-section="site-weather-section">
+            <div class="site-hero-weather-mini" id="site-hero-weather-mini">
+              <span class="site-hero-weather-kicker" id="hero-weather-label">Meteo ora</span>
+              <div class="site-hero-weather-main">
+                <span class="site-hero-weather-emoji" id="hero-weather-emoji">🌤️</span>
+                <span class="site-hero-weather-temp" id="hero-weather-temp">--°</span>
+              </div>
+              <div class="site-hero-weather-meta">
+                <span class="site-hero-weather-pill" id="hero-weather-wind">💨 -- km/h</span>
+                <span class="site-hero-weather-pill" id="hero-weather-time">🕒 --:--</span>
+              </div>
+            </div>
           </a>
           <a class="site-hero-quicknav-card plain" href="#site-official-communications-section" data-open-site-section="site-official-communications-section">
             <span class="site-hero-quicknav-title">Comunicazioni ufficiali</span>
@@ -1481,7 +1560,7 @@
         </section>
       </div>
 
-    <section class="site-section site-weather-section" aria-label="Open-Meteo weather section">
+    <section id="site-weather-section" class="site-section site-weather-section" aria-label="Open-Meteo weather section">
       <div class="site-weather-panel">
         <div class="site-weather-top">
           <h3 class="site-weather-title">Meteo</h3>
@@ -1498,7 +1577,7 @@
       <div class="site-official-card">
         <div class="site-official-kicker">Area istituzionale</div>
         <h3 class="site-official-title">Comunicazioni ufficiali</h3>
-        <p class="site-official-text">Avvisi e aggiornamenti da fonti ufficiali, sempre con link alla pagina originale.</p>
+        <p class="site-official-text">Le comunicazioni ufficiali dei principali enti governativi che operano sul territorio, tutti in un unico posto.</p>
         <div id="site-official-list" class="site-official-list" aria-label="Lista comunicazioni ufficiali"><div class="site-empty">Caricamento comunicazioni ufficiali…</div></div>
         <p class="site-official-disclaimer">5TerreGo.com organizza questi avvisi per renderli più facili da consultare. Per decisioni importanti verifica sempre la fonte ufficiale.</p>
       </div>
@@ -1615,6 +1694,12 @@ window.FTG_ACTIONBAR_CONFIG = {
   var currentSitePOIFilter = 'all';
   var currentSitePOILocationFilter = 'all';
   var currentMapFilter = 'all';
+  var WEATHER_CONFIG = {
+    label: 'Cinque Terre',
+    latitude: 44.1275,
+    longitude: 9.7092,
+    timezone: 'Europe/Rome'
+  };
   var siteDeferredLoadState = { stories: false, pois: false, trails: false, weather: false, official: false };
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
@@ -1741,6 +1826,30 @@ window.FTG_ACTIONBAR_CONFIG = {
     }).join('') + '</div></div>';
   }
 
+  function renderHeroWeatherQuickCard() {
+    var current = siteWeatherData && siteWeatherData.current_weather ? siteWeatherData.current_weather : null;
+    var label = document.getElementById('hero-weather-label');
+    var emoji = document.getElementById('hero-weather-emoji');
+    var temp = document.getElementById('hero-weather-temp');
+    var wind = document.getElementById('hero-weather-wind');
+    var time = document.getElementById('hero-weather-time');
+    var currentTime = '--:--';
+    if (!label || !emoji || !temp || !wind || !time) return;
+    label.textContent = WEATHER_CONFIG.label + ' · ' + getUILabel('now', 'Ora');
+    if (!current) {
+      emoji.textContent = '🌤️';
+      temp.textContent = '--°';
+      wind.textContent = '💨 -- km/h';
+      time.textContent = '🕒 --:--';
+      return;
+    }
+    if (current.time) currentTime = String(current.time).slice(11, 16) || '--:--';
+    emoji.textContent = getWeatherEmoji(current.weathercode);
+    temp.textContent = formatWeatherValue(current.temperature, '°');
+    wind.textContent = '💨 ' + formatWeatherValue(current.windspeed, ' km/h');
+    time.textContent = '🕒 ' + currentTime;
+  }
+
   function renderSiteWeatherSection() {
     var container = document.getElementById('site-weather-body');
     var current;
@@ -1753,12 +1862,14 @@ window.FTG_ACTIONBAR_CONFIG = {
     if (!container) return;
     if (!siteWeatherData) {
       renderSiteWeatherTabs(null);
+      renderHeroWeatherQuickCard();
       container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('loadingWeather', 'Caricamento meteo…')) + '</div>';
       return;
     }
     current = siteWeatherData.current_weather || {};
     daily = siteWeatherData.daily || {};
     renderSiteWeatherTabs(daily);
+    renderHeroWeatherQuickCard();
     if (!daily.time || !daily.time.length) {
       container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('weatherUnavailable', 'Previsioni non disponibili.')) + '</div>';
       return;
@@ -1772,10 +1883,15 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   async function updateWeather() {
+    var url;
+    var response;
+    var data;
+    siteDeferredLoadState.weather = true;
     try {
-      var url = 'https://api.open-meteo.com/v1/forecast?latitude=44.12&longitude=9.71&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=Europe%2FRome&forecast_days=7';
-      var response = await fetch(url);
-      var data = await response.json();
+      url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(String(WEATHER_CONFIG.latitude)) + '&longitude=' + encodeURIComponent(String(WEATHER_CONFIG.longitude)) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=' + encodeURIComponent(WEATHER_CONFIG.timezone) + '&forecast_days=7';
+      response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Weather HTTP ' + response.status);
+      data = await response.json();
       siteWeatherData = data || null;
       renderSiteWeatherSection();
     } catch (error) {
@@ -2413,7 +2529,6 @@ window.FTG_ACTIONBAR_CONFIG = {
       ['stories', loadBlogPosts, 260],
       ['pois', loadPOIs, 820],
       ['trails', loadTrails, 1380],
-      ['weather', updateWeather, 1940],
       ['official', loadOfficialCommunications, 2500]
     ];
 
@@ -2429,7 +2544,6 @@ window.FTG_ACTIONBAR_CONFIG = {
     observed = [
       { element: document.getElementById('site-places-section'), key: 'pois', loader: loadPOIs },
       { element: document.getElementById('site-trails-section'), key: 'trails', loader: loadTrails },
-      { element: document.getElementById('site-weather-section') || document.querySelector('.site-weather-section'), key: 'weather', loader: updateWeather },
       { element: document.getElementById('site-official-communications-section'), key: 'official', loader: loadOfficialCommunications }
     ].filter(function(entry) { return !!entry.element; });
 
@@ -2505,6 +2619,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     setupInteractions();
     checkUser();
     renderSiteViewFromMapData();
+    updateWeather();
     scheduleDeferredDataLoads();
   }
 
@@ -2521,7 +2636,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       login:'Login', map:'Map', site:'Site', search:'Search everywhere on the site', all:'All', trails:'Trails', viewpoints:'Viewpoints', beaches:'Beaches', food:'Food', churches:'Churches', monuments:'Monuments', stations:'Stations', ferry:'Ferry', curiosities:'Curiosities', recenter:'Recenter', exitTour:'Exit tour', heroTitle:'A free guide to explore the Cinque Terre with respect.', heroText:'5TerreGo is a free interactive map created by young local builders to help visitors orient themselves, discover the villages, spread flows more intelligently and promote more conscious tourism.', openInteractiveMap:'Open the free guide', stories:'Local stories', experiences:'Exclusive discounts', bookStay:'Trails', fiveVillages:'The five villages', tapMap:'tap to open map', startHere:'Start here', siteSections:'site sections', readBefore:'Discover before you arrive.', storyText:'Short guides, local stories and essential information to help visitors understand the Cinque Terre, respect the places and move with more awareness.', openStories:'Open local stories', thingsDoing:'Direct value for visitors.', expText:'Free benefits at selected local businesses, designed to create a simpler connection between visitors and the local area.', openExperiences:'See exclusive discounts', bookSmarter:'Clear trails before the first step.', stayText:'Mobile trail cards with difficulty, duration and elevation profile, so visitors can choose suitable routes and prepare before walking.', openStay:'Open trail', weather:'Weather', weatherNote:'Now and next hours', placesSection:'Useful places', placesNote:'map', placesCopy:'Selected points from the map: viewpoints, beaches, monuments, stations and useful places to move more consciously through the villages.', anchorStories:'Stories', anchorDiscounts:'Discounts', anchorTrails:'Trails', anchorPlaces:'Places', anchorWeather:'Weather', officialKicker:'Institutional area', officialTitle:'Official communications', officialText:'Official notices, public updates and institutional alerts collected with a direct link to the original source.', institutionalNotice:'Institutional notice', loadingWeather:'Loading weather data…', trailCopy:'Each card helps visitors evaluate the route before walking: starting point, difficulty, estimated time and useful details directly on the map.', from:'From', difficulty:'Difficulty', time:'Time', elevation:'Elevation', openTrail:'Open trail', distance:'Distance', estimatedTime:'Estimated time', shoes:'Recommended shoes', price:'Price', gainLoss:'Elevation gain / loss', profile:'Elevation profile', directions:'Directions', aiGuide:'AI guide', readMore:'Read more', startTour:'Start village tour', tourActive:'Tour active', nextStop:'Next stop', moveNext:'Move toward the next stop.', followPath:'Follow the path', audio:'▶ Audio', contact:'Contact us', footerNote:'All rights reserved. Map, weather, ferry and local information are provided for guidance only and may change without notice.', aiSubtitle:'Your Cinque Terre guide', aiPlaceholder:'Ask the guide...', ai1:'what should I do today?', ai2:'best sunset?', ai3:'beaches and viewpoints?', ai4:'trails or ferry?', aiClose:'Close AI', aiOpen:'Open AI Guide', liveLoading:'Loading live stream'
     },
     it: {
-      login:'Accedi', map:'Mappa', site:'Sito', search:'Cerca ovunque nel sito', all:'Tutti', trails:'Sentieri', viewpoints:'Panorami', beaches:'Spiagge', food:'Cibo', churches:'Chiese', monuments:'Monumenti', stations:'Stazioni', ferry:'Traghetti', curiosities:'Curiosità', recenter:'Ricentra', exitTour:'Esci dal tour', heroTitle:'Una guida gratuita per vivere le Cinque Terre con rispetto.', heroText:'5TerreGo è una mappa interattiva gratuita creata da giovani del territorio per orientare i visitatori, valorizzare i borghi, distribuire meglio i flussi e promuovere un turismo più consapevole.', openInteractiveMap:'Apri la guida gratuita', stories:'Storie locali', experiences:'Sconti esclusivi', bookStay:'Sentieri', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni del sito', readBefore:'Scoprire prima di arrivare.', storyText:'Guide brevi, storie locali e informazioni essenziali per aiutare chi visita le Cinque Terre a capire i luoghi, rispettarli e muoversi con più consapevolezza.', openStories:'Apri le storie locali', thingsDoing:'Valore diretto per chi visita.', expText:'Vantaggi gratuiti presso attività selezionate del territorio, pensati per creare un rapporto più semplice tra visitatori e realtà locali.', openExperiences:'Vedi sconti esclusivi', bookSmarter:'Sentieri chiari, prima del passo.', stayText:'Percorsi consultabili da mobile con difficoltà, durata e profilo altimetrico, per scegliere itinerari adatti e prepararsi meglio prima di partire.', openStay:'Apri sentiero', weather:'Meteo', weatherNote:'Ora e prossime ore', placesSection:'Luoghi utili', placesNote:'mappa', placesCopy:'Punti selezionati dalla mappa: panorami, spiagge, monumenti, stazioni e luoghi utili per orientarsi meglio nei borghi.', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo', officialKicker:'Area istituzionale', officialTitle:'Comunicazioni ufficiali', officialText:'Avvisi, aggiornamenti pubblici e comunicazioni istituzionali raccolti con link diretto alla fonte originale.', institutionalNotice:'Comunicazione istituzionale', loadingWeather:'Caricamento meteo…', trailCopy:'Ogni scheda aiuta a valutare il percorso prima di camminare: punto di partenza, difficoltà, tempi indicativi e dettagli utili direttamente sulla mappa.', from:'Da', difficulty:'Difficoltà', time:'Tempo', elevation:'Altimetria', openTrail:'Apri sentiero', distance:'Distanza', estimatedTime:'Tempo stimato', shoes:'Scarpe consigliate', price:'Prezzo', gainLoss:'Dislivello salita / discesa', profile:'Profilo altimetrico', directions:'Indicazioni', aiGuide:'Guida AI', readMore:'Leggi di più', startTour:'Avvia tour del borgo', tourActive:'Tour attivo', nextStop:'Prossima tappa', moveNext:'Muoviti verso la prossima tappa.', followPath:'Segui il percorso', audio:'▶ Audio', contact:'Contattaci', footerNote:'Tutti i diritti riservati. Mappa, meteo, traghetti e informazioni locali sono indicativi e possono cambiare senza preavviso.', aiSubtitle:'La tua guida delle Cinque Terre', aiPlaceholder:'Chiedi alla guida...', ai1:'cosa fare oggi?', ai2:'miglior tramonto?', ai3:'spiagge e panorami?', ai4:'sentieri o traghetto?', aiClose:'Chiudi AI', aiOpen:'Apri guida AI', liveLoading:'Caricamento live'
+      login:'Accedi', map:'Mappa', site:'Sito', search:'Cerca ovunque nel sito', all:'Tutti', trails:'Sentieri', viewpoints:'Panorami', beaches:'Spiagge', food:'Cibo', churches:'Chiese', monuments:'Monumenti', stations:'Stazioni', ferry:'Traghetti', curiosities:'Curiosità', recenter:'Ricentra', exitTour:'Esci dal tour', heroTitle:'Una guida gratuita per vivere le Cinque Terre con rispetto.', heroText:'5TerreGo è una mappa interattiva gratuita creata da giovani del territorio per orientare i visitatori, valorizzare i borghi, distribuire meglio i flussi e promuovere un turismo più consapevole.', openInteractiveMap:'Apri la guida gratuita', stories:'Storie locali', experiences:'Sconti esclusivi', bookStay:'Sentieri', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni del sito', readBefore:'Scoprire prima di arrivare.', storyText:'Guide brevi, storie locali e informazioni essenziali per aiutare chi visita le Cinque Terre a capire i luoghi, rispettarli e muoversi con più consapevolezza.', openStories:'Apri le storie locali', thingsDoing:'Valore diretto per chi visita.', expText:'Vantaggi gratuiti presso attività selezionate del territorio, pensati per creare un rapporto più semplice tra visitatori e realtà locali.', openExperiences:'Vedi sconti esclusivi', bookSmarter:'Sentieri chiari, prima del passo.', stayText:'Percorsi consultabili da mobile con difficoltà, durata e profilo altimetrico, per scegliere itinerari adatti e prepararsi meglio prima di partire.', openStay:'Apri sentiero', weather:'Meteo', weatherNote:'Ora e prossime ore', placesSection:'Luoghi utili', placesNote:'mappa', placesCopy:'Punti selezionati dalla mappa: panorami, spiagge, monumenti, stazioni e luoghi utili per orientarsi meglio nei borghi.', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo', officialKicker:'Area istituzionale', officialTitle:'Comunicazioni ufficiali', officialText:'Le comunicazioni ufficiali dei principali enti governativi che operano sul territorio, tutti in un unico posto.', institutionalNotice:'Comunicazione istituzionale', loadingWeather:'Caricamento meteo…', trailCopy:'Ogni scheda aiuta a valutare il percorso prima di camminare: punto di partenza, difficoltà, tempi indicativi e dettagli utili direttamente sulla mappa.', from:'Da', difficulty:'Difficoltà', time:'Tempo', elevation:'Altimetria', openTrail:'Apri sentiero', distance:'Distanza', estimatedTime:'Tempo stimato', shoes:'Scarpe consigliate', price:'Prezzo', gainLoss:'Dislivello salita / discesa', profile:'Profilo altimetrico', directions:'Indicazioni', aiGuide:'Guida AI', readMore:'Leggi di più', startTour:'Avvia tour del borgo', tourActive:'Tour attivo', nextStop:'Prossima tappa', moveNext:'Muoviti verso la prossima tappa.', followPath:'Segui il percorso', audio:'▶ Audio', contact:'Contattaci', footerNote:'Tutti i diritti riservati. Mappa, meteo, traghetti e informazioni locali sono indicativi e possono cambiare senza preavviso.', aiSubtitle:'La tua guida delle Cinque Terre', aiPlaceholder:'Chiedi alla guida...', ai1:'cosa fare oggi?', ai2:'miglior tramonto?', ai3:'spiagge e panorami?', ai4:'sentieri o traghetto?', aiClose:'Chiudi AI', aiOpen:'Apri guida AI', liveLoading:'Caricamento live'
     },
     fr: { login:'Connexion', map:'Carte', site:'Site', search:'Rechercher partout sur le site', all:'Tout', trails:'Sentiers', viewpoints:'Points de vue', beaches:'Plages', food:'Cuisine', churches:'Églises', monuments:'Monuments', stations:'Gares', ferry:'Ferry', curiosities:'Curiosités', recenter:'Recentrer', exitTour:'Quitter le tour', heroTitle:'Votre guide interactif complet des Cinque Terre.', heroText:'Orientez-vous avec la carte interactive, lisez des histoires locales, débloquez des réductions exclusives, vivez des expériences inoubliables et réservez des séjours au meilleur prix garanti.', openInteractiveMap:'Ouvrir la carte interactive', stories:'Histoires', experiences:'Expériences', bookStay:'Séjours', fiveVillages:'Les cinq villages', tapMap:'touchez pour ouvrir la carte', startHere:'Commencez ici', siteSections:'sections du site', readBefore:'À lire avant de partir.', storyText:'Articles de guide, notes sur les villages et idées pratiques de 5TerreGo.', openStories:'Ouvrir les Histoires', thingsDoing:'Des choses qui valent le détour.', expText:'Activités sélectionnées autour des cinq villages, pensées pour une vraie façon d’explorer.', openExperiences:'Ouvrir les Expériences', bookSmarter:'Réservez mieux. Payez un euro de moins.', stayText:'Notre promesse est simple : la même chambre, toujours 1 € de moins que le prix le plus bas trouvé en ligne. Vous trouvez une meilleure offre ? Envoyez-la-nous et nous vous la vendrons un euro de moins.', openStay:'Ouvrir Réserver votre séjour', weather:'Météo', weatherNote:'Maintenant et prochaines heures', loadingWeather:'Chargement de la météo…', trailCopy:'Choisissez un itinéraire par difficulté et temps de marche. Les cartes des sentiers défilent horizontalement et ouvrent la page complète sur la carte.', from:'De', difficulty:'Difficulté', time:'Temps', elevation:'Altitude', openTrail:'Ouvrir le sentier', distance:'Distance', estimatedTime:'Temps estimé', shoes:'Chaussures conseillées', price:'Prix', gainLoss:'Dénivelé montée / descente', profile:'Profil d’altitude', directions:'Itinéraire', aiGuide:'Guide IA', readMore:'Lire plus', startTour:'Démarrer le tour du village', tourActive:'Tour actif', nextStop:'Prochain arrêt', moveNext:'Avancez vers le prochain arrêt.', followPath:'Suivre le parcours', audio:'▶ Audio', contact:'Contactez-nous', footerNote:'Tous droits réservés. La carte, la météo, les ferries et les informations locales sont indicatifs et peuvent changer sans préavis.', aiSubtitle:'Votre guide des Cinque Terre', aiPlaceholder:'Demandez au guide...', ai1:'que faire aujourd’hui ?', ai2:'meilleur coucher de soleil ?', ai3:'plages et points de vue ?', ai4:'sentiers ou ferry ?', aiClose:'Fermer l’IA', aiOpen:'Ouvrir le guide IA', liveLoading:'Chargement du direct'
     },
@@ -2536,7 +2651,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   };
   var SIMPLE_COPY = {
     en: { heroTitle:'Cinque Terre, made simple.', heroText:'Villages, trails, weather, ferries and useful alerts. One free guide to move better and respect the territory.', openInteractiveMap:'Open the guide', fiveVillages:'The five villages', tapMap:'tap to open map', startHere:'Start here', siteSections:'sections', readBefore:'Useful Stories', storyText:'Short local guides and articles to understand the villages before you arrive.', openStories:'Read stories', thingsDoing:'Local discounts.', expText:'Free offers from selected local businesses. No commission for partners.', bookSmarter:'Clear trails.', stayText:'Difficulty, time and elevation to choose the right route before you start.', openStay:'Open trail', placesSection:'Useful places', placesCopy:'Viewpoints, beaches, monuments, stations and practical places to open on the map.', weather:'Weather', weatherNote:'Now and next hours', officialKicker:'Official sources', officialTitle:'Official updates', officialText:'Alerts and public updates from official sources, always linked to the original page.', officialDisclaimer:'5TerreGo.com organizes these updates to make them easier to read. For important decisions, always check the official source.', trailCopy:'Choose a trail, check the key details and open it on the map.', footerNote:'All rights reserved. Texts, visual design, code, maps, database structure, itineraries and original editorial content may not be copied, reproduced, scraped, adapted or reused without written permission.', contact:'Contact us', anchorStories:'Stories', anchorDiscounts:'Discounts', anchorTrails:'Trails', anchorPlaces:'Places', anchorWeather:'Weather' },
-    it: { heroTitle:'Cinque Terre, semplice.', heroText:'Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.', openInteractiveMap:'Apri la guida', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni', readBefore:'Storie Utili', storyText:'Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.', openStories:'Leggi le storie', thingsDoing:'Sconti locali.', expText:'Offerte gratuite da attività selezionate. Nessuna commissione per i partner.', bookSmarter:'Sentieri chiari.', stayText:'Difficoltà, durata e altimetria per scegliere il percorso giusto prima di partire.', openStay:'Apri sentiero', placesSection:'Luoghi utili', placesCopy:'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.', weather:'Meteo', weatherNote:'Ora e prossime ore', officialKicker:'Fonti ufficiali', officialTitle:'Avvisi ufficiali', officialText:'Avvisi e aggiornamenti da fonti ufficiali, sempre con link alla pagina originale.', officialDisclaimer:'5TerreGo.com organizza questi avvisi per renderli più facili da consultare. Per decisioni importanti verifica sempre la fonte ufficiale.', trailCopy:'Scegli un sentiero, controlla i dati principali e aprilo sulla mappa.', footerNote:'Tutti i diritti riservati. Testi, grafica, codice, mappe, struttura dati, itinerari e contenuti editoriali originali non possono essere copiati, riprodotti, estratti, adattati o riutilizzati senza autorizzazione scritta.', contact:'Contattaci', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo' },
+    it: { heroTitle:'Cinque Terre, semplice.', heroText:'Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.', openInteractiveMap:'Apri la guida', fiveVillages:'I cinque borghi', tapMap:'tocca per aprire la mappa', startHere:'Inizia da qui', siteSections:'sezioni', readBefore:'Storie Utili', storyText:'Guide brevi e articoli locali per capire meglio i borghi prima di arrivare.', openStories:'Leggi le storie', thingsDoing:'Sconti locali.', expText:'Offerte gratuite da attività selezionate. Nessuna commissione per i partner.', bookSmarter:'Sentieri chiari.', stayText:'Difficoltà, durata e altimetria per scegliere il percorso giusto prima di partire.', openStay:'Apri sentiero', placesSection:'Luoghi utili', placesCopy:'Panorami, spiagge, monumenti, stazioni e punti comodi da aprire sulla mappa.', weather:'Meteo', weatherNote:'Ora e prossime ore', officialKicker:'Fonti ufficiali', officialTitle:'Avvisi ufficiali', officialText:'Le comunicazioni ufficiali dei principali enti governativi che operano sul territorio, tutti in un unico posto.', officialDisclaimer:'5TerreGo.com organizza questi avvisi per renderli più facili da consultare. Per decisioni importanti verifica sempre la fonte ufficiale.', trailCopy:'Scegli un sentiero, controlla i dati principali e aprilo sulla mappa.', footerNote:'Tutti i diritti riservati. Testi, grafica, codice, mappe, struttura dati, itinerari e contenuti editoriali originali non possono essere copiati, riprodotti, estratti, adattati o riutilizzati senza autorizzazione scritta.', contact:'Contattaci', anchorStories:'Storie', anchorDiscounts:'Sconti', anchorTrails:'Sentieri', anchorPlaces:'Luoghi', anchorWeather:'Meteo' },
     fr: { heroTitle:'Cinque Terre, en simple.', heroText:'Carte, villages, sentiers, météo, ferries et alertes utiles. Un guide gratuit pour mieux se déplacer et respecter le territoire.', openInteractiveMap:'Ouvrir le guide', fiveVillages:'Les cinq villages', tapMap:'touchez pour ouvrir la carte', startHere:'Commencez ici', siteSections:'sections', readBefore:'Histoires utiles.', storyText:'Guides courts et articles locaux pour mieux comprendre les villages avant d’arriver.', openStories:'Lire les histoires', thingsDoing:'Réductions locales.', expText:'Offres gratuites de commerces sélectionnés. Aucune commission pour les partenaires.', bookSmarter:'Sentiers clairs.', stayText:'Difficulté, durée et altitude pour choisir le bon itinéraire avant de partir.', openStay:'Ouvrir le sentier', placesSection:'Lieux utiles', placesCopy:'Points de vue, plages, monuments, gares et lieux pratiques à ouvrir sur la carte.', weather:'Météo', weatherNote:'Maintenant et prochaines heures', officialKicker:'Sources officielles', officialTitle:'Mises à jour officielles', officialText:'Alertes et mises à jour publiques de sources officielles, toujours liées à la page originale.', officialDisclaimer:'5TerreGo.com organise ces informations pour les rendre plus faciles à consulter. Pour les décisions importantes, vérifiez toujours la source officielle.', trailCopy:'Choisissez un sentier, vérifiez les informations principales et ouvrez-le sur la carte.', footerNote:'Tous droits réservés. Textes, design, code, cartes, structure de données, itinéraires et contenus éditoriaux originaux ne peuvent pas être copiés, reproduits, extraits, adaptés ou réutilisés sans autorisation écrite.', contact:'Contact', anchorStories:'Histoires', anchorDiscounts:'Réductions', anchorTrails:'Sentiers', anchorPlaces:'Lieux', anchorWeather:'Météo' },
     de: { heroTitle:'Cinque Terre, einfach.', heroText:'Karte, Dörfer, Wege, Wetter, Fähren und nützliche Hinweise. Ein kostenloser Guide, um sich besser zu bewegen und die Region zu respektieren.', openInteractiveMap:'Guide öffnen', fiveVillages:'Die fünf Dörfer', tapMap:'tippen, um die Karte zu öffnen', startHere:'Hier starten', siteSections:'Bereiche', readBefore:'Nützliche Stories.', storyText:'Kurze lokale Guides und Artikel, um die Dörfer vor der Ankunft besser zu verstehen.', openStories:'Stories lesen', thingsDoing:'Lokale Rabatte.', expText:'Kostenlose Angebote von ausgewählten lokalen Partnern. Keine Provision für Partner.', bookSmarter:'Klare Wege.', stayText:'Schwierigkeit, Zeit und Höhenprofil, um vor dem Start die richtige Route zu wählen.', openStay:'Weg öffnen', placesSection:'Nützliche Orte', placesCopy:'Aussichtspunkte, Strände, Denkmäler, Bahnhöfe und praktische Orte direkt auf der Karte.', weather:'Wetter', weatherNote:'Jetzt und nächste Stunden', officialKicker:'Offizielle Quellen', officialTitle:'Offizielle Updates', officialText:'Hinweise und öffentliche Updates aus offiziellen Quellen, immer mit Link zur Originalseite.', officialDisclaimer:'5TerreGo.com ordnet diese Hinweise, damit sie leichter lesbar sind. Für wichtige Entscheidungen immer die offizielle Quelle prüfen.', trailCopy:'Wähle einen Weg, prüfe die wichtigsten Daten und öffne ihn auf der Karte.', footerNote:'Alle Rechte vorbehalten. Texte, visuelles Design, Code, Karten, Datenstruktur, Routen und originale redaktionelle Inhalte dürfen ohne schriftliche Genehmigung nicht kopiert, reproduziert, ausgelesen, angepasst oder wiederverwendet werden.', contact:'Kontakt', anchorStories:'Stories', anchorDiscounts:'Rabatte', anchorTrails:'Wege', anchorPlaces:'Orte', anchorWeather:'Wetter' },
     ru: { heroTitle:'Чинкве-Терре проще.', heroText:'Карта, деревни, маршруты, погода, паромы и важные уведомления. Бесплатный гид, чтобы легче ориентироваться и уважать территорию.', openInteractiveMap:'Открыть гид', fiveVillages:'Пять деревень', tapMap:'нажмите, чтобы открыть карту', startHere:'Начните здесь', siteSections:'разделы', readBefore:'Полезные истории.', storyText:'Короткие местные гиды и статьи, чтобы лучше понять деревни до приезда.', openStories:'Читать истории', thingsDoing:'Местные скидки.', expText:'Бесплатные предложения от выбранных местных заведений. Без комиссии для партнёров.', bookSmarter:'Понятные маршруты.', stayText:'Сложность, время и высота помогут выбрать маршрут до старта.', openStay:'Открыть маршрут', placesSection:'Полезные места', placesCopy:'Смотровые точки, пляжи, памятники, станции и удобные места на карте.', weather:'Погода', weatherNote:'Сейчас и ближайшие часы', officialKicker:'Официальные источники', officialTitle:'Официальные обновления', officialText:'Уведомления и публичные обновления из официальных источников, всегда со ссылкой на оригинал.', officialDisclaimer:'5TerreGo.com упорядочивает эти уведомления для удобного просмотра. Для важных решений всегда проверяйте официальный источник.', trailCopy:'Выберите маршрут, проверьте главные данные и откройте его на карте.', footerNote:'Все права защищены. Тексты, визуальный дизайн, код, карты, структура данных, маршруты и оригинальные редакционные материалы нельзя копировать, воспроизводить, извлекать, адаптировать или повторно использовать без письменного разрешения.', contact:'Связаться', anchorStories:'Истории', anchorDiscounts:'Скидки', anchorTrails:'Маршруты', anchorPlaces:'Места', anchorWeather:'Погода' },
