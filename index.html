@@ -150,10 +150,21 @@
     @media (max-width: 380px) { .mode-bar { gap: 7px; } .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; } .top-bar { left: 8px; right: 8px; padding: 7px; border-radius: 22px; gap: 7px; } .top-row { grid-template-columns: auto 1fr auto; gap: 7px; min-height: 34px; } .center-brand { font-size: 12.5px; letter-spacing: -0.055em; } #app-menu-toggle { width: 34px; height: 34px; padding: 9px; gap: 4px; } #app-menu-toggle span { width: 6px; height: 6px; } .app-menu { right: 8px; width: min(292px, calc(100vw - 16px)); border-radius: 22px; } .app-menu-link { min-height: 68px; padding: 10px; } .top-bar.menu-expanded .app-menu { left: 20px; right: 20px; top: calc(88px + env(safe-area-inset-top)); bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; gap: 8px; grid-template-rows: auto minmax(0, 1fr) auto auto; align-items: stretch; } .top-bar.menu-expanded .app-menu-language { left: 20px; top: calc(34px + env(safe-area-inset-top)); width: 42px; max-width: 42px; } .top-bar.menu-expanded .app-menu-language.language-expanded { left: 18px; right: 68px; top: calc(64px + env(safe-area-inset-top)); max-width: none; } .top-bar.menu-expanded .center-brand { top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded #app-menu-toggle { right: 19px; top: calc(34px + env(safe-area-inset-top)); } .top-bar.menu-expanded .app-menu-head { padding-bottom: 6px; } .top-bar.menu-expanded #app-menu-username { font-size: 27px; line-height: 1.1; padding-bottom: 3px; } .top-bar.menu-expanded .app-menu-grid { gap: 10px; margin-top: 0; margin-bottom: 0; align-self: center; justify-self: stretch; padding: 0 calc((100% - 86%) / 2); scroll-padding-inline: calc((100% - 86%) / 2); } .top-bar.menu-expanded .app-menu-link { flex: 0 0 86%; width: 86%; aspect-ratio: 1 / 1; height: auto; min-height: 248px; max-height: 248px; padding: 14px; border-radius: 26px; } .top-bar.menu-expanded .app-menu-quick-row { gap: 7px; margin-top: 0; } .top-bar.menu-expanded .app-menu-quick-title { margin-top: 0; } .app-menu-quick-link { height: 38px; min-height: 38px; max-height: 38px; padding: 0 9px; font-size: 11px; } #search { min-height: 38px; padding-left: 38px; font-size: 14px; } .search-wrap::before { left: 14px; font-size: 16px; } }
     .site-view-panel { position: fixed; inset: 0; z-index: 2; display: block; height: 100dvh; background: linear-gradient(180deg, #0b2a3d 0%, #082033 12%, #071424 38%, #071424 100%); color: #fff; overflow: hidden; -webkit-overflow-scrolling: touch; }
     .site-view-panel.ftg-section-paging { overflow: hidden; }
-    .site-view-panel.ftg-section-paging .site-view-inner { position: relative; height: 100dvh; min-height: 100dvh; overflow: hidden; transition: transform .58s cubic-bezier(.2,.9,.2,1); will-change: transform; }
+    .site-view-panel.ftg-section-paging .site-view-inner { position: relative; height: 100dvh; min-height: 100dvh; overflow: hidden; transition: transform .46s cubic-bezier(.22,.88,.24,1); will-change: transform; }
+    .site-view-panel.ftg-section-paging .site-view-inner.ftg-is-dragging {
+      transition: none !important;
+    }
     .site-view-panel.ftg-section-paging .ftg-page-frame { position: absolute; left: 0; right: 0; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; display: flex; align-items: flex-start; justify-content: flex-start; padding: 0 14px calc(104px + env(safe-area-inset-bottom)); overflow: hidden; }
+    .site-view-panel.ftg-section-paging .ftg-page-frame[data-ftg-page-index="0"] {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .site-view-panel.ftg-section-paging .ftg-page-frame[data-ftg-page-index="0"] .ftg-page-shell {
+      width: 100vw;
+      max-width: 100vw;
+    }
     .site-view-panel.ftg-section-paging .ftg-page-shell { width: 100%; max-width: 100%; max-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); display: flex; align-items: flex-start; justify-content: flex-start; overflow: visible; }
-    .site-view-panel.ftg-section-paging #site-welcome-section { margin: 0 !important; width: 100%; }
+    .site-view-panel.ftg-section-paging #site-welcome-section { margin: 0 !important; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
       position: absolute;
       left: 0;
@@ -165,7 +176,7 @@
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      padding: 92px 22px 0;
+      padding: 92px 0 0;
     }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
@@ -188,7 +199,7 @@
       right: 0;
       top: 56dvh;
       z-index: 4;
-      padding: 0 14px;
+      padding: 0;
     }
     .site-hero-quicknav-track {
       display: flex;
@@ -197,7 +208,7 @@
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 2px 2px 4px;
+      padding: 2px 0 4px;
       scroll-snap-type: x proximity;
     }
     .site-hero-quicknav-track::-webkit-scrollbar {
@@ -265,11 +276,11 @@
       }
       .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
         min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
-        padding: 84px 20px 0;
+        padding: 84px 0 0;
       }
       .site-hero-quicknav {
         top: 57dvh;
-        padding: 0 12px;
+        padding: 0;
       }
       .site-hero-quicknav-card {
         flex-basis: min(68vw, 214px);
@@ -282,6 +293,66 @@
       }
     }
     .site-hero-video { display: none !important; }
+    .site-hero-section {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      width: 100%;
+      height: 100dvh;
+      min-height: 100dvh;
+      max-height: 100dvh;
+    }
+    .site-hero-slider {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      background: #071424;
+    }
+    .site-hero-slider::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background:
+        linear-gradient(180deg, rgba(4,10,18,.10) 0%, rgba(4,10,18,.18) 18%, rgba(4,10,18,.34) 46%, rgba(7,20,36,.72) 78%, rgba(7,20,36,.96) 100%),
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,.10), transparent 38%);
+    }
+    .site-hero-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center center;
+      opacity: 0;
+      will-change: opacity;
+      animation: siteHeroSlideCut 24s steps(1, end) infinite;
+    }
+    .site-hero-slide:nth-child(1) { animation-delay: 0s; }
+    .site-hero-slide:nth-child(2) { animation-delay: 8s; }
+    .site-hero-slide:nth-child(3) { animation-delay: 16s; }
+    @keyframes siteHeroSlideCut {
+      0% { opacity: 0; }
+      0.01% { opacity: 1; }
+      33.32% { opacity: 1; }
+      33.33% { opacity: 0; }
+      100% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .site-hero-slide {
+        animation: none !important;
+        opacity: 0;
+      }
+      .site-hero-slide:first-child {
+        opacity: 1;
+      }
+    }
     .site-hero-section::before { content: none; }
     .site-hero-section::after { content: none; }
     .site-hero-content { position: relative; z-index: 4; transform: none; opacity: 1; text-shadow: 0 14px 42px rgba(0,0,0,.38); pointer-events: auto; }
@@ -652,7 +723,7 @@
     .site-footer-actions { margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
     .site-footer-contact-btn { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; background: #111; color: #fff; text-decoration: none; font-size: 12px; line-height: 1; font-weight: 950; box-shadow: 0 10px 26px rgba(0,0,0,.08); }
     @media (max-width: 380px) { .site-weather-main-row { grid-template-columns: 62px minmax(0, 1fr) 108px; gap: 9px; } .site-weather-emoji { width: 62px; height: 62px; border-radius: 22px; font-size: 37px; } .site-weather-main-temp { font-size: 46px; } .site-weather-main-desc { font-size: 15px; } .site-weather-sun-inline { width: 108px; min-width: 100px; } .site-weather-sun-arc { width: 104px; height: 52px; } .site-weather-sun-times { width: 104px; font-size: 9px; } .site-weather-data-grid { gap: 6px; } .site-weather-data-card { padding: 9px 7px; } .site-weather-data-value { font-size: 13px; } }
-    @media (max-width: 380px) { .site-hero-section { padding-left: 22px; padding-right: 22px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); } .site-view-title { font-size: clamp(36px, 10.8vw, 62px); } .site-hero-primary-action { margin-bottom: 10px; } .site-hero-primary-action a { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-hero-actions { gap: 8px; } .site-hero-actions a, .site-hero-actions button { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-section { margin-left: 12px; margin-right: 12px; } .site-guide-band { margin-left: 12px; margin-right: 12px; } .site-page-card.primary h3 { font-size: 28px; } .site-village-tile { flex-basis: 82%; } }
+    @media (max-width: 380px) { .site-hero-section { padding-left: 0; padding-right: 0; padding-bottom: calc(104px + env(safe-area-inset-bottom)); } .site-view-title { font-size: clamp(36px, 10.8vw, 62px); } .site-hero-primary-action { margin-bottom: 10px; } .site-hero-primary-action a { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-hero-actions { gap: 8px; } .site-hero-actions a, .site-hero-actions button { min-height: 40px; padding-left: 7px; padding-right: 7px; font-size: 11.5px; } .site-section { margin-left: 12px; margin-right: 12px; } .site-guide-band { margin-left: 12px; margin-right: 12px; } .site-page-card.primary h3 { font-size: 28px; } .site-village-tile { flex-basis: 82%; } }
     .tour-top-actions { display: none; gap: 8px; }
     #tour-exit-top, #tour-recenter-top { width: 100%; padding: 12px 14px; border: 0; border-radius: 999px; font-size: 14px; font-weight: 950; cursor: pointer; }
     #tour-exit-top { background: rgba(255,138,29,0.92); color: #111; }
@@ -1285,10 +1356,10 @@
 <div id="site-view-panel" class="site-view-panel" aria-hidden="false">
   <main class="site-view-inner">
     <section id="site-welcome-section" class="site-hero-section">
-<div class="site-hero-video-wrap">
-        <video autoplay muted loop playsinline preload="metadata">
-          <source src="videohome.mp4" type="video/mp4">
-        </video>
+      <div class="site-hero-slider" aria-hidden="true">
+        <div class="site-hero-slide" style="background-image:url('https://images.pexels.com/photos/36998433/pexels-photo-36998433.jpeg?_gl=1*ysyqdt*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODExOTcyMTYkbzM2JGcxJHQxNzgxMTk4ODk0JGozNSRsMCRoMA..');"></div>
+        <div class="site-hero-slide" style="background-image:url('https://images.pexels.com/photos/14085348/pexels-photo-14085348.jpeg?_gl=1*nebpwd*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODExOTcyMTYkbzM2JGcxJHQxNzgxMTk5MTI3JGo0MSRsMCRoMA..');"></div>
+        <div class="site-hero-slide" style="background-image:url('https://images.pexels.com/photos/17454329/pexels-photo-17454329.jpeg?_gl=1*j8mq51*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODExOTcyMTYkbzM2JGcxJHQxNzgxMTk5MTcyJGo1OSRsMCRoMA..');"></div>
       </div>
       <div class="site-hero-content">
         <h1 class="site-view-title">Cinque Terre, semplice.</h1>
@@ -1971,13 +2042,28 @@ window.FTG_ACTIONBAR_CONFIG = {
     var panel = document.getElementById('site-view-panel');
     var host;
     var targets;
+    var pages;
     var currentIndex = 0;
-    var wheelGestureLocked = false;
-    var wheelGestureTimer = null;
+    var viewportHeight = window.innerHeight || 1;
+    var currentTranslate = 0;
+    var wheelAccum = 0;
+    var wheelPreview = 0;
+    var wheelTimer = null;
+    var snapLock = false;
     var touchStartY = 0;
     var touchStartX = 0;
-    var touchGestureLocked = false;
+    var touchCurrentY = 0;
+    var touchCurrentX = 0;
+    var touchStartTime = 0;
+    var touchStartIndex = 0;
+    var touchTracking = false;
+    var touchDragging = false;
+    var touchAxis = null;
+    var touchGestureContext = null;
     var pageSelector = '#site-welcome-section, #site-stories-section, #site-places-section, #site-experiences-section, #site-trails-section, .site-weather-section, #site-official-communications-section, .site-footer';
+    var horizontalGestureSelector = '.site-article-slider, .site-poi-slider, .site-trail-slider, .site-official-list, .site-weather-hourly-strip, .site-weather-date-tabs, .site-poi-filters, .site-trails-filters, .site-horizontal-list, .site-hero-quicknav-track';
+    var verticalGestureSelector = '.site-official-full-text';
+    var formGestureSelector = 'select, input, textarea';
 
     if (!panel) return;
     host = panel.querySelector('.site-view-inner');
@@ -2004,22 +2090,54 @@ window.FTG_ACTIONBAR_CONFIG = {
       host.setAttribute('data-ftg-pages-mounted', 'true');
     }
 
-    var pages = Array.prototype.slice.call(host.querySelectorAll('.ftg-page-frame'));
+    pages = Array.prototype.slice.call(host.querySelectorAll('.ftg-page-frame'));
+    if (!pages.length) return;
 
     function clampIndex(index) {
       return Math.max(0, Math.min(index, pages.length - 1));
     }
 
-    function lockWheelGesture() {
-      wheelGestureLocked = true;
-      window.clearTimeout(wheelGestureTimer);
-      wheelGestureTimer = window.setTimeout(function(){
-        wheelGestureLocked = false;
-      }, 900);
+    function baseTranslate(index) {
+      return -(clampIndex(index) * viewportHeight);
+    }
+
+    function previewLimit() {
+      return Math.max(56, Math.round(viewportHeight * 0.22));
+    }
+
+    function getGestureContext(target) {
+      var match;
+      if (!target || !target.closest) return null;
+      match = target.closest(verticalGestureSelector);
+      if (match) return { kind: 'vertical', element: match };
+      match = target.closest(horizontalGestureSelector);
+      if (match) return { kind: 'horizontal', element: match };
+      match = target.closest(formGestureSelector);
+      if (match) return { kind: 'form', element: match };
+      return null;
+    }
+
+    function canScrollVertically(element, delta) {
+      if (!element) return false;
+      if ((element.scrollHeight - element.clientHeight) <= 1) return false;
+      if (delta < 0) return (element.scrollTop + element.clientHeight) < (element.scrollHeight - 1);
+      if (delta > 0) return element.scrollTop > 1;
+      return false;
+    }
+
+    function setDraggingState(isDragging) {
+      host.classList.toggle('ftg-is-dragging', !!isDragging);
+      host.style.transition = isDragging ? 'none' : '';
+    }
+
+    function applyTranslate(value, immediate) {
+      currentTranslate = value;
+      setDraggingState(!!immediate);
+      host.style.transform = 'translate3d(0,' + Math.round(value) + 'px,0)';
     }
 
     function syncPageFrames() {
-      var viewportHeight = window.innerHeight;
+      viewportHeight = window.innerHeight || 1;
       pages.forEach(function(page, index) {
         page.style.top = (index * viewportHeight) + 'px';
         page.style.height = viewportHeight + 'px';
@@ -2030,64 +2148,157 @@ window.FTG_ACTIONBAR_CONFIG = {
       host.style.minHeight = (pages.length * viewportHeight) + 'px';
     }
 
-    function applyPageTransform() {
-      host.style.transform = 'translate3d(0,' + (-(currentIndex * window.innerHeight)) + 'px,0)';
+    function clearWheelPreview() {
+      wheelAccum = 0;
+      wheelPreview = 0;
+      if (wheelTimer) {
+        window.clearTimeout(wheelTimer);
+        wheelTimer = null;
+      }
     }
 
-    function goToPage(index) {
+    function releaseSnapLockSoon() {
+      window.setTimeout(function() {
+        snapLock = false;
+      }, 220);
+    }
+
+    function snapToPage(index) {
       currentIndex = clampIndex(index);
-      applyPageTransform();
+      snapLock = true;
+      clearWheelPreview();
+      applyTranslate(baseTranslate(currentIndex), false);
+      releaseSnapLockSoon();
     }
 
     function goToAdjacentPage(direction) {
-      goToPage(currentIndex + direction);
+      if (!direction) {
+        snapToPage(currentIndex);
+        return;
+      }
+      snapToPage(currentIndex + direction);
+    }
+
+    function dampPreview(delta) {
+      var limit = previewLimit();
+      var resisted = delta * 0.86;
+      if ((currentIndex === 0 && delta > 0) || (currentIndex === pages.length - 1 && delta < 0)) {
+        resisted = delta * 0.24;
+      }
+      return Math.max(-limit, Math.min(limit, resisted));
+    }
+
+    function resolveWheelGesture() {
+      var threshold = Math.max(42, Math.round(viewportHeight * 0.07));
+      var direction = 0;
+      wheelTimer = null;
+      if (wheelAccum > threshold) direction = 1;
+      if (wheelAccum < -threshold) direction = -1;
+      goToAdjacentPage(direction);
     }
 
     syncPageFrames();
-    applyPageTransform();
+    applyTranslate(baseTranslate(currentIndex), false);
 
-    window.addEventListener('resize', function(){
+    window.addEventListener('resize', function() {
       syncPageFrames();
-      applyPageTransform();
+      applyTranslate(baseTranslate(currentIndex), false);
     });
 
-    window.addEventListener('wheel', function(event){
-      var interactive = event.target.closest('.site-article-slider, .site-poi-slider, .site-trail-slider, .site-official-list, .site-weather-hourly-strip, .site-weather-date-tabs, .site-poi-filters, .site-trails-filters, .site-horizontal-list, select, option, input, textarea');
-      if (interactive) return;
-      if (Math.abs(event.deltaY) < 8) return;
+    window.addEventListener('wheel', function(event) {
+      var deltaY;
+      var context = getGestureContext(event.target);
+      deltaY = Number(event.deltaY || 0);
+      if (context && context.kind === 'form') return;
+      if (context && context.kind === 'vertical' && canScrollVertically(context.element, deltaY)) return;
+      if (Math.abs(deltaY) < 4) return;
       event.preventDefault();
-      if (wheelGestureLocked) return;
-      lockWheelGesture();
-      goToAdjacentPage(event.deltaY > 0 ? 1 : -1);
+      if (snapLock) return;
+      wheelAccum += deltaY;
+      wheelPreview += deltaY * 0.32;
+      wheelPreview = Math.max(-previewLimit(), Math.min(previewLimit(), wheelPreview));
+      applyTranslate(baseTranslate(currentIndex) - wheelPreview, true);
+      if (wheelTimer) window.clearTimeout(wheelTimer);
+      wheelTimer = window.setTimeout(resolveWheelGesture, 86);
     }, { passive: false });
 
-    window.addEventListener('touchstart', function(event){
+    window.addEventListener('touchstart', function(event) {
+      var touch;
       if (!event.touches || !event.touches[0]) return;
-      touchStartY = event.touches[0].clientY;
-      touchStartX = event.touches[0].clientX;
+      touch = event.touches[0];
+      touchStartY = touch.clientY;
+      touchStartX = touch.clientX;
+      touchCurrentY = touch.clientY;
+      touchCurrentX = touch.clientX;
+      touchStartTime = Date.now();
+      touchStartIndex = currentIndex;
+      touchTracking = true;
+      touchDragging = false;
+      touchAxis = null;
+      touchGestureContext = getGestureContext(event.target);
     }, { passive: true });
 
-    window.addEventListener('touchend', function(event){
-      var interactive = event.target.closest('.site-article-slider, .site-poi-slider, .site-trail-slider, .site-official-list, .site-weather-hourly-strip, .site-weather-date-tabs, .site-poi-filters, .site-trails-filters, .site-horizontal-list, .site-hero-quicknav-track, select, option, input, textarea');
-      var endY;
-      var endX;
+    window.addEventListener('touchmove', function(event) {
+      var touch;
       var deltaY;
       var deltaX;
-      if (touchGestureLocked) return;
-      if (!event.changedTouches || !event.changedTouches[0]) return;
-      endY = event.changedTouches[0].clientY;
-      endX = event.changedTouches[0].clientX;
-      deltaY = endY - touchStartY;
-      deltaX = endX - touchStartX;
-      if (Math.abs(deltaY) < 42) return;
-      if (interactive && Math.abs(deltaX) > Math.abs(deltaY)) return;
-      if (Math.abs(deltaY) <= Math.abs(deltaX)) return;
-      touchGestureLocked = true;
-      goToAdjacentPage(deltaY < 0 ? 1 : -1);
-      window.setTimeout(function(){ touchGestureLocked = false; }, 900);
-    }, { passive: true });
+      if (!touchTracking || snapLock) return;
+      if (!event.touches || !event.touches[0]) return;
+      touch = event.touches[0];
+      touchCurrentY = touch.clientY;
+      touchCurrentX = touch.clientX;
+      deltaY = touchCurrentY - touchStartY;
+      deltaX = touchCurrentX - touchStartX;
+      if (!touchAxis) {
+        if (Math.abs(deltaY) < 6 && Math.abs(deltaX) < 6) return;
+        touchAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x';
+      }
+      if (touchGestureContext && touchGestureContext.kind === 'form') {
+        return;
+      }
+      if (touchGestureContext && touchGestureContext.kind === 'horizontal' && touchAxis === 'x') {
+        return;
+      }
+      if (touchGestureContext && touchGestureContext.kind === 'vertical' && touchAxis === 'y' && canScrollVertically(touchGestureContext.element, deltaY)) {
+        return;
+      }
+      if (touchAxis !== 'y') return;
+      event.preventDefault();
+      touchDragging = true;
+      applyTranslate(baseTranslate(touchStartIndex) + dampPreview(deltaY), true);
+    }, { passive: false });
 
-    window.FTG_SCROLL_TO_SITE_PAGE = goToPage;
+    function finishTouchGesture() {
+      var deltaY;
+      var elapsed;
+      var velocity;
+      var threshold;
+      var direction = 0;
+      if (!touchTracking) return;
+      deltaY = touchCurrentY - touchStartY;
+      elapsed = Math.max(1, Date.now() - touchStartTime);
+      velocity = deltaY / elapsed;
+      threshold = Math.max(56, Math.round(viewportHeight * 0.11));
+      if (touchDragging && touchAxis === 'y') {
+        if (deltaY <= -threshold || velocity <= -0.42) direction = 1;
+        if (deltaY >= threshold || velocity >= 0.42) direction = -1;
+        currentIndex = touchStartIndex;
+        goToAdjacentPage(direction);
+      } else if (!touchGestureContext || touchGestureContext.kind !== 'form') {
+        snapToPage(currentIndex);
+      }
+      touchTracking = false;
+      touchDragging = false;
+      touchAxis = null;
+      touchGestureContext = null;
+    }
+
+    window.addEventListener('touchend', finishTouchGesture, { passive: true });
+    window.addEventListener('touchcancel', finishTouchGesture, { passive: true });
+
+    window.FTG_SCROLL_TO_SITE_PAGE = function(index) {
+      snapToPage(index);
+    };
   }
 
   function setupInteractions() {
