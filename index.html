@@ -261,6 +261,91 @@
       max-width: 92%;
       margin: 0;
     }
+    .site-hero-quicknav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 56dvh;
+      z-index: 4;
+      padding: 0 14px;
+    }
+    .site-hero-quicknav-track {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 2px 2px 4px;
+      scroll-snap-type: x proximity;
+    }
+    .site-hero-quicknav-track::-webkit-scrollbar {
+      display: none;
+    }
+    .site-hero-quicknav-card {
+      position: relative;
+      flex: 0 0 min(62vw, 228px);
+      min-height: 120px;
+      padding: 14px 14px 16px;
+      border-radius: 26px;
+      overflow: hidden;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #fff;
+      text-decoration: none;
+      scroll-snap-align: start;
+      box-shadow: 0 18px 36px rgba(0,0,0,.16);
+      backdrop-filter: blur(14px) saturate(1.08);
+      -webkit-backdrop-filter: blur(14px) saturate(1.08);
+      isolation: isolate;
+    }
+    .site-hero-quicknav-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.48));
+      pointer-events: none;
+    }
+    .site-hero-quicknav-card video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      z-index: -2;
+      pointer-events: none;
+      transform: scale(1.04);
+    }
+    .site-hero-quicknav-kicker {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 950;
+      color: rgba(255,255,255,.72);
+    }
+    .site-hero-quicknav-title {
+      display: block;
+      font-size: 22px;
+      line-height: .96;
+      letter-spacing: -.045em;
+      font-weight: 950;
+      text-wrap: balance;
+    }
+    .site-hero-quicknav-card.plain {
+      background: rgba(255,255,255,.10);
+    }
+    .site-hero-quicknav-card.plain::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background: linear-gradient(135deg, rgba(30,155,255,.18), rgba(255,138,29,.12));
+    }
     @media (max-width: 380px) {
       .site-hero-video-wrap {
         height: 50dvh;
@@ -268,6 +353,19 @@
       .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
         height: 50dvh;
         padding: 96px 20px 0;
+      }
+      .site-hero-quicknav {
+        top: 57dvh;
+        padding: 0 12px;
+      }
+      .site-hero-quicknav-card {
+        flex-basis: min(68vw, 214px);
+        min-height: 112px;
+        border-radius: 24px;
+        padding: 13px 13px 14px;
+      }
+      .site-hero-quicknav-title {
+        font-size: 20px;
       }
     }
     .site-hero-video { display: none !important; }
@@ -1282,7 +1380,37 @@
       <div class="site-hero-content">
         <h1 class="site-view-title">Cinque Terre, semplice.</h1>
         <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
-
+      </div>
+      <div class="site-hero-quicknav" aria-label="Accessi rapidi hero">
+        <div class="site-hero-quicknav-track">
+          <a class="site-hero-quicknav-card" href="#site-stories-section" data-open-site-section="site-stories-section">
+            <video autoplay muted loop playsinline preload="metadata">
+              <source src="videohome.mp4" type="video/mp4">
+            </video>
+            <span class="site-hero-quicknav-kicker">Free guide</span>
+            <span class="site-hero-quicknav-title">Guide</span>
+          </a>
+          <a class="site-hero-quicknav-card plain" href="#site-places-section" data-open-site-section="site-places-section">
+            <span class="site-hero-quicknav-kicker">Section</span>
+            <span class="site-hero-quicknav-title">Places</span>
+          </a>
+          <a class="site-hero-quicknav-card plain" href="#site-experiences-section" data-open-site-section="site-experiences-section">
+            <span class="site-hero-quicknav-kicker">Section</span>
+            <span class="site-hero-quicknav-title">Local discounts</span>
+          </a>
+          <a class="site-hero-quicknav-card plain" href="#site-trails-section" data-open-site-section="site-trails-section">
+            <span class="site-hero-quicknav-kicker">Section</span>
+            <span class="site-hero-quicknav-title">Sentieri</span>
+          </a>
+          <a class="site-hero-quicknav-card plain" href="#site-weather-section" data-open-site-section="site-weather-section">
+            <span class="site-hero-quicknav-kicker">Section</span>
+            <span class="site-hero-quicknav-title">Meteo</span>
+          </a>
+          <a class="site-hero-quicknav-card plain" href="#site-official-communications-section" data-open-site-section="site-official-communications-section">
+            <span class="site-hero-quicknav-kicker">Section</span>
+            <span class="site-hero-quicknav-title">Comunicazioni ufficiali</span>
+          </a>
+        </div>
       </div>
     </section>
 <div class="site-feature-stack">
@@ -1876,7 +2004,23 @@ window.FTG_ACTIONBAR_CONFIG = {
   function stabilizeMapFilterButtons() {}
   function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; }
   function setSiteViewMode() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function openSiteSectionFromMenu(sectionId) { var section = document.getElementById(sectionId); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  function openSiteSectionFromMenu(sectionId) {
+    var map = {
+      'site-welcome-section': 0,
+      'site-stories-section': 1,
+      'site-places-section': 2,
+      'site-experiences-section': 3,
+      'site-trails-section': 4,
+      'site-weather-section': 5,
+      'site-official-communications-section': 6
+    };
+    if (window.FTG_SCROLL_TO_SITE_PAGE && map[sectionId] !== undefined) {
+      window.FTG_SCROLL_TO_SITE_PAGE(map[sectionId]);
+      return;
+    }
+    var section = document.getElementById(sectionId);
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   window.FTG_OPEN_SITE_SECTION = openSiteSectionFromMenu;
   window.FTG_OPEN_MAP_FOCUS = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); return true; };
   window.FTG_LOAD_OFFICIAL_COMMUNICATIONS = loadOfficialCommunications;
@@ -2017,18 +2161,20 @@ window.FTG_ACTIONBAR_CONFIG = {
     }, { passive: true });
 
     window.addEventListener('touchend', function(event){
-      var interactive = event.target.closest('.site-article-slider, .site-poi-slider, .site-trail-slider, .site-official-list, .site-weather-hourly-strip, .site-weather-date-tabs, .site-poi-filters, .site-trails-filters, .site-horizontal-list, select, option, input, textarea');
+      var interactive = event.target.closest('.site-article-slider, .site-poi-slider, .site-trail-slider, .site-official-list, .site-weather-hourly-strip, .site-weather-date-tabs, .site-poi-filters, .site-trails-filters, .site-horizontal-list, .site-hero-quicknav-track, select, option, input, textarea');
       var endY;
       var endX;
       var deltaY;
       var deltaX;
-      if (interactive || touchGestureLocked) return;
+      if (touchGestureLocked) return;
       if (!event.changedTouches || !event.changedTouches[0]) return;
       endY = event.changedTouches[0].clientY;
       endX = event.changedTouches[0].clientX;
       deltaY = endY - touchStartY;
       deltaX = endX - touchStartX;
-      if (Math.abs(deltaY) < 42 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
+      if (Math.abs(deltaY) < 42) return;
+      if (interactive && Math.abs(deltaX) > Math.abs(deltaY)) return;
+      if (Math.abs(deltaY) <= Math.abs(deltaX)) return;
       touchGestureLocked = true;
       goToAdjacentPage(deltaY < 0 ? 1 : -1);
       window.setTimeout(function(){ touchGestureLocked = false; }, 900);
@@ -2045,6 +2191,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       var weatherDay = event.target.closest('[data-weather-day]');
       var filterBtn = event.target.closest('[data-site-poi-filter]');
       var officialCard = event.target.closest('.site-official-item');
+      var quickSection = event.target.closest('[data-open-site-section]');
       var appAction = event.target.closest('[data-app-menu-action]');
       if (weatherDay) {
         selectedSiteWeatherIndex = Number(weatherDay.getAttribute('data-weather-day') || 0);
@@ -2059,6 +2206,11 @@ window.FTG_ACTIONBAR_CONFIG = {
       if (event.target.closest('.site-official-read')) return;
       if (officialCard) {
         officialCard.classList.toggle('is-flipped');
+        return;
+      }
+      if (quickSection) {
+        event.preventDefault();
+        openSiteSectionFromMenu(quickSection.getAttribute('data-open-site-section'));
         return;
       }
       if (appAction) {
