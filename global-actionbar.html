@@ -516,7 +516,7 @@
     var aiSubtitle = config.aiSubtitle || 'Global actionbar';
     var aiWelcome = config.aiWelcome || 'Actionbar globale pronta. Ora puoi riusarla su tutte le pagine del sito.';
     var pages = config.pages || {
-      map: { label: 'Mappa', emoji: '🗺️', href: '#map' },
+      map: { label: 'Mappa', emoji: '🗺️', href: 'map.html' },
       home: { label: 'Home', emoji: '🏠', href: '#home' },
       guide: { label: 'Guide', emoji: '📖', href: '#guide' },
       profile: { label: 'More', emoji: '', href: '#profile', drawer: true, iconType: 'grid' }
@@ -572,7 +572,7 @@
         '<div class="ftg-profile-drawer-scroll">' +
           '<' + 'div class="ftg-profile-drawer-head">' +
             '<div class="ftg-profile-head-left">' +
-              '<button id="ftg-profile-primary-btn" class="ftg-profile-primary-btn" type="button">' + (isLoggedIn ? 'Preferenze' : 'Accedi') + '</button>' +
+              '<button id="ftg-profile-primary-btn" class="ftg-profile-primary-btn" type="button">' + (isLoggedIn ? ('Hi, ' + escapeHTML(userName)) : 'Accedi') + '</button>' +
               '<div id="ftg-profile-language-menu" class="ftg-profile-language-menu">' +
                 '<button id="ftg-profile-language-current" class="ftg-profile-language-current" type="button" aria-label="Selettore lingua">' + escapeHTML((languages.find(function(lang){ return lang.code === currentLanguage; }) || languages[0] || { label: '🇮🇹' }).label.split(' ')[0]) + '</button>' +
                 '<div class="ftg-profile-language-list">' +
@@ -708,7 +708,11 @@
         if (isLoggedIn) {
           if (typeof config.onOpenPreferences === 'function') config.onOpenPreferences();
         } else {
-          if (typeof config.onLoginClick === 'function') config.onLoginClick();
+          if (typeof config.onLoginClick === 'function') {
+            config.onLoginClick();
+          } else {
+            window.location.href = 'login.html';
+          }
         }
       });
     }
