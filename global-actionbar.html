@@ -539,6 +539,7 @@
       { code: 'de', label: '🇩🇪 Deutsch' }
     ];
     var currentLanguage = config.language || (languages[0] && languages[0].code) || 'it';
+    var basePath = typeof config.basePath === 'string' ? config.basePath.trim() : '';
     var root = document.getElementById('ftg-global-actionbar-root');
     var pageKeys = ['map', 'home', 'guide', 'profile'];
 
@@ -549,6 +550,14 @@
       return String(value || '').replace(/[&<>\"]/g, function (char) {
         return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
       });
+    }
+
+    function resolveHref(href) {
+      var value = String(href || '').trim();
+      if (!value) return '';
+      if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
+      if (basePath) return basePath.replace(/\/+$/, '') + '/' + value.replace(/^\/+/, '');
+      return '/' + value.replace(/^\/+/, '');
     }
 
     function buildNavItem(key) {
@@ -667,7 +676,7 @@
 
     function navigateToPage(pageId) {
       var page = pages[pageId] || {};
-      var href = String(page.href || '').trim();
+      var href = resolveHref(page.href || '');
       closeProfileDrawer();
       syncActiveButton(pageId);
 
@@ -720,7 +729,7 @@
           if (typeof config.onLoginClick === 'function') {
             config.onLoginClick();
           } else {
-            window.location.href = 'login.html';
+            window.location.href = resolveHref('login.html');
           }
         }
       });
