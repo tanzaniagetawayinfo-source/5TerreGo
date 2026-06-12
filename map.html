@@ -39,6 +39,77 @@
       background: #071424;
       touch-action: none;
     }
+    body.map-loading #map {
+      pointer-events: none;
+      touch-action: none;
+    }
+    body.map-loading .search-floating,
+    body.map-loading #bottom-rail,
+    body.map-loading #user-location-btn,
+    body.map-loading #poi-card,
+    body.map-loading #trail-card,
+    body.map-loading #tour-nav {
+      pointer-events: none !important;
+    }
+    #map-loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10060;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(7,20,36,.38);
+      backdrop-filter: blur(14px) saturate(1.08);
+      -webkit-backdrop-filter: blur(14px) saturate(1.08);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .24s ease, visibility .24s ease;
+    }
+    body.map-loading #map-loading-overlay {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .map-loading-card {
+      width: min(320px, calc(100vw - 32px));
+      border-radius: 28px;
+      padding: 22px 20px 20px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(8,12,16,.82);
+      color: #fff;
+      box-shadow: 0 22px 58px rgba(0,0,0,.28);
+      backdrop-filter: blur(22px) saturate(1.12);
+      -webkit-backdrop-filter: blur(22px) saturate(1.12);
+      text-align: center;
+    }
+    .map-loading-spinner {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.12);
+      border-top-color: rgba(255,255,255,.92);
+      animation: mapLoadingSpin .9s linear infinite;
+    }
+    .map-loading-title {
+      font-size: 18px;
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      font-weight: 950;
+      margin-bottom: 6px;
+    }
+    .map-loading-text {
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 700;
+      color: rgba(255,255,255,.66);
+    }
+    @keyframes mapLoadingSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     .hidden { display: none !important; }
     .leaflet-container { background: #f6f1e8 !important; }
     .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
@@ -288,64 +359,185 @@
       transition: opacity .22s ease, transform .22s ease;
     }
     #user-location-toast.is-visible { opacity: 1; transform: translateY(0); }
+
+    #bottom-rail {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1105;
+      padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+      pointer-events: none;
+    }
+    .bottom-rail-village-title {
+      display: none;
+      width: 100%;
+      text-align: center;
+      margin: 0 0 10px;
+      color: rgba(255,255,255,.92);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      text-shadow: 0 6px 18px rgba(0,0,0,.30);
+      pointer-events: none;
+    }
+    .bottom-rail-village-title.is-visible {
+      display: block;
+    }
+    .bottom-rail-track {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 6px 2px 2px;
+      pointer-events: auto;
+    }
+    .bottom-rail-track::-webkit-scrollbar { display: none; }
+    .bottom-rail-card {
+      position: relative;
+      flex: 0 0 auto;
+      width: min(84vw, 320px);
+      min-height: 126px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 28px;
+      overflow: hidden;
+      background: rgba(8,12,16,.76);
+      box-shadow: 0 22px 54px rgba(0,0,0,.26);
+      backdrop-filter: blur(18px) saturate(1.12);
+      -webkit-backdrop-filter: blur(18px) saturate(1.12);
+      scroll-snap-align: start;
+      cursor: pointer;
+      text-align: left;
+    }
+    .bottom-rail-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8,12,16,.04), rgba(8,12,16,.78));
+      pointer-events: none;
+      z-index: 1;
+    }
+    .bottom-rail-card.is-empty {
+      width: auto;
+      min-width: 220px;
+      min-height: 92px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,.76);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .bottom-rail-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      z-index: 0;
+      transform: scale(1.01);
+    }
+    .bottom-rail-body {
+      position: relative;
+      z-index: 2;
+      min-height: 126px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px;
+      gap: 5px;
+      color: #fff;
+    }
+    .bottom-rail-kicker {
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.66);
+    }
+    .bottom-rail-title {
+      font-size: 20px;
+      line-height: 1.02;
+      letter-spacing: -.05em;
+      font-weight: 950;
+      text-shadow: 0 6px 18px rgba(0,0,0,.34);
+      text-wrap: balance;
+    }
+    .bottom-rail-meta {
+      font-size: 12px;
+      line-height: 1.34;
+      font-weight: 760;
+      color: rgba(255,255,255,.80);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-width: 92%;
+    }
+    .bottom-rail-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(8,12,16,.66);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.10);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .bottom-rail-shadow-edge {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 54px;
+      background: linear-gradient(270deg, rgba(8,12,16,.10), rgba(8,12,16,0));
+      pointer-events: none;
+      z-index: 3;
+    }
+    @media (max-width: 520px) {
+      #bottom-rail { padding-left: 8px; padding-right: 8px; }
+      .bottom-rail-village-title {
+        margin-bottom: 8px;
+        font-size: 11px;
+        letter-spacing: .12em;
+      }
+      .bottom-rail-card {
+        width: min(86vw, 286px);
+        min-height: 114px;
+        border-radius: 24px;
+      }
+      .bottom-rail-body {
+        min-height: 114px;
+        padding: 13px;
+      }
+      .bottom-rail-title { font-size: 18px; }
+      .bottom-rail-meta { font-size: 11.5px; }
+    }
+
     .user-location-marker { width: 18px; height: 18px; border-radius: 50%; background: #1e9bff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(30,155,255,0.18), 0 8px 24px rgba(0,0,0,0.22); }
     .user-location-marker::after { content: ""; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(30,155,255,0.45); transform: translate(-50%, -50%); animation: userLocationPulse 1.8s ease-out infinite; }
     @keyframes userLocationPulse { 0% { transform: translate(-50%, -50%) scale(.72); opacity: .85; } 100% { transform: translate(-50%, -50%) scale(1.55); opacity: 0; } }
 
-    .bottom-card {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      z-index: 1000;
-      border-radius: 20px;
-      overflow: hidden;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      touch-action: none;
-    }
-    .bottom-card.is-visible { opacity: 1; transform: translateY(0); }
-    .card-media { position: relative; width: 100%; height: 140px; overflow: hidden; background: rgba(255,255,255,0.08); }
-    .bottom-card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-    .card-live-frame { position: absolute; top: 50%; left: 50%; width: 100%; height: calc((100vw - 24px) * 9 / 16); min-width: 100%; min-height: 100%; border: 0; opacity: 0; pointer-events: auto; transform: translate(-50%, -50%) scale(1.18); transition: opacity 0.35s ease; }
-    .card-media.live-ready img { opacity: 1; }
-    .card-media.live-ready .card-live-frame { opacity: 0; }
-    .card-media.live-ready.live-visible img { opacity: 0; }
-    .card-media.live-ready.live-visible .card-live-frame { opacity: 1; }
-    .card-live-touch-layer { position: absolute; inset: 0; z-index: 3; background: transparent; touch-action: none; }
-    .card-live-badge { position: absolute; top: 8px; left: 8px; z-index: 4; padding: 5px 8px; border-radius: 999px; background: rgba(0,0,0,0.58); color: white; font-size: 11px; font-weight: 900; opacity: 0; text-decoration: none; }
-    .card-media.live-ready.live-visible .card-live-badge { opacity: 1; }
-    .card-live-loading { position: absolute; inset: 0; z-index: 4; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 9px; background: rgba(0,0,0,0.18); color: white; font-size: 13px; font-weight: 900; }
-    .card-media.live-loading .card-live-loading { display: flex; }
-    .card-media.live-visible .card-live-loading { display: none; }
-    .card-title-row { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 10px; min-height: 50px; }
-    .bottom-card .title { position: absolute; top: 10px; left: 50%; z-index: 5; max-width: calc(100% - 92px); transform: translateX(-50%); color: white; font-weight: 900; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-actions { display: flex; justify-content: flex-start; align-items: center; gap: 6px; flex-shrink: 0; }
-    .card-action-btn { padding: 8px 10px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.14); color: #fff; font-size: 12px; font-weight: 800; cursor: pointer; }
-    #card-tour-play { position: absolute; right: 12px; top: 12px; z-index: 8; width: 46px; height: 46px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.88); color: #111; font-size: 21px; font-weight: 950; display: grid; place-items: center; box-shadow: 0 12px 28px rgba(0,0,0,0.22); cursor: pointer; }
-    .bottom-card.tour-mode .card-media, .bottom-card.tour-mode .card-title-row, .bottom-card.tour-mode #card-tour-play { display: none; }
-    #card-tour-panel { display: none; padding: 18px 16px 16px; color: #fff; min-height: 188px; background: rgba(0,0,0,0.18); }
-    .bottom-card.tour-mode #card-tour-panel { display: block; }
-    .card-tour-kicker { font-size: 12px; font-weight: 900; letter-spacing: .10em; text-transform: uppercase; color: rgba(255,255,255,0.62); margin-bottom: 6px; }
-    .card-tour-title { font-size: 24px; font-weight: 950; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 8px; }
-    .card-tour-subtitle { font-size: 14px; line-height: 1.32; color: rgba(255,255,255,0.76); margin-bottom: 14px; }
-    .card-tour-starts { display: flex; flex-wrap: wrap; gap: 8px; }
-    .card-tour-start-btn { border: 0; border-radius: 999px; padding: 10px 12px; background: rgba(255,255,255,0.16); color: #fff; font-size: 13px; font-weight: 850; cursor: pointer; }
-    .card-tour-start-btn.primary { background: rgba(255,138,29,0.88); color: #111; }
-    .card-tour-back { margin-top: 12px; border: 0; background: transparent; color: rgba(255,255,255,0.72); font-size: 13px; font-weight: 800; cursor: pointer; }
-    .card-tour-start-btn.secondary { background: rgba(255,255,255,0.12); color: #fff; }
-    .card-tour-stop-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px; max-height: 220px; overflow-y: auto; padding-right: 2px; }
-    .card-tour-stop-row { width: 100%; border: 0; border-radius: 16px; padding: 10px 11px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: rgba(255,255,255,0.13); color: #fff; text-align: left; cursor: pointer; }
-    .card-tour-stop-row.is-off { opacity: 0.46; }
-    .card-tour-stop-name { min-width: 0; flex: 1; font-size: 13px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-tour-stop-check { width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center; flex: 0 0 24px; background: rgba(255,255,255,0.18); font-size: 13px; font-weight: 950; }
-    .card-tour-stop-row:not(.is-off) .card-tour-stop-check { background: rgba(255,138,29,0.92); color: #111; }
-    .card-tour-mini-note { margin-top: 8px; font-size: 12px; line-height: 1.28; color: rgba(255,255,255,0.58); }
+    .bottom-card { display: none !important; }
+    #card, #card-media, #card-live, #card-live-touch-layer, #card-live-badge, #card-tour-play, #card-tour-panel { display: none !important; }
 
     #tour-nav {
       position: fixed;
@@ -592,21 +784,16 @@
 </div>
 
 <div id="map"></div>
+<div id="map-loading-overlay" aria-hidden="true">
+  <div class="map-loading-card">
+    <div class="map-loading-spinner" aria-hidden="true"></div>
+    <div class="map-loading-title">Loading map</div>
+    <div class="map-loading-text">Please wait while places are being prepared.</div>
+  </div>
+</div>
+<div id="bottom-rail" aria-label="Map cards carousel"><div id="bottom-rail-village-title" class="bottom-rail-village-title"></div><div id="bottom-rail-track" class="bottom-rail-track"></div></div>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
 <div id="user-location-toast" aria-live="polite"></div>
-<div class="bottom-card" id="card" aria-hidden="true">
-  <button id="card-tour-play" type="button" aria-label="Start village tour">▶</button>
-  <div class="card-media" id="card-media">
-    <img id="card-img" src="" alt="" />
-    <iframe id="card-live" class="card-live-frame" title="Live webcam" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-    <div id="card-live-touch-layer" class="card-live-touch-layer" aria-hidden="true"></div>
-    <a id="card-live-badge" class="card-live-badge" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Open live webcam on YouTube">LIVE</a>
-    <div class="card-live-loading" aria-live="polite"><span class="card-live-loading-text">Loading live stream</span></div>
-  </div>
-  <div class="card-title-row"><div class="title" id="card-title"></div><div class="card-actions"><button class="card-action-btn" id="card-experiences" type="button">Experiences</button><button class="card-action-btn" id="card-stories" type="button">Stories</button></div></div>
-  <div id="card-tour-panel" aria-hidden="true"></div>
-</div>
-
 <div id="tour-nav" aria-hidden="true">
   <div class="tour-nav-kicker" id="tour-nav-kicker">Tour active</div>
   <div class="tour-nav-title" id="tour-nav-title">Next stop</div>
@@ -756,6 +943,9 @@
   var tourNavCompassArrow = document.getElementById('tour-nav-compass-arrow');
   var tourNavAudioBtn = document.getElementById('tour-nav-audio');
   var tourNavNextBtn = document.getElementById('tour-nav-next');
+  var bottomRail = document.getElementById('bottom-rail');
+  var bottomRailVillageTitle = document.getElementById('bottom-rail-village-title');
+  var bottomRailTrack = document.getElementById('bottom-rail-track');
 
   var poiMarkers = [];
   var trailItems = [];
@@ -805,6 +995,7 @@
   var cityCardManuallyClosed = false;
   var userCheckTimer = null;
   var poiTypeTimer = null;
+  var USE_BOTTOM_RAIL = true;
   var startX = 0, startY = 0, currentX = 0, currentY = 0, isDragging = false, hasMoved = false, dragAxis = null;
   var poiSheetStartY = 0;
   var poiSheetStartX = 0;
@@ -960,16 +1151,16 @@
   async function handleGenerateDiscount() { var session, user, existing, result, codeObj, codeValue, resolvedPoiId; if (!currentPOI) return; openDiscountModal(); if (discountQrWrap) discountQrWrap.classList.remove('is-visible'); setDiscountStatus('Checking discount...', ''); try { if (getPOIDiscountValue(currentPOI) <= 0) throw new Error('This place has no active discount right now.'); session = await getCurrentSessionForDiscount(); user = session && session.user ? session.user : null; if (!user || !user.id || !user.email) throw new Error('You must login before generating a discount QR.'); setDiscountStatus('Finding the correct restaurant...', ''); resolvedPoiId = await resolveDiscountPOIId(currentPOI); existing = await findActiveDiscountCodeForUser(resolvedPoiId, user); if (existing) { showDiscountQRCode(existing.code, currentPOI); setDiscountStatus('You already generated a discount for this restaurant today. You can use this QR code until it expires.', 'ok'); return; } setDiscountStatus('Generating and saving your QR code...', ''); result = await createAndStoreDiscountCodeDirect(resolvedPoiId, currentPOI, user); codeObj = result && result.code ? result.code : result; codeValue = codeObj && codeObj.code ? codeObj.code : ''; if (!codeValue) throw new Error('Could not create the discount code.'); showDiscountQRCode(codeValue, currentPOI); setDiscountStatus(result && result.already_existing ? 'You already generated a discount for this restaurant today. You can use this QR code until it expires.' : 'Discount code saved. The QR is valid for 24 hours and you can generate only one per restaurant per day.', 'ok'); } catch (error) { setDiscountStatus(escapeHTML(error.message || 'Could not generate discount.'), 'error'); } }
   function rememberRealUserGesture(event) { if (event && event.isTrusted === false) return; lastRealUserGestureAt = Date.now(); lastRealUserGestureType = event && event.type ? event.type : 'gesture'; }
   function hasFreshRealUserGesture(maxAge) { return Date.now() - lastRealUserGestureAt <= (maxAge || 1200); }
-  function resetCardLive() { cardMedia.classList.remove('live-ready'); cardMedia.classList.remove('live-visible'); cardMedia.classList.remove('live-loading'); cardMedia.removeAttribute('data-live-unlocked'); cardMedia.removeAttribute('data-live-gesture'); cardLive.onload = null; cardLive.removeAttribute('src'); if (cardLiveBadge) { cardLiveBadge.href = 'https://www.youtube.com'; cardLiveBadge.setAttribute('aria-label', 'Open live webcam on YouTube'); } }
-  function postYouTubeCommand(command) { if (!cardLive || !cardLive.contentWindow) return; try { cardLive.contentWindow.postMessage(JSON.stringify({ event: 'command', func: command, args: [] }), '*'); } catch (error) {} }
-  function forceYouTubeAutoplay() { postYouTubeCommand('mute'); postYouTubeCommand('playVideo'); window.setTimeout(function () { postYouTubeCommand('mute'); postYouTubeCommand('playVideo'); }, 350); window.setTimeout(function () { postYouTubeCommand('mute'); postYouTubeCommand('playVideo'); }, 900); }
-  function unlockLiveFromRealGesture(event) { if (event) rememberRealUserGesture(event); if (!cardMedia || !cardLive || !cardLive.src) return; if (isIOSDevice() && !hasFreshRealUserGesture(1600)) return; cardMedia.setAttribute('data-live-unlocked', '1'); cardMedia.setAttribute('data-live-gesture', lastRealUserGestureType || 'gesture'); cardMedia.classList.add('live-ready'); cardMedia.classList.add('live-visible'); cardMedia.classList.remove('live-loading'); forceYouTubeAutoplay(); window.setTimeout(forceYouTubeAutoplay, 80); window.setTimeout(forceYouTubeAutoplay, 260); }
-  function loadCardLive(videoId) { var src = getYouTubeEmbedUrl(videoId); resetCardLive(); if (cardLiveBadge) { cardLiveBadge.href = getYouTubeWatchUrl(videoId); cardLiveBadge.setAttribute('aria-label', 'Open this live webcam on YouTube'); } if (!src) return; cardMedia.classList.add('live-loading'); cardLive.onload = function () { cardMedia.classList.add('live-ready'); cardMedia.classList.remove('live-visible'); if (isIOSDevice()) { if (hasFreshRealUserGesture(1600)) unlockLiveFromRealGesture(); return; } forceYouTubeAutoplay(); window.setTimeout(function () { if (cardLive.src === src) { forceYouTubeAutoplay(); cardMedia.classList.add('live-visible'); cardMedia.classList.remove('live-loading'); } }, 5200); }; cardLive.src = src; if (isIOSDevice()) { if (hasFreshRealUserGesture(1600)) unlockLiveFromRealGesture(); return; } forceYouTubeAutoplay(); }
-  function setCardContent(item) { closeVillageTourPanel(); cardTitle.innerText = item.name; cardImg.src = item.image || 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg'; cardImg.alt = item.name; loadCardLive(item.liveVideoId); }
-  function showCityCard(item) { closePOICard(true); setCardContent(item); card.style.display = 'block'; card.setAttribute('aria-hidden', 'false'); window.requestAnimationFrame(function () { card.classList.add('is-visible'); card.style.transform = 'translateY(0)'; }); }
-  function hideCard(manual) { if (manual) cityCardManuallyClosed = true; if (card.getAttribute('aria-hidden') === 'true') return; card.classList.remove('is-visible'); card.setAttribute('aria-hidden', 'true'); card.style.transform = 'translateY(40px)'; window.setTimeout(function () { if (card.getAttribute('aria-hidden') === 'true') { card.style.display = 'none'; resetCardLive(); } }, 300); }
+  function resetCardLive() {}
+  function postYouTubeCommand(command) {}
+  function forceYouTubeAutoplay() {}
+  function unlockLiveFromRealGesture(event) { if (event) rememberRealUserGesture(event); }
+  function loadCardLive(videoId) {}
+  function setCardContent(item) {}
+  function showCityCard(item) {}
+  function hideCard(manual) {}
   function centerCity(place) { var zoomLevel; if (!place) return; isProgrammaticMove = true; zoomLevel = place.name === 'Monterosso' ? 14 : 15; map.flyTo(place.coords, zoomLevel, { duration: 1.2 }); window.setTimeout(function () { isProgrammaticMove = false; updatePOIVisibility(); updateTrailWidths(); }, 1400); }
-  function showCityByIndex(index, shouldCenter) { var place; if (shouldCenter === undefined) shouldCenter = true; if (index < 0 || index >= places.length) return; currentDataset = 'places'; currentIndex = index; currentPOI = null; place = places[index]; if (shouldCenter) centerCity(place); showCityCard(place); }
+  function showCityByIndex(index, shouldCenter) { var place; if (shouldCenter === undefined) shouldCenter = true; if (index < 0 || index >= places.length) return; currentDataset = 'places'; currentIndex = index; currentPOI = null; place = places[index]; if (shouldCenter) centerCity(place); }
   function getClosestPlaceNameForCoords(coords) { var bestName = ''; var bestDistance = Infinity; if (!isValidCoords(coords)) return ''; places.forEach(function(place) { var distance = distanceMeters(coords, place.coords); if (distance < bestDistance) { bestDistance = distance; bestName = place.name; } }); return bestName; }
   function poiBelongsToCardVillage(place, poi) { if (!place || !poi || !isValidCoords(poi.coords)) return false; if (distanceMeters(place.coords, poi.coords) > 950) return false; return getClosestPlaceNameForCoords(poi.coords) === place.name; }
   function isTouristicPOI(poi) { var type = normalizeText(poi && poi.type ? poi.type : ''); var name = normalizeText(poi && poi.name ? poi.name : ''); if (!poi) return false; if (type === 'ferry' || type === 'stazione' || type === 'station') return false; if (name.indexOf('ferry') !== -1 || name.indexOf('station') !== -1 || name.indexOf('stazione') !== -1) return false; return true; }
@@ -981,7 +1172,7 @@
   function getShortestVillageTourOrder(startCoords, stops) { var candidates = stops.filter(function(poi) { return poi && isValidCoords(poi.coords); }); var bestOrder = null; var bestDistance = Infinity; var used = []; var current = []; function distanceFor(order) { var total = 0; var last = startCoords; order.forEach(function(poi) { total += distanceMeters(last, poi.coords); last = poi.coords; }); return total; } function walk() { var i; var distance; if (current.length === candidates.length) { distance = distanceFor(current); if (distance < bestDistance) { bestDistance = distance; bestOrder = current.slice(); } return; } for (i = 0; i < candidates.length; i += 1) { if (used[i]) continue; used[i] = true; current.push(candidates[i]); walk(); current.pop(); used[i] = false; } } if (candidates.length <= 1) return candidates; walk(); return bestOrder || candidates; }
   function isUserInsideVillage(place) { if (!place || !isValidCoords(userLocationLatLng)) return false; return getClosestPlaceNameForCoords(userLocationLatLng) === place.name && distanceMeters(place.coords, userLocationLatLng) <= 950; }
   function getTourStartInstruction(place) { return 'Go to ' + (place && place.name ? place.name : 'this village') + ' and enable location to start the tour.'; }
-  function renderTourLocationRequestPanel(place, message) { var html; if (!place || !cardTourPanel) return; html = '<div class="card-tour-kicker">Location required</div><div class="card-tour-title">Enable location</div><div class="card-tour-subtitle">' + escapeHTML(message || getTourStartInstruction(place)) + '</div><div class="card-tour-starts"><button class="card-tour-start-btn primary" type="button" data-start="enable-location">📍 Enable location</button></div><button class="card-tour-back" type="button" data-start="back-tour">Back to tour</button>'; cardTourPanel.innerHTML = html; cardTourPanel.setAttribute('aria-hidden', 'false'); card.classList.add('tour-mode'); }
+  function renderTourLocationRequestPanel(place, message) {}
   function getLocalTourPath(fromPoint, toPoint) { var points = []; var steps = 10; var i; var t; var lat; var lng; var wiggleLat; var wiggleLng; var dLat; var dLng; if (!isValidCoords(fromPoint) || !isValidCoords(toPoint)) return []; dLat = toPoint[0] - fromPoint[0]; dLng = toPoint[1] - fromPoint[1]; for (i = 0; i <= steps; i += 1) { t = i / steps; wiggleLat = Math.sin(t * Math.PI) * dLng * 0.10; wiggleLng = Math.sin(t * Math.PI) * -dLat * 0.10; lat = fromPoint[0] + dLat * t + wiggleLat; lng = fromPoint[1] + dLng * t + wiggleLng; points.push([lat, lng]); } return points; }
   function attachTourStopLocalPaths(startCoords, orderedStops) { var previous = startCoords; return orderedStops.map(function(stop) { var copy = Object.assign({}, stop); copy.localTourPath = getLocalTourPath(previous, stop.coords); previous = stop.coords; return copy; }); }
   function drawAITourRouteLine(latLngs) { if (!map || !latLngs || latLngs.length < 2) return false; if (activeTour) activeTour.currentLegPath = latLngs.slice(); if (aiTourRouteLine && map) { try { map.removeLayer(aiTourRouteLine); } catch (error) {} aiTourRouteLine = null; } aiTourRouteLine = L.polyline(latLngs, { color: '#ff8a1d', weight: 5, opacity: 0.96, dashArray: null, lineCap: 'round', lineJoin: 'round' }).addTo(map); aiTourRouteLine.bringToFront(); updateTourCompass(); return true; }
@@ -1009,10 +1200,10 @@
   function goToNextActiveTourStop() { var distance; if (!activeTour) return; distance = getActiveTourStopDistance(); if (!Number.isFinite(distance) || distance > activeTourArrivalRadius) { showUserLocationToast('Reach this stop before continuing to the next one.'); return; } stopTourAudio(); closePOICard(false); activeTour.currentCardStopId = null; if (activeTour.index >= activeTour.stops.length - 1) { showUserLocationToast('Tour completed.'); endActiveTour(); return; } activeTour.index += 1; activeTourLastRouteKey = ''; renderActiveTourNav(); centerMapOnTourUser(); updateActiveTourLegRoute(); }
   function checkActiveTourArrival() { var stop; var distance; var id; if (!activeTour) return; stop = getActiveTourStop(); if (!stop) return; distance = getActiveTourStopDistance(); renderActiveTourNav(); updateTourCompass(); if (Number.isFinite(distance) && activeTour.currentCardStopId && distance > activeTourLeaveRadius) { closePOICard(false); activeTour.currentCardStopId = null; stopTourAudio(); renderActiveTourNav(); updateActiveTourLegRoute(); return; } if (!Number.isFinite(distance) || distance > activeTourArrivalRadius) return; id = String(stop.id || stop.name || activeTour.index); if (activeTour.openedStopIds[id] && currentPOI === stop && poiCard && poiCard.getAttribute('aria-hidden') === 'false') return; activeTour.openedStopIds[id] = true; activeTour.currentCardStopId = id; openActiveTourStop(); stopTourAudio(); showUserLocationToast('You reached ' + (stop.name || 'this stop') + '. Open the audio only if you want to listen.'); }
   function startVillageTour(place, startLabel, startCoords) { var stops; var ordered; if (!place) return; pendingTourPlace = place; pendingTourLocationRequest = true; if (!isValidCoords(userLocationLatLng)) { renderTourLocationRequestPanel(place, 'To start this tour, allow location access when your browser asks.'); startUserLocationWatch(); return; } if (!isUserInsideVillage(place)) { showUserLocationToast(getTourStartInstruction(place)); renderTourLocationRequestPanel(place, getTourStartInstruction(place)); return; } startCoords = userLocationLatLng.slice(); startLabel = 'your current location'; stops = getSelectedTourPOIsForVillage(place); if (!stops.length) { showUserLocationToast('Select at least one tourist stop before starting the tour.'); return; } ordered = getShortestVillageTourOrder(startCoords, stops); ordered = attachTourStopLocalPaths(startCoords, ordered); beginActiveTour(place, ordered, startCoords); pendingTourPlace = null; pendingTourLocationRequest = false; showUserLocationToast(place.name + ' tour started from your current location.'); hideCard(true); }
-  function renderVillageTourPanel() { var place = places[currentIndex]; var html; var selectedCount; if (!place || !cardTourPanel) return; if (!Array.isArray(currentTourCustomStopIds)) setDefaultTourSelection(place); selectedCount = getSelectedTourPOIsForVillage(place).length; html = '<div class="card-tour-kicker">Village tour</div><div class="card-tour-title">Explore ' + escapeHTML(place.name) + '</div><div class="card-tour-subtitle">Start only when you are inside the village. You can review the stops before starting.</div><div class="card-tour-starts"><button class="card-tour-start-btn primary" type="button" data-start="start-tour">▶ Start tour</button><button class="card-tour-start-btn secondary" type="button" data-start="customize">⚙️ Customize stops</button></div><div class="card-tour-mini-note">' + selectedCount + ' stops selected.</div><button class="card-tour-back" type="button" data-start="back">Back to card</button>'; cardTourPanel.innerHTML = html; cardTourPanel.setAttribute('aria-hidden', 'false'); card.classList.add('tour-mode'); }
-  function renderVillageTourCustomizePanel() { var place = places[currentIndex]; var all; var html; if (!place || !cardTourPanel) return; if (!Array.isArray(currentTourCustomStopIds)) setDefaultTourSelection(place); all = getAllTouristicPOIsForVillage(place); html = '<div class="card-tour-kicker">Tour stops</div><div class="card-tour-title">Customize stops</div><div class="card-tour-subtitle">Choose which POIs should be included in the walking tour.</div>'; if (!all.length) { html += '<div class="card-tour-mini-note">No tourist stops have been saved for this village yet.</div>'; } else { html += '<div class="card-tour-stop-list">' + all.map(function(poi) { var selected = currentTourCustomStopIds.indexOf(String(poi.id)) !== -1; return '<button class="card-tour-stop-row ' + (selected ? '' : 'is-off') + '" type="button" data-start="toggle-stop" data-stop-id="' + escapeHTML(String(poi.id)) + '"><span class="card-tour-stop-name">' + escapeHTML(poi.name) + '</span><span class="card-tour-stop-check">' + (selected ? '✓' : '+') + '</span></button>'; }).join('') + '</div>'; } html += '<div class="card-tour-starts"><button class="card-tour-start-btn primary" type="button" data-start="start-tour">▶ Start selected tour</button></div><button class="card-tour-back" type="button" data-start="back-tour">Back to tour</button>'; cardTourPanel.innerHTML = html; cardTourPanel.setAttribute('aria-hidden', 'false'); card.classList.add('tour-mode'); }
-  function closeVillageTourPanel() { if (card) card.classList.remove('tour-mode'); currentTourCustomStopIds = null; pendingTourPlace = null; pendingTourLocationRequest = false; if (cardTourPanel) { cardTourPanel.setAttribute('aria-hidden', 'true'); cardTourPanel.innerHTML = ''; } }
-  function handleVillageTourPanelClick(event) { var button = event.target.closest('[data-start]'); var place = places[currentIndex]; var startType; var stopId; if (!button || !place) return; startType = button.getAttribute('data-start'); if (startType === 'back') { closeVillageTourPanel(); return; } if (startType === 'back-tour') { renderVillageTourPanel(); return; } if (startType === 'customize') { renderVillageTourCustomizePanel(); return; } if (startType === 'toggle-stop') { stopId = button.getAttribute('data-stop-id'); toggleTourStopSelection(stopId); renderVillageTourCustomizePanel(); return; } if (startType === 'enable-location') { event.preventDefault(); event.stopPropagation(); requestTourLocationAgain(place); return; } if (startType === 'start-tour') { startVillageTour(place, 'your current location', userLocationLatLng ? userLocationLatLng.slice() : null); } }
+  function renderVillageTourPanel() {}
+  function renderVillageTourCustomizePanel() {}
+  function closeVillageTourPanel() {}
+  function handleVillageTourPanelClick(event) {}
   function createPOIDotIcon(poi) { return L.divIcon({ className: 'custom-poi custom-poi-dot', html: '<div class="poi-dot-label"></div>', iconSize: [13, 13], iconAnchor: [6, 6] }); }
   function createPOIFullIcon(poi) { return L.divIcon({ className: 'custom-poi', html: '<div class="poi-label' + (getPOIDiscountValue(poi) > 0 ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>', iconSize: [38, 38], iconAnchor: [19, 19] }); }
   function isPOIMatchFilter(poi, filter) { var type = normalizePOIType(poi && poi.type); filter = String(filter || 'all'); if (filter === 'all') return true; if (filter === 'trails') return false; if (filter === 'discounts') return getPOIDiscountValue(poi) > 0; if (filter === 'viewpoint') return type === 'punto panoramico'; if (filter === 'beach') return type === 'spiaggia'; if (filter === 'food') return type === 'ristorante' || type === 'bar'; if (filter === 'church') return type === 'chiesa'; if (filter === 'monument') return type === 'monumento'; if (filter === 'station') return type === 'stazione'; if (filter === 'ferry') return type === 'ferry'; if (filter === 'curiosity') return type === 'curiosity'; return true; }
@@ -1049,7 +1240,7 @@
   function updateTrailWidths() { updateMapSymbolVisibility(); }
   function updatePOIVisibility() { updateMapSymbolVisibility(); }
   function updateFerryVisibilityForFilter() { var showFerries = currentMapFilter === 'all' || currentMapFilter === 'ferry'; if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
-  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; document.querySelectorAll('#map-filter-bar .mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.getAttribute('data-map-filter') === currentMapFilter); }); updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); }
+  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; document.querySelectorAll('#map-filter-bar .mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.getAttribute('data-map-filter') === currentMapFilter); }); updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); }
   function getCurrentUILocale() { return 'en-GB'; }
   function formatWeatherDate(value) { var date = new Date(String(value || '') + 'T12:00:00'); if (!Number.isFinite(date.getTime())) return String(value || ''); return new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short', day: '2-digit', month: 'short' }).format(date); }
   function formatWeatherValue(value, suffix) { if (value === undefined || value === null || value === '') return '—'; if (typeof value === 'number') return String(Math.round(value * 10) / 10) + (suffix || ''); return String(value) + (suffix || ''); }
@@ -1066,7 +1257,125 @@
   function requestTourLocationAgain(place) { userLocationRequestMode = 'tour'; if (place) pendingTourPlace = place; pendingTourLocationRequest = true; resetUserLocationWatch(); startUserLocationWatch(); }
   function requestPlainUserLocation() { userLocationRequestMode = 'plain'; pendingTourPlace = null; pendingTourLocationRequest = false; resetUserLocationWatch(); startUserLocationWatch(); }
   function getClosestCity() { var center = map.getCenter(), minDist = Infinity, closestIndex = -1; places.forEach(function (place, index) { var distance = center.distanceTo(L.latLng(place.coords)); if (distance < minDist) { minDist = distance; closestIndex = index; } }); return { index: closestIndex, distance: minDist }; }
-  function evaluateAutoCard() { var zoom, closest; if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return; zoom = map.getZoom(); closest = getClosestCity(); if (cityCardManuallyClosed && closest.index === currentIndex) return; if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false; if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) { if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') showCityByIndex(closest.index, false); return; } if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) hideCard(false); }
+  function evaluateAutoCard() {
+    if (USE_BOTTOM_RAIL) {
+      hideCard(false);
+      return;
+    }
+    var zoom, closest;
+    if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return;
+    zoom = map.getZoom();
+    closest = getClosestCity();
+    if (cityCardManuallyClosed && closest.index === currentIndex) return;
+    if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false;
+    if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
+      if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') showCityByIndex(closest.index, false);
+      return;
+    }
+    if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) hideCard(false);
+  }
+  function getBottomRailGeneralItems() {
+    return [];
+  }
+  function getBottomRailVillageLabel() {
+    var center;
+    var closest;
+    var minZoomForVillageLabel = 13.4;
+    var maxCenterDistance = 420;
+    if (!map || !bottomRailVillageTitle) return '';
+    if (map.getZoom() < minZoomForVillageLabel) return '';
+    center = map.getCenter();
+    closest = places.map(function(place) {
+      return { place: place, distance: distanceMeters([center.lat, center.lng], place.coords) };
+    }).sort(function(a, b) {
+      return a.distance - b.distance;
+    })[0];
+    if (!closest || !closest.place) return '';
+    return closest.distance <= maxCenterDistance ? closest.place.name : '';
+  }
+  function getBottomRailViewportItems() {
+    var bounds = map ? map.getBounds() : null;
+    var center = map ? [map.getCenter().lat, map.getCenter().lng] : null;
+    var items = [];
+    var minZoomForSpecificCards = 12.6;
+    if (!bounds || !center || !map) return items;
+    if (map.getZoom() < minZoomForSpecificCards) return items;
+    if (currentMapFilter === 'trails') {
+      items = trailItems.filter(function(entry) {
+        return entry && entry.trail && entry.latLngs && entry.latLngs.length && bounds.contains(entry.latLngs[0]);
+      }).map(function(entry) {
+        return {
+          kind: 'trail',
+          id: 'trail-' + String(entry.trail.id || entry.trail.name || ''),
+          title: entry.trail.name,
+          kicker: 'Trail',
+          meta: [entry.trail.start_name, entry.trail.end_name].filter(Boolean).join(' → ') || entry.trail.description || '',
+          image: '',
+          badge: getDisplayDifficulty(entry.trail),
+          trail: entry.trail,
+          distance: distanceMeters(center, entry.latLngs[0])
+        };
+      }).sort(function(a, b) {
+        return (a.distance || 0) - (b.distance || 0);
+      });
+    } else {
+      items = poiMarkers.filter(function(entry) {
+        return entry && entry.poi && isValidCoords(entry.poi.coords) && bounds.contains(entry.poi.coords) && isPOIMatchFilter(entry.poi, currentMapFilter);
+      }).map(function(entry) {
+        var poi = entry.poi;
+        return {
+          kind: 'poi',
+          id: 'poi-' + String(poi.id || poi.name || ''),
+          title: poi.name,
+          kicker: poi.type || 'POI',
+          meta: poi.description || '',
+          image: getPOIImag
+  function renderBottomRailCards() {
+    var items;
+    var villageLabel;
+    if (!bottomRailTrack || !map) return;
+    if (USE_BOTTOM_RAIL) hideCard(false);
+    items = getBottomRailViewportItems();
+    villageLabel = getBottomRailVillageLabel();
+    if (bottomRailVillageTitle) {
+      if (villageLabel) {
+        bottomRailVillageTitle.textContent = '— ' + villageLabel + ' —';
+        bottomRailVillageTitle.classList.add('is-visible');
+      } else {
+        bottomRailVillageTitle.textContent = '';
+        bottomRailVillageTitle.classList.remove('is-visible');
+      }
+    }
+    if (!items.length) {
+      bottomRailTrack.innerHTML = '<div class="bottom-rail-card is-empty"><div>No places in this area yet.</div></div>';
+      return;
+    }
+    bottomRailTrack.innerHTML = items.map(function(item) {
+      var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
+      var badge = item.badge ? '<div class="bottom-rail-badge">' + escapeHTML(item.badge) + '</div>' : '';
+      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + badge + '<div class="bottom-rail-body"><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div>' + (item.meta ? '<div class="bottom-rail-meta">' + escapeHTML(item.meta) + '</div>' : '') + '</div></button>';
+    }).join('');
+  }
+  function handleBottomRailClick(event) {
+    var button = event.target.closest('[data-rail-kind]');
+    var kind;
+    var id;
+    var index;
+    var item;
+    if (!button) return;
+    kind = button.getAttribute('data-rail-kind');
+    id = button.getAttribute('data-rail-id') || '';
+    
+    if (kind === 'poi') {
+      item = poiMarkers.find(function(entry) { return 'poi-' + String(entry.poi && (entry.poi.id || entry.poi.name || '')) === id; });
+      if (item && item.poi) openPOIWithMapMove(item.poi, null);
+      return;
+    }
+    if (kind === 'trail') {
+      item = trailItems.find(function(entry) { return 'trail-' + String(entry.trail && (entry.trail.id || entry.trail.name || '')) === id; });
+      if (item && item.trail) showTrailCard(item.trail);
+    }
+  }
   function destroyPoiMiniMap() { if (poiMiniMap) { try { poiMiniMap.remove(); } catch (error) {} poiMiniMap = null; } if (poiCircle) poiCircle.innerHTML = ''; }
   function closePOICard(immediate) { closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); } }, 360); }
   function setPOISheetHeight(percent, animated) { if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = percent + 'dvh'; poiCard.classList.toggle('sheet-expanded', percent >= 88); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
@@ -1079,7 +1388,7 @@
     renderRelatedArticlesForPOI(poi, blogPostsCache);
     renderDiscountCTA(poi); window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); } }, 80); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } isProgrammaticMove = true; if (isIOSDevice()) { map.setView(poi.coords, 17, { animate: true }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 300); } else { map.flyTo(poi.coords, 17, { duration: 1.2 }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 400); } }
-  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); }
+  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); renderBottomRailCards(); }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
   function createSeaArc(p1, p2, segments) { var lat1 = p1[0], lng1 = p1[1], lat2 = p2[0], lng2 = p2[1], midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2, distance = Math.abs(lng2 - lng1), offset = 0.018 + distance * 0.45, control = [midLat - 0.003, midLng - offset], points = [], i, t, lat, lng; for (i = 0; i <= segments; i += 1) { t = i / segments; lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2; lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2; points.push([lat, lng]); } return points; }
   function normalizeFerryPortName(value) { var text = String(value || '').toLowerCase(); try { text = text.normalize('NFD'); } catch (error) {} text = text.replace(/[̀-ͯ]/g, ''); text = text.replace(/[^a-z0-9]+/g, ' ').trim(); return text; }
@@ -1135,37 +1444,45 @@
   }
   async function loadPOIs() {
     var response, rows = [];
+    poiDataLoaded = false;
+    refreshMapLoadingState();
     poiLayer.clearLayers();
     poiMarkers = [];
-    if (SUPABASE_READY && supabaseClient) {
-      response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false });
-      if (response.error) {
-        console.warn('Supabase POI load failed:', response.error.message);
+    try {
+      if (SUPABASE_READY && supabaseClient) {
+        response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false });
+        if (response.error) {
+          console.warn('Supabase POI load failed:', response.error.message);
+        } else {
+          rows = response.data || [];
+        }
       } else {
-        rows = response.data || [];
+        rows = readLocalPOIs();
       }
-    } else {
-      rows = readLocalPOIs();
-    }
 
-    rows.map(normalizePOI).filter(isValidPOI).forEach(function(poi) {
-      var marker = L.marker(poi.coords, {
-        title: poi.name,
-        zIndexOffset: 2400,
-        icon: createPOIFullIcon(poi)
-      }).on('click', function(event) {
-        openPOIWithMapMove(poi, event);
+      rows.map(normalizePOI).filter(isValidPOI).forEach(function(poi) {
+        var marker = L.marker(poi.coords, {
+          title: poi.name,
+          zIndexOffset: 2400,
+          icon: createPOIFullIcon(poi)
+        }).on('click', function(event) {
+          openPOIWithMapMove(poi, event);
+        });
+        poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi });
       });
-      poiMarkers.push({ marker: marker, importance: poi.relevance || 0, poi: poi });
-    });
 
-    console.log('POIs loaded:', poiMarkers.length);
-    updateExclusiveDiscountFilterVisibility();
-    updatePOIVisibility();
-    addFerryRoutes();
-    await loadFerryTimetable();
-    await loadBlogPosts();
-    if (searchInput) renderSearchSuggestions(searchInput.value);
+      console.log('POIs loaded:', poiMarkers.length);
+      updateExclusiveDiscountFilterVisibility();
+      updatePOIVisibility();
+      renderBottomRailCards();
+      addFerryRoutes();
+      await loadFerryTimetable();
+      await loadBlogPosts();
+      if (searchInput) renderSearchSuggestions(searchInput.value);
+    } finally {
+      poiDataLoaded = true;
+      refreshMapLoadingState();
+    }
   }
   function normalizeSearchText(value) { return normalizeText(value); }
   function searchMatches(item, q) { var haystack = normalizeSearchText([item.name, item.label, item.description, item.keywords].filter(Boolean).join(' ')); if (!q) return false; return haystack.indexOf(q) !== -1 || q.split(' ').filter(function(word) { return word.length > 2; }).some(function(word) { return haystack.indexOf(word) !== -1; }); }
@@ -1293,6 +1610,7 @@
   var universalSearchResults = [];
   var searchTypeFilter = 'all';
   var searchFitTimer = null;
+  var poiDataLoaded = false;
   function renderSearchSuggestions(value) {
     var query = String(value || '').trim();
     if (!searchResults) return;
@@ -1337,41 +1655,15 @@
       });
     });
 
-    if (card) {
-      card.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true });
-      card.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true });
-      card.addEventListener('click', unlockLiveFromRealGesture);
-    }
+    
 
-    if (cardMedia) {
-      cardMedia.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true });
-      cardMedia.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true });
-      cardMedia.addEventListener('click', unlockLiveFromRealGesture);
-    }
+    
 
-    if (cardLiveBadge) {
-      cardLiveBadge.addEventListener('click', function (event) {
-        event.stopPropagation();
-      });
-    }
+    
 
-    if (cardTourPlayBtn) {
-      cardTourPlayBtn.addEventListener('touchstart', function (event) {
-        event.stopPropagation();
-      }, { passive: true });
-      cardTourPlayBtn.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        renderVillageTourPanel();
-      });
-    }
+    
 
-    if (cardTourPanel) {
-      cardTourPanel.addEventListener('touchstart', function (event) {
-        event.stopPropagation();
-      }, { passive: true });
-      cardTourPanel.addEventListener('click', handleVillageTourPanelClick);
-    }
+    
 
     if (tourNav) {
       tourNav.addEventListener('click', function (event) {
@@ -1481,6 +1773,10 @@
         searchInput.blur();
       });
 
+      if (bottomRailTrack) {
+        bottomRailTrack.addEventListener('click', handleBottomRailClick);
+      }
+
       document.addEventListener('click', function (event) {
         if (!searchResults.contains(event.target) && event.target !== searchInput) {
           searchResults.style.display = 'none';
@@ -1503,14 +1799,56 @@
     map.on('moveend zoomend', function () {
       evaluateAutoCard();
       updatePOIVisibility();
+      renderBottomRailCards();
     });
 
-    setupCardSwipe(card);
-    setupCardSwipe(cardLiveTouchLayer);
+    
     setupPOISheetDrag();
   }
   function runTests() { }
-  function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); applyMapFilterUI(currentMapFilter); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
+  function setMapLoadingState(isLoading) {
+    document.body.classList.toggle('map-loading', Boolean(isLoading));
+    var overlay = document.getElementById('map-loading-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+    if (!map) return;
+    if (isLoading) {
+      map.dragging.disable();
+      map.touchZoom.disable();
+      map.doubleClickZoom.disable();
+      map.scrollWheelZoom.disable();
+      map.boxZoom.disable();
+      map.keyboard.disable();
+    } else {
+      map.dragging.enable();
+      map.touchZoom.enable();
+      map.doubleClickZoom.enable();
+      map.scrollWheelZoom.enable();
+      map.boxZoom.enable();
+      map.keyboard.enable();
+    }
+  }
+  function refreshMapLoadingState() {
+    setMapLoadingState(!poiDataLoaded);
+  }
+  function start() {
+    document.body.classList.add('map-loading');
+    initMap();
+    setMapLoadingState(true);
+    createCityMarkers();
+    preloadImages();
+    updateWeather(44.12, 9.71);
+    setupEvents();
+    setUserLocationButtonState('idle');
+    updateMapVisualByZoom();
+    runTests();
+    applyMapFilterUI(currentMapFilter);
+    renderBottomRailCards();
+    loadPOIs();
+    loadTrails();
+    window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300);
+    window.setTimeout(function () { checkUser(); startUserPolling(); }, 250);
+    if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); });
+  }
   start();
 }());
 </script>
