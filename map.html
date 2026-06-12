@@ -43,104 +43,177 @@
     .leaflet-container { background: #f6f1e8 !important; }
     .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
 
-    .top-bar {
+    .top-bar { display: none !important; }
+    .search-floating {
       position: fixed;
       top: calc(8px + env(safe-area-inset-top));
       left: 10px;
       right: 10px;
-      z-index: 1000;
+      width: auto;
+      z-index: 2100;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 8px;
-      border-radius: 24px;
-      background: rgba(8,12,16,0.58);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 34px rgba(0,0,0,0.24);
-      backdrop-filter: blur(22px) saturate(1.22);
-      -webkit-backdrop-filter: blur(22px) saturate(1.22);
+      pointer-events: auto;
+      align-items: flex-start;
     }
-    .top-row {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 9px;
-      min-height: 36px;
+    .search-wrap {
+      position: relative;
+      min-height: 56px;
+      width: min(520px, calc(100vw - 94px));
+      max-width: calc(100vw - 94px);
     }
-    .center-brand {
-      justify-self: center;
-      font-weight: 950;
-      font-size: 15px;
-      line-height: 1;
-      letter-spacing: -0.06em;
-      text-decoration: none;
-      white-space: nowrap;
-      color: white;
-      text-shadow: 0 0 12px rgba(30,155,255,0.16), 0 3px 10px rgba(0,0,0,0.42);
-    }
-    .blue { color: #1e9bff; }
-    .orange { color: #ff8a1d; }
-    #weather {
-      justify-self: start;
-      min-height: 29px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.13);
-      color: white;
-      font-weight: 850;
-      font-size: 13px;
-      line-height: 1;
-      white-space: nowrap;
-    }
-
-    .search-wrap { position: relative; }
     .search-wrap::before {
       content: '⌕';
       position: absolute;
-      left: 15px;
+      left: 18px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 2;
-      color: rgba(255,255,255,0.58);
-      font-size: 17px;
+      color: rgba(255,255,255,.70);
+      font-size: 20px;
       font-weight: 700;
       pointer-events: none;
     }
     #search {
       width: 100%;
-      min-height: 40px;
-      padding: 9px 14px 9px 40px;
+      height: 56px;
+      padding: 0 18px 0 52px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,.12);
       outline: none;
-      background: rgba(255,255,255,0.12);
-      color: white;
-      font-size: 14.5px;
-      font-weight: 650;
+      background: rgba(8,12,16,.76);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      box-shadow: 0 20px 54px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter: blur(18px) saturate(1.12);
+      -webkit-backdrop-filter: blur(18px) saturate(1.12);
     }
-    #search::placeholder { color: rgba(255,255,255,0.58); }
+    #search::placeholder { color: rgba(255,255,255,.68); }
+    #search:focus {
+      border-color: rgba(255,255,255,.18);
+      background: rgba(8,12,16,.88);
+    }
     #search-results {
       position: absolute;
-      top: 100%;
+      top: calc(100% + 8px);
       left: 0;
       right: 0;
-      margin-top: 6px;
-      background: rgba(0,0,0,0.62);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 14px;
-      overflow: hidden;
       display: none;
       flex-direction: column;
-      z-index: 1001;
-      box-shadow: 0 14px 34px rgba(0,0,0,0.25);
+      max-height: min(340px, 48dvh);
+      overflow-y: auto;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(8,12,16,.90);
+      box-shadow: 0 24px 60px rgba(0,0,0,.30);
+      backdrop-filter: blur(22px) saturate(1.14);
+      -webkit-backdrop-filter: blur(22px) saturate(1.14);
+      z-index: 2101;
     }
-    .search-item { padding: 11px 12px; color: white; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+    .search-item {
+      padding: 12px 14px;
+      color: #fff;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
     .search-item:last-child { border-bottom: none; }
+    .search-item-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 850;
+      line-height: 1.2;
+    }
+    .search-item-type {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.82);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .search-item-desc {
+      font-size: 12px;
+      line-height: 1.35;
+      color: rgba(255,255,255,.58);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .search-type-pills {
+      width: calc(100vw - 20px);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 2px 2px;
+    }
+    .search-type-pills::-webkit-scrollbar { display: none; }
+    .search-type-pill {
+      flex: 0 0 auto;
+      min-height: 34px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(8,12,16,.58);
+      color: rgba(255,255,255,.90);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 12px 26px rgba(0,0,0,.18);
+      backdrop-filter: blur(18px) saturate(1.08);
+      -webkit-backdrop-filter: blur(18px) saturate(1.08);
+    }
+    .search-type-pill.is-active {
+      background: rgba(255,255,255,.94);
+      color: #111;
+      border-color: rgba(255,255,255,.72);
+      box-shadow: 0 18px 44px rgba(0,0,0,.22);
+    }
+    @media (max-width: 520px) {
+      .search-floating {
+        top: calc(8px + env(safe-area-inset-top));
+        left: 8px;
+        right: 8px;
+      }
+      .search-wrap {
+        min-height: 50px;
+        width: calc(100vw - 86px);
+        max-width: calc(100vw - 86px);
+      }
+      #search {
+        height: 50px;
+        padding-left: 48px;
+        font-size: 14px;
+      }
+      .search-wrap::before {
+        left: 16px;
+        font-size: 18px;
+      }
+      .search-type-pills {
+        width: calc(100vw - 16px);
+      }
+      .search-type-pill {
+        min-height: 31px;
+        padding: 7px 12px;
+        font-size: 10px;
+      }
+    }
 
     .mode-bar {
       display: flex;
@@ -411,487 +484,6 @@
       .poi-preview-img { flex-basis: 136px; width: 136px; height: 136px; border-radius: 20px; }
       .trail-info-grid { grid-template-columns:1fr; }
     }
-    :root {
-    --ftg-fab-right: max(12px, env(safe-area-inset-right));
-    --ftg-fab-top: calc(12px + env(safe-area-inset-top));
-    --ftg-fab-bottom: calc(12px + env(safe-area-inset-bottom));
-    --ftg-surface: rgba(8,12,16,.76);
-    --ftg-surface-strong: rgba(8,12,16,.9);
-    --ftg-border: rgba(255,255,255,.12);
-    --ftg-text: #fff;
-    --ftg-text-soft: rgba(255,255,255,.68);
-    --ftg-shadow: 0 20px 54px rgba(0,0,0,.28);
-  }
-
-  body.ftg-actionbar-enabled {
-    padding-bottom: calc(18px + env(safe-area-inset-bottom));
-  }
-
-  .ftg-fab {
-    position: fixed;
-    width: 56px;
-    height: 56px;
-    border: 1px solid rgba(255,255,255,.16);
-    border-radius: 50%;
-    background: var(--ftg-surface);
-    box-shadow: var(--ftg-shadow);
-    backdrop-filter: blur(18px) saturate(1.12);
-    -webkit-backdrop-filter: blur(18px) saturate(1.12);
-    color: var(--ftg-text);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 80;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .22s ease, background .22s ease, border-color .22s ease;
-  }
-  .ftg-fab:active { transform: scale(.96); }
-  .ftg-fab.open {
-    background: rgba(255,255,255,.92);
-    color: #111;
-    border-color: rgba(255,255,255,.72);
-  }
-
-  .ftg-more-fab {
-    top: var(--ftg-fab-top);
-    right: var(--ftg-fab-right);
-    z-index: 82;
-    isolation: isolate;
-    background: rgba(255,255,255,.94);
-    color: #111;
-    border-color: rgba(255,255,255,.78);
-    box-shadow: 0 18px 44px rgba(0,0,0,.22);
-  }
-
-  .ftg-more-icon {
-    position: relative;
-    width: 22px;
-    height: 22px;
-  }
-  .ftg-more-icon span {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: currentColor;
-    transition: transform .28s cubic-bezier(.2,.9,.2,1), width .24s ease, height .24s ease, opacity .18s ease, top .28s cubic-bezier(.2,.9,.2,1), left .28s cubic-bezier(.2,.9,.2,1);
-  }
-  .ftg-more-icon span:nth-child(1) { top: 1px; left: 1px; }
-  .ftg-more-icon span:nth-child(2) { top: 1px; right: 1px; }
-  .ftg-more-icon span:nth-child(3) { bottom: 1px; left: 1px; }
-  .ftg-more-icon span:nth-child(4) { bottom: 1px; right: 1px; }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(1),
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(4) {
-    width: 16px;
-    height: 3px;
-    top: 9px;
-    left: 3px;
-    border-radius: 999px;
-  }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(1) { transform: rotate(45deg); }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(4) { transform: rotate(-45deg); }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(2),
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(3) {
-    opacity: 0;
-    transform: scale(.2);
-    top: 9px;
-    left: 9px;
-  }
-
-  .ftg-ai-fab {
-    right: var(--ftg-fab-right);
-    bottom: var(--ftg-fab-bottom);
-    overflow: hidden;
-  }
-  .ftg-ai-fab video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center 0%;
-    transform: scale(1.22);
-    pointer-events: none;
-  }
-
-  .ftg-more-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 74;
-    display: none;
-    background: transparent;
-  }
-  .ftg-more-overlay.open { display: block; }
-
-  .ftg-more-panel {
-    position: fixed;
-    top: calc(var(--ftg-fab-top) - 14px);
-    left: 6px;
-    right: calc(var(--ftg-fab-right) - 14px);
-    z-index: 79;
-    width: auto;
-    max-width: none;
-    padding: 16px 10px 12px 10px;
-    border-radius: 0 0 0 30px;
-    background: var(--ftg-surface-strong);
-    border: 1px solid var(--ftg-border);
-    box-shadow: 0 28px 80px rgba(0,0,0,.34);
-    backdrop-filter: blur(22px) saturate(1.14);
-    -webkit-backdrop-filter: blur(22px) saturate(1.14);
-    opacity: 0;
-    transform-origin: top right;
-    transform: translate(10px, -10px) scale(.84);
-    pointer-events: none;
-    transition: transform .34s cubic-bezier(.2,.9,.2,1), opacity .24s ease;
-    overflow: hidden;
-  }
-  .ftg-more-panel.open {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-    pointer-events: auto;
-    overflow: visible;
-  }
-  .ftg-more-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,0) 38%);
-    pointer-events: none;
-  }
-  .ftg-more-panel::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 76px;
-    height: 76px;
-    border-radius: 999px;
-    background: var(--ftg-surface-strong);
-    border: 1px solid var(--ftg-border);
-    box-shadow: 0 18px 44px rgba(0,0,0,.16);
-    pointer-events: none;
-  }
-
-  .ftg-more-head {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 12px;
-    margin-bottom: 14px;
-    padding-right: 70px;
-    min-height: 44px;
-  }
-  .ftg-more-primary {
-    min-height: 38px;
-    padding: 0 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.94);
-    color: #111;
-    font-size: 14px;
-    font-weight: 950;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    text-decoration: none;
-    box-shadow: 0 10px 26px rgba(0,0,0,.16);
-  }
-
-  .ftg-more-language-row {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-    margin-bottom: 12px;
-  }
-  .ftg-more-language-row::-webkit-scrollbar { display: none; }
-  .ftg-more-language-btn {
-    flex: 0 0 auto;
-    min-height: 34px;
-    padding: 7px 11px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.08);
-    color: rgba(255,255,255,.84);
-    font-size: 11px;
-    font-weight: 900;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .ftg-more-language-btn.active {
-    background: rgba(255,255,255,.94);
-    color: #111;
-  }
-
-  .ftg-more-grid {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .ftg-more-item {
-    position: relative;
-    min-height: 84px;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 22px;
-    background: rgba(255,255,255,.08);
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    color: var(--ftg-text);
-    text-decoration: none;
-    padding: 10px 11px;
-    display: grid;
-    align-content: space-between;
-    gap: 10px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform .22s ease, background .22s ease, border-color .22s ease;
-  }
-  .ftg-more-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(8,12,16,.16), rgba(8,12,16,.72));
-    pointer-events: none;
-  }
-  .ftg-more-item:active { transform: scale(.98); }
-  .ftg-more-item.active {
-    background-color: rgba(255,255,255,.14);
-    border-color: rgba(255,255,255,.18);
-  }
-  .ftg-more-item-top {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-  .ftg-more-item-icon { display: none; }
-  .ftg-more-item-arrow {
-    color: rgba(255,255,255,.48);
-    font-size: 16px;
-    line-height: 1;
-  }
-  .ftg-more-item-label {
-    position: relative;
-    z-index: 1;
-    font-size: 13px;
-    line-height: 1.05;
-    letter-spacing: -.02em;
-    font-weight: 900;
-    text-align: left;
-    text-wrap: balance;
-  }
-
-  .ftg-more-footer {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    padding-top: 2px;
-  }
-  .ftg-more-footer a {
-    color: rgba(255,255,255,.62);
-    font-size: 12px;
-    font-weight: 800;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .ftg-ai-chat {
-    position: fixed;
-    left: 10px;
-    right: 10px;
-    top: calc(72px + env(safe-area-inset-top));
-    bottom: calc(74px + env(safe-area-inset-bottom));
-    z-index: 100;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    border-radius: 26px;
-    border: 1px solid rgba(255,255,255,.34);
-    background: rgba(255,255,255,.78);
-    box-shadow: 0 24px 70px rgba(0,0,0,.28);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    color: #111;
-  }
-  .ftg-ai-chat.ai-open { display: flex; }
-  .ftg-ai-head {
-    padding: 14px 14px 12px;
-    border-bottom: 1px solid rgba(0,0,0,.07);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .ftg-ai-head-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
-  }
-  .ftg-ai-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex: 0 0 42px;
-    background: rgba(255,255,255,.85);
-    border: 1px solid rgba(0,0,0,.08);
-    box-shadow: 0 4px 14px rgba(0,0,0,.12);
-  }
-  .ftg-ai-avatar video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center 0%;
-    transform: scale(1.22);
-  }
-  .ftg-ai-title {
-    font-size: 15px;
-    font-weight: 900;
-    letter-spacing: -.03em;
-    line-height: 1.1;
-    color: #111;
-  }
-  .ftg-ai-subtitle {
-    margin-top: 3px;
-    font-size: 12px;
-    color: rgba(0,0,0,.52);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.15;
-  }
-  .ftg-ai-close {
-    width: 32px;
-    height: 32px;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(0,0,0,.07);
-    color: #111;
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-  }
-  .ftg-ai-messages {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 12px;
-    font-size: 14px;
-    line-height: 1.35;
-    -webkit-overflow-scrolling: touch;
-  }
-  .ftg-ai-msg {
-    max-width: 84%;
-    word-break: break-word;
-    margin-bottom: 8px;
-    padding: 10px 12px;
-    border-radius: 18px;
-    white-space: pre-line;
-  }
-  .ftg-ai-msg.user {
-    margin-left: auto;
-    background: #111;
-    color: #fff;
-    border-bottom-right-radius: 6px;
-  }
-  .ftg-ai-msg.bot {
-    margin-right: auto;
-    background: rgba(0,0,0,.07);
-    color: #111;
-    border-bottom-left-radius: 6px;
-  }
-  .ftg-ai-suggestions {
-    display: flex;
-    gap: 7px;
-    padding: 0 12px 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .ftg-ai-suggestions::-webkit-scrollbar { display: none; }
-  .ftg-ai-suggestion {
-    flex: 0 0 auto;
-    border: 0;
-    border-radius: 999px;
-    padding: 8px 10px;
-    background: rgba(0,0,0,.07);
-    color: #111;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .ftg-ai-input-row {
-    padding: 10px;
-    display: flex;
-    gap: 8px;
-    border-top: 1px solid rgba(0,0,0,.07);
-    background: rgba(255,255,255,.36);
-  }
-  .ftg-ai-input {
-    flex: 1;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    border-radius: 999px;
-    background: rgba(0,0,0,.07);
-    color: #111;
-    padding: 11px 13px;
-    font-size: 15px;
-  }
-  .ftg-ai-send {
-    width: 42px;
-    height: 42px;
-    border: 0;
-    border-radius: 50%;
-    background: #111;
-    color: #fff;
-    font-weight: 900;
-    cursor: pointer;
-  }
-
-  body.ftg-ai-chat-active .ftg-more-fab,
-  body.ftg-ai-chat-active .ftg-more-panel,
-  body.ftg-ai-chat-active .ftg-more-overlay,
-  body.ftg-ai-chat-active .ftg-ai-fab {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-  }
-
-  @media (min-width: 700px) {
-    .ftg-ai-chat { max-width: 380px; }
-    .ftg-ai-chat {
-      left: max(10px, calc(50% - 190px));
-      right: max(10px, calc(50% - 190px));
-    }
-  }
   </style>
   <script>
     window.FTG_ACTIONBAR_CONFIG = {
@@ -917,290 +509,41 @@
         { label: 'Policy', href: '#policy' }
       ]
     };
-  </script>
-  <script>
-    function FTG_BOOT_GLOBAL_ACTIONBAR() {
-      'use strict';
 
-      if (window.FTG_GLOBAL_ACTIONBAR_BOOTED) return;
-      window.FTG_GLOBAL_ACTIONBAR_BOOTED = true;
-
-      var config = window.FTG_ACTIONBAR_CONFIG || {};
-      var activePage = config.activePage || 'home';
-      var userName = config.userName || 'Utente';
-      var isLoggedIn = Boolean(config.isLoggedIn);
-      var accountPillLabel = isLoggedIn ? ('Hi, ' + userName) : 'Accedi';
-      var aiTitle = config.aiTitle || 'Captain Gull';
-      var aiSubtitle = config.aiSubtitle || 'Global actionbar';
-      var aiWelcome = config.aiWelcome || 'Actionbar globale pronta. Ora puoi riusarla su tutte le pagine del sito.';
-      var pages = config.pages || {
-        map: { label: 'Mappa', emoji: '🗺️', href: 'map.html' },
-        home: { label: 'Home', emoji: '🏠', href: '#home' },
-        guide: { label: 'Guide', emoji: '📖', href: '#guide' }
-      };
-      var menuItems = config.menuItems || [
-        { id: 'map', label: pages.map && pages.map.label || 'Map', href: 'map.html' },
-        { id: 'home', label: pages.home && pages.home.label || 'Home', href: pages.home && pages.home.href || '#home' },
-        { id: 'guide', label: pages.guide && pages.guide.label || 'Guide', href: pages.guide && pages.guide.href || 'https://5terrego.com/site-stories-section' }
-      ];
-      var legalLinks = config.legalLinks || [
-        { label: 'Privacy', href: '#privacy' },
-        { label: 'Policy', href: '#policy' }
-      ];
-      var languages = config.languages || [
-        { code: 'it', label: '🇮🇹 Italiano' },
-        { code: 'en', label: '🇬🇧 English' },
-        { code: 'fr', label: '🇫🇷 Français' },
-        { code: 'de', label: '🇩🇪 Deutsch' }
-      ];
-      var currentLanguage = config.language || (languages[0] && languages[0].code) || 'it';
-      var basePath = typeof config.basePath === 'string' ? config.basePath.trim() : '';
-      var root = document.getElementById('ftg-global-actionbar-root');
-      var welcomed = false;
-
-      if (!root) return;
-      document.body.classList.add('ftg-actionbar-enabled');
-
-      function escapeHTML(value) {
-        return String(value || '').replace(/[&<>\"]/g, function (char) {
-          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
-        });
+    (function () {
+      function mountGlobalActionbar() {
+        var root = document.getElementById('ftg-global-actionbar-root');
+        if (!root) return;
+        fetch('global-actionbar.html', { cache: 'no-store' })
+          .then(function (response) {
+            if (!response.ok) throw new Error('Unable to load global-actionbar.html');
+            return response.text();
+          })
+          .then(function (html) {
+            var host = document.createElement('div');
+            var scripts;
+            host.innerHTML = html;
+            scripts = Array.prototype.slice.call(host.querySelectorAll('script'));
+            scripts.forEach(function (oldScript) {
+              var newScript = document.createElement('script');
+              if (oldScript.src) newScript.src = oldScript.src;
+              if (oldScript.type) newScript.type = oldScript.type;
+              newScript.textContent = oldScript.textContent;
+              oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+            root.replaceWith.apply(root, Array.prototype.slice.call(host.childNodes));
+          })
+          .catch(function (error) {
+            console.error('Global actionbar load failed:', error);
+          });
       }
 
-      function resolveHref(href) {
-        var value = String(href || '').trim();
-        if (!value) return '';
-        if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
-        if (basePath) return basePath.replace(/\/+$/, '') + '/' + value.replace(/^\/+/, '');
-        return '/' + value.replace(/^\/+/, '');
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mountGlobalActionbar, { once: true });
+      } else {
+        mountGlobalActionbar();
       }
-
-      function buildMenuCard(item) {
-        var isActive = activePage === item.id;
-        var backgroundStyle = item.backgroundImage ? ' style="background-image:url(' + "'" + escapeHTML(item.backgroundImage) + "'" + ')"' : '';
-        return '<button class="ftg-more-item' + (isActive ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id || '') + '" data-page-href="' + escapeHTML(item.href || '') + '"' + backgroundStyle + '><span class="ftg-more-item-top"><span class="ftg-more-item-arrow">›</span></span><span class="ftg-more-item-label">' + escapeHTML(item.label || item.id || '') + '</span></button>';
-      }
-
-      root.innerHTML = '' +
-        '<button class="ftg-fab ftg-more-fab" id="ftg-more-fab" type="button" aria-label="Open menu">' +
-          '<span class="ftg-more-icon"><span></span><span></span><span></span><span></span></span>' +
-        '</button>' +
-        '<div class="ftg-more-overlay" id="ftg-more-overlay"></div>' +
-        '<aside class="ftg-more-panel" id="ftg-more-panel" aria-hidden="true">' +
-          '<div class="ftg-more-head">' +
-            '<button class="ftg-more-primary" id="ftg-more-primary" type="button">' + escapeHTML(accountPillLabel) + '</button>' +
-          '</div>' +
-          '<div class="ftg-more-language-row" id="ftg-more-language-row">' +
-            languages.map(function (lang) {
-              return '<button class="ftg-more-language-btn' + (lang.code === currentLanguage ? ' active' : '') + '" type="button" data-lang="' + escapeHTML(lang.code) + '">' + escapeHTML(lang.label) + '</button>';
-            }).join('') +
-          '</div>' +
-          '<div class="ftg-more-grid">' + menuItems.map(buildMenuCard).join('') + '</div>' +
-          '<div class="ftg-more-footer">' +
-            legalLinks.map(function (link) {
-              return '<a href="' + escapeHTML(link.href || '#') + '">' + escapeHTML(link.label || '') + '</a>';
-            }).join('') +
-          '</div>' +
-        '</aside>' +
-        '<button class="ftg-fab ftg-ai-fab" id="ftg-ai-chat-btn" type="button" aria-label="Open AI Guide">' +
-          '<video id="ftg-ai-mascot-video" autoplay muted loop playsinline preload="auto">' +
-            '<source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm">' +
-            '<source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm">' +
-          '</video>' +
-        '</button>' +
-        '<div id="ftg-ai-chat" class="ftg-ai-chat" aria-hidden="true">' +
-          '<div class="ftg-ai-head">' +
-            '<div class="ftg-ai-head-left">' +
-              '<div class="ftg-ai-avatar">' +
-                '<video id="ftg-ai-header-video" autoplay muted loop playsinline preload="auto">' +
-                  '<source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm">' +
-                  '<source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm">' +
-                '</video>' +
-              '</div>' +
-              '<div><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div>' +
-            '</div>' +
-            '<button id="ftg-ai-close" class="ftg-ai-close" type="button" aria-label="Close AI">×</button>' +
-          '</div>' +
-          '<div id="ftg-ai-messages" class="ftg-ai-messages"></div>' +
-          '<div class="ftg-ai-suggestions">' +
-            '<button class="ftg-ai-suggestion" type="button">come organizziamo il menu?</button>' +
-            '<button class="ftg-ai-suggestion" type="button">quale pagina è attiva?</button>' +
-            '<button class="ftg-ai-suggestion" type="button">portiamolo su tutto il sito</button>' +
-          '</div>' +
-          '<div class="ftg-ai-input-row">' +
-            '<input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask the guide..." autocomplete="off" />' +
-            '<button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button>' +
-          '</div>' +
-        '</div>';
-
-      var moreFab = document.getElementById('ftg-more-fab');
-      var moreOverlay = document.getElementById('ftg-more-overlay');
-      var morePanel = document.getElementById('ftg-more-panel');
-      var morePrimary = document.getElementById('ftg-more-primary');
-      var menuButtons = Array.prototype.slice.call(root.querySelectorAll('[data-page-target]'));
-      var languageButtons = Array.prototype.slice.call(root.querySelectorAll('.ftg-more-language-btn'));
-      var aiBtn = document.getElementById('ftg-ai-chat-btn');
-      var aiChat = document.getElementById('ftg-ai-chat');
-      var aiClose = document.getElementById('ftg-ai-close');
-      var aiMessages = document.getElementById('ftg-ai-messages');
-      var aiInput = document.getElementById('ftg-ai-input');
-      var aiSend = document.getElementById('ftg-ai-send');
-      var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll('.ftg-ai-suggestion'));
-
-      function syncActiveButtons(pageId) {
-        activePage = pageId;
-        menuButtons.forEach(function (button) {
-          button.classList.toggle('active', button.getAttribute('data-page-target') === pageId);
-        });
-      }
-
-      function closeMorePanel() {
-        morePanel.classList.remove('open');
-        morePanel.setAttribute('aria-hidden', 'true');
-        moreOverlay.classList.remove('open');
-        moreFab.classList.remove('open');
-        document.body.classList.remove('ftg-more-open');
-      }
-
-      function openMorePanel() {
-        morePanel.classList.add('open');
-        morePanel.setAttribute('aria-hidden', 'false');
-        moreOverlay.classList.add('open');
-        moreFab.classList.add('open');
-        document.body.classList.add('ftg-more-open');
-      }
-
-      function toggleMorePanel(forceOpen) {
-        var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !morePanel.classList.contains('open');
-        if (shouldOpen) openMorePanel(); else closeMorePanel();
-      }
-
-      function navigateTo(itemId, href) {
-        var finalHref = itemId === 'map' ? resolveHref('map.html') : resolveHref(href || '');
-        syncActiveButtons(itemId);
-        closeMorePanel();
-
-        if (itemId === 'map') {
-          window.location.href = finalHref;
-          return;
-        }
-
-        if (typeof config.onNavigate === 'function') {
-          config.onNavigate(itemId, { href: finalHref });
-          return;
-        }
-
-        if (finalHref) window.location.href = finalHref;
-      }
-
-      function forceMascotVideos() {
-        ['ftg-ai-mascot-video', 'ftg-ai-header-video'].forEach(function (id) {
-          var video = document.getElementById(id);
-          if (!video) return;
-          video.muted = true;
-          video.loop = true;
-          video.playsInline = true;
-          video.setAttribute('muted', '');
-          video.setAttribute('playsinline', '');
-          video.setAttribute('webkit-playsinline', '');
-          video.load();
-          var playPromise = video.play();
-          if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(function () {});
-        });
-      }
-
-      function addAIMessage(text, isUser) {
-        var div = document.createElement('div');
-        div.className = 'ftg-ai-msg ' + (isUser ? 'user' : 'bot');
-        div.innerText = text;
-        aiMessages.appendChild(div);
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-      }
-
-      function toggleAI(open) {
-        var shouldOpen = typeof open === 'boolean' ? open : !aiChat.classList.contains('ai-open');
-        aiChat.classList.toggle('ai-open', shouldOpen);
-        aiChat.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
-        document.body.classList.toggle('ftg-ai-chat-active', shouldOpen);
-        if (shouldOpen) closeMorePanel();
-        if (shouldOpen && !welcomed) {
-          welcomed = true;
-          addAIMessage(aiWelcome, false);
-        }
-      }
-
-      function handleAISend(textFromButton) {
-        var text = String(textFromButton || aiInput.value || '').trim();
-        if (!text) return;
-        addAIMessage(text, true);
-        aiInput.value = '';
-        window.setTimeout(function () {
-          addAIMessage('Pagina attiva: ' + activePage + '. Questa è la base shared della nuova actionbar minimale.', false);
-        }, 120);
-      }
-
-      if (moreFab) moreFab.addEventListener('click', function () { toggleMorePanel(); });
-      if (moreOverlay) moreOverlay.addEventListener('click', closeMorePanel);
-      document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-          closeMorePanel();
-          toggleAI(false);
-        }
-      });
-
-      menuButtons.forEach(function (button) {
-        button.addEventListener('click', function () {
-          navigateTo(button.getAttribute('data-page-target'), button.getAttribute('data-page-href'));
-        });
-      });
-
-      if (morePrimary) {
-        morePrimary.addEventListener('click', function () {
-          closeMorePanel();
-          window.location.href = resolveHref('login.html');
-        });
-      }
-
-      languageButtons.forEach(function (button) {
-        button.addEventListener('click', function () {
-          currentLanguage = button.getAttribute('data-lang') || currentLanguage;
-          languageButtons.forEach(function (item) { item.classList.remove('active'); });
-          button.classList.add('active');
-          if (typeof config.onLanguageChange === 'function') config.onLanguageChange(currentLanguage);
-        });
-      });
-
-      if (aiBtn) aiBtn.addEventListener('click', function () { toggleAI(); });
-      if (aiClose) aiClose.addEventListener('click', function () { toggleAI(false); });
-      if (aiSend) aiSend.addEventListener('click', function () { handleAISend(); });
-      if (aiInput) aiInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') handleAISend(); });
-      aiSuggestions.forEach(function (button) {
-        button.addEventListener('click', function () { handleAISend(button.innerText); });
-      });
-
-      forceMascotVideos();
-      window.addEventListener('load', forceMascotVideos);
-      document.addEventListener('touchstart', forceMascotVideos, { passive: true, once: true });
-      document.addEventListener('click', forceMascotVideos, { passive: true, once: true });
-
-      window.FTG_GLOBAL_ACTIONBAR = {
-        navigateToPage: function (pageId) {
-          var match = menuItems.find(function(item){ return item.id === pageId; }) || {};
-          navigateTo(pageId, match.href || '');
-        },
-        openMorePanel: openMorePanel,
-        closeMorePanel: closeMorePanel,
-        toggleAI: toggleAI,
-        getCurrentPage: function () { return activePage; },
-        setActivePage: function (pageId) { syncActiveButtons(pageId); activePage = pageId; }
-      };
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', FTG_BOOT_GLOBAL_ACTIONBAR, { once: true });
-    } else {
-      FTG_BOOT_GLOBAL_ACTIONBAR();
-    }
+    }());
   </script>
   <script>
     (function(){
@@ -1229,6 +572,24 @@
 </head>
 <body class="park-presentation-mode">
 <div id="ftg-global-actionbar-root"></div>
+<div class="search-floating">
+  <div class="search-wrap">
+    <input id="search" type="search" placeholder="Search POIs and trails" autocomplete="off" />
+    <div id="search-results"></div>
+  </div>
+  <div id="search-type-pills" class="search-type-pills" aria-label="Search type filters">
+    <button class="search-type-pill is-active" type="button" data-search-type="all">All</button>
+    <button class="search-type-pill" type="button" data-search-type="beach">Beaches</button>
+    <button class="search-type-pill" type="button" data-search-type="food">Food</button>
+    <button class="search-type-pill" type="button" data-search-type="viewpoint">Viewpoints</button>
+    <button class="search-type-pill" type="button" data-search-type="church">Churches</button>
+    <button class="search-type-pill" type="button" data-search-type="monument">Monuments</button>
+    <button class="search-type-pill" type="button" data-search-type="station">Stations</button>
+    <button class="search-type-pill" type="button" data-search-type="ferry">Ferries</button>
+    <button class="search-type-pill" type="button" data-search-type="curiosity">Curiosities</button>
+    <button class="search-type-pill" type="button" data-search-type="trail">Trails</button>
+  </div>
+</div>
 
 <div id="map"></div>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
@@ -1808,11 +1169,146 @@
   }
   function normalizeSearchText(value) { return normalizeText(value); }
   function searchMatches(item, q) { var haystack = normalizeSearchText([item.name, item.label, item.description, item.keywords].filter(Boolean).join(' ')); if (!q) return false; return haystack.indexOf(q) !== -1 || q.split(' ').filter(function(word) { return word.length > 2; }).some(function(word) { return haystack.indexOf(word) !== -1; }); }
-  function getSearchResults(query) { var q = normalizeSearchText(query); var results = []; if (!q) return results; places.forEach(function (place, index) { var item = { type: 'city', label: 'Borgo', name: place.name, index: index, description: place.description || '', keywords: 'village borgo paese cinque terre live webcam' }; if (searchMatches(item, q)) results.push(item); }); poiMarkers.forEach(function (entry) { var poi = entry && entry.poi; var item; if (!poi) return; item = { type: 'poi', label: 'POI', name: poi.name, poiId: poi.id, description: poi.description || '', keywords: [poi.type, poi.symbol, getPOIDiscountValue(poi) > 0 ? 'sconto discount qr offerta' : ''].join(' ') }; if (searchMatches(item, q)) results.push(item); }); trailItems.forEach(function (entry) { var trail = entry && entry.trail; var item; if (!trail) return; item = { type: 'trail', label: 'Sentiero', name: trail.name, description: trail.description || '', keywords: [trail.start_name, trail.end_name, trail.difficulty, trail.estimated_duration, 'trekking trail sentiero camminare'].join(' ') }; if (searchMatches(item, q)) results.push(item); }); return results.slice(0, 12); }
+  function getSearchResults(query) {
+    var q = normalizeSearchText(query);
+    var results = [];
+    function matchesSearchType(poi) {
+      var type = normalizePOIType(poi && poi.type);
+      if (searchTypeFilter === 'all') return true;
+      if (searchTypeFilter === 'beach') return type === 'spiaggia';
+      if (searchTypeFilter === 'food') return type === 'ristorante' || type === 'bar';
+      if (searchTypeFilter === 'viewpoint') return type === 'punto panoramico';
+      if (searchTypeFilter === 'church') return type === 'chiesa';
+      if (searchTypeFilter === 'monument') return type === 'monumento';
+      if (searchTypeFilter === 'station') return type === 'stazione';
+      if (searchTypeFilter === 'ferry') return type === 'ferry';
+      if (searchTypeFilter === 'curiosity') return type === 'curiosity';
+      return false;
+    }
+    if (!q) return results;
+    if (searchTypeFilter !== 'trail') {
+      poiMarkers.forEach(function (entry) {
+        var poi = entry && entry.poi;
+        var item;
+        var typeLabel;
+        if (!poi || !matchesSearchType(poi)) return;
+        typeLabel = String(poi.type || 'POI');
+        item = {
+          type: 'poi',
+          label: typeLabel,
+          name: poi.name,
+          poiId: poi.id,
+          description: poi.description || '',
+          keywords: [poi.type, poi.symbol, getPOIDiscountValue(poi) > 0 ? 'discount qr offer restaurant beach church monument station viewpoint ferry curiosity' : 'poi place landmark spot'].join(' ')
+        };
+        if (searchMatches(item, q)) results.push(item);
+      });
+    }
+    if (searchTypeFilter === 'all' || searchTypeFilter === 'trail') {
+      trailItems.forEach(function (entry) {
+        var trail = entry && entry.trail;
+        var item;
+        if (!trail) return;
+        item = {
+          type: 'trail',
+          label: 'Trail',
+          name: trail.name,
+          description: trail.description || '',
+          keywords: [trail.start_name, trail.end_name, trail.difficulty, trail.estimated_duration, 'trekking trail sentiero hiking walking path route'].join(' ')
+        };
+        if (searchMatches(item, q)) results.push(item);
+      });
+    }
+    return results.slice(0, 12);
+  }
+  function getSearchBoundsItems(query) {
+    var q = normalizeSearchText(query);
+    var items = [];
+    function matchesSearchType(poi) {
+      var type = normalizePOIType(poi && poi.type);
+      if (searchTypeFilter === 'all') return true;
+      if (searchTypeFilter === 'beach') return type === 'spiaggia';
+      if (searchTypeFilter === 'food') return type === 'ristorante' || type === 'bar';
+      if (searchTypeFilter === 'viewpoint') return type === 'punto panoramico';
+      if (searchTypeFilter === 'church') return type === 'chiesa';
+      if (searchTypeFilter === 'monument') return type === 'monumento';
+      if (searchTypeFilter === 'station') return type === 'stazione';
+      if (searchTypeFilter === 'ferry') return type === 'ferry';
+      if (searchTypeFilter === 'curiosity') return type === 'curiosity';
+      return false;
+    }
+    if (!q) return items;
+    if (searchTypeFilter !== 'trail') {
+      poiMarkers.forEach(function (entry) {
+        var poi = entry && entry.poi;
+        var item;
+        if (!poi || !isValidCoords(poi.coords) || !matchesSearchType(poi)) return;
+        item = {
+          name: poi.name,
+          label: poi.type || 'POI',
+          description: poi.description || '',
+          keywords: [poi.type, poi.symbol, getPOIDiscountValue(poi) > 0 ? 'discount qr offer restaurant beach church monument station viewpoint ferry curiosity' : 'poi place landmark spot'].join(' ')
+        };
+        if (searchMatches(item, q)) items.push({ type: 'poi', coords: [poi.coords] });
+      });
+    }
+    if (searchTypeFilter === 'all' || searchTypeFilter === 'trail') {
+      trailItems.forEach(function (entry) {
+        var trail = entry && entry.trail;
+        var latLngs = entry && entry.latLngs;
+        var item;
+        if (!trail || !latLngs || !latLngs.length) return;
+        item = {
+          name: trail.name,
+          label: 'Trail',
+          description: trail.description || '',
+          keywords: [trail.start_name, trail.end_name, trail.difficulty, trail.estimated_duration, 'trekking trail sentiero hiking walking path route'].join(' ')
+        };
+        if (searchMatches(item, q)) items.push({ type: 'trail', coords: latLngs.slice() });
+      });
+    }
+    return items;
+  }
+  function fitMapToSearchResults(query) {
+    var items;
+    var bounds;
+    var pointCount = 0;
+    if (!map) return;
+    items = getSearchBoundsItems(query);
+    if (!items.length) return;
+    bounds = L.latLngBounds([]);
+    items.forEach(function (item) {
+      (item.coords || []).forEach(function (coord) {
+        if (!isValidCoords(coord)) return;
+        bounds.extend(coord);
+        pointCount += 1;
+      });
+    });
+    if (!bounds.isValid() || !pointCount) return;
+    isProgrammaticMove = true;
+    if (pointCount === 1) map.flyTo(bounds.getCenter(), Math.max(map.getZoom(), 16), { duration: 0.55 });
+    else map.flyToBounds(bounds, { padding: [62, 110], maxZoom: 16.8, duration: 0.7 });
+    window.setTimeout(function () { isProgrammaticMove = false; }, 900);
+  }
   var universalSearchResults = [];
+  var searchTypeFilter = 'all';
+  var searchFitTimer = null;
   function renderSearchSuggestions(value) {
+    var query = String(value || '').trim();
     if (!searchResults) return;
-    universalSearchResults = getSearchResults(value); if (!value || universalSearchResults.length === 0) { searchResults.style.display = 'none'; searchResults.innerHTML = ''; return; } searchResults.innerHTML = universalSearchResults.map(function (result, index) { return '<div class="search-item" data-search-index="' + index + '">' + escapeHTML(result.name) + ' · ' + escapeHTML(result.label || result.type || 'Result') + '</div>'; }).join(''); searchResults.style.display = 'flex'; }
+    universalSearchResults = getSearchResults(query);
+    if (!query || universalSearchResults.length === 0) {
+      searchResults.style.display = 'none';
+      searchResults.innerHTML = '';
+      return;
+    }
+    searchResults.innerHTML = universalSearchResults.map(function (result, index) {
+      var typeLabel = escapeHTML(result.label || result.type || 'Result');
+      var desc = escapeHTML(String(result.description || '').trim());
+      return '<div class="search-item" data-search-index="' + index + '"><div class="search-item-title"><span class="search-item-type">' + typeLabel + '</span><span>' + escapeHTML(result.name) + '</span></div>' + (desc ? '<div class="search-item-desc">' + desc + '</div>' : '') + '</div>';
+    }).join('');
+    searchResults.style.display = 'flex';
+  }
   function focusAIPlace(name) { var place = places.find(function (item) { return normalizeText(item.name) === normalizeText(name) || normalizeText(item.name).indexOf(normalizeText(name)) !== -1; }); var index; if (!place) return false; index = places.indexOf(place); if (index < 0) return false; cityCardManuallyClosed = false; showCityByIndex(index, true); return true; }
   function focusAIPOI(name) { var item = poiMarkers.find(function (entry) { return entry.poi && (normalizeText(entry.poi.name) === normalizeText(name) || normalizeText(entry.poi.name).indexOf(normalizeText(name)) !== -1); }); if (!item || !item.poi) return false; openPOIWithMapMove(item.poi, null); return true; }
   function focusAITrail(name) { var item = trailItems.find(function (entry) { return entry.trail && (normalizeText(entry.trail.name) === normalizeText(name) || normalizeText(entry.trail.name).indexOf(normalizeText(name)) !== -1); }); if (!item || !item.trail) return false; if (item.latLngs && item.latLngs.length) { map.flyTo(item.latLngs[0], 16, { duration: 0.9 }); } showTrailCard(item.trail); return true; }
@@ -1937,8 +1433,24 @@
     }
 
     if (searchInput && searchResults) {
+      var searchTypeButtons = Array.prototype.slice.call(document.querySelectorAll('[data-search-type]'));
+      searchTypeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          searchTypeFilter = button.getAttribute('data-search-type') || 'all';
+          searchTypeButtons.forEach(function (item) { item.classList.toggle('is-active', item === button); });
+          renderSearchSuggestions(searchInput.value);
+          if (searchFitTimer) window.clearTimeout(searchFitTimer);
+          searchFitTimer = window.setTimeout(function () {
+            fitMapToSearchResults(searchInput.value);
+          }, 120);
+        });
+      });
       searchInput.addEventListener('input', function () {
         renderSearchSuggestions(searchInput.value);
+        if (searchFitTimer) window.clearTimeout(searchFitTimer);
+        searchFitTimer = window.setTimeout(function () {
+          fitMapToSearchResults(searchInput.value);
+        }, 120);
       });
 
       searchInput.addEventListener('keydown', function (event) {
