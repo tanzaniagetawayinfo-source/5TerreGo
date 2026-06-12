@@ -331,7 +331,7 @@
     #poi-card.sheet-expanded { height: 95dvh; }
     #poi-sheet-handle { position: absolute; left: 0; right: 0; top: 0; height: 26px; z-index: 14; display: flex; align-items: center; justify-content: center; touch-action: none; cursor: grab; background: #fff; border-radius: 30px 30px 0 0; }
     #poi-sheet-handle::before { content: ''; width: 42px; height: 5px; border-radius: 999px; background: rgba(0,0,0,0.20); }
-    .poi-content { position: relative; z-index: 3; height: 100%; padding: 0 16px calc(18px + env(safe-area-inset-bottom)); color: #111; text-align: left; opacity: 0; transform: translateY(6px); transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1); overflow-y: hidden; touch-action: pan-y; overscroll-behavior: contain; }
+    .poi-content { position: relative; z-index: 3; height: 100%; padding: 0 16px calc(18px + env(safe-area-inset-bottom)); color: #111; text-align: left; opacity: 0; transform: translateY(6px); transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1); overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; }
     #poi-card.sheet-expanded .poi-content { overflow-y: auto; }
     #poi-card.open .poi-content { opacity: 1; transform: translateY(0); }
     #poi-title { position: sticky; top: 0; z-index: 11; min-height: 66px; display: flex; align-items: flex-end; margin: 0 -16px 0; padding: 30px 58px 10px 20px; background: #fff; font-size: 25px; font-weight: 950; line-height: 1.02; letter-spacing: -0.06em; text-align: left; box-shadow: 0 1px 0 rgba(0,0,0,0.045), 0 12px 18px rgba(255,255,255,0.96); }
@@ -340,6 +340,19 @@
     #poi-card.has-images #poi-images-preview { display: flex; }
     .poi-preview-img { flex: 0 0 152px; width: 152px; height: 152px; border-radius: 22px; object-fit: cover; display: block; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06); }
     #poi-desc { font-size: 15px; line-height: 1.52; color: rgba(0,0,0,0.68); margin: 0; white-space: pre-line; padding-bottom: 2px; }
+    #poi-related-articles { display: none; margin-top: 16px; }
+    #poi-related-articles.is-visible { display: block; }
+    .poi-related-title { font-size: 12px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,.42); margin: 0 0 10px; }
+    .poi-related-list { display: flex; flex-direction: column; gap: 12px; }
+    .poi-related-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: stretch; padding: 10px; border-radius: 18px; background: rgba(0,0,0,.045); border: 1px solid rgba(0,0,0,.06); text-decoration: none; color: #111; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
+    .poi-related-card:active { transform: scale(.99); }
+    .poi-related-card-cover { width: 96px; height: 96px; border-radius: 14px; overflow: hidden; background: rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.05); }
+    .poi-related-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .poi-related-card-body { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .poi-related-card-title { font-size: 16px; font-weight: 950; line-height: 1.16; letter-spacing: -.03em; color: #111; }
+    .poi-related-card-meta { margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(0,0,0,.48); }
+    .poi-related-card-excerpt { margin-top: 7px; font-size: 13px; line-height: 1.42; color: rgba(0,0,0,.68); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    @media (max-width: 380px) { .poi-related-card { grid-template-columns: 82px minmax(0, 1fr); gap: 10px; } .poi-related-card-cover { width: 82px; height: 82px; } }
     #poi-close { position: absolute; top: 30px; right: 14px; z-index: 15; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: rgba(0,0,0,0.07); color: #111; font-size: 24px; cursor: pointer; }
     #poi-directions { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border-radius: 999px; text-align: center; background: #1a73e8; color: white; font-size: 13px; font-weight: 900; text-decoration: none; box-shadow: 0 8px 20px rgba(26,115,232,0.22); white-space: nowrap; }
     #poi-discount-btn { display: none; width: 100%; margin-top: 14px; border: 0; border-radius: 18px; padding: 13px 14px; background: linear-gradient(135deg, #ff8a1d, #ffb13d); color: #111; font-size: 14px; font-weight: 950; box-shadow: 0 12px 26px rgba(255,138,29,0.22); cursor: pointer; }
@@ -906,7 +919,7 @@
     };
   </script>
   <script>
-    (function () {
+    function FTG_BOOT_GLOBAL_ACTIONBAR() {
       'use strict';
 
       if (window.FTG_GLOBAL_ACTIONBAR_BOOTED) return;
@@ -1181,7 +1194,13 @@
         getCurrentPage: function () { return activePage; },
         setActivePage: function (pageId) { syncActiveButtons(pageId); activePage = pageId; }
       };
-    }());
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', FTG_BOOT_GLOBAL_ACTIONBAR, { once: true });
+    } else {
+      FTG_BOOT_GLOBAL_ACTIONBAR();
+    }
   </script>
   <script>
     (function(){
@@ -1244,7 +1263,7 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
+  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
   <div id="poi-close">×</div>
 </div>
 
@@ -1335,6 +1354,8 @@
   var poiDesc = document.getElementById('poi-desc');
   var poiClose = document.getElementById('poi-close');
   var poiImagesPreview = document.getElementById('poi-images-preview');
+  var poiRelatedArticles = document.getElementById('poi-related-articles');
+  var poiRelatedArticlesList = document.getElementById('poi-related-articles-list');
   var poiCircle = document.getElementById('poi-circle');
   var poiDirections = document.getElementById('poi-directions');
   var poiAiBtn = document.getElementById('poi-ai');
@@ -1465,6 +1486,59 @@
   function getAllImageFields(raw) { var images = []; var main; raw = raw || {}; main = getFirstImageField(raw); if (main) images.push(main); images = images.concat(normalizePOIImages(raw.cover_images || raw.coverImages || raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || [])); return images.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }); }
   function normalizePOI(raw) { var parsed, symbol, mainImage, allImages; raw = raw || {}; parsed = parseCoords(raw); symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍'); mainImage = getFirstImageField(raw); allImages = getAllImageFields(raw); return { id: raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2), name: String(raw.name || raw.title || 'POI'), symbol: symbol, coords: [parsed.lat, parsed.lng], lat: parsed.lat, lng: parsed.lng, image: mainImage, cover_image: raw.cover_image || mainImage, images: allImages, description: raw.description || raw.descrizione || '', type: raw.type || raw.tipo || '', owner_email: raw.owner_email || raw.email || '', phone: raw.phone || raw.telephone || '', relevance: Number(raw.importance || raw.relevance || raw.score || 0), discount: Number(raw.discount || 0), discount_info: raw.discount_info || raw.discount_text || raw.discount_description || '', emails: raw.emails || '', active_codes: Array.isArray(raw.active_codes) ? raw.active_codes : [] }; }
   function normalizePOIImages(value) { var parsed; if (!value) return []; if (Array.isArray(value)) return value.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean); if (typeof value === 'string') { value = value.trim(); if (!value) return []; try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean); } catch (error) {} if (value.indexOf(',') !== -1) return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); return [value]; } return []; }
+  function normalizeRelatedPois(value) { var parsed; if (Array.isArray(value)) return value.map(function(item) { return String(item).trim(); }).filter(Boolean); if (typeof value === 'string' && value.trim()) { try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.map(function(item) { return String(item).trim(); }).filter(Boolean); } catch (error) {} return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); } return []; }
+  function getPOIArticleUrl(post) { var slug = String(post && post.slug || '').trim(); if (slug) return '/blog/' + encodeURIComponent(slug); return '#'; }
+  function getPOIArticleDateLabel(value) { var date = value ? new Date(value) : null; if (!date || !Number.isFinite(date.getTime())) return ''; return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date); }
+  function renderRelatedArticlesForPOI(poi, posts) {
+    var id;
+    var name;
+    var poiWords;
+    var matches;
+    if (!poiRelatedArticles || !poiRelatedArticlesList) return;
+
+    poiRelatedArticlesList.innerHTML = '';
+    poiRelatedArticles.classList.remove('is-visible');
+    if (!poi) return;
+
+    id = String(poi.id || '').trim();
+    name = normalizeText(poi.name || '');
+    poiWords = name.split(' ').filter(function(word) { return word && word.length > 2; });
+
+    matches = (posts || []).filter(function(post) {
+      var related = normalizeRelatedPois(post && post.related_pois);
+      var status = String(post && post.status || '').toLowerCase();
+      var titleText = normalizeText(post && post.title || '');
+      var excerptText = normalizeText(post && post.excerpt || '');
+      var contentText = normalizeText(post && post.content || '');
+      var relatedNormalized = related.map(function(item) { return normalizeText(item); });
+      var combined = [titleText, excerptText, contentText].join(' ');
+      var strongWordMatches = poiWords.filter(function(word) { return combined.indexOf(word) !== -1; }).length;
+
+      if (status && status !== 'published' && status !== 'draft') return false;
+      if (id && related.indexOf(id) !== -1) return true;
+      if (relatedNormalized.indexOf(name) !== -1) return true;
+      if (name && (titleText.indexOf(name) !== -1 || excerptText.indexOf(name) !== -1 || contentText.indexOf(name) !== -1)) return true;
+      if (poiWords.length >= 2 && strongWordMatches >= 2) return true;
+      if (poiWords.length === 1 && strongWordMatches >= 1) return true;
+      return false;
+    }).sort(function(a, b) {
+      return new Date(b && (b.published_at || b.created_at) || 0).getTime() - new Date(a && (a.published_at || a.created_at) || 0).getTime();
+    }).slice(0, 6);
+
+    console.log('related articles for poi:', poi && poi.name, matches.length, matches);
+    if (!matches.length) return;
+
+    poiRelatedArticlesList.innerHTML = matches.map(function(post) {
+      var title = escapeHTML(post.title || 'Article');
+      var meta = [post.category || '', getPOIArticleDateLabel(post.published_at || post.created_at)].filter(Boolean).join(' • ');
+      var excerpt = escapeHTML(post.excerpt || '');
+      var cover = String(post.cover_image || '').trim();
+      var coverHtml = cover ? '<div class="poi-related-card-cover"><img src="' + escapeHTML(cover) + '" alt="' + title + '"></div>' : '<div class="poi-related-card-cover"></div>';
+      return '<a class="poi-related-card" href="' + escapeHTML(getPOIArticleUrl(post)) + '">' + coverHtml + '<div class="poi-related-card-body"><div class="poi-related-card-title">' + title + '</div>' + (meta ? '<div class="poi-related-card-meta">' + escapeHTML(meta) + '</div>' : '') + (excerpt ? '<div class="poi-related-card-excerpt">' + excerpt + '</div>' : '') + '</div></a>';
+    }).join('');
+
+    poiRelatedArticles.classList.add('is-visible');
+  }
   function getPOIImages(poi) { var images = normalizePOIImages(poi && poi.images); var main = poi && (poi.cover_image || poi.coverImage || poi.image_url || poi.imageUrl || poi.thumbnail_url || poi.thumbnail || poi.image) ? String(poi.cover_image || poi.coverImage || poi.image_url || poi.imageUrl || poi.thumbnail_url || poi.thumbnail || poi.image).trim() : ''; if (main && images.indexOf(main) === -1) images.unshift(main); return images.filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }).slice(0, 8); }
   function isValidPOI(poi) { return Boolean(poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0); }
   function getPOIEmoji(type, fallback) { switch (String(type || '').toLowerCase()) { case 'chiesa': return 'church.png'; case 'monumento': return 'monument.png'; case 'sentiero': return 'sentiero.png'; case 'spiaggia': return 'beach.png'; case 'stazione': return 'station.png'; case 'fontana': return 'fountan.png'; case 'ristorante': return '🍽️'; case 'bar': return '🍸'; case 'ferry': return 'ferrystation.png'; case 'curiosity': return '✨'; case 'punto panoramico': return 'viewpoint.png'; default: return fallback || '📌'; } }
@@ -1633,13 +1707,16 @@
   function getClosestCity() { var center = map.getCenter(), minDist = Infinity, closestIndex = -1; places.forEach(function (place, index) { var distance = center.distanceTo(L.latLng(place.coords)); if (distance < minDist) { minDist = distance; closestIndex = index; } }); return { index: closestIndex, distance: minDist }; }
   function evaluateAutoCard() { var zoom, closest; if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return; zoom = map.getZoom(); closest = getClosestCity(); if (cityCardManuallyClosed && closest.index === currentIndex) return; if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false; if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) { if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') showCityByIndex(closest.index, false); return; } if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) hideCard(false); }
   function destroyPoiMiniMap() { if (poiMiniMap) { try { poiMiniMap.remove(); } catch (error) {} poiMiniMap = null; } if (poiCircle) poiCircle.innerHTML = ''; }
-  function closePOICard(immediate) { closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; window.currentFiveTerrePOI = null; if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); } }, 360); }
+  function closePOICard(immediate) { closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); } }, 360); }
   function setPOISheetHeight(percent, animated) { if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = percent + 'dvh'; poiCard.classList.toggle('sheet-expanded', percent >= 88); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
   function getPOISheetPercentFromHeight(px) { var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); return (Number(px) / vh) * 100; }
   function setupPOISheetDrag() { var handle; var content; if (!poiCard || poiCard.getAttribute('data-sheet-ready') === '1') return; poiCard.setAttribute('data-sheet-ready', '1'); handle = document.getElementById('poi-sheet-handle'); content = poiCard.querySelector('.poi-content'); function beginPendingDrag(event, source) { if (!poiCard.classList.contains('open')) return; if (!event.touches || event.touches.length !== 1) return; poiSheetPendingDrag = true; poiSheetDragging = false; poiSheetDragSource = source || ''; poiSheetStartY = event.touches[0].clientY; poiSheetStartX = event.touches[0].clientX; poiSheetStartHeight = poiCard.getBoundingClientRect().height; poiSheetStartScrollTop = content ? content.scrollTop : 0; } function startRealDrag() { poiSheetPendingDrag = false; poiSheetDragging = true; poiCard.style.transition = 'none'; } function finishDrag() { var percent; poiSheetPendingDrag = false; if (!poiSheetDragging) return; poiSheetDragging = false; poiCard.style.transition = ''; percent = getPOISheetPercentFromHeight(poiCard.getBoundingClientRect().height); if (percent <= 40) { closePOICard(false); return; } if (percent >= 72) setPOISheetHeight(95, true); else setPOISheetHeight(50, true); } function handleMove(event) { var y; var delta; var nextHeight; var percent; var isExpanded; var scrollTop; if ((!poiSheetPendingDrag && !poiSheetDragging) || !event.touches || event.touches.length !== 1) return; y = event.touches[0].clientY; delta = poiSheetStartY - y; isExpanded = poiCard.classList.contains('sheet-expanded'); scrollTop = content ? content.scrollTop : 0; if (poiSheetPendingDrag) { if (Math.abs(delta) < 6) return; if (poiSheetDragSource === 'content' && event.target && event.target.closest && event.target.closest('#poi-images-preview')) { if (Math.abs(event.touches[0].clientX - poiSheetStartX) > Math.abs(delta)) { poiSheetPendingDrag = false; return; } } if (poiSheetDragSource === 'content' && isExpanded) { if (delta > 0) { poiSheetPendingDrag = false; return; } if (delta < 0 && scrollTop > 0) { poiSheetPendingDrag = false; return; } } startRealDrag(); } if (!poiSheetDragging) return; event.preventDefault(); nextHeight = poiSheetStartHeight + delta; percent = getPOISheetPercentFromHeight(nextHeight); setPOISheetHeight(percent, false); if (poiSheetDragSource === 'content' && delta > 0 && percent >= 95) { poiSheetDragging = false; poiSheetPendingDrag = false; poiCard.style.transition = ''; setPOISheetHeight(95, false); } } function cancelDrag() { poiSheetPendingDrag = false; poiSheetDragging = false; poiCard.style.transition = ''; } [handle, poiTitle].filter(Boolean).forEach(function(target) { target.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'header'); }, { passive: true }); target.addEventListener('touchmove', handleMove, { passive: false }); target.addEventListener('touchend', finishDrag); target.addEventListener('touchcancel', cancelDrag); }); if (content) { content.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'content'); }, { passive: true }); content.addEventListener('touchmove', handleMove, { passive: false }); content.addEventListener('touchend', finishDrag); content.addEventListener('touchcancel', cancelDrag); } }
   function renderPOIImagesPreview(poi) { var images = getPOIImages(poi); if (!poiImagesPreview || !poiCard) return; poiImagesPreview.innerHTML = ''; poiCard.classList.toggle('has-images', images.length > 0); images.forEach(function(src, index) { var img = document.createElement('img'); img.className = 'poi-preview-img'; img.src = src; img.alt = (poi && poi.name ? poi.name : 'POI') + ' image ' + (index + 1); img.loading = 'lazy'; poiImagesPreview.appendChild(img); }); }
   function renderPOIDescription(fullText) { var text = String(fullText || '').trim() || 'No description available'; if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } if (poiDesc) poiDesc.textContent = text; }
-  function showPOICard(poi) { var fullText, lat, lng; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); poiCard.style.height = '50dvh'; poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi); renderPOIDescription(fullText); renderDiscountCTA(poi); window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); } }, 80); }
+  function showPOICard(poi) { var fullText, lat, lng; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); poiCard.style.height = '50dvh'; poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi);
+    renderPOIDescription(fullText);
+    renderRelatedArticlesForPOI(poi, blogPostsCache);
+    renderDiscountCTA(poi); window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); } }, 80); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } isProgrammaticMove = true; if (isIOSDevice()) { map.setView(poi.coords, 17, { animate: true }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 300); } else { map.flyTo(poi.coords, 17, { duration: 1.2 }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 400); } }
   async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
@@ -1669,6 +1746,32 @@
   function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; stopMovingFerryRefresh(); stopMovingFerries(); ferryRoutesLayer.clearLayers(); ferryRouteArcs = []; ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 48); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: false }); L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.62, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } startMovingFerries(); }
   async function loadFerryTimetable() { var response; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('ferry_timetable').select('*').order('trip_id', { ascending: true }).order('stop_sequence', { ascending: true }); if (response.error) { console.warn('Supabase ferry timetable load failed:', response.error.message); ferryTimetableRows = []; startMovingFerries(); return; } ferryTimetableRows = response.data || []; startMovingFerries(); }
   function readLocalPOIs() { try { return JSON.parse(localStorage.getItem(LOCAL_POI_KEY) || '[]'); } catch (error) { return []; } }
+  var blogPostsCache = [];
+  async function loadBlogPosts() {
+    var response;
+    blogPostsCache = [];
+    if (!SUPABASE_READY || !supabaseClient) {
+      console.warn('blog_posts skipped: Supabase not ready');
+      return;
+    }
+
+    response = await supabaseClient
+      .from('blog_posts')
+      .select('id,title,slug,excerpt,cover_image,category,status,published_at,created_at,related_pois,content')
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
+
+    if (response.error) {
+      console.warn('Supabase blog_posts load failed:', response.error.message, response.error);
+      blogPostsCache = [];
+      if (currentPOI) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+      return;
+    }
+
+    blogPostsCache = Array.isArray(response.data) ? response.data : [];
+    console.log('blog_posts loaded:', blogPostsCache.length);
+    if (currentPOI) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+  }
   async function loadPOIs() {
     var response, rows = [];
     poiLayer.clearLayers();
@@ -1700,6 +1803,7 @@
     updatePOIVisibility();
     addFerryRoutes();
     await loadFerryTimetable();
+    await loadBlogPosts();
     if (searchInput) renderSearchSuggestions(searchInput.value);
   }
   function normalizeSearchText(value) { return normalizeText(value); }
