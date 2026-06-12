@@ -2644,6 +2644,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   'use strict';
 
   var qr = document.getElementById('desktop-mobile-gate-qr');
+  var IS_CANVAS_BLOB_PREVIEW = window.location.protocol === 'blob:' || /^blob:/i.test(String(window.location.href || ''));
   var urlLabel = document.getElementById('desktop-mobile-gate-url');
   var mobileUrl = 'https://www.5terrego.com/';
   var siteWeatherData = null;
@@ -2668,7 +2669,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   var currentMapFilter = 'all';
   var currentSiteGuideFilter = 'all';
   var currentSiteGuideSearch = '';
-  var siteArticleSpeechState = { articleId: '', utterance: null };
+  var siteArticleSpeechState = { articleId: '', utterance: null, playbackMode: '', isLoading: false };
   var WEATHER_CONFIG = {
     label: 'Cinque Terre',
     latitude: 44.1275,
@@ -2896,7 +2897,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       id: row.id || row.slug || row.title || '',
       title: row.title || 'Articolo',
       slug: row.slug || '',
-      url: row.slug ? ('blog.html?slug=' + encodeURIComponent(row.slug)) : 'blog.html',
+      url: IS_CANVAS_BLOB_PREVIEW ? '#' : (row.slug ? ('blog.html?slug=' + encodeURIComponent(row.slug)) : 'blog.html'),
       image: row.cover_image || row.image_url || row.thumbnail_url || row.image || '',
       meta: row.category || row.author || 'Guida',
       category: row.category || '',
@@ -3019,20 +3020,96 @@ window.FTG_ACTIONBAR_CONFIG = {
   function getGuideAudioAriaLabel() {
     var current = getCurrentUILanguage();
     if (current === 'it') return 'Ascolta articolo';
-    if (current === 'fr') return 'Écouter l’article';
+    if (current === 'fr') return "Écouter l'article";
     if (current === 'de') return 'Artikel anhören';
     return 'Listen to article';
   }
 
-  function getGuideAudioLocale() {
-    var current = getCurrentUILanguage();
-    if (current === 'it') return 'it-IT';
-    if (current === 'fr') return 'fr-FR';
-    if (current === 'de') return 'de-DE';
-    if (current === 'ru') return 'ru-RU';
-    if (current === 'zh') return 'zh-CN';
-    if (current === 'ar') return 'ar-SA';
-    return 'en-GB';
+  function getGuideDetectedArticleLanguage(article) {
+    var raw = [article && article.language || '', article && article.lang || '', article && article.locale || '', article && article.tags || '', article && article.category || ''].join(' ').toLowerCase();
+    var sample = stripArticleSpeechText([article && article.title || '', article && article.excerpt || '', article && article.content || ''].join(' ')).toLowerCase();
+    var framed = ' ' + sample + ' ';
+    var scores = { it: 0, fr: 0, de: 0, en: 0 };
+    var best = 'en';
+    function result(code) {
+      return {
+        code: code,
+        locale: ({ it: 'it-IT', fr: 'fr-FR', de: 'de-DE', en: 'en-GB' })[code] || 'en-GB'
+      };
+    }
+    function bump(code, words, points) {
+      words.forEach(function(word) {
+        if (framed.indexOf(' ' + word + ' ') !== -1) scores[code] += points;
+      });
+    }
+    while (framed.indexOf('  ') !== -1) framed = framed.split('  ').join(' ');
+    if (raw.indexOf('ital') !== -1 || raw === 'it') return result('it');
+    if (raw.indexOf('fren') !== -1 || raw === 'fr') return result('fr');
+    if (raw.indexOf('germ') !== -1 || raw === 'de') return result('de');
+    if (raw.indexOf('engl') !== -1 || raw === 'en') return result('en');
+    bump('it', ['che', 'non', 'per', 'con', 'una', 'delle', 'degli', 'borgo', 'sentiero', 'luogo'], 2);
+    bump('fr', ['avec', 'pour', 'dans', 'une', 'des', 'est', 'plage', 'village', 'guide'], 2);
+    bump('de', ['und', 'der', 'die', 'das', 'mit', 'nicht', 'ein', 'ist', 'weg', 'dorf'], 2);
+    bump('en', ['the', 'and', 'with', 'for', 'this', 'from', 'your', 'guide', 'village', 'trail'], 2);
+    Object.keys(scores).forEach(function(code) {
+      if (scores[code] > scores[best]) best = code;
+    });
+    if (scores[best] <= 1) {
+      var ui = getCurrentUILanguage();
+      if (ui === 'it' || ui === 'fr' || ui === 'de') return result(ui);
+      return result('en');
+    }
+    return result(best);
+  }
+
+  function getGuideAudioLocale(article) {
+    return getGuideDetectedArticleLanguage(article).locale;
+  }
+
+  function getGuideAudioLanguageCode(article) {
+    return getGuideDetectedArticleLanguage(article).code;
+  }
+
+  function clearGuideAudioPlayback() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    siteArticleSpeechState.utterance = null;
+    siteArticleSpeechState.playbackMode = '';
+    siteArticleSpeechState.isLoading = false;
+  }
+
+  function playGuideBrowserSpeech(articleId, text, localeInfo) {
+    var utterance;
+    var voice;
+    var voices = window.speechSynthesis && window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+    try {
+      utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = localeInfo.locale;
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      voice = voices.find(function(item) {
+        return item && item.lang && item.lang.toLowerCase() === String(localeInfo.locale || '').toLowerCase();
+      }) || voices.find(function(item) {
+        return item && item.lang && item.lang.toLowerCase().indexOf(String(localeInfo.code || '').toLowerCase()) === 0;
+      }) || null;
+      if (voice) utterance.voice = voice;
+      utterance.onend = function() {
+        if (siteArticleSpeechState.utterance !== utterance) return;
+        stopSiteArticleSpeech();
+      };
+      utterance.onerror = function() {
+        if (siteArticleSpeechState.utterance !== utterance) return;
+        stopSiteArticleSpeech();
+      };
+      siteArticleSpeechState.utterance = utterance;
+      siteArticleSpeechState.playbackMode = 'browser';
+      siteArticleSpeechState.isLoading = false;
+      setGuideAudioButtonsState();
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   function stripArticleSpeechText(value) {
@@ -3055,26 +3132,22 @@ window.FTG_ACTIONBAR_CONFIG = {
 
   function setGuideAudioButtonsState() {
     document.querySelectorAll('[data-site-article-audio]').forEach(function(button) {
-      var isSpeaking = siteArticleSpeechState.articleId && button.getAttribute('data-site-article-audio') === siteArticleSpeechState.articleId;
-      button.classList.toggle('is-speaking', !!isSpeaking);
-      button.textContent = isSpeaking ? '❚❚' : '▶';
+      var isCurrent = siteArticleSpeechState.articleId && button.getAttribute('data-site-article-audio') === siteArticleSpeechState.articleId;
+      button.classList.toggle('is-speaking', !!(isCurrent && !siteArticleSpeechState.isLoading));
+      button.textContent = isCurrent ? (siteArticleSpeechState.isLoading ? '…' : '❚❚') : '▶';
     });
   }
 
   function stopSiteArticleSpeech() {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    clearGuideAudioPlayback();
     siteArticleSpeechState.articleId = '';
-    siteArticleSpeechState.utterance = null;
     setGuideAudioButtonsState();
   }
 
   async function playSiteArticleAudio(articleId) {
     var article = findSiteArticle(articleId);
-    var utterance;
-    var locale;
-    var voices;
-    var voice;
     var text;
+    var localeInfo;
     if (!article) return;
     if (!('speechSynthesis' in window) || typeof window.SpeechSynthesisUtterance === 'undefined') return;
     if (siteArticleSpeechState.articleId === articleId) {
@@ -3085,33 +3158,12 @@ window.FTG_ACTIONBAR_CONFIG = {
     text = getSiteArticleSpeechText(article);
     if (!text) return;
     stopSiteArticleSpeech();
-    locale = getGuideAudioLocale();
-    utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = locale;
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
-    voice = voices.find(function(item) {
-      return item && item.lang && (item.lang === locale || item.lang.indexOf(locale.split('-')[0]) === 0);
-    });
-    if (voice) utterance.voice = voice;
-    utterance.onend = function() {
-      if (siteArticleSpeechState.utterance !== utterance) return;
-      siteArticleSpeechState.articleId = '';
-      siteArticleSpeechState.utterance = null;
-      setGuideAudioButtonsState();
-    };
-    utterance.onerror = function() {
-      if (siteArticleSpeechState.utterance !== utterance) return;
-      siteArticleSpeechState.articleId = '';
-      siteArticleSpeechState.utterance = null;
-      setGuideAudioButtonsState();
-    };
+    localeInfo = getGuideDetectedArticleLanguage(article);
     siteArticleSpeechState.articleId = articleId;
-    siteArticleSpeechState.utterance = utterance;
+    siteArticleSpeechState.isLoading = true;
     setGuideAudioButtonsState();
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    if (playGuideBrowserSpeech(articleId, text, localeInfo)) return;
+    stopSiteArticleSpeech();
   }
 
   function getGuideAllLabel() {
@@ -3274,6 +3326,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
         return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
       }).join('') + '</div><div class="site-empty">' + escapeHTML(getGuideNoResultsLabel()) + '</div>';
+      setGuideAudioButtonsState();
       return;
     }
     featured = filtered[0];
@@ -3285,6 +3338,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       }).join('') + '</div><div class="site-guide-stage is-search-mode"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
         return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
       }).join('') + '</div></div>';
+      setGuideAudioButtonsState();
       return;
     }
     container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
@@ -3293,6 +3347,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
     }).join('') + '</div></div>';
     bindGuideRailEffects();
+    setGuideAudioButtonsState();
   }
 
   async function loadBlogPosts() {
@@ -3514,7 +3569,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     ];
 
     siteArticles.forEach(function(article) {
-      items.push({ kind: 'story', title: article.title || getUILabel('stories', 'Stories'), meta: article.meta || getUILabel('stories', 'Stories'), keywords: [article.excerpt || '', article.slug || ''].join(' '), tag: getUILabel('stories', 'Stories'), action: function() { window.location.href = article.url || 'blog.html'; } });
+      items.push({ kind: 'story', title: article.title || getUILabel('stories', 'Stories'), meta: article.meta || getUILabel('stories', 'Stories'), keywords: [article.excerpt || '', article.slug || ''].join(' '), tag: getUILabel('stories', 'Stories'), action: function() { if (IS_CANVAS_BLOB_PREVIEW) { openSiteSectionFromMenu('site-stories-section'); openSiteArticleReader(getSiteArticleIdentifier(article)); return; } window.location.href = article.url || 'blog.html'; } });
     });
 
     sitePOIs.forEach(function(poi) {
@@ -4087,6 +4142,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     var trailFrom = document.getElementById('site-trail-from-filter');
     var trailDifficulty = document.getElementById('site-trail-difficulty-filter');
     document.addEventListener('click', function(event) {
+      var localHtmlLink = IS_CANVAS_BLOB_PREVIEW ? event.target.closest('a[href]') : null;
       var guideFilter = event.target.closest('[data-site-guide-filter]');
       var articleAudio = event.target.closest('[data-site-article-audio]');
       var articleCard = event.target.closest('[data-site-article-id]');
@@ -4095,6 +4151,21 @@ window.FTG_ACTIONBAR_CONFIG = {
       var officialCard = event.target.closest('.site-official-item');
       var quickSection = event.target.closest('[data-open-site-section]');
       var appAction = event.target.closest('[data-app-menu-action]');
+      if (localHtmlLink) {
+        var href = String(localHtmlLink.getAttribute('href') || '').trim();
+        if (href && href.charAt(0) !== '#' && href.indexOf('mailto:') !== 0 && href.indexOf('http://') !== 0 && href.indexOf('https://') !== 0 && /\.html(\?|$)/i.test(href)) {
+          event.preventDefault();
+          if (localHtmlLink.hasAttribute('data-site-article-id')) {
+            openSiteArticleReader(localHtmlLink.getAttribute('data-site-article-id'));
+            return;
+          }
+          if (/blog\.html/i.test(href)) {
+            openSiteSectionFromMenu('site-stories-section');
+            return;
+          }
+          return;
+        }
+      }
       if (guideFilter) {
         currentSiteGuideFilter = guideFilter.getAttribute('data-site-guide-filter') || 'start';
         renderStoryPreviewSection();
@@ -4362,6 +4433,10 @@ window.FTG_ACTIONBAR_CONFIG = {
 (function(){
   var host = document.getElementById('ftg-global-actionbar-host');
   if (!host) return;
+  if (window.location.protocol === 'blob:' || /^blob:/i.test(String(window.location.href || ''))) {
+    host.innerHTML = '';
+    return;
+  }
   (function(){ return new Promise(function(resolve){ if ('requestIdleCallback' in window) { window.requestIdleCallback(resolve, { timeout: 1400 }); } else { window.setTimeout(resolve, 420); } }).then(function(){ return fetch('global-actionbar.html'); }); }())
     .then(function(response){
       if (!response.ok) throw new Error('HTTP ' + response.status);
