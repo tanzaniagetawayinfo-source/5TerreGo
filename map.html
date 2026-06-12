@@ -39,77 +39,9 @@
       background: #071424;
       touch-action: none;
     }
-    body.map-loading #map {
-      pointer-events: none;
-      touch-action: none;
-    }
-    body.map-loading .search-floating,
-    body.map-loading #bottom-rail,
-    body.map-loading #user-location-btn,
-    body.map-loading #poi-card,
-    body.map-loading #trail-card,
-    body.map-loading #tour-nav {
-      pointer-events: none !important;
-    }
-    #map-loading-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10060;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(7,20,36,.38);
-      backdrop-filter: blur(14px) saturate(1.08);
-      -webkit-backdrop-filter: blur(14px) saturate(1.08);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity .24s ease, visibility .24s ease;
-    }
-    body.map-loading #map-loading-overlay {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-    .map-loading-card {
-      width: min(320px, calc(100vw - 32px));
-      border-radius: 28px;
-      padding: 22px 20px 20px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(8,12,16,.82);
-      color: #fff;
-      box-shadow: 0 22px 58px rgba(0,0,0,.28);
-      backdrop-filter: blur(22px) saturate(1.12);
-      -webkit-backdrop-filter: blur(22px) saturate(1.12);
-      text-align: center;
-    }
-    .map-loading-spinner {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto 14px;
-      border-radius: 50%;
-      border: 3px solid rgba(255,255,255,.12);
-      border-top-color: rgba(255,255,255,.92);
-      animation: mapLoadingSpin .9s linear infinite;
-    }
-    .map-loading-title {
-      font-size: 18px;
-      line-height: 1.08;
-      letter-spacing: -.03em;
-      font-weight: 950;
-      margin-bottom: 6px;
-    }
-    .map-loading-text {
-      font-size: 13px;
-      line-height: 1.4;
-      font-weight: 700;
-      color: rgba(255,255,255,.66);
-    }
-    @keyframes mapLoadingSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+    
+    
+    
     .hidden { display: none !important; }
     .leaflet-container { background: #f6f1e8 !important; }
     .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
@@ -400,10 +332,11 @@
     .bottom-rail-card {
       position: relative;
       flex: 0 0 auto;
-      width: min(84vw, 320px);
-      min-height: 126px;
+      width: min(34vw, 148px);
+      aspect-ratio: 1 / 1;
+      min-height: 0;
       border: 1px solid rgba(255,255,255,.10);
-      border-radius: 28px;
+      border-radius: 24px;
       overflow: hidden;
       background: rgba(8,12,16,.76);
       box-shadow: 0 22px 54px rgba(0,0,0,.26);
@@ -422,9 +355,10 @@
       z-index: 1;
     }
     .bottom-rail-card.is-empty {
-      width: auto;
-      min-width: 220px;
-      min-height: 92px;
+      width: min(34vw, 148px);
+      aspect-ratio: 1 / 1;
+      min-width: 120px;
+      min-height: 0;
       padding: 16px 18px;
       display: flex;
       align-items: center;
@@ -446,71 +380,43 @@
     .bottom-rail-body {
       position: relative;
       z-index: 2;
-      min-height: 126px;
+      min-height: 0;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding: 16px;
-      gap: 5px;
+      padding: 12px;
+      gap: 4px;
       color: #fff;
     }
     .bottom-rail-kicker {
       font-size: 10px;
       line-height: 1;
-      font-weight: 950;
-      letter-spacing: .10em;
+      font-weight: 900;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      color: rgba(255,255,255,.66);
+      color: rgba(255,255,255,.72);
     }
     .bottom-rail-title {
-      font-size: 20px;
-      line-height: 1.02;
-      letter-spacing: -.05em;
+      font-size: 16px;
+      line-height: 1.05;
+      letter-spacing: -.04em;
       font-weight: 950;
       text-shadow: 0 6px 18px rgba(0,0,0,.34);
       text-wrap: balance;
-    }
-    .bottom-rail-meta {
-      font-size: 12px;
-      line-height: 1.34;
-      font-weight: 760;
-      color: rgba(255,255,255,.80);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      max-width: 92%;
+    }
+    .bottom-rail-meta {
+      display: none !important;
     }
     .bottom-rail-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      z-index: 2;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 26px;
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgba(8,12,16,.66);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.10);
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      display: none !important;
     }
     .bottom-rail-shadow-edge {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 54px;
-      background: linear-gradient(270deg, rgba(8,12,16,.10), rgba(8,12,16,0));
-      pointer-events: none;
-      z-index: 3;
+      display: none !important;
     }
     @media (max-width: 520px) {
       #bottom-rail { padding-left: 8px; padding-right: 8px; }
@@ -520,16 +426,18 @@
         letter-spacing: .12em;
       }
       .bottom-rail-card {
-        width: min(86vw, 286px);
-        min-height: 114px;
-        border-radius: 24px;
+        width: min(38vw, 132px);
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        border-radius: 22px;
       }
       .bottom-rail-body {
-        min-height: 114px;
-        padding: 13px;
+        min-height: 0;
+        height: 100%;
+        padding: 11px;
       }
-      .bottom-rail-title { font-size: 18px; }
-      .bottom-rail-meta { font-size: 11.5px; }
+      .bottom-rail-title { font-size: 14px; }
+      .bottom-rail-meta { display: none !important; }
     }
 
     .user-location-marker { width: 18px; height: 18px; border-radius: 50%; background: #1e9bff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(30,155,255,0.18), 0 8px 24px rgba(0,0,0,0.22); }
@@ -784,13 +692,6 @@
 </div>
 
 <div id="map"></div>
-<div id="map-loading-overlay" aria-hidden="true">
-  <div class="map-loading-card">
-    <div class="map-loading-spinner" aria-hidden="true"></div>
-    <div class="map-loading-title">Loading map</div>
-    <div class="map-loading-text">Please wait while places are being prepared.</div>
-  </div>
-</div>
 <div id="bottom-rail" aria-label="Map cards carousel"><div id="bottom-rail-village-title" class="bottom-rail-village-title"></div><div id="bottom-rail-track" class="bottom-rail-track"></div></div>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
 <div id="user-location-toast" aria-live="polite"></div>
@@ -865,6 +766,18 @@
   var TRANSLATION_API_URL = SUPABASE_URL + '/functions/v1/translate';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
+  var FALLBACK_RAIL_POIS = [
+    { id: 'fallback-castello-riomaggiore', name: 'Castello di Riomaggiore', type: 'Castle', coords: [44.1003, 9.7389], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', description: 'Historic hilltop castle above the village with panoramic views over the harbor and coastline.', relevance: 96 },
+    { id: 'fallback-castello-vernazza', name: 'Doria Tower', type: 'Castle', coords: [44.1346, 9.6838], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', description: 'Stone defensive tower and old fortification overlooking Vernazza bay.', relevance: 95 },
+    { id: 'fallback-monumento-gigante', name: 'Il Gigante', type: 'Monument', coords: [44.1486, 9.6487], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', description: 'The famous giant statue carved into the rocks beside Monterosso beach.', relevance: 94 },
+    { id: 'fallback-chiesa-san-giovanni', name: 'Church of San Giovanni Battista', type: 'Church', coords: [44.0995, 9.7395], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', description: 'Gothic-style church with black and white stone bands in Riomaggiore.', relevance: 93 },
+    { id: 'fallback-chiesa-santa-margherita', name: 'Santa Margherita di Antiochia', type: 'Church', coords: [44.1349, 9.6835], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', description: 'Iconic waterfront church facing Vernazza harbour and piazza.', relevance: 92 },
+    { id: 'fallback-beach-fegina', name: 'Fegina Beach', type: 'Beach', coords: [44.1469, 9.6502], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', description: 'The largest sandy beach in Cinque Terre, ideal for a relaxed stop by the sea.', relevance: 91 },
+    { id: 'fallback-beach-guvano', name: 'Guvano Beach Viewpoint', type: 'Beach', coords: [44.1219, 9.7147], image: 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg', description: 'Wild hidden bay viewpoint above one of the most legendary coastal spots.', relevance: 90 },
+    { id: 'fallback-monumento-war', name: 'Monterosso War Memorial', type: 'Monument', coords: [44.1456, 9.6533], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', description: 'Seafront memorial area with open views and a quiet historic feel.', relevance: 88 },
+    { id: 'fallback-chiesa-san-lorenzo', name: 'Church of San Lorenzo', type: 'Church', coords: [44.1078, 9.7288], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', description: 'The main church in Manarola, just above the village lanes and sea.', relevance: 89 },
+    { id: 'fallback-castello-monterosso', name: 'Monterosso Old Castle Ruins', type: 'Castle', coords: [44.1477, 9.6558], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', description: 'Remains of the old defensive system perched over Monterosso old town.', relevance: 87 }
+  ];
   var AUTO_OPEN_ZOOM = 13;
   var AUTO_OPEN_DISTANCE = 500;
   var AUTO_CLOSE_ZOOM = 12;
@@ -1093,20 +1006,59 @@
   }
   function getPOIImages(poi) { var images = normalizePOIImages(poi && poi.images); var main = poi && (poi.cover_image || poi.coverImage || poi.image_url || poi.imageUrl || poi.thumbnail_url || poi.thumbnail || poi.image) ? String(poi.cover_image || poi.coverImage || poi.image_url || poi.imageUrl || poi.thumbnail_url || poi.thumbnail || poi.image).trim() : ''; if (main && images.indexOf(main) === -1) images.unshift(main); return images.filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }).slice(0, 8); }
   function isValidPOI(poi) { return Boolean(poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng) && poi.name.length > 0); }
-  function getPOIEmoji(type, fallback) { switch (String(type || '').toLowerCase()) { case 'chiesa': return 'church.png'; case 'monumento': return 'monument.png'; case 'sentiero': return 'sentiero.png'; case 'spiaggia': return 'beach.png'; case 'stazione': return 'station.png'; case 'fontana': return 'fountan.png'; case 'ristorante': return '🍽️'; case 'bar': return '🍸'; case 'ferry': return 'ferrystation.png'; case 'curiosity': return '✨'; case 'punto panoramico': return 'viewpoint.png'; default: return fallback || '📌'; } }
+  function getPOIEmoji(type, fallback) {
+    switch (String(type || '').toLowerCase().trim()) {
+      case 'chiesa':
+      case 'church':
+        return 'church.png';
+      case 'monumento':
+      case 'monument':
+        return 'monument.png';
+      case 'sentiero':
+      case 'trail':
+        return 'sentiero.png';
+      case 'spiaggia':
+      case 'beach':
+        return 'beach.png';
+      case 'stazione':
+      case 'station':
+        return 'station.png';
+      case 'fontana':
+      case 'fountain':
+        return 'fountan.png';
+      case 'ristorante':
+      case 'restaurant':
+      case 'food':
+        return '🍽️';
+      case 'bar':
+        return '🍸';
+      case 'ferry':
+        return 'ferrystation.png';
+      case 'curiosity':
+        return '✨';
+      case 'punto panoramico':
+      case 'viewpoint':
+        return 'viewpoint.png';
+      default:
+        return fallback || '📌';
+    }
+  }
   function normalizePOIType(type) { return String(type || '').trim().toLowerCase(); }
   function getGithubAssetUrl(file) { var name = String(file || '').trim().replace(/^\.\//, ''); if (!name) return ''; return 'https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/' + encodeURIComponent(name); }
   function getPOIIconHTML(poi) {
     var symbol = poi && poi.symbol ? String(poi.symbol) : '📌';
     var type = normalizePOIType(poi && poi.type);
-    if (type === 'chiesa' || symbol === 'church.png') return '<img src="' + getGithubAssetUrl('church.png') + '" alt="Church" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛪\'))">';
-    if (type === 'monumento' || symbol === 'monument.png') return '<img src="' + getGithubAssetUrl('monument.png') + '" alt="Monument" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏛️\'))">';
-    if (type === 'sentiero' || symbol === 'sentiero.png') return '<img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🥾\'))">';
-    if (type === 'spiaggia' || symbol === 'beach.png') return '<img src="' + getGithubAssetUrl('beach.png') + '" alt="Beach" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏖️\'))">';
-    if (type === 'stazione' || symbol === 'station.png') return '<img src="' + getGithubAssetUrl('station.png') + '" alt="Train station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🚉\'))">';
-    if (type === 'fontana' || symbol === 'fontana.png' || symbol === 'fountain.png' || symbol === 'fountan.png') return '<img src="' + getGithubAssetUrl('fountan.png') + '" alt="Fountain" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛲\'))">';
+    if (type === 'chiesa' || type === 'church' || symbol === 'church.png') return '<img src="' + getGithubAssetUrl('church.png') + '" alt="Church" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛪\'))">';
+    if (type === 'monumento' || type === 'monument' || symbol === 'monument.png') return '<img src="' + getGithubAssetUrl('monument.png') + '" alt="Monument" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏛️\'))">';
+    if (type === 'sentiero' || type === 'trail' || symbol === 'sentiero.png') return '<img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🥾\'))">';
+    if (type === 'spiaggia' || type === 'beach' || symbol === 'beach.png') return '<img src="' + getGithubAssetUrl('beach.png') + '" alt="Beach" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏖️\'))">';
+    if (type === 'stazione' || type === 'station' || symbol === 'station.png') return '<img src="' + getGithubAssetUrl('station.png') + '" alt="Train station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🚉\'))">';
+    if (type === 'fontana' || type === 'fountain' || symbol === 'fontana.png' || symbol === 'fountain.png' || symbol === 'fountan.png') return '<img src="' + getGithubAssetUrl('fountan.png') + '" alt="Fountain" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛲\'))">';
     if (type === 'ferry' || symbol === 'ferrystation.png') return '<img src="' + getGithubAssetUrl('ferrystation.png') + '" alt="Ferry station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛴️\'))">';
-    if (type === 'punto panoramico' || symbol === 'viewpoint.png') return '<img src="' + getGithubAssetUrl('viewpoint.png') + '" alt="Viewpoint" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'📍\'))">';
+    if (type === 'punto panoramico' || type === 'viewpoint' || symbol === 'viewpoint.png') return '<img src="' + getGithubAssetUrl('viewpoint.png') + '" alt="Viewpoint" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'📍\'))">';
+    if (type === 'ristorante' || type === 'restaurant' || type === 'food') return '🍽️';
+    if (type === 'bar') return '🍸';
+    if (type === 'curiosity') return '✨';
     return escapeHTML(symbol || '📌');
   }
   function getMinZoomForImportance(importance) { var n = Number(importance || 0); if (n >= 95) return 11; if (n >= 85) return 12; if (n >= 75) return 13; if (n >= 65) return 14; if (n >= 55) return 15; if (n >= 40) return 16; return 17; }
@@ -1205,16 +1157,76 @@
   function closeVillageTourPanel() {}
   function handleVillageTourPanelClick(event) {}
   function createPOIDotIcon(poi) { return L.divIcon({ className: 'custom-poi custom-poi-dot', html: '<div class="poi-dot-label"></div>', iconSize: [13, 13], iconAnchor: [6, 6] }); }
-  function createPOIFullIcon(poi) { return L.divIcon({ className: 'custom-poi', html: '<div class="poi-label' + (getPOIDiscountValue(poi) > 0 ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>', iconSize: [38, 38], iconAnchor: [19, 19] }); }
+  function createPOIFullIcon(poi) {
+    var html = getPOIIconHTML(poi);
+    if (!html || !String(html).trim()) html = '📍';
+    return L.divIcon({ className: 'custom-poi', html: '<div class="poi-label' + (getPOIDiscountValue(poi) > 0 ? ' has-discount' : '') + '">' + html + '</div>', iconSize: [38, 38], iconAnchor: [19, 19] });
+  }
   function isPOIMatchFilter(poi, filter) { var type = normalizePOIType(poi && poi.type); filter = String(filter || 'all'); if (filter === 'all') return true; if (filter === 'trails') return false; if (filter === 'discounts') return getPOIDiscountValue(poi) > 0; if (filter === 'viewpoint') return type === 'punto panoramico'; if (filter === 'beach') return type === 'spiaggia'; if (filter === 'food') return type === 'ristorante' || type === 'bar'; if (filter === 'church') return type === 'chiesa'; if (filter === 'monument') return type === 'monumento'; if (filter === 'station') return type === 'stazione'; if (filter === 'ferry') return type === 'ferry'; if (filter === 'curiosity') return type === 'curiosity'; return true; }
   function hasDiscountedPOIs() { return poiMarkers.some(function(item) { return item && item.poi && getPOIDiscountValue(item.poi) > 0; }); }
   function updateExclusiveDiscountFilterVisibility() { var btn = document.getElementById('exclusive-discounts-filter'); var hasDiscounts = hasDiscountedPOIs(); if (!btn) return; if (hasDiscounts) { btn.classList.remove('hidden'); btn.style.display = ''; } else { btn.classList.add('hidden'); btn.style.display = 'none'; if (currentMapFilter === 'discounts') applyMapFilterUI('all'); } }
   function isTrailMatchFilter(filter) { filter = String(filter || 'all'); return filter === 'all' || filter === 'trails'; }
-  function applyPOIIconByZoom(item, zoom, minZoom) { if (!item || !item.marker || !item.poi) return; if (zoom < minZoom) { item.marker.setIcon(createPOIDotIcon(item.poi)); item.marker.setZIndexOffset(-900); item.marker.options.interactive = false; if (item.marker._icon) item.marker._icon.style.pointerEvents = 'none'; } else { item.marker.setIcon(createPOIFullIcon(item.poi)); item.marker.setZIndexOffset(2400); item.marker.options.interactive = true; if (item.marker._icon) item.marker._icon.style.pointerEvents = ''; } }
-  function separateMapSymbols(items, zoom) { var nodes; var minGap; var iterations; var pull; if (!map) return items || []; zoom = Number(zoom || map.getZoom()); minGap = zoom < 14 ? 18 : zoom < 16 ? 26 : zoom < 18 ? 34 : 38; iterations = 12; pull = zoom < 14 ? 0.22 : zoom < 16 ? 0.18 : zoom < 18 ? 0.14 : 0.10; nodes = (items || []).filter(function(item) { return item && item.marker && isValidCoords(item.coords); }).sort(function(a, b) { return String(a.sortKey || '').localeCompare(String(b.sortKey || '')); }).map(function(item) { var original = map.latLngToLayerPoint(item.coords); return { item: item, original: original, x: original.x, y: original.y }; }); for (var pass = 0; pass < iterations; pass += 1) { for (var i = 0; i < nodes.length; i += 1) { for (var j = i + 1; j < nodes.length; j += 1) { var a = nodes[i]; var b = nodes[j]; var dx = b.x - a.x; var dy = b.y - a.y; var distance = Math.sqrt(dx * dx + dy * dy) || 0.001; var overlap = minGap - distance; var nx; var ny; var push; if (overlap <= 0) continue; nx = dx / distance; ny = dy / distance; push = overlap * 0.5; a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push; } } nodes.forEach(function(node) { node.x += (node.original.x - node.x) * pull; node.y += (node.original.y - node.y) * pull; }); } nodes.forEach(function(node) { var displayCoords; var maxOffset = zoom < 14 ? 22 : zoom < 16 ? 34 : zoom < 18 ? 48 : 58; var ox = node.x - node.original.x; var oy = node.y - node.original.y; var offsetDistance = Math.sqrt(ox * ox + oy * oy); if (offsetDistance > maxOffset) { node.x = node.original.x + (ox / offsetDistance) * maxOffset; node.y = node.original.y + (oy / offsetDistance) * maxOffset; } displayCoords = map.layerPointToLatLng(L.point(node.x, node.y)); node.item.displayCoords = [displayCoords.lat, displayCoords.lng]; node.item.marker.setLatLng(node.item.displayCoords); }); return items || []; }
-  function getVisiblePOIMapItems(zoom) { if (!map) return []; zoom = Number(zoom || map.getZoom()); return poiMarkers.filter(function(item) { var minZoom; if (!item || !item.poi) return false; if (!isPOIMatchFilter(item.poi, currentMapFilter)) return false; minZoom = getMinZoomForImportance(item.importance); return zoom >= Math.max(map.getMinZoom(), minZoom - 1.15); }).map(function(item) { applyPOIIconByZoom(item, zoom, getMinZoomForImportance(item.importance)); return { kind: 'poi', marker: item.marker, coords: item.poi.coords, layer: poiLayer, source: item, sortKey: 'poi-' + String(item.poi.id || item.poi.name || '') }; }); }
-  function getVisibleTrailMapItems(zoom) { if (!map) return []; zoom = Number(zoom || map.getZoom()); return trailItems.filter(function(item) { if (!item || !item.marker || !item.trail || !item.latLngs || !item.latLngs.length) return false; if (!isTrailMatchFilter(currentMapFilter)) return false; return currentMapFilter === 'trails' || zoom >= getMinZoomForTrailImportance(item.trail.importance); }).map(function(item) { return { kind: 'trail', marker: item.marker, coords: item.latLngs[0], layer: trailsLayer, sortKey: 'trail-' + String(item.trail.id || item.trail.name || '') }; }); }
-  function addSeparatedMapSymbolToLayer(item) { if (!item || !item.marker || !item.layer) return; item.marker.addTo(item.layer); }
+  function applyPOIIconByZoom(item, zoom, minZoom) {
+    if (!item || !item.marker || !item.poi) return;
+    zoom = Number(zoom || (map ? map.getZoom() : 0));
+    minZoom = Number(minZoom || getMinZoomForImportance(item.importance));
+    if (zoom < minZoom) {
+      item.marker.setIcon(createPOIDotIcon(item.poi));
+      item.marker.setZIndexOffset(2200);
+    } else {
+      item.marker.setIcon(createPOIFullIcon(item.poi));
+      item.marker.setZIndexOffset(3400);
+    }
+    item.marker.options.interactive = true;
+    if (item.marker._icon) item.marker._icon.style.pointerEvents = '';
+  }
+  function getVisiblePOIMapItems(zoom) {
+    if (!map) return [];
+    zoom = Number(zoom || map.getZoom());
+    return poiMarkers.filter(function(item) {
+      var minZoom;
+      if (!item || !item.poi) return false;
+      if (!isPOIMatchFilter(item.poi, currentMapFilter)) return false;
+      minZoom = getMinZoomForImportance(item.importance);
+      return zoom >= Math.max(map.getMinZoom(), minZoom - 1.15);
+    }).map(function(item) {
+      applyPOIIconByZoom(item, zoom, getMinZoomForImportance(item.importance));
+      return {
+        kind: 'poi',
+        marker: item.marker,
+        coords: item.poi.coords,
+        layer: poiLayer,
+        source: item,
+        sortKey: 'poi-' + String(item.poi.id || item.poi.name || '')
+      };
+    });
+  }
+  function getVisibleTrailMapItems(zoom) {
+    if (!map || !isTrailMatchFilter(currentMapFilter)) return [];
+    zoom = Number(zoom || map.getZoom());
+    return trailItems.filter(function(item) {
+      return item && item.trail && item.marker && item.latLngs && item.latLngs.length;
+    }).filter(function(item) {
+      return zoom >= getMinZoomForTrailImportance(item.trail && item.trail.importance);
+    }).map(function(item) {
+      item.marker.setLatLng(item.latLngs[0]);
+      return {
+        kind: 'trail',
+        marker: item.marker,
+        coords: item.latLngs[0],
+        layer: trailsLayer,
+        source: item,
+        sortKey: 'trail-' + String(item.trail && (item.trail.id || item.trail.name || ''))
+      };
+    });
+  }
+  function addSeparatedMapSymbolToLayer(item) {
+    if (!item || !item.layer || !item.marker) return;
+    item.layer.addLayer(item.marker);
+  }
+  function separateMapSymbols(items) {
+    return Array.isArray(items) ? items : [];
+  }
   function updateMapSymbolVisibility() {
     var zoom;
     var visibleSymbols;
@@ -1275,7 +1287,23 @@
     if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) hideCard(false);
   }
   function getBottomRailGeneralItems() {
-    return [];
+    var center = map ? [map.getCenter().lat, map.getCenter().lng] : places[2].coords;
+    return FALLBACK_RAIL_POIS.slice().sort(function(a, b) {
+      return distanceMeters(center, a.coords) - distanceMeters(center, b.coords);
+    }).slice(0, 10).map(function(item) {
+      return {
+        kind: 'virtual-poi',
+        id: 'virtual-' + String(item.id || item.name || ''),
+        title: item.name,
+        kicker: item.type,
+        meta: item.description || '',
+        image: item.image || '',
+        badge: '',
+        poi: item,
+        distance: distanceMeters(center, item.coords),
+        score: Number(item.relevance || 0)
+      };
+    });
   }
   function getBottomRailVillageLabel() {
     var center;
@@ -1297,9 +1325,7 @@
     var bounds = map ? map.getBounds() : null;
     var center = map ? [map.getCenter().lat, map.getCenter().lng] : null;
     var items = [];
-    var minZoomForSpecificCards = 10.9;
     if (!bounds || !center || !map) return items;
-    if (map.getZoom() < minZoomForSpecificCards) return items;
     if (currentMapFilter === 'trails') {
       items = trailItems.filter(function(entry) {
         return entry && entry.trail && entry.latLngs && entry.latLngs.length && bounds.contains(entry.latLngs[0]);
@@ -1348,6 +1374,7 @@
     if (!bottomRailTrack || !map) return;
     if (USE_BOTTOM_RAIL) hideCard(false);
     items = getBottomRailViewportItems();
+    if (!items.length) items = getBottomRailGeneralItems();
     villageLabel = getBottomRailVillageLabel();
     if (bottomRailVillageTitle) {
       if (villageLabel) {
@@ -1359,28 +1386,39 @@
       }
     }
     if (!items.length) {
-      bottomRailTrack.innerHTML = '<div class="bottom-rail-card is-empty"><div>Zoom in a bit to see places in this area.</div></div>';
+      bottomRailTrack.innerHTML = '<div class="bottom-rail-card is-empty"><div>No places available yet.</div></div>';
       return;
     }
     bottomRailTrack.innerHTML = items.map(function(item) {
       var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
       var badge = item.badge ? '<div class="bottom-rail-badge">' + escapeHTML(item.badge) + '</div>' : '';
-      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + badge + '<div class="bottom-rail-body"><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div>' + (item.meta ? '<div class="bottom-rail-meta">' + escapeHTML(item.meta) + '</div>' : '') + '</div><div class="bottom-rail-shadow-edge"></div></button>';
+      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div></div></button>';
     }).join('');
   }
   function handleBottomRailClick(event) {
     var button = event.target.closest('[data-rail-kind]');
     var kind;
     var id;
-    var index;
     var item;
     if (!button) return;
     kind = button.getAttribute('data-rail-kind');
     id = button.getAttribute('data-rail-id') || '';
-    
+
     if (kind === 'poi') {
       item = poiMarkers.find(function(entry) { return 'poi-' + String(entry.poi && (entry.poi.id || entry.poi.name || '')) === id; });
       if (item && item.poi) openPOIWithMapMove(item.poi, null);
+      return;
+    }
+    if (kind === 'virtual-poi') {
+      item = FALLBACK_RAIL_POIS.find(function(entry) { return 'virtual-' + String(entry.id || entry.name || '') === id; });
+      if (item && isValidCoords(item.coords)) {
+        isProgrammaticMove = true;
+        map.flyTo(item.coords, 15.8, { duration: 0.9 });
+        window.setTimeout(function() {
+          showPOICard(item);
+          isProgrammaticMove = false;
+        }, 260);
+      }
       return;
     }
     if (kind === 'trail') {
@@ -1400,7 +1438,7 @@
     renderRelatedArticlesForPOI(poi, blogPostsCache);
     renderDiscountCTA(poi); window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); } }, 80); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } isProgrammaticMove = true; if (isIOSDevice()) { map.setView(poi.coords, 17, { animate: true }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 300); } else { map.flyTo(poi.coords, 17, { duration: 1.2 }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 400); } }
-  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); renderBottomRailCards(); }
+  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, pane: 'trailPane', icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); renderBottomRailCards(); }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
   function createSeaArc(p1, p2, segments) { var lat1 = p1[0], lng1 = p1[1], lat2 = p2[0], lng2 = p2[1], midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2, distance = Math.abs(lng2 - lng1), offset = 0.018 + distance * 0.45, control = [midLat - 0.003, midLng - offset], points = [], i, t, lat, lng; for (i = 0; i <= segments; i += 1) { t = i / segments; lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2; lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2; points.push([lat, lng]); } return points; }
   function normalizeFerryPortName(value) { var text = String(value || '').toLowerCase(); try { text = text.normalize('NFD'); } catch (error) {} text = text.replace(/[̀-ͯ]/g, ''); text = text.replace(/[^a-z0-9]+/g, ' ').trim(); return text; }
@@ -1475,7 +1513,8 @@
       rows.map(normalizePOI).filter(isValidPOI).forEach(function(poi) {
         var marker = L.marker(poi.coords, {
           title: poi.name,
-          zIndexOffset: 2400,
+          zIndexOffset: 3400,
+          pane: 'poiPane',
           icon: createPOIFullIcon(poi)
         }).on('click', function(event) {
           openPOIWithMapMove(poi, event);
@@ -1646,7 +1685,7 @@
   async function geocodeSearch(query) { try { var response = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query)); var data = await response.json(); if (data && data[0]) { var lat = parseFloat(data[0].lat); var lon = parseFloat(data[0].lon); map.setView([lat, lon], 13); updateWeather(lat, lon); return true; } } catch (error) { console.warn('Search failed:', error); } return false; }
   function isCardInteractiveTarget(target) { return Boolean(target && target.closest && target.closest('button, a, input, textarea, select, iframe, [data-start], #card-tour-play, #card-tour-panel, .card-action-btn')); }
   function setupCardSwipe(target) { if (!target) return; target.addEventListener('touchstart', function (event) { if (isCardInteractiveTarget(event.target)) return; if (event.touches.length !== 1) return; event.preventDefault(); startX = event.touches[0].clientX; startY = event.touches[0].clientY; currentX = startX; currentY = startY; isDragging = true; hasMoved = false; dragAxis = null; card.style.transition = 'none'; }, { passive: false }); target.addEventListener('touchmove', function (event) { var deltaX, deltaY, pullDown, blockedRight, blockedLeft; if (!isDragging || event.touches.length !== 1) return; event.preventDefault(); currentX = event.touches[0].clientX; currentY = event.touches[0].clientY; deltaX = currentX - startX; deltaY = currentY - startY; if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x'; if (!dragAxis) return; hasMoved = true; if (dragAxis === 'y') { pullDown = Math.max(0, deltaY); card.style.transform = 'translateY(' + pullDown + 'px)'; card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260)); return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (blockedRight || blockedLeft) deltaX = 0; card.style.transform = 'translateX(' + deltaX + 'px)'; }, { passive: false }); target.addEventListener('touchend', function (event) { var deltaX, deltaY, blockedRight, blockedLeft; if (!isDragging) return; if (event && event.changedTouches && event.changedTouches.length) { currentX = event.changedTouches[0].clientX; currentY = event.changedTouches[0].clientY; } deltaX = currentX - startX; deltaY = currentY - startY; isDragging = false; card.style.opacity = ''; if (dragAxis === 'y') { if (deltaY > 55) { hideCard(true); dragAxis = null; return; } card.style.transition = 'transform 0.22s ease, opacity 0.22s ease'; card.style.transform = 'translateY(0)'; dragAxis = null; return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) { card.style.transition = 'transform 0.2s ease'; card.style.transform = 'translateX(0)'; dragAxis = null; return; } if (deltaX < -80) { showCityByIndex(currentIndex + 1, true); dragAxis = null; return; } if (deltaX > 80) showCityByIndex(currentIndex - 1, true); dragAxis = null; }, { passive: false }); target.addEventListener('touchcancel', function (event) { if (event) event.preventDefault(); isDragging = false; dragAxis = null; card.style.opacity = ''; card.style.transition = 'transform 0.2s ease, opacity 0.2s ease'; card.style.transform = 'translateX(0) translateY(0)'; }, { passive: false }); }
-  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.12, 9.71], 11); satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
+  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.12, 9.71], 11); map.createPane('trailPane'); map.getPane('trailPane').style.zIndex = 640; map.createPane('poiPane'); map.getPane('poiPane').style.zIndex = 690; satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
   function updateMapVisualByZoom() { var z, raw, t; if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return; z = map.getZoom(); raw = Math.min(1, Math.max(0, (z - 17.1) / 1.35)); t = raw * raw * (3 - 2 * raw); satelliteLayer.setOpacity(1); roadsLayer.setOpacity(0.42 * t); detailedRoadsLayer.setOpacity(0.78 * t); whiteLayer.setOpacity(0); labelsLayer.setOpacity(0); }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function createCityMarkers() { places.forEach(function (place, index) { L.marker(place.coords, { title: place.name, zIndexOffset: 2600, icon: L.divIcon({ className: 'custom-label', html: '<div class="label">' + escapeHTML(place.name) + '</div>' }) }).addTo(map).on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } cityCardManuallyClosed = false; showCityByIndex(index, true); }); }); }
@@ -1818,34 +1857,10 @@
     setupPOISheetDrag();
   }
   function runTests() { }
-  function setMapLoadingState(isLoading) {
-    document.body.classList.toggle('map-loading', Boolean(isLoading));
-    var overlay = document.getElementById('map-loading-overlay');
-    if (overlay) overlay.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
-    if (!map) return;
-    if (isLoading) {
-      map.dragging.disable();
-      map.touchZoom.disable();
-      map.doubleClickZoom.disable();
-      map.scrollWheelZoom.disable();
-      map.boxZoom.disable();
-      map.keyboard.disable();
-    } else {
-      map.dragging.enable();
-      map.touchZoom.enable();
-      map.doubleClickZoom.enable();
-      map.scrollWheelZoom.enable();
-      map.boxZoom.enable();
-      map.keyboard.enable();
-    }
-  }
-  function refreshMapLoadingState() {
-    setMapLoadingState(!poiDataLoaded);
-  }
+  function setMapLoadingState() {}
+  function refreshMapLoadingState() {}
   function start() {
-    document.body.classList.add('map-loading');
     initMap();
-    setMapLoadingState(true);
     createCityMarkers();
     preloadImages();
     updateWeather(44.12, 9.71);
