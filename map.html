@@ -96,131 +96,6 @@
       line-height: 1;
       white-space: nowrap;
     }
-    .top-actions {
-      justify-self: end;
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 7px;
-    }
-    #app-menu-toggle {
-      width: 36px;
-      height: 36px;
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 4px;
-      padding: 9px;
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 50%;
-      background: rgba(255,255,255,0.13);
-      cursor: pointer;
-    }
-    #app-menu-toggle span {
-      display: block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.92);
-    }
-    .app-menu-language {
-      width: 36px;
-      height: 36px;
-      min-height: 36px;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      overflow: hidden;
-      padding: 3px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.13);
-      border: 1px solid rgba(255,255,255,0.16);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 18px rgba(0,0,0,0.18);
-      backdrop-filter: blur(16px) saturate(1.18);
-      -webkit-backdrop-filter: blur(16px) saturate(1.18);
-    }
-    .language-option {
-      flex: 0 0 auto;
-      min-height: 31px;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 10px 5px 5px;
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 999px;
-      background: rgba(255,255,255,.12);
-      color: rgba(255,255,255,.86);
-      font-size: 12px;
-      font-weight: 900;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .language-option.active { display: inline-flex; background: rgba(255,255,255,.94); color: #111; }
-    .language-option img { width: 21px; height: 21px; border-radius: 50%; display: block; }
-    .app-menu {
-      position: fixed;
-      right: 10px;
-      top: calc(56px + env(safe-area-inset-top));
-      z-index: 3500;
-      width: min(292px, calc(100vw - 20px));
-      max-height: calc(100dvh - 76px - env(safe-area-inset-top));
-      overflow-y: auto;
-      display: none;
-      padding: 9px;
-      border-radius: 22px;
-      background: rgba(8,14,18,.68);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow: 0 18px 46px rgba(0,0,0,.30);
-      backdrop-filter: blur(22px) saturate(1.18);
-      -webkit-backdrop-filter: blur(22px) saturate(1.18);
-    }
-    .top-actions.quick-menu-open .app-menu { display: block; }
-    .app-menu-head { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px 8px; }
-    .app-menu-kicker { margin-bottom: 4px; font-size: 11px; font-weight: 950; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.46); }
-    #app-menu-username { color: #fff; font-size: 31px; line-height: 1.08; letter-spacing: -.07em; font-weight: 950; }
-    .app-menu-auth-actions { display: flex; justify-content: center; gap: 8px; padding: 8px 0 0; }
-    #login, .app-menu-auth-btn {
-      flex: 1 1 0;
-      height: 40px;
-      min-width: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.92);
-      color: #111;
-      font-size: 12px;
-      font-weight: 950;
-      text-decoration: none;
-    }
-    .app-menu-auth-btn.logout { background: rgba(255,59,48,.96); color: #fff; border-color: rgba(255,59,48,.72); }
-    body.user-logged-in .app-menu-auth-btn.guest-only { display: none; }
-    body:not(.user-logged-in) .app-menu-auth-btn.user-only { display: none; }
-    .app-menu-main { width: 100%; display: flex; flex-direction: column; gap: 9px; margin-top: 14px; }
-    .app-menu-pill {
-      width: 100%;
-      min-height: 46px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.13);
-      color: #fff;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 950;
-      cursor: pointer;
-    }
-    .app-menu-pill:first-child { background: rgba(255,255,255,.94); color: #111; }
-    .app-menu-pill:nth-child(2) { background: rgba(255,138,29,.96); color: #111; }
-    .app-menu-legal-links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 18px; color: rgba(255,255,255,.38); font-size: 12px; font-weight: 850; }
-    .app-menu-legal-link { color: rgba(255,255,255,.58); text-decoration: underline; text-underline-offset: 3px; }
 
     .search-wrap { position: relative; }
     .search-wrap::before {
@@ -456,7 +331,6 @@
     #poi-card.sheet-expanded { height: 95dvh; }
     #poi-sheet-handle { position: absolute; left: 0; right: 0; top: 0; height: 26px; z-index: 14; display: flex; align-items: center; justify-content: center; touch-action: none; cursor: grab; background: #fff; border-radius: 30px 30px 0 0; }
     #poi-sheet-handle::before { content: ''; width: 42px; height: 5px; border-radius: 999px; background: rgba(0,0,0,0.20); }
-    #poi-circle, #poi-ai { display: none !important; }
     .poi-content { position: relative; z-index: 3; height: 100%; padding: 0 16px calc(18px + env(safe-area-inset-bottom)); color: #111; text-align: left; opacity: 0; transform: translateY(6px); transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1); overflow-y: hidden; touch-action: pan-y; overscroll-behavior: contain; }
     #poi-card.sheet-expanded .poi-content { overflow-y: auto; }
     #poi-card.open .poi-content { opacity: 1; transform: translateY(0); }
@@ -555,17 +429,6 @@
 <div id="map"></div>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
 <div id="user-location-toast" aria-live="polite"></div>
-
-<div class="top-bar">
-  <div class="top-row">
-    <div id="weather">--</div>
-    <a href="https://www.5terrego.com" class="center-brand" target="_blank" rel="noopener noreferrer" aria-label="Open 5TerreGo.com"><span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span></a>
-    <div class="top-actions"><div id="language-menu" class="app-menu-language" aria-label="Choose language"><button class="language-option active" type="button" data-lang="en"><img src="https://hatscripts.github.io/circle-flags/flags/gb.svg" alt="">English</button><button class="language-option" type="button" data-lang="it"><img src="https://hatscripts.github.io/circle-flags/flags/it.svg" alt="">Italiano</button><button class="language-option" type="button" data-lang="fr"><img src="https://hatscripts.github.io/circle-flags/flags/fr.svg" alt="">Français</button><button class="language-option" type="button" data-lang="de"><img src="https://hatscripts.github.io/circle-flags/flags/de.svg" alt="">Deutsch</button><button class="language-option" type="button" data-lang="ru"><img src="https://hatscripts.github.io/circle-flags/flags/ru.svg" alt="">Русский</button><button class="language-option" type="button" data-lang="zh"><img src="https://hatscripts.github.io/circle-flags/flags/cn.svg" alt="">中文</button><button class="language-option" type="button" data-lang="ar"><img src="https://hatscripts.github.io/circle-flags/flags/sa.svg" alt="">العربية</button></div><button id="app-menu-toggle" type="button" aria-label="Open quick menu" aria-expanded="false"><span></span><span></span><span></span><span></span></button><div id="app-menu" class="app-menu" aria-label="Quick menu"><div class="app-menu-head"><div class="app-menu-hi"><div class="app-menu-kicker">Ciao</div><div id="app-menu-username">Ospite</div><div class="app-menu-auth-actions"><button id="login" class="app-menu-auth-btn guest-only" type="button">Login</button><a id="app-menu-account" class="app-menu-auth-btn user-only" href="profile.html">Area personale</a><button id="app-menu-logout" class="app-menu-auth-btn logout user-only" type="button">Logout</button></div></div></div><nav class="app-menu-main" aria-label="Menu principale"><a class="app-menu-pill" href="blog.html">Leggi il blog</a><button class="app-menu-pill" type="button" data-app-menu-action="ai">Parla con Captain Gull</button><a class="app-menu-pill" href="mailto:5terrego.info@gmail.com?subject=Contatto%205TerreGo">Contattaci</a></nav><div class="app-menu-legal-links" aria-label="Link legali"><a class="app-menu-legal-link" href="privacy.html">Privacy</a><span aria-hidden="true">·</span><a class="app-menu-legal-link" href="cookie.html">Cookie</a><span aria-hidden="true">·</span><a class="app-menu-legal-link" href="terms.html">Termini</a><span aria-hidden="true">·</span><a class="app-menu-legal-link" href="copyright.html">Copyright</a></div></div></div>
-  </div>
-  <div class="search-wrap"><input id="search" placeholder="Cerca ovunque nel sito" autocomplete="off" /><div id="search-results"></div></div>
-  <div class="mode-bar map-filter-bar" id="map-filter-bar" aria-label="Map filters"><button class="mode-btn active" type="button" data-map-filter="all">✨ All</button><button id="exclusive-discounts-filter" class="mode-btn exclusive-discounts-filter hidden" type="button" data-map-filter="discounts">🔥 Exclusive discounts</button><button class="mode-btn" type="button" data-map-filter="trails">🥾 Trails</button><button class="mode-btn" type="button" data-map-filter="viewpoint">📍 Viewpoints</button><button class="mode-btn" type="button" data-map-filter="beach">🏖️ Beaches</button><button class="mode-btn" type="button" data-map-filter="food">🍽️ Food</button><button class="mode-btn" type="button" data-map-filter="church">⛪ Churches</button><button class="mode-btn" type="button" data-map-filter="monument">🏛️ Monuments</button><button class="mode-btn" type="button" data-map-filter="station">🚉 Stations</button><button class="mode-btn" type="button" data-map-filter="ferry">⛴️ Ferry</button><button class="mode-btn" type="button" data-map-filter="curiosity">✨ Curiosities</button></div>
-</div>
-
 <div class="bottom-card" id="card" aria-hidden="true">
   <button id="card-tour-play" type="button" aria-label="Start village tour">▶</button>
   <div class="card-media" id="card-media">
@@ -596,10 +459,8 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div id="poi-circle"></div>
   <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
   <div id="poi-close">×</div>
-  <button id="poi-ai" type="button">AI guide</button>
 </div>
 
 <div id="discount-modal" aria-hidden="true">
@@ -681,15 +542,15 @@
   var cardTourPanel = document.getElementById('card-tour-panel');
   var cardExperiencesBtn = document.getElementById('card-experiences');
   var cardStoriesBtn = document.getElementById('card-stories');
-  var loginBtn = document.getElementById('login');
+  var weatherEl = document.getElementById('weather');
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
   var poiCard = document.getElementById('poi-card');
-  var poiCircle = document.getElementById('poi-circle');
   var poiTitle = document.getElementById('poi-title');
-  var poiImagesPreview = document.getElementById('poi-images-preview');
   var poiDesc = document.getElementById('poi-desc');
   var poiClose = document.getElementById('poi-close');
+  var poiImagesPreview = document.getElementById('poi-images-preview');
+  var poiCircle = document.getElementById('poi-circle');
   var poiDirections = document.getElementById('poi-directions');
   var poiAiBtn = document.getElementById('poi-ai');
   var poiDiscountBtn = document.getElementById('poi-discount-btn');
@@ -940,7 +801,7 @@
   function formatWeatherDate(value) { var date = new Date(String(value || '') + 'T12:00:00'); if (!Number.isFinite(date.getTime())) return String(value || ''); return new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short', day: '2-digit', month: 'short' }).format(date); }
   function formatWeatherValue(value, suffix) { if (value === undefined || value === null || value === '') return '—'; if (typeof value === 'number') return String(Math.round(value * 10) / 10) + (suffix || ''); return String(value) + (suffix || ''); }
   function getWeatherEmoji(code) { code = Number(code); if (code === 0) return '☀️'; if (code === 1) return '🌤️'; if (code === 2) return '⛅'; if (code === 3) return '☁️'; if ([45,48].indexOf(code) !== -1) return '🌫️'; if ([51,53,55,56,57].indexOf(code) !== -1) return '🌦️'; if ([61,63,65,66,67,80,81,82].indexOf(code) !== -1) return '🌧️'; if ([71,73,75,77,85,86].indexOf(code) !== -1) return '❄️'; if ([95,96,99].indexOf(code) !== -1) return '⛈️'; return '🌡️'; }
-  async function updateWeather(lat, lng) { try { var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7'; var response = await fetch(url); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; siteWeatherData = data || null; document.getElementById('weather').innerText = temperature === undefined ? '--' : getWeatherEmoji(data && data.current_weather ? data.current_weather.weathercode : null) + ' ' + temperature + '°'; } catch (error) { siteWeatherData = null; document.getElementById('weather').innerText = '--'; } }
+  async function updateWeather(lat, lng) { try { var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7'; var response = await fetch(url); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; siteWeatherData = data || null; if (weatherEl) weatherEl.innerText = temperature === undefined ? '--' : getWeatherEmoji(data && data.current_weather ? data.current_weather.weathercode : null) + ' ' + temperature + '°'; } catch (error) { siteWeatherData = null; if (weatherEl) weatherEl.innerText = '--'; } }
   function getUserDisplayName(user) { var meta; if (!user) return 'User'; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return 'User'; }
   async function readCurrentUser() { var sessionResponse, session, userResponse; if (!supabaseClient) return null; sessionResponse = await supabaseClient.auth.getSession(); session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null; if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
   async function checkUser() { var user = await readCurrentUser(); var menuName = document.getElementById('app-menu-username'); currentUser = user; window.FTG_CURRENT_USER = user || null; document.body.classList.toggle('user-logged-in', Boolean(user)); if (!user) { if (menuName) menuName.innerText = 'Ospite'; return false; } if (menuName) menuName.innerText = getUserDisplayName(user); return true; }
@@ -960,7 +821,7 @@
   function setupPOISheetDrag() { var handle; var content; if (!poiCard || poiCard.getAttribute('data-sheet-ready') === '1') return; poiCard.setAttribute('data-sheet-ready', '1'); handle = document.getElementById('poi-sheet-handle'); content = poiCard.querySelector('.poi-content'); function beginPendingDrag(event, source) { if (!poiCard.classList.contains('open')) return; if (!event.touches || event.touches.length !== 1) return; poiSheetPendingDrag = true; poiSheetDragging = false; poiSheetDragSource = source || ''; poiSheetStartY = event.touches[0].clientY; poiSheetStartX = event.touches[0].clientX; poiSheetStartHeight = poiCard.getBoundingClientRect().height; poiSheetStartScrollTop = content ? content.scrollTop : 0; } function startRealDrag() { poiSheetPendingDrag = false; poiSheetDragging = true; poiCard.style.transition = 'none'; } function finishDrag() { var percent; poiSheetPendingDrag = false; if (!poiSheetDragging) return; poiSheetDragging = false; poiCard.style.transition = ''; percent = getPOISheetPercentFromHeight(poiCard.getBoundingClientRect().height); if (percent <= 40) { closePOICard(false); return; } if (percent >= 72) setPOISheetHeight(95, true); else setPOISheetHeight(50, true); } function handleMove(event) { var y; var delta; var nextHeight; var percent; var isExpanded; var scrollTop; if ((!poiSheetPendingDrag && !poiSheetDragging) || !event.touches || event.touches.length !== 1) return; y = event.touches[0].clientY; delta = poiSheetStartY - y; isExpanded = poiCard.classList.contains('sheet-expanded'); scrollTop = content ? content.scrollTop : 0; if (poiSheetPendingDrag) { if (Math.abs(delta) < 6) return; if (poiSheetDragSource === 'content' && event.target && event.target.closest && event.target.closest('#poi-images-preview')) { if (Math.abs(event.touches[0].clientX - poiSheetStartX) > Math.abs(delta)) { poiSheetPendingDrag = false; return; } } if (poiSheetDragSource === 'content' && isExpanded) { if (delta > 0) { poiSheetPendingDrag = false; return; } if (delta < 0 && scrollTop > 0) { poiSheetPendingDrag = false; return; } } startRealDrag(); } if (!poiSheetDragging) return; event.preventDefault(); nextHeight = poiSheetStartHeight + delta; percent = getPOISheetPercentFromHeight(nextHeight); setPOISheetHeight(percent, false); if (poiSheetDragSource === 'content' && delta > 0 && percent >= 95) { poiSheetDragging = false; poiSheetPendingDrag = false; poiCard.style.transition = ''; setPOISheetHeight(95, false); } } function cancelDrag() { poiSheetPendingDrag = false; poiSheetDragging = false; poiCard.style.transition = ''; } [handle, poiTitle].filter(Boolean).forEach(function(target) { target.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'header'); }, { passive: true }); target.addEventListener('touchmove', handleMove, { passive: false }); target.addEventListener('touchend', finishDrag); target.addEventListener('touchcancel', cancelDrag); }); if (content) { content.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'content'); }, { passive: true }); content.addEventListener('touchmove', handleMove, { passive: false }); content.addEventListener('touchend', finishDrag); content.addEventListener('touchcancel', cancelDrag); } }
   function renderPOIImagesPreview(poi) { var images = getPOIImages(poi); if (!poiImagesPreview || !poiCard) return; poiImagesPreview.innerHTML = ''; poiCard.classList.toggle('has-images', images.length > 0); images.forEach(function(src, index) { var img = document.createElement('img'); img.className = 'poi-preview-img'; img.src = src; img.alt = (poi && poi.name ? poi.name : 'POI') + ' image ' + (index + 1); img.loading = 'lazy'; poiImagesPreview.appendChild(img); }); }
   function renderPOIDescription(fullText) { var text = String(fullText || '').trim() || 'No description available'; if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } if (poiDesc) poiDesc.textContent = text; }
-  function showPOICard(poi) { var fullText, lat, lng; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); poiCard.style.height = '50dvh'; poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); if (poiAiBtn) poiAiBtn.style.display = 'none'; poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi); renderPOIDescription(fullText); renderDiscountCTA(poi); window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); } }, 80); }
+  function showPOICard(poi) { var fullText, lat, lng; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); poiCard.style.height = '50dvh'; poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi); renderPOIDescription(fullText); renderDiscountCTA(poi); window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); } }, 80); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } isProgrammaticMove = true; if (isIOSDevice()) { map.setView(poi.coords, 17, { animate: true }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 300); } else { map.flyTo(poi.coords, 17, { duration: 1.2 }); window.setTimeout(function () { showPOICard(poi); isProgrammaticMove = false; }, 400); } }
   async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
@@ -995,7 +856,9 @@
   function searchMatches(item, q) { var haystack = normalizeSearchText([item.name, item.label, item.description, item.keywords].filter(Boolean).join(' ')); if (!q) return false; return haystack.indexOf(q) !== -1 || q.split(' ').filter(function(word) { return word.length > 2; }).some(function(word) { return haystack.indexOf(word) !== -1; }); }
   function getSearchResults(query) { var q = normalizeSearchText(query); var results = []; if (!q) return results; places.forEach(function (place, index) { var item = { type: 'city', label: 'Borgo', name: place.name, index: index, description: place.description || '', keywords: 'village borgo paese cinque terre live webcam' }; if (searchMatches(item, q)) results.push(item); }); poiMarkers.forEach(function (entry) { var poi = entry && entry.poi; var item; if (!poi) return; item = { type: 'poi', label: 'POI', name: poi.name, poiId: poi.id, description: poi.description || '', keywords: [poi.type, poi.symbol, getPOIDiscountValue(poi) > 0 ? 'sconto discount qr offerta' : ''].join(' ') }; if (searchMatches(item, q)) results.push(item); }); trailItems.forEach(function (entry) { var trail = entry && entry.trail; var item; if (!trail) return; item = { type: 'trail', label: 'Sentiero', name: trail.name, description: trail.description || '', keywords: [trail.start_name, trail.end_name, trail.difficulty, trail.estimated_duration, 'trekking trail sentiero camminare'].join(' ') }; if (searchMatches(item, q)) results.push(item); }); return results.slice(0, 12); }
   var universalSearchResults = [];
-  function renderSearchSuggestions(value) { universalSearchResults = getSearchResults(value); if (!value || universalSearchResults.length === 0) { searchResults.style.display = 'none'; searchResults.innerHTML = ''; return; } searchResults.innerHTML = universalSearchResults.map(function (result, index) { return '<div class="search-item" data-search-index="' + index + '">' + escapeHTML(result.name) + ' · ' + escapeHTML(result.label || result.type || 'Result') + '</div>'; }).join(''); searchResults.style.display = 'flex'; }
+  function renderSearchSuggestions(value) {
+    if (!searchResults) return;
+    universalSearchResults = getSearchResults(value); if (!value || universalSearchResults.length === 0) { searchResults.style.display = 'none'; searchResults.innerHTML = ''; return; } searchResults.innerHTML = universalSearchResults.map(function (result, index) { return '<div class="search-item" data-search-index="' + index + '">' + escapeHTML(result.name) + ' · ' + escapeHTML(result.label || result.type || 'Result') + '</div>'; }).join(''); searchResults.style.display = 'flex'; }
   function focusAIPlace(name) { var place = places.find(function (item) { return normalizeText(item.name) === normalizeText(name) || normalizeText(item.name).indexOf(normalizeText(name)) !== -1; }); var index; if (!place) return false; index = places.indexOf(place); if (index < 0) return false; cityCardManuallyClosed = false; showCityByIndex(index, true); return true; }
   function focusAIPOI(name) { var item = poiMarkers.find(function (entry) { return entry.poi && (normalizeText(entry.poi.name) === normalizeText(name) || normalizeText(entry.poi.name).indexOf(normalizeText(name)) !== -1); }); if (!item || !item.poi) return false; openPOIWithMapMove(item.poi, null); return true; }
   function focusAITrail(name) { var item = trailItems.find(function (entry) { return entry.trail && (normalizeText(entry.trail.name) === normalizeText(name) || normalizeText(entry.trail.name).indexOf(normalizeText(name)) !== -1); }); if (!item || !item.trail) return false; if (item.latLngs && item.latLngs.length) { map.flyTo(item.latLngs[0], 16, { duration: 0.9 }); } showTrailCard(item.trail); return true; }
@@ -1007,106 +870,183 @@
   function updateMapVisualByZoom() { var z, raw, t; if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return; z = map.getZoom(); raw = Math.min(1, Math.max(0, (z - 17.1) / 1.35)); t = raw * raw * (3 - 2 * raw); satelliteLayer.setOpacity(1); roadsLayer.setOpacity(0.42 * t); detailedRoadsLayer.setOpacity(0.78 * t); whiteLayer.setOpacity(0); labelsLayer.setOpacity(0); }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function createCityMarkers() { places.forEach(function (place, index) { L.marker(place.coords, { title: place.name, zIndexOffset: 2600, icon: L.divIcon({ className: 'custom-label', html: '<div class="label">' + escapeHTML(place.name) + '</div>' }) }).addTo(map).on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } cityCardManuallyClosed = false; showCityByIndex(index, true); }); }); }
-  function setupEvents() { if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) { window.speechSynthesis.onvoiceschanged = function() { getPreferredSpeechVoice(); }; } document.addEventListener('touchstart', rememberRealUserGesture, { passive: true, capture: true }); document.addEventListener('pointerdown', rememberRealUserGesture, { passive: true, capture: true }); document.addEventListener('click', rememberRealUserGesture, true); document.querySelectorAll('#map-filter-bar [data-map-filter]').forEach(function(btn) { btn.addEventListener('click', function() { applyMapFilterUI(btn.getAttribute('data-map-filter')); }); }); if (card) { card.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true }); card.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true }); card.addEventListener('click', unlockLiveFromRealGesture); } if (cardMedia) { cardMedia.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true }); cardMedia.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true }); cardMedia.addEventListener('click', unlockLiveFromRealGesture); } if (cardLiveBadge) { cardLiveBadge.addEventListener('click', function(event) { event.stopPropagation(); }); } if (cardTourPlayBtn) { cardTourPlayBtn.addEventListener('touchstart', function(event) { event.stopPropagation(); }, { passive: true }); cardTourPlayBtn.addEventListener('click', function(event) { event.preventDefault(); event.stopPropagation(); renderVillageTourPanel(); }); } if (cardTourPanel) { cardTourPanel.addEventListener('touchstart', function(event) { event.stopPropagation(); }, { passive: true }); cardTourPanel.addEventListener('click', handleVillageTourPanelClick); } if (tourNav) tourNav.addEventListener('click', function(event) { var button = event.target.closest('[data-tour-action]'); var action; if (!button) return; action = button.getAttribute('data-tour-action'); if (action === 'audio') playActiveTourStopAudio(); if (action === 'next-stop') goToNextActiveTourStop(); }); if (poiAiBtn) poiAiBtn.addEventListener('click', function(){}); if (poiDiscountBtn) poiDiscountBtn.addEventListener('click', handleGenerateDiscount); if (discountModalClose) discountModalClose.addEventListener('click', closeDiscountModal); if (discountModal) discountModal.addEventListener('click', function(event) { if (event.target === discountModal) closeDiscountModal(); }); if (poiClose) poiClose.addEventListener('click', function () { closePOICard(false); }); if (trailClose) trailClose.addEventListener('click', function () { closeTrailCard(false); }); if (trailMapExpandBtn) trailMapExpandBtn.addEventListener('click', function (event) { event.stopPropagation(); trailCard.classList.toggle('map-expanded'); trailMapExpandBtn.innerText = trailCard.classList.contains('map-expanded') ? '↙' : '↗'; window.setTimeout(fitTrailMiniMap, 80); window.setTimeout(fitTrailMiniMap, 360); }); if (loginBtn) loginBtn.addEventListener('click', function () { var baseOrigin = window.location.origin; window.location.href = baseOrigin + '/login.html'; }); if (userLocationBtn) userLocationBtn.addEventListener('click', function () { requestPlainUserLocation(); }); searchInput.addEventListener('input', function () { renderSearchSuggestions(searchInput.value); }); searchInput.addEventListener('keydown', function (event) { var query, first; if (event.key !== 'Enter') return; query = searchInput.value.trim(); if (!query) return; first = getSearchResults(query)[0]; if (first && selectSearchResult(first)) { searchResults.style.display = 'none'; searchInput.blur(); return; } geocodeSearch(query).then(function () { searchResults.style.display = 'none'; searchInput.blur(); }); }); searchResults.addEventListener('click', function (event) { var item = event.target.closest('.search-item'); var index; if (!item) return; index = Number(item.getAttribute('data-search-index')); selectSearchResult(universalSearchResults[index] || item.getAttribute('data-name')); searchResults.style.display = 'none'; searchInput.blur(); }); document.addEventListener('click', function (event) { var menuAction = event.target.closest('[data-app-menu-action]'); if (menuAction) { event.preventDefault(); event.stopPropagation(); if (menuAction.getAttribute('data-app-menu-action') === 'ai') { var aiBtn = document.getElementById('ai-chat-btn'); if (aiBtn) aiBtn.click(); return; } } if (!searchResults.contains(event.target) && event.target !== searchInput) searchResults.style.display = 'none'; }); map.on('zoom zoomend moveend', function () { updateMapVisualByZoom(); updateTrailWidths(); updateMovingFerryIconSizes(); updatePOIVisibility(); }); map.on('dragstart zoomstart', function () { if (!activeTour || isProgrammaticMove) return; activeTourFollowUser = false; }); map.on('moveend zoomend', function () { evaluateAutoCard(); updatePOIVisibility(); }); setupCardSwipe(card); setupCardSwipe(cardLiveTouchLayer); setupPOISheetDrag(); }
+  function setupEvents() {
+    if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = function () {
+        getPreferredSpeechVoice();
+      };
+    }
+
+    document.addEventListener('touchstart', rememberRealUserGesture, { passive: true, capture: true });
+    document.addEventListener('pointerdown', rememberRealUserGesture, { passive: true, capture: true });
+    document.addEventListener('click', rememberRealUserGesture, true);
+
+    document.querySelectorAll('#map-filter-bar [data-map-filter]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        applyMapFilterUI(btn.getAttribute('data-map-filter'));
+      });
+    });
+
+    if (card) {
+      card.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true });
+      card.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true });
+      card.addEventListener('click', unlockLiveFromRealGesture);
+    }
+
+    if (cardMedia) {
+      cardMedia.addEventListener('touchstart', unlockLiveFromRealGesture, { passive: true });
+      cardMedia.addEventListener('pointerdown', unlockLiveFromRealGesture, { passive: true });
+      cardMedia.addEventListener('click', unlockLiveFromRealGesture);
+    }
+
+    if (cardLiveBadge) {
+      cardLiveBadge.addEventListener('click', function (event) {
+        event.stopPropagation();
+      });
+    }
+
+    if (cardTourPlayBtn) {
+      cardTourPlayBtn.addEventListener('touchstart', function (event) {
+        event.stopPropagation();
+      }, { passive: true });
+      cardTourPlayBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        renderVillageTourPanel();
+      });
+    }
+
+    if (cardTourPanel) {
+      cardTourPanel.addEventListener('touchstart', function (event) {
+        event.stopPropagation();
+      }, { passive: true });
+      cardTourPanel.addEventListener('click', handleVillageTourPanelClick);
+    }
+
+    if (tourNav) {
+      tourNav.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-tour-action]');
+        var action;
+        if (!button) return;
+        action = button.getAttribute('data-tour-action');
+        if (action === 'audio') playActiveTourStopAudio();
+        if (action === 'next-stop') goToNextActiveTourStop();
+      });
+    }
+
+    if (poiAiBtn) {
+      poiAiBtn.addEventListener('click', function () {});
+    }
+
+    if (poiDiscountBtn) {
+      poiDiscountBtn.addEventListener('click', handleGenerateDiscount);
+    }
+
+    if (discountModalClose) {
+      discountModalClose.addEventListener('click', closeDiscountModal);
+    }
+
+    if (discountModal) {
+      discountModal.addEventListener('click', function (event) {
+        if (event.target === discountModal) {
+          closeDiscountModal();
+        }
+      });
+    }
+
+    if (poiClose) {
+      poiClose.addEventListener('click', function () {
+        closePOICard(false);
+      });
+    }
+
+    if (trailClose) {
+      trailClose.addEventListener('click', function () {
+        closeTrailCard(false);
+      });
+    }
+
+    if (trailMapExpandBtn) {
+      trailMapExpandBtn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        trailCard.classList.toggle('map-expanded');
+        trailMapExpandBtn.innerText = trailCard.classList.contains('map-expanded') ? '↙' : '↗';
+        window.setTimeout(fitTrailMiniMap, 80);
+        window.setTimeout(fitTrailMiniMap, 360);
+      });
+    }
+
+    if (userLocationBtn) {
+      userLocationBtn.addEventListener('click', function () {
+        requestPlainUserLocation();
+      });
+    }
+
+    if (searchInput && searchResults) {
+      searchInput.addEventListener('input', function () {
+        renderSearchSuggestions(searchInput.value);
+      });
+
+      searchInput.addEventListener('keydown', function (event) {
+        var query;
+        var first;
+        if (event.key !== 'Enter') return;
+        query = searchInput.value.trim();
+        if (!query) return;
+        first = getSearchResults(query)[0];
+        if (first && selectSearchResult(first)) {
+          searchResults.style.display = 'none';
+          searchInput.blur();
+          return;
+        }
+        geocodeSearch(query).then(function () {
+          searchResults.style.display = 'none';
+          searchInput.blur();
+        });
+      });
+
+      searchResults.addEventListener('click', function (event) {
+        var item = event.target.closest('.search-item');
+        var index;
+        if (!item) return;
+        index = Number(item.getAttribute('data-search-index'));
+        selectSearchResult(universalSearchResults[index] || item.getAttribute('data-name'));
+        searchResults.style.display = 'none';
+        searchInput.blur();
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!searchResults.contains(event.target) && event.target !== searchInput) {
+          searchResults.style.display = 'none';
+        }
+      });
+    }
+
+    map.on('zoom zoomend moveend', function () {
+      updateMapVisualByZoom();
+      updateTrailWidths();
+      updateMovingFerryIconSizes();
+      updatePOIVisibility();
+    });
+
+    map.on('dragstart zoomstart', function () {
+      if (!activeTour || isProgrammaticMove) return;
+      activeTourFollowUser = false;
+    });
+
+    map.on('moveend zoomend', function () {
+      evaluateAutoCard();
+      updatePOIVisibility();
+    });
+
+    setupCardSwipe(card);
+    setupCardSwipe(cardLiveTouchLayer);
+    setupPOISheetDrag();
+  }
   function runTests() { }
   function start() { initMap(); createCityMarkers(); preloadImages(); updateWeather(44.12, 9.71); setupEvents(); setUserLocationButtonState('idle'); updateMapVisualByZoom(); runTests(); applyMapFilterUI(currentMapFilter); loadPOIs(); loadTrails(); window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300); window.setTimeout(function () { checkUser(); startUserPolling(); }, 250); if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); }); }
   start();
 }());
 </script>
-
-<script>
-(function(){
-  var FLAGS = { en: 'gb', it: 'it', fr: 'fr', de: 'de', ru: 'ru', zh: 'cn', ar: 'sa' };
-  var NAMES = { en: 'English', it: 'Italiano', fr: 'Français', de: 'Deutsch', ru: 'Русский', zh: '中文', ar: 'العربية' };
-  var UI = {
-    en: { login:'Login', search:'Search on the map', all:'All', trails:'Trails', viewpoints:'Viewpoints', beaches:'Beaches', food:'Food', churches:'Churches', monuments:'Monuments', stations:'Stations', ferry:'Ferry', curiosities:'Curiosities', experiences:'Experiences', stories:'Stories', recenter:'Recenter', exitTour:'Exit tour', directions:'Directions', weather:'Weather', aiOpen:'Open AI Guide', aiClose:'Close AI', aiSubtitle:'Your Cinque Terre guide', aiPlaceholder:'Ask the guide...', ai1:'what should I do today?', ai2:'best sunset?', ai3:'beaches and viewpoints?', ai4:'trails or ferry?', liveLoading:'Loading live stream', guest:'Guest', menuHi:'Hi', logout:'Log out', editProfile:'Profile' },
-    it: { login:'Accedi', search:'Cerca sulla mappa', all:'Tutti', trails:'Sentieri', viewpoints:'Panorami', beaches:'Spiagge', food:'Cibo', churches:'Chiese', monuments:'Monumenti', stations:'Stazioni', ferry:'Traghetti', curiosities:'Curiosità', experiences:'Esperienze', stories:'Storie', recenter:'Ricentra', exitTour:'Esci dal tour', directions:'Indicazioni', weather:'Meteo', aiOpen:'Apri guida AI', aiClose:'Chiudi AI', aiSubtitle:'La tua guida delle Cinque Terre', aiPlaceholder:'Chiedi alla guida...', ai1:'cosa fare oggi?', ai2:'miglior tramonto?', ai3:'spiagge e panorami?', ai4:'sentieri o traghetto?', liveLoading:'Caricamento live', guest:'Ospite', menuHi:'Ciao', logout:'Esci', editProfile:'Profilo' }
-  };
-  function lang(){ return localStorage.getItem('5terrego_language') || 'en'; }
-  function t(key){ var l = lang(); return (UI[l] && UI[l][key]) || UI.en[key] || key; }
-  function setText(selector, value){ var el = document.querySelector(selector); if (el) el.textContent = value; }
-  function setPlaceholder(selector, value){ var el = document.querySelector(selector); if (el) el.setAttribute('placeholder', value); }
-  function applyLanguage(next){ var l = next || lang(); localStorage.setItem('5terrego_language', l); document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; document.querySelectorAll('.language-option').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-lang') === l); }); setPlaceholder('#search', t('search')); setText('#card-experiences', t('experiences')); setText('#card-stories', t('stories')); setText('#poi-directions', t('directions')); setText('#tour-nav-kicker', 'Tour active'); setText('.tour-nav-compass-label', 'Follow the path'); setText('.ai-subtitle', t('aiSubtitle')); setPlaceholder('#ai-input', t('aiPlaceholder')); var aiClose = document.getElementById('ai-close'); if (aiClose) aiClose.setAttribute('aria-label', t('aiClose')); var aiBtn = document.getElementById('ai-chat-btn'); if (aiBtn) aiBtn.setAttribute('aria-label', t('aiOpen')); var menuName = document.getElementById('app-menu-username'); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest'); setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile')); setText('#app-menu-logout', t('logout')); }
-  function setup(){ var actions = document.querySelector('.top-actions'); var menu = document.getElementById('language-menu'); var appToggle = document.getElementById('app-menu-toggle'); function setMenuOpen(open){ if (!actions) return; actions.classList.toggle('quick-menu-open', open); if (appToggle) appToggle.setAttribute('aria-expanded', open ? 'true' : 'false'); } if (appToggle && actions) appToggle.addEventListener('click', function(e){ e.stopPropagation(); setMenuOpen(!actions.classList.contains('quick-menu-open')); }); if (menu) menu.addEventListener('click', function(e){ var btn = e.target.closest('[data-lang]'); if (!btn) return; e.preventDefault(); e.stopPropagation(); applyLanguage(btn.getAttribute('data-lang')); }); document.addEventListener('click', function(){ setMenuOpen(false); }); applyLanguage(lang()); }
-  window.FTG_I18N = { t:t, setLanguage:applyLanguage, getLanguage:lang };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
-}());
-</script>
-
-<style>
-  #ai-chat-btn { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 3000; width: 72px; height: 72px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.78); overflow: hidden; cursor: pointer; box-shadow: 0 18px 42px rgba(0,0,0,0.24); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
-  #ai-chat-btn video { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 0%; transform: scale(1.22); pointer-events: none; }
-  #ai-chat { position: fixed; left: 12px; right: 12px; top: calc(92px + env(safe-area-inset-top)); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 3000; width: auto; height: auto; display: none; flex-direction: column; overflow: hidden; border-radius: 26px; border: 1px solid rgba(255,255,255,0.34); background: rgba(255,255,255,0.78); box-shadow: 0 24px 70px rgba(0,0,0,0.28); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); color: #111; }
-  #ai-chat.ai-open { display: flex; }
-  .ai-head { padding: 14px 14px 12px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .ai-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
-  .ai-avatar { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; flex: 0 0 42px; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
-  .ai-avatar video { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 0%; transform: scale(1.22); pointer-events: none; }
-  .ai-title-wrap { min-width: 0; flex: 1; }
-  .ai-title { font-size: 15px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; color: #111; }
-  .ai-subtitle { margin-top: 3px; font-size: 12px; color: rgba(0,0,0,0.52); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
-  #ai-close { width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(0,0,0,0.07); color: #111; font-size: 18px; font-weight: 800; cursor: pointer; }
-  #ai-messages { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; overflow-y: auto; overflow-x: hidden; padding: 12px; font-size: 14px; line-height: 1.35; }
-  .ai-msg { max-width: 84%; word-break: break-word; margin-bottom: 8px; padding: 10px 12px; border-radius: 18px; white-space: pre-line; }
-  .ai-msg.user { margin-left: auto; background: #111; color: #fff; border-bottom-right-radius: 6px; }
-  .ai-msg.bot { margin-right: auto; background: rgba(0,0,0,0.07); color: #111; border-bottom-left-radius: 6px; }
-  .ai-result-card { width: min(86%, 340px); margin: 0 auto 8px 0; padding: 11px; border-radius: 18px; background: rgba(255,255,255,0.76); border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 10px 24px rgba(0,0,0,0.08); color: #111; }
-  .ai-result-kicker { margin-bottom: 5px; font-size: 10px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,0.42); }
-  .ai-result-title { font-size: 15px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 950; margin-bottom: 8px; }
-  .ai-result-subtitle { margin-top: -3px; margin-bottom: 9px; font-size: 12px; line-height: 1.3; color: rgba(0,0,0,0.56); }
-  .ai-result-btn { border: 0; border-radius: 999px; padding: 8px 12px; background: #111; color: #fff; font-size: 12px; font-weight: 900; cursor: pointer; }
-  .ai-suggestions { display: flex; gap: 7px; padding: 0 12px 10px; overflow-x: auto; overflow-y: hidden; }
-  .ai-suggestion { flex: 0 0 auto; border: 0; border-radius: 999px; padding: 8px 10px; background: rgba(0,0,0,0.07); color: #111; font-size: 12px; font-weight: 700; cursor: pointer; }
-  .ai-input-row { padding: 10px; display: flex; gap: 8px; border-top: 1px solid rgba(0,0,0,0.07); background: rgba(255,255,255,0.36); }
-  #ai-input { flex: 1; min-width: 0; max-width: 100%; border: 0; outline: 0; border-radius: 999px; background: rgba(0,0,0,0.07); color: #111; padding: 11px 13px; font-size: 15px; }
-  #ai-input::placeholder { color: rgba(0,0,0,0.44); }
-  #ai-send { width: 42px; height: 42px; border: 0; border-radius: 50%; background: #111; color: #fff; font-weight: 900; cursor: pointer; }
-</style>
-
-<button id="ai-chat-btn" type="button" aria-label="Open AI Guide"><video id="ai-mascot-video" autoplay muted loop playsinline preload="auto"><source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm"><source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm"><source src="mascotterelax.webm" type="video/webm"></video></button>
-<div id="ai-chat" aria-hidden="true">
-  <div class="ai-head"><div class="ai-head-left"><div class="ai-avatar"><video id="ai-header-video" autoplay muted loop playsinline preload="auto"><source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm"><source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm"><source src="mascotterelax.webm" type="video/webm"></video></div><div class="ai-title-wrap"><div class="ai-title">Captain Gull</div><div class="ai-subtitle">Your Cinque Terre guide</div></div></div><button id="ai-close" type="button" aria-label="Close AI">×</button></div>
-  <div id="ai-messages"></div>
-  <div class="ai-suggestions"><button class="ai-suggestion" type="button">what should I do today?</button><button class="ai-suggestion" type="button">best sunset?</button><button class="ai-suggestion" type="button">beaches and viewpoints?</button><button class="ai-suggestion" type="button">trails or ferry?</button></div>
-  <div class="ai-input-row"><input id="ai-input" placeholder="Ask the guide..." autocomplete="off" /><button id="ai-send" type="button">→</button></div>
-</div>
-
-<script>
-(function(){
-  function forceMascotVideos(){ ['ai-mascot-video','ai-header-video'].forEach(function(id){ var video = document.getElementById(id); if (!video) return; video.muted = true; video.loop = true; video.playsInline = true; video.setAttribute('muted', ''); video.setAttribute('playsinline', ''); video.setAttribute('webkit-playsinline', ''); video.load(); var playPromise = video.play(); if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(function(){}); }); }
-  forceMascotVideos();
-  window.addEventListener('load', forceMascotVideos);
-  document.addEventListener('touchstart', forceMascotVideos, { passive: true, once: true });
-  document.addEventListener('click', forceMascotVideos, { passive: true, once: true });
-  var btn = document.getElementById('ai-chat-btn');
-  var panel = document.getElementById('ai-chat');
-  var input = document.getElementById('ai-input');
-  var send = document.getElementById('ai-send');
-  var closeBtn = document.getElementById('ai-close');
-  var messages = document.getElementById('ai-messages');
-  var suggestions = Array.prototype.slice.call(document.querySelectorAll('.ai-suggestion'));
-  var hasWelcomed = false;
-  var pendingAICards = [];
-  function toggleChat(open){ var shouldOpen = typeof open === 'boolean' ? open : !panel.classList.contains('ai-open'); panel.classList.toggle('ai-open', shouldOpen); panel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true'); if (shouldOpen && !hasWelcomed) { hasWelcomed = true; addMessage('Hi, I’m Captain Gull. I can help you explore the Cinque Terre: villages, trails, ferries, beaches, viewpoints, stories, restaurants and practical ideas for today.', false, true); } }
-  window.openCaptainGullForPOI = function(poi){ var name = poi && poi.name ? String(poi.name) : 'POI'; var description = poi && poi.description && String(poi.description).trim().length > 0 ? String(poi.description).trim() : 'No description available.'; panel.classList.add('ai-open'); panel.setAttribute('aria-hidden', 'false'); messages.innerHTML = ''; hasWelcomed = true; addMessage(name + '\n\n' + description, false, true); };
-  function typeMessage(div, text, keepTop) { var fullText = String(text || ''), index = 0, speed = fullText.length > 260 ? 7 : 14; div.innerText = ''; function step() { index += 1; div.innerText = fullText.slice(0, index); messages.scrollTop = keepTop ? 0 : messages.scrollHeight; if (index < fullText.length) window.setTimeout(step, speed); } step(); }
-  function addMessage(text, isUser, keepTop, instant){ var div = document.createElement('div'); div.className = 'ai-msg ' + (isUser ? 'user' : 'bot'); messages.appendChild(div); if (instant || isUser) { div.innerText = text; if (keepTop) { requestAnimationFrame(function(){ messages.scrollTop = 0; }); return div; } messages.scrollTop = messages.scrollHeight; return div; } typeMessage(div, text, keepTop); return div; }
-  function clearAICards(){ pendingAICards = []; }
-  function queueAICard(kind, item){ if (!item) return; pendingAICards.push({ kind: kind, title: item.name || item.title || 'Result', subtitle: item.description || item.excerpt || '', url: item.url || '', name: item.name || item.title || '' }); }
-  function queueAICards(kind, items, limit){ (items || []).slice(0, limit || 3).forEach(function(item){ queueAICard(kind, item); }); }
-  function escapeCardHTML(value){ return String(value || '').replace(/[&<>\"]/g, function(char){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]; }); }
-  function getAICardKindLabel(kind){ if (kind === 'poi') return 'POI'; if (kind === 'trail') return 'Trail'; return 'Result'; }
-  function addAICards(){ var cards = pendingAICards.slice(); pendingAICards = []; cards.forEach(function(card){ var div = document.createElement('div'); div.className = 'ai-result-card'; div.innerHTML = '<div class="ai-result-kicker">' + escapeCardHTML(getAICardKindLabel(card.kind)) + '</div><div class="ai-result-title">' + escapeCardHTML(card.title) + '</div>' + (card.subtitle ? '<div class="ai-result-subtitle">' + escapeCardHTML(card.subtitle) + '</div>' : '') + '<button class="ai-result-btn" type="button" data-ai-card-kind="' + escapeCardHTML(card.kind) + '" data-ai-card-name="' + escapeCardHTML(card.name) + '" data-ai-card-url="' + escapeCardHTML(card.url) + '">View</button>'; messages.appendChild(div); messages.scrollTop = messages.scrollHeight; }); }
-  function simpleAI(question){ clearAICards(); var api = window.fiveTerreGoAI; var q = String(question || '').toLowerCase(); var places = api.getPlaces(); var pois = api.getPOIs(); var trails = api.getTrails(); var place = places.find(function(p){ return q.indexOf(String(p.name || '').toLowerCase()) !== -1; }); if (q.indexOf('trail') !== -1 || q.indexOf('sentier') !== -1 || q.indexOf('cammin') !== -1) { queueAICards('trail', trails, 4); return 'I can help with trails. Right now I see: ' + trails.slice(0, 4).map(function(t){ return t.name || 'Trail'; }).join(', ') + '.'; } if (q.indexOf('beach') !== -1 || q.indexOf('spiagg') !== -1 || q.indexOf('viewpoint') !== -1 || q.indexOf('panoram') !== -1) { var filtered = pois.filter(function(p){ var type = String(p.type || '').toLowerCase(); return type === 'spiaggia' || type === 'punto panoramico'; }); queueAICards('poi', filtered, 4); return 'Here are useful places from the map for beaches and viewpoints.'; } if (q.indexOf('sunset') !== -1 || q.indexOf('tramonto') !== -1) { return 'For sunset, choose Manarola for the classic postcard view, Vernazza for harbour colours, or Riomaggiore for a more intimate atmosphere. Arrive 60–90 minutes early.'; } if (place) { var nearby = pois.filter(function(p){ return p && Array.isArray(p.coords) && api.distanceMeters(place.coords, p.coords) <= 1000; }).slice(0,4); queueAICards('poi', nearby, 4); return place.name + ': ' + (place.description || 'Cinque Terre village.') + '\n\nNearby you can open useful places directly on the map.'; } return 'Tell me what you want: villages, trails, ferries, beaches, viewpoints or sunset.'; }
-  async function handleSend(textFromButton){ var text = String(textFromButton || input.value || '').trim(); var reply; if(!text) return; addMessage(text, true); input.value = ''; addMessage('Typing...', false, false, true); reply = simpleAI(text); if (messages.lastChild && messages.lastChild.innerText === 'Typing...') messages.removeChild(messages.lastChild); window.setTimeout(function(){ addMessage(reply, false); window.setTimeout(addAICards, Math.min(900, Math.max(220, String(reply || '').length * 9))); }, 120); }
-  btn.addEventListener('click', function(){ if (window.currentFiveTerrePOI && typeof window.openCaptainGullForPOI === 'function') { window.openCaptainGullForPOI(window.currentFiveTerrePOI); return; } toggleChat(); });
-  closeBtn.addEventListener('click', function(){ toggleChat(false); });
-  send.addEventListener('click', function(){ handleSend(); });
-  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') handleSend(); });
-  suggestions.forEach(function(button){ button.addEventListener('click', function(){ handleSend(button.innerText); }); });
-  messages.addEventListener('click', function(event){ var button = event.target.closest('[data-ai-card-kind]'); var kind; var name; var api; if (!button) return; kind = button.getAttribute('data-ai-card-kind'); name = button.getAttribute('data-ai-card-name'); api = window.fiveTerreGoAI; toggleChat(false); window.setTimeout(function(){ if (kind === 'poi' && api && typeof api.focusPOI === 'function') api.focusPOI(name); if (kind === 'trail' && api && typeof api.focusTrail === 'function') api.focusTrail(name); }, 80); });
-}());
-</script>
-
 </body>
 </html>
