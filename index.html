@@ -992,6 +992,50 @@
       inset: 0;
       background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.22));
     }
+    .site-guide-audio-btn {
+      position: absolute;
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(0,0,0,.18);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .site-guide-audio-btn:active {
+      transform: scale(.96);
+    }
+    .site-guide-audio-btn.is-speaking {
+      background: rgba(255,255,255,.94);
+      color: #111;
+      border-color: rgba(255,255,255,.74);
+    }
+    .site-guide-featured-audio {
+      top: 12px;
+      right: 12px;
+      width: 40px;
+      height: 40px;
+      font-size: 17px;
+      line-height: 1;
+      font-weight: 950;
+    }
+    .site-guide-mini-audio {
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 950;
+    }
     .site-guide-rail {
       display: flex;
       gap: 10px;
@@ -1207,6 +1251,244 @@
       }
       .site-guide-mini-title {
         font-size: 16px;
+      }
+    }
+    body.site-article-reader-open {
+      overflow: hidden !important;
+      touch-action: none;
+    }
+    body.site-article-reader-open .site-view-panel,
+    body.site-article-reader-open .top-bar,
+    body.site-article-reader-open #map,
+    body.site-article-reader-open #ftg-global-actionbar-host {
+      pointer-events: none !important;
+    }
+    #site-article-reader {
+      position: fixed;
+      inset: 0;
+      z-index: 5200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: calc(18px + env(safe-area-inset-top)) 12px calc(18px + env(safe-area-inset-bottom));
+      background: rgba(4,10,18,.22);
+      backdrop-filter: blur(8px) saturate(1.02);
+      -webkit-backdrop-filter: blur(8px) saturate(1.02);
+      overscroll-behavior: contain;
+    }
+    #site-article-reader.open {
+      display: flex;
+    }
+    .site-article-reader-sheet {
+      position: relative;
+      width: min(760px, 100%);
+      max-width: 100%;
+      height: min(88dvh, 920px);
+      max-height: min(88dvh, 920px);
+      display: flex;
+      flex-direction: column;
+      border-radius: 34px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(12,34,51,.96) 0%, rgba(8,23,34,.97) 26%, rgba(7,20,36,.98) 100%);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 28px 80px rgba(0,0,0,.34);
+      backdrop-filter: blur(20px) saturate(1.08);
+      -webkit-backdrop-filter: blur(20px) saturate(1.08);
+      pointer-events: auto;
+    }
+    #site-article-reader-close {
+      position: absolute;
+      top: calc(14px + env(safe-area-inset-top));
+      right: 14px;
+      z-index: 3;
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      font-size: 28px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      cursor: pointer;
+    }
+    .site-article-reader-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: calc(74px + env(safe-area-inset-top)) 18px calc(34px + env(safe-area-inset-bottom));
+    }
+    .site-article-reader-scroll::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+    .site-article-reader-head {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .site-article-reader-topline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .site-article-reader-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.86);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .site-article-reader-title {
+      margin: 0;
+      font-size: clamp(32px, 9.4vw, 48px);
+      line-height: .92;
+      letter-spacing: -.072em;
+      font-weight: 950;
+      text-wrap: balance;
+    }
+    .site-article-reader-cover {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 28px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 42px rgba(0,0,0,.18);
+    }
+    .site-article-reader-cover img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .site-article-reader-excerpt {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.5;
+      color: rgba(255,255,255,.74);
+    }
+    .site-article-reader-body {
+      display: grid;
+      gap: 15px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255,255,255,.88);
+    }
+    .site-article-reader-body h2,
+    .site-article-reader-body h3,
+    .site-article-reader-body h4 {
+      margin: 10px 0 0;
+      font-size: 22px;
+      line-height: 1.04;
+      letter-spacing: -.045em;
+      font-weight: 950;
+      color: #fff;
+    }
+    .site-article-reader-body p,
+    .site-article-reader-body ul,
+    .site-article-reader-body ol,
+    .site-article-reader-body blockquote {
+      margin: 0;
+    }
+    .site-article-reader-body ul,
+    .site-article-reader-body ol {
+      padding-left: 20px;
+      display: grid;
+      gap: 8px;
+    }
+    .site-article-reader-body blockquote {
+      padding: 14px 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.78);
+    }
+    .site-article-reader-loading {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 850;
+      color: rgba(255,255,255,.68);
+    }
+    .site-article-reader-fallback {
+      min-height: 200px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+    .site-article-reader-open-link {
+      width: fit-content;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 15px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color: #111;
+      text-decoration: none;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 950;
+      box-shadow: 0 14px 30px rgba(0,0,0,.16);
+    }
+    @media (max-width: 380px) {
+      #site-article-reader {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      }
+      .site-article-reader-sheet {
+        width: 100%;
+        height: min(90dvh, 100%);
+        max-height: min(90dvh, 100%);
+        border-radius: 28px;
+      }
+      #site-article-reader-close {
+        top: calc(12px + env(safe-area-inset-top));
+        right: 12px;
+        width: 40px;
+        height: 40px;
+        font-size: 26px;
+      }
+      .site-article-reader-scroll {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: calc(30px + env(safe-area-inset-bottom));
+      }
+      .site-article-reader-title {
+        font-size: clamp(30px, 9.6vw, 42px);
+      }
+      .site-article-reader-cover {
+        border-radius: 24px;
+      }
+      .site-article-reader-body {
+        font-size: 15px;
+        line-height: 1.64;
       }
     }
     #site-stories-section .site-feature-title,
@@ -2276,6 +2558,15 @@
   </main>
 </div>
 
+<div id="site-article-reader" aria-hidden="true">
+  <div class="site-article-reader-sheet" role="dialog" aria-modal="true" aria-labelledby="site-article-reader-title">
+    <button id="site-article-reader-close" type="button" aria-label="Close article">×</button>
+    <div class="site-article-reader-scroll">
+      <div id="site-article-reader-content"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 window.FTG_ACTIONBAR_CONFIG = {
   activePage: 'home',
@@ -2377,6 +2668,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   var currentMapFilter = 'all';
   var currentSiteGuideFilter = 'all';
   var currentSiteGuideSearch = '';
+  var siteArticleSpeechState = { articleId: '', utterance: null };
   var WEATHER_CONFIG = {
     label: 'Cinque Terre',
     latitude: 44.1275,
@@ -2508,6 +2800,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       return '<article class="site-weather-hour ' + (item.isNow ? 'is-now' : '') + '"><span class="site-weather-hour-time">' + escapeHTML(item.isNow ? getUILabel('now', 'Ora') : item.time) + '</span><span class="site-weather-hour-icon">' + escapeHTML(getWeatherEmoji(item.code)) + '</span><span class="site-weather-hour-temp">' + escapeHTML(formatWeatherValue(item.temp, '°')) + '</span><span class="site-weather-hour-rain">' + escapeHTML(formatWeatherValue(item.rain, '%')) + '</span><span class="site-weather-hour-wind">' + escapeHTML(formatWeatherValue(item.wind, ' km/h')) + '</span></article>';
     }).join('') + '</div></div>';
     bindGuideRailEffects();
+    setGuideAudioButtonsState();
   }
 
   function renderHeroWeatherQuickCard() {
@@ -2609,9 +2902,216 @@ window.FTG_ACTIONBAR_CONFIG = {
       category: row.category || '',
       excerpt: row.excerpt || '',
       tags: row.tags || '',
+      content: row.content || row.body || row.article_body || row.full_text || row.text || row.html || row.markdown || '',
+      updated_at: row.updated_at || row.published_at || row.created_at || '',
+      created_at: row.created_at || row.published_at || '',
       guideGroup: getGuideArticleGroup(row),
       featured: !!(row.is_featured || row.featured || row.priority === 'high')
     };
+  }
+
+  function getSiteArticleIdentifier(article) {
+    return String(article && (article.id || article.slug || article.title) || '');
+  }
+
+  function findSiteArticle(articleId) {
+    articleId = String(articleId || '');
+    return siteArticles.find(function(article) {
+      return getSiteArticleIdentifier(article) === articleId;
+    }) || null;
+  }
+
+  function formatGuideArticleDate(value) {
+    var date = new Date(String(value || ''));
+    if (!Number.isFinite(date.getTime())) return '';
+    return new Intl.DateTimeFormat(getCurrentUILocale(), { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+  }
+
+  function formatSiteArticleBodyHTML(raw) {
+    var content = String(raw || '').trim();
+    var blocks;
+    if (!content) return '';
+    if (content.indexOf('<p') !== -1 || content.indexOf('<h2') !== -1 || content.indexOf('<h3') !== -1 || content.indexOf('<ul') !== -1 || content.indexOf('<ol') !== -1 || content.indexOf('<blockquote') !== -1) return content;
+    blocks = content.split('\r').join('').split('\n\n');
+    return blocks.map(function(block) {
+      var trimmed = String(block || '').trim();
+      var lines;
+      var headingText;
+      if (!trimmed) return '';
+      if (trimmed.charAt(0) === '#') {
+        headingText = trimmed;
+        while (headingText.charAt(0) === '#') headingText = headingText.slice(1);
+        return '<h3>' + escapeHTML(headingText.trim()) + '</h3>';
+      }
+      if (trimmed.indexOf('- ') === 0 || trimmed.indexOf('• ') === 0) {
+        lines = trimmed.split('\n').map(function(line) {
+          return String(line || '').trim();
+        }).filter(Boolean);
+        return '<ul>' + lines.map(function(line) {
+          var text = line.indexOf('- ') === 0 || line.indexOf('• ') === 0 ? line.slice(2).trim() : line;
+          return '<li>' + escapeHTML(text) + '</li>';
+        }).join('') + '</ul>';
+      }
+      return '<p>' + escapeHTML(trimmed).split('\n').join('<br>') + '</p>';
+    }).join('');
+  }
+
+  async function ensureSiteArticleContent(article) {
+    var response;
+    var refreshed;
+    if (!article) return null;
+    if (String(article.content || '').trim()) return article;
+    if (!supabaseClient) return article;
+    try {
+      if (article.id) response = await supabaseClient.from('blog_posts').select('*').eq('id', article.id).maybeSingle();
+      else if (article.slug) response = await supabaseClient.from('blog_posts').select('*').eq('slug', article.slug).maybeSingle();
+      refreshed = response && response.data ? normalizeBlogPost(response.data) : null;
+      if (!refreshed) return article;
+      siteArticles = siteArticles.map(function(item) {
+        return getSiteArticleIdentifier(item) === getSiteArticleIdentifier(article) ? refreshed : item;
+      });
+      return refreshed;
+    } catch (error) {
+      return article;
+    }
+  }
+
+  function renderSiteArticleReader(article, isLoading) {
+    var content = document.getElementById('site-article-reader-content');
+    var articleBody;
+    var dateLabel;
+    if (!content || !article) return;
+    if (isLoading) {
+      content.innerHTML = '<div class="site-article-reader-loading">Loading article…</div>';
+      return;
+    }
+    articleBody = formatSiteArticleBodyHTML(article.content || article.excerpt || '');
+    dateLabel = formatGuideArticleDate(article.updated_at || article.created_at || '');
+    content.innerHTML = '<div class="site-article-reader-head"><div class="site-article-reader-topline"><span class="site-article-reader-pill">' + escapeHTML(article.category || article.meta || 'Guide') + '</span>' + (dateLabel ? '<span class="site-article-reader-pill">' + escapeHTML(dateLabel) + '</span>' : '') + '</div><h2 id="site-article-reader-title" class="site-article-reader-title">' + escapeHTML(article.title || 'Article') + '</h2>' + (article.image ? '<div class="site-article-reader-cover"><img src="' + escapeHTML(article.image) + '" alt="' + escapeHTML(article.title || 'Article') + '" loading="lazy" decoding="async"></div>' : '') + (article.excerpt ? '<p class="site-article-reader-excerpt">' + escapeHTML(article.excerpt) + '</p>' : '') + '</div>' + (articleBody ? '<div class="site-article-reader-body">' + articleBody + '</div>' : '<div class="site-article-reader-fallback"><p class="site-article-reader-excerpt">Open the full article to read the complete text.</p><a class="site-article-reader-open-link" href="' + escapeHTML(article.url || 'blog.html') + '">Open full article</a></div>');
+  }
+
+  async function openSiteArticleReader(articleId) {
+    var modal = document.getElementById('site-article-reader');
+    var article = findSiteArticle(articleId);
+    var scroll;
+    if (!modal || !article) return;
+    document.body.classList.add('site-article-reader-open');
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    scroll = modal.querySelector('.site-article-reader-scroll');
+    if (scroll) scroll.scrollTop = 0;
+    renderSiteArticleReader(article, true);
+    article = await ensureSiteArticleContent(article);
+    renderSiteArticleReader(article, false);
+    if (scroll) scroll.scrollTop = 0;
+  }
+
+  function closeSiteArticleReader() {
+    var modal = document.getElementById('site-article-reader');
+    var content = document.getElementById('site-article-reader-content');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('site-article-reader-open');
+    if (content) content.innerHTML = '';
+  }
+
+  function getGuideAudioAriaLabel() {
+    var current = getCurrentUILanguage();
+    if (current === 'it') return 'Ascolta articolo';
+    if (current === 'fr') return 'Écouter l’article';
+    if (current === 'de') return 'Artikel anhören';
+    return 'Listen to article';
+  }
+
+  function getGuideAudioLocale() {
+    var current = getCurrentUILanguage();
+    if (current === 'it') return 'it-IT';
+    if (current === 'fr') return 'fr-FR';
+    if (current === 'de') return 'de-DE';
+    if (current === 'ru') return 'ru-RU';
+    if (current === 'zh') return 'zh-CN';
+    if (current === 'ar') return 'ar-SA';
+    return 'en-GB';
+  }
+
+  function stripArticleSpeechText(value) {
+    var box = document.createElement('div');
+    var text;
+    box.innerHTML = String(value || '');
+    text = String(box.textContent || box.innerText || value || '');
+    text = text.split('\r').join(' ').split('\n').join(' ').split('\t').join(' ');
+    text = text.replace(/[\#\*`•]+/g, ' ');
+    while (text.indexOf('  ') !== -1) text = text.split('  ').join(' ');
+    return text.trim();
+  }
+
+  function getSiteArticleSpeechText(article) {
+    var parts = [article && article.title || '', article && article.excerpt || '', article && article.content || ''];
+    var text = stripArticleSpeechText(parts.join(' '));
+    if (text.length > 2600) text = text.slice(0, 2600) + '…';
+    return text;
+  }
+
+  function setGuideAudioButtonsState() {
+    document.querySelectorAll('[data-site-article-audio]').forEach(function(button) {
+      var isSpeaking = siteArticleSpeechState.articleId && button.getAttribute('data-site-article-audio') === siteArticleSpeechState.articleId;
+      button.classList.toggle('is-speaking', !!isSpeaking);
+      button.textContent = isSpeaking ? '❚❚' : '▶';
+    });
+  }
+
+  function stopSiteArticleSpeech() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    siteArticleSpeechState.articleId = '';
+    siteArticleSpeechState.utterance = null;
+    setGuideAudioButtonsState();
+  }
+
+  async function playSiteArticleAudio(articleId) {
+    var article = findSiteArticle(articleId);
+    var utterance;
+    var locale;
+    var voices;
+    var voice;
+    var text;
+    if (!article) return;
+    if (!('speechSynthesis' in window) || typeof window.SpeechSynthesisUtterance === 'undefined') return;
+    if (siteArticleSpeechState.articleId === articleId) {
+      stopSiteArticleSpeech();
+      return;
+    }
+    article = await ensureSiteArticleContent(article);
+    text = getSiteArticleSpeechText(article);
+    if (!text) return;
+    stopSiteArticleSpeech();
+    locale = getGuideAudioLocale();
+    utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = locale;
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+    voice = voices.find(function(item) {
+      return item && item.lang && (item.lang === locale || item.lang.indexOf(locale.split('-')[0]) === 0);
+    });
+    if (voice) utterance.voice = voice;
+    utterance.onend = function() {
+      if (siteArticleSpeechState.utterance !== utterance) return;
+      siteArticleSpeechState.articleId = '';
+      siteArticleSpeechState.utterance = null;
+      setGuideAudioButtonsState();
+    };
+    utterance.onerror = function() {
+      if (siteArticleSpeechState.utterance !== utterance) return;
+      siteArticleSpeechState.articleId = '';
+      siteArticleSpeechState.utterance = null;
+      setGuideAudioButtonsState();
+    };
+    siteArticleSpeechState.articleId = articleId;
+    siteArticleSpeechState.utterance = utterance;
+    setGuideAudioButtonsState();
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
   }
 
   function getGuideAllLabel() {
@@ -2783,14 +3283,14 @@ window.FTG_ACTIONBAR_CONFIG = {
       container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
         return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
       }).join('') + '</div><div class="site-guide-stage is-search-mode"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
-        return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '"><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
+        return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
       }).join('') + '</div></div>';
       return;
     }
     container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
       return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
-    }).join('') + '</div><div class="site-guide-stage"><a class="site-guide-featured" href="' + escapeHTML(featured.url) + '"><div class="site-guide-featured-content"><span class="site-guide-featured-badge">' + escapeHTML(featured.category || getGuideFilterLabel(currentSiteGuideFilter)) + '</span><div><h4 class="site-guide-featured-title">' + escapeHTML(featured.title) + '</h4><p class="site-guide-featured-text">' + escapeHTML(featured.excerpt || 'Apri l’articolo per leggere la guida completa.') + '</p></div><div class="site-guide-featured-meta"><span>' + escapeHTML(featured.meta || 'Guida') + '</span><span>Open article</span></div></div><div class="site-guide-featured-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(featured)) + "'" + ')"></div></a><div class="site-guide-rail site-guide-rail-default">' + railItems.map(function(article) {
-      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '"><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
+    }).join('') + '</div><div class="site-guide-stage"><a class="site-guide-featured" href="' + escapeHTML(featured.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(featured)) + '"><span class="site-guide-audio-btn site-guide-featured-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(featured)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-featured-content"><span class="site-guide-featured-badge">' + escapeHTML(featured.category || getGuideFilterLabel(currentSiteGuideFilter)) + '</span><div><h4 class="site-guide-featured-title">' + escapeHTML(featured.title) + '</h4><p class="site-guide-featured-text">' + escapeHTML(featured.excerpt || 'Apri l’articolo per leggere la guida completa.') + '</p></div><div class="site-guide-featured-meta"><span>' + escapeHTML(featured.meta || 'Guida') + '</span><span>Open article</span></div></div><div class="site-guide-featured-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(featured)) + "'" + ')"></div></a><div class="site-guide-rail site-guide-rail-default">' + railItems.map(function(article) {
+      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
     }).join('') + '</div></div>';
     bindGuideRailEffects();
   }
@@ -3337,6 +3837,7 @@ window.FTG_ACTIONBAR_CONFIG = {
 
     window.addEventListener('wheel', function(event) {
       var deltaY;
+      if (document.body.classList.contains('site-article-reader-open')) return;
       var context = getGestureContext(event.target);
       deltaY = Number(event.deltaY || 0);
       if (context && context.kind === 'form') return;
@@ -3370,6 +3871,7 @@ window.FTG_ACTIONBAR_CONFIG = {
 
     window.addEventListener('touchmove', function(event) {
       var touch;
+      if (document.body.classList.contains('site-article-reader-open')) return;
       var deltaY;
       var deltaX;
       if (!touchTracking || snapLock) return;
@@ -3579,11 +4081,15 @@ window.FTG_ACTIONBAR_CONFIG = {
 
   function setupInteractions() {
     var guideSearchInput = document.getElementById('site-guide-search-input');
+    var readerClose = document.getElementById('site-article-reader-close');
+    var readerModal = document.getElementById('site-article-reader');
     var locationSelect = document.getElementById('site-poi-location-filter');
     var trailFrom = document.getElementById('site-trail-from-filter');
     var trailDifficulty = document.getElementById('site-trail-difficulty-filter');
     document.addEventListener('click', function(event) {
       var guideFilter = event.target.closest('[data-site-guide-filter]');
+      var articleAudio = event.target.closest('[data-site-article-audio]');
+      var articleCard = event.target.closest('[data-site-article-id]');
       var weatherDay = event.target.closest('[data-weather-day]');
       var filterBtn = event.target.closest('[data-site-poi-filter]');
       var officialCard = event.target.closest('.site-official-item');
@@ -3592,6 +4098,17 @@ window.FTG_ACTIONBAR_CONFIG = {
       if (guideFilter) {
         currentSiteGuideFilter = guideFilter.getAttribute('data-site-guide-filter') || 'start';
         renderStoryPreviewSection();
+        return;
+      }
+      if (articleAudio) {
+        event.preventDefault();
+        event.stopPropagation();
+        playSiteArticleAudio(articleAudio.getAttribute('data-site-article-audio'));
+        return;
+      }
+      if (articleCard) {
+        event.preventDefault();
+        openSiteArticleReader(articleCard.getAttribute('data-site-article-id'));
         return;
       }
       if (weatherDay) {
@@ -3627,6 +4144,24 @@ window.FTG_ACTIONBAR_CONFIG = {
     if (guideSearchInput) guideSearchInput.addEventListener('input', function() {
       currentSiteGuideSearch = guideSearchInput.value || '';
       renderStoryPreviewSection();
+    });
+    if (readerClose) readerClose.addEventListener('click', function() {
+      closeSiteArticleReader();
+    });
+    if (readerModal) readerModal.addEventListener('click', function(event) {
+      if (event.target === readerModal) closeSiteArticleReader();
+    });
+    document.addEventListener('keydown', function(event) {
+      var audioTrigger = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-site-article-audio') : '';
+      if (event.key === 'Escape') {
+        closeSiteArticleReader();
+        stopSiteArticleSpeech();
+        return;
+      }
+      if (audioTrigger && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        playSiteArticleAudio(audioTrigger);
+      }
     });
     if (locationSelect) locationSelect.addEventListener('change', function() { currentSitePOILocationFilter = locationSelect.value || 'all'; renderSitePOISection(); });
     if (trailFrom) {
