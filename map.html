@@ -251,9 +251,9 @@
       transition: opacity .22s ease, transform .22s ease, filter .22s ease;
     }
     .custom-poi.is-dimmed {
-      opacity: .28;
-      transform: scale(.86);
-      filter: saturate(.7);
+      opacity: 1;
+      transform: scale(.82);
+      filter: saturate(.82);
     }
     .custom-poi.is-selected {
       opacity: 1;
@@ -281,9 +281,9 @@
     }
     .custom-trail-start.is-dimmed,
     .moving-ferry-icon.is-dimmed {
-      opacity: .24;
-      transform: scale(.84);
-      filter: saturate(.65);
+      opacity: 1;
+      transform: scale(.82);
+      filter: saturate(.82);
     }
     .custom-trail-start.is-selected,
     .moving-ferry-icon.is-selected {
@@ -445,6 +445,15 @@
       letter-spacing: .08em;
       text-transform: uppercase;
       color: rgba(255,255,255,.72);
+    }
+    .bottom-rail-discover {
+      margin-top: 6px;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.96);
     }
     .bottom-rail-title {
       font-size: 16px;
@@ -1362,7 +1371,25 @@
   }
   function updateFerryVisibilityForFilter() { var showFerries = currentMapFilter === 'all' || currentMapFilter === 'ferry'; if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
   function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; document.querySelectorAll('#map-filter-bar .mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.getAttribute('data-map-filter') === currentMapFilter); }); updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); }
-  function getCurrentUILocale() { return 'en-GB'; }
+  function getSelectedLanguageCode() {
+    var htmlLang = document.documentElement && document.documentElement.lang ? String(document.documentElement.lang).trim().toLowerCase() : '';
+    var stored = '';
+    try {
+      stored = String(localStorage.getItem('selectedLanguage') || localStorage.getItem('ftg_language') || localStorage.getItem('language') || '').trim().toLowerCase();
+    } catch (error) {}
+    return stored || htmlLang || String(navigator.language || 'en').trim().toLowerCase();
+  }
+  function getDiscoverLabel() {
+    var lang = getSelectedLanguageCode();
+    if (lang.indexOf('it') === 0) return 'Scopri';
+    if (lang.indexOf('fr') === 0) return 'Découvrir';
+    if (lang.indexOf('es') === 0) return 'Descubre';
+    if (lang.indexOf('de') === 0) return 'Entdecken';
+    if (lang.indexOf('pt') === 0) return 'Descobrir';
+    if (lang.indexOf('sw') === 0) return 'Gundua';
+    return 'Discover';
+  }
+  function getCurrentUILocale() { return getSelectedLanguageCode() || 'en-GB'; }
   function formatWeatherDate(value) { var date = new Date(String(value || '') + 'T12:00:00'); if (!Number.isFinite(date.getTime())) return String(value || ''); return new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short', day: '2-digit', month: 'short' }).format(date); }
   function formatWeatherValue(value, suffix) { if (value === undefined || value === null || value === '') return '—'; if (typeof value === 'number') return String(Math.round(value * 10) / 10) + (suffix || ''); return String(value) + (suffix || ''); }
   function getWeatherEmoji(code) { code = Number(code); if (code === 0) return '☀️'; if (code === 1) return '🌤️'; if (code === 2) return '⛅'; if (code === 3) return '☁️'; if ([45,48].indexOf(code) !== -1) return '🌫️'; if ([51,53,55,56,57].indexOf(code) !== -1) return '🌦️'; if ([61,63,65,66,67,80,81,82].indexOf(code) !== -1) return '🌧️'; if ([71,73,75,77,85,86].indexOf(code) !== -1) return '❄️'; if ([95,96,99].indexOf(code) !== -1) return '⛈️'; return '🌡️'; }
@@ -1398,6 +1425,20 @@
   function getRailSearchQuery() {
     return searchInput ? String(searchInput.value || '').trim() : '';
   }
+  function railTypeMatchesSearchType(type) {
+    var normalized = normalizePOIType(type);
+    if (searchTypeFilter === 'all') return true;
+    if (searchTypeFilter === 'beach') return normalized === 'spiaggia' || normalized === 'beach';
+    if (searchTypeFilter === 'food') return normalized === 'ristorante' || normalized === 'restaurant' || normalized === 'bar' || normalized === 'food';
+    if (searchTypeFilter === 'viewpoint') return normalized === 'punto panoramico' || normalized === 'viewpoint';
+    if (searchTypeFilter === 'church') return normalized === 'chiesa' || normalized === 'church';
+    if (searchTypeFilter === 'monument') return normalized === 'monumento' || normalized === 'monument';
+    if (searchTypeFilter === 'station') return normalized === 'stazione' || normalized === 'station';
+    if (searchTypeFilter === 'ferry') return normalized === 'ferry';
+    if (searchTypeFilter === 'curiosity') return normalized === 'curiosity';
+    if (searchTypeFilter === 'trail') return false;
+    return true;
+  }
   function isRailItemMatchingSearch(item, query) {
     var q = normalizeSearchText(query);
     var haystack;
@@ -1423,7 +1464,16 @@
   function getBottomRailGeneralItems() {
     var center = map ? [map.getCenter().lat, map.getCenter().lng] : places[2].coords;
     var query = getRailSearchQuery();
-    return FALLBACK_RAIL_POIS.slice().sort(function(a, b) {
+    var allowedFallbackTypes = {
+      castle: true,
+      church: true,
+      monument: true,
+      curiosity: true,
+      beach: true
+    };
+    return FALLBACK_RAIL_POIS.slice().filter(function(item) {
+      return allowedFallbackTypes[normalizePOIType(item && item.type)];
+    }).sort(function(a, b) {
       return distanceMeters(center, a.coords) - distanceMeters(center, b.coords);
     }).map(function(item) {
       return {
@@ -1440,24 +1490,22 @@
       };
     }).filter(function(item) {
       if (currentMapFilter !== 'all' && !isPOIMatchFilter(item.poi, currentMapFilter)) return false;
+      if (!railTypeMatchesSearchType(item.poi && item.poi.type)) return false;
       return isRailItemMatchingSearch(item, query);
     }).slice(0, 10);
   }
   function getBottomRailVillageLabel() {
-    var center;
-    var closest;
     var minZoomForVillageLabel = 13.4;
-    var maxCenterDistance = 420;
     if (!map || !bottomRailVillageTitle) return '';
-    if (map.getZoom() < minZoomForVillageLabel) return '';
-    center = map.getCenter();
-    closest = places.map(function(place) {
+    if (map.getZoom() < minZoomForVillageLabel) return getDiscoverLabel();
+    var center = map.getCenter();
+    var closest = places.map(function(place) {
       return { place: place, distance: distanceMeters([center.lat, center.lng], place.coords) };
     }).sort(function(a, b) {
       return a.distance - b.distance;
     })[0];
     if (!closest || !closest.place) return '';
-    return closest.distance <= maxCenterDistance ? closest.place.name : '';
+    return closest.distance <= 420 ? closest.place.name : '';
   }
   function getBottomRailViewportItems() {
     var bounds = map ? map.getBounds() : null;
@@ -1487,7 +1535,7 @@
       });
     } else {
       items = poiMarkers.filter(function(entry) {
-        return entry && entry.poi && isValidCoords(entry.poi.coords) && bounds.contains(entry.poi.coords) && isPOIMatchFilter(entry.poi, currentMapFilter);
+        return entry && entry.poi && isValidCoords(entry.poi.coords) && bounds.contains(entry.poi.coords) && isPOIMatchFilter(entry.poi, currentMapFilter) && railTypeMatchesSearchType(entry.poi.type);
       }).map(function(entry) {
         var poi = entry.poi;
         return {
@@ -1535,7 +1583,7 @@
     bottomRailTrack.innerHTML = items.map(function(item) {
       var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
       var badge = item.badge ? '<div class="bottom-rail-badge">' + escapeHTML(item.badge) + '</div>' : '';
-      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div></div></button>';
+      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-discover">' + escapeHTML(getDiscoverLabel()) + '</div></div></button>';
     }).join('');
   }
   function handleBottomRailClick(event) {
@@ -1926,6 +1974,7 @@
           searchTypeFilter = button.getAttribute('data-search-type') || 'all';
           searchTypeButtons.forEach(function (item) { item.classList.toggle('is-active', item === button); });
           renderSearchSuggestions(searchInput.value);
+          renderBottomRailCards();
           if (searchFitTimer) window.clearTimeout(searchFitTimer);
           searchFitTimer = window.setTimeout(function () {
             fitMapToSearchResults(searchInput.value);
@@ -1934,6 +1983,7 @@
       });
       searchInput.addEventListener('input', function () {
         renderSearchSuggestions(searchInput.value);
+        renderBottomRailCards();
         if (searchFitTimer) window.clearTimeout(searchFitTimer);
         searchFitTimer = window.setTimeout(function () {
           fitMapToSearchResults(searchInput.value);
