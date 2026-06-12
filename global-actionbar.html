@@ -43,31 +43,35 @@
     transform: scale(.96);
   }
   .ftg-fab.open {
-    background: rgba(255,255,255,.92);
-    color: #111;
-    border-color: rgba(255,255,255,.72);
+    background: rgba(8,12,16,.88);
+    color: #fff;
+    border-color: rgba(255,255,255,.18);
   }
 
   .ftg-more-fab {
+    width: 52px;
+    height: 52px;
     top: var(--ftg-fab-top);
     right: var(--ftg-fab-right);
     z-index: 82;
     isolation: isolate;
-    background: rgba(255,255,255,.94);
-    color: #111;
-    border-color: rgba(255,255,255,.78);
-    box-shadow: 0 18px 44px rgba(0,0,0,.22);
+    background: rgba(8,12,16,.76);
+    color: #fff;
+    border-color: rgba(255,255,255,.16);
+    box-shadow: 0 20px 54px rgba(0,0,0,.28);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
   }
 
   .ftg-more-icon {
     position: relative;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
   .ftg-more-icon span {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 999px;
     background: currentColor;
     transition:
@@ -96,9 +100,9 @@
   }
   .ftg-more-fab.open .ftg-more-icon span:nth-child(1),
   .ftg-more-fab.open .ftg-more-icon span:nth-child(4) {
-    width: 16px;
+    width: 14px;
     height: 3px;
-    top: 9px;
+    top: 8px;
     left: 3px;
     border-radius: 999px;
   }
@@ -112,8 +116,8 @@
   .ftg-more-fab.open .ftg-more-icon span:nth-child(3) {
     opacity: 0;
     transform: scale(.2);
-    top: 9px;
-    left: 9px;
+    top: 8px;
+    left: 8px;
   }
 
   .ftg-ai-fab {
@@ -178,17 +182,8 @@
     pointer-events: none;
   }
   .ftg-more-panel::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 76px;
-    height: 76px;
-    border-radius: 999px;
-    background: var(--ftg-surface-strong);
-    border: 1px solid var(--ftg-border);
-    box-shadow: 0 18px 44px rgba(0,0,0,.16);
-    pointer-events: none;
+    content: none;
+    display: none;
   }
 
   .ftg-more-head {
