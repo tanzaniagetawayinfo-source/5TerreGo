@@ -1297,7 +1297,7 @@
     var bounds = map ? map.getBounds() : null;
     var center = map ? [map.getCenter().lat, map.getCenter().lng] : null;
     var items = [];
-    var minZoomForSpecificCards = 12.6;
+    var minZoomForSpecificCards = 10.9;
     if (!bounds || !center || !map) return items;
     if (map.getZoom() < minZoomForSpecificCards) return items;
     if (currentMapFilter === 'trails') {
@@ -1329,7 +1329,19 @@
           title: poi.name,
           kicker: poi.type || 'POI',
           meta: poi.description || '',
-          image: getPOIImag
+          image: getPOIImages(poi)[0] || '',
+          badge: getPOIDiscountValue(poi) > 0 ? ('-' + getPOIDiscountValue(poi) + '%') : '',
+          poi: poi,
+          distance: distanceMeters(center, poi.coords),
+          score: Number(poi.relevance || 0)
+        };
+      }).sort(function(a, b) {
+        if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+        return (a.distance || 0) - (b.distance || 0);
+      });
+    }
+    return items.slice(0, 10);
+  }
   function renderBottomRailCards() {
     var items;
     var villageLabel;
@@ -1347,13 +1359,13 @@
       }
     }
     if (!items.length) {
-      bottomRailTrack.innerHTML = '<div class="bottom-rail-card is-empty"><div>No places in this area yet.</div></div>';
+      bottomRailTrack.innerHTML = '<div class="bottom-rail-card is-empty"><div>Zoom in a bit to see places in this area.</div></div>';
       return;
     }
     bottomRailTrack.innerHTML = items.map(function(item) {
       var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
       var badge = item.badge ? '<div class="bottom-rail-badge">' + escapeHTML(item.badge) + '</div>' : '';
-      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + badge + '<div class="bottom-rail-body"><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div>' + (item.meta ? '<div class="bottom-rail-meta">' + escapeHTML(item.meta) + '</div>' : '') + '</div></button>';
+      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + badge + '<div class="bottom-rail-body"><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div>' + (item.meta ? '<div class="bottom-rail-meta">' + escapeHTML(item.meta) + '</div>' : '') + '</div><div class="bottom-rail-shadow-edge"></div></button>';
     }).join('');
   }
   function handleBottomRailClick(event) {
