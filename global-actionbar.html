@@ -3,45 +3,78 @@
 
 <style>
   :root {
-    --ftg-actionbar-side: 12px;
-    --ftg-actionbar-bottom: calc(12px + env(safe-area-inset-bottom));
-    --ftg-ai-bottom: calc(92px + env(safe-area-inset-bottom));
-    --ftg-surface: rgba(8,12,16,.74);
-    --ftg-surface-strong: rgba(8,12,16,.88);
+    --ftg-fab-right: max(12px, env(safe-area-inset-right));
+    --ftg-fab-top: calc(12px + env(safe-area-inset-top));
+    --ftg-fab-bottom: calc(12px + env(safe-area-inset-bottom));
+    --ftg-surface: rgba(8,12,16,.76);
+    --ftg-surface-strong: rgba(8,12,16,.9);
     --ftg-border: rgba(255,255,255,.12);
     --ftg-text: #fff;
-    --ftg-text-soft: rgba(255,255,255,.62);
+    --ftg-text-soft: rgba(255,255,255,.68);
+    --ftg-shadow: 0 20px 54px rgba(0,0,0,.28);
   }
 
   body.ftg-actionbar-enabled {
-    padding-bottom: calc(116px + env(safe-area-inset-bottom));
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
   }
 
-  .ftg-bottom-ai-stack {
+  .ftg-fab {
     position: fixed;
-    right: 18px;
-    bottom: var(--ftg-ai-bottom);
-    z-index: 60;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 50%;
+    background: var(--ftg-surface);
+    box-shadow: var(--ftg-shadow);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+    color: var(--ftg-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 80;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .22s ease, background .22s ease, border-color .22s ease;
+  }
+  .ftg-fab:active {
+    transform: scale(.96);
+  }
+  .ftg-fab.open {
+    background: rgba(255,255,255,.92);
+    color: #111;
+    border-color: rgba(255,255,255,.72);
   }
 
-  .ftg-ai-chat-btn {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.55);
-    background: rgba(255,255,255,.78);
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 18px 42px rgba(0,0,0,.24);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+  .ftg-more-fab {
+    top: var(--ftg-fab-top);
+    right: var(--ftg-fab-right);
   }
-  .ftg-ai-chat-btn:active { transform: scale(.95); }
-  .ftg-ai-chat-btn video {
+
+  .ftg-more-icon {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 3px;
+  }
+  .ftg-more-icon span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background: currentColor;
+  }
+
+  .ftg-ai-fab {
+    right: var(--ftg-fab-right);
+    bottom: var(--ftg-fab-bottom);
+    overflow: hidden;
+  }
+  .ftg-ai-fab video {
     width: 100%;
     height: 100%;
     display: block;
@@ -51,249 +84,199 @@
     pointer-events: none;
   }
 
-  .ftg-bottom-nav {
+  .ftg-more-overlay {
     position: fixed;
-    left: var(--ftg-actionbar-side);
-    right: var(--ftg-actionbar-side);
-    bottom: var(--ftg-actionbar-bottom);
-    z-index: 70;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
-    padding: 8px;
-    border-radius: 28px;
-    background: var(--ftg-surface);
-    border: 1px solid var(--ftg-border);
-    box-shadow: 0 20px 48px rgba(0,0,0,.28);
-    backdrop-filter: blur(22px) saturate(1.16);
-    -webkit-backdrop-filter: blur(22px) saturate(1.16);
-  }
-
-  .ftg-nav-item {
-    min-height: 58px;
-    border: 0;
-    border-radius: 22px;
+    inset: 0;
+    z-index: 74;
+    display: none;
     background: transparent;
-    color: var(--ftg-text-soft);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    font-size: 11px;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: -.01em;
-    cursor: pointer;
-    transition: background .22s ease, color .22s ease, transform .22s ease, opacity .22s ease;
   }
-  .ftg-nav-item:active { transform: scale(.96); }
-  .ftg-nav-item.active {
-    background: rgba(255,255,255,.12);
-    color: var(--ftg-text);
-  }
-  .ftg-nav-icon {
-    width: 24px;
-    height: 24px;
-    display: grid;
-    place-items: center;
-    font-size: 19px;
-    line-height: 1;
-  }
-  .ftg-nav-icon-grid {
-    width: 18px;
-    height: 18px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 3px;
-  }
-  .ftg-nav-icon-grid span {
+  .ftg-more-overlay.open {
     display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 3px;
-    background: currentColor;
   }
 
-  .ftg-profile-drawer {
+  .ftg-more-panel {
     position: fixed;
-    left: var(--ftg-actionbar-side);
-    right: var(--ftg-actionbar-side);
-    bottom: var(--ftg-actionbar-bottom);
-    z-index: 55;
-    border-radius: 30px 30px 28px 28px;
+    top: calc(var(--ftg-fab-top) + 66px);
+    right: var(--ftg-fab-right);
+    z-index: 79;
+    width: min(82vw, 330px);
+    max-width: 330px;
+    padding: 12px;
+    border-radius: 30px 24px 30px 30px;
     background: var(--ftg-surface-strong);
     border: 1px solid var(--ftg-border);
-    box-shadow: 0 22px 56px rgba(0,0,0,.28);
-    backdrop-filter: blur(24px) saturate(1.16);
-    -webkit-backdrop-filter: blur(24px) saturate(1.16);
-    padding: 14px 14px 0;
-    display: block;
+    box-shadow: 0 28px 80px rgba(0,0,0,.34);
+    backdrop-filter: blur(22px) saturate(1.14);
+    -webkit-backdrop-filter: blur(22px) saturate(1.14);
     opacity: 0;
-    transform: translateY(calc(100% - 82px));
-    transform-origin: bottom center;
-    transition: transform .34s cubic-bezier(.2,.9,.2,1), opacity .24s ease;
+    transform-origin: top right;
+    transform: translate(14px, -12px) scale(.84);
     pointer-events: none;
-    max-height: min(76vh, 640px);
+    transition: transform .34s cubic-bezier(.2,.9,.2,1), opacity .24s ease;
     overflow: hidden;
   }
-  .ftg-profile-drawer.open {
+  .ftg-more-panel.open {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(0, 0) scale(1);
     pointer-events: auto;
   }
-  .ftg-profile-drawer-handle {
-    display: none;
+  .ftg-more-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,0) 38%);
+    pointer-events: none;
   }
-  .ftg-profile-drawer-handle::before {
-    display: none;
-  }
-  .ftg-profile-drawer-scroll {
-    max-height: calc(min(76vh, 640px) - 18px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 2px;
-    padding-bottom: 92px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .ftg-profile-drawer-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
-  .ftg-profile-drawer-head {
+
+  .ftg-more-head {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ftg-more-identity {
+    min-width: 0;
+  }
+  .ftg-more-kicker {
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 950;
+    color: rgba(255,255,255,.54);
+  }
+  .ftg-more-title {
+    margin-top: 5px;
+    font-size: 18px;
+    line-height: .98;
+    letter-spacing: -.04em;
+    font-weight: 950;
     color: var(--ftg-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .ftg-profile-head-left {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .ftg-profile-primary-btn {
-    min-height: 40px;
-    padding: 0 14px;
+  .ftg-more-primary {
+    min-height: 38px;
+    padding: 0 12px;
     border-radius: 999px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.94);
     color: #111;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 950;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex: 0 0 auto;
   }
-  .ftg-profile-language-menu {
+
+  .ftg-more-language-row {
     position: relative;
-    display: inline-flex;
-  }
-  .ftg-profile-language-current {
-    width: 40px;
-    height: 40px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.16);
-    background: rgba(255,255,255,.10);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  .ftg-profile-language-list {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    display: none;
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px;
-    min-width: 112px;
-    border-radius: 18px;
-    background: rgba(8,12,16,.94);
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 16px 36px rgba(0,0,0,.24);
-  }
-  .ftg-profile-language-menu.open .ftg-profile-language-list {
-    display: flex;
-  }
-  
-  .ftg-profile-close {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 0;
-    background: rgba(255,255,255,.10);
-    color: var(--ftg-text);
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-    flex: 0 0 34px;
-  }
-  .ftg-profile-language-row {
+    z-index: 1;
     display: flex;
     gap: 8px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin-bottom: 14px;
     padding-bottom: 2px;
+    margin-bottom: 12px;
   }
-  .ftg-profile-language-row::-webkit-scrollbar { display: none; }
-  .ftg-profile-language-btn {
+  .ftg-more-language-row::-webkit-scrollbar {
+    display: none;
+  }
+  .ftg-more-language-btn {
     flex: 0 0 auto;
-    min-height: 38px;
-    padding: 8px 12px;
+    min-height: 34px;
+    padding: 7px 11px;
     border-radius: 999px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.08);
     color: rgba(255,255,255,.84);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 900;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .ftg-profile-language-btn.active {
+  .ftg-more-language-btn.active {
     background: rgba(255,255,255,.94);
     color: #111;
   }
-  
-  .ftg-profile-links {
+
+  .ftg-more-grid {
+    position: relative;
+    z-index: 1;
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
-  .ftg-profile-link {
-    width: 100%;
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 14px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,.10);
+  .ftg-more-item {
+    min-height: 72px;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 22px;
     background: rgba(255,255,255,.08);
     color: var(--ftg-text);
     text-decoration: none;
-    font-size: 14px;
-    font-weight: 850;
+    padding: 10px 11px;
+    display: grid;
+    align-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform .22s ease, background .22s ease, border-color .22s ease;
   }
-  .ftg-profile-link span:last-child {
-    color: rgba(255,255,255,.46);
+  .ftg-more-item:active {
+    transform: scale(.98);
+  }
+  .ftg-more-item.active {
+    background: rgba(255,255,255,.14);
+    border-color: rgba(255,255,255,.18);
+  }
+  .ftg-more-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .ftg-more-item-icon {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
     font-size: 18px;
     line-height: 1;
   }
-  .ftg-profile-legal {
+  .ftg-more-item-arrow {
+    color: rgba(255,255,255,.38);
+    font-size: 16px;
+    line-height: 1;
+  }
+  .ftg-more-item-label {
+    font-size: 13px;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    font-weight: 900;
+    text-align: left;
+    text-wrap: balance;
+  }
+
+  .ftg-more-footer {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 8px 12px;
     padding-top: 2px;
   }
-  .ftg-profile-legal a {
+  .ftg-more-footer a {
     color: rgba(255,255,255,.62);
     font-size: 12px;
     font-weight: 800;
@@ -301,24 +284,12 @@
     text-underline-offset: 3px;
   }
 
-  body.ftg-profile-drawer-open .ftg-bottom-nav {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    pointer-events: auto;
-    border-radius: 0 0 28px 28px;
-  }
-  body.ftg-profile-drawer-open .ftg-nav-item[data-profile-trigger] {
-    background: rgba(255,255,255,.12);
-    color: var(--ftg-text);
-  }
-
   .ftg-ai-chat {
     position: fixed;
-    left: 12px;
-    right: 12px;
-    top: calc(82px + env(safe-area-inset-top));
-    bottom: calc(100px + env(safe-area-inset-bottom));
+    left: 10px;
+    right: 10px;
+    top: calc(72px + env(safe-area-inset-top));
+    bottom: calc(74px + env(safe-area-inset-bottom));
     z-index: 100;
     display: none;
     flex-direction: column;
@@ -331,7 +302,9 @@
     -webkit-backdrop-filter: blur(22px);
     color: #111;
   }
-  .ftg-ai-chat.ai-open { display: flex; }
+  .ftg-ai-chat.ai-open {
+    display: flex;
+  }
   .ftg-ai-head {
     padding: 14px 14px 12px;
     border-bottom: 1px solid rgba(0,0,0,.07);
@@ -432,7 +405,9 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
-  .ftg-ai-suggestions::-webkit-scrollbar { display: none; }
+  .ftg-ai-suggestions::-webkit-scrollbar {
+    display: none;
+  }
   .ftg-ai-suggestion {
     flex: 0 0 auto;
     border: 0;
@@ -473,31 +448,23 @@
     cursor: pointer;
   }
 
-  body.ftg-ai-chat-active .ftg-bottom-nav,
-  body.ftg-ai-chat-active .ftg-bottom-ai-stack,
-  body.ftg-ai-chat-active .ftg-profile-drawer {
+  body.ftg-ai-chat-active .ftg-more-fab,
+  body.ftg-ai-chat-active .ftg-more-panel,
+  body.ftg-ai-chat-active .ftg-more-overlay,
+  body.ftg-ai-chat-active .ftg-ai-fab {
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
   }
 
   @media (min-width: 700px) {
-    .ftg-bottom-nav,
-    .ftg-ai-chat,
-    .ftg-bottom-ai-stack,
-    .ftg-profile-drawer {
-      max-width: 406px;
-      margin-left: auto;
-      margin-right: auto;
+    .ftg-more-panel,
+    .ftg-ai-chat {
+      max-width: 380px;
     }
-    .ftg-bottom-nav,
-    .ftg-ai-chat,
-    .ftg-profile-drawer {
-      left: max(12px, calc(50% - 203px));
-      right: max(12px, calc(50% - 203px));
-    }
-    .ftg-bottom-ai-stack {
-      right: max(18px, calc(50% - 185px));
+    .ftg-ai-chat {
+      left: max(10px, calc(50% - 190px));
+      right: max(10px, calc(50% - 190px));
     }
   }
 </style>
@@ -519,14 +486,15 @@
     var pages = config.pages || {
       map: { label: 'Mappa', emoji: '🗺️', href: 'map.html' },
       home: { label: 'Home', emoji: '🏠', href: '#home' },
-      guide: { label: 'Guide', emoji: '📖', href: '#guide' },
-      profile: { label: 'More', emoji: '', href: '#profile', drawer: true, iconType: 'grid' }
+      guide: { label: 'Guide', emoji: '📖', href: '#guide' }
     };
-    var profileLinks = config.profileLinks || [
-      { label: 'Mi piace', href: '#likes' },
-      { label: 'Le mie experience', href: '#experiences' },
-      { label: 'Modifica profilo', href: '#edit-profile' },
-      { label: 'Preferenze', href: '#preferences' }
+    var menuItems = config.menuItems || [
+      { id: 'map', label: pages.map && pages.map.label || 'Map', emoji: pages.map && pages.map.emoji || '🗺️', href: pages.map && pages.map.href || 'map.html' },
+      { id: 'home', label: pages.home && pages.home.label || 'Home', emoji: pages.home && pages.home.emoji || '🏠', href: pages.home && pages.home.href || '#home' },
+      { id: 'guide', label: pages.guide && pages.guide.label || 'Guide', emoji: pages.guide && pages.guide.emoji || '📖', href: pages.guide && pages.guide.href || '#guide' },
+      { id: 'likes', label: 'Mi piace', emoji: '❤️', href: '#likes' },
+      { id: 'experiences', label: 'Experience', emoji: '✨', href: '#experiences' },
+      { id: 'profile', label: 'Profilo', emoji: '👤', href: '#profile' }
     ];
     var legalLinks = config.legalLinks || [
       { label: 'Privacy', href: '#privacy' },
@@ -541,7 +509,7 @@
     var currentLanguage = config.language || (languages[0] && languages[0].code) || 'it';
     var basePath = typeof config.basePath === 'string' ? config.basePath.trim() : '';
     var root = document.getElementById('ftg-global-actionbar-root');
-    var pageKeys = ['map', 'home', 'guide', 'profile'];
+    var welcomed = false;
 
     if (!root) return;
     document.body.classList.add('ftg-actionbar-enabled');
@@ -560,55 +528,47 @@
       return '/' + value.replace(/^\/+/, '');
     }
 
-    function buildNavItem(key) {
-      var page = pages[key] || {};
-      var iconHTML = page.iconType === 'grid'
-        ? '<span class="ftg-nav-icon-grid"><span></span><span></span><span></span><span></span></span>'
-        : escapeHTML(page.emoji || '•');
-      return '<button class="ftg-nav-item' + (activePage === key ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(key) + '"' + (page.drawer ? ' data-profile-trigger="true"' : '') + '><span class="ftg-nav-icon">' + iconHTML + '</span><span>' + escapeHTML(page.label || key) + '</span></button>';
+    function getCurrentFlag() {
+      var current = languages.find(function(lang){ return lang.code === currentLanguage; }) || languages[0] || { label: '🇮🇹' };
+      return String(current.label || '🌐').split(' ')[0];
+    }
+
+    function buildMenuCard(item) {
+      var isActive = activePage === item.id;
+      return '<button class="ftg-more-item' + (isActive ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id || '') + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-more-item-top"><span class="ftg-more-item-icon">' + escapeHTML(item.emoji || '•') + '</span><span class="ftg-more-item-arrow">›</span></span><span class="ftg-more-item-label">' + escapeHTML(item.label || item.id || '') + '</span></button>';
     }
 
     root.innerHTML = '' +
-      '<div class="ftg-bottom-ai-stack">' +
-        '<button class="ftg-ai-chat-btn" id="ftg-ai-chat-btn" type="button" aria-label="Open AI Guide">' +
-          '<video id="ftg-ai-mascot-video" autoplay muted loop playsinline preload="auto">' +
-            '<source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm">' +
-            '<source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm">' +
-          '</video>' +
-        '</button>' +
-      '</div>' +
-      '<aside id="ftg-profile-drawer" class="ftg-profile-drawer" aria-hidden="true">' +
-        '<div id="ftg-profile-drawer-handle" class="ftg-profile-drawer-handle" aria-hidden="true"></div>' +
-        '<div class="ftg-profile-drawer-scroll">' +
-          '<' + 'div class="ftg-profile-drawer-head">' +
-            '<div class="ftg-profile-head-left">' +
-              '<button id="ftg-profile-primary-btn" class="ftg-profile-primary-btn" type="button">' + (isLoggedIn ? ('Hi, ' + escapeHTML(userName)) : 'Accedi') + '</button>' +
-              '<div id="ftg-profile-language-menu" class="ftg-profile-language-menu">' +
-                '<button id="ftg-profile-language-current" class="ftg-profile-language-current" type="button" aria-label="Selettore lingua">' + escapeHTML((languages.find(function(lang){ return lang.code === currentLanguage; }) || languages[0] || { label: '🇮🇹' }).label.split(' ')[0]) + '</button>' +
-                '<div class="ftg-profile-language-list">' +
-                  languages.map(function (lang) {
-                    return '<button class="ftg-profile-language-btn' + (lang.code === currentLanguage ? ' active' : '') + '" type="button" data-lang="' + escapeHTML(lang.code) + '"><span>' + escapeHTML(lang.label.split(' ')[0]) + '</span><span>' + escapeHTML(lang.label.split(' ').slice(1).join(' ')) + '</span></button>';
-                  }).join('') +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-            '<button id="ftg-profile-close" class="ftg-profile-close" type="button" aria-label="Chiudi area riservata">×</button>' +
+      '<button class="ftg-fab ftg-more-fab" id="ftg-more-fab" type="button" aria-label="Open menu">' +
+        '<span class="ftg-more-icon"><span></span><span></span><span></span><span></span></span>' +
+      '</button>' +
+      '<div class="ftg-more-overlay" id="ftg-more-overlay"></div>' +
+      '<aside class="ftg-more-panel" id="ftg-more-panel" aria-hidden="true">' +
+        '<div class="ftg-more-head">' +
+          '<div class="ftg-more-identity">' +
+            '<div class="ftg-more-kicker">More</div>' +
+            '<div class="ftg-more-title">' + escapeHTML(userName) + '</div>' +
           '</div>' +
-          '<div class="ftg-profile-links">' +
-            profileLinks.map(function (link) {
-              return '<a class="ftg-profile-link" href="' + escapeHTML(link.href || '#') + '"><span>' + escapeHTML(link.label || '') + '</span><span>›</span></a>';
-            }).join('') +
-          '</div>' +
-          '<div class="ftg-profile-legal">' +
-            legalLinks.map(function (link) {
-              return '<a href="' + escapeHTML(link.href || '#') + '">' + escapeHTML(link.label || '') + '</a>';
-            }).join('') +
-          '</div>' +
+          '<button class="ftg-more-primary" id="ftg-more-primary" type="button">' + (isLoggedIn ? 'Account' : 'Accedi') + '</button>' +
+        '</div>' +
+        '<div class="ftg-more-language-row" id="ftg-more-language-row">' +
+          languages.map(function (lang) {
+            return '<button class="ftg-more-language-btn' + (lang.code === currentLanguage ? ' active' : '') + '" type="button" data-lang="' + escapeHTML(lang.code) + '">' + escapeHTML(lang.label) + '</button>';
+          }).join('') +
+        '</div>' +
+        '<div class="ftg-more-grid">' + menuItems.map(buildMenuCard).join('') + '</div>' +
+        '<div class="ftg-more-footer">' +
+          legalLinks.map(function (link) {
+            return '<a href="' + escapeHTML(link.href || '#') + '">' + escapeHTML(link.label || '') + '</a>';
+          }).join('') +
         '</div>' +
       '</aside>' +
-      '<nav class="ftg-bottom-nav" aria-label="Global bottom actionbar">' +
-        pageKeys.map(buildNavItem).join('') +
-      '</nav>' +
+      '<button class="ftg-fab ftg-ai-fab" id="ftg-ai-chat-btn" type="button" aria-label="Open AI Guide">' +
+        '<video id="ftg-ai-mascot-video" autoplay muted loop playsinline preload="auto">' +
+          '<source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm">' +
+          '<source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm">' +
+        '</video>' +
+      '</button>' +
       '<div id="ftg-ai-chat" class="ftg-ai-chat" aria-hidden="true">' +
         '<div class="ftg-ai-head">' +
           '<div class="ftg-ai-head-left">' +
@@ -624,9 +584,9 @@
         '</div>' +
         '<div id="ftg-ai-messages" class="ftg-ai-messages"></div>' +
         '<div class="ftg-ai-suggestions">' +
-          '<button class="ftg-ai-suggestion" type="button">come organizziamo la barra globale?</button>' +
+          '<button class="ftg-ai-suggestion" type="button">come organizziamo il menu?</button>' +
           '<button class="ftg-ai-suggestion" type="button">quale pagina è attiva?</button>' +
-          '<button class="ftg-ai-suggestion" type="button">portiamola su tutto il sito</button>' +
+          '<button class="ftg-ai-suggestion" type="button">portiamolo su tutto il sito</button>' +
         '</div>' +
         '<div class="ftg-ai-input-row">' +
           '<input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask the guide..." autocomplete="off" />' +
@@ -634,14 +594,12 @@
         '</div>' +
       '</div>';
 
-    var navButtons = Array.prototype.slice.call(root.querySelectorAll('.ftg-nav-item'));
-    var profileDrawer = document.getElementById('ftg-profile-drawer');
-    var profileClose = document.getElementById('ftg-profile-close');
-    var profileHandle = document.getElementById('ftg-profile-drawer-handle');
-    var profilePrimaryBtn = document.getElementById('ftg-profile-primary-btn');
-    var profileLanguageMenu = document.getElementById('ftg-profile-language-menu');
-    var profileLanguageCurrent = document.getElementById('ftg-profile-language-current');
-    var languageButtons = Array.prototype.slice.call(root.querySelectorAll('.ftg-profile-language-btn'));
+    var moreFab = document.getElementById('ftg-more-fab');
+    var moreOverlay = document.getElementById('ftg-more-overlay');
+    var morePanel = document.getElementById('ftg-more-panel');
+    var morePrimary = document.getElementById('ftg-more-primary');
+    var menuButtons = Array.prototype.slice.call(root.querySelectorAll('[data-page-target]'));
+    var languageButtons = Array.prototype.slice.call(root.querySelectorAll('.ftg-more-language-btn'));
     var aiBtn = document.getElementById('ftg-ai-chat-btn');
     var aiChat = document.getElementById('ftg-ai-chat');
     var aiClose = document.getElementById('ftg-ai-close');
@@ -649,109 +607,46 @@
     var aiInput = document.getElementById('ftg-ai-input');
     var aiSend = document.getElementById('ftg-ai-send');
     var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll('.ftg-ai-suggestion'));
-    var welcomed = false;
 
-    function syncActiveButton(pageId) {
+    function syncActiveButtons(pageId) {
       activePage = pageId;
-      navButtons.forEach(function (button) {
+      menuButtons.forEach(function (button) {
         button.classList.toggle('active', button.getAttribute('data-page-target') === pageId);
       });
     }
 
-    function closeProfileDrawer() {
-      if (!profileDrawer) return;
-      profileDrawer.classList.remove('open');
-      profileDrawer.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('ftg-profile-drawer-open');
-      if (activePage !== 'profile') syncActiveButton(activePage);
+    function closeMorePanel() {
+      morePanel.classList.remove('open');
+      morePanel.setAttribute('aria-hidden', 'true');
+      moreOverlay.classList.remove('open');
+      moreFab.classList.remove('open');
+      document.body.classList.remove('ftg-more-open');
     }
 
-    function openProfileDrawer() {
-      if (!profileDrawer) return;
-      profileDrawer.classList.add('open');
-      profileDrawer.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('ftg-profile-drawer-open');
-      syncActiveButton('profile');
+    function openMorePanel() {
+      morePanel.classList.add('open');
+      morePanel.setAttribute('aria-hidden', 'false');
+      moreOverlay.classList.add('open');
+      moreFab.classList.add('open');
+      document.body.classList.add('ftg-more-open');
     }
 
-    function navigateToPage(pageId) {
-      var page = pages[pageId] || {};
-      var href = resolveHref(page.href || '');
-      closeProfileDrawer();
-      syncActiveButton(pageId);
+    function toggleMorePanel(forceOpen) {
+      var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !morePanel.classList.contains('open');
+      if (shouldOpen) openMorePanel(); else closeMorePanel();
+    }
 
-      if (href && href !== '#' && href.charAt(0) !== '#') {
-        window.location.href = href;
-        return;
-      }
+    function navigateTo(itemId, href) {
+      var finalHref = resolveHref(href || '');
+      syncActiveButtons(itemId);
+      closeMorePanel();
 
       if (typeof config.onNavigate === 'function') {
-        config.onNavigate(pageId, page);
+        config.onNavigate(itemId, { href: finalHref });
         return;
       }
 
-      if (href) window.location.href = href;
-    }
-
-    navButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        if (button.hasAttribute('data-profile-trigger')) {
-          if (profileDrawer.classList.contains('open')) closeProfileDrawer();
-          else openProfileDrawer();
-          return;
-        }
-        navigateToPage(button.getAttribute('data-page-target'));
-      });
-    });
-
-    if (profileClose) profileClose.addEventListener('click', closeProfileDrawer);
-    if (profileHandle) profileHandle.addEventListener('click', closeProfileDrawer);
-    document.addEventListener('click', function (event) {
-      if (profileLanguageMenu && profileLanguageMenu.classList.contains('open') && !profileLanguageMenu.contains(event.target)) {
-        profileLanguageMenu.classList.remove('open');
-      }
-      if (!document.body.classList.contains('ftg-profile-drawer-open')) return;
-      if (event.target.closest('[data-profile-trigger]')) return;
-      if (profileDrawer && profileDrawer.contains(event.target)) {
-        if (!event.target.closest('.ftg-profile-link') && !event.target.closest('.ftg-profile-language-menu') && !event.target.closest('.ftg-profile-primary-btn') && !event.target.closest('.ftg-profile-close')) {
-          closeProfileDrawer();
-        }
-        return;
-      }
-      closeProfileDrawer();
-    });
-
-    if (profilePrimaryBtn) {
-      profilePrimaryBtn.addEventListener('click', function () {
-        if (isLoggedIn) {
-          if (typeof config.onOpenPreferences === 'function') config.onOpenPreferences();
-        } else {
-          if (typeof config.onLoginClick === 'function') {
-            config.onLoginClick();
-          } else {
-            window.location.href = resolveHref('login.html');
-          }
-        }
-      });
-    }
-
-    languageButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        var pieces = button.textContent.trim().split(' ');
-        currentLanguage = button.getAttribute('data-lang') || currentLanguage;
-        languageButtons.forEach(function (item) { item.classList.remove('active'); });
-        button.classList.add('active');
-        if (profileLanguageCurrent) profileLanguageCurrent.textContent = pieces[0] || '🌐';
-        if (profileLanguageMenu) profileLanguageMenu.classList.remove('open');
-        if (typeof config.onLanguageChange === 'function') config.onLanguageChange(currentLanguage);
-      });
-    });
-
-    if (profileLanguageCurrent && profileLanguageMenu) {
-      profileLanguageCurrent.addEventListener('click', function (event) {
-        event.stopPropagation();
-        profileLanguageMenu.classList.toggle('open');
-      });
+      if (finalHref) window.location.href = finalHref;
     }
 
     function forceMascotVideos() {
@@ -783,6 +678,7 @@
       aiChat.classList.toggle('ai-open', shouldOpen);
       aiChat.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
       document.body.classList.toggle('ftg-ai-chat-active', shouldOpen);
+      if (shouldOpen) closeMorePanel();
       if (shouldOpen && !welcomed) {
         welcomed = true;
         addAIMessage(aiWelcome, false);
@@ -795,9 +691,45 @@
       addAIMessage(text, true);
       aiInput.value = '';
       window.setTimeout(function () {
-        addAIMessage('Pagina attiva: ' + activePage + '. Questa è la base shared di global-actionbar.html.', false);
+        addAIMessage('Pagina attiva: ' + activePage + '. Questa è la base shared della nuova actionbar minimale.', false);
       }, 120);
     }
+
+    if (moreFab) moreFab.addEventListener('click', function () { toggleMorePanel(); });
+    if (moreOverlay) moreOverlay.addEventListener('click', closeMorePanel);
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeMorePanel();
+        toggleAI(false);
+      }
+    });
+
+    menuButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        navigateTo(button.getAttribute('data-page-target'), button.getAttribute('data-page-href'));
+      });
+    });
+
+    if (morePrimary) {
+      morePrimary.addEventListener('click', function () {
+        closeMorePanel();
+        if (isLoggedIn) {
+          if (typeof config.onOpenPreferences === 'function') config.onOpenPreferences();
+        } else {
+          if (typeof config.onLoginClick === 'function') config.onLoginClick();
+          else window.location.href = resolveHref('login.html');
+        }
+      });
+    }
+
+    languageButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        currentLanguage = button.getAttribute('data-lang') || currentLanguage;
+        languageButtons.forEach(function (item) { item.classList.remove('active'); });
+        button.classList.add('active');
+        if (typeof config.onLanguageChange === 'function') config.onLanguageChange(currentLanguage);
+      });
+    });
 
     if (aiBtn) aiBtn.addEventListener('click', function () { toggleAI(); });
     if (aiClose) aiClose.addEventListener('click', function () { toggleAI(false); });
@@ -813,12 +745,15 @@
     document.addEventListener('click', forceMascotVideos, { passive: true, once: true });
 
     window.FTG_GLOBAL_ACTIONBAR = {
-      navigateToPage: navigateToPage,
-      openProfileDrawer: openProfileDrawer,
-      closeProfileDrawer: closeProfileDrawer,
+      navigateToPage: function (pageId) {
+        var match = menuItems.find(function(item){ return item.id === pageId; }) || {};
+        navigateTo(pageId, match.href || '');
+      },
+      openMorePanel: openMorePanel,
+      closeMorePanel: closeMorePanel,
       toggleAI: toggleAI,
       getCurrentPage: function () { return activePage; },
-      setActivePage: function (pageId) { syncActiveButton(pageId); activePage = pageId; }
+      setActivePage: function (pageId) { syncActiveButtons(pageId); activePage = pageId; }
     };
   }());
 </script>
