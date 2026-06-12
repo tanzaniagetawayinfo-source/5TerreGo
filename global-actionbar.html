@@ -145,12 +145,13 @@
   .ftg-more-panel {
     position: fixed;
     top: calc(var(--ftg-fab-top) - 14px);
+    left: 6px;
     right: calc(var(--ftg-fab-right) - 14px);
     z-index: 79;
-    width: min(82vw, 330px);
-    max-width: 330px;
-    padding: 16px 12px 12px;
-    border-radius: 34px 34px 30px 30px;
+    width: auto;
+    max-width: none;
+    padding: 16px 10px 12px 10px;
+    border-radius: 0 0 0 30px;
     background: var(--ftg-surface-strong);
     border: 1px solid var(--ftg-border);
     box-shadow: 0 28px 80px rgba(0,0,0,.34);
@@ -512,7 +513,6 @@
   }
 
   @media (min-width: 700px) {
-    .ftg-more-panel,
     .ftg-ai-chat {
       max-width: 380px;
     }
