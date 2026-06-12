@@ -263,10 +263,14 @@
     margin-bottom: 10px;
   }
   .ftg-more-item {
-    min-height: 72px;
+    position: relative;
+    min-height: 84px;
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 22px;
     background: rgba(255,255,255,.08);
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
     color: var(--ftg-text);
     text-decoration: none;
     padding: 10px 11px;
@@ -274,35 +278,42 @@
     align-content: space-between;
     gap: 10px;
     cursor: pointer;
+    overflow: hidden;
     transition: transform .22s ease, background .22s ease, border-color .22s ease;
+  }
+  .ftg-more-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8,12,16,.16), rgba(8,12,16,.72));
+    pointer-events: none;
   }
   .ftg-more-item:active {
     transform: scale(.98);
   }
   .ftg-more-item.active {
-    background: rgba(255,255,255,.14);
+    background-color: rgba(255,255,255,.14);
     border-color: rgba(255,255,255,.18);
   }
   .ftg-more-item-top {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 8px;
   }
   .ftg-more-item-icon {
-    width: 20px;
-    height: 20px;
-    display: grid;
-    place-items: center;
-    font-size: 18px;
-    line-height: 1;
+    display: none;
   }
   .ftg-more-item-arrow {
-    color: rgba(255,255,255,.38);
+    color: rgba(255,255,255,.48);
     font-size: 16px;
     line-height: 1;
   }
   .ftg-more-item-label {
+    position: relative;
+    z-index: 1;
     font-size: 13px;
     line-height: 1.05;
     letter-spacing: -.02em;
@@ -533,12 +544,12 @@
       guide: { label: 'Guide', emoji: '📖', href: '#guide' }
     };
     var menuItems = config.menuItems || [
-      { id: 'map', label: pages.map && pages.map.label || 'Map', emoji: pages.map && pages.map.emoji || '🗺️', href: 'map.html' },
-      { id: 'home', label: pages.home && pages.home.label || 'Home', emoji: pages.home && pages.home.emoji || '🏠', href: pages.home && pages.home.href || '#home' },
-      { id: 'guide', label: pages.guide && pages.guide.label || 'Guide', emoji: pages.guide && pages.guide.emoji || '📖', href: pages.guide && pages.guide.href || 'https://5terrego.com/site-stories-section' },
-      { id: 'likes', label: 'Mi piace', emoji: '❤️', href: '#likes' },
-      { id: 'experiences', label: 'Experience', emoji: '✨', href: '#experiences' },
-      { id: 'profile', label: 'Profilo', emoji: '👤', href: '#profile' }
+      { id: 'map', label: pages.map && pages.map.label || 'Map', href: 'map.html' },
+      { id: 'home', label: pages.home && pages.home.label || 'Home', href: pages.home && pages.home.href || '#home' },
+      { id: 'guide', label: pages.guide && pages.guide.label || 'Guide', href: pages.guide && pages.guide.href || 'https://5terrego.com/site-stories-section' },
+      { id: 'places', label: 'Places', href: '#places', backgroundImage: 'https://images.pexels.com/photos/7118987/pexels-photo-7118987.jpeg?_gl=1*1ygueye*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2NDE0JGo1OSRsMCRoMA..' },
+      { id: 'local-discounts', label: 'Local Discounts', href: '#local-discounts', backgroundImage: 'https://images.pexels.com/photos/34342746/pexels-photo-34342746.jpeg?_gl=1*1j2vzz9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2NjgzJGoxMiRsMCRoMA..' },
+      { id: 'sentieri', label: 'Sentieri', href: '#sentieri', backgroundImage: 'https://images.pexels.com/photos/13368981/pexels-photo-13368981.jpeg?_gl=1*oqh5qj*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2OTQwJGo1OCRsMCRoMA..' }
     ];
     var legalLinks = config.legalLinks || [
       { label: 'Privacy', href: '#privacy' },
@@ -579,7 +590,8 @@
 
     function buildMenuCard(item) {
       var isActive = activePage === item.id;
-      return '<button class="ftg-more-item' + (isActive ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id || '') + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-more-item-top"><span class="ftg-more-item-icon">' + escapeHTML(item.emoji || '•') + '</span><span class="ftg-more-item-arrow">›</span></span><span class="ftg-more-item-label">' + escapeHTML(item.label || item.id || '') + '</span></button>';
+      var backgroundStyle = item.backgroundImage ? ' style="background-image:url(' + "'" + escapeHTML(item.backgroundImage) + "'" + ')"' : '';
+      return '<button class="ftg-more-item' + (isActive ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id || '') + '" data-page-href="' + escapeHTML(item.href || '') + '"' + backgroundStyle + '><span class="ftg-more-item-top"><span class="ftg-more-item-arrow">›</span></span><span class="ftg-more-item-label">' + escapeHTML(item.label || item.id || '') + '</span></button>';
     }
 
     root.innerHTML = '' +
