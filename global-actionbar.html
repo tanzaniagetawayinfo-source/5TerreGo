@@ -250,6 +250,23 @@
     color: #111;
   }
 
+  .ftg-more-featured {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .ftg-more-featured .ftg-more-item {
+    width: min(100%, 280px);
+    min-height: 96px;
+    padding: 12px 14px;
+    border-radius: 24px;
+  }
+  .ftg-more-featured .ftg-more-item-label {
+    font-size: 15px;
+  }
+
   .ftg-more-grid {
     position: relative;
     z-index: 1;
@@ -589,6 +606,23 @@
       return '<button class="ftg-more-item' + (isActive ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id || '') + '" data-page-href="' + escapeHTML(item.href || '') + '"' + backgroundStyle + '><span class="ftg-more-item-top"><span class="ftg-more-item-arrow">›</span></span><span class="ftg-more-item-label">' + escapeHTML(item.label || item.id || '') + '</span></button>';
     }
 
+    function getFeaturedMenuItem() {
+      var featuredId = activePage === 'map' ? 'home' : 'map';
+      return menuItems.find(function (item) { return item.id === featuredId; }) || null;
+    }
+
+    function getSecondaryMenuItems() {
+      var featured = getFeaturedMenuItem();
+      return menuItems.filter(function (item) {
+        if (featured && item.id === featured.id) return false;
+        if (activePage !== 'map' && item.id === 'home') return false;
+        if (activePage === 'map' && item.id === 'map') return false;
+        return true;
+      });
+    }
+
+    var featuredMenuItem = getFeaturedMenuItem();
+
     root.innerHTML = '' +
       '<button class="ftg-fab ftg-more-fab" id="ftg-more-fab" type="button" aria-label="Open menu">' +
         '<span class="ftg-more-icon"><span></span><span></span><span></span><span></span></span>' +
@@ -603,7 +637,8 @@
             return '<button class="ftg-more-language-btn' + (lang.code === currentLanguage ? ' active' : '') + '" type="button" data-lang="' + escapeHTML(lang.code) + '">' + escapeHTML(lang.label) + '</button>';
           }).join('') +
         '</div>' +
-        '<div class="ftg-more-grid">' + menuItems.map(buildMenuCard).join('') + '</div>' +
+        (featuredMenuItem ? '<div class="ftg-more-featured">' + buildMenuCard(featuredMenuItem) + '</div>' : '') +
+        '<div class="ftg-more-grid">' + getSecondaryMenuItems().map(buildMenuCard).join('') + '</div>' +
         '<div class="ftg-more-footer">' +
           legalLinks.map(function (link) {
             return '<a href="' + escapeHTML(link.href || '#') + '">' + escapeHTML(link.label || '') + '</a>';
