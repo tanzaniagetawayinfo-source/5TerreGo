@@ -3668,21 +3668,18 @@ window.FTG_ACTIONBAR_CONFIG = {
   function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; }
   function setSiteViewMode() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
   function openSiteSectionFromMenu(sectionId) {
-    var map = {
-      'site-welcome-section': 0,
-      'site-stories-section': 1,
-      'site-places-section': 2,
-      'site-experiences-section': 3,
-      'site-trails-section': 4,
-      'site-weather-section': 5,
-      'site-official-communications-section': 6
-    };
+    var map = FTG_SITE_SECTION_TO_PAGE_INDEX;
+    var section = document.getElementById(sectionId);
+    sectionId = getNormalizedSectionHash(sectionId);
     if (window.FTG_SCROLL_TO_SITE_PAGE && map[sectionId] !== undefined) {
-      window.FTG_SCROLL_TO_SITE_PAGE(map[sectionId]);
+      window.FTG_SCROLL_TO_SITE_PAGE(map[sectionId], { pushHash: true });
       return;
     }
-    var section = document.getElementById(sectionId);
-    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (section) {
+      if (window.history && typeof window.history.pushState === 'function') window.history.pushState({ ftgSection: sectionId }, '', '#' + sectionId);
+      else window.location.hash = sectionId;
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
   window.FTG_OPEN_SITE_SECTION = openSiteSectionFromMenu;
   window.FTG_OPEN_MAP_FOCUS = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); return true; };
@@ -3692,6 +3689,27 @@ window.FTG_ACTIONBAR_CONFIG = {
   window.renderSiteWeatherSection = renderSiteWeatherSection;
   window.renderOfficialCommunications = renderOfficialCommunications;
   window.loadOfficialCommunications = loadOfficialCommunications;
+
+  var FTG_SITE_SECTION_TO_PAGE_INDEX = {
+    'site-welcome-section': 0,
+    'site-stories-section': 1,
+    'site-places-section': 2,
+    'site-experiences-section': 3,
+    'site-trails-section': 4,
+    'site-weather-section': 5,
+    'site-official-communications-section': 6,
+    'site-footer': 7
+  };
+
+  function getNormalizedSectionHash(value) {
+    return String(value || '').replace(/^#/, '').trim();
+  }
+
+  function getSectionShareURL(sectionId) {
+    return String(window.location.href || '').split('#')[0] + '#' + getNormalizedSectionHash(sectionId);
+  }
+
+  window.FTG_GET_SECTION_SHARE_URL = getSectionShareURL;
   window.renderSiteMapTip = renderSiteMapTip;
   window.stabilizeMapFilterButtons = stabilizeMapFilterButtons;
   window.applyMapFilterUI = applyMapFilterUI;
@@ -3728,6 +3746,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     var host;
     var targets;
     var pages;
+    var pageIds = [];
     var currentIndex = 0;
     var viewportHeight = window.innerHeight || 1;
     var currentTranslate = 0;
@@ -3777,9 +3796,38 @@ window.FTG_ACTIONBAR_CONFIG = {
 
     pages = Array.prototype.slice.call(host.querySelectorAll('.ftg-page-frame'));
     if (!pages.length) return;
+    pageIds = pages.map(function(page) {
+      var section = page.querySelector('[id]');
+      return section && section.id ? section.id : '';
+    });
 
     function clampIndex(index) {
       return Math.max(0, Math.min(index, pages.length - 1));
+    }
+
+    function getSectionIdForIndex(index) {
+      return pageIds[clampIndex(index)] || '';
+    }
+
+    function getIndexForSectionHash(value) {
+      var sectionId = getNormalizedSectionHash(value);
+      var index;
+      if (!sectionId) return null;
+      index = pageIds.indexOf(sectionId);
+      return index === -1 ? null : index;
+    }
+
+    function syncURLHashForIndex(index, pushHash) {
+      var sectionId = getSectionIdForIndex(index);
+      var nextHash;
+      if (!sectionId) return;
+      nextHash = '#' + sectionId;
+      if (window.location.hash === nextHash) return;
+      if (window.history && typeof window.history[pushHash ? 'pushState' : 'replaceState'] === 'function') {
+        window.history[pushHash ? 'pushState' : 'replaceState']({ ftgSection: sectionId }, '', nextHash);
+        return;
+      }
+      window.location.hash = sectionId;
     }
 
     function baseTranslate(index) {
@@ -3848,20 +3896,22 @@ window.FTG_ACTIONBAR_CONFIG = {
       }, 220);
     }
 
-    function snapToPage(index) {
+    function snapToPage(index, options) {
+      options = options || {};
       currentIndex = clampIndex(index);
       snapLock = true;
       clearWheelPreview();
       applyTranslate(baseTranslate(currentIndex), false);
+      if (!options.skipHashSync) syncURLHashForIndex(currentIndex, !!options.pushHash);
       releaseSnapLockSoon();
     }
 
-    function goToAdjacentPage(direction) {
+    function goToAdjacentPage(direction, options) {
       if (!direction) {
-        snapToPage(currentIndex);
+        snapToPage(currentIndex, options || {});
         return;
       }
-      snapToPage(currentIndex + direction);
+      snapToPage(currentIndex + direction, options || {});
     }
 
     function dampPreview(delta) {
@@ -3883,11 +3933,20 @@ window.FTG_ACTIONBAR_CONFIG = {
     }
 
     syncPageFrames();
+    currentIndex = getIndexForSectionHash(window.location.hash);
+    if (currentIndex === null) currentIndex = 0;
     applyTranslate(baseTranslate(currentIndex), false);
+    syncURLHashForIndex(currentIndex, false);
 
     window.addEventListener('resize', function() {
       syncPageFrames();
       applyTranslate(baseTranslate(currentIndex), false);
+    });
+
+    window.addEventListener('hashchange', function() {
+      var nextIndex = getIndexForSectionHash(window.location.hash);
+      if (nextIndex === null || nextIndex === currentIndex) return;
+      snapToPage(nextIndex, { skipHashSync: true });
     });
 
     window.addEventListener('wheel', function(event) {
@@ -3983,8 +4042,8 @@ window.FTG_ACTIONBAR_CONFIG = {
     window.addEventListener('touchend', finishTouchGesture, { passive: true });
     window.addEventListener('touchcancel', finishTouchGesture, { passive: true });
 
-    window.FTG_SCROLL_TO_SITE_PAGE = function(index) {
-      snapToPage(index);
+    window.FTG_SCROLL_TO_SITE_PAGE = function(index, options) {
+      snapToPage(index, options || {});
     };
   }
 
