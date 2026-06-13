@@ -188,8 +188,9 @@
       position: absolute;
       left: 0;
       right: 0;
-      bottom: calc(26px + env(safe-area-inset-bottom));
-      z-index: 4;
+      top: calc(96px + env(safe-area-inset-top));
+      bottom: auto;
+      z-index: 6;
       padding: 0 14px;
     }
     .site-hero-copy-bottom .site-view-title,
@@ -203,9 +204,10 @@
       max-width: 92%;
     }
     .site-hero-copy-bottom .site-view-title {
-      margin: 0 0 10px;
+      margin: 0;
     }
     .site-hero-copy-bottom .site-view-text {
+      display: none;
       margin: 0;
     }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
@@ -229,7 +231,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(104px + env(safe-area-inset-top));
+      top: calc(236px + env(safe-area-inset-top));
       z-index: 5;
       width: 100%;
       margin-top: 0;
@@ -241,7 +243,7 @@
       min-height: 236px;
       display: block;
       padding: 0;
-      border-radius: 26px;
+      border-radius: 22px;
       overflow: hidden;
       background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.14);
@@ -292,7 +294,8 @@
       z-index: 4;
       min-height: 236px;
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
+      justify-content: flex-start;
       padding: 16px;
     }
     .site-hero-map-card-title {
@@ -302,13 +305,14 @@
       letter-spacing: -.045em;
       font-weight: 950;
       text-wrap: balance;
+      text-align: left;
       text-shadow: 0 10px 26px rgba(0,0,0,.24);
     }
     .site-hero-quicknav {
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(356px + env(safe-area-inset-top));
+      top: calc(478px + env(safe-area-inset-top));
       z-index: 4;
       padding: 0;
     }
@@ -319,7 +323,7 @@
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 2px 0 4px 12px;
+      padding: 2px 12px 6px;
       scroll-padding-left: 12px;
       scroll-padding-inline-start: 12px;
       scroll-snap-type: x proximity;
@@ -331,164 +335,105 @@
       position: relative;
       flex: 0 0 min(62vw, 228px);
       min-height: 120px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
       padding: 14px 14px 16px;
-      border-radius: 26px;
+      border-radius: 22px;
       overflow: hidden;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.14);
       color: #fff;
       text-decoration: none;
-      scroll-snap-align: start;
-      box-shadow: 0 18px 36px rgba(0,0,0,.16);
-      backdrop-filter: blur(14px) saturate(1.08);
-      -webkit-backdrop-filter: blur(14px) saturate(1.08);
-      isolation: isolate;
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
-    }
-    @media (max-width: 380px) {
-      .site-hero-quicknav-track {
-        padding-left: 10px;
-        scroll-padding-left: 10px;
-        scroll-padding-inline-start: 10px;
-      }
-    }
-
-    .site-hero-quicknav-card {
-      position: relative;
-      flex: 0 0 min(62vw, 228px);
-      min-height: 120px;
-      padding: 14px 14px 16px;
-      border-radius: 26px;
-      overflow: hidden;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.14);
-      color: #fff;
-      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 16px 36px rgba(0,0,0,.16);
       scroll-snap-align: start;
-      box-shadow: 0 18px 36px rgba(0,0,0,.16);
-      backdrop-filter: blur(14px) saturate(1.08);
-      -webkit-backdrop-filter: blur(14px) saturate(1.08);
       isolation: isolate;
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
     }
     .site-hero-quicknav-card::before {
       content: '';
       position: absolute;
       inset: 0;
       z-index: -1;
-      background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.48));
+      background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.56));
       pointer-events: none;
     }
-    .site-hero-quicknav-card.video-card {
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
+    .site-hero-quicknav-card.plain {
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(14px) saturate(1.08);
+      -webkit-backdrop-filter: blur(14px) saturate(1.08);
     }
-    .site-hero-quicknav-card video {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      z-index: -2;
-      pointer-events: none;
-      transform: scale(1.04);
-      opacity: 0;
-      transition: opacity .24s ease;
+    .site-hero-quicknav-card.plain::before {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.18));
     }
-    .site-hero-quicknav-card.video-ready video {
-      opacity: 1;
-    }
-    .site-hero-quicknav-kicker { display: none !important; }
     .site-hero-quicknav-title {
+      position: relative;
+      z-index: 1;
       display: block;
       font-size: 22px;
       line-height: .96;
       letter-spacing: -.045em;
       font-weight: 950;
+      text-align: left;
       text-wrap: balance;
-    }
-    .site-hero-weather-card {
-      justify-content: flex-end;
+      text-shadow: 0 10px 24px rgba(0,0,0,.22);
     }
     .site-hero-weather-mini {
       position: relative;
       z-index: 1;
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
     }
     .site-hero-weather-kicker {
       display: block;
       font-size: 10px;
       line-height: 1;
-      letter-spacing: .12em;
+      letter-spacing: .11em;
       text-transform: uppercase;
       font-weight: 950;
       color: rgba(255,255,255,.68);
     }
     .site-hero-weather-main {
       display: flex;
-      align-items: flex-end;
-      gap: 8px;
+      align-items: center;
+      gap: 10px;
     }
     .site-hero-weather-emoji {
       font-size: 30px;
       line-height: 1;
-      filter: drop-shadow(0 6px 14px rgba(0,0,0,.18));
     }
     .site-hero-weather-temp {
-      font-size: 34px;
-      line-height: .88;
-      letter-spacing: -.08em;
+      font-size: 33px;
+      line-height: .9;
+      letter-spacing: -.06em;
       font-weight: 950;
-      color: #fff;
     }
     .site-hero-weather-meta {
       display: flex;
-      align-items: center;
-      gap: 6px;
       flex-wrap: wrap;
+      gap: 7px;
     }
     .site-hero-weather-pill {
       display: inline-flex;
       align-items: center;
-      min-height: 24px;
-      padding: 6px 8px;
+      min-height: 26px;
+      padding: 5px 8px;
       border-radius: 999px;
-      background: rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.92);
-      font-size: 11px;
+      color: rgba(255,255,255,.90);
+      font-size: 10px;
       line-height: 1;
       font-weight: 900;
-      letter-spacing: -.02em;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .site-hero-quicknav-card.plain {
-      background: rgba(255,255,255,.10);
-    }
-    .site-hero-quicknav-card.plain::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: -2;
-      background: linear-gradient(135deg, rgba(30,155,255,.18), rgba(255,138,29,.12));
+      white-space: nowrap;
     }
     @media (max-width: 380px) {
-      .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
-      .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
-        padding-left: 12px;
-      }
       .site-hero-copy-bottom {
-        bottom: calc(22px + env(safe-area-inset-bottom));
+        top: calc(88px + env(safe-area-inset-top));
+        bottom: auto;
         padding-left: 12px;
         padding-right: 12px;
       }
@@ -497,13 +442,13 @@
         padding-left: 0;
       }
       .site-hero-search-wrap {
-        top: calc(96px + env(safe-area-inset-top));
+        top: calc(222px + env(safe-area-inset-top));
         padding-left: 10px;
         padding-right: 10px;
       }
       .site-hero-map-card {
         min-height: 220px;
-        border-radius: 24px;
+        border-radius: 20px;
       }
       .site-hero-map-card-content {
         min-height: 220px;
@@ -512,23 +457,21 @@
       .site-hero-map-card-title {
         font-size: 20px;
       }
-      .site-hero-video-wrap {
-        inset: 0;
-        height: 100%;
-      }
-      .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
-        min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
-        padding: 84px 0 0;
-      }
       .site-hero-quicknav {
-        top: calc(330px + env(safe-area-inset-top));
+        top: calc(452px + env(safe-area-inset-top));
         padding: 0;
       }
+      .site-hero-quicknav-track {
+        gap: 9px;
+        padding-left: 10px;
+        padding-right: 10px;
+        scroll-padding-left: 10px;
+      }
       .site-hero-quicknav-card {
-        flex-basis: min(68vw, 214px);
+        flex: 0 0 min(68vw, 214px);
         min-height: 112px;
-        border-radius: 24px;
         padding: 13px 13px 14px;
+        border-radius: 20px;
       }
       .site-hero-quicknav-title {
         font-size: 20px;
@@ -2446,7 +2389,6 @@
       </div>
       <div class="site-hero-copy-bottom">
         <h1 class="site-view-title">Cinque Terre, semplice.</h1>
-        <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
       </div>
     </section>
 <div class="site-feature-stack">
