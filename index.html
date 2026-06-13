@@ -184,6 +184,30 @@
       justify-content: flex-start;
       padding: 92px 0 0;
     }
+    .site-hero-copy-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: calc(26px + env(safe-area-inset-bottom));
+      z-index: 4;
+      padding: 0 14px;
+    }
+    .site-hero-copy-bottom .site-view-title,
+    .site-hero-copy-bottom .site-view-text {
+      position: relative;
+      z-index: 3;
+      text-shadow:
+        0 18px 40px rgba(0,0,0,.42),
+        0 6px 16px rgba(0,0,0,.34);
+      padding-left: 0;
+      max-width: 92%;
+    }
+    .site-hero-copy-bottom .site-view-title {
+      margin: 0 0 10px;
+    }
+    .site-hero-copy-bottom .site-view-text {
+      margin: 0;
+    }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-title,
     .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
       position: relative;
@@ -205,7 +229,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(61dvh - 118px);
+      top: calc(104px + env(safe-area-inset-top));
       z-index: 5;
       width: 100%;
       margin-top: 0;
@@ -284,7 +308,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(61dvh + 142px);
+      top: calc(356px + env(safe-area-inset-top));
       z-index: 4;
       padding: 0;
     }
@@ -463,8 +487,17 @@
       .site-view-panel.ftg-section-paging #site-welcome-section .site-view-text {
         padding-left: 12px;
       }
+      .site-hero-copy-bottom {
+        bottom: calc(22px + env(safe-area-inset-bottom));
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .site-hero-copy-bottom .site-view-title,
+      .site-hero-copy-bottom .site-view-text {
+        padding-left: 0;
+      }
       .site-hero-search-wrap {
-        top: calc(62dvh - 112px);
+        top: calc(96px + env(safe-area-inset-top));
         padding-left: 10px;
         padding-right: 10px;
       }
@@ -488,7 +521,7 @@
         padding: 84px 0 0;
       }
       .site-hero-quicknav {
-        top: calc(62dvh + 132px);
+        top: calc(330px + env(safe-area-inset-top));
         padding: 0;
       }
       .site-hero-quicknav-card {
@@ -2368,8 +2401,6 @@
         <div class="site-hero-slide" data-bg="https://images.pexels.com/photos/17454329/pexels-photo-17454329.jpeg?auto=compress&cs=tinysrgb&w=960&fit=crop&dpr=1&q=70"></div>
       </div>
       <div class="site-hero-content">
-        <h1 class="site-view-title">Cinque Terre, semplice.</h1>
-        <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
         <div class="site-hero-search-wrap" id="site-hero-search-wrap">
           <a class="site-hero-map-card" href="map.html" aria-label="Mappa interattiva">
             <div class="site-hero-map-card-preview" aria-hidden="true">
@@ -2412,6 +2443,10 @@
             <span class="site-hero-quicknav-title">Comunicazioni ufficiali</span>
           </a>
         </div>
+      </div>
+      <div class="site-hero-copy-bottom">
+        <h1 class="site-view-title">Cinque Terre, semplice.</h1>
+        <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
       </div>
     </section>
 <div class="site-feature-stack">
