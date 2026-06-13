@@ -2655,6 +2655,12 @@ window.FTG_ACTIONBAR_CONFIG = {
   var officialCommunicationsLoaded = false;
   var sitePOIs = [];
   var sitePOIsLoaded = false;
+  var FTG_POI_HOT_CACHE_KEYS = ['ftg-pois-hot-v1', '5terrego-pois-hot-v1', 'ftg-map-pois-hot-v1'];
+  var FTG_POI_HOT_CACHE_TS_KEY = 'ftg-pois-hot-ts-v1';
+  var FTG_POI_PREFETCH_DB_NAME = 'ftg-prefetch-cache-v1';
+  var FTG_POI_PREFETCH_STORE = 'kv';
+  var FTG_POI_FULL_CACHE_IDB_KEY = 'pois-full-v1';
+  var sitePOIFullPrefetchPromise = null;
   var FALLBACK_SITE_POIS = [
     { name: 'Belvedere di Manarola', type: 'punto panoramico', image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', location: 'Manarola' },
     { name: 'Spiaggia di Monterosso', type: 'spiaggia', image: 'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg', location: 'Monterosso' },
@@ -2710,6 +2716,161 @@ window.FTG_ACTIONBAR_CONFIG = {
       }
     }
     return { lat: lat, lng: lng };
+  }
+
+  function safeParseJSON(value, fallback) {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function getPOIRanking(row) {
+    return Number(row && (row.importance || row.relevance || row.score || 0)) || 0;
+  }
+
+  function sortPOIRowsByImportance(rows) {
+    return (Array.isArray(rows) ? rows.slice() : []).sort(function(a, b) {
+      var diff = getPOIRanking(b) - getPOIRanking(a);
+      if (diff) return diff;
+      return String((a && (a.name || a.title || a.id)) || '').localeCompare(String((b && (b.name || b.title || b.id)) || ''));
+    });
+  }
+
+  function readHotPOICache() {
+    var rows = [];
+    FTG_POI_HOT_CACHE_KEYS.some(function(key) {
+      var cached = safeParseJSON(localStorage.getItem(key) || 'null', null);
+      if (Array.isArray(cached) && cached.length) {
+        rows = cached;
+        return true;
+      }
+      return false;
+    });
+    return rows;
+  }
+
+  function writeHotPOICache(rows) {
+    var sortedRows;
+    var serialized;
+    if (!Array.isArray(rows) || !rows.length) return;
+    sortedRows = sortPOIRowsByImportance(rows).slice(0, 260);
+    serialized = JSON.stringify(sortedRows);
+    FTG_POI_HOT_CACHE_KEYS.forEach(function(key) {
+      try { localStorage.setItem(key, serialized); } catch (error) {}
+    });
+    try { localStorage.setItem(FTG_POI_HOT_CACHE_TS_KEY, String(Date.now())); } catch (error) {}
+  }
+
+  function openPOIPrefetchDB() {
+    return new Promise(function(resolve, reject) {
+      var request;
+      if (!window.indexedDB) {
+        resolve(null);
+        return;
+      }
+      request = window.indexedDB.open(FTG_POI_PREFETCH_DB_NAME, 1);
+      request.onupgradeneeded = function(event) {
+        var db = event.target.result;
+        if (!db.objectStoreNames.contains(FTG_POI_PREFETCH_STORE)) db.createObjectStore(FTG_POI_PREFETCH_STORE);
+      };
+      request.onsuccess = function() { resolve(request.result); };
+      request.onerror = function() { reject(request.error || new Error('IndexedDB unavailable')); };
+    });
+  }
+
+  function readFullPOICacheFromIDB() {
+    return openPOIPrefetchDB().then(function(db) {
+      return new Promise(function(resolve) {
+        var transaction;
+        var store;
+        var request;
+        if (!db) {
+          resolve([]);
+          return;
+        }
+        transaction = db.transaction(FTG_POI_PREFETCH_STORE, 'readonly');
+        store = transaction.objectStore(FTG_POI_PREFETCH_STORE);
+        request = store.get(FTG_POI_FULL_CACHE_IDB_KEY);
+        request.onsuccess = function() {
+          resolve(Array.isArray(request.result) ? request.result : []);
+        };
+        request.onerror = function() { resolve([]); };
+      });
+    }).catch(function() { return []; });
+  }
+
+  function writeFullPOICacheToIDB(rows) {
+    return openPOIPrefetchDB().then(function(db) {
+      return new Promise(function(resolve) {
+        var transaction;
+        var store;
+        if (!db || !Array.isArray(rows) || !rows.length) {
+          resolve();
+          return;
+        }
+        transaction = db.transaction(FTG_POI_PREFETCH_STORE, 'readwrite');
+        store = transaction.objectStore(FTG_POI_PREFETCH_STORE);
+        store.put(rows, FTG_POI_FULL_CACHE_IDB_KEY);
+        transaction.oncomplete = function() { resolve(); };
+        transaction.onerror = function() { resolve(); };
+      });
+    }).catch(function() {});
+  }
+
+  function applySitePOIRows(rows, options) {
+    var normalizedRows;
+    options = options || {};
+    normalizedRows = sortPOIRowsByImportance(rows).map(normalizePOI).filter(function(poi) { return poi && poi.name; });
+    if (!normalizedRows.length) return false;
+    sitePOIs = normalizedRows;
+    sitePOIsLoaded = true;
+    renderSitePOISection();
+    if (options.persistHot !== false) writeHotPOICache(rows);
+    return true;
+  }
+
+  function primeSitePOIsFromCache() {
+    var hotRows = readHotPOICache();
+    var hadHot = applySitePOIRows(hotRows, { persistHot: false });
+    readFullPOICacheFromIDB().then(function(rows) {
+      if (!Array.isArray(rows) || !rows.length) return;
+      if (sitePOIsLoaded && rows.length <= sitePOIs.length) return;
+      applySitePOIRows(rows, { persistHot: false });
+    }).catch(function() {});
+    return hadHot;
+  }
+
+  function startPOIFullPrefetch() {
+    var pageSize = 250;
+    if (sitePOIFullPrefetchPromise || !supabaseClient) return sitePOIFullPrefetchPromise;
+    sitePOIFullPrefetchPromise = (async function() {
+      var allRows = [];
+      var from = 0;
+      var response;
+      var rows;
+      while (true) {
+        response = await supabaseClient.from('pois').select('*').order('id', { ascending: true }).range(from, from + pageSize - 1);
+        if (!response || response.error) throw new Error(response && response.error ? response.error.message : 'POI prefetch failed');
+        rows = Array.isArray(response.data) ? response.data : [];
+        if (!rows.length) break;
+        allRows = allRows.concat(rows);
+        if (allRows.length <= pageSize) writeHotPOICache(allRows);
+        if (rows.length < pageSize) break;
+        from += rows.length;
+        await new Promise(function(resolve) { window.setTimeout(resolve, 0); });
+      }
+      if (allRows.length) {
+        writeHotPOICache(allRows);
+        writeFullPOICacheToIDB(allRows);
+      }
+      return allRows;
+    })().catch(function(error) {
+      console.warn('POI full prefetch failed:', error && error.message ? error.message : error);
+      return [];
+    });
+    return sitePOIFullPrefetchPromise;
   }
 
   function getCurrentUILanguage() {
@@ -3431,26 +3592,27 @@ window.FTG_ACTIONBAR_CONFIG = {
   async function loadPOIs() {
     var response;
     var rows;
-    sitePOIsLoaded = false;
-    renderSitePOISection();
-    if (!supabaseClient) {
-      sitePOIs = FALLBACK_SITE_POIS.map(normalizePOI).filter(function(poi){ return poi.name; });
-      sitePOIsLoaded = true;
+    var hadCache = primeSitePOIsFromCache();
+    if (!hadCache) {
+      sitePOIsLoaded = false;
       renderSitePOISection();
+    }
+    if (!supabaseClient) {
+      if (!sitePOIs.length) applySitePOIRows(FALLBACK_SITE_POIS, { persistHot: false });
       return;
     }
+    startPOIFullPrefetch();
     try {
-      response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }).limit(200);
+      response = await supabaseClient.from('pois').select('*').order('importance', { ascending: false, nullsFirst: false }).limit(240);
       rows = (response && response.data) || [];
-      sitePOIs = rows.map(normalizePOI).filter(function(poi){ return poi.name; });
-      if (!sitePOIs.length) {
-        sitePOIs = FALLBACK_SITE_POIS.map(normalizePOI).filter(function(poi){ return poi.name; });
+      if (rows.length) {
+        applySitePOIRows(rows, { persistHot: true });
+      } else if (!sitePOIs.length) {
+        applySitePOIRows(FALLBACK_SITE_POIS, { persistHot: false });
       }
     } catch (error) {
-      sitePOIs = FALLBACK_SITE_POIS.map(normalizePOI).filter(function(poi){ return poi.name; });
+      if (!sitePOIs.length) applySitePOIRows(FALLBACK_SITE_POIS, { persistHot: false });
     }
-    sitePOIsLoaded = true;
-    renderSitePOISection();
   }
 
   function normalizeTrail(row) {
@@ -4124,12 +4286,13 @@ window.FTG_ACTIONBAR_CONFIG = {
     var observed = [];
     var fallbackPlan = [
       ['stories', loadBlogPosts, 260],
-      ['pois', loadPOIs, 820],
+      ['pois', loadPOIs, 120],
       ['trails', loadTrails, 1380],
       ['official', loadOfficialCommunications, 2500]
     ];
 
     queueDeferredLoad('stories', loadBlogPosts, 220);
+    queueDeferredLoad('pois', loadPOIs, 120);
 
     if (!('IntersectionObserver' in window)) {
       fallbackPlan.forEach(function(step) {
@@ -4139,7 +4302,6 @@ window.FTG_ACTIONBAR_CONFIG = {
     }
 
     observed = [
-      { element: document.getElementById('site-places-section'), key: 'pois', loader: loadPOIs },
       { element: document.getElementById('site-trails-section'), key: 'trails', loader: loadTrails },
       { element: document.getElementById('site-official-communications-section'), key: 'official', loader: loadOfficialCommunications }
     ].filter(function(entry) { return !!entry.element; });
@@ -4305,6 +4467,7 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   function start() {
+    primeSitePOIsFromCache();
     setupHeroSlidePerformance();
     setupHeroQuicknavMedia();
     setupSectionPaging();
