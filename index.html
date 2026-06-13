@@ -750,38 +750,53 @@
     #site-stories-section.story-guide-section {
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      width: 100%;
       height: 100%;
-      min-height: 0;
+      min-height: 100%;
     }
     #site-stories-section .site-guide-page-shell {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
+      width: 100%;
       height: 100%;
-      min-height: 0;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: clamp(22px, 4vh, 38px);
+      padding: clamp(22px, 5vh, 52px) 0;
     }
     #site-stories-section .site-guide-page-head {
-      display: grid;
-      grid-template-rows: auto auto;
-      align-content: start;
-      gap: 16px;
-      padding-top: 10px;
-      padding-bottom: 2px !important;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      min-height: 0 !important;
+      padding: 0 !important;
+      margin: 0;
+      background: transparent !important;
     }
     #site-stories-section .site-guide-topline {
       display: inline-flex !important;
       align-items: center;
       justify-content: flex-start;
-      gap: 10px;
+      gap: 14px;
       width: fit-content;
       margin: 0;
-      padding-top: 10px;
-      padding-bottom: 10px;
+      padding: 0;
+    }
+    #site-stories-section .site-guide-stage-shell {
+      flex: 0 0 auto;
+      width: 100%;
+      min-height: 0;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      align-self: center;
     }
     #site-stories-section .site-guide-search {
       position: relative;
       width: 100%;
-      margin-top: 2px;
+      margin: 0;
     }
     #site-stories-section .site-guide-search-field {
       position: relative;
@@ -800,7 +815,7 @@
     }
     #site-guide-search-input {
       width: 100%;
-      min-height: 44px;
+      min-height: 46px;
       padding: 11px 15px 11px 40px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.14);
@@ -826,20 +841,20 @@
       border-radius: 0;
       background: transparent;
       border: 0;
-      color: rgba(255,255,255,.70);
-      font-size: 18px;
-      line-height: 1;
+      color: rgba(255,255,255,.72);
+      font-size: 38px;
+      line-height: .88;
       font-weight: 950;
-      letter-spacing: -.03em;
+      letter-spacing: -.06em;
       white-space: nowrap;
     }
     #site-stories-section .site-guide-topline .site-feature-kicker {
       display: block !important;
       margin: 0;
       color: #fff;
-      font-size: 18px;
-      line-height: 1;
-      letter-spacing: -.035em;
+      font-size: 38px;
+      line-height: .88;
+      letter-spacing: -.07em;
       font-weight: 950;
       text-transform: none;
     }
@@ -854,9 +869,14 @@
     }
     #site-story-list.site-guide-page-content {
       display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
+      grid-template-rows: auto auto;
+      align-content: start;
+      gap: 14px;
       min-height: 0;
+    }
+    #site-stories-section .site-guide-page-content > .site-guide-filters {
+      padding-top: 2px;
+      padding-bottom: 4px;
     }
     .site-guide-toolbar {
       display: flex;
@@ -925,7 +945,10 @@
       min-height: 0;
       display: grid;
       grid-template-rows: auto auto;
-      gap: 10px;
+      gap: 12px;
+    }
+    .site-guide-stage.is-rail-only {
+      grid-template-rows: 1fr;
     }
     .site-guide-stage.is-search-mode {
       grid-template-rows: 1fr;
@@ -1058,19 +1081,19 @@
     }
     .site-guide-rail {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 1px 1px 4px;
+      padding: 2px 1px 8px;
       scroll-snap-type: x proximity;
       touch-action: pan-x;
       align-items: flex-start;
     }
     .site-guide-rail.site-guide-rail-default {
-      padding-right: calc(100% - min(63vw, 236px));
-      padding-bottom: 10px;
+      padding-right: calc(100% - min(68vw, 252px));
+      padding-bottom: 12px;
     }
     .site-guide-rail.site-guide-rail-default::after {
       content: '';
@@ -1081,13 +1104,13 @@
     }
     .site-guide-mini-card {
       position: relative;
-      flex: 0 0 min(63vw, 236px);
-      height: 146px;
-      min-height: 146px;
+      flex: 0 0 min(68vw, 252px);
+      height: 162px;
+      min-height: 162px;
       display: grid;
-      grid-template-rows: 82px minmax(0, 1fr);
+      grid-template-rows: 92px minmax(0, 1fr);
       overflow: hidden;
-      border-radius: 26px;
+      border-radius: 28px;
       background: rgba(255,255,255,.11);
       border: 1px solid rgba(255,255,255,.12);
       color: #fff;
@@ -1126,7 +1149,7 @@
       grid-template-rows: auto auto 1fr;
       gap: 7px;
       height: 100%;
-      padding: 12px 12px 13px;
+      padding: 13px 13px 14px;
       background: linear-gradient(180deg, rgba(8,20,34,.14), rgba(8,20,34,.76));
       align-content: start;
     }
@@ -1140,9 +1163,9 @@
     }
     .site-guide-mini-title {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       line-height: .98;
-      letter-spacing: -.042em;
+      letter-spacing: -.045em;
       font-weight: 950;
       text-wrap: balance;
       display: -webkit-box;
@@ -1151,8 +1174,8 @@
       overflow: hidden;
     }
     .site-guide-rail-default .site-guide-mini-card.is-leading {
-      height: 212px;
-      min-height: 212px;
+      height: 224px;
+      min-height: 224px;
       background: rgba(255,255,255,.14);
       border-color: rgba(255,255,255,.18);
       box-shadow: 0 22px 44px rgba(0,0,0,.18);
@@ -1208,21 +1231,26 @@
       gap: 10px;
     }
     .site-guide-skeleton-mini {
-      flex: 0 0 min(63vw, 236px);
-      min-height: 142px;
-      border-radius: 24px;
+      flex: 0 0 min(68vw, 252px);
+      min-height: 156px;
+      border-radius: 28px;
     }
     @media (max-width: 380px) {
+      #site-stories-section .site-guide-page-shell {
+        gap: 18px;
+        padding: clamp(18px, 4.5vh, 36px) 0;
+      }
       #site-stories-section .site-guide-topline {
-        gap: 8px;
+        gap: 10px;
       }
       #site-stories-section .site-guide-topline .site-feature-step {
-        min-height: auto;
-        padding: 0;
-        font-size: 17px;
+        font-size: 30px;
       }
       #site-stories-section .site-guide-topline .site-feature-kicker {
-        font-size: 17px;
+        font-size: 30px;
+      }
+      #site-stories-section .site-guide-stage-shell {
+        gap: 12px;
       }
       .site-guide-toolbar {
         gap: 8px;
@@ -1254,23 +1282,23 @@
       }
       .site-guide-mini-card,
       .site-guide-skeleton-mini {
-        flex-basis: min(66vw, 214px);
-        height: 136px;
-        min-height: 136px;
+        flex-basis: min(72vw, 224px);
+        height: 148px;
+        min-height: 148px;
         border-radius: 24px;
       }
       .site-guide-mini-card {
-        grid-template-rows: 74px minmax(0, 1fr);
+        grid-template-rows: 80px minmax(0, 1fr);
       }
       .site-guide-rail-default .site-guide-mini-card.is-leading {
-        height: 198px;
-        min-height: 198px;
+        height: 206px;
+        min-height: 206px;
       }
       .site-guide-rail.site-guide-rail-default {
-        padding-right: calc(100% - min(66vw, 214px));
+        padding-right: calc(100% - min(72vw, 224px));
       }
       .site-guide-mini-title {
-        font-size: 16px;
+        font-size: 17px;
       }
     }
     body.site-article-reader-open {
@@ -2499,9 +2527,11 @@
           <div class="site-guide-page-shell">
             <div class="site-feature-cover site-guide-page-head">
               <div class="site-feature-label-row site-guide-topline"><span class="site-feature-step" id="site-guide-step">1</span><div class="site-feature-kicker">Free Guide</div></div>
-              <div class="site-guide-search"><div class="site-guide-search-field"><input id="site-guide-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search articles" aria-label="Search guide articles"></div></div>
             </div>
-            <div id="site-story-list" class="site-guide-page-content"></div>
+            <div class="site-guide-stage-shell">
+              <div class="site-guide-search"><div class="site-guide-search-field"><input id="site-guide-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search articles" aria-label="Search guide articles"></div></div>
+              <div id="site-story-list" class="site-guide-page-content"></div>
+            </div>
           </div>
         </section>
 
@@ -3483,14 +3513,12 @@ window.FTG_ACTIONBAR_CONFIG = {
     var guideSearchInput = document.getElementById('site-guide-search-input');
     var filters = getGuideFilterKeys();
     var filtered;
-    var featured;
-    var railItems;
     var searchValue = normalizeSearchText(currentSiteGuideSearch);
     if (!container) return;
     if (guideSearchInput && guideSearchInput.value !== currentSiteGuideSearch) guideSearchInput.value = currentSiteGuideSearch;
     updateGuideTopline();
     if (!blogPostsLoaded) {
-      container.innerHTML = '<div class="site-guide-loading"><div class="site-guide-skeleton-chips"><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div></div><div><div class="site-guide-skeleton-card"></div><div class="site-guide-skeleton-minis"><div class="site-guide-skeleton-mini"></div><div class="site-guide-skeleton-mini"></div></div></div></div>';
+      container.innerHTML = '<div class="site-guide-loading"><div class="site-guide-skeleton-chips"><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div><div class="site-guide-skeleton-chip"></div></div><div class="site-guide-skeleton-minis"><div class="site-guide-skeleton-mini"></div><div class="site-guide-skeleton-mini"></div><div class="site-guide-skeleton-mini"></div></div></div>';
       return;
     }
     if (!siteArticles.length) {
@@ -3520,24 +3548,11 @@ window.FTG_ACTIONBAR_CONFIG = {
       setGuideAudioButtonsState();
       return;
     }
-    featured = filtered[0];
-    railItems = filtered.slice(1, 9);
-    if (!railItems.length && featured) railItems = [featured];
-    if (searchValue) {
-      container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
-        return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
-      }).join('') + '</div><div class="site-guide-stage is-search-mode"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
-        return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
-      }).join('') + '</div></div>';
-      setGuideAudioButtonsState();
-      return;
-    }
     container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
       return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
-    }).join('') + '</div><div class="site-guide-stage"><a class="site-guide-featured" href="' + escapeHTML(featured.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(featured)) + '"><span class="site-guide-audio-btn site-guide-featured-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(featured)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-featured-content"><span class="site-guide-featured-badge">' + escapeHTML(featured.category || getGuideFilterLabel(currentSiteGuideFilter)) + '</span><div><h4 class="site-guide-featured-title">' + escapeHTML(featured.title) + '</h4><p class="site-guide-featured-text">' + escapeHTML(featured.excerpt || 'Apri l’articolo per leggere la guida completa.') + '</p></div><div class="site-guide-featured-meta"><span>' + escapeHTML(featured.meta || 'Guida') + '</span><span>Open article</span></div></div><div class="site-guide-featured-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(featured)) + "'" + ')"></div></a><div class="site-guide-rail site-guide-rail-default">' + railItems.map(function(article) {
+    }).join('') + '</div><div class="site-guide-stage is-rail-only"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
       return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
     }).join('') + '</div></div>';
-    bindGuideRailEffects();
     setGuideAudioButtonsState();
   }
 
