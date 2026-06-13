@@ -897,6 +897,7 @@
   var AUTO_OPEN_DISTANCE = 500;
   var AUTO_CLOSE_ZOOM = 12;
   var AUTO_CLOSE_DISTANCE = 800;
+  var HERO_PREVIEW_CYCLE_MS = 2600;
 
   var SUPABASE_READY = Boolean(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.indexOf('YOUR_PROJECT') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_PUBLIC') === -1);
   var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
@@ -1030,6 +1031,8 @@
   var poiSheetStartScrollTop = 0;
   var lastRealUserGestureAt = 0;
   var lastRealUserGestureType = '';
+  var heroPreviewCycleTimer = null;
+  var heroPreviewCycleIndex = 0;
 
   function distanceMeters(a, b) {
     var R = 6371000;
@@ -2395,6 +2398,47 @@
   function updateMapVisualByZoom() { var z, raw, t; if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return; z = map.getZoom(); raw = Math.min(1, Math.max(0, (z - 17.1) / 1.35)); t = raw * raw * (3 - 2 * raw); satelliteLayer.setOpacity(1); roadsLayer.setOpacity(0.42 * t); detailedRoadsLayer.setOpacity(0.78 * t); whiteLayer.setOpacity(0); labelsLayer.setOpacity(0); }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function createCityMarkers() { places.forEach(function (place, index) { L.marker(place.coords, { title: place.name, zIndexOffset: 2600, icon: L.divIcon({ className: 'custom-label', html: '<div class="label">' + escapeHTML(place.name) + '</div>' }) }).addTo(map).on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } cityCardManuallyClosed = false; showCityByIndex(index, true); }); }); }
+  function getHeroPreviewStates() {
+    return [
+      { name: 'Riomaggiore', center: [44.0988, 9.7397], zoom: 15.45 },
+      { name: 'Manarola', center: [44.1078, 9.7276], zoom: 15.35 },
+      { name: 'Corniglia', center: [44.1198, 9.7078], zoom: 15.2 },
+      { name: 'Vernazza', center: [44.1349, 9.6829], zoom: 15.35 },
+      { name: 'Monterosso', center: [44.1467, 9.6514], zoom: 15.2 }
+    ];
+  }
+  function applyHeroPreviewState(state, animate) {
+    if (!map || !state || !Array.isArray(state.center)) return;
+    if (animate === false) {
+      map.setView(state.center, state.zoom, { animate: false });
+      return;
+    }
+    map.flyTo(state.center, state.zoom, { duration: 1.2, easeLinearity: 0.2, animate: true });
+  }
+  function stopHeroPreviewCycle() {
+    if (!heroPreviewCycleTimer) return;
+    window.clearInterval(heroPreviewCycleTimer);
+    heroPreviewCycleTimer = null;
+  }
+  function startHeroPreviewCycle() {
+    var states = getHeroPreviewStates();
+    if (!isMapPreviewMode || !map || !states.length) return;
+    stopHeroPreviewCycle();
+    heroPreviewCycleIndex = 0;
+    applyHeroPreviewState(states[heroPreviewCycleIndex], false);
+    heroPreviewCycleTimer = window.setInterval(function() {
+      heroPreviewCycleIndex = (heroPreviewCycleIndex + 1) % states.length;
+      applyHeroPreviewState(states[heroPreviewCycleIndex], true);
+    }, HERO_PREVIEW_CYCLE_MS);
+    document.addEventListener('visibilitychange', function() {
+      if (!isMapPreviewMode) return;
+      if (document.hidden) {
+        stopHeroPreviewCycle();
+        return;
+      }
+      startHeroPreviewCycle();
+    }, { passive: true });
+  }
   function setupEvents() {
     if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = function () {
@@ -2554,7 +2598,7 @@
   function runTests() { }
   function start() {
     initMap();
-    createCityMarkers();
+    if (!isMapPreviewMode) createCityMarkers();
     preloadImages();
     updateWeather(44.12, 9.71);
     if (!isMapPreviewMode) {
@@ -2562,6 +2606,7 @@
       setUserLocationButtonState('idle');
     }
     updateMapVisualByZoom();
+    if (isMapPreviewMode) startHeroPreviewCycle();
     runTests();
     if (!isMapPreviewMode) {
       applyMapFilterUI(currentMapFilter);
