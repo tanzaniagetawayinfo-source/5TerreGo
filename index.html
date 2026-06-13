@@ -747,24 +747,28 @@
     .site-feature-cta-row { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
     .site-feature-cta-row a, .site-feature-cta-row button { border: 0; border-radius: 999px; padding: 10px 13px; background: #111; color: #fff; font-size: 12px; font-weight: 950; text-decoration: none; font-family: inherit; cursor: pointer; }
     .site-feature-section.dark .site-feature-cta-row a, .site-feature-section.dark .site-feature-cta-row button { background: #ff8a1d; color: #111; }
-    #site-stories-section.story-guide-section {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: stretch;
+    .site-view-panel.ftg-section-paging #site-stories-section.story-guide-section {
+      display: grid;
+      align-items: center;
       width: 100%;
-      height: 100%;
-      min-height: 100%;
+      height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+      min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+      max-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
     }
-    #site-stories-section .site-guide-page-shell {
+    .site-view-panel.ftg-section-paging #site-stories-section .site-guide-page-shell {
       width: 100%;
-      height: 100%;
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: clamp(22px, 4vh, 38px);
-      padding: clamp(22px, 5vh, 52px) 0;
+      height: auto;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+    .site-view-panel.ftg-section-paging #site-stories-section .site-guide-centered-box {
+      width: 100%;
+      max-width: 100%;
+      display: grid;
+      gap: clamp(20px, 3.6vh, 30px);
+      align-content: start;
     }
     #site-stories-section .site-guide-page-head {
       display: flex;
@@ -1236,9 +1240,16 @@
       border-radius: 28px;
     }
     @media (max-width: 380px) {
-      #site-stories-section .site-guide-page-shell {
-        gap: 18px;
-        padding: clamp(18px, 4.5vh, 36px) 0;
+      .site-view-panel.ftg-section-paging #site-stories-section.story-guide-section {
+        height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+        min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+        max-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+      }
+      .site-view-panel.ftg-section-paging #site-stories-section .site-guide-page-shell {
+        padding: 0;
+      }
+      .site-view-panel.ftg-section-paging #site-stories-section .site-guide-centered-box {
+        gap: 16px;
       }
       #site-stories-section .site-guide-topline {
         gap: 10px;
@@ -2525,12 +2536,14 @@
 <div class="site-feature-stack">
         <section id="site-stories-section" class="site-feature-section dark story-guide-section" aria-label="Stories section">
           <div class="site-guide-page-shell">
+            <div class="site-guide-centered-box">
             <div class="site-feature-cover site-guide-page-head">
               <div class="site-feature-label-row site-guide-topline"><span class="site-feature-step" id="site-guide-step">1</span><div class="site-feature-kicker">Free Guide</div></div>
             </div>
             <div class="site-guide-stage-shell">
               <div class="site-guide-search"><div class="site-guide-search-field"><input id="site-guide-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search articles" aria-label="Search guide articles"></div></div>
               <div id="site-story-list" class="site-guide-page-content"></div>
+            </div>
             </div>
           </div>
         </section>
