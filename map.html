@@ -1140,9 +1140,22 @@
       case 'stazione':
       case 'station':
         return 'station.png';
+      case 'fermata bus':
+      case 'bus stop':
+      case 'busstop':
+        return 'busstop.png';
+      case 'atm':
+        return 'atm.png';
       case 'fontana':
       case 'fountain':
         return 'fountan.png';
+      case 'ascensore pubblico':
+      case 'public elevator':
+      case 'elevator':
+        return 'elevators.png';
+      case 'castello':
+      case 'castle':
+        return 'castle.png';
       case 'ristorante':
       case 'restaurant':
       case 'food':
@@ -1156,6 +1169,9 @@
       case 'punto panoramico':
       case 'viewpoint':
         return 'viewpoint.png';
+      case 'unknown spot':
+      case 'unknownspot':
+        return 'unknownspot.png';
       default:
         return fallback || '📌';
     }
@@ -1170,9 +1186,14 @@
     if (type === 'sentiero' || type === 'trail' || symbol === 'sentiero.png') return '<img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🥾\'))">';
     if (type === 'spiaggia' || type === 'beach' || symbol === 'beach.png') return '<img src="' + getGithubAssetUrl('beach.png') + '" alt="Beach" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏖️\'))">';
     if (type === 'stazione' || type === 'station' || symbol === 'station.png') return '<img src="' + getGithubAssetUrl('station.png') + '" alt="Train station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🚉\'))">';
+    if (type === 'fermata bus' || type === 'bus stop' || type === 'busstop' || symbol === 'busstop.png') return '<img src="' + getGithubAssetUrl('busstop.png') + '" alt="Bus stop" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🚏\'))">';
+    if (type === 'atm' || symbol === 'atm.png') return '<img src="' + getGithubAssetUrl('atm.png') + '" alt="ATM" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏧\'))">';
     if (type === 'fontana' || type === 'fountain' || symbol === 'fontana.png' || symbol === 'fountain.png' || symbol === 'fountan.png') return '<img src="' + getGithubAssetUrl('fountan.png') + '" alt="Fountain" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛲\'))">';
+    if (type === 'ascensore pubblico' || type === 'public elevator' || type === 'elevator' || symbol === 'elevators.png') return '<img src="' + getGithubAssetUrl('elevators.png') + '" alt="Elevator" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🛗\'))">';
+    if (type === 'castello' || type === 'castle' || symbol === 'castle.png') return '<img src="' + getGithubAssetUrl('castle.png') + '" alt="Castle" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏰\'))">';
     if (type === 'ferry' || symbol === 'ferrystation.png') return '<img src="' + getGithubAssetUrl('ferrystation.png') + '" alt="Ferry station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛴️\'))">';
     if (type === 'punto panoramico' || type === 'viewpoint' || symbol === 'viewpoint.png') return '<img src="' + getGithubAssetUrl('viewpoint.png') + '" alt="Viewpoint" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'📍\'))">';
+    if (type === 'unknown spot' || type === 'unknownspot' || symbol === 'unknownspot.png') return '<img src="' + getGithubAssetUrl('unknownspot.png') + '" alt="Unknown spot" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'📷\'))">';
     if (type === 'ristorante' || type === 'restaurant' || type === 'food') return '🍽️';
     if (type === 'bar') return '🍸';
     if (type === 'curiosity') return '✨';
@@ -1365,7 +1386,7 @@
       className: 'custom-poi',
       html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>',
       iconSize: [40, 40],
-      iconAnchor: [20, 20]
+      iconAnchor: [20, 34]
     });
   }
   function scheduleIncrementalPOIRefresh() {
