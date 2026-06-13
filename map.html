@@ -39,14 +39,6 @@
       background: #071424;
       touch-action: none;
     }
-    .poi-dot-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 350;
-      pointer-events: none;
-    }
     
     
     
@@ -361,7 +353,7 @@
     .custom-poi.is-dimmed .poi-label {
       opacity: .72;
     }
-    .poi-dot-label { width: 9px; height: 9px; display: block; border-radius: 999px; background: rgba(255,255,255,.96); border: 2px solid rgba(0,0,0,.58); box-shadow: 0 4px 10px rgba(0,0,0,.34); }
+    .poi-dot-label { width: 10px; height: 10px; display: block; border-radius: 999px; background: rgba(255,255,255,1); border: 2px solid rgba(0,0,0,.62); box-shadow: 0 5px 12px rgba(0,0,0,.38); }
     .poi-label.has-discount::after { content: '🔥'; position: absolute; top: -9px; right: -9px; width: 19px; height: 19px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,0.94); border: 1px solid rgba(255,138,29,0.45); box-shadow: 0 6px 14px rgba(0,0,0,0.24); font-size: 12px; }
     .trail-start-label { min-width: 38px; min-height: 38px; display: grid; place-items: center; background: transparent; border: 0; overflow: visible; }
     .trail-start-label img { width: 34px; height: 34px; display: block; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
@@ -648,8 +640,6 @@
     .user-location-marker::after { content: ""; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(30,155,255,0.45); transform: translate(-50%, -50%); animation: userLocationPulse 1.8s ease-out infinite; }
     @keyframes userLocationPulse { 0% { transform: translate(-50%, -50%) scale(.72); opacity: .85; } 100% { transform: translate(-50%, -50%) scale(1.55); opacity: 0; } }
 
-    .bottom-card { display: none !important; }
-    #card, #card-media, #card-live, #card-live-touch-layer, #card-live-badge, #card-tour-play, #card-tour-panel { display: none !important; }
 
     #tour-nav {
       position: fixed;
@@ -948,18 +938,10 @@
   ];
 
   var map, satelliteLayer, roadsLayer, detailedRoadsLayer, whiteLayer, labelsLayer, ferryRoutesLayer, ferryVehiclesLayer, trailsLayer;
-  var card = document.getElementById('card');
-  var cardTitle = document.getElementById('card-title');
-  var cardImg = document.getElementById('card-img');
-  var cardMedia = document.getElementById('card-media');
-  var cardLive = document.getElementById('card-live');
-  var cardLiveTouchLayer = document.getElementById('card-live-touch-layer');
-  var cardLiveBadge = document.getElementById('card-live-badge');
-  var cardTourPlayBtn = document.getElementById('card-tour-play');
-  var cardTourPanel = document.getElementById('card-tour-panel');
-  var cardExperiencesBtn = document.getElementById('card-experiences');
-  var cardStoriesBtn = document.getElementById('card-stories');
-  var weatherEl = document.getElementById('weather');
+  var card = null;
+  var weatherEl = null;
+  var poiDotCanvas = null;
+
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
   var poiCard = document.getElementById('poi-card');
@@ -969,9 +951,9 @@
   var poiImagesPreview = document.getElementById('poi-images-preview');
   var poiRelatedArticles = document.getElementById('poi-related-articles');
   var poiRelatedArticlesList = document.getElementById('poi-related-articles-list');
-  var poiCircle = document.getElementById('poi-circle');
+
   var poiDirections = document.getElementById('poi-directions');
-  var poiAiBtn = document.getElementById('poi-ai');
+
   var poiDiscountBtn = document.getElementById('poi-discount-btn');
   var poiDiscountNote = document.getElementById('poi-discount-note');
   var discountModal = document.getElementById('discount-modal');
@@ -1014,12 +996,7 @@
 
   var poiMarkers = [];
   var trailItems = [];
-  var poiDotCanvas = null;
-  var poiDotCanvasCtx = null;
-  var poiDotCanvasFrame = 0;
   var incrementalPOIRefreshFrame = 0;
-  var pendingPOIMarkerEntries = [];
-  var pendingPOIFrame = 0;
   var mapRefreshFrame = 0;
   var mapRefreshNeedsRail = false;
   var mapRefreshNeedsAuto = false;
@@ -1113,7 +1090,7 @@
     lat = readValue(raw.lat, raw.latitude); lng = readValue(raw.lng, raw.longitude); if (lat !== undefined && lng !== undefined) return normalizeLatLngPair(lat, lng); if (raw.lon !== undefined || raw.long !== undefined) return normalizeLatLngPair(readValue(raw.lat, raw.latitude), readValue(raw.lon, raw.long)); return { lat: Number(lat), lng: Number(lng) }; }
   function getFirstImageField(raw) { var direct; var fromList; raw = raw || {}; direct = raw.cover_image || raw.coverImage || raw.image_url || raw.imageUrl || raw.thumbnail_url || raw.thumbnailUrl || raw.thumbnail || raw.image || raw.photo_url || raw.photoUrl || raw.img || ''; if (direct) return String(direct).trim(); fromList = normalizePOIImages(raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || []); return fromList.length ? fromList[0] : ''; }
   function getAllImageFields(raw) { var images = []; var main; raw = raw || {}; main = getFirstImageField(raw); if (main) images.push(main); images = images.concat(normalizePOIImages(raw.cover_images || raw.coverImages || raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || [])); return images.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }); }
-  function normalizePOI(raw) { var parsed, symbol, mainImage, allImages, fallbackName; raw = raw || {}; parsed = parseCoords(raw); symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍'); mainImage = getFirstImageField(raw); allImages = getAllImageFields(raw); fallbackName = 'poi-' + String(raw.id || raw._id || Math.random().toString(16).slice(2)); return { id: raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2), name: String(raw.name || raw.title || fallbackName), symbol: symbol, coords: [parsed.lat, parsed.lng], lat: parsed.lat, lng: parsed.lng, image: mainImage, cover_image: raw.cover_image || mainImage, images: allImages, description: raw.description || raw.descrizione || '', type: raw.type || raw.tipo || '', owner_email: raw.owner_email || raw.email || '', phone: raw.phone || raw.telephone || '', relevance: Number(raw.importance || raw.relevance || raw.score || 0), discount: Number(raw.discount || 0), discount_info: raw.discount_info || raw.discount_text || raw.discount_description || '', emails: raw.emails || '', active_codes: Array.isArray(raw.active_codes) ? raw.active_codes : [] }; }
+  function normalizePOI(raw) { var parsed, symbol, mainImage, allImages, fallbackName, zoomScore; raw = raw || {}; parsed = parseCoords(raw); symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍'); mainImage = getFirstImageField(raw); allImages = getAllImageFields(raw); fallbackName = 'poi-' + String(raw.id || raw._id || Math.random().toString(16).slice(2)); zoomScore = getPOIZoomScoreFromRaw(raw); return { id: raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2), name: String(raw.name || raw.title || fallbackName), symbol: symbol, coords: [parsed.lat, parsed.lng], lat: parsed.lat, lng: parsed.lng, image: mainImage, cover_image: raw.cover_image || mainImage, images: allImages, description: raw.description || raw.descrizione || '', type: raw.type || raw.tipo || '', owner_email: raw.owner_email || raw.email || '', phone: raw.phone || raw.telephone || '', relevance: Number(raw.importance || raw.relevance || raw.score || 0), zoom_point: zoomScore, zoomPoint: zoomScore, discount: Number(raw.discount || 0), discount_info: raw.discount_info || raw.discount_text || raw.discount_description || '', emails: raw.emails || '', active_codes: Array.isArray(raw.active_codes) ? raw.active_codes : [] }; }
   function normalizePOIImages(value) { var parsed; if (!value) return []; if (Array.isArray(value)) return value.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean); if (typeof value === 'string') { value = value.trim(); if (!value) return []; try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean); } catch (error) {} if (value.indexOf(',') !== -1) return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); return [value]; } return []; }
   function normalizeRelatedPois(value) { var parsed; if (Array.isArray(value)) return value.map(function(item) { return String(item).trim(); }).filter(Boolean); if (typeof value === 'string' && value.trim()) { try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.map(function(item) { return String(item).trim(); }).filter(Boolean); } catch (error) {} return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); } return []; }
   function getPOIArticleUrl(post) { var slug = String(post && post.slug || '').trim(); if (slug) return '/blog/' + encodeURIComponent(slug); return '#'; }
@@ -1225,7 +1202,61 @@
     if (type === 'curiosity') return '✨';
     return escapeHTML(symbol || '📌');
   }
+  function clampPOIZoomScore(value) { var n = Number(value); if (!Number.isFinite(n)) return null; return Math.max(1, Math.min(100, n)); }
+  function getPOIZoomScoreFromRaw(raw) {
+    raw = raw || {};
+    return clampPOIZoomScore(
+      readValue(
+        raw.zoom_point,
+        readValue(
+          raw.zoomPoint,
+          readValue(
+            raw.poi_zoom,
+            readValue(
+              raw.poiZoom,
+              readValue(
+                raw.zoom_score,
+                readValue(raw.zoomScore, readValue(raw.zoom_level_score, raw.zoom))
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+  function mapPOIZoomScoreToMinZoom(score) {
+    var value = clampPOIZoomScore(score);
+    var minMapZoom = 11.2;
+    var maxMapZoom = 17.8;
+    if (value === null) return null;
+    return minMapZoom + ((value - 1) / 99) * (maxMapZoom - minMapZoom);
+  }
   function getMinZoomForImportance(importance) { var n = Number(importance || 0); if (n >= 95) return 11; if (n >= 85) return 12; if (n >= 75) return 13; if (n >= 65) return 14; if (n >= 55) return 15; if (n >= 40) return 16; return 17; }
+  function getPOIIconMinZoom(poi, importance) {
+    var score = clampPOIZoomScore(
+      poi && readValue(
+        poi.zoom_point,
+        readValue(
+          poi.zoomPoint,
+          readValue(
+            poi.poi_zoom,
+            readValue(
+              poi.poiZoom,
+              readValue(
+                poi.zoom_score,
+                readValue(
+                  poi.zoomScore,
+                  readValue(poi.zoom_level_score, poi.zoom)
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+    if (score !== null) return mapPOIZoomScoreToMinZoom(score);
+    return getMinZoomForImportance(importance);
+  }
   function getYouTubeEmbedUrl(videoId) { if (!videoId) return ''; return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&origin=' + encodeURIComponent(window.location.origin); }
   function getYouTubeWatchUrl(videoId) { if (!videoId) return 'https://www.youtube.com'; return 'https://www.youtube.com/watch?v=' + encodeURIComponent(videoId); }
   function getPreferredSpeechVoice() { var voices, best = null, bestScore = -999; if (!('speechSynthesis' in window) || !window.speechSynthesis.getVoices) return null; voices = window.speechSynthesis.getVoices() || []; voices.forEach(function(v){ var lang = String(v.lang || '').toLowerCase(); var name = String(v.name || '').toLowerCase(); var score = lang.indexOf('en') === 0 ? 10 : 0; if (name.indexOf('natural') !== -1 || name.indexOf('enhanced') !== -1 || name.indexOf('premium') !== -1 || name.indexOf('google') !== -1 || name.indexOf('microsoft') !== -1 || name.indexOf('siri') !== -1) score += 4; if (score > bestScore) { bestScore = score; best = v; } }); preferredSpeechVoice = best || voices[0] || null; return preferredSpeechVoice; }
@@ -1275,6 +1306,8 @@
   function setCardContent(item) {}
   function showCityCard(item) {}
   function hideCard(manual) {}
+  function renderTourLocationRequestPanel() {}
+  function refreshMapLoadingState() {}
   function centerCity(place) { var zoomLevel; if (!place) return; isProgrammaticMove = true; zoomLevel = place.name === 'Monterosso' ? 14 : 15; map.flyTo(place.coords, zoomLevel, { duration: 1.2 }); window.setTimeout(function () { isProgrammaticMove = false; updatePOIVisibility(); updateTrailWidths(); }, 1400); }
   function showCityByIndex(index, shouldCenter) { var place; if (shouldCenter === undefined) shouldCenter = true; if (index < 0 || index >= places.length) return; currentDataset = 'places'; currentIndex = index; currentPOI = null; place = places[index]; if (shouldCenter) centerCity(place); }
   function getClosestPlaceNameForCoords(coords) { var bestName = ''; var bestDistance = Infinity; if (!isValidCoords(coords)) return ''; places.forEach(function(place) { var distance = distanceMeters(coords, place.coords); if (distance < bestDistance) { bestDistance = distance; bestName = place.name; } }); return bestName; }
@@ -1288,7 +1321,6 @@
   function getShortestVillageTourOrder(startCoords, stops) { var candidates = stops.filter(function(poi) { return poi && isValidCoords(poi.coords); }); var bestOrder = null; var bestDistance = Infinity; var used = []; var current = []; function distanceFor(order) { var total = 0; var last = startCoords; order.forEach(function(poi) { total += distanceMeters(last, poi.coords); last = poi.coords; }); return total; } function walk() { var i; var distance; if (current.length === candidates.length) { distance = distanceFor(current); if (distance < bestDistance) { bestDistance = distance; bestOrder = current.slice(); } return; } for (i = 0; i < candidates.length; i += 1) { if (used[i]) continue; used[i] = true; current.push(candidates[i]); walk(); current.pop(); used[i] = false; } } if (candidates.length <= 1) return candidates; walk(); return bestOrder || candidates; }
   function isUserInsideVillage(place) { if (!place || !isValidCoords(userLocationLatLng)) return false; return getClosestPlaceNameForCoords(userLocationLatLng) === place.name && distanceMeters(place.coords, userLocationLatLng) <= 950; }
   function getTourStartInstruction(place) { return 'Go to ' + (place && place.name ? place.name : 'this village') + ' and enable location to start the tour.'; }
-  function renderTourLocationRequestPanel(place, message) {}
   function getLocalTourPath(fromPoint, toPoint) { var points = []; var steps = 10; var i; var t; var lat; var lng; var wiggleLat; var wiggleLng; var dLat; var dLng; if (!isValidCoords(fromPoint) || !isValidCoords(toPoint)) return []; dLat = toPoint[0] - fromPoint[0]; dLng = toPoint[1] - fromPoint[1]; for (i = 0; i <= steps; i += 1) { t = i / steps; wiggleLat = Math.sin(t * Math.PI) * dLng * 0.10; wiggleLng = Math.sin(t * Math.PI) * -dLat * 0.10; lat = fromPoint[0] + dLat * t + wiggleLat; lng = fromPoint[1] + dLng * t + wiggleLng; points.push([lat, lng]); } return points; }
   function attachTourStopLocalPaths(startCoords, orderedStops) { var previous = startCoords; return orderedStops.map(function(stop) { var copy = Object.assign({}, stop); copy.localTourPath = getLocalTourPath(previous, stop.coords); previous = stop.coords; return copy; }); }
   function drawAITourRouteLine(latLngs) { if (!map || !latLngs || latLngs.length < 2) return false; if (activeTour) activeTour.currentLegPath = latLngs.slice(); if (aiTourRouteLine && map) { try { map.removeLayer(aiTourRouteLine); } catch (error) {} aiTourRouteLine = null; } aiTourRouteLine = L.polyline(latLngs, { color: '#ff8a1d', weight: 5, opacity: 0.96, dashArray: null, lineCap: 'round', lineJoin: 'round' }).addTo(map); aiTourRouteLine.bringToFront(); updateTourCompass(); return true; }
@@ -1315,81 +1347,49 @@
   function playActiveTourStopAudio() { var stop = getActiveTourStop(); var distance; var text; var utter; if (!stop) return; if (tourAudioPlaying) { stopTourAudio(); return; } distance = getActiveTourStopDistance(); if (!Number.isFinite(distance) || distance > activeTourArrivalRadius) { showUserLocationToast('Reach this stop to listen to the description.'); return; } text = (stop && stop.name ? stop.name + '. ' : '') + (stop && stop.description ? stop.description : 'No description available.'); if (!('speechSynthesis' in window) || typeof window.SpeechSynthesisUtterance === 'undefined') { alert(text); return; } stopTourAudio(); utter = new SpeechSynthesisUtterance(text); configureTourUtterance(utter); utter.onend = function() { if (tourAudioUtterance === utter) { tourAudioUtterance = null; setTourAudioButtonState(false); } }; utter.onerror = function() { if (tourAudioUtterance === utter) { tourAudioUtterance = null; setTourAudioButtonState(false); } }; tourAudioUtterance = utter; setTourAudioButtonState(true); window.speechSynthesis.speak(utter); }
   function goToNextActiveTourStop() { var distance; if (!activeTour) return; distance = getActiveTourStopDistance(); if (!Number.isFinite(distance) || distance > activeTourArrivalRadius) { showUserLocationToast('Reach this stop before continuing to the next one.'); return; } stopTourAudio(); closePOICard(false); activeTour.currentCardStopId = null; if (activeTour.index >= activeTour.stops.length - 1) { showUserLocationToast('Tour completed.'); endActiveTour(); return; } activeTour.index += 1; activeTourLastRouteKey = ''; renderActiveTourNav(); centerMapOnTourUser(); updateActiveTourLegRoute(); }
   function checkActiveTourArrival() { var stop; var distance; var id; if (!activeTour) return; stop = getActiveTourStop(); if (!stop) return; distance = getActiveTourStopDistance(); renderActiveTourNav(); updateTourCompass(); if (Number.isFinite(distance) && activeTour.currentCardStopId && distance > activeTourLeaveRadius) { closePOICard(false); activeTour.currentCardStopId = null; stopTourAudio(); renderActiveTourNav(); updateActiveTourLegRoute(); return; } if (!Number.isFinite(distance) || distance > activeTourArrivalRadius) return; id = String(stop.id || stop.name || activeTour.index); if (activeTour.openedStopIds[id] && currentPOI === stop && poiCard && poiCard.getAttribute('aria-hidden') === 'false') return; activeTour.openedStopIds[id] = true; activeTour.currentCardStopId = id; openActiveTourStop(); stopTourAudio(); showUserLocationToast('You reached ' + (stop.name || 'this stop') + '. Open the audio only if you want to listen.'); }
-  function startVillageTour(place, startLabel, startCoords) { var stops; var ordered; if (!place) return; pendingTourPlace = place; pendingTourLocationRequest = true; if (!isValidCoords(userLocationLatLng)) { renderTourLocationRequestPanel(place, 'To start this tour, allow location access when your browser asks.'); startUserLocationWatch(); return; } if (!isUserInsideVillage(place)) { showUserLocationToast(getTourStartInstruction(place)); renderTourLocationRequestPanel(place, getTourStartInstruction(place)); return; } startCoords = userLocationLatLng.slice(); startLabel = 'your current location'; stops = getSelectedTourPOIsForVillage(place); if (!stops.length) { showUserLocationToast('Select at least one tourist stop before starting the tour.'); return; } ordered = getShortestVillageTourOrder(startCoords, stops); ordered = attachTourStopLocalPaths(startCoords, ordered); beginActiveTour(place, ordered, startCoords); pendingTourPlace = null; pendingTourLocationRequest = false; showUserLocationToast(place.name + ' tour started from your current location.'); hideCard(true); }
-  function renderVillageTourPanel() {}
-  function renderVillageTourCustomizePanel() {}
-  function closeVillageTourPanel() {}
-  function handleVillageTourPanelClick(event) {}
-  function createPOIDotIcon(poi) { return L.divIcon({ className: 'custom-poi custom-poi-dot', html: '<div class="poi-dot-label"></div>', iconSize: [13, 13], iconAnchor: [6, 6] }); }
-  function createPOIFullIcon(poi) {
-    var html = getPOIIconHTML(poi);
-    if (!html || !String(html).trim()) html = '📍';
-    return L.divIcon({ className: 'custom-poi', html: '<div class="poi-label' + (getPOIDiscountValue(poi) > 0 ? ' has-discount' : '') + '">' + html + '</div>', iconSize: [38, 38], iconAnchor: [19, 19] });
-  }
-  function ensurePOIDotCanvas() {
-    var container;
-    if (!map) return;
-    container = map.getContainer();
-    if (!container) return;
-    if (!poiDotCanvas) {
-      poiDotCanvas = document.createElement('canvas');
-      poiDotCanvas.className = 'poi-dot-canvas';
-      poiDotCanvas.style.zIndex = '350';
-      container.appendChild(poiDotCanvas);
-      poiDotCanvasCtx = poiDotCanvas.getContext('2d');
-    } else if (poiDotCanvas.parentNode !== container) {
-      container.appendChild(poiDotCanvas);
+  function startVillageTour(place, startLabel, startCoords) {
+    var stops;
+    var ordered;
+    if (!place) return;
+    pendingTourPlace = place;
+    pendingTourLocationRequest = true;
+    if (!isValidCoords(userLocationLatLng)) {
+      startUserLocationWatch();
+      return;
     }
-    resizePOIDotCanvas();
+    if (!isUserInsideVillage(place)) {
+      showUserLocationToast(getTourStartInstruction(place));
+      return;
+    }
+    startCoords = userLocationLatLng.slice();
+    startLabel = 'your current location';
+    stops = getSelectedTourPOIsForVillage(place);
+    if (!stops.length) {
+      showUserLocationToast('Select at least one tourist stop before starting the tour.');
+      return;
+    }
+    ordered = getShortestVillageTourOrder(startCoords, stops);
+    ordered = attachTourStopLocalPaths(startCoords, ordered);
+    beginActiveTour(place, ordered, startCoords);
+    pendingTourPlace = null;
+    pendingTourLocationRequest = false;
+    showUserLocationToast(place.name + ' tour started from your current location.');
   }
-  function resizePOIDotCanvas() {
-    var size;
-    var dpr;
-    if (!map || !poiDotCanvas) return;
-    size = map.getSize();
-    dpr = window.devicePixelRatio || 1;
-    if (poiDotCanvas.__width === size.x && poiDotCanvas.__height === size.y && poiDotCanvas.__dpr === dpr) return;
-    poiDotCanvas.__width = size.x;
-    poiDotCanvas.__height = size.y;
-    poiDotCanvas.__dpr = dpr;
-    poiDotCanvas.style.width = size.x + 'px';
-    poiDotCanvas.style.height = size.y + 'px';
-    poiDotCanvas.width = Math.max(1, Math.round(size.x * dpr));
-    poiDotCanvas.height = Math.max(1, Math.round(size.y * dpr));
-    poiDotCanvasCtx = poiDotCanvas.getContext('2d');
-    poiDotCanvasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  function drawPOIDotCanvas() {
-    var zoom;
-    if (!map) return;
-    ensurePOIDotCanvas();
-    if (!poiDotCanvas || !poiDotCanvasCtx) return;
-    resizePOIDotCanvas();
-    poiDotCanvasCtx.clearRect(0, 0, poiDotCanvas.__width || 0, poiDotCanvas.__height || 0);
-    zoom = map.getZoom();
-    poiMarkers.forEach(function(item) {
-      var minZoom;
-      var point;
-      if (!item || !item.poi || !isValidCoords(item.poi.coords)) return;
-      if (activeTour || !isPOIMatchFilter(item.poi, currentMapFilter)) return;
-      minZoom = getMinZoomForImportance(item.importance);
-      if (zoom >= minZoom) return;
-      point = map.latLngToContainerPoint(item.poi.coords);
-      if (!point || point.x < -10 || point.y < -10 || point.x > (poiDotCanvas.__width || 0) + 10 || point.y > (poiDotCanvas.__height || 0) + 10) return;
-      poiDotCanvasCtx.beginPath();
-      poiDotCanvasCtx.arc(point.x, point.y, 4.5, 0, Math.PI * 2);
-      poiDotCanvasCtx.fillStyle = 'rgba(255,255,255,.96)';
-      poiDotCanvasCtx.fill();
-      poiDotCanvasCtx.lineWidth = 2;
-      poiDotCanvasCtx.strokeStyle = 'rgba(0,0,0,.58)';
-      poiDotCanvasCtx.stroke();
+  function createPOIDotIcon(poi) {
+    return L.divIcon({
+      className: 'custom-poi custom-poi-dot',
+      html: '<div class="poi-dot-label"></div>',
+      iconSize: [16, 16],
+      iconAnchor: [8, 8]
     });
   }
-  function schedulePOIDotCanvasDraw() {
-    if (poiDotCanvasFrame) return;
-    poiDotCanvasFrame = window.requestAnimationFrame(function() {
-      poiDotCanvasFrame = 0;
-      drawPOIDotCanvas();
+  function createPOIFullIcon(poi) {
+    var hasDiscount = getPOIDiscountValue(poi) > 0;
+    return L.divIcon({
+      className: 'custom-poi',
+      html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
   }
   function scheduleIncrementalPOIRefresh() {
@@ -1418,56 +1418,20 @@
       if (needsAuto) evaluateAutoCard();
     });
   }
-  function cancelPendingPOIMarkerQueue() {
-    if (pendingPOIFrame) {
-      window.cancelAnimationFrame(pendingPOIFrame);
-      pendingPOIFrame = 0;
-    }
-    pendingPOIMarkerEntries = [];
-  }
-  function schedulePendingPOIMarkerDrain() {
-    var batchSize = 80;
-    if (pendingPOIFrame) return;
-    pendingPOIFrame = window.requestAnimationFrame(function() {
-      var zoom;
-      var processed = 0;
-      pendingPOIFrame = 0;
-      if (!pendingPOIMarkerEntries.length) return;
-      zoom = map ? map.getZoom() : 11;
-      while (pendingPOIMarkerEntries.length && processed < batchSize) {
-        var entry = pendingPOIMarkerEntries.shift();
-        var minZoom;
-        if (!entry || !entry.poi || !isValidCoords(entry.poi.coords)) {
-          processed += 1;
-          continue;
-        }
-        poiMarkers.push(entry);
-        minZoom = getMinZoomForImportance(entry.importance);
-        if (!activeTour && isPOIMatchFilter(entry.poi, currentMapFilter) && zoom >= minZoom && entry.marker && map && !map.hasLayer(entry.marker)) {
-          applyPOIIconByZoom(entry, zoom, minZoom);
-          entry.marker.addTo(map);
-        }
-        processed += 1;
-      }
-      schedulePOIDotCanvasDraw();
-      renderBottomRailCards();
-      updateExclusiveDiscountFilterVisibility();
-      updateSelectedPOIEmphasis();
-      if (pendingPOIMarkerEntries.length) schedulePendingPOIMarkerDrain();
-    });
-  }
   function isPOIMatchFilter(poi, filter) { var type = normalizePOIType(poi && poi.type); filter = String(filter || 'all'); if (filter === 'all') return true; if (filter === 'trails') return false; if (filter === 'discounts') return getPOIDiscountValue(poi) > 0; if (filter === 'viewpoint') return type === 'punto panoramico'; if (filter === 'beach') return type === 'spiaggia'; if (filter === 'food') return type === 'ristorante' || type === 'bar'; if (filter === 'church') return type === 'chiesa'; if (filter === 'monument') return type === 'monumento'; if (filter === 'station') return type === 'stazione'; if (filter === 'ferry') return type === 'ferry'; if (filter === 'curiosity') return type === 'curiosity'; return true; }
   function hasDiscountedPOIs() { return poiMarkers.some(function(item) { return item && item.poi && getPOIDiscountValue(item.poi) > 0; }); }
   function updateExclusiveDiscountFilterVisibility() { var btn = document.getElementById('exclusive-discounts-filter'); var hasDiscounts = hasDiscountedPOIs(); if (!btn) return; if (hasDiscounts) { btn.classList.remove('hidden'); btn.style.display = ''; } else { btn.classList.add('hidden'); btn.style.display = 'none'; if (currentMapFilter === 'discounts') applyMapFilterUI('all'); } }
   function isTrailMatchFilter(filter) { filter = String(filter || 'all'); return filter === 'all' || filter === 'trails'; }
   function applyPOIIconByZoom(item, zoom, minZoom) {
+    var useDot;
     if (!item || !item.marker || !item.poi) return;
-    if (item._displayMode !== 'full') {
-      item.marker.setIcon(createPOIFullIcon(item.poi));
-      item._displayMode = 'full';
+    useDot = Number(zoom) < Number(minZoom);
+    if (item._displayMode !== (useDot ? 'dot' : 'full')) {
+      item.marker.setIcon(useDot ? createPOIDotIcon(item.poi) : createPOIFullIcon(item.poi));
+      item._displayMode = useDot ? 'dot' : 'full';
     }
     item.marker.options.pane = 'poiPane';
-    item.marker.setZIndexOffset(3400);
+    item.marker.setZIndexOffset(useDot ? 3000 : 3400);
     item.marker.options.interactive = true;
     if (item.marker._icon) item.marker._icon.style.pointerEvents = '';
   }
@@ -1507,15 +1471,13 @@
     poiMarkers.forEach(function(item) {
       var shouldShow;
       var minZoom;
-      var useDot;
       if (!item || !item.poi || !isValidCoords(item.poi.coords)) return;
       shouldShow = !activeTour && isPOIMatchFilter(item.poi, currentMapFilter);
-      minZoom = getMinZoomForImportance(item.importance);
-      useDot = zoom < minZoom;
+      minZoom = getPOIIconMinZoom(item.poi, item.importance);
 
       if (item.marker) item.marker.setLatLng(item.poi.coords);
 
-      if (!shouldShow || useDot) {
+      if (!shouldShow) {
         if (item.marker && map.hasLayer(item.marker)) map.removeLayer(item.marker);
         return;
       }
@@ -1528,8 +1490,8 @@
     visibleTrailSymbols = getVisibleTrailMapItems(zoom);
     separateMapSymbols(visibleTrailSymbols, zoom).forEach(addSeparatedMapSymbolToLayer);
 
-    schedulePOIDotCanvasDraw();
-    if (poiDotCanvas) poiDotCanvas.style.zIndex = '350';
+    
+    if (poiDotCanvas) poiDotCanvas.style.zIndex = '120';
     if (map.getPane('poiPane')) map.getPane('poiPane').style.zIndex = 690;
     if (map.getPane('trailPane')) map.getPane('trailPane').style.zIndex = 640;
   }
@@ -1587,7 +1549,7 @@
     window.requestAnimationFrame(updateSelectedPOIEmphasis);
   }
   function updateFerryVisibilityForFilter() { var showFerries = currentMapFilter === 'all' || currentMapFilter === 'ferry'; if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
-  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; document.querySelectorAll('#map-filter-bar .mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.getAttribute('data-map-filter') === currentMapFilter); }); updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); }
+  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); }
   function getSelectedLanguageCode() {
     var htmlLang = document.documentElement && document.documentElement.lang ? String(document.documentElement.lang).trim().toLowerCase() : '';
     var stored = '';
@@ -1610,34 +1572,78 @@
   function formatWeatherDate(value) { var date = new Date(String(value || '') + 'T12:00:00'); if (!Number.isFinite(date.getTime())) return String(value || ''); return new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short', day: '2-digit', month: 'short' }).format(date); }
   function formatWeatherValue(value, suffix) { if (value === undefined || value === null || value === '') return '—'; if (typeof value === 'number') return String(Math.round(value * 10) / 10) + (suffix || ''); return String(value) + (suffix || ''); }
   function getWeatherEmoji(code) { code = Number(code); if (code === 0) return '☀️'; if (code === 1) return '🌤️'; if (code === 2) return '⛅'; if (code === 3) return '☁️'; if ([45,48].indexOf(code) !== -1) return '🌫️'; if ([51,53,55,56,57].indexOf(code) !== -1) return '🌦️'; if ([61,63,65,66,67,80,81,82].indexOf(code) !== -1) return '🌧️'; if ([71,73,75,77,85,86].indexOf(code) !== -1) return '❄️'; if ([95,96,99].indexOf(code) !== -1) return '⛈️'; return '🌡️'; }
-  async function updateWeather(lat, lng) { try { var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7'; var response = await fetch(url); var data = await response.json(); var temperature = data && data.current_weather ? data.current_weather.temperature : undefined; siteWeatherData = data || null; if (weatherEl) weatherEl.innerText = temperature === undefined ? '--' : getWeatherEmoji(data && data.current_weather ? data.current_weather.weathercode : null) + ' ' + temperature + '°'; } catch (error) { siteWeatherData = null; if (weatherEl) weatherEl.innerText = '--'; } }
+  async function updateWeather(lat, lng) {
+    try {
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&current_weather=true&hourly=temperature_2m,weathercode,precipitation_probability,windspeed_10m,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset,uv_index_max&timezone=Europe%2FRome&forecast_days=7';
+      var response = await fetch(url);
+      var data = await response.json();
+      siteWeatherData = data || null;
+    } catch (error) {
+      siteWeatherData = null;
+    }
+  }
   function getUserDisplayName(user) { var meta; if (!user) return 'User'; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return 'User'; }
   async function readCurrentUser() { var sessionResponse, session, userResponse; if (!supabaseClient) return null; sessionResponse = await supabaseClient.auth.getSession(); session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null; if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
   async function checkUser() { var user = await readCurrentUser(); var menuName = document.getElementById('app-menu-username'); currentUser = user; window.FTG_CURRENT_USER = user || null; document.body.classList.toggle('user-logged-in', Boolean(user)); if (!user) { if (menuName) menuName.innerText = 'Ospite'; return false; } if (menuName) menuName.innerText = getUserDisplayName(user); return true; }
   function startUserPolling() { var tries = 0; if (userCheckTimer) { clearInterval(userCheckTimer); userCheckTimer = null; } userCheckTimer = setInterval(async function () { tries += 1; await checkUser(); if (currentUser || tries >= 12) { clearInterval(userCheckTimer); userCheckTimer = null; } }, 250); }
-  function updateUserLocationOnMap(position) { var lat, lng, accuracy, tourPlace, gpsHeading; if (!map || !position || !position.coords) return; lat = Number(position.coords.latitude); lng = Number(position.coords.longitude); accuracy = Math.max(8, Number(position.coords.accuracy || 30)); gpsHeading = Number(position.coords.heading); if (Number.isFinite(gpsHeading) && gpsHeading >= 0 && Number(position.coords.speed || 0) >= 0.7) setTourHeading(gpsHeading, 'gps'); if (!Number.isFinite(lat) || !Number.isFinite(lng)) return; userLocationLatLng = [lat, lng]; if (!userLocationMarker) userLocationMarker = L.marker(userLocationLatLng, { icon: createUserLocationIcon(), interactive: false, zIndexOffset: 2000 }).addTo(map); else userLocationMarker.setLatLng(userLocationLatLng); if (!userLocationAccuracyCircle) userLocationAccuracyCircle = L.circle(userLocationLatLng, { radius: accuracy, color: '#1e9bff', weight: 1, opacity: 0.35, fillColor: '#1e9bff', fillOpacity: 0.08, interactive: false }).addTo(map); else { userLocationAccuracyCircle.setLatLng(userLocationLatLng); userLocationAccuracyCircle.setRadius(accuracy); } setUserLocationButtonState('active'); tourPlace = userLocationRequestMode === 'tour' && pendingTourLocationRequest ? pendingTourPlace : null; if (tourPlace && !activeTour && card && card.getAttribute('aria-hidden') === 'false') { if (isUserInsideVillage(tourPlace)) { showUserLocationToast('Location enabled. Starting tour...'); startVillageTour(tourPlace, 'your current location', userLocationLatLng.slice()); return; } renderTourLocationRequestPanel(tourPlace, getTourStartInstruction(tourPlace)); showUserLocationToast(getTourStartInstruction(tourPlace)); return; } if (activeTour) { checkActiveTourArrival(); if (activeTourFollowUser) centerMapOnTourUser(); updateActiveTourLegRoute(); return; } if (userLocationFirstFix) { userLocationFirstFix = false; isProgrammaticMove = true; map.flyTo(userLocationLatLng, Math.max(map.getZoom(), 16), { duration: 0.9 }); window.setTimeout(function () { isProgrammaticMove = false; }, 1000); } }
+  function updateUserLocationOnMap(position) {
+    var lat, lng, accuracy, tourPlace, gpsHeading;
+    if (!map || !position || !position.coords) return;
+    lat = Number(position.coords.latitude);
+    lng = Number(position.coords.longitude);
+    accuracy = Math.max(8, Number(position.coords.accuracy || 30));
+    gpsHeading = Number(position.coords.heading);
+    if (Number.isFinite(gpsHeading) && gpsHeading >= 0 && Number(position.coords.speed || 0) >= 0.7) setTourHeading(gpsHeading, 'gps');
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    userLocationLatLng = [lat, lng];
+    if (!userLocationMarker) userLocationMarker = L.marker(userLocationLatLng, { icon: createUserLocationIcon(), interactive: false, zIndexOffset: 2000 }).addTo(map);
+    else userLocationMarker.setLatLng(userLocationLatLng);
+    if (!userLocationAccuracyCircle) userLocationAccuracyCircle = L.circle(userLocationLatLng, { radius: accuracy, color: '#1e9bff', weight: 1, opacity: 0.35, fillColor: '#1e9bff', fillOpacity: 0.08, interactive: false }).addTo(map);
+    else {
+      userLocationAccuracyCircle.setLatLng(userLocationLatLng);
+      userLocationAccuracyCircle.setRadius(accuracy);
+    }
+    setUserLocationButtonState('active');
+    tourPlace = userLocationRequestMode === 'tour' && pendingTourLocationRequest ? pendingTourPlace : null;
+    if (tourPlace && !activeTour) {
+      if (isUserInsideVillage(tourPlace)) {
+        showUserLocationToast('Location enabled. Starting tour...');
+        startVillageTour(tourPlace, 'your current location', userLocationLatLng.slice());
+        return;
+      }
+      showUserLocationToast(getTourStartInstruction(tourPlace));
+      return;
+    }
+    if (activeTour) {
+      checkActiveTourArrival();
+      if (activeTourFollowUser) centerMapOnTourUser();
+      updateActiveTourLegRoute();
+      return;
+    }
+    if (userLocationFirstFix) {
+      userLocationFirstFix = false;
+      isProgrammaticMove = true;
+      map.flyTo(userLocationLatLng, Math.max(map.getZoom(), 16), { duration: 0.9 });
+      window.setTimeout(function () { isProgrammaticMove = false; }, 1000);
+    }
+  }
   function resetUserLocationWatch() { if (userLocationWatchId !== null && navigator.geolocation) { try { navigator.geolocation.clearWatch(userLocationWatchId); } catch (error) {} } userLocationWatchId = null; userLocationFirstFix = true; }
-  function handleUserLocationError(error) { var message = userLocationRequestMode === 'tour' ? 'Location is not available right now.' : 'Your location is not available right now.'; resetUserLocationWatch(); if (error && error.code === 1) message = userLocationRequestMode === 'tour' ? 'Location is required to start the tour. Tap Enable location and allow access when your browser asks.' : 'Location permission was denied. Allow location access to center the map on you.'; if (error && error.code === 2) message = userLocationRequestMode === 'tour' ? 'Your browser cannot find your position. Tap Enable location and try again outdoors.' : 'Your browser cannot find your position. Try again outdoors or with GPS enabled.'; if (error && error.code === 3) message = userLocationRequestMode === 'tour' ? 'Location search timed out. Tap Enable location to try again.' : 'Location search timed out. Tap the compass to try again.'; showUserLocationToast(message); if (!userLocationLatLng) setUserLocationButtonState('idle'); else setUserLocationButtonState('active'); if (userLocationRequestMode === 'tour' && pendingTourLocationRequest && pendingTourPlace && card && card.getAttribute('aria-hidden') === 'false') renderTourLocationRequestPanel(pendingTourPlace, message); }
+  function handleUserLocationError(error) {
+    var message = userLocationRequestMode === 'tour' ? 'Location is not available right now.' : 'Your location is not available right now.';
+    resetUserLocationWatch();
+    if (error && error.code === 1) message = userLocationRequestMode === 'tour' ? 'Location is required to start the tour. Tap Enable location and allow access when your browser asks.' : 'Location permission was denied. Allow location access to center the map on you.';
+    if (error && error.code === 2) message = userLocationRequestMode === 'tour' ? 'Your browser cannot find your position. Tap Enable location and try again outdoors.' : 'Your browser cannot find your position. Try again outdoors or with GPS enabled.';
+    if (error && error.code === 3) message = userLocationRequestMode === 'tour' ? 'Location search timed out. Tap Enable location to try again.' : 'Location search timed out. Tap the compass to try again.';
+    showUserLocationToast(message);
+    if (!userLocationLatLng) setUserLocationButtonState('idle');
+    else setUserLocationButtonState('active');
+  }
   function startUserLocationWatch() { if (!isGeolocationAvailable()) { handleUserLocationError({ code: 2 }); return; } resetUserLocationWatch(); userLocationFirstFix = true; setUserLocationButtonState('pending'); showUserLocationToast('Looking for your location...'); navigator.geolocation.getCurrentPosition(function(position) { updateUserLocationOnMap(position); if (userLocationWatchId === null) userLocationWatchId = navigator.geolocation.watchPosition(updateUserLocationOnMap, handleUserLocationError, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }); }, handleUserLocationError, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }); }
   function requestTourLocationAgain(place) { userLocationRequestMode = 'tour'; if (place) pendingTourPlace = place; pendingTourLocationRequest = true; resetUserLocationWatch(); startUserLocationWatch(); }
   function requestPlainUserLocation() { userLocationRequestMode = 'plain'; pendingTourPlace = null; pendingTourLocationRequest = false; resetUserLocationWatch(); startUserLocationWatch(); }
   function getClosestCity() { var center = map.getCenter(), minDist = Infinity, closestIndex = -1; places.forEach(function (place, index) { var distance = center.distanceTo(L.latLng(place.coords)); if (distance < minDist) { minDist = distance; closestIndex = index; } }); return { index: closestIndex, distance: minDist }; }
   function evaluateAutoCard() {
-    if (USE_BOTTOM_RAIL) {
-      hideCard(false);
-      return;
-    }
-    var zoom, closest;
-    if (isProgrammaticMove || poiCard.getAttribute('aria-hidden') === 'false') return;
-    zoom = map.getZoom();
-    closest = getClosestCity();
-    if (cityCardManuallyClosed && closest.index === currentIndex) return;
-    if (cityCardManuallyClosed && closest.index !== currentIndex) cityCardManuallyClosed = false;
-    if (zoom >= AUTO_OPEN_ZOOM && closest.distance < AUTO_OPEN_DISTANCE) {
-      if (currentDataset !== 'places' || currentIndex !== closest.index || card.getAttribute('aria-hidden') === 'true') showCityByIndex(closest.index, false);
-      return;
-    }
-    if (zoom < AUTO_CLOSE_ZOOM || closest.distance > AUTO_CLOSE_DISTANCE) hideCard(false);
+    return;
   }
   function getRailSearchQuery() {
     return searchInput ? String(searchInput.value || '').trim() : '';
@@ -1852,7 +1858,7 @@
       if (item && item.trail) showTrailCard(item.trail);
     }
   }
-  function destroyPoiMiniMap() { if (poiMiniMap) { try { poiMiniMap.remove(); } catch (error) {} poiMiniMap = null; } if (poiCircle) poiCircle.innerHTML = ''; }
+  function destroyPoiMiniMap() { if (poiMiniMap) { try { poiMiniMap.remove(); } catch (error) {} poiMiniMap = null; } }
   function closePOICard(immediate) { closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; updateSelectedPOIEmphasis(); if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); updateSelectedPOIEmphasis(); } }, 360); }
   function setPOISheetHeight(percent, animated) { if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = percent + 'dvh'; poiCard.classList.toggle('sheet-expanded', percent >= 88); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
   function getPOISheetPercentFromHeight(px) { var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); return (Number(px) / vh) * 100; }
@@ -2038,8 +2044,6 @@
     if (!id) return null;
     return poiMarkers.find(function(entry) {
       return getPOIEntryId(entry && entry.poi) === id;
-    }) || pendingPOIMarkerEntries.find(function(entry) {
-      return getPOIEntryId(entry && entry.poi) === id;
     }) || null;
   }
   function appendPOIRows(rows, options) {
@@ -2056,8 +2060,8 @@
         if (entry && entry.marker && map && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
       });
       poiMarkers = [];
-      cancelPendingPOIMarkerQueue();
-      schedulePOIDotCanvasDraw();
+      
+      
     }
 
     rows.map(normalizePOI).filter(isValidPOI).forEach(function(poi) {
@@ -2066,34 +2070,37 @@
       var initialImportance;
       var initialMinZoom;
       var initialZoom;
-      var useFullIcon;
       var marker;
       var entry;
 
       if (existing) {
         existing.poi = keepRichData ? Object.assign({}, existing.poi || {}, poi) : Object.assign({}, existing.poi || {}, poi);
         existing.importance = Number(existing.poi.relevance || 0);
-        if (existing.marker) existing.marker.setLatLng(existing.poi.coords);
+        if (existing.marker) {
+          existing.marker.setLatLng(existing.poi.coords);
+          applyPOIIconByZoom(existing, map ? map.getZoom() : initialZoom, getPOIIconMinZoom(existing.poi, existing.importance));
+        }
         updated += 1;
         return;
       }
 
       initialImportance = Number(poi.relevance || 0);
-      initialMinZoom = getMinZoomForImportance(initialImportance);
+      initialMinZoom = getPOIIconMinZoom(poi, initialImportance);
       initialZoom = map ? map.getZoom() : 11;
-      useFullIcon = initialZoom >= initialMinZoom;
-      entry = { marker: null, importance: initialImportance, poi: poi, _displayMode: 'full' };
+      entry = { marker: null, importance: initialImportance, poi: poi, _displayMode: null };
       marker = L.marker(poi.coords, {
         title: poi.name,
         zIndexOffset: 3400,
         pane: 'poiPane',
-        icon: createPOIFullIcon(poi)
+        icon: createPOIDotIcon(poi)
       }).on('click', function(event) {
         openPOIWithMapMove(entry.poi, event);
       });
       entry.marker = marker;
       poiMarkers.push(entry);
-      if (!activeTour && isPOIMatchFilter(poi, currentMapFilter) && map && useFullIcon && !map.hasLayer(marker)) {
+
+      applyPOIIconByZoom(entry, initialZoom, initialMinZoom);
+      if (!activeTour && isPOIMatchFilter(poi, currentMapFilter) && map && !map.hasLayer(marker)) {
         marker.addTo(map);
       }
       added += 1;
@@ -2129,7 +2136,7 @@
       if (entry && entry.marker && map && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
     });
     poiMarkers = [];
-    cancelPendingPOIMarkerQueue();
+    
 
     try {
       localRows = readLocalPOIs();
@@ -2148,7 +2155,7 @@
       }
 
       if (!SUPABASE_READY || !supabaseClient) {
-        poiCoordsReady = poiMarkers.length > 0 || pendingPOIMarkerEntries.length > 0;
+        poiCoordsReady = poiMarkers.length > 0 || 0 > 0;
         renderBottomRailCards();
         await loadFerryTimetable();
         await loadBlogPosts();
@@ -2242,7 +2249,7 @@
       }
 
       if (generation !== poiLoadGeneration) return;
-      poiCoordsReady = poiMarkers.length > 0 || pendingPOIMarkerEntries.length > 0;
+      poiCoordsReady = poiMarkers.length > 0 || 0 > 0;
       writeLocalPOIs(poiMarkers.map(function(entry) { return entry && entry.poi ? entry.poi : null; }).filter(Boolean));
       updateExclusiveDiscountFilterVisibility();
       updatePOIVisibility();
@@ -2254,7 +2261,7 @@
     } finally {
       if (generation === poiLoadGeneration) {
         poiDataLoaded = true;
-        if (!poiCoordsReady) poiCoordsReady = poiMarkers.length > 0 || pendingPOIMarkerEntries.length > 0;
+        if (!poiCoordsReady) poiCoordsReady = poiMarkers.length > 0 || 0 > 0;
         refreshMapLoadingState();
       }
     }
@@ -2411,7 +2418,7 @@
   async function geocodeSearch(query) { try { var response = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query)); var data = await response.json(); if (data && data[0]) { var lat = parseFloat(data[0].lat); var lon = parseFloat(data[0].lon); map.setView([lat, lon], 13); updateWeather(lat, lon); return true; } } catch (error) { console.warn('Search failed:', error); } return false; }
   function isCardInteractiveTarget(target) { return Boolean(target && target.closest && target.closest('button, a, input, textarea, select, iframe, [data-start], #card-tour-play, #card-tour-panel, .card-action-btn')); }
   function setupCardSwipe(target) { if (!target) return; target.addEventListener('touchstart', function (event) { if (isCardInteractiveTarget(event.target)) return; if (event.touches.length !== 1) return; event.preventDefault(); startX = event.touches[0].clientX; startY = event.touches[0].clientY; currentX = startX; currentY = startY; isDragging = true; hasMoved = false; dragAxis = null; card.style.transition = 'none'; }, { passive: false }); target.addEventListener('touchmove', function (event) { var deltaX, deltaY, pullDown, blockedRight, blockedLeft; if (!isDragging || event.touches.length !== 1) return; event.preventDefault(); currentX = event.touches[0].clientX; currentY = event.touches[0].clientY; deltaX = currentX - startX; deltaY = currentY - startY; if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x'; if (!dragAxis) return; hasMoved = true; if (dragAxis === 'y') { pullDown = Math.max(0, deltaY); card.style.transform = 'translateY(' + pullDown + 'px)'; card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260)); return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (blockedRight || blockedLeft) deltaX = 0; card.style.transform = 'translateX(' + deltaX + 'px)'; }, { passive: false }); target.addEventListener('touchend', function (event) { var deltaX, deltaY, blockedRight, blockedLeft; if (!isDragging) return; if (event && event.changedTouches && event.changedTouches.length) { currentX = event.changedTouches[0].clientX; currentY = event.changedTouches[0].clientY; } deltaX = currentX - startX; deltaY = currentY - startY; isDragging = false; card.style.opacity = ''; if (dragAxis === 'y') { if (deltaY > 55) { hideCard(true); dragAxis = null; return; } card.style.transition = 'transform 0.22s ease, opacity 0.22s ease'; card.style.transform = 'translateY(0)'; dragAxis = null; return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) { card.style.transition = 'transform 0.2s ease'; card.style.transform = 'translateX(0)'; dragAxis = null; return; } if (deltaX < -80) { showCityByIndex(currentIndex + 1, true); dragAxis = null; return; } if (deltaX > 80) showCityByIndex(currentIndex - 1, true); dragAxis = null; }, { passive: false }); target.addEventListener('touchcancel', function (event) { if (event) event.preventDefault(); isDragging = false; dragAxis = null; card.style.opacity = ''; card.style.transition = 'transform 0.2s ease, opacity 0.2s ease'; card.style.transform = 'translateX(0) translateY(0)'; }, { passive: false }); }
-  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.12, 9.71], 11); map.createPane('trailPane'); map.getPane('trailPane').style.zIndex = 640; map.createPane('poiPane'); map.getPane('poiPane').style.zIndex = 690; ensurePOIDotCanvas(); satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
+  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80 }).setView([44.12, 9.71], 11); map.createPane('trailPane'); map.getPane('trailPane').style.zIndex = 640; map.createPane('poiPane'); map.getPane('poiPane').style.zIndex = 690; satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
   function updateMapVisualByZoom() { var z, raw, t; if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return; z = map.getZoom(); raw = Math.min(1, Math.max(0, (z - 17.1) / 1.35)); t = raw * raw * (3 - 2 * raw); satelliteLayer.setOpacity(1); roadsLayer.setOpacity(0.42 * t); detailedRoadsLayer.setOpacity(0.78 * t); whiteLayer.setOpacity(0); labelsLayer.setOpacity(0); }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function createCityMarkers() { places.forEach(function (place, index) { L.marker(place.coords, { title: place.name, zIndexOffset: 2600, icon: L.divIcon({ className: 'custom-label', html: '<div class="label">' + escapeHTML(place.name) + '</div>' }) }).addTo(map).on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } cityCardManuallyClosed = false; showCityByIndex(index, true); }); }); }
@@ -2426,12 +2433,7 @@
     document.addEventListener('pointerdown', rememberRealUserGesture, { passive: true, capture: true });
     document.addEventListener('click', rememberRealUserGesture, true);
 
-    document.querySelectorAll('#map-filter-bar [data-map-filter]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        applyMapFilterUI(btn.getAttribute('data-map-filter'));
-      });
-    });
-
+    
     
 
     
@@ -2453,9 +2455,6 @@
       });
     }
 
-    if (poiAiBtn) {
-      poiAiBtn.addEventListener('click', function () {});
-    }
 
     if (poiDiscountBtn) {
       poiDiscountBtn.addEventListener('click', handleGenerateDiscount);
@@ -2580,8 +2579,6 @@
     setupPOISheetDrag();
   }
   function runTests() { }
-  function setMapLoadingState() {}
-  function refreshMapLoadingState() {}
   function start() {
     initMap();
     createCityMarkers();
