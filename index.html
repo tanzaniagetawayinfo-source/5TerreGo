@@ -799,7 +799,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 14px;
+      gap: 8px;
       align-self: center;
     }
     #site-stories-section .site-guide-search {
@@ -880,12 +880,12 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 14px;
+      gap: 10px;
       min-height: 0;
     }
     #site-stories-section .site-guide-page-content > .site-guide-filters {
-      padding-top: 2px;
-      padding-bottom: 4px;
+      padding-top: 0;
+      padding-bottom: 2px;
     }
     .site-guide-toolbar {
       display: flex;
@@ -920,7 +920,7 @@
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 1px 0 2px;
+      padding: 0 0 1px;
       touch-action: pan-x;
     }
     .site-guide-filters::-webkit-scrollbar {
@@ -1114,10 +1114,10 @@
     .site-guide-mini-card {
       position: relative;
       flex: 0 0 min(68vw, 252px);
-      height: 162px;
-      min-height: 162px;
+      height: 272px;
+      min-height: 272px;
       display: grid;
-      grid-template-rows: 92px minmax(0, 1fr);
+      grid-template-rows: 98px minmax(0, 1fr);
       overflow: hidden;
       border-radius: 28px;
       background: rgba(255,255,255,.11);
@@ -1156,9 +1156,9 @@
       z-index: 1;
       display: grid;
       grid-template-rows: auto auto 1fr;
-      gap: 7px;
+      gap: 8px;
       height: 100%;
-      padding: 13px 13px 14px;
+      padding: 13px 13px 16px;
       background: linear-gradient(180deg, rgba(8,20,34,.14), rgba(8,20,34,.76));
       align-content: start;
     }
@@ -1194,11 +1194,11 @@
     }
     .site-guide-mini-text {
       margin: 0;
-      font-size: 11px;
-      line-height: 1.3;
-      color: rgba(255,255,255,.66);
+      font-size: 12px;
+      line-height: 1.38;
+      color: rgba(255,255,255,.70);
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 7;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -1241,7 +1241,7 @@
     }
     .site-guide-skeleton-mini {
       flex: 0 0 min(68vw, 252px);
-      min-height: 156px;
+      min-height: 272px;
       border-radius: 28px;
     }
     @media (max-width: 380px) {
@@ -1299,12 +1299,12 @@
       .site-guide-mini-card,
       .site-guide-skeleton-mini {
         flex-basis: min(72vw, 224px);
-        height: 148px;
-        min-height: 148px;
+        height: 236px;
+        min-height: 236px;
         border-radius: 24px;
       }
       .site-guide-mini-card {
-        grid-template-rows: 80px minmax(0, 1fr);
+        grid-template-rows: 86px minmax(0, 1fr);
       }
       .site-guide-rail-default .site-guide-mini-card.is-leading {
         height: 206px;
@@ -1315,6 +1315,11 @@
       }
       .site-guide-mini-title {
         font-size: 17px;
+      }
+      .site-guide-mini-text {
+        font-size: 11px;
+        line-height: 1.34;
+        -webkit-line-clamp: 5;
       }
     }
     body.site-article-reader-open {
@@ -3473,6 +3478,13 @@ window.FTG_ACTIONBAR_CONFIG = {
     return article && article.image ? article.image : 'https://images.pexels.com/photos/7545061/pexels-photo-7545061.jpeg?auto=compress&cs=tinysrgb&w=720&fit=crop&dpr=1&q=70';
   }
 
+  function getGuideCardSummary(article) {
+    var source = stripArticleSpeechText(article && (article.content || '') || '') || stripArticleSpeechText(article && (article.excerpt || '') || '');
+    if (!source) return 'Open the article to read the full guide.';
+    if (source.length > 240) source = source.slice(0, 240).trim() + '…';
+    return source;
+  }
+
   function updateGuideRailLeadingCard(rail) {
     var cards;
     var railRect;
@@ -3569,7 +3581,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
       return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
     }).join('') + '</div><div class="site-guide-stage is-rail-only"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
-      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(article.excerpt || 'Apri l’articolo per vedere tutti i dettagli.') + '</p></div></a>';
+      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(getGuideCardSummary(article)) + '</p></div></a>';
     }).join('') + '</div></div>';
     setGuideAudioButtonsState();
   }
