@@ -748,8 +748,9 @@
     .site-feature-cta-row a, .site-feature-cta-row button { border: 0; border-radius: 999px; padding: 10px 13px; background: #111; color: #fff; font-size: 12px; font-weight: 950; text-decoration: none; font-family: inherit; cursor: pointer; }
     .site-feature-section.dark .site-feature-cta-row a, .site-feature-section.dark .site-feature-cta-row button { background: #ff8a1d; color: #111; }
     .site-view-panel.ftg-section-paging #site-stories-section.story-guide-section {
-      display: grid;
+      display: flex;
       align-items: center;
+      justify-content: center;
       width: 100%;
       height: calc(100dvh - 104px - env(safe-area-inset-bottom));
       min-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
@@ -757,18 +758,21 @@
     }
     .site-view-panel.ftg-section-paging #site-stories-section .site-guide-page-shell {
       width: 100%;
-      height: auto;
-      min-height: 0;
-      display: grid;
-      place-items: center;
+      height: 100%;
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 0;
     }
     .site-view-panel.ftg-section-paging #site-stories-section .site-guide-centered-box {
       width: 100%;
       max-width: 100%;
-      display: grid;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       gap: clamp(20px, 3.6vh, 30px);
-      align-content: start;
+      margin: auto 0;
     }
     #site-stories-section .site-guide-page-head {
       display: flex;
@@ -792,9 +796,10 @@
       flex: 0 0 auto;
       width: 100%;
       min-height: 0;
-      display: grid;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       gap: 14px;
-      align-content: start;
       align-self: center;
     }
     #site-stories-section .site-guide-search {
@@ -872,9 +877,9 @@
       display: none !important;
     }
     #site-story-list.site-guide-page-content {
-      display: grid;
-      grid-template-rows: auto auto;
-      align-content: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       gap: 14px;
       min-height: 0;
     }
