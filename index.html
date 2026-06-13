@@ -251,49 +251,17 @@
       height: 100%;
       overflow: hidden;
       background: #071424;
-      --hero-map-x: -50%;
-      --hero-map-y: -50%;
-      --hero-map-scale: 1.2;
     }
     .site-hero-map-card-preview iframe {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 154%;
-      height: 154%;
+      width: 100%;
+      height: 100%;
       border: 0;
       display: block;
       pointer-events: none;
-      transform: translate(var(--hero-map-x), var(--hero-map-y)) scale(var(--hero-map-scale));
+      transform: scale(1.02);
       transform-origin: center center;
-      transition: transform 1s cubic-bezier(.22,.88,.24,1), filter .36s ease;
       filter: saturate(.92) contrast(1.02);
       background: #071424;
-    }
-    .site-hero-map-card-preview.focus-riomaggiore {
-      --hero-map-x: -34%;
-      --hero-map-y: -58%;
-      --hero-map-scale: 1.18;
-    }
-    .site-hero-map-card-preview.focus-manarola {
-      --hero-map-x: -42%;
-      --hero-map-y: -56%;
-      --hero-map-scale: 1.18;
-    }
-    .site-hero-map-card-preview.focus-corniglia {
-      --hero-map-x: -50%;
-      --hero-map-y: -54%;
-      --hero-map-scale: 1.18;
-    }
-    .site-hero-map-card-preview.focus-vernazza {
-      --hero-map-x: -58%;
-      --hero-map-y: -54%;
-      --hero-map-scale: 1.18;
-    }
-    .site-hero-map-card-preview.focus-monterosso {
-      --hero-map-x: -66%;
-      --hero-map-y: -52%;
-      --hero-map-scale: 1.18;
     }
     .site-hero-map-card-content {
       position: relative;
@@ -311,25 +279,6 @@
       font-weight: 950;
       text-wrap: balance;
       text-shadow: 0 10px 26px rgba(0,0,0,.24);
-    }
-    .site-hero-map-card-village {
-      display: inline-flex;
-      align-items: center;
-      width: fit-content;
-      min-height: 24px;
-      margin-top: 8px;
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.94);
-      font-size: 10px;
-      line-height: 1;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-weight: 950;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
     }
     .site-hero-quicknav {
       position: absolute;
@@ -2423,14 +2372,11 @@
         <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
         <div class="site-hero-search-wrap" id="site-hero-search-wrap">
           <a class="site-hero-map-card" href="map.html" aria-label="Mappa interattiva">
-            <div class="site-hero-map-card-preview focus-riomaggiore" id="site-hero-map-card-preview" aria-hidden="true">
+            <div class="site-hero-map-card-preview" aria-hidden="true">
               <iframe src="map.html?preview=hero" loading="lazy" tabindex="-1" title="Preview map"></iframe>
             </div>
             <div class="site-hero-map-card-content">
-              <div>
-                <span class="site-hero-map-card-title">Mappa interattiva</span>
-                <span class="site-hero-map-card-village" id="site-hero-map-preview-village">Riomaggiore</span>
-              </div>
+              <span class="site-hero-map-card-title">Mappa interattiva</span>
             </div>
           </a>
         </div>
@@ -4286,55 +4232,6 @@ window.FTG_ACTIONBAR_CONFIG = {
     }
   }
 
-  function setupHeroMapPreviewCycle() {
-    var preview = document.getElementById('site-hero-map-card-preview');
-    var label = document.getElementById('site-hero-map-preview-village');
-    var timer = 0;
-    var states = [
-      { key: 'riomaggiore', label: 'Riomaggiore' },
-      { key: 'manarola', label: 'Manarola' },
-      { key: 'corniglia', label: 'Corniglia' },
-      { key: 'vernazza', label: 'Vernazza' },
-      { key: 'monterosso', label: 'Monterosso' }
-    ];
-    var index = 0;
-    var classes = states.map(function(state) { return 'focus-' + state.key; });
-
-    function applyState(nextIndex) {
-      var state;
-      if (!preview) return;
-      index = ((nextIndex % states.length) + states.length) % states.length;
-      state = states[index];
-      preview.classList.remove.apply(preview.classList, classes);
-      preview.classList.add('focus-' + state.key);
-      if (label) label.textContent = state.label;
-    }
-
-    function stopCycle() {
-      if (!timer) return;
-      window.clearInterval(timer);
-      timer = 0;
-    }
-
-    function startCycle() {
-      if (!preview || timer) return;
-      timer = window.setInterval(function() {
-        applyState(index + 1);
-      }, 2600);
-    }
-
-    if (!preview) return;
-    applyState(0);
-    startCycle();
-    document.addEventListener('visibilitychange', function() {
-      if (document.hidden) {
-        stopCycle();
-      } else {
-        startCycle();
-      }
-    });
-  }
-
   function scheduleDeferredDataLoads() {
     var observed = [];
     var fallbackPlan = [
@@ -4523,7 +4420,6 @@ window.FTG_ACTIONBAR_CONFIG = {
     primeSitePOIsFromCache();
     setupHeroSlidePerformance();
     setupHeroQuicknavMedia();
-    setupHeroMapPreviewCycle();
     setupSectionPaging();
     setupHeroUniversalSearch();
     setupMenu();
