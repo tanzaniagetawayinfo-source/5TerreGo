@@ -171,6 +171,104 @@
     }
     .site-view-panel.ftg-section-paging .ftg-page-shell { width: 100%; max-width: 100%; max-height: calc(100dvh - 104px - env(safe-area-inset-bottom)); display: flex; align-items: flex-start; justify-content: flex-start; overflow: visible; }
     .site-view-panel.ftg-section-paging #site-welcome-section { margin: 0 !important; width: 100%; height: 100dvh; min-height: 100dvh; max-height: 100dvh; }
+    #ftg-next-section-indicator {
+      position: fixed;
+      left: 50%;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      z-index: 2400;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(255,255,255,.94);
+      transform: translateX(-50%);
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .24s ease, transform .24s ease, visibility .24s ease;
+      -webkit-tap-highlight-color: transparent;
+      text-shadow: 0 10px 24px rgba(0,0,0,.26), 0 3px 10px rgba(0,0,0,.22);
+    }
+    #ftg-next-section-indicator.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    #ftg-next-section-indicator:active {
+      transform: translateX(-50%) scale(.96);
+    }
+    .ftg-next-section-arrows {
+      position: relative;
+      width: 34px;
+      height: 22px;
+      display: block;
+    }
+    .ftg-next-section-arrows::before,
+    .ftg-next-section-arrows::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      border-right: 3px solid currentColor;
+      border-bottom: 3px solid currentColor;
+      transform-origin: center center;
+      opacity: .96;
+    }
+    .ftg-next-section-arrows::before {
+      top: 0;
+      transform: translateX(-50%) rotate(-135deg);
+    }
+    .ftg-next-section-arrows::after {
+      top: 8px;
+      transform: translateX(-50%) rotate(-135deg);
+    }
+    .ftg-next-section-label {
+      display: block;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .02em;
+      text-transform: none;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    body.map-focus-mode #ftg-next-section-indicator,
+    body.quick-menu-expanded #ftg-next-section-indicator,
+    body.poi-panel-active #ftg-next-section-indicator,
+    body.trail-page-active #ftg-next-section-indicator,
+    body.city-card-active #ftg-next-section-indicator,
+    body.tour-navigation-active #ftg-next-section-indicator,
+    body.ai-chat-active #ftg-next-section-indicator,
+    body.site-article-reader-open #ftg-next-section-indicator {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    @media (max-width: 380px) {
+      #ftg-next-section-indicator {
+        bottom: calc(14px + env(safe-area-inset-bottom));
+      }
+      .ftg-next-section-arrows {
+        width: 30px;
+        height: 20px;
+      }
+      .ftg-next-section-arrows::before,
+      .ftg-next-section-arrows::after {
+        width: 14px;
+        height: 14px;
+        border-right-width: 2.5px;
+        border-bottom-width: 2.5px;
+      }
+      .ftg-next-section-label {
+        font-size: 9px;
+      }
+    }
     .site-view-panel.ftg-section-paging #site-welcome-section .site-hero-content {
       position: absolute;
       left: 0;
@@ -2335,6 +2433,11 @@
 </div>
 
 
+<button id="ftg-next-section-indicator" type="button" aria-label="Apri la sezione successiva">
+  <span class="ftg-next-section-arrows" aria-hidden="true"></span>
+  <span class="ftg-next-section-label">Free guide</span>
+</button>
+
 <div id="site-view-panel" class="site-view-panel" aria-hidden="false">
   <main class="site-view-inner">
     <section id="site-welcome-section" class="site-hero-section">
@@ -3832,6 +3935,7 @@ window.FTG_ACTIONBAR_CONFIG = {
 
   function setupSectionPaging() {
     var panel = document.getElementById('site-view-panel');
+    var nextIndicator = document.getElementById('ftg-next-section-indicator');
     var host;
     var targets;
     var pages;
@@ -3889,6 +3993,32 @@ window.FTG_ACTIONBAR_CONFIG = {
       var section = page.querySelector('[id]');
       return section && section.id ? section.id : '';
     });
+
+    function getNextSectionIndicatorLabel(index) {
+      var nextId = getSectionIdForIndex(index + 1);
+      var labels = {
+        'site-stories-section': 'Free guide',
+        'site-places-section': 'Luoghi utili',
+        'site-experiences-section': 'Local discounts',
+        'site-trails-section': 'Sentieri',
+        'site-weather-section': 'Meteo',
+        'site-official-communications-section': 'Comunicazioni ufficiali',
+        'site-footer': 'Contatti'
+      };
+      return labels[nextId] || '';
+    }
+
+    function updateNextSectionIndicator() {
+      var labelEl;
+      var isVisible;
+      if (!nextIndicator) return;
+      labelEl = nextIndicator.querySelector('.ftg-next-section-label');
+      isVisible = currentIndex < (pages.length - 1);
+      nextIndicator.classList.toggle('is-visible', isVisible);
+      nextIndicator.disabled = !isVisible;
+      if (labelEl) labelEl.textContent = getNextSectionIndicatorLabel(currentIndex);
+      nextIndicator.setAttribute('aria-label', isVisible ? ('Apri: ' + getNextSectionIndicatorLabel(currentIndex)) : 'Fine pagina');
+    }
 
     function clampIndex(index) {
       return Math.max(0, Math.min(index, pages.length - 1));
@@ -3991,6 +4121,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       snapLock = true;
       clearWheelPreview();
       applyTranslate(baseTranslate(currentIndex), false);
+      updateNextSectionIndicator();
       if (!options.skipHashSync) syncURLHashForIndex(currentIndex, !!options.pushHash);
       releaseSnapLockSoon();
     }
@@ -4025,11 +4156,13 @@ window.FTG_ACTIONBAR_CONFIG = {
     currentIndex = getIndexForSectionHash(window.location.hash);
     if (currentIndex === null) currentIndex = 0;
     applyTranslate(baseTranslate(currentIndex), false);
+    updateNextSectionIndicator();
     syncURLHashForIndex(currentIndex, false);
 
     window.addEventListener('resize', function() {
       syncPageFrames();
       applyTranslate(baseTranslate(currentIndex), false);
+      updateNextSectionIndicator();
     });
 
     window.addEventListener('hashchange', function() {
@@ -4130,6 +4263,13 @@ window.FTG_ACTIONBAR_CONFIG = {
 
     window.addEventListener('touchend', finishTouchGesture, { passive: true });
     window.addEventListener('touchcancel', finishTouchGesture, { passive: true });
+
+    if (nextIndicator) {
+      nextIndicator.addEventListener('click', function() {
+        if (currentIndex >= (pages.length - 1)) return;
+        snapToPage(currentIndex + 1, { pushHash: true });
+      });
+    }
 
     window.FTG_SCROLL_TO_SITE_PAGE = function(index, options) {
       snapToPage(index, options || {});
