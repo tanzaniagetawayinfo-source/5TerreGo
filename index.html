@@ -202,135 +202,83 @@
       padding-left: 14px;
     }
     .site-hero-search-wrap {
-      position: relative;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(56dvh - 142px);
       z-index: 5;
       width: 100%;
-      margin-top: 16px;
+      margin-top: 0;
       padding: 0 12px;
     }
-    .site-hero-search-field {
+    .site-hero-map-card {
       position: relative;
+      width: 100%;
+      min-height: 118px;
+      display: block;
+      padding: 0;
+      border-radius: 26px;
+      overflow: hidden;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 18px 36px rgba(0,0,0,.16);
+      backdrop-filter: blur(14px) saturate(1.08);
+      -webkit-backdrop-filter: blur(14px) saturate(1.08);
+      isolation: isolate;
     }
-    .site-hero-search-field::before {
-      content: '⌕';
+    .site-hero-map-card::before {
+      content: '';
       position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
-      color: rgba(255,255,255,.58);
-      font-size: 18px;
-      font-weight: 800;
+      inset: 0;
+      z-index: -2;
+      background: linear-gradient(135deg, rgba(30,155,255,.18), rgba(255,138,29,.12));
+    }
+    .site-hero-map-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.42));
       pointer-events: none;
     }
-    #hero-universal-search-input {
-      width: 100%;
-      min-height: 46px;
-      padding: 12px 16px 12px 43px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.14);
-      color: #fff;
-      font-size: 14px;
-      line-height: 1;
-      font-weight: 850;
-      letter-spacing: -.02em;
-      outline: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 12px 28px rgba(0,0,0,.12);
-      backdrop-filter: blur(14px) saturate(1.14);
-      -webkit-backdrop-filter: blur(14px) saturate(1.14);
-    }
-    #hero-universal-search-input::placeholder {
-      color: rgba(255,255,255,.62);
-      font-weight: 750;
-    }
-    .site-hero-search-results {
+    .site-hero-map-card-preview {
       position: absolute;
-      left: 12px;
-      right: 12px;
-      top: calc(100% + 8px);
-      z-index: 8;
-      display: none;
-      flex-direction: column;
-      max-height: min(42dvh, 320px);
-      overflow-y: auto;
-      border-radius: 26px;
-      background: rgba(7,20,36,.82);
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 20px 52px rgba(0,0,0,.26);
-      backdrop-filter: blur(22px) saturate(1.14);
-      -webkit-backdrop-filter: blur(22px) saturate(1.14);
-    }
-    .site-hero-search-results.is-open {
-      display: flex;
-    }
-    .site-hero-search-result {
+      inset: 0;
+      z-index: 1;
       width: 100%;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
+      height: 100%;
+      overflow: hidden;
+      background: #071424;
+    }
+    .site-hero-map-card-preview iframe {
+      width: 100%;
+      height: 100%;
       border: 0;
-      background: transparent;
-      color: #fff;
-      text-align: left;
-      font-family: inherit;
-      cursor: pointer;
-    }
-    .site-hero-search-result + .site-hero-search-result {
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-    .site-hero-search-result:active {
-      background: rgba(255,255,255,.08);
-    }
-    .site-hero-search-result-main {
-      min-width: 0;
-    }
-    .site-hero-search-result-title {
       display: block;
-      font-size: 14px;
-      line-height: 1.14;
-      font-weight: 900;
-      letter-spacing: -.03em;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      pointer-events: none;
+      transform: scale(1.02);
+      transform-origin: center center;
+      filter: saturate(.92) contrast(1.02);
+      background: #071424;
     }
-    .site-hero-search-result-meta {
+    .site-hero-map-card-content {
+      position: relative;
+      z-index: 4;
+      min-height: 118px;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+    }
+    .site-hero-map-card-title {
       display: block;
-      margin-top: 4px;
-      font-size: 11px;
-      line-height: 1.28;
-      font-weight: 750;
-      color: rgba(255,255,255,.62);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .site-hero-search-result-tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 26px;
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.92);
-      font-size: 10px;
-      line-height: 1;
+      font-size: 22px;
+      line-height: .96;
+      letter-spacing: -.045em;
       font-weight: 950;
-      letter-spacing: .02em;
-      white-space: nowrap;
-    }
-    .site-hero-search-empty {
-      padding: 14px 15px;
-      font-size: 13px;
-      line-height: 1.35;
-      font-weight: 760;
-      color: rgba(255,255,255,.68);
+      text-wrap: balance;
+      text-shadow: 0 10px 26px rgba(0,0,0,.24);
     }
     .site-hero-quicknav {
       position: absolute;
@@ -516,22 +464,20 @@
         padding-left: 12px;
       }
       .site-hero-search-wrap {
+        top: calc(57dvh - 136px);
         padding-left: 10px;
         padding-right: 10px;
       }
-      #hero-universal-search-input {
-        min-height: 44px;
-        padding-left: 40px;
-        font-size: 13px;
-      }
-      .site-hero-search-field::before {
-        left: 15px;
-        font-size: 17px;
-      }
-      .site-hero-search-results {
-        left: 10px;
-        right: 10px;
+      .site-hero-map-card {
+        min-height: 112px;
         border-radius: 24px;
+      }
+      .site-hero-map-card-content {
+        min-height: 112px;
+        padding: 14px;
+      }
+      .site-hero-map-card-title {
+        font-size: 20px;
       }
       .site-hero-video-wrap {
         inset: 0;
@@ -2425,10 +2371,14 @@
         <h1 class="site-view-title">Cinque Terre, semplice.</h1>
         <p class="site-view-text">Mappa, borghi, sentieri, meteo, traghetti e avvisi utili. Tutto in una guida gratuita, pensata per muoversi meglio e rispettare il territorio.</p>
         <div class="site-hero-search-wrap" id="site-hero-search-wrap">
-          <div class="site-hero-search-field">
-            <input id="hero-universal-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search everywhere on the site" aria-label="Universal search">
-          </div>
-          <div class="site-hero-search-results" id="hero-universal-search-results" aria-live="polite"></div>
+          <a class="site-hero-map-card" href="map.html" aria-label="Mappa interattiva">
+            <div class="site-hero-map-card-preview" aria-hidden="true">
+              <iframe src="map.html" loading="lazy" tabindex="-1" title="Preview map"></iframe>
+            </div>
+            <div class="site-hero-map-card-content">
+              <span class="site-hero-map-card-title">Mappa interattiva</span>
+            </div>
+          </a>
         </div>
       </div>
       <div class="site-hero-quicknav" aria-label="Accessi rapidi hero">
