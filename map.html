@@ -66,13 +66,44 @@
       flex-direction: column;
       gap: 8px;
       pointer-events: auto;
-      align-items: flex-start;
+      align-items: stretch;
+    }
+    .search-top-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+    .search-home-btn {
+      flex: 0 0 56px;
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(8,12,16,.76);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 20px 54px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter: blur(18px) saturate(1.12);
+      -webkit-backdrop-filter: blur(18px) saturate(1.12);
+      overflow: hidden;
+    }
+    .search-home-btn span {
+      font-size: 24px;
+      line-height: 1;
+      transform: translateY(-1px);
     }
     .search-wrap {
       position: relative;
       min-height: 56px;
-      width: min(520px, calc(100vw - 94px));
-      max-width: calc(100vw - 94px);
+      flex: 1 1 auto;
+      width: auto;
+      max-width: none;
+      min-width: 0;
     }
     .search-wrap::before {
       content: '⌕';
@@ -89,7 +120,7 @@
     #search {
       width: 100%;
       height: 56px;
-      padding: 0 18px 0 52px;
+      padding: 0 64px 0 52px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.12);
       outline: none;
@@ -163,8 +194,42 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .search-login-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(255,255,255,.12);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .search-login-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .search-login-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+      pointer-events: none;
+    }
     .search-type-pills {
-      width: calc(100vw - 20px);
+      width: 100%;
       display: flex;
       gap: 8px;
       overflow-x: auto;
@@ -202,14 +267,26 @@
         left: 8px;
         right: 8px;
       }
+      .search-top-row {
+        gap: 6px;
+      }
+      .search-home-btn {
+        flex-basis: 50px;
+        width: 50px;
+        height: 50px;
+      }
+      .search-home-btn span {
+        font-size: 22px;
+      }
       .search-wrap {
         min-height: 50px;
-        width: calc(100vw - 86px);
-        max-width: calc(100vw - 86px);
+        width: 100%;
+        max-width: none;
       }
       #search {
         height: 50px;
         padding-left: 48px;
+        padding-right: 58px;
         font-size: 14px;
       }
       .search-wrap::before {
@@ -217,12 +294,17 @@
         font-size: 18px;
       }
       .search-type-pills {
-        width: calc(100vw - 16px);
+        width: 100%;
       }
       .search-type-pill {
         min-height: 31px;
         padding: 7px 12px;
         font-size: 10px;
+      }
+      .search-login-btn {
+        right: 6px;
+        width: 36px;
+        height: 36px;
       }
     }
 
@@ -708,66 +790,6 @@
     }
   </style>
   <script>
-    window.FTG_ACTIONBAR_CONFIG = {
-      activePage: 'map',
-      aiTitle: 'Captain Gull',
-      aiSubtitle: 'Global actionbar',
-      aiWelcome: 'Actionbar globale pronta. Ora puoi riusarla su tutte le pagine del sito.',
-      pages: {
-        map: { label: 'Mappa', href: 'map.html' },
-        home: { label: 'Home', href: 'index.html' },
-        guide: { label: 'Guide', href: 'guide.html' }
-      },
-      menuItems: [
-        { id: 'map', label: 'Mappa', href: 'map.html' },
-        { id: 'home', label: 'Home', href: 'index.html' },
-        { id: 'guide', label: 'Guide', href: 'guide.html' },
-        { id: 'places', label: 'Places', href: '#places', backgroundImage: 'https://images.pexels.com/photos/7118987/pexels-photo-7118987.jpeg?_gl=1*1ygueye*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2NDE0JGo1OSRsMCRoMA..' },
-        { id: 'local-discounts', label: 'Local Discounts', href: '#local-discounts', backgroundImage: 'https://images.pexels.com/photos/34342746/pexels-photo-34342746.jpeg?_gl=1*1j2vzz9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2NjgzJGoxMiRsMCRoMA..' },
-        { id: 'sentieri', label: 'Sentieri', href: '#sentieri', backgroundImage: 'https://images.pexels.com/photos/13368981/pexels-photo-13368981.jpeg?_gl=1*oqh5qj*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2OTQwJGo1OCRsMCRoMA..' }
-      ],
-      legalLinks: [
-        { label: 'Privacy', href: '#privacy' },
-        { label: 'Policy', href: '#policy' }
-      ]
-    };
-
-    (function () {
-      function mountGlobalActionbar() {
-        var root = document.getElementById('ftg-global-actionbar-root');
-        if (!root) return;
-        fetch('global-actionbar.html', { cache: 'no-store' })
-          .then(function (response) {
-            if (!response.ok) throw new Error('Unable to load global-actionbar.html');
-            return response.text();
-          })
-          .then(function (html) {
-            var host = document.createElement('div');
-            var scripts;
-            host.innerHTML = html;
-            scripts = Array.prototype.slice.call(host.querySelectorAll('script'));
-            scripts.forEach(function (oldScript) {
-              var newScript = document.createElement('script');
-              if (oldScript.src) newScript.src = oldScript.src;
-              if (oldScript.type) newScript.type = oldScript.type;
-              newScript.textContent = oldScript.textContent;
-              oldScript.parentNode.replaceChild(newScript, oldScript);
-            });
-            root.replaceWith.apply(root, Array.prototype.slice.call(host.childNodes));
-          })
-          .catch(function (error) {
-            console.error('Global actionbar load failed:', error);
-          });
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', mountGlobalActionbar, { once: true });
-      } else {
-        mountGlobalActionbar();
-      }
-    }());
-  </script>
-  <script>
     (function(){
       var iconUrl = 'app.png';
       var manifest = {
@@ -793,11 +815,14 @@
   </script>
 </head>
 <body class="park-presentation-mode">
-<div id="ftg-global-actionbar-root"></div>
 <div class="search-floating">
-  <div class="search-wrap">
+  <div class="search-top-row">
+    <a class="search-home-btn" href="index.html" aria-label="Go home"><span>⌂</span></a>
+    <div class="search-wrap">
     <input id="search" type="search" placeholder="Search POIs and trails" autocomplete="off" />
+    <a id="search-login-btn" class="search-login-btn" href="login.html" aria-label="Open login"><img src="app.png" alt="Login" /></a>
     <div id="search-results"></div>
+    </div>
   </div>
   <div id="search-type-pills" class="search-type-pills" aria-label="Search type filters">
     <button class="search-type-pill is-active" type="button" data-search-type="all">All</button>
