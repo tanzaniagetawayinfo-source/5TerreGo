@@ -2678,21 +2678,40 @@ window.FTG_ACTIONBAR_CONFIG = {
     { code: 'it', label: '🇮🇹 Italiano' },
     { code: 'en', label: '🇬🇧 English' },
     { code: 'fr', label: '🇫🇷 Français' },
-    { code: 'de', label: '🇩🇪 Deutsch' }
+    { code: 'de', label: '🇩🇪 Deutsch' },
+    { code: 'ru', label: '🇷🇺 Русский' },
+    { code: 'zh', label: '🇨🇳 中文' },
+    { code: 'ar', label: '🇸🇦 العربية' }
   ],
   language: 'it',
   onNavigate: function(pageId, page) {
     if (pageId === 'map') {
+      if (window.FTG_OPEN_MAP_FOCUS) {
+        window.FTG_OPEN_MAP_FOCUS();
+        return;
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (pageId === 'home') {
-      var hero = document.getElementById('site-welcome-section');
-      if (hero) hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
+      if (window.FTG_OPEN_SITE_SECTION) {
+        window.FTG_OPEN_SITE_SECTION('site-welcome-section');
+        return;
+      }
+    }
+    if (pageId === 'guide') {
+      if (window.FTG_OPEN_SITE_SECTION) {
+        window.FTG_OPEN_SITE_SECTION('site-stories-section');
+        return;
+      }
     }
     if (page && page.href && page.href.charAt(0) === '#') {
-      var target = document.querySelector(page.href);
+      var targetId = page.href.replace('#', '');
+      if (window.FTG_OPEN_SITE_SECTION) {
+        window.FTG_OPEN_SITE_SECTION(targetId);
+        return;
+      }
+      var target = document.getElementById(targetId);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
@@ -3223,16 +3242,17 @@ window.FTG_ACTIONBAR_CONFIG = {
 
   function renderSiteArticleReader(article, isLoading) {
     var content = document.getElementById('site-article-reader-content');
+    var localizedArticle = getLocalizedArticle(article);
     var articleBody;
     var dateLabel;
     if (!content || !article) return;
     if (isLoading) {
-      content.innerHTML = '<div class="site-article-reader-loading">Loading article…</div>';
+      content.innerHTML = '<div class="site-article-reader-loading">' + escapeHTML(getUILabel('loadingArticle', 'Loading article…')) + '</div>';
       return;
     }
-    articleBody = formatSiteArticleBodyHTML(article.content || article.excerpt || '');
-    dateLabel = formatGuideArticleDate(article.updated_at || article.created_at || '');
-    content.innerHTML = '<div class="site-article-reader-head"><div class="site-article-reader-topline"><span class="site-article-reader-pill">' + escapeHTML(article.category || article.meta || 'Guide') + '</span>' + (dateLabel ? '<span class="site-article-reader-pill">' + escapeHTML(dateLabel) + '</span>' : '') + '</div><h2 id="site-article-reader-title" class="site-article-reader-title">' + escapeHTML(article.title || 'Article') + '</h2>' + (article.image ? '<div class="site-article-reader-cover"><img src="' + escapeHTML(article.image) + '" alt="' + escapeHTML(article.title || 'Article') + '" loading="lazy" decoding="async"></div>' : '') + (article.excerpt ? '<p class="site-article-reader-excerpt">' + escapeHTML(article.excerpt) + '</p>' : '') + '</div>' + (articleBody ? '<div class="site-article-reader-body">' + articleBody + '</div>' : '<div class="site-article-reader-fallback"><p class="site-article-reader-excerpt">Open the full article to read the complete text.</p><a class="site-article-reader-open-link" href="' + escapeHTML(article.url || 'blog.html') + '">Open full article</a></div>');
+    articleBody = formatSiteArticleBodyHTML(localizedArticle.content_text || localizedArticle.content || localizedArticle.excerpt || '');
+    dateLabel = formatGuideArticleDate(localizedArticle.updated_at || localizedArticle.created_at || article.updated_at || article.created_at || '');
+    content.innerHTML = '<div class="site-article-reader-head"><div class="site-article-reader-topline"><span class="site-article-reader-pill">' + escapeHTML(localizedArticle.category || localizedArticle.meta || getUILabel('freeGuide', 'Guide')) + '</span>' + (dateLabel ? '<span class="site-article-reader-pill">' + escapeHTML(dateLabel) + '</span>' : '') + '</div><h2 id="site-article-reader-title" class="site-article-reader-title">' + escapeHTML(localizedArticle.title || article.title || 'Article') + '</h2>' + ((localizedArticle.image || article.image) ? '<div class="site-article-reader-cover"><img src="' + escapeHTML(localizedArticle.image || article.image) + '" alt="' + escapeHTML(localizedArticle.title || article.title || 'Article') + '" loading="lazy" decoding="async"></div>' : '') + ((localizedArticle.excerpt || article.excerpt) ? '<p class="site-article-reader-excerpt">' + escapeHTML(localizedArticle.excerpt || article.excerpt) + '</p>' : '') + '</div>' + (articleBody ? '<div class="site-article-reader-body">' + articleBody + '</div>' : '<div class="site-article-reader-fallback"><p class="site-article-reader-excerpt">' + escapeHTML(getUILabel('noArticleText', 'Open the article to read the full guide.')) + '</p><a class="site-article-reader-open-link" href="' + escapeHTML(localizedArticle.url || article.url || 'blog.html') + '">' + escapeHTML(getUILabel('openFullArticle', 'Open full article')) + '</a></div>');
   }
 
   async function openSiteArticleReader(articleId) {
@@ -3243,11 +3263,23 @@ window.FTG_ACTIONBAR_CONFIG = {
     document.body.classList.add('site-article-reader-open');
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('data-article-id', articleId);
     scroll = modal.querySelector('.site-article-reader-scroll');
     if (scroll) scroll.scrollTop = 0;
     renderSiteArticleReader(article, true);
     article = await ensureSiteArticleContent(article);
     renderSiteArticleReader(article, false);
+    ensureLocalizedEntity('article', getSiteArticleIdentifier(article), article && (article.source_language || article.language || article.lang || getGuideDetectedArticleLanguage(article).code), {
+      title: article && article.title || '',
+      excerpt: article && article.excerpt || '',
+      content_text: stripArticleSpeechText(article && (article.content || article.excerpt || '') || ''),
+      category: article && article.category || '',
+      meta: article && article.meta || ''
+    }).then(function(result) {
+      if (!result || !result.changed) return;
+      if (modal.getAttribute('data-article-id') !== articleId) return;
+      renderSiteArticleReader(article, false);
+    }).catch(function() {});
     if (scroll) scroll.scrollTop = 0;
   }
 
@@ -3257,16 +3289,13 @@ window.FTG_ACTIONBAR_CONFIG = {
     if (!modal) return;
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
+    modal.removeAttribute('data-article-id');
     document.body.classList.remove('site-article-reader-open');
     if (content) content.innerHTML = '';
   }
 
   function getGuideAudioAriaLabel() {
-    var current = getCurrentUILanguage();
-    if (current === 'it') return 'Ascolta articolo';
-    if (current === 'fr') return "Écouter l'article";
-    if (current === 'de') return 'Artikel anhören';
-    return 'Listen to article';
+    return getUILabel('listenArticle', 'Listen to article');
   }
 
   function getGuideDetectedArticleLanguage(article) {
@@ -3411,19 +3440,11 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   function getGuideAllLabel() {
-    var current = getCurrentUILanguage();
-    if (current === 'it') return 'Tutti';
-    if (current === 'fr') return 'Tout';
-    if (current === 'de') return 'Alle';
-    return 'All';
+    return getUILabel('all', 'All');
   }
 
   function getGuideNoResultsLabel() {
-    var current = getCurrentUILanguage();
-    if (current === 'it') return 'Nessun articolo corrisponde alla ricerca.';
-    if (current === 'fr') return 'Aucun article ne correspond à la recherche.';
-    if (current === 'de') return 'Kein Artikel passt zur Suche.';
-    return 'No articles match this search.';
+    return getUILabel('noGuideResults', 'No articles match this search.');
   }
 
   function getGuideCategories() {
@@ -3479,10 +3500,316 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   function getGuideCardSummary(article) {
-    var source = stripArticleSpeechText(article && (article.content || '') || '') || stripArticleSpeechText(article && (article.excerpt || '') || '');
-    if (!source) return 'Open the article to read the full guide.';
+    var source = String(article && (article.content_text || article.content || article.excerpt) || '');
+    source = stripArticleSpeechText(source);
+    if (!source) return getUILabel('noArticleText', 'Open the article to read the full guide.');
     if (source.length > 240) source = source.slice(0, 240).trim() + '…';
     return source;
+  }
+
+  var FTG_TRANSLATION_PREFIX = 'ftg-translation-v5:';
+  var ftgTranslationMemory = {};
+  var ftgTranslationPending = {};
+  var ftgTranslationQueue = Promise.resolve();
+  var ftgLocalizedEntityCache = { article: {}, poi: {}, trail: {}, official: {} };
+  var ftgLocalizedEntityPending = {};
+
+  function normalizeSupportedLanguage(code) {
+    code = String(code || '').toLowerCase().trim();
+    if (!code) return 'en';
+    if (code.indexOf('-') !== -1) code = code.split('-')[0];
+    if (['it', 'en', 'fr', 'de', 'ru', 'zh', 'ar'].indexOf(code) === -1) return 'en';
+    return code;
+  }
+
+  function hashTranslationValue(value) {
+    var input = String(value || '');
+    var hash = 0;
+    var index;
+    for (index = 0; index < input.length; index += 1) {
+      hash = ((hash << 5) - hash) + input.charCodeAt(index);
+      hash |= 0;
+    }
+    return String(hash);
+  }
+
+  function containsCharRange(text, start, end) {
+    var value = String(text || '');
+    var index;
+    var code;
+    for (index = 0; index < value.length; index += 1) {
+      code = value.charCodeAt(index);
+      if (code >= start && code <= end) return true;
+    }
+    return false;
+  }
+
+  function detectLikelyLanguage(text, fallback) {
+    var sample = (' ' + stripArticleSpeechText(text || '').toLowerCase() + ' ').split('  ').join(' ');
+    var scores = { it: 0, fr: 0, de: 0, en: 0 };
+    var best = normalizeSupportedLanguage(fallback || getCurrentUILanguage() || 'en');
+    function bump(code, terms, points) {
+      terms.forEach(function(term) {
+        if (sample.indexOf(' ' + term + ' ') !== -1 || sample.indexOf(term) !== -1) scores[code] += points;
+      });
+    }
+    if (!sample.trim()) return best;
+    if (containsCharRange(sample, 1536, 1791)) return 'ar';
+    if (containsCharRange(sample, 19968, 40959)) return 'zh';
+    if (containsCharRange(sample, 1024, 1279)) return 'ru';
+    bump('it', [' che ', ' con ', ' una ', ' sentier', ' spiagg', ' borgo ', ' guida '], 2);
+    bump('fr', [' avec ', ' pour ', ' plage ', ' village ', ' guide ', ' des '], 2);
+    bump('de', [' und ', ' der ', ' die ', ' das ', ' mit ', ' weg ', ' dorf '], 2);
+    bump('en', [' the ', ' and ', ' with ', ' village ', ' trail ', ' guide '], 2);
+    Object.keys(scores).forEach(function(code) {
+      if (scores[code] > scores[best]) best = code;
+    });
+    return best;
+  }
+
+  function getTranslationCacheKey(source, target, text) {
+    return FTG_TRANSLATION_PREFIX + source + ':' + target + ':' + hashTranslationValue(text);
+  }
+
+  function readTranslationCache(key) {
+    var value = ftgTranslationMemory[key];
+    if (value) return value;
+    try {
+      value = localStorage.getItem(key) || '';
+    } catch (error) {
+      value = '';
+    }
+    if (value) ftgTranslationMemory[key] = value;
+    return value;
+  }
+
+  function writeTranslationCache(key, value) {
+    ftgTranslationMemory[key] = value;
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {}
+  }
+
+  function splitTextForTranslation(text, maxLength) {
+    var raw = String(text || '').split(String.fromCharCode(13)).join('');
+    var separator = String.fromCharCode(10) + String.fromCharCode(10);
+    var parts = raw.split(separator);
+    var chunks = [];
+    var buffer = '';
+    parts.forEach(function(part) {
+      var piece = String(part || '').trim();
+      var nextValue;
+      if (!piece) return;
+      nextValue = buffer ? (buffer + separator + piece) : piece;
+      if (nextValue.length > maxLength && buffer) {
+        chunks.push(buffer);
+        buffer = piece;
+        return;
+      }
+      buffer = nextValue;
+    });
+    if (buffer) chunks.push(buffer);
+    if (!chunks.length && raw.trim()) chunks.push(raw.trim());
+    return chunks;
+  }
+
+  function decodeTranslatedValue(value) {
+    var box = document.createElement('textarea');
+    box.innerHTML = String(value || '');
+    return box.value;
+  }
+
+  function queueTranslationTask(task) {
+    var next = ftgTranslationQueue.then(task, task);
+    ftgTranslationQueue = next.catch(function() {});
+    return next;
+  }
+
+  async function fetchMyMemoryTranslation(text, source, target) {
+    var response = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + encodeURIComponent(source) + '|' + encodeURIComponent(target), { headers: { Accept: 'application/json' } });
+    var data;
+    var translated = '';
+    if (!response.ok) throw new Error('MyMemory ' + response.status);
+    data = await response.json();
+    translated = decodeTranslatedValue(data && data.responseData && data.responseData.translatedText || '');
+    if (!translated || translated === text) throw new Error('MyMemory empty translation');
+    return translated;
+  }
+
+  async function fetchArgosTranslation(text, source, target) {
+    var response = await fetch('https://translate.argosopentech.com/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ q: text, source: source, target: target, format: 'text' })
+    });
+    var data;
+    var translated = '';
+    if (!response.ok) throw new Error('Argos ' + response.status);
+    data = await response.json();
+    translated = decodeTranslatedValue(data && data.translatedText || '');
+    if (!translated || translated === text) throw new Error('Argos empty translation');
+    return translated;
+  }
+
+  function translateRemoteText(text, targetLanguage, sourceLanguage) {
+    var raw = String(text || '');
+    var target = normalizeSupportedLanguage(targetLanguage || getCurrentUILanguage());
+    var source = normalizeSupportedLanguage(sourceLanguage || detectLikelyLanguage(raw, 'en'));
+    var cacheKey = getTranslationCacheKey(source, target, raw);
+    var cached = readTranslationCache(cacheKey);
+    var chunks;
+    if (!raw.trim()) return Promise.resolve('');
+    if (source === target) return Promise.resolve(raw);
+    if (cached) return Promise.resolve(cached);
+    if (ftgTranslationPending[cacheKey]) return ftgTranslationPending[cacheKey];
+    chunks = splitTextForTranslation(raw, 420);
+    ftgTranslationPending[cacheKey] = Promise.all(chunks.map(function(chunk) {
+      return queueTranslationTask(function() {
+        return fetchMyMemoryTranslation(chunk, source, target).catch(function() {
+          return fetchArgosTranslation(chunk, source, target);
+        }).catch(function() {
+          return chunk;
+        });
+      });
+    })).then(function(values) {
+      var joined = values.join(String.fromCharCode(10) + String.fromCharCode(10));
+      writeTranslationCache(cacheKey, joined || raw);
+      return joined || raw;
+    }).finally(function() {
+      delete ftgTranslationPending[cacheKey];
+    });
+    return ftgTranslationPending[cacheKey];
+  }
+
+  window.FTG_TRANSLATE_TEXT = function(text, targetLanguage, sourceLanguage) {
+    return translateRemoteText(String(text || ''), targetLanguage || getCurrentUILanguage(), sourceLanguage || detectLikelyLanguage(text, 'en'));
+  };
+
+  function getLocalizedEntity(type, entityId, original) {
+    var target = getCurrentUILanguage();
+    var bucket = ftgLocalizedEntityCache[type] && ftgLocalizedEntityCache[type][target];
+    if (!bucket || !bucket[entityId]) return original;
+    return Object.assign({}, original, bucket[entityId]);
+  }
+
+  function ensureLocalizedEntity(type, entityId, sourceLanguage, fields) {
+    var target = getCurrentUILanguage();
+    var source = normalizeSupportedLanguage(sourceLanguage || detectLikelyLanguage(Object.keys(fields).map(function(key) { return fields[key]; }).join(' '), 'en'));
+    var cacheBucket = ftgLocalizedEntityCache[type] = ftgLocalizedEntityCache[type] || {};
+    var langBucket = cacheBucket[target] = cacheBucket[target] || {};
+    var pendingKey = type + ':' + target + ':' + entityId;
+    if (!entityId) return Promise.resolve({ changed: false, data: null });
+    if (langBucket[entityId]) return Promise.resolve({ changed: false, data: langBucket[entityId] });
+    if (source === target) return Promise.resolve({ changed: false, data: null });
+    if (ftgLocalizedEntityPending[pendingKey]) return ftgLocalizedEntityPending[pendingKey];
+    ftgLocalizedEntityPending[pendingKey] = Promise.all(Object.keys(fields).map(function(fieldKey) {
+      var value = String(fields[fieldKey] || '');
+      if (!value.trim()) return Promise.resolve([fieldKey, value]);
+      return window.FTG_TRANSLATE_TEXT(value, target, source).then(function(translated) {
+        return [fieldKey, translated || value];
+      }).catch(function() {
+        return [fieldKey, value];
+      });
+    })).then(function(entries) {
+      var payload = {};
+      entries.forEach(function(entry) {
+        payload[entry[0]] = entry[1];
+      });
+      langBucket[entityId] = payload;
+      return { changed: true, data: payload };
+    }).catch(function() {
+      return { changed: false, data: null };
+    }).finally(function() {
+      delete ftgLocalizedEntityPending[pendingKey];
+    });
+    return ftgLocalizedEntityPending[pendingKey];
+  }
+
+  function getLocalizedArticle(article) {
+    return getLocalizedEntity('article', getSiteArticleIdentifier(article), article);
+  }
+
+  function getLocalizedPOI(poi) {
+    return getLocalizedEntity('poi', String(poi && (poi.id || poi.name) || ''), poi);
+  }
+
+  function getLocalizedTrail(trail) {
+    return getLocalizedEntity('trail', String(trail && (trail.id || trail.name) || ''), trail);
+  }
+
+  function getLocalizedOfficial(item) {
+    return getLocalizedEntity('official', String(item && (item.id || item.title) || ''), item);
+  }
+
+  function queueGuideArticleTranslations(articles) {
+    var target = getCurrentUILanguage();
+    Promise.all((articles || []).slice(0, 12).map(function(article) {
+      return ensureLocalizedEntity('article', getSiteArticleIdentifier(article), article && (article.source_language || article.language || article.lang || getGuideDetectedArticleLanguage(article).code), {
+        title: article && article.title || '',
+        excerpt: article && article.excerpt || '',
+        content_text: stripArticleSpeechText(article && (article.content || article.excerpt || '') || ''),
+        category: article && article.category || '',
+        meta: article && article.meta || ''
+      });
+    })).then(function(results) {
+      var modal = document.getElementById('site-article-reader');
+      var articleId = modal ? modal.getAttribute('data-article-id') : '';
+      if (getCurrentUILanguage() !== target) return;
+      if (results.some(function(result) { return !!(result && result.changed); })) {
+        renderStoryPreviewSection();
+        if (articleId) {
+          var currentArticle = findSiteArticle(articleId);
+          if (currentArticle) renderSiteArticleReader(currentArticle, false);
+        }
+      }
+    }).catch(function() {});
+  }
+
+  function queuePOITranslations(pois) {
+    var target = getCurrentUILanguage();
+    Promise.all((pois || []).slice(0, 12).map(function(poi) {
+      return ensureLocalizedEntity('poi', String(poi && (poi.id || poi.name) || ''), detectLikelyLanguage([poi && poi.name || '', poi && poi.type || '', poi && poi.description || '', poi && poi.location || ''].join(' '), 'it'), {
+        name: poi && poi.name || '',
+        type: poi && poi.type || '',
+        description: poi && poi.description || '',
+        location: poi && poi.location || ''
+      });
+    })).then(function(results) {
+      if (getCurrentUILanguage() !== target) return;
+      if (results.some(function(result) { return !!(result && result.changed); })) renderSitePOISection();
+    }).catch(function() {});
+  }
+
+  function queueTrailTranslations(trails) {
+    var target = getCurrentUILanguage();
+    Promise.all((trails || []).slice(0, 12).map(function(trail) {
+      return ensureLocalizedEntity('trail', String(trail && (trail.id || trail.name) || ''), detectLikelyLanguage([trail && trail.name || '', trail && trail.description || '', trail && trail.start_name || '', trail && trail.end_name || '', trail && trail.difficulty || ''].join(' '), 'it'), {
+        name: trail && trail.name || '',
+        description: trail && trail.description || '',
+        difficulty: trail && trail.difficulty || '',
+        start_name: trail && trail.start_name || '',
+        end_name: trail && trail.end_name || '',
+        estimated_duration: trail && trail.estimated_duration || ''
+      });
+    })).then(function(results) {
+      if (getCurrentUILanguage() !== target) return;
+      if (results.some(function(result) { return !!(result && result.changed); })) renderSiteTrailsSection();
+    }).catch(function() {});
+  }
+
+  function queueOfficialTranslations(items) {
+    var target = getCurrentUILanguage();
+    Promise.all((items || []).slice(0, 12).map(function(item) {
+      return ensureLocalizedEntity('official', String(item && (item.id || item.title) || ''), detectLikelyLanguage([item && item.title || '', item && item.excerpt || '', item && item.category || '', item && item.source || ''].join(' '), 'it'), {
+        title: item && item.title || '',
+        excerpt: item && item.excerpt || '',
+        category: item && item.category || '',
+        source: item && item.source || ''
+      });
+    })).then(function(results) {
+      if (getCurrentUILanguage() !== target) return;
+      if (results.some(function(result) { return !!(result && result.changed); })) renderOfficialCommunications();
+    }).catch(function() {});
   }
 
   function updateGuideRailLeadingCard(rail) {
@@ -3552,7 +3879,7 @@ window.FTG_ACTIONBAR_CONFIG = {
       return;
     }
     if (!siteArticles.length) {
-      container.innerHTML = '<div class="site-empty">Nessun articolo disponibile al momento.</div>';
+      container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('noArticles', 'No articles available right now.')) + '</div>';
       return;
     }
     if (filters.indexOf(currentSiteGuideFilter) === -1) currentSiteGuideFilter = 'all';
@@ -3581,9 +3908,11 @@ window.FTG_ACTIONBAR_CONFIG = {
     container.innerHTML = '<div class="site-guide-filters">' + filters.map(function(filterKey) {
       return '<button class="site-guide-filter ' + (filterKey === currentSiteGuideFilter ? 'active' : '') + '" type="button" data-site-guide-filter="' + filterKey + '">' + escapeHTML(getGuideFilterLabel(filterKey)) + '</button>';
     }).join('') + '</div><div class="site-guide-stage is-rail-only"><div class="site-guide-rail">' + filtered.slice(0, 12).map(function(article) {
-      return '<a class="site-guide-mini-card" href="' + escapeHTML(article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(article)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(article.category || article.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(getGuideCardSummary(article)) + '</p></div></a>';
+      var localizedArticle = getLocalizedArticle(article);
+      return '<a class="site-guide-mini-card" href="' + escapeHTML(localizedArticle.url || article.url) + '" data-site-article-id="' + escapeHTML(getSiteArticleIdentifier(article)) + '"><span class="site-guide-audio-btn site-guide-mini-audio" data-site-article-audio="' + escapeHTML(getSiteArticleIdentifier(article)) + '" role="button" tabindex="0" aria-label="' + escapeHTML(getGuideAudioAriaLabel()) + '">▶</span><div class="site-guide-mini-media" style="background-image:url(' + "'" + escapeHTML(getGuideCardImage(localizedArticle)) + "'" + ')"></div><div class="site-guide-mini-body"><span class="site-guide-mini-kicker">' + escapeHTML(localizedArticle.category || localizedArticle.meta || getGuideAllLabel()) + '</span><h5 class="site-guide-mini-title">' + escapeHTML(localizedArticle.title || article.title) + '</h5><p class="site-guide-mini-text">' + escapeHTML(getGuideCardSummary(localizedArticle)) + '</p></div></a>';
     }).join('') + '</div></div>';
     setGuideAudioButtonsState();
+    queueGuideArticleTranslations(filtered);
   }
 
   async function loadBlogPosts() {
@@ -3620,7 +3949,17 @@ window.FTG_ACTIONBAR_CONFIG = {
   }
 
   function getSitePOIGroupLabel(group) {
-    return ({ all: 'Tutti', viewpoint: 'Panorami', beach: 'Spiagge', church: 'Chiese', monument: 'Monumenti', station: 'Stazioni', food: 'Food', curiosity: 'Curiosità', other: 'Altro' })[group] || group;
+    return ({
+      all: getUILabel('all', 'All'),
+      viewpoint: getUILabel('viewpoints', 'Viewpoints'),
+      beach: getUILabel('beaches', 'Beaches'),
+      church: getUILabel('churches', 'Churches'),
+      monument: getUILabel('monuments', 'Monuments'),
+      station: getUILabel('stations', 'Stations'),
+      food: getUILabel('food', 'Food'),
+      curiosity: getUILabel('curiosities', 'Curiosities'),
+      other: getUILabel('more', 'More')
+    })[group] || group;
   }
 
   function renderSitePOIFilters() {
@@ -3631,12 +3970,12 @@ window.FTG_ACTIONBAR_CONFIG = {
     if (!container) return;
     if (!sitePOIsLoaded) {
       container.innerHTML = '<span class="site-poi-filter is-skeleton">Loading</span><span class="site-poi-filter is-skeleton">Loading</span><span class="site-poi-filter is-skeleton">Loading</span>';
-      if (locationSelect) locationSelect.innerHTML = '<option value="all">All</option>';
+      if (locationSelect) locationSelect.innerHTML = '<option value="all">' + escapeHTML(getUILabel('all', 'All')) + '</option>';
       return;
     }
     locations = ['all'].concat(sitePOIs.map(function(poi){ return poi.location; }).filter(Boolean).filter(function(value, index, list){ return list.indexOf(value) === index; }).sort(function(a, b){ return a.localeCompare(b); }));
     if (locationSelect) {
-      locationSelect.innerHTML = locations.map(function(location){ return '<option value="' + escapeHTML(location) + '">' + escapeHTML(location === 'all' ? 'All' : location) + '</option>'; }).join('');
+      locationSelect.innerHTML = locations.map(function(location){ return '<option value="' + escapeHTML(location) + '">' + escapeHTML(location === 'all' ? getUILabel('all', 'All') : location) + '</option>'; }).join('');
       locationSelect.value = locations.indexOf(currentSitePOILocationFilter) !== -1 ? currentSitePOILocationFilter : 'all';
     }
     groups = ['all'].concat(sitePOIs.map(getSitePOIGroup).filter(function(value, index, list){ return list.indexOf(value) === index; }));
@@ -3658,10 +3997,14 @@ window.FTG_ACTIONBAR_CONFIG = {
       return true;
     }).slice(0, 12);
     if (!filtered.length) {
-      container.innerHTML = '<div class="site-empty">Nessun luogo disponibile al momento.</div>';
+      container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('noPlaces', 'No useful places available right now.')) + '</div>';
       return;
     }
-    container.innerHTML = filtered.map(function(poi) { return '<article class="site-poi-card"><img src="' + escapeHTML(poi.image || 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg') + '" alt="' + escapeHTML(poi.name) + '" loading="lazy" decoding="async"><div class="site-poi-content"><h4 class="site-poi-title">' + escapeHTML(poi.name) + '</h4></div></article>'; }).join('');
+    container.innerHTML = filtered.map(function(poi) {
+      var localizedPOI = getLocalizedPOI(poi);
+      return '<article class="site-poi-card"><img src="' + escapeHTML(localizedPOI.image || poi.image || 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg') + '" alt="' + escapeHTML(localizedPOI.name || poi.name) + '" loading="lazy" decoding="async"><div class="site-poi-content"><h4 class="site-poi-title">' + escapeHTML(localizedPOI.name || poi.name) + '</h4></div></article>';
+    }).join('');
+    queuePOITranslations(filtered);
   }
 
   async function loadPOIs() {
@@ -3705,10 +4048,14 @@ window.FTG_ACTIONBAR_CONFIG = {
     if (fromFilter !== 'all') trails = trails.filter(function(trail){ return String(trail.start_name || '') === fromFilter; });
     if (difficultyFilter !== 'all') trails = trails.filter(function(trail){ return String(trail.difficulty || '').toLowerCase() === difficultyFilter; });
     if (!trails.length) {
-      container.innerHTML = '<div class="site-empty">Nessun sentiero disponibile al momento.</div>';
+      container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('noTrails', 'No trails available right now.')) + '</div>';
       return;
     }
-    container.innerHTML = trails.slice(0, 12).map(function(trail) { return '<article class="site-trail-card"><div class="site-trail-chart"><span class="site-trail-badge">Altimetria</span><canvas></canvas></div><div class="site-trail-body"><h4 class="site-trail-title">' + escapeHTML(trail.name) + '</h4><p class="site-trail-route">' + escapeHTML(trail.start_name + ' → ' + trail.end_name) + '</p><div class="site-trail-meta-grid"><div class="site-trail-meta"><span class="site-trail-meta-label">Difficoltà</span><span class="site-trail-meta-value">' + escapeHTML(trail.difficulty || '—') + '</span></div><div class="site-trail-meta"><span class="site-trail-meta-label">Tempo</span><span class="site-trail-meta-value">' + escapeHTML(trail.estimated_duration || '—') + '</span></div></div><span class="site-trail-open">Apri sentiero</span></div></article>'; }).join('');
+    container.innerHTML = trails.slice(0, 12).map(function(trail) {
+      var localizedTrail = getLocalizedTrail(trail);
+      return '<article class="site-trail-card"><div class="site-trail-chart"><span class="site-trail-badge">' + escapeHTML(getUILabel('elevation', 'Elevation')) + '</span><canvas></canvas></div><div class="site-trail-body"><h4 class="site-trail-title">' + escapeHTML(localizedTrail.name || trail.name) + '</h4><p class="site-trail-route">' + escapeHTML((localizedTrail.start_name || trail.start_name) + ' → ' + (localizedTrail.end_name || trail.end_name)) + '</p><div class="site-trail-meta-grid"><div class="site-trail-meta"><span class="site-trail-meta-label">' + escapeHTML(getUILabel('difficulty', 'Difficulty')) + '</span><span class="site-trail-meta-value">' + escapeHTML(localizedTrail.difficulty || trail.difficulty || '—') + '</span></div><div class="site-trail-meta"><span class="site-trail-meta-label">' + escapeHTML(getUILabel('time', 'Time')) + '</span><span class="site-trail-meta-value">' + escapeHTML(localizedTrail.estimated_duration || trail.estimated_duration || '—') + '</span></div></div><span class="site-trail-open">' + escapeHTML(getUILabel('openTrail', 'Open trail')) + '</span></div></article>';
+    }).join('');
+    queueTrailTranslations(trails);
   }
 
   async function loadTrails() {
@@ -3752,22 +4099,24 @@ window.FTG_ACTIONBAR_CONFIG = {
     var items;
     if (!container) return;
     if (!officialCommunicationsLoaded) {
-      container.innerHTML = '<div class="site-empty">Caricamento comunicazioni ufficiali…</div>';
+      container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('loadingOfficial', 'Loading official updates…')) + '</div>';
       return;
     }
     items = officialCommunications.filter(function(item) { return item && item.is_active !== false && item.status !== 'archived' && item.status !== 'hidden'; }).slice(0, 12);
     if (!items.length) {
-      container.innerHTML = '<div class="site-empty">Le comunicazioni ufficiali appariranno qui quando saranno disponibili.</div>';
+      container.innerHTML = '<div class="site-empty">' + escapeHTML(getUILabel('noOfficial', 'Official updates will appear here when available.')) + '</div>';
       return;
     }
     container.innerHTML = items.map(function(item) {
-      var href = item.source_url || '#';
-      var title = item.title || 'Comunicazione ufficiale';
-      var fullText = item.excerpt || 'Apri la comunicazione sul sito ufficiale per leggere il testo completo.';
-      var source = item.source || 'Fonte ufficiale';
-      var type = getOfficialCommunicationType(item);
-      return '<article class="site-official-item' + (String(fullText || '').length > 520 ? ' is-long' : '') + '" role="button" tabindex="0"><div class="site-official-flip"><div class="site-official-face site-official-front"><div><span class="site-official-card-label">Fonte:<strong>' + escapeHTML(source) + '</strong></span><div class="site-official-item-top"><span class="site-official-category">' + escapeHTML(type) + '</span></div><h4 class="site-official-item-title">' + escapeHTML(title) + '</h4><p class="site-official-item-excerpt">' + escapeHTML(fullText) + '</p></div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span></div></div><div class="site-official-face site-official-back"><div class="site-official-back-title">' + escapeHTML(title) + '</div><div class="site-official-full-text">' + escapeHTML(fullText) + '</div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span><a class="site-official-read" href="' + escapeHTML(href) + '" target="_blank" rel="noopener noreferrer">Apri fonte</a></div></div></div></article>';
+      var localizedItem = getLocalizedOfficial(item);
+      var href = localizedItem.source_url || item.source_url || '#';
+      var title = localizedItem.title || item.title || getUILabel('officialTitle', 'Official update');
+      var fullText = localizedItem.excerpt || item.excerpt || getUILabel('noArticleText', 'Open the article to read the full guide.');
+      var source = localizedItem.source || item.source || getUILabel('officialKicker', 'Official source');
+      var type = getOfficialCommunicationType(localizedItem);
+      return '<article class="site-official-item' + (String(fullText || '').length > 520 ? ' is-long' : '') + '" role="button" tabindex="0"><div class="site-official-flip"><div class="site-official-face site-official-front"><div><span class="site-official-card-label">' + escapeHTML(getUILabel('sourceLabel', 'Source')) + ':<strong>' + escapeHTML(source) + '</strong></span><div class="site-official-item-top"><span class="site-official-category">' + escapeHTML(type) + '</span></div><h4 class="site-official-item-title">' + escapeHTML(title) + '</h4><p class="site-official-item-excerpt">' + escapeHTML(fullText) + '</p></div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span></div></div><div class="site-official-face site-official-back"><div class="site-official-back-title">' + escapeHTML(title) + '</div><div class="site-official-full-text">' + escapeHTML(fullText) + '</div><div class="site-official-item-bottom"><span class="site-official-date">' + escapeHTML(formatOfficialDate(item.published_at || item.fetched_at)) + '</span><a class="site-official-read" href="' + escapeHTML(href) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(getUILabel('openSource', 'Open source')) + '</a></div></div></div></article>';
     }).join('');
+    queueOfficialTranslations(items);
   }
 
   async function loadOfficialCommunications() {
@@ -4042,13 +4391,13 @@ window.FTG_ACTIONBAR_CONFIG = {
     function getNextSectionIndicatorLabel(index) {
       var nextId = getSectionIdForIndex(index + 1);
       var labels = {
-        'site-stories-section': 'Free guide',
-        'site-places-section': 'Luoghi utili',
-        'site-experiences-section': 'Local discounts',
-        'site-trails-section': 'Sentieri',
-        'site-weather-section': 'Meteo',
-        'site-official-communications-section': 'Comunicazioni ufficiali',
-        'site-footer': 'Contatti'
+        'site-stories-section': getUILabel('freeGuide', 'Free guide'),
+        'site-places-section': getUILabel('placesSection', 'Places'),
+        'site-experiences-section': getUILabel('localDiscounts', 'Local discounts'),
+        'site-trails-section': getUILabel('trails', 'Trails'),
+        'site-weather-section': getUILabel('weather', 'Weather'),
+        'site-official-communications-section': getUILabel('officialTitle', 'Official updates'),
+        'site-footer': getUILabel('contact', 'Contact us')
       };
       return labels[nextId] || '';
     }
@@ -4315,6 +4664,8 @@ window.FTG_ACTIONBAR_CONFIG = {
         snapToPage(currentIndex + 1, { pushHash: true });
       });
     }
+
+    window.FTG_REFRESH_NEXT_SECTION_INDICATOR = updateNextSectionIndicator;
 
     window.FTG_SCROLL_TO_SITE_PAGE = function(index, options) {
       snapToPage(index, options || {});
@@ -4628,6 +4979,16 @@ window.FTG_ACTIONBAR_CONFIG = {
     ar: { heroTitle:'تشينكوي تيري ببساطة.', heroText:'خريطة، قرى، مسارات، طقس، عبّارات وتنبيهات مفيدة. دليل مجاني يساعدك على الحركة بشكل أفضل واحترام المكان.', openInteractiveMap:'افتح الدليل', fiveVillages:'القرى الخمس', tapMap:'اضغط لفتح الخريطة', startHere:'ابدأ هنا', siteSections:'الأقسام', readBefore:'قصص مفيدة.', storyText:'أدلة قصيرة ومقالات محلية لفهم القرى قبل الوصول.', openStories:'اقرأ القصص', thingsDoing:'خصومات محلية.', expText:'عروض مجانية من أنشطة محلية مختارة. لا عمولة على الشركاء.', bookSmarter:'مسارات واضحة.', stayText:'الصعوبة والوقت والارتفاع تساعدك على اختيار المسار المناسب قبل الانطلاق.', openStay:'افتح المسار', placesSection:'أماكن مفيدة', placesCopy:'إطلالات وشواطئ ومعالم ومحطات وأماكن عملية يمكن فتحها على الخريطة.', weather:'الطقس', weatherNote:'الآن والساعات القادمة', officialKicker:'مصادر رسمية', officialTitle:'تحديثات رسمية', officialText:'تنبيهات وتحديثات عامة من مصادر رسمية، مع رابط دائم للصفحة الأصلية.', officialDisclaimer:'ينظم 5TerreGo.com هذه التنبيهات لتسهيل قراءتها. للقرارات المهمة، تحقق دائماً من المصدر الرسمي.', trailCopy:'اختر مساراً، تحقق من المعلومات الأساسية وافتحه على الخريطة.', footerNote:'جميع الحقوق محفوظة. لا يجوز نسخ النصوص أو التصميم المرئي أو الكود أو الخرائط أو بنية البيانات أو المسارات أو المحتوى التحريري الأصلي أو إعادة إنتاجها أو استخراجها أو تعديلها أو استخدامها دون إذن كتابي.', contact:'تواصل معنا', anchorStories:'قصص', anchorDiscounts:'خصومات', anchorTrails:'مسارات', anchorPlaces:'أماكن', anchorWeather:'الطقس' }
   };
   Object.keys(SIMPLE_COPY).forEach(function(code){ UI[code] = Object.assign({}, UI[code] || {}, SIMPLE_COPY[code]); });
+  var PAGE_EXTRA_COPY = {
+    en: { freeGuide:'Free guide', mapInteractive:'Interactive map', searchArticles:'Search articles', noArticles:'No articles available right now.', noGuideResults:'No articles match this search.', loadingArticle:'Loading article…', openFullArticle:'Open full article', noArticleText:'Open the article to read the full guide.', noPlaces:'No useful places available right now.', noTrails:'No trails available right now.', loadingOfficial:'Loading official updates…', noOfficial:'Official updates will appear here when available.', sourceLabel:'Source', openSource:'Open source', listenArticle:'Listen to article', localDiscounts:'Local discounts', homePage:'Home', more:'More', likes:'Likes', desktopTitle:'Discover it on your phone.', desktopText:'This guide is designed to be used vertically on your phone, while moving through the Cinque Terre.' },
+    it: { freeGuide:'Free guide', mapInteractive:'Mappa interattiva', searchArticles:'Cerca articoli', noArticles:'Nessun articolo disponibile al momento.', noGuideResults:'Nessun articolo corrisponde alla ricerca.', loadingArticle:'Caricamento articolo…', openFullArticle:'Apri articolo completo', noArticleText:'Apri l’articolo per leggere tutta la guida.', noPlaces:'Nessun luogo utile disponibile al momento.', noTrails:'Nessun sentiero disponibile al momento.', loadingOfficial:'Caricamento comunicazioni ufficiali…', noOfficial:'Le comunicazioni ufficiali appariranno qui quando saranno disponibili.', sourceLabel:'Fonte', openSource:'Apri fonte', listenArticle:'Ascolta articolo', localDiscounts:'Sconti locali', homePage:'Home', more:'Altro', likes:'Mi piace', desktopTitle:'Scoprilo dal telefono.', desktopText:'Questa guida è pensata per essere usata in verticale sul telefono, direttamente mentre ti muovi tra le Cinque Terre.' },
+    fr: { freeGuide:'Guide gratuite', mapInteractive:'Carte interactive', searchArticles:'Rechercher des articles', noArticles:'Aucun article disponible pour le moment.', noGuideResults:'Aucun article ne correspond à la recherche.', loadingArticle:'Chargement de l’article…', openFullArticle:'Ouvrir l’article complet', noArticleText:'Ouvrez l’article pour lire le guide complet.', noPlaces:'Aucun lieu utile disponible pour le moment.', noTrails:'Aucun sentier disponible pour le moment.', loadingOfficial:'Chargement des communications officielles…', noOfficial:'Les communications officielles apparaîtront ici dès qu’elles seront disponibles.', sourceLabel:'Source', openSource:'Ouvrir la source', listenArticle:'Écouter l’article', localDiscounts:'Réductions locales', homePage:'Accueil', more:'Plus', likes:'Favoris', desktopTitle:'Découvrez-le sur votre téléphone.', desktopText:'Ce guide est conçu pour être utilisé en vertical sur téléphone, pendant vos déplacements aux Cinque Terre.' },
+    de: { freeGuide:'Kostenloser Guide', mapInteractive:'Interaktive Karte', searchArticles:'Artikel suchen', noArticles:'Derzeit sind keine Artikel verfügbar.', noGuideResults:'Kein Artikel passt zur Suche.', loadingArticle:'Artikel wird geladen…', openFullArticle:'Vollständigen Artikel öffnen', noArticleText:'Öffne den Artikel, um den vollständigen Guide zu lesen.', noPlaces:'Derzeit sind keine nützlichen Orte verfügbar.', noTrails:'Derzeit sind keine Wege verfügbar.', loadingOfficial:'Offizielle Mitteilungen werden geladen…', noOfficial:'Offizielle Mitteilungen erscheinen hier, sobald sie verfügbar sind.', sourceLabel:'Quelle', openSource:'Quelle öffnen', listenArticle:'Artikel anhören', localDiscounts:'Lokale Rabatte', homePage:'Startseite', more:'Mehr', likes:'Favoriten', desktopTitle:'Entdecke es auf dem Handy.', desktopText:'Dieser Guide ist für die vertikale Nutzung auf dem Handy gedacht, direkt unterwegs in den Cinque Terre.' },
+    ru: { freeGuide:'Бесплатный гид', mapInteractive:'Интерактивная карта', searchArticles:'Искать статьи', noArticles:'Сейчас нет доступных статей.', noGuideResults:'Нет статей по этому запросу.', loadingArticle:'Загрузка статьи…', openFullArticle:'Открыть полную статью', noArticleText:'Откройте статью, чтобы прочитать полный гид.', noPlaces:'Сейчас нет полезных мест.', noTrails:'Сейчас нет доступных маршрутов.', loadingOfficial:'Загрузка официальных сообщений…', noOfficial:'Официальные сообщения появятся здесь, когда будут доступны.', sourceLabel:'Источник', openSource:'Открыть источник', listenArticle:'Слушать статью', localDiscounts:'Локальные скидки', homePage:'Главная', more:'Ещё', likes:'Избранное', desktopTitle:'Откройте на телефоне.', desktopText:'Этот гид создан для вертикального использования на телефоне прямо во время перемещения по Чинкве-Терре.' },
+    zh: { freeGuide:'免费指南', mapInteractive:'互动地图', searchArticles:'搜索文章', noArticles:'目前没有可用文章。', noGuideResults:'没有匹配的文章。', loadingArticle:'正在加载文章…', openFullArticle:'打开完整文章', noArticleText:'打开文章以阅读完整指南。', noPlaces:'目前没有可用的实用地点。', noTrails:'目前没有可用步道。', loadingOfficial:'正在加载官方通知…', noOfficial:'有可用内容时，官方通知会显示在这里。', sourceLabel:'来源', openSource:'打开来源', listenArticle:'收听文章', localDiscounts:'本地优惠', homePage:'首页', more:'更多', likes:'收藏', desktopTitle:'请在手机上查看。', desktopText:'这个指南专为手机竖屏使用而设计，方便你在五渔村移动时直接使用。' },
+    ar: { freeGuide:'الدليل المجاني', mapInteractive:'الخريطة التفاعلية', searchArticles:'ابحث في المقالات', noArticles:'لا توجد مقالات متاحة حالياً.', noGuideResults:'لا توجد مقالات تطابق هذا البحث.', loadingArticle:'جارٍ تحميل المقال…', openFullArticle:'افتح المقال الكامل', noArticleText:'افتح المقال لقراءة الدليل الكامل.', noPlaces:'لا توجد أماكن مفيدة متاحة حالياً.', noTrails:'لا توجد مسارات متاحة حالياً.', loadingOfficial:'جارٍ تحميل الإشعارات الرسمية…', noOfficial:'ستظهر الإشعارات الرسمية هنا عند توفرها.', sourceLabel:'المصدر', openSource:'افتح المصدر', listenArticle:'استمع إلى المقال', localDiscounts:'خصومات محلية', homePage:'الرئيسية', more:'المزيد', likes:'المفضلة', desktopTitle:'اكتشفه من الهاتف.', desktopText:'هذا الدليل مصمم ليُستخدم بشكل عمودي على الهاتف أثناء تنقلك بين قرى تشينكوي تيري.' }
+  };
+  Object.keys(PAGE_EXTRA_COPY).forEach(function(code){ UI[code] = Object.assign({}, UI[code] || {}, PAGE_EXTRA_COPY[code]); });
   var TEXT_REPLACE = {
     it: {
       'Hi, I’m Captain Gull. I can help you explore the Cinque Terre: villages, trails, ferries, beaches, viewpoints, stories, restaurants and practical ideas for today.':'Ciao, sono Captain Gull. Ti aiuto a esplorare le Cinque Terre: borghi, sentieri, traghetti, spiagge, panorami, storie, ristoranti e idee pratiche per oggi.',
@@ -4713,15 +5074,79 @@ window.FTG_ACTIONBAR_CONFIG = {
         window.FTG_TRANSLATE_TEXT(original, l).then(function(translated) {
           if (lang() !== l) return;
           if (!translated || translated === original) return;
-          if (/invalid source language|langpair|no content/i.test(translated)) return;
+          if (String(translated).toLowerCase().indexOf('invalid source language') !== -1) return;
+          if (String(translated).toLowerCase().indexOf('langpair') !== -1) return;
           el.textContent = translated;
         }).catch(function() {});
       });
     });
   }
+
+  function syncActionbarI18N() {
+    var cfg = window.FTG_ACTIONBAR_CONFIG;
+    var languageLabels = {
+      it: '🇮🇹 Italiano',
+      en: '🇬🇧 English',
+      fr: '🇫🇷 Français',
+      de: '🇩🇪 Deutsch',
+      ru: '🇷🇺 Русский',
+      zh: '🇨🇳 中文',
+      ar: '🇸🇦 العربية'
+    };
+    if (!cfg) return;
+    cfg.language = lang();
+    cfg.languages = ['it', 'en', 'fr', 'de', 'ru', 'zh', 'ar'].map(function(code) {
+      return { code: code, label: languageLabels[code] };
+    });
+    if (cfg.pages) {
+      if (cfg.pages.map) cfg.pages.map.label = t('map');
+      if (cfg.pages.home) cfg.pages.home.label = t('homePage');
+      if (cfg.pages.guide) cfg.pages.guide.label = t('freeGuide');
+      if (cfg.pages.profile) cfg.pages.profile.label = t('more');
+    }
+    if (cfg.profileLinks) {
+      cfg.profileLinks = [
+        { label: t('likes'), href: '#likes' },
+        { label: t('myBookings') || t('bookings'), href: '#experiences' },
+        { label: t('editProfile'), href: 'profile.html' },
+        { label: t('preferences'), href: '#preferences' }
+      ];
+    }
+    try {
+      window.dispatchEvent(new CustomEvent('ftg-actionbar-config-changed', { detail: { language: lang(), config: cfg } }));
+      document.dispatchEvent(new CustomEvent('ftg-actionbar-config-changed', { detail: { language: lang(), config: cfg } }));
+    } catch (error) {}
+  }
+
+  function syncExtendedI18NUI() {
+    var guideInput = document.getElementById('site-guide-search-input');
+    var desktopGate = document.getElementById('desktop-mobile-gate');
+    var fromSelect = document.getElementById('site-trail-from-filter');
+    var difficultySelect = document.getElementById('site-trail-difficulty-filter');
+    setText('.site-hero-map-card-title', t('mapInteractive'));
+    setText('#site-stories-section .site-feature-kicker', t('freeGuide'));
+    setText('.desktop-mobile-gate-card h1', t('desktopTitle'));
+    setText('.desktop-mobile-gate-card p', t('desktopText'));
+    setAllText('.site-hero-quicknav-track .site-hero-quicknav-title', [t('freeGuide'), t('placesSection'), t('localDiscounts'), t('trails'), t('officialTitle')]);
+    if (guideInput) {
+      guideInput.setAttribute('placeholder', t('searchArticles'));
+      guideInput.setAttribute('aria-label', t('searchArticles'));
+    }
+    if (desktopGate) desktopGate.setAttribute('dir', lang() === 'ar' ? 'rtl' : 'ltr');
+    if (fromSelect && fromSelect.options && fromSelect.options[0]) fromSelect.options[0].textContent = t('all');
+    if (difficultySelect && difficultySelect.options) {
+      if (difficultySelect.options[0]) difficultySelect.options[0].textContent = t('all');
+      if (difficultySelect.options[1]) difficultySelect.options[1].textContent = 'Easy';
+      if (difficultySelect.options[2]) difficultySelect.options[2].textContent = 'Medium';
+      if (difficultySelect.options[3]) difficultySelect.options[3].textContent = 'Hard';
+      if (difficultySelect.options[4]) difficultySelect.options[4].textContent = 'Expert';
+    }
+    syncActionbarI18N();
+    if (window.FTG_REFRESH_NEXT_SECTION_INDICATOR) window.FTG_REFRESH_NEXT_SECTION_INDICATOR();
+  }
   function applyLanguage(next, options){ var l = next || lang(); var flag = document.getElementById('language-flag'); var flagImg = document.getElementById('language-flag-img'); options = options || {}; localStorage.setItem('5terrego_language', l); document.documentElement.lang = l; document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr'; if (flag) flag.setAttribute('data-current-language', l); if (flagImg) { flagImg.src = 'https://hatscripts.github.io/circle-flags/flags/' + FLAGS[l] + '.svg'; flagImg.alt = NAMES[l]; }
     document.querySelectorAll('.language-option').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-lang') === l); });
-    var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest') || 'Ospite'; setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search')); setPlaceholder('#hero-universal-search-input', t('search')); setPlaceholder('#site-guide-search-input', t('search'));
+    var menuName = document.getElementById('app-menu-username'); if (menuName && window.FTG_CURRENT_USER) menuName.textContent = getUserDisplayNameForI18N(window.FTG_CURRENT_USER); if (menuName && !window.FTG_CURRENT_USER) menuName.textContent = t('guest') || 'Ospite'; setText('.app-menu-kicker', t('menuHi')); setText('#login', t('login')); setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setText('.app-menu-auth-btn[href="bookings.html"]', t('bookings')); setText('.app-menu-quick-title', t('quickLinks')); setAllText('.app-menu-grid .app-menu-title', [t('stories'), t('experiences'), t('bookStay'), 'Copyright']); setAllText('.app-menu-quick-row .app-menu-quick-link', [t('trails'), t('meteo'), t('ferry'), 'Copyright', t('exclusiveDiscounts')]); setPlaceholder('#search', t('search')); setPlaceholder('#hero-universal-search-input', t('search')); setPlaceholder('#site-guide-search-input', t('searchArticles'));
     if (typeof stabilizeMapFilterButtons === 'function') stabilizeMapFilterButtons();
     setText('#tour-recenter-top', t('recenter')); setText('#tour-exit-top', t('exitTour'));
     setText('.site-view-title', t('heroTitle')); setText('.site-view-text', t('heroText')); setText('#open-interactive-map-btn', t('openInteractiveMap')); setAllText('.site-hero-actions a', [t('stories'),t('experiences'),t('bookStay')]);
@@ -4735,6 +5160,7 @@ window.FTG_ACTIONBAR_CONFIG = {
     setText('#tour-nav-kicker', t('tourActive')); setText('#tour-nav-title', t('nextStop')); setText('#tour-nav-distance', t('moveNext')); setText('.tour-nav-compass-label', t('followPath')); setText('#tour-nav-audio', t('audio'));
     setText('.site-footer-contact-btn', t('contact')); setText('.site-footer-note', t('footerNote')); setText('.site-footer-company', 'by Rosetta Ventures FZ-LLC'); setText('.site-official-disclaimer', t('officialDisclaimer')); setText('.site-institutional-badge > span:first-child', t('supportedBy')); 
     setText('.ai-subtitle', t('aiSubtitle')); setPlaceholder('#ai-input', t('aiPlaceholder')); setAllText('.ai-suggestion', [t('ai1'),t('ai2'),t('ai3'),t('ai4')]); var aiClose = document.getElementById('ai-close'); if (aiClose) aiClose.setAttribute('aria-label', t('aiClose')); var aiBtn = document.getElementById('ai-chat-btn'); if (aiBtn) aiBtn.setAttribute('aria-label', t('aiOpen')); setText('.card-live-loading-text', t('liveLoading'));
+    syncExtendedI18NUI();
     window.setTimeout(translateRemainingStaticUI, 60);
   }
   function setup(){ var flag = document.getElementById('language-flag'); var actions = document.querySelector('.top-actions'); var topBar = document.querySelector('.top-bar'); var menu = document.getElementById('language-menu'); var appToggle = document.getElementById('app-menu-toggle'); var appMenu = document.getElementById('app-menu'); function setMenuOpen(open){ if (!actions) return; actions.classList.toggle('quick-menu-open', open); if (topBar) topBar.classList.toggle('menu-expanded', open); document.body.classList.toggle('quick-menu-expanded', open); if (appToggle) appToggle.setAttribute('aria-expanded', open ? 'true' : 'false'); if (!open && appMenu) appMenu.classList.remove('language-expanded'); if (!open && menu) menu.classList.remove('language-expanded'); if (open) window.setTimeout(function(){ var slider = document.querySelector('.top-bar.menu-expanded .app-menu-grid'); var middle = slider ? slider.querySelectorAll('.app-menu-link')[1] : null; if (slider && middle) { try { middle.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (error) { slider.scrollLeft = middle.offsetLeft - ((slider.clientWidth - middle.clientWidth) / 2); } } }, 80); } if (appToggle && actions) appToggle.addEventListener('click', function(e){ e.stopPropagation(); setMenuOpen(!actions.classList.contains('quick-menu-open')); }); if (flag && actions) flag.addEventListener('click', function(e){ e.stopPropagation(); setMenuOpen(!actions.classList.contains('quick-menu-open')); }); if (menu) menu.addEventListener('click', function(e){ var btn = e.target.closest('[data-lang]'); var panel = document.getElementById('site-view-panel'); var currentScroll = panel ? panel.scrollTop : 0; if (!btn) { if (menu.classList.contains('language-expanded')) { e.preventDefault(); e.stopPropagation(); menu.classList.remove('language-expanded'); if (appMenu) appMenu.classList.remove('language-expanded'); } return; } e.preventDefault(); e.stopPropagation(); if (btn.classList.contains('active') && !menu.classList.contains('language-expanded')) { menu.classList.add('language-expanded'); if (appMenu) appMenu.classList.add('language-expanded'); return; } applyLanguage(btn.getAttribute('data-lang'), { source: 'manual' }); if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('manual language change'); panel = document.getElementById('site-view-panel'); if (panel) window.requestAnimationFrame(function(){ panel.scrollTop = currentScroll; }); menu.classList.remove('language-expanded'); if (appMenu) appMenu.classList.remove('language-expanded'); }); if (appMenu) appMenu.addEventListener('click', function(e){ var filterLink = e.target.closest('[data-open-filter]'); var siteSectionLink = e.target.closest('[data-open-site-section]'); if (e.target.closest('[data-lang]')) return; if (filterLink) { e.preventDefault(); var filterName = filterLink.getAttribute('data-open-filter'); setMenuOpen(false); window.setTimeout(function(){ var btn = document.querySelector('#map-filter-bar [data-map-filter="' + filterName + '"]'); if (btn) btn.click(); }, 80); return; }
@@ -4758,6 +5184,21 @@ window.FTG_ACTIONBAR_CONFIG = {
           }, 80);
           return;
         } if (siteSectionLink) { e.preventDefault(); var sectionId = siteSectionLink.getAttribute('data-open-site-section'); setMenuOpen(false); window.setTimeout(function(){ if (window.FTG_OPEN_SITE_SECTION) window.FTG_OPEN_SITE_SECTION(sectionId); }, 80); return; } if (e.target.closest('a')) setMenuOpen(false); e.stopPropagation(); }); var logoutBtn = document.getElementById('app-menu-logout'); if (logoutBtn) logoutBtn.addEventListener('click', async function(e){ e.preventDefault(); e.stopPropagation(); if (window.fiveTerreSupabaseClient && window.fiveTerreSupabaseClient.auth) { try { await window.fiveTerreSupabaseClient.auth.signOut(); } catch (error) {} } window.FTG_CURRENT_USER = null; document.body.classList.remove('user-logged-in'); var menuName = document.getElementById('app-menu-username'); if (menuName) menuName.textContent = t('guest') || 'Ospite'; setText('#app-menu-account', t('editProfile') || 'Area personale'); setText('#app-menu-logout', t('logout') || 'Logout'); setMenuOpen(false); }); document.addEventListener('click', function(){ setMenuOpen(false); }); applyLanguage(lang()); if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('initial language'); }
+  window.FTG_TRANSLATE_DYNAMIC_CONTENT = function(reason) {
+    syncExtendedI18NUI();
+    if (typeof renderStoryPreviewSection === 'function') renderStoryPreviewSection();
+    if (typeof renderSitePOISection === 'function') renderSitePOISection();
+    if (typeof renderSiteTrailsSection === 'function') renderSiteTrailsSection();
+    if (typeof renderOfficialCommunications === 'function') renderOfficialCommunications();
+    if (typeof renderSiteWeatherSection === 'function') renderSiteWeatherSection();
+    var modal = document.getElementById('site-article-reader');
+    var articleId = modal ? modal.getAttribute('data-article-id') : '';
+    if (articleId) {
+      var currentArticle = findSiteArticle(articleId);
+      if (currentArticle) renderSiteArticleReader(currentArticle, false);
+    }
+  };
+
   window.FTG_I18N = { t:t, setLanguage:function(next, options){ applyLanguage(next, options); if (typeof renderSiteMapTip === 'function') renderSiteMapTip(); if (window.FTG_TRANSLATE_DYNAMIC_CONTENT) window.FTG_TRANSLATE_DYNAMIC_CONTENT('language changed'); }, getLanguage:lang, translateText:translateText, getLoginText:getLoginText, apply:applyLanguage };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
 }());
