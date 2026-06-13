@@ -1107,7 +1107,10 @@
   function setUserLocationButtonState(state) { if (!userLocationBtn) return; if (state === 'pending') { userLocationBtn.innerHTML = getUserLocationButtonIcon('pending'); userLocationBtn.title = 'Looking for your location'; return; } if (state === 'active') { userLocationBtn.innerHTML = getUserLocationButtonIcon('active'); userLocationBtn.title = 'Center on my location'; return; } userLocationBtn.innerHTML = getUserLocationButtonIcon('idle'); userLocationBtn.title = 'Show my location'; }
   function createUserLocationIcon() { return L.divIcon({ className: 'user-location-icon', html: '<div class="user-location-marker"></div>', iconSize: [24, 24], iconAnchor: [12, 12] }); }
   function normalizeText(value){ var text = String(value || '').toLowerCase().normalize('NFD'), output = '', lastWasSpace = false, i, code, ch; for (i = 0; i < text.length; i += 1) { ch = text.charAt(i); code = text.charCodeAt(i); if (code >= 768 && code <= 879) continue; if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) { output += ch; lastWasSpace = false; } else if (!lastWasSpace) { output += ' '; lastWasSpace = true; } } return output.trim(); }
-  function parseCoords(raw) { var lat, lng, str, parts; raw = raw || {}; if (typeof raw.coords === 'string') { str = raw.coords.trim(); parts = str.split(','); if (parts.length > 2) { lat = Number(String(parts[0]).trim() + '.' + String(parts[1]).trim()); lng = Number(String(parts[2]).trim() + '.' + String(parts[3]).trim()); } else { lat = Number(String(parts[0]).trim()); lng = Number(String(parts[1]).trim()); } return { lat: lat, lng: lng }; } lat = Number(readValue(raw.lat, raw.latitude)); lng = Number(readValue(raw.lng, raw.longitude)); return { lat: lat, lng: lng }; }
+  function normalizeLatLngPair(first, second) { var a = Number(first), b = Number(second); if (!Number.isFinite(a) || !Number.isFinite(b)) return { lat: NaN, lng: NaN }; if (Math.abs(a) > 20 && Math.abs(b) < 20) return { lat: a, lng: b }; if (Math.abs(b) > 20 && Math.abs(a) < 20) return { lat: b, lng: a }; return { lat: a, lng: b }; }
+  function parseCoords(raw) { var lat, lng, str, cleaned, parts; raw = raw || {}; if (Array.isArray(raw.coords) && raw.coords.length >= 2) return normalizeLatLngPair(raw.coords[0], raw.coords[1]); if (raw.coords && typeof raw.coords === 'object' && !Array.isArray(raw.coords)) { lat = readValue(raw.coords.lat, raw.coords.latitude); lng = readValue(raw.coords.lng, raw.coords.longitude); if (lat !== undefined && lng !== undefined) return normalizeLatLngPair(lat, lng); if (Array.isArray(raw.coords.coordinates) && raw.coords.coordinates.length >= 2) return normalizeLatLngPair(raw.coords.coordinates[1], raw.coords.coordinates[0]); if (raw.coords.x !== undefined && raw.coords.y !== undefined) return normalizeLatLngPair(raw.coords.y, raw.coords.x); }
+    if (typeof raw.coords === 'string') { str = raw.coords.trim(); cleaned = str.split('(').join('').split(')').join('').split(';').join(',').split(' ').join(''); parts = cleaned.split(',').filter(Boolean); if (parts.length >= 2) { if (parts.length === 4 && parts[0].indexOf('.') === -1 && parts[2].indexOf('.') === -1) return normalizeLatLngPair(parts[0] + '.' + parts[1], parts[2] + '.' + parts[3]); return normalizeLatLngPair(parts[0], parts[1]); } }
+    lat = readValue(raw.lat, raw.latitude); lng = readValue(raw.lng, raw.longitude); if (lat !== undefined && lng !== undefined) return normalizeLatLngPair(lat, lng); if (raw.lon !== undefined || raw.long !== undefined) return normalizeLatLngPair(readValue(raw.lat, raw.latitude), readValue(raw.lon, raw.long)); return { lat: Number(lat), lng: Number(lng) }; }
   function getFirstImageField(raw) { var direct; var fromList; raw = raw || {}; direct = raw.cover_image || raw.coverImage || raw.image_url || raw.imageUrl || raw.thumbnail_url || raw.thumbnailUrl || raw.thumbnail || raw.image || raw.photo_url || raw.photoUrl || raw.img || ''; if (direct) return String(direct).trim(); fromList = normalizePOIImages(raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || []); return fromList.length ? fromList[0] : ''; }
   function getAllImageFields(raw) { var images = []; var main; raw = raw || {}; main = getFirstImageField(raw); if (main) images.push(main); images = images.concat(normalizePOIImages(raw.cover_images || raw.coverImages || raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || [])); return images.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }); }
   function normalizePOI(raw) { var parsed, symbol, mainImage, allImages, fallbackName; raw = raw || {}; parsed = parseCoords(raw); symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍'); mainImage = getFirstImageField(raw); allImages = getAllImageFields(raw); fallbackName = 'poi-' + String(raw.id || raw._id || Math.random().toString(16).slice(2)); return { id: raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2), name: String(raw.name || raw.title || fallbackName), symbol: symbol, coords: [parsed.lat, parsed.lng], lat: parsed.lat, lng: parsed.lng, image: mainImage, cover_image: raw.cover_image || mainImage, images: allImages, description: raw.description || raw.descrizione || '', type: raw.type || raw.tipo || '', owner_email: raw.owner_email || raw.email || '', phone: raw.phone || raw.telephone || '', relevance: Number(raw.importance || raw.relevance || raw.score || 0), discount: Number(raw.discount || 0), discount_info: raw.discount_info || raw.discount_text || raw.discount_description || '', emails: raw.emails || '', active_codes: Array.isArray(raw.active_codes) ? raw.active_codes : [] }; }
@@ -1956,18 +1959,24 @@
       });
     }).catch(function() {});
   }
+  function filterUsableCachedPOIRows(rows) { return (Array.isArray(rows) ? rows : []).filter(function(row) { var parsed = parseCoords(row || {}); return Number.isFinite(parsed.lat) && Number.isFinite(parsed.lng); }); }
   function readLocalPOIs() {
-    var rows = [];
+    var localRows = filterUsableCachedPOIRows(safeParseJSON(localStorage.getItem(LOCAL_POI_KEY) || '[]', []));
+    var hotRows = [];
     FTG_POI_HOT_CACHE_KEYS.some(function(key) {
-      var cached = safeParseJSON(localStorage.getItem(key) || 'null', null);
-      if (Array.isArray(cached) && cached.length) {
-        rows = cached;
-        return true;
-      }
+      var cached = filterUsableCachedPOIRows(safeParseJSON(localStorage.getItem(key) || 'null', null));
+      if (cached.length) { hotRows = cached; return true; }
       return false;
     });
-    if (rows.length) return sortCachedPOIRows(rows);
-    return sortCachedPOIRows(safeParseJSON(localStorage.getItem(LOCAL_POI_KEY) || '[]', []));
+    if (localRows.length && hotRows.length) {
+      return sortCachedPOIRows(localRows.concat(hotRows.filter(function(row) {
+        var id = String(row && (row.id || row._id || '') || '');
+        return !id || !localRows.some(function(localRow) { return String(localRow && (localRow.id || localRow._id || '') || '') === id; });
+      })));
+    }
+    if (localRows.length) return sortCachedPOIRows(localRows);
+    if (hotRows.length) return sortCachedPOIRows(hotRows);
+    return [];
   }
   function writeLocalPOIs(rows) {
     var trimmed;
