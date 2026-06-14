@@ -362,6 +362,123 @@
     .custom-poi.is-dimmed .poi-label {
       opacity: .72;
     }
+    .poi-overlap-group {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .poi-overlap-group::before {
+      display: none !important;
+      content: none !important;
+    }
+    .poi-overlap-group-icon {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      perspective: 900px;
+      transform-style: preserve-3d;
+      transform-origin: 50% 50%;
+    }
+    .poi-overlap-group-icon.is-flipping .poi-overlap-face.is-front {
+      animation: poiFaceFrontFlipOut 2.48s linear both;
+    }
+    .poi-overlap-group-icon.is-flipping .poi-overlap-face.is-back {
+      animation: poiFaceBackFlipIn 2.48s linear both;
+    }
+    .poi-overlap-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform-style: preserve-3d;
+      transform-origin: 50% 50%;
+    }
+    .poi-overlap-face.is-front {
+      transform: rotateY(0deg);
+      opacity: 1;
+    }
+    .poi-overlap-face.is-back {
+      transform: rotateY(-90deg);
+      opacity: 0;
+    }
+    .poi-overlap-group-icon img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,.28));
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+    @keyframes poiFaceFrontFlipOut {
+      0% {
+        transform: rotateY(0deg) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+      49.999% {
+        transform: rotateY(90deg) scale(.92);
+        opacity: 1;
+        filter: brightness(.90);
+      }
+      50%, 100% {
+        transform: rotateY(90deg) scale(.92);
+        opacity: 0;
+        filter: brightness(.90);
+      }
+    }
+    @keyframes poiFaceBackFlipIn {
+      0%, 49.999% {
+        transform: rotateY(-90deg) scale(.92);
+        opacity: 0;
+        filter: brightness(.90);
+      }
+      50% {
+        transform: rotateY(-90deg) scale(.92);
+        opacity: 1;
+        filter: brightness(.90);
+      }
+      100% {
+        transform: rotateY(0deg) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+    }
+    .poi-overlap-group-count {
+      position: absolute;
+      right: -3px;
+      bottom: 0px;
+      z-index: 3;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.96);
+      color: #111;
+      border: 1px solid rgba(0,0,0,.06);
+      font-size: 10px;
+      font-weight: 950;
+      line-height: 1;
+      letter-spacing: -.01em;
+      box-shadow: 0 6px 16px rgba(0,0,0,.16);
+      pointer-events: none;
+    }
     .poi-dot-label { width: 10px; height: 10px; display: block; border-radius: 999px; background: rgba(255,255,255,1); border: 2px solid rgba(0,0,0,.62); box-shadow: 0 5px 12px rgba(0,0,0,.38); }
     .poi-label.has-discount::after { content: '🔥'; position: absolute; top: -9px; right: -9px; width: 19px; height: 19px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,0.94); border: 1px solid rgba(255,138,29,0.45); box-shadow: 0 6px 14px rgba(0,0,0,0.24); font-size: 12px; }
     .trail-start-label { min-width: 38px; min-height: 38px; display: grid; place-items: center; background: transparent; border: 0; overflow: visible; }
@@ -1348,6 +1465,9 @@
 
   var poiMarkers = [];
   var trailItems = [];
+  var poiOverlapLayer = null;
+  var poiOverlapGroups = [];
+  var poiOverlapCycleTimer = null;
   var incrementalPOIRefreshFrame = 0;
   var mapRefreshFrame = 0;
   var mapRefreshNeedsRail = false;
@@ -1399,7 +1519,13 @@
   var userCheckTimer = null;
   var poiTypeTimer = null;
   var USE_BOTTOM_RAIL = true;
-  var startX = 0, startY = 0, currentX = 0, currentY = 0, isDragging = false, hasMoved = false, dragAxis = null;
+  var startX = 0;
+  var startY = 0;
+  var currentX = 0;
+  var currentY = 0;
+  var isDragging = false;
+  var hasMoved = false;
+  var dragAxis = null;
   var poiSheetStartY = 0;
   var poiSheetStartX = 0;
   var poiSheetStartHeight = 0;
@@ -1546,6 +1672,9 @@
       case 'castello':
       case 'castle':
         return 'castle.png';
+      case 'farmacia':
+      case 'pharmacy':
+        return 'pharmacy.png';
       case 'ristorante':
       case 'restaurant':
       case 'food':
@@ -1567,23 +1696,80 @@
     }
   }
   function normalizePOIType(type) { return String(type || '').trim().toLowerCase(); }
+  function getLocalAssetUrl(file) {
+    var name = String(file || '').trim().replace(/^\.\//, '');
+    if (!name) return '';
+    return encodeURI(name);
+  }
   function getGithubAssetUrl(file) { var name = String(file || '').trim().replace(/^\.\//, ''); if (!name) return ''; return 'https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/' + encodeURIComponent(name); }
+  function getGithubAssetCdnUrl(file) {
+    var name = String(file || '').trim().replace(/^\.\//, '');
+    if (!name) return '';
+    return 'https://cdn.jsdelivr.net/gh/tanzaniagetawayinfo-source/5TerreGo@main/' + encodeURIComponent(name);
+  }
+  function getAssetCandidates(file) {
+    var list = [getLocalAssetUrl(file), getGithubAssetCdnUrl(file), getGithubAssetUrl(file)].filter(Boolean);
+    return list.filter(function(src, index) { return list.indexOf(src) === index; });
+  }
+  window.__ftgImgFallback = function(img, emoji) {
+    var altSrc;
+    var fallbackSrc;
+    var parent;
+    if (!img) return;
+    altSrc = img.getAttribute('data-alt-src') || '';
+    fallbackSrc = img.getAttribute('data-fallback-src') || '';
+    if (altSrc) {
+      img.removeAttribute('data-alt-src');
+      img.src = altSrc;
+      return;
+    }
+    if (fallbackSrc) {
+      img.removeAttribute('data-fallback-src');
+      img.src = fallbackSrc;
+      return;
+    }
+    parent = img.parentNode;
+    if (parent) parent.textContent = emoji || '📍';
+  };
+  function buildPOIAssetImage(file, alt, emoji) {
+    var sources = getAssetCandidates(file);
+    var src = escapeHTML(sources[0] || '');
+    var altSrc = escapeHTML(sources[1] || '');
+    var fallbackSrc = escapeHTML(sources[2] || '');
+    var safeEmoji = JSON.stringify(String(emoji || '📍'));
+    return '<img src="' + src + '"' +
+      (altSrc ? ' data-alt-src="' + altSrc + '"' : '') +
+      (fallbackSrc ? ' data-fallback-src="' + fallbackSrc + '"' : '') +
+      ' alt="' + escapeHTML(alt || '') + '" loading="eager" decoding="async"' +
+      " onerror='window.__ftgImgFallback && window.__ftgImgFallback(this, " + safeEmoji + ")'>";
+  }
+  function warmPOIAssets() {
+    var files = ['church.png','monument.png','sentiero.png','beach.png','station.png','busstop.png','atm.png','fountan.png','elevators.png','castle.png','ferrystation.png','viewpoint.png','unknownspot.png','pharmacy.png','ferry.png'];
+    files.forEach(function(file) {
+      getAssetCandidates(file).forEach(function(src) {
+        var img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+      });
+    });
+  }
   function getPOIIconHTML(poi) {
     var symbol = poi && poi.symbol ? String(poi.symbol) : '📌';
     var type = normalizePOIType(poi && poi.type);
-    if (type === 'chiesa' || type === 'church' || symbol === 'church.png') return '<img src="' + getGithubAssetUrl('church.png') + '" alt="Church" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛪\'))">';
-    if (type === 'monumento' || type === 'monument' || symbol === 'monument.png') return '<img src="' + getGithubAssetUrl('monument.png') + '" alt="Monument" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏛️\'))">';
-    if (type === 'sentiero' || type === 'trail' || symbol === 'sentiero.png') return '<img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🥾\'))">';
-    if (type === 'spiaggia' || type === 'beach' || symbol === 'beach.png') return '<img src="' + getGithubAssetUrl('beach.png') + '" alt="Beach" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏖️\'))">';
-    if (type === 'stazione' || type === 'station' || symbol === 'station.png') return '<img src="' + getGithubAssetUrl('station.png') + '" alt="Train station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🚉\'))">';
-    if (type === 'fermata bus' || type === 'bus stop' || type === 'busstop' || symbol === 'busstop.png') return '<img src="' + getGithubAssetUrl('busstop.png') + '" alt="Bus stop" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🚏\'))">';
-    if (type === 'atm' || symbol === 'atm.png') return '<img src="' + getGithubAssetUrl('atm.png') + '" alt="ATM" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏧\'))">';
-    if (type === 'fontana' || type === 'fountain' || symbol === 'fontana.png' || symbol === 'fountain.png' || symbol === 'fountan.png') return '<img src="' + getGithubAssetUrl('fountan.png') + '" alt="Fountain" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛲\'))">';
-    if (type === 'ascensore pubblico' || type === 'public elevator' || type === 'elevator' || symbol === 'elevators.png') return '<img src="' + getGithubAssetUrl('elevators.png') + '" alt="Elevator" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🛗\'))">';
-    if (type === 'castello' || type === 'castle' || symbol === 'castle.png') return '<img src="' + getGithubAssetUrl('castle.png') + '" alt="Castle" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'🏰\'))">';
-    if (type === 'ferry' || symbol === 'ferrystation.png') return '<img src="' + getGithubAssetUrl('ferrystation.png') + '" alt="Ferry station" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'⛴️\'))">';
-    if (type === 'punto panoramico' || type === 'viewpoint' || symbol === 'viewpoint.png') return '<img src="' + getGithubAssetUrl('viewpoint.png') + '" alt="Viewpoint" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'📍\'))">';
-    if (type === 'unknown spot' || type === 'unknownspot' || symbol === 'unknownspot.png') return '<img src="' + getGithubAssetUrl('unknownspot.png') + '" alt="Unknown spot" onerror="this.onerror=null;this.replaceWith(document.createTextNode(\'📷\'))">';
+    if (type === 'chiesa' || type === 'church' || symbol === 'church.png') return buildPOIAssetImage('church.png', 'Church', '⛪');
+    if (type === 'monumento' || type === 'monument' || symbol === 'monument.png') return buildPOIAssetImage('monument.png', 'Monument', '🏛️');
+    if (type === 'sentiero' || type === 'trail' || symbol === 'sentiero.png') return buildPOIAssetImage('sentiero.png', 'Trail', '🥾');
+    if (type === 'spiaggia' || type === 'beach' || symbol === 'beach.png') return buildPOIAssetImage('beach.png', 'Beach', '🏖️');
+    if (type === 'stazione' || type === 'station' || symbol === 'station.png') return buildPOIAssetImage('station.png', 'Train station', '🚉');
+    if (type === 'fermata bus' || type === 'bus stop' || type === 'busstop' || symbol === 'busstop.png') return buildPOIAssetImage('busstop.png', 'Bus stop', '🚏');
+    if (type === 'atm' || symbol === 'atm.png') return buildPOIAssetImage('atm.png', 'ATM', '🏧');
+    if (type === 'fontana' || type === 'fountain' || symbol === 'fontana.png' || symbol === 'fountain.png' || symbol === 'fountan.png') return buildPOIAssetImage('fountan.png', 'Fountain', '⛲');
+    if (type === 'ascensore pubblico' || type === 'public elevator' || type === 'elevator' || symbol === 'elevators.png') return buildPOIAssetImage('elevators.png', 'Elevator', '🛗');
+    if (type === 'castello' || type === 'castle' || symbol === 'castle.png') return buildPOIAssetImage('castle.png', 'Castle', '🏰');
+    if (type === 'farmacia' || type === 'pharmacy' || symbol === 'pharmacy.png') return buildPOIAssetImage('pharmacy.png', 'Pharmacy', '💊');
+    if (type === 'ferry' || symbol === 'ferrystation.png') return buildPOIAssetImage('ferrystation.png', 'Ferry station', '⛴️');
+    if (type === 'punto panoramico' || type === 'viewpoint' || symbol === 'viewpoint.png') return buildPOIAssetImage('viewpoint.png', 'Viewpoint', '📍');
+    if (type === 'unknown spot' || type === 'unknownspot' || symbol === 'unknownspot.png') return buildPOIAssetImage('unknownspot.png', 'Unknown spot', '📷');
     if (type === 'ristorante' || type === 'restaurant' || type === 'food') return '🍽️';
     if (type === 'bar') return '🍸';
     if (type === 'curiosity') return '✨';
@@ -1683,8 +1869,11 @@
   function renderDiscountCTA(poi) { var discount = getPOIDiscountValue(poi); var hasDiscount = discount > 0; if (!poiCard) return; poiCard.classList.toggle('has-discount', hasDiscount); if (!hasDiscount) { if (poiDiscountBtn) poiDiscountBtn.style.display = 'none'; if (poiDiscountNote) poiDiscountNote.textContent = ''; return; } if (poiDiscountBtn) { poiDiscountBtn.style.display = 'block'; poiDiscountBtn.textContent = 'Generate ' + discount + '% discount'; } if (poiDiscountNote) poiDiscountNote.textContent = poi.discount_info || 'Login and generate your personal QR code. Each user can have only one active discount code for this place.'; }
   async function resolveDiscountPOIId(poi) { var response, rows, best, lat, lng, id; if (!supabaseClient || !poi) throw new Error('Servizio non disponibile al momento. Riprova più tardi.'); id = poi.id ? String(poi.id).trim() : ''; if (id && id.indexOf('local-') !== 0) return id; response = await supabaseClient.from('pois').select('id,name,coords,discount,active_codes').ilike('name', String(poi.name || '').trim()).limit(20); if (response.error) throw new Error(response.error.message || 'Could not resolve this POI.'); rows = Array.isArray(response.data) ? response.data : []; if (!rows.length) throw new Error('Questo luogo non è disponibile per lo sconto in questo momento. Riprova più tardi.'); if (rows.length === 1) return rows[0].id; lat = Number(poi.lat || (poi.coords && poi.coords[0])); lng = Number(poi.lng || (poi.coords && poi.coords[1])); best = rows.map(function(row) { var parsed = parseCoords(row); return { row: row, distance: distanceMeters([lat, lng], [parsed.lat, parsed.lng]) }; }).sort(function(a, b) { return a.distance - b.distance; })[0]; return best && Number.isFinite(best.distance) && best.distance < 120 ? best.row.id : rows[0].id; }
   async function handleGenerateDiscount() { var session, user, existing, result, codeObj, codeValue, resolvedPoiId; if (!currentPOI) return; openDiscountModal(); if (discountQrWrap) discountQrWrap.classList.remove('is-visible'); setDiscountStatus('Checking discount...', ''); try { if (getPOIDiscountValue(currentPOI) <= 0) throw new Error('This place has no active discount right now.'); session = await getCurrentSessionForDiscount(); user = session && session.user ? session.user : null; if (!user || !user.id || !user.email) throw new Error('You must login before generating a discount QR.'); setDiscountStatus('Finding the correct restaurant...', ''); resolvedPoiId = await resolveDiscountPOIId(currentPOI); existing = await findActiveDiscountCodeForUser(resolvedPoiId, user); if (existing) { showDiscountQRCode(existing.code, currentPOI); setDiscountStatus('You already generated a discount for this restaurant today. You can use this QR code until it expires.', 'ok'); return; } setDiscountStatus('Generating and saving your QR code...', ''); result = await createAndStoreDiscountCodeDirect(resolvedPoiId, currentPOI, user); codeObj = result && result.code ? result.code : result; codeValue = codeObj && codeObj.code ? codeObj.code : ''; if (!codeValue) throw new Error('Could not create the discount code.'); showDiscountQRCode(codeValue, currentPOI); setDiscountStatus(result && result.already_existing ? 'You already generated a discount for this restaurant today. You can use this QR code until it expires.' : 'Discount code saved. The QR is valid for 24 hours and you can generate only one per restaurant per day.', 'ok'); } catch (error) { setDiscountStatus(escapeHTML(error.message || 'Could not generate discount.'), 'error'); } }
+  var hasExplicitPermissionGesture = false;
   function rememberRealUserGesture(event) { if (event && event.isTrusted === false) return; lastRealUserGestureAt = Date.now(); lastRealUserGestureType = event && event.type ? event.type : 'gesture'; }
+  function markExplicitPermissionGesture(event) { rememberRealUserGesture(event); hasExplicitPermissionGesture = true; }
   function hasFreshRealUserGesture(maxAge) { return Date.now() - lastRealUserGestureAt <= (maxAge || 1200); }
+  function canRequestSensitivePermission() { if (document.visibilityState && document.visibilityState !== 'visible') return false; return hasExplicitPermissionGesture || !isIOSDevice(); }
   function resetCardLive() {}
   function postYouTubeCommand(command) {}
   function forceYouTubeAutoplay() {}
@@ -1838,11 +2027,15 @@
   }
   
   function getVisibleTrailMapItems(zoom) {
-    if (!map || !isTrailMatchFilter(currentMapFilter)) return [];
+    var searchQuery = normalizeSearchText(getRailSearchQuery());
+    var searchMode = Boolean(searchQuery);
+    var allowTrailsByType = searchTypeFilter === 'all' || searchTypeFilter === 'trail';
+    if (!map || !isTrailMatchFilter(currentMapFilter) || !allowTrailsByType) return [];
     zoom = Number(zoom || map.getZoom());
     return trailItems.filter(function(item) {
       return item && item.trail && item.marker && item.latLngs && item.latLngs.length;
     }).filter(function(item) {
+      if (searchMode) return trailMatchesActiveSearch(item.trail, searchQuery);
       return zoom >= getMinZoomForTrailImportance(item.trail && item.trail.importance);
     }).map(function(item) {
       item.marker.setLatLng(item.latLngs[0]);
@@ -1863,65 +2056,199 @@
   function separateMapSymbols(items) {
     return Array.isArray(items) ? items : [];
   }
-  function resetPOIDeclutterOffsets() {
+  function stopPOIOverlapCycle() {
+    poiOverlapGroups.forEach(function(group) {
+      if (group && group.flipFinalizeTimer) {
+        window.clearTimeout(group.flipFinalizeTimer);
+        group.flipFinalizeTimer = null;
+      }
+      if (group) {
+        group.isFlipping = false;
+        group.nextCycleIndex = null;
+      }
+    });
+    if (!poiOverlapCycleTimer) return;
+    window.clearInterval(poiOverlapCycleTimer);
+    poiOverlapCycleTimer = null;
+  }
+  function resetPOIGrouping() {
     poiMarkers.forEach(function(entry) {
       var iconEl = entry && entry.marker ? entry.marker._icon : null;
       if (!iconEl) return;
+      iconEl.style.visibility = '';
+      iconEl.style.pointerEvents = '';
+      iconEl.style.zIndex = '';
       iconEl.style.marginLeft = '';
       iconEl.style.marginTop = '';
-      iconEl.style.zIndex = '';
     });
+    if (poiOverlapLayer) poiOverlapLayer.clearLayers();
+    poiOverlapGroups = [];
+    stopPOIOverlapCycle();
   }
-  function getPOIDeclutterOffsets(count) {
+  function getPOIMaxZoomSeparationOffsets(count) {
     var offsets = [];
-    var placed = 0;
-    var ring = 0;
-    var slots;
-    var take;
-    var radius;
     var i;
+    var radius;
     var angle;
     if (count <= 1) return [{ x: 0, y: 0 }];
-    if (count === 2) return [{ x: -5, y: 0 }, { x: 5, y: 0 }];
-    if (count === 3) return [{ x: 0, y: -6 }, { x: -5, y: 4 }, { x: 5, y: 4 }];
-    if (count === 4) return [{ x: -6, y: -4 }, { x: 6, y: -4 }, { x: -4, y: 5 }, { x: 4, y: 5 }];
-    while (placed < count) {
-      ring += 1;
-      radius = ring === 1 ? 7 : 10;
-      slots = ring === 1 ? 6 : 8;
-      take = Math.min(slots, count - placed);
-      for (i = 0; i < take; i += 1) {
-        angle = (-Math.PI / 2) + ((Math.PI * 2) * (i / take));
-        offsets.push({
-          x: Math.cos(angle) * radius,
-          y: Math.sin(angle) * radius
-        });
-      }
-      placed += take;
+    if (count === 2) return [{ x: -14, y: 0 }, { x: 14, y: 0 }];
+    if (count === 3) return [{ x: 0, y: -18 }, { x: -15, y: 12 }, { x: 15, y: 12 }];
+    if (count === 4) return [{ x: -16, y: -10 }, { x: 16, y: -10 }, { x: -16, y: 12 }, { x: 16, y: 12 }];
+    radius = Math.min(30, 16 + Math.max(0, count - 4) * 2);
+    for (i = 0; i < count; i += 1) {
+      angle = (-Math.PI / 2) + ((Math.PI * 2) * (i / count));
+      offsets.push({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius });
     }
     return offsets;
   }
+  function getPOIIconRect(iconEl) {
+    var rect;
+    if (!iconEl || !iconEl.getBoundingClientRect) return null;
+    rect = iconEl.getBoundingClientRect();
+    if (!rect || !Number.isFinite(rect.left) || !Number.isFinite(rect.top)) return null;
+    return rect;
+  }
+  function doPOIIconRectsOverlap(a, b) {
+    var pad = 2;
+    if (!a || !b) return false;
+    return !(a.right - pad <= b.left + pad || a.left + pad >= b.right - pad || a.bottom - pad <= b.top + pad || a.top + pad >= b.bottom - pad);
+  }
+  function createPOIOverlapGroupIcon(group) {
+    var entry = group && group.entries && group.entries.length ? group.entries[group.cycleIndex % group.entries.length] : null;
+    var frontHTML = entry && entry.poi ? getPOIIconHTML(entry.poi) : '📍';
+    return L.divIcon({
+      className: 'poi-overlap-group-marker',
+      html: '<div class="poi-overlap-group"><div class="poi-overlap-group-icon"><div class="poi-overlap-face is-front">' + frontHTML + '</div><div class="poi-overlap-face is-back">' + frontHTML + '</div></div><div class="poi-overlap-group-count">' + String(group && group.entries ? group.entries.length : 0) + '</div></div>',
+      iconSize: [40, 40],
+      iconAnchor: [20, 34]
+    });
+  }
+  function getPOIOverlapGroupDOMParts(group) {
+    var iconEl = group && group.marker ? group.marker._icon : null;
+    if (!iconEl) return null;
+    return {
+      iconEl: iconEl,
+      rootEl: iconEl.querySelector('.poi-overlap-group'),
+      spinnerEl: iconEl.querySelector('.poi-overlap-group-icon'),
+      frontEl: iconEl.querySelector('.poi-overlap-face.is-front'),
+      backEl: iconEl.querySelector('.poi-overlap-face.is-back'),
+      countEl: iconEl.querySelector('.poi-overlap-group-count')
+    };
+  }
+  function syncPOIOverlapGroupMarkerDOM(group) {
+    var parts = getPOIOverlapGroupDOMParts(group);
+    var entry = group && group.entries && group.entries.length ? group.entries[group.cycleIndex % group.entries.length] : null;
+    var html = entry && entry.poi ? getPOIIconHTML(entry.poi) : '📍';
+    if (!group || !group.marker) return;
+    if (!parts || !parts.spinnerEl || !parts.frontEl || !parts.backEl) {
+      group.marker.setIcon(createPOIOverlapGroupIcon(group));
+      return;
+    }
+    parts.spinnerEl.classList.remove('is-flipping');
+    parts.frontEl.innerHTML = html;
+    parts.backEl.innerHTML = html;
+    if (parts.countEl) parts.countEl.textContent = String(group && group.entries ? group.entries.length : 0);
+  }
+  function zoomToPOIOverlapGroup(group) {
+    var coords;
+    var bounds;
+    var center;
+    if (!map || !group || !Array.isArray(group.entries) || !group.entries.length) return;
+    coords = group.entries.map(function(entry) {
+      return entry && entry.poi && isValidCoords(entry.poi.coords) ? entry.poi.coords : null;
+    }).filter(Boolean);
+    if (!coords.length) return;
+    bounds = L.latLngBounds(coords);
+    isProgrammaticMove = true;
+    if (!bounds.isValid() || coords.length === 1 || (bounds.getSouthWest().lat === bounds.getNorthEast().lat && bounds.getSouthWest().lng === bounds.getNorthEast().lng)) {
+      center = group.centerLatLng || coords[0];
+      map.flyTo(center, Math.min(20, map.getZoom() + 3), { duration: 0.75 });
+      window.setTimeout(function() { isProgrammaticMove = false; }, 980);
+      return;
+    }
+    map.flyToBounds(bounds.pad(0.65), { padding: [96, 180], maxZoom: 20, duration: 0.82 });
+    window.setTimeout(function() { isProgrammaticMove = false; }, 1080);
+  }
+  function triggerPOIOverlapSpin(group) {
+    var nextIndex;
+    var cycleDuration = 2480;
+    var parts;
+    var currentEntry;
+    var nextEntry;
+    var currentHTML;
+    var nextHTML;
+    if (!group || !group.marker || !group.entries || group.entries.length < 2 || group.isFlipping) return;
+    nextIndex = (group.cycleIndex + 1) % group.entries.length;
+    currentEntry = group.entries[group.cycleIndex % group.entries.length];
+    nextEntry = group.entries[nextIndex];
+    currentHTML = currentEntry && currentEntry.poi ? getPOIIconHTML(currentEntry.poi) : '📍';
+    nextHTML = nextEntry && nextEntry.poi ? getPOIIconHTML(nextEntry.poi) : currentHTML;
+    group.nextCycleIndex = nextIndex;
+    group.isFlipping = true;
+    parts = getPOIOverlapGroupDOMParts(group);
+    if (!parts || !parts.spinnerEl || !parts.frontEl || !parts.backEl) {
+      group.marker.setIcon(createPOIOverlapGroupIcon(group));
+      parts = getPOIOverlapGroupDOMParts(group);
+    }
+    if (!parts || !parts.spinnerEl || !parts.frontEl || !parts.backEl) {
+      group.isFlipping = false;
+      group.nextCycleIndex = null;
+      return;
+    }
+    parts.frontEl.innerHTML = currentHTML;
+    parts.backEl.innerHTML = nextHTML;
+    if (parts.countEl) parts.countEl.textContent = String(group && group.entries ? group.entries.length : 0);
+    parts.spinnerEl.classList.remove('is-flipping');
+    void parts.spinnerEl.offsetWidth;
+    parts.spinnerEl.classList.add('is-flipping');
+    if (group.flipFinalizeTimer) window.clearTimeout(group.flipFinalizeTimer);
+    group.flipFinalizeTimer = window.setTimeout(function() {
+      if (!group || !group.marker) return;
+      group.cycleIndex = nextIndex;
+      group.nextCycleIndex = null;
+      group.isFlipping = false;
+      group.flipFinalizeTimer = null;
+      syncPOIOverlapGroupMarkerDOM(group);
+    }, cycleDuration - 20);
+  }
+  function startPOIOverlapCycle() {
+    var cycleDuration = 2480;
+    stopPOIOverlapCycle();
+    if (!poiOverlapGroups.length) return;
+    poiOverlapGroups.forEach(function(group) {
+      triggerPOIOverlapSpin(group);
+    });
+    poiOverlapCycleTimer = window.setInterval(function() {
+      poiOverlapGroups.forEach(function(group) {
+        triggerPOIOverlapSpin(group);
+      });
+    }, cycleDuration);
+  }
   function applyPOIDeclutter() {
     var visible;
-    var threshold;
     var nodes;
     var visited;
     var groups = [];
+    var forceSeparateAtMaxZoom = false;
     if (!map) return;
-    resetPOIDeclutterOffsets();
-    if (map.getZoom() < 15.2) return;
+    resetPOIGrouping();
+    forceSeparateAtMaxZoom = map.getZoom() >= (Number(map.getMaxZoom()) - 0.05);
+    if ((currentPOI && poiCard && poiCard.getAttribute('aria-hidden') === 'false') || (currentTrail && trailCard && trailCard.getAttribute('aria-hidden') === 'false')) return;
     visible = poiMarkers.filter(function(entry) {
-      return entry && entry.poi && entry.marker && map.hasLayer(entry.marker) && entry.marker._icon && !entry.marker._icon.classList.contains('custom-poi-dot') && isValidCoords(entry.poi.coords);
+      return entry && entry.poi && entry.marker && map.hasLayer(entry.marker) && entry.marker._icon && entry._displayMode === 'full' && isValidCoords(entry.poi.coords);
     });
     if (visible.length < 2) return;
-    threshold = map.getZoom() >= 17 ? 18 : 14;
     nodes = visible.map(function(entry, index) {
       return {
         index: index,
         entry: entry,
-        point: map.latLngToLayerPoint(entry.poi.coords)
+        point: map.latLngToLayerPoint(entry.poi.coords),
+        rect: getPOIIconRect(entry.marker._icon)
       };
+    }).filter(function(node) {
+      return Boolean(node.rect);
     });
+    if (nodes.length < 2) return;
     visited = {};
     nodes.forEach(function(node, startIndex) {
       var stack;
@@ -1935,12 +2262,8 @@
         var current = nodes[currentIndex];
         group.push(current);
         nodes.forEach(function(candidate, candidateIndex) {
-          var dx;
-          var dy;
           if (visited[candidateIndex] || candidateIndex === currentIndex) return;
-          dx = candidate.point.x - current.point.x;
-          dy = candidate.point.y - current.point.y;
-          if (Math.sqrt(dx * dx + dy * dy) <= threshold) {
+          if (doPOIIconRectsOverlap(current.rect, candidate.rect)) {
             visited[candidateIndex] = true;
             stack.push(candidateIndex);
           }
@@ -1949,34 +2272,95 @@
       groups.push(group);
     });
     groups.forEach(function(group) {
+      var totalX = 0;
+      var totalY = 0;
+      var centerPoint;
+      var centerLatLng;
+      var marker;
+      var payload;
       var offsets;
       if (!group || group.length < 2) return;
       group.sort(function(a, b) {
-        return Number(b.entry && b.entry.poi && (b.entry.poi.relevance || b.entry.poi.importance || 0) || 0) - Number(a.entry && a.entry.poi && (a.entry.poi.relevance || a.entry.poi.importance || 0) || 0);
+        var aZoom = getPOIIconMinZoom(a && a.entry && a.entry.poi, a && a.entry && a.entry.importance);
+        var bZoom = getPOIIconMinZoom(b && b.entry && b.entry.poi, b && b.entry && b.entry.importance);
+        var aScore = Number(a && a.entry && a.entry.poi && (a.entry.poi.relevance || a.entry.poi.importance || 0) || 0);
+        var bScore = Number(b && b.entry && b.entry.poi && (b.entry.poi.relevance || b.entry.poi.importance || 0) || 0);
+        if (aZoom !== bZoom) return aZoom - bZoom;
+        return bScore - aScore;
       });
-      offsets = getPOIDeclutterOffsets(group.length);
-      group.forEach(function(item, index) {
-        var iconEl = item && item.entry && item.entry.marker ? item.entry.marker._icon : null;
-        var shift = offsets[index] || { x: 0, y: 0 };
-        if (!iconEl) return;
-        iconEl.style.marginLeft = Math.round(shift.x) + 'px';
-        iconEl.style.marginTop = Math.round(shift.y) + 'px';
-        iconEl.style.zIndex = String(760 + index);
+
+      if (forceSeparateAtMaxZoom) {
+        offsets = getPOIMaxZoomSeparationOffsets(group.length);
+        group.forEach(function(node, index) {
+          var iconEl = node && node.entry && node.entry.marker ? node.entry.marker._icon : null;
+          var shift = offsets[index] || { x: 0, y: 0 };
+          if (!iconEl) return;
+          iconEl.style.marginLeft = Math.round(shift.x) + 'px';
+          iconEl.style.marginTop = Math.round(shift.y) + 'px';
+          iconEl.style.zIndex = String(760 + index);
+          iconEl.style.visibility = '';
+          iconEl.style.pointerEvents = '';
+        });
+        return;
+      }
+
+      group.forEach(function(node) {
+        totalX += Number(node.point && node.point.x || 0);
+        totalY += Number(node.point && node.point.y || 0);
+        if (node.entry && node.entry.marker && node.entry.marker._icon) {
+          node.entry.marker._icon.style.visibility = 'hidden';
+          node.entry.marker._icon.style.pointerEvents = 'none';
+        }
       });
+      centerPoint = L.point(totalX / group.length, totalY / group.length);
+      centerLatLng = map.layerPointToLatLng(centerPoint);
+      payload = {
+        entries: group.map(function(node) { return node.entry; }),
+        cycleIndex: 0,
+        nextCycleIndex: null,
+        isFlipping: false,
+        flipFinalizeTimer: null,
+        centerLatLng: centerLatLng,
+        marker: null
+      };
+      marker = L.marker(centerLatLng, {
+        icon: createPOIOverlapGroupIcon(payload),
+        pane: 'poiGroupPane',
+        zIndexOffset: 4200,
+        interactive: true,
+        title: 'Open overlapping POIs'
+      });
+      marker.on('click', function(event) {
+        if (event && event.originalEvent) {
+          L.DomEvent.stopPropagation(event.originalEvent);
+          L.DomEvent.preventDefault(event.originalEvent);
+        }
+        zoomToPOIOverlapGroup(payload);
+      });
+      payload.marker = marker;
+      poiOverlapGroups.push(payload);
+      if (poiOverlapLayer) poiOverlapLayer.addLayer(marker);
     });
+    if (!forceSeparateAtMaxZoom) startPOIOverlapCycle();
   }
   function updateMapSymbolVisibility() {
     var zoom;
     var visibleTrailSymbols;
+    var searchQuery;
+    var searchMode;
+    var forcedTypeVisibility;
     if (!map) return;
     zoom = map.getZoom();
+    searchQuery = normalizeSearchText(getRailSearchQuery());
+    searchMode = Boolean(searchQuery);
+    forcedTypeVisibility = hasForcedTypeFilterVisibility();
 
     poiMarkers.forEach(function(item) {
       var shouldShow;
       var minZoom;
       if (!item || !item.poi || !isValidCoords(item.poi.coords)) return;
-      shouldShow = !activeTour && isPOIMatchFilter(item.poi, currentMapFilter);
-      minZoom = getPOIIconMinZoom(item.poi, item.importance);
+      shouldShow = !activeTour && isPOIMatchFilter(item.poi, currentMapFilter) && railTypeMatchesSearchType(item.poi && item.poi.type) && (!searchMode || poiMatchesActiveSearch(item.poi, searchQuery));
+      minZoom = (searchMode || forcedTypeVisibility) ? -999 : getPOIIconMinZoom(item.poi, item.importance);
 
       if (item.marker) item.marker.setLatLng(item.poi.coords);
 
@@ -2000,6 +2384,7 @@
     if (poiDotCanvas) poiDotCanvas.style.zIndex = '120';
     if (map.getPane('poiPane')) map.getPane('poiPane').style.zIndex = 690;
     if (map.getPane('trailPane')) map.getPane('trailPane').style.zIndex = 640;
+    if (map.getPane('poiGroupPane')) map.getPane('poiGroupPane').style.zIndex = 705;
   }
   function updateTrailWidths() { updateMapSymbolVisibility(); }
   function setSelectedPOIVisualState(entry, isSelected, hasSelection) {
@@ -2147,7 +2532,22 @@
     if (!userLocationLatLng) setUserLocationButtonState('idle');
     else setUserLocationButtonState('active');
   }
-  function startUserLocationWatch() { if (!isGeolocationAvailable()) { handleUserLocationError({ code: 2 }); return; } resetUserLocationWatch(); userLocationFirstFix = true; setUserLocationButtonState('pending'); showUserLocationToast('Looking for your location...'); navigator.geolocation.getCurrentPosition(function(position) { updateUserLocationOnMap(position); if (userLocationWatchId === null) userLocationWatchId = navigator.geolocation.watchPosition(updateUserLocationOnMap, handleUserLocationError, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }); }, handleUserLocationError, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }); }
+  function startUserLocationWatch() {
+    if (!isGeolocationAvailable()) { handleUserLocationError({ code: 2 }); return; }
+    if (!canRequestSensitivePermission()) {
+      showUserLocationToast('Location will be requested only after a real tap on the compass.');
+      setUserLocationButtonState(userLocationLatLng ? 'active' : 'idle');
+      return;
+    }
+    resetUserLocationWatch();
+    userLocationFirstFix = true;
+    setUserLocationButtonState('pending');
+    showUserLocationToast('Looking for your location...');
+    navigator.geolocation.getCurrentPosition(function(position) {
+      updateUserLocationOnMap(position);
+      if (userLocationWatchId === null) userLocationWatchId = navigator.geolocation.watchPosition(updateUserLocationOnMap, handleUserLocationError, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
+    }, handleUserLocationError, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+  }
   function requestTourLocationAgain(place) { userLocationRequestMode = 'tour'; if (place) pendingTourPlace = place; pendingTourLocationRequest = true; resetUserLocationWatch(); startUserLocationWatch(); }
   function requestPlainUserLocation() { userLocationRequestMode = 'plain'; pendingTourPlace = null; pendingTourLocationRequest = false; resetUserLocationWatch(); startUserLocationWatch(); }
   function getClosestCity() { var center = map.getCenter(), minDist = Infinity, closestIndex = -1; places.forEach(function (place, index) { var distance = center.distanceTo(L.latLng(place.coords)); if (distance < minDist) { minDist = distance; closestIndex = index; } }); return { index: closestIndex, distance: minDist }; }
@@ -2156,6 +2556,9 @@
   }
   function getRailSearchQuery() {
     return searchInput ? String(searchInput.value || '').trim() : '';
+  }
+  function hasForcedTypeFilterVisibility() {
+    return searchTypeFilter !== 'all' && searchTypeFilter !== 'trail';
   }
   function railTypeMatchesSearchType(type) {
     var normalized = normalizePOIType(type);
@@ -3046,6 +3449,37 @@
   }
   function normalizeSearchText(value) { return normalizeText(value); }
   function searchMatches(item, q) { var haystack = normalizeSearchText([item.name, item.label, item.description, item.keywords].filter(Boolean).join(' ')); if (!q) return false; return haystack.indexOf(q) !== -1 || q.split(' ').filter(function(word) { return word.length > 2; }).some(function(word) { return haystack.indexOf(word) !== -1; }); }
+  function hasActiveSearchQuery() { return Boolean(normalizeSearchText(getRailSearchQuery())); }
+  function getPOISearchIndexItem(poi) {
+    return {
+      type: 'poi',
+      label: String(poi && poi.type || 'POI'),
+      name: poi && poi.name || '',
+      description: poi && poi.description || '',
+      keywords: [poi && poi.type, poi && poi.symbol, getPOIDiscountValue(poi) > 0 ? 'discount qr offer restaurant beach church monument station viewpoint ferry curiosity' : 'poi place landmark spot'].join(' ')
+    };
+  }
+  function getTrailSearchIndexItem(trail) {
+    return {
+      type: 'trail',
+      label: 'Trail',
+      name: trail && trail.name || '',
+      description: trail && trail.description || '',
+      keywords: [trail && trail.start_name, trail && trail.end_name, trail && trail.difficulty, trail && trail.estimated_duration, 'trekking trail sentiero hiking walking path route'].join(' ')
+    };
+  }
+  function poiMatchesActiveSearch(poi, query) {
+    var q = normalizeSearchText(query !== undefined ? query : getRailSearchQuery());
+    if (!q) return true;
+    if (!railTypeMatchesSearchType(poi && poi.type)) return false;
+    return searchMatches(getPOISearchIndexItem(poi), q);
+  }
+  function trailMatchesActiveSearch(trail, query) {
+    var q = normalizeSearchText(query !== undefined ? query : getRailSearchQuery());
+    if (!q) return true;
+    if (!(searchTypeFilter === 'all' || searchTypeFilter === 'trail')) return false;
+    return searchMatches(getTrailSearchIndexItem(trail), q);
+  }
   function getSearchResults(query) {
     var q = normalizeSearchText(query);
     var results = [];
@@ -3223,7 +3657,7 @@
   function toggleBaseMapMode() {
     applyBaseMapMode(currentBaseMapMode === 'satellite' ? 'map' : 'satellite');
   }
-  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80, dragging: !isMapPreviewMode, scrollWheelZoom: !isMapPreviewMode, doubleClickZoom: !isMapPreviewMode, boxZoom: !isMapPreviewMode, keyboard: !isMapPreviewMode, touchZoom: !isMapPreviewMode }).setView([44.12, 9.71], isMapPreviewMode ? 13.9 : 11); map.createPane('trailPane'); map.getPane('trailPane').style.zIndex = 640; map.createPane('poiPane'); map.getPane('poiPane').style.zIndex = 690; satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
+  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80, dragging: !isMapPreviewMode, scrollWheelZoom: !isMapPreviewMode, doubleClickZoom: !isMapPreviewMode, boxZoom: !isMapPreviewMode, keyboard: !isMapPreviewMode, touchZoom: !isMapPreviewMode }).setView([44.12, 9.71], isMapPreviewMode ? 13.9 : 11); map.createPane('trailPane'); map.getPane('trailPane').style.zIndex = 640; map.createPane('poiPane'); map.getPane('poiPane').style.zIndex = 690; map.createPane('poiGroupPane'); map.getPane('poiGroupPane').style.zIndex = 705; satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiOverlapLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
   function updateMapVisualByZoom() {
     var z, raw, t;
     if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return;
@@ -3386,7 +3820,8 @@
     }
 
     if (userLocationBtn) {
-      userLocationBtn.addEventListener('click', function () {
+      userLocationBtn.addEventListener('click', function (event) {
+        markExplicitPermissionGesture(event);
         requestPlainUserLocation();
       });
     }
@@ -3398,7 +3833,7 @@
           searchTypeFilter = button.getAttribute('data-search-type') || 'all';
           searchTypeButtons.forEach(function (item) { item.classList.toggle('is-active', item === button); });
           renderSearchSuggestions(searchInput.value);
-          renderBottomRailCards();
+          scheduleMapRefresh({ rail: true, auto: false });
           if (searchFitTimer) window.clearTimeout(searchFitTimer);
           searchFitTimer = window.setTimeout(function () {
             fitMapToSearchResults(searchInput.value);
@@ -3407,7 +3842,7 @@
       });
       searchInput.addEventListener('input', function () {
         renderSearchSuggestions(searchInput.value);
-        renderBottomRailCards();
+        scheduleMapRefresh({ rail: true, auto: false });
         if (searchFitTimer) window.clearTimeout(searchFitTimer);
         searchFitTimer = window.setTimeout(function () {
           fitMapToSearchResults(searchInput.value);
@@ -3472,6 +3907,7 @@
   }
   function runTests() { }
   function start() {
+    warmPOIAssets();
     initMap();
     applyBaseMapMode(getStoredMapMode(), true);
     createCityMarkers(!isMapPreviewMode);
