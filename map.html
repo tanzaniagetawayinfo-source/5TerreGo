@@ -18,17 +18,21 @@
   <link id="dynamic-apple-icon" rel="apple-touch-icon" href="app.png" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="apple-touch-fullscreen" content="yes" />
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 100%;
       height: 100%;
+      min-height: 100%;
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: #071424;
-      position: fixed;
-      inset: 0;
+      position: relative;
+      overscroll-behavior: none;
+      -webkit-text-size-adjust: 100%;
     }
     #map {
       position: fixed;
@@ -36,6 +40,10 @@
       z-index: 1;
       width: 100vw;
       height: 100dvh;
+      height: 100svh;
+      min-height: -webkit-fill-available;
+      background: #071424;
+      touch-action: none;
       background: #071424;
       touch-action: none;
     }
@@ -1194,6 +1202,44 @@
       inset: 0;
       width: 100%;
       height: 100%;
+      min-height: -webkit-fill-available;
+    }
+
+    #boot-status {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #071424;
+      color: #fff;
+      text-align: center;
+    }
+    #boot-status.hidden {
+      display: none !important;
+    }
+    .boot-status-card {
+      width: min(92vw, 420px);
+      padding: 18px 18px 16px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(8,12,16,.76);
+      box-shadow: 0 20px 54px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter: blur(18px) saturate(1.12);
+      -webkit-backdrop-filter: blur(18px) saturate(1.12);
+    }
+    .boot-status-title {
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -.03em;
+      margin-bottom: 6px;
+    }
+    .boot-status-text {
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255,255,255,.76);
     }
   </style>
   <script>
@@ -1222,6 +1268,12 @@
   </script>
 </head>
 <body class="park-presentation-mode">
+<div id="boot-status" aria-live="polite">
+  <div class="boot-status-card">
+    <div class="boot-status-title">Loading map…</div>
+    <div id="boot-status-text" class="boot-status-text">If iPhone blocks some external resources, the page will retry automatically.</div>
+  </div>
+</div>
 <div class="search-floating">
   <div class="search-top-row">
     <a class="search-home-btn" href="index.html" aria-label="Go home"><span>⌂</span></a>
@@ -1319,8 +1371,64 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var bootStatus = document.getElementById('boot-status');
+  var bootStatusText = document.getElementById('boot-status-text');
+  function setBootMessage(text) {
+    if (bootStatusText) bootStatusText.textContent = text;
+  }
+  function hideBootStatus() {
+    if (bootStatus) bootStatus.classList.add('hidden');
+  }
+  function showBootError(text) {
+    if (bootStatus) bootStatus.classList.remove('hidden');
+    setBootMessage(text || 'The map could not load some required resources.');
+  }
+  function loadScriptSequential(urls, done) {
+    var index = 0;
+    function tryNext() {
+      var script;
+      var url = urls[index];
+      if (!url) {
+        done(false);
+        return;
+      }
+      script = document.createElement('script');
+      script.src = url;
+      script.async = false;
+      script.onload = function(){ done(true); };
+      script.onerror = function(){ index += 1; tryNext(); };
+      document.body.appendChild(script);
+    }
+    tryNext();
+  }
+  window.__ftgHideBootStatus = hideBootStatus;
+  window.__ftgShowBootError = showBootError;
+  window.__ftgSetBootMessage = setBootMessage;
+  setBootMessage('Loading map libraries…');
+  loadScriptSequential([
+    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+    'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'
+  ], function(okLeaflet){
+    if (!okLeaflet) {
+      showBootError('Leaflet was blocked by the browser. On iPhone this often happens with strict protection.');
+      return;
+    }
+    setBootMessage('Connecting services…');
+    loadScriptSequential([
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+      'https://unpkg.com/@supabase/supabase-js@2'
+    ], function(){
+      if (typeof window.__ftgBoot === 'function') {
+        window.__ftgBoot();
+      } else {
+        showBootError('The app boot sequence did not start correctly.');
+      }
+    });
+  });
+}());
+</script>
 <script>
 (function(){
   var qr = document.getElementById('desktop-mobile-gate-qr');
@@ -3907,6 +4015,7 @@
   }
   function runTests() { }
   function start() {
+    if (window.__ftgSetBootMessage) window.__ftgSetBootMessage('Rendering map…');
     warmPOIAssets();
     initMap();
     applyBaseMapMode(getStoredMapMode(), true);
@@ -3928,6 +4037,12 @@
       if (isMapPreviewMode && map && poiMarkers.length) {
         updatePOIVisibility();
       }
+      if (window.__ftgHideBootStatus) window.__ftgHideBootStatus();
+    }).catch(function(error) {
+      console.error('POI load failed:', error);
+      if (window.__ftgShowBootError) {
+        window.__ftgShowBootError('The map opened, but some remote data was blocked on this browser. Try Safari or reduce strict tracking protection only for this site.');
+      }
     });
     if (!isMapPreviewMode) loadTrails();
     window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300);
@@ -3936,7 +4051,7 @@
       if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); });
     }
   }
-  start();
+  window.__ftgBoot = start;
 }());
 </script>
 </body>
