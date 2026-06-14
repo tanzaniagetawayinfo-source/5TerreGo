@@ -503,25 +503,98 @@
 
     #bottom-rail {
       position: fixed;
-      left: 0;
-      right: 0;
+      left: 8px;
+      right: 8px;
       bottom: 0;
       z-index: 1105;
-      padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+      height: min(82dvh, 640px);
+      border-radius: 28px 28px 0 0;
+      background: linear-gradient(180deg, rgba(12,22,18,.54), rgba(8,12,16,.92));
+      border: 1px solid rgba(255,255,255,.10);
+      border-bottom: 0;
+      box-shadow: 0 -24px 64px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.07);
+      backdrop-filter: blur(18px) saturate(1.08);
+      -webkit-backdrop-filter: blur(18px) saturate(1.08);
+      overflow: hidden;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition: transform .32s cubic-bezier(.2,.9,.2,1), box-shadow .22s ease;
+      will-change: transform;
+      touch-action: pan-y;
+    }
+    #bottom-rail.sheet-expanded {
+      box-shadow: 0 -28px 78px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    #bottom-rail.sheet-title-only .bottom-rail-track,
+    #bottom-rail.sheet-title-only .bottom-rail-calendar {
       pointer-events: none;
     }
-    .bottom-rail-village-title {
+    #bottom-rail.sheet-disabled {
+      transition: opacity .22s ease, box-shadow .22s ease;
+      transform: translateY(0) !important;
+      height: auto;
+      max-height: none;
+    }
+    #bottom-rail.sheet-disabled .bottom-rail-sheet-content {
+      height: auto;
+      overflow: visible;
+      padding-top: 12px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    #bottom-rail.sheet-disabled .bottom-rail-sheet-handle,
+    #bottom-rail.sheet-disabled .bottom-rail-calendar {
+      display: none !important;
+    }
+    .bottom-rail-sheet-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      touch-action: none;
+      cursor: grab;
+    }
+    .bottom-rail-sheet-handle::before {
+      content: '';
+      width: 44px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.28);
+      box-shadow: 0 1px 0 rgba(0,0,0,.18);
+    }
+    .bottom-rail-sheet-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 30px 10px calc(18px + env(safe-area-inset-bottom));
+      touch-action: pan-y;
+    }
+    .bottom-rail-sheet-content::-webkit-scrollbar {
       display: none;
+      width: 0;
+      height: 0;
+    }
+    .bottom-rail-village-title {
       width: 100%;
       text-align: center;
-      margin: 0 0 10px;
-      color: rgba(255,255,255,.92);
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing: .14em;
+      margin: 0 0 12px;
+      color: rgba(255,255,255,.96);
+      font-size: 14px;
+      font-weight: 980;
+      letter-spacing: .16em;
       text-transform: uppercase;
-      text-shadow: 0 6px 18px rgba(0,0,0,.30);
-      pointer-events: none;
+      text-shadow: 0 6px 18px rgba(0,0,0,.34);
+      user-select: none;
+      touch-action: none;
     }
     .bottom-rail-village-title.is-visible {
       display: block;
@@ -534,8 +607,9 @@
       scroll-snap-type: x proximity;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 6px 2px 2px;
+      padding: 4px 2px 4px;
       pointer-events: auto;
+      touch-action: pan-x;
     }
     .bottom-rail-track::-webkit-scrollbar { display: none; }
     .bottom-rail-card {
@@ -627,14 +701,156 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .bottom-rail-meta {
-      display: none !important;
-    }
-    .bottom-rail-badge {
-      display: none !important;
-    }
+    .bottom-rail-meta,
+    .bottom-rail-badge,
     .bottom-rail-shadow-edge {
       display: none !important;
+    }
+    .bottom-rail-calendar {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 26px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 16px 40px rgba(0,0,0,.18);
+    }
+    .bottom-rail-calendar-head {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+    .bottom-rail-calendar-kicker {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.58);
+    }
+    .bottom-rail-calendar-title {
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -.05em;
+      font-weight: 980;
+      color: #fff;
+    }
+    .bottom-rail-calendar-month {
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(255,255,255,.74);
+    }
+    .bottom-rail-calendar-weekdays,
+    .bottom-rail-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .bottom-rail-calendar-weekdays {
+      margin-bottom: 8px;
+    }
+    .bottom-rail-calendar-weekday {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.52);
+    }
+    .bottom-rail-calendar-day {
+      position: relative;
+      min-height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(8,12,16,.32);
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 850;
+      color: rgba(255,255,255,.90);
+    }
+    .bottom-rail-calendar-day.is-empty {
+      opacity: .28;
+      background: rgba(255,255,255,.03);
+    }
+    .bottom-rail-calendar-day.has-event {
+      border-color: rgba(255,179,71,.38);
+      background: rgba(255,160,58,.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .bottom-rail-calendar-day-dot {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #ffb347;
+      box-shadow: 0 0 0 4px rgba(255,179,71,.16);
+    }
+    .bottom-rail-calendar-events-wrap {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .bottom-rail-calendar-events-title {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.54);
+      margin-bottom: 10px;
+    }
+    .bottom-rail-calendar-events {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bottom-rail-calendar-event {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(8,12,16,.30);
+      color: #fff;
+    }
+    .bottom-rail-calendar-event-day {
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: -.04em;
+      font-weight: 980;
+      color: #ffcf7f;
+    }
+    .bottom-rail-calendar-event-body {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .bottom-rail-calendar-event-title {
+      font-size: 15px;
+      line-height: 1.1;
+      font-weight: 900;
+      color: #fff;
+    }
+    .bottom-rail-calendar-event-meta {
+      font-size: 12px;
+      font-weight: 750;
+      color: rgba(255,255,255,.62);
+    }
+    .bottom-rail-calendar-empty {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,.16);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.64);
+      font-size: 13px;
+      line-height: 1.42;
+      font-weight: 700;
     }
     .bottom-rail-card.is-ghost {
       border-color: rgba(255,255,255,.06);
@@ -693,11 +909,23 @@
       100% { transform: translateX(100%); }
     }
     @media (max-width: 520px) {
-      #bottom-rail { padding-left: 8px; padding-right: 8px; }
+      #bottom-rail {
+        left: 0;
+        right: 0;
+        height: min(84dvh, 640px);
+        border-radius: 30px 30px 0 0;
+      }
+      #bottom-rail.sheet-disabled {
+        height: auto;
+      }
+      .bottom-rail-sheet-content {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
       .bottom-rail-village-title {
-        margin-bottom: 8px;
-        font-size: 11px;
-        letter-spacing: .12em;
+        margin-bottom: 10px;
+        font-size: 12px;
+        letter-spacing: .13em;
       }
       .bottom-rail-card {
         width: min(38vw, 132px);
@@ -711,7 +939,31 @@
         padding: 11px;
       }
       .bottom-rail-title { font-size: 14px; }
-      .bottom-rail-meta { display: none !important; }
+      .bottom-rail-calendar {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 24px;
+      }
+      .bottom-rail-calendar-title {
+        font-size: 21px;
+      }
+      .bottom-rail-calendar-grid,
+      .bottom-rail-calendar-weekdays {
+        gap: 6px;
+      }
+      .bottom-rail-calendar-day {
+        min-height: 38px;
+        border-radius: 12px;
+        font-size: 12px;
+        padding: 7px;
+      }
+      .bottom-rail-calendar-event {
+        grid-template-columns: 42px minmax(0, 1fr);
+        padding: 11px;
+      }
+      .bottom-rail-calendar-event-day {
+        font-size: 18px;
+      }
     }
 
     .user-location-marker { width: 18px; height: 18px; border-radius: 50%; background: #1e9bff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(30,155,255,0.18), 0 8px 24px rgba(0,0,0,0.22); }
@@ -877,7 +1129,26 @@
 </div>
 
 <div id="map"></div>
-<div id="bottom-rail" aria-label="Map cards carousel"><div id="bottom-rail-village-title" class="bottom-rail-village-title"></div><div id="bottom-rail-track" class="bottom-rail-track"></div></div>
+<div id="bottom-rail" aria-label="Map cards carousel">
+  <div id="bottom-rail-sheet-handle" class="bottom-rail-sheet-handle" aria-hidden="true"></div>
+  <div id="bottom-rail-sheet-content" class="bottom-rail-sheet-content">
+    <div id="bottom-rail-village-title" class="bottom-rail-village-title"></div>
+    <div id="bottom-rail-track" class="bottom-rail-track"></div>
+    <section id="bottom-rail-calendar" class="bottom-rail-calendar" aria-label="Village events calendar">
+      <div class="bottom-rail-calendar-head">
+        <div class="bottom-rail-calendar-kicker">Village events</div>
+        <div id="bottom-rail-calendar-title" class="bottom-rail-calendar-title">Riomaggiore calendar</div>
+        <div id="bottom-rail-calendar-month" class="bottom-rail-calendar-month">June 2026</div>
+      </div>
+      <div id="bottom-rail-calendar-weekdays" class="bottom-rail-calendar-weekdays"></div>
+      <div id="bottom-rail-calendar-grid" class="bottom-rail-calendar-grid"></div>
+      <div class="bottom-rail-calendar-events-wrap">
+        <div class="bottom-rail-calendar-events-title">Events</div>
+        <div id="bottom-rail-calendar-events" class="bottom-rail-calendar-events"></div>
+      </div>
+    </section>
+  </div>
+</div>
 <button id="map-style-btn" type="button" aria-label="Switch map style" title="Switch map style" data-map-mode="satellite"><span class="map-style-btn-preview" aria-hidden="true"></span></button>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
 <div id="user-location-toast" aria-live="polite"></div>
@@ -991,6 +1262,25 @@
     { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' }
   ];
 
+  function createVillageCalendarSeed(name) {
+    var now = new Date();
+    return {
+      village: name,
+      year: now.getFullYear(),
+      monthIndex: now.getMonth(),
+      events: [],
+      emptyText: 'Add ' + name + ' events here.'
+    };
+  }
+
+  var villageCalendarData = {
+    'Monterosso': createVillageCalendarSeed('Monterosso'),
+    'Vernazza': createVillageCalendarSeed('Vernazza'),
+    'Corniglia': createVillageCalendarSeed('Corniglia'),
+    'Manarola': createVillageCalendarSeed('Manarola'),
+    'Riomaggiore': createVillageCalendarSeed('Riomaggiore')
+  };
+
   var map, satelliteLayer, roadsLayer, detailedRoadsLayer, whiteLayer, labelsLayer, ferryRoutesLayer, ferryVehiclesLayer, trailsLayer;
   var card = null;
   var weatherEl = null;
@@ -1046,8 +1336,15 @@
   var tourNavAudioBtn = document.getElementById('tour-nav-audio');
   var tourNavNextBtn = document.getElementById('tour-nav-next');
   var bottomRail = document.getElementById('bottom-rail');
+  var bottomRailHandle = document.getElementById('bottom-rail-sheet-handle');
+  var bottomRailContent = document.getElementById('bottom-rail-sheet-content');
   var bottomRailVillageTitle = document.getElementById('bottom-rail-village-title');
   var bottomRailTrack = document.getElementById('bottom-rail-track');
+  var bottomRailCalendarTitle = document.getElementById('bottom-rail-calendar-title');
+  var bottomRailCalendarMonth = document.getElementById('bottom-rail-calendar-month');
+  var bottomRailCalendarWeekdays = document.getElementById('bottom-rail-calendar-weekdays');
+  var bottomRailCalendarGrid = document.getElementById('bottom-rail-calendar-grid');
+  var bottomRailCalendarEvents = document.getElementById('bottom-rail-calendar-events');
 
   var poiMarkers = [];
   var trailItems = [];
@@ -1115,6 +1412,17 @@
   var heroPreviewCycleTimer = null;
   var heroPreviewCycleIndex = 0;
   var currentBaseMapMode = 'satellite';
+  var bottomRailSheetMode = 'peek';
+  var bottomRailSheetExpanded = false;
+  var bottomRailSheetTranslateY = 0;
+  var bottomRailSheetCollapsedY = 0;
+  var bottomRailSheetPeekY = 0;
+  var bottomRailSheetTitleOnlyY = 0;
+  var bottomRailSheetPendingDrag = false;
+  var bottomRailSheetDragging = false;
+  var bottomRailSheetStartY = 0;
+  var bottomRailSheetStartX = 0;
+  var bottomRailSheetStartTranslateY = 0;
 
   function distanceMeters(a, b) {
     var R = 6371000;
@@ -1940,6 +2248,264 @@
     if (!closest || !closest.place) return '';
     return closest.distance <= 420 ? closest.place.name : '';
   }
+  function getBottomRailActiveVillageName() {
+    var label = getBottomRailVillageLabel();
+    var center;
+    var closest;
+    if (label && label !== getDiscoverLabel()) return label;
+    if (!map) return places[0] ? places[0].name : 'Riomaggiore';
+    center = map.getCenter();
+    closest = places.map(function(place) {
+      return { place: place, distance: distanceMeters([center.lat, center.lng], place.coords) };
+    }).sort(function(a, b) {
+      return a.distance - b.distance;
+    })[0];
+    return closest && closest.place ? closest.place.name : (places[0] ? places[0].name : 'Riomaggiore');
+  }
+  function isBottomRailVillageSheetEnabled() {
+    var label = getBottomRailVillageLabel();
+    return Boolean(label && label !== getDiscoverLabel());
+  }
+  function getVillageCalendarConfig(name) {
+    if (!villageCalendarData[name]) villageCalendarData[name] = createVillageCalendarSeed(name);
+    return villageCalendarData[name];
+  }
+  function getCalendarMonthLabel(year, monthIndex) {
+    var date = new Date(year, monthIndex, 1);
+    return new Intl.DateTimeFormat(getCurrentUILocale(), { month: 'long', year: 'numeric' }).format(date);
+  }
+  function getCalendarWeekdayLabels() {
+    var base = new Date(2026, 0, 5);
+    var labels = [];
+    var i;
+    for (i = 0; i < 7; i += 1) {
+      labels.push(new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short' }).format(new Date(base.getFullYear(), base.getMonth(), base.getDate() + i)));
+    }
+    return labels;
+  }
+  function renderBottomRailCalendar() {
+    var villageName;
+    if (!isBottomRailVillageSheetEnabled()) {
+      if (bottomRailCalendarTitle) bottomRailCalendarTitle.textContent = '';
+      if (bottomRailCalendarMonth) bottomRailCalendarMonth.textContent = '';
+      if (bottomRailCalendarWeekdays) bottomRailCalendarWeekdays.innerHTML = '';
+      if (bottomRailCalendarGrid) bottomRailCalendarGrid.innerHTML = '';
+      if (bottomRailCalendarEvents) bottomRailCalendarEvents.innerHTML = '';
+      return;
+    }
+    var config;
+    var firstDay;
+    var startOffset;
+    var daysInMonth;
+    var weekdays;
+    var cells = [];
+    var events;
+    var i;
+    var dayNumber;
+    if (!bottomRailCalendarTitle || !bottomRailCalendarMonth || !bottomRailCalendarGrid || !bottomRailCalendarEvents || !bottomRailCalendarWeekdays) return;
+    villageName = getBottomRailActiveVillageName();
+    config = getVillageCalendarConfig(villageName);
+    events = Array.isArray(config.events) ? config.events.slice() : [];
+    firstDay = new Date(config.year, config.monthIndex, 1);
+    startOffset = (firstDay.getDay() + 6) % 7;
+    daysInMonth = new Date(config.year, config.monthIndex + 1, 0).getDate();
+    weekdays = getCalendarWeekdayLabels();
+
+    bottomRailCalendarTitle.textContent = villageName + ' calendar';
+    bottomRailCalendarMonth.textContent = getCalendarMonthLabel(config.year, config.monthIndex);
+    bottomRailCalendarWeekdays.innerHTML = weekdays.map(function(label) {
+      return '<div class="bottom-rail-calendar-weekday">' + escapeHTML(label) + '</div>';
+    }).join('');
+
+    for (i = 0; i < 42; i += 1) {
+      dayNumber = i - startOffset + 1;
+      if (dayNumber < 1 || dayNumber > daysInMonth) {
+        cells.push('<div class="bottom-rail-calendar-day is-empty" aria-hidden="true"></div>');
+        continue;
+      }
+      cells.push('<div class="bottom-rail-calendar-day' + (events.some(function(eventItem) { return Number(eventItem && eventItem.day) === dayNumber; }) ? ' has-event' : '') + '"><span>' + dayNumber + '</span>' + (events.some(function(eventItem) { return Number(eventItem && eventItem.day) === dayNumber; }) ? '<span class="bottom-rail-calendar-day-dot"></span>' : '') + '</div>');
+    }
+    bottomRailCalendarGrid.innerHTML = cells.join('');
+
+    if (!events.length) {
+      bottomRailCalendarEvents.innerHTML = '<div class="bottom-rail-calendar-empty">' + escapeHTML(config.emptyText || ('Add ' + villageName + ' events here.')) + '</div>';
+      return;
+    }
+
+    events.sort(function(a, b) {
+      return Number(a && a.day || 0) - Number(b && b.day || 0);
+    });
+    bottomRailCalendarEvents.innerHTML = events.map(function(eventItem) {
+      return '<div class="bottom-rail-calendar-event"><div class="bottom-rail-calendar-event-day">' + escapeHTML(String(eventItem && eventItem.day || '')) + '</div><div class="bottom-rail-calendar-event-body"><div class="bottom-rail-calendar-event-title">' + escapeHTML(eventItem && eventItem.title || 'Event') + '</div>' + ((eventItem && (eventItem.time || eventItem.note)) ? '<div class="bottom-rail-calendar-event-meta">' + escapeHTML([eventItem.time || '', eventItem.note || ''].filter(Boolean).join(' • ')) + '</div>' : '') + '</div></div>';
+    }).join('');
+  }
+  function getBottomRailPeekHeight() {
+    var viewportHeight = Math.max(window.innerHeight || 0, document.documentElement ? document.documentElement.clientHeight : 0, 1);
+    return Math.min(Math.max(viewportHeight * 0.25, 230), 300);
+  }
+  function getBottomRailTitleOnlyHeight() {
+    return 78;
+  }
+  function measureBottomRailCollapsedY() {
+    var totalHeight = bottomRail ? bottomRail.getBoundingClientRect().height : 0;
+    bottomRailSheetPeekY = Math.max(0, totalHeight - getBottomRailPeekHeight());
+    bottomRailSheetTitleOnlyY = Math.max(0, totalHeight - getBottomRailTitleOnlyHeight());
+    return bottomRailSheetPeekY;
+  }
+  function applyBottomRailTranslate(value, animated) {
+    var clamped;
+    if (!bottomRail) return;
+    if (!isBottomRailVillageSheetEnabled()) {
+      bottomRailSheetTranslateY = 0;
+      bottomRail.style.transform = 'translateY(0)';
+      bottomRail.classList.remove('sheet-expanded');
+      bottomRail.classList.remove('sheet-title-only');
+      return;
+    }
+    measureBottomRailCollapsedY();
+    clamped = Math.max(0, Math.min(bottomRailSheetTitleOnlyY, Number(value) || 0));
+    bottomRailSheetTranslateY = clamped;
+    if (animated === false) bottomRail.style.transition = 'none';
+    bottomRail.style.transform = 'translateY(' + Math.round(clamped) + 'px)';
+    bottomRail.classList.toggle('sheet-expanded', clamped <= Math.max(16, bottomRailSheetPeekY * 0.42));
+    bottomRail.classList.toggle('sheet-title-only', clamped >= Math.max(0, bottomRailSheetTitleOnlyY - 10));
+    if (animated === false) {
+      window.requestAnimationFrame(function() {
+        if (bottomRail) bottomRail.style.transition = '';
+      });
+    }
+  }
+  function setBottomRailSheetExpanded(expanded, animated) {
+    if (!isBottomRailVillageSheetEnabled()) {
+      bottomRailSheetMode = 'peek';
+      bottomRailSheetExpanded = false;
+      bottomRailSheetCollapsedY = 0;
+      applyBottomRailTranslate(0, false);
+      return;
+    }
+    bottomRailSheetCollapsedY = measureBottomRailCollapsedY();
+    if (expanded) bottomRailSheetMode = 'expanded';
+    else if (bottomRailSheetMode === 'expanded') bottomRailSheetMode = 'peek';
+    bottomRailSheetExpanded = bottomRailSheetMode === 'expanded';
+    applyBottomRailTranslate(bottomRailSheetMode === 'expanded' ? 0 : (bottomRailSheetMode === 'title' ? bottomRailSheetTitleOnlyY : bottomRailSheetPeekY), animated !== false);
+  }
+  function syncBottomRailSheetLayout(forceMode) {
+    var targetTranslate;
+    if (!bottomRail) return;
+    if (!isBottomRailVillageSheetEnabled()) {
+      bottomRailSheetMode = 'peek';
+      bottomRailSheetExpanded = false;
+      bottomRailSheetCollapsedY = 0;
+      applyBottomRailTranslate(0, false);
+      return;
+    }
+    bottomRailSheetCollapsedY = measureBottomRailCollapsedY();
+    if (forceMode === 'expanded') bottomRailSheetMode = 'expanded';
+    if (forceMode === 'peek' || forceMode === 'collapsed') bottomRailSheetMode = 'peek';
+    if (forceMode === 'title') bottomRailSheetMode = 'title';
+    bottomRailSheetExpanded = bottomRailSheetMode === 'expanded';
+    targetTranslate = bottomRailSheetMode === 'expanded' ? 0 : (bottomRailSheetMode === 'title' ? bottomRailSheetTitleOnlyY : bottomRailSheetPeekY);
+    applyBottomRailTranslate(targetTranslate, false);
+  }
+  function setupBottomRailSheet() {
+    var dragTargets;
+    var contentTarget;
+    function beginPendingDrag(event) {
+      if (!bottomRail || !isBottomRailVillageSheetEnabled() || !event.touches || event.touches.length !== 1) return;
+      bottomRailSheetPendingDrag = true;
+      bottomRailSheetDragging = false;
+      bottomRailSheetStartY = event.touches[0].clientY;
+      bottomRailSheetStartX = event.touches[0].clientX;
+      bottomRailSheetStartTranslateY = bottomRailSheetTranslateY;
+    }
+    function handleDragMove(event, allowHorizontalScroll) {
+      var touch;
+      var deltaY;
+      var deltaX;
+      var scrollTop;
+      if ((!bottomRailSheetPendingDrag && !bottomRailSheetDragging) || !isBottomRailVillageSheetEnabled() || !event.touches || event.touches.length !== 1) return;
+      touch = event.touches[0];
+      deltaY = touch.clientY - bottomRailSheetStartY;
+      deltaX = touch.clientX - bottomRailSheetStartX;
+      scrollTop = bottomRailContent ? bottomRailContent.scrollTop : 0;
+      if (bottomRailSheetPendingDrag) {
+        if (bottomRailSheetExpanded && deltaY > 8 && scrollTop > 0) {
+          bottomRailSheetPendingDrag = false;
+          return;
+        }
+        if (bottomRailSheetExpanded && deltaY < -8 && scrollTop > 0) {
+          bottomRailSheetPendingDrag = false;
+          return;
+        }
+        if (Math.abs(deltaY) < 8) return;
+        if (allowHorizontalScroll && Math.abs(deltaX) > Math.abs(deltaY) + 4) {
+          bottomRailSheetPendingDrag = false;
+          return;
+        }
+        bottomRailSheetPendingDrag = false;
+        bottomRailSheetDragging = true;
+        if (bottomRail) bottomRail.style.transition = 'none';
+      }
+      if (!bottomRailSheetDragging) return;
+      event.preventDefault();
+      applyBottomRailTranslate(bottomRailSheetStartTranslateY + deltaY, false);
+    }
+    function finishDrag() {
+      var expandedThreshold;
+      var titleThreshold;
+      if (bottomRailSheetPendingDrag) bottomRailSheetPendingDrag = false;
+      if (!bottomRailSheetDragging) return;
+      bottomRailSheetDragging = false;
+      if (bottomRail) bottomRail.style.transition = '';
+      measureBottomRailCollapsedY();
+      expandedThreshold = bottomRailSheetPeekY * 0.52;
+      titleThreshold = bottomRailSheetPeekY + ((bottomRailSheetTitleOnlyY - bottomRailSheetPeekY) * 0.54);
+      if (bottomRailSheetTranslateY <= expandedThreshold) {
+        bottomRailSheetMode = 'expanded';
+      } else if (bottomRailSheetTranslateY >= titleThreshold) {
+        bottomRailSheetMode = 'title';
+      } else {
+        bottomRailSheetMode = 'peek';
+      }
+      bottomRailSheetExpanded = bottomRailSheetMode === 'expanded';
+      applyBottomRailTranslate(bottomRailSheetMode === 'expanded' ? 0 : (bottomRailSheetMode === 'title' ? bottomRailSheetTitleOnlyY : bottomRailSheetPeekY), true);
+    }
+    function cancelDrag() {
+      bottomRailSheetPendingDrag = false;
+      if (!bottomRailSheetDragging) return;
+      bottomRailSheetDragging = false;
+      if (bottomRail) bottomRail.style.transition = '';
+      applyBottomRailTranslate(bottomRailSheetMode === 'expanded' ? 0 : (bottomRailSheetMode === 'title' ? bottomRailSheetTitleOnlyY : bottomRailSheetPeekY), true);
+    }
+    if (!bottomRail || bottomRail.getAttribute('data-sheet-ready') === '1') return;
+    bottomRail.setAttribute('data-sheet-ready', '1');
+    dragTargets = [bottomRailHandle, bottomRailVillageTitle].filter(Boolean);
+    contentTarget = bottomRailContent;
+    dragTargets.forEach(function(target) {
+      target.addEventListener('touchstart', beginPendingDrag, { passive: true });
+      target.addEventListener('touchmove', function(event) { handleDragMove(event, false); }, { passive: false });
+      target.addEventListener('touchend', finishDrag);
+      target.addEventListener('touchcancel', cancelDrag);
+    });
+    if (bottomRailTrack) {
+      bottomRailTrack.addEventListener('touchstart', beginPendingDrag, { passive: true });
+      bottomRailTrack.addEventListener('touchmove', function(event) { handleDragMove(event, true); }, { passive: false });
+      bottomRailTrack.addEventListener('touchend', finishDrag);
+      bottomRailTrack.addEventListener('touchcancel', cancelDrag);
+    }
+    if (contentTarget) {
+      contentTarget.addEventListener('touchstart', beginPendingDrag, { passive: true });
+      contentTarget.addEventListener('touchmove', function(event) { handleDragMove(event, false); }, { passive: false });
+      contentTarget.addEventListener('touchend', finishDrag);
+      contentTarget.addEventListener('touchcancel', cancelDrag);
+    }
+    window.addEventListener('resize', function() {
+      syncBottomRailSheetLayout(bottomRailSheetExpanded ? 'expanded' : 'collapsed');
+    });
+    window.requestAnimationFrame(function() {
+      syncBottomRailSheetLayout('peek');
+    });
+  }
   function getBottomRailViewportItems() {
     var bounds = map ? map.getBounds() : null;
     var center = map ? [map.getCenter().lat, map.getCenter().lng] : null;
@@ -2002,11 +2568,22 @@
   function renderBottomRailCards() {
     var items;
     var villageLabel;
+    var villageSheetEnabled;
     if (!bottomRailTrack || !map) return;
     if (USE_BOTTOM_RAIL) hideCard(false);
     items = getBottomRailViewportItems();
     if (!items.length) items = getBottomRailGeneralItems();
     villageLabel = getBottomRailVillageLabel();
+    villageSheetEnabled = Boolean(villageLabel && villageLabel !== getDiscoverLabel());
+    if (bottomRail) bottomRail.classList.toggle('sheet-disabled', !villageSheetEnabled);
+    if (!villageSheetEnabled) {
+      bottomRailSheetMode = 'peek';
+      bottomRailSheetExpanded = false;
+      bottomRailSheetCollapsedY = 0;
+      applyBottomRailTranslate(0, false);
+    } else {
+      syncBottomRailSheetLayout(bottomRailSheetMode === 'expanded' ? 'expanded' : (bottomRailSheetMode === 'title' ? 'title' : 'peek'));
+    }
     if (bottomRailVillageTitle) {
       if (villageLabel) {
         bottomRailVillageTitle.textContent = '— ' + villageLabel + ' —';
@@ -2016,6 +2593,7 @@
         bottomRailVillageTitle.classList.remove('is-visible');
       }
     }
+    renderBottomRailCalendar();
     if (!items.length) {
       if (!poiDataLoaded) {
         renderBottomRailGhosts(6);
@@ -2026,7 +2604,6 @@
     }
     bottomRailTrack.innerHTML = items.map(function(item) {
       var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
-      var badge = item.badge ? '<div class="bottom-rail-badge">' + escapeHTML(item.badge) + '</div>' : '';
       return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-discover">' + escapeHTML(getDiscoverLabel()) + '</div></div></button>';
     }).join('');
   }
@@ -2891,6 +3468,7 @@
 
         
     setupPOISheetDrag();
+    setupBottomRailSheet();
   }
   function runTests() { }
   function start() {
