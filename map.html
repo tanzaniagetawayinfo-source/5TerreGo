@@ -1415,7 +1415,7 @@
       showBootError('Leaflet was blocked by the browser. On iPhone this often happens with strict protection.');
       return;
     }
-    setBootMessage('Connecting services…');
+    setBootMessage('Connecting services in Safari-safe mode…');
     loadScriptSequential([
       'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
       'https://unpkg.com/@supabase/supabase-js@2'
@@ -1476,7 +1476,15 @@
   var HERO_PREVIEW_CYCLE_MS = 4800;
 
   var SUPABASE_READY = Boolean(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.indexOf('YOUR_PROJECT') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_PUBLIC') === -1);
-  var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
+  var FTG_SAFARI_STORAGE_SAFE_MODE = isIOSDevice();
+  var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      flowType: 'pkce'
+    }
+  }) : null;
   window.fiveTerreSupabaseClient = supabaseClient;
 
   var places = [
@@ -2555,6 +2563,7 @@
   function getSelectedLanguageCode() {
     var htmlLang = document.documentElement && document.documentElement.lang ? String(document.documentElement.lang).trim().toLowerCase() : '';
     var stored = '';
+    if (FTG_SAFARI_STORAGE_SAFE_MODE) return htmlLang || String(navigator.language || 'en').trim().toLowerCase();
     try {
       stored = String(localStorage.getItem('selectedLanguage') || localStorage.getItem('ftg_language') || localStorage.getItem('language') || '').trim().toLowerCase();
     } catch (error) {}
@@ -3204,7 +3213,7 @@
   function openPOIPrefetchDB() {
     return new Promise(function(resolve, reject) {
       var request;
-      if (!window.indexedDB) {
+      if (FTG_SAFARI_STORAGE_SAFE_MODE || !window.indexedDB) {
         resolve(null);
         return;
       }
@@ -3256,6 +3265,7 @@
   }
   function filterUsableCachedPOIRows(rows) { return (Array.isArray(rows) ? rows : []).filter(function(row) { var parsed = parseCoords(row || {}); return Number.isFinite(parsed.lat) && Number.isFinite(parsed.lng); }); }
   function readLocalPOIs() {
+    if (FTG_SAFARI_STORAGE_SAFE_MODE) return [];
     var localRows = filterUsableCachedPOIRows(safeParseJSON(localStorage.getItem(LOCAL_POI_KEY) || '[]', []));
     var hotRows = [];
     FTG_POI_HOT_CACHE_KEYS.some(function(key) {
@@ -3274,6 +3284,7 @@
     return [];
   }
   function writeLocalPOIs(rows) {
+    if (FTG_SAFARI_STORAGE_SAFE_MODE) return;
     var trimmed;
     var serialized;
     trimmed = sortCachedPOIRows(rows).slice(0, 1200);
@@ -3739,6 +3750,7 @@
   function isCardInteractiveTarget(target) { return Boolean(target && target.closest && target.closest('button, a, input, textarea, select, iframe, [data-start], #card-tour-play, #card-tour-panel, .card-action-btn')); }
   function setupCardSwipe(target) { if (!target) return; target.addEventListener('touchstart', function (event) { if (isCardInteractiveTarget(event.target)) return; if (event.touches.length !== 1) return; event.preventDefault(); startX = event.touches[0].clientX; startY = event.touches[0].clientY; currentX = startX; currentY = startY; isDragging = true; hasMoved = false; dragAxis = null; card.style.transition = 'none'; }, { passive: false }); target.addEventListener('touchmove', function (event) { var deltaX, deltaY, pullDown, blockedRight, blockedLeft; if (!isDragging || event.touches.length !== 1) return; event.preventDefault(); currentX = event.touches[0].clientX; currentY = event.touches[0].clientY; deltaX = currentX - startX; deltaY = currentY - startY; if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x'; if (!dragAxis) return; hasMoved = true; if (dragAxis === 'y') { pullDown = Math.max(0, deltaY); card.style.transform = 'translateY(' + pullDown + 'px)'; card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260)); return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (blockedRight || blockedLeft) deltaX = 0; card.style.transform = 'translateX(' + deltaX + 'px)'; }, { passive: false }); target.addEventListener('touchend', function (event) { var deltaX, deltaY, blockedRight, blockedLeft; if (!isDragging) return; if (event && event.changedTouches && event.changedTouches.length) { currentX = event.changedTouches[0].clientX; currentY = event.changedTouches[0].clientY; } deltaX = currentX - startX; deltaY = currentY - startY; isDragging = false; card.style.opacity = ''; if (dragAxis === 'y') { if (deltaY > 55) { hideCard(true); dragAxis = null; return; } card.style.transition = 'transform 0.22s ease, opacity 0.22s ease'; card.style.transform = 'translateY(0)'; dragAxis = null; return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) { card.style.transition = 'transform 0.2s ease'; card.style.transform = 'translateX(0)'; dragAxis = null; return; } if (deltaX < -80) { showCityByIndex(currentIndex + 1, true); dragAxis = null; return; } if (deltaX > 80) showCityByIndex(currentIndex - 1, true); dragAxis = null; }, { passive: false }); target.addEventListener('touchcancel', function (event) { if (event) event.preventDefault(); isDragging = false; dragAxis = null; card.style.opacity = ''; card.style.transition = 'transform 0.2s ease, opacity 0.2s ease'; card.style.transform = 'translateX(0) translateY(0)'; }, { passive: false }); }
   function getStoredMapMode() {
+    if (FTG_SAFARI_STORAGE_SAFE_MODE) return 'satellite';
     try {
       return String(localStorage.getItem('ftg-map-style-mode') || '').trim().toLowerCase() === 'map' ? 'map' : 'satellite';
     } catch (error) {
@@ -3746,6 +3758,7 @@
     }
   }
   function setStoredMapMode(mode) {
+    if (FTG_SAFARI_STORAGE_SAFE_MODE) return;
     try {
       localStorage.setItem('ftg-map-style-mode', mode === 'map' ? 'map' : 'satellite');
     } catch (error) {}
@@ -4046,7 +4059,7 @@
     });
     if (!isMapPreviewMode) loadTrails();
     window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300);
-    if (!isMapPreviewMode) {
+    if (!isMapPreviewMode && !FTG_SAFARI_STORAGE_SAFE_MODE) {
       window.setTimeout(function () { checkUser(); startUserPolling(); }, 250);
       if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); });
     }
