@@ -661,6 +661,8 @@ const HERO_QUOTES = [
 const heroQuoteEl = document.getElementById("heroQuote");
 let heroQuoteIndex = 0;
 let heroQuoteTimer = null;
+let searchDebounceTimer = null;
+let renderBatchToken = 0;
 
 function setHeroQuote(nextText){
   if(!heroQuoteEl) return;
@@ -1180,19 +1182,22 @@ async function loadPois(){
 
   try{
     const hasUser = Boolean(getToken());
-    const res = await fetch(SUPABASE_URL + "/rest/v1/pois?select=*&order=importance.desc.nullslast", {
-      method: "GET",
-      headers: buildHeaders({ useUserToken: hasUser })
-    });
+    const res = await fetch(
+      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type,emails,phone,discount,images&order=importance.desc.nullslast",
+      {
+        method: "GET",
+        headers: buildHeaders({ useUserToken: hasUser })
+      }
+    );
 
     pois = await parseResponse(res);
+    if(!Array.isArray(pois)) pois = [];
     editingPoiId = null;
-    renderPois(searchEl.value);
-    setStatus(String(pois.length) + " POI caricati");
+    renderPois(searchEl.value, { skipStatus: true });
   }catch(err){
     console.error("LOAD POIS ERROR", err);
     pois = [];
-    renderPois(searchEl.value);
+    renderPois(searchEl.value, { skipStatus: true });
 
     if(isPermissionError(err)){
       setStatus(permissionHelp() + "<br><br>Se sei loggato, la lettura usa il ruolo authenticated; altrimenti usa anon.<br><br>Dettaglio: " + err.message, true);
@@ -1283,16 +1288,67 @@ function renderTaskSlider(filteredPois){
   });
 }
 
-function renderPois(filter = ""){
+function createPoiCard(p){
+  const div = document.createElement("div");
+  div.className = "poi";
+  const missing = getMissingPoiFields(p);
+
+  if(missing.includes("descrizione")){
+    const alertBadge = document.createElement("div");
+    alertBadge.className = "poi-alert desc";
+    alertBadge.innerText = "manca desc.";
+    div.appendChild(alertBadge);
+  }
+
+  if(missing.includes("coordinate")){
+    const alertBadge = document.createElement("div");
+    alertBadge.className = missing.includes("descrizione") ? "poi-alert coord has-desc" : "poi-alert coord";
+    alertBadge.innerText = "no coord.";
+    div.appendChild(alertBadge);
+  }
+
+  const title = document.createElement("div");
+  title.className = "poi-title";
+  title.innerText = p.name || "(senza nome)";
+
+  const meta = document.createElement("div");
+  meta.className = "poi-meta";
+  meta.innerText = String(p.type || "-") + " • importanza " + String(p.importance ?? "-") + " • sconto " + String(p.discount ?? 0) + "%";
+
+  div.appendChild(title);
+  div.appendChild(meta);
+
+  const images = normalizePoiImages(p.images);
+  if(images.length){
+    const strip = document.createElement("div");
+    strip.className = "poi-thumb-strip";
+
+    const thumb = document.createElement("img");
+    thumb.className = "poi-thumb";
+    thumb.src = images[0];
+    thumb.alt = p.name || "POI";
+    thumb.loading = "lazy";
+    thumb.decoding = "async";
+    strip.appendChild(thumb);
+
+    if(images.length > 1){
+      const more = document.createElement("div");
+      more.className = "poi-thumb-more";
+      more.innerText = "+" + String(images.length - 1);
+      strip.appendChild(more);
+    }
+
+    div.appendChild(strip);
+  }
+
+  div.addEventListener("click", () => openModal(p));
+  return div;
+}
+
+function renderPoisChunked(items){
   listEl.innerHTML = "";
 
-  const query = String(filter || "").trim().toLowerCase();
-  const filtered = pois.filter((p) => {
-    const haystack = String((p && p.name) || "") + " " + String((p && p.type) || "") + " " + String((p && p.description) || "");
-    return !query || haystack.toLowerCase().includes(query);
-  });
-
-  if(!filtered.length){
+  if(!items.length){
     const empty = document.createElement("div");
     empty.className = "empty";
     empty.innerText = pois.length ? "Nessun POI trovato" : "Nessun POI disponibile";
@@ -1300,59 +1356,45 @@ function renderPois(filter = ""){
     return;
   }
 
-  filtered.forEach((p) => {
-    const div = document.createElement("div");
-    div.className = "poi";
-    const missing = getMissingPoiFields(p);
+  const token = ++renderBatchToken;
+  let index = 0;
+  const chunkSize = 24;
 
-    if(missing.includes("descrizione")){
-      const alertBadge = document.createElement("div");
-      alertBadge.className = "poi-alert desc";
-      alertBadge.innerText = "manca desc.";
-      div.appendChild(alertBadge);
+  function appendChunk(){
+    if(token !== renderBatchToken) return;
+
+    const fragment = document.createDocumentFragment();
+    const end = Math.min(index + chunkSize, items.length);
+
+    for(let i = index; i < end; i++){
+      fragment.appendChild(createPoiCard(items[i]));
     }
 
-    if(missing.includes("coordinate")){
-      const alertBadge = document.createElement("div");
-      alertBadge.className = missing.includes("descrizione") ? "poi-alert coord has-desc" : "poi-alert coord";
-      alertBadge.innerText = "no coord.";
-      div.appendChild(alertBadge);
+    listEl.appendChild(fragment);
+    index = end;
+
+    if(index < items.length){
+      requestAnimationFrame(appendChunk);
     }
+  }
 
-    const title = document.createElement("div");
-    title.className = "poi-title";
-    title.innerText = p.name || "(senza nome)";
+  requestAnimationFrame(appendChunk);
+}
 
-    const meta = document.createElement("div");
-    meta.className = "poi-meta";
-    meta.innerText = String(p.type || "-") + " • importanza " + String(p.importance ?? "-") + " • sconto " + String(p.discount ?? 0) + "%";
-
-    div.appendChild(title);
-    div.appendChild(meta);
-
-    const images = normalizePoiImages(p.images);
-    if(images.length){
-      const strip = document.createElement("div");
-      strip.className = "poi-thumb-strip";
-      images.slice(0, 3).forEach(src=>{
-        const thumb = document.createElement("img");
-        thumb.className = "poi-thumb";
-        thumb.src = src;
-        thumb.alt = p.name || "POI";
-        strip.appendChild(thumb);
-      });
-      if(images.length > 3){
-        const more = document.createElement("div");
-        more.className = "poi-thumb-more";
-        more.innerText = "+" + String(images.length - 3);
-        strip.appendChild(more);
-      }
-      div.appendChild(strip);
-    }
-
-    div.addEventListener("click", () => openModal(p));
-    listEl.appendChild(div);
+function renderPois(filter = "", options = {}){
+  const query = String(filter || "").trim().toLowerCase();
+  const filtered = pois.filter((p) => {
+    const haystack = String((p && p.name) || "") + " " + String((p && p.type) || "") + " " + String((p && p.description) || "");
+    return !query || haystack.toLowerCase().includes(query);
   });
+
+  renderPoisChunked(filtered);
+
+  if(!options.skipStatus){
+    setStatus(query ? (String(filtered.length) + " risultati") : (String(filtered.length) + " POI caricati"));
+  }else if(!statusEl.classList.contains("error")){
+    setStatus(query ? (String(filtered.length) + " risultati") : (String(filtered.length) + " POI caricati"));
+  }
 }
 
 function openSuggestedPoi(name){
@@ -1502,7 +1544,12 @@ addBtn.addEventListener("click", () => openModal());
 deleteBtn.addEventListener("click", deletePoi);
 closeBtn.addEventListener("click", closeModal);
 saveBtn.addEventListener("click", savePoi);
-searchEl.addEventListener("input", () => renderPois(searchEl.value));
+searchEl.addEventListener("input", () => {
+  if(searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    renderPois(searchEl.value);
+  }, 180);
+});
 importanceEl.addEventListener("input", () => updateImportanceUI());
 imageAddBtn.addEventListener("click", () => poiImagesEl.click());
 nameEl.addEventListener("input", scheduleAutomaticImageSuggestions);
