@@ -1,0 +1,211 @@
+name: iPhone Safari compatibility
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ios-safari-compat.yml'
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-local-fallbacks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download first-party browser libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p vendor/images data
+
+          if [ ! -s vendor/leaflet.js ]; then
+            curl --fail --location --retry 3 \
+              https://raw.githubusercontent.com/Leaflet/Leaflet/v1.9.4/dist/leaflet.js \
+              --output vendor/leaflet.js
+          fi
+
+          if [ ! -s vendor/leaflet.css ]; then
+            curl --fail --location --retry 3 \
+              https://raw.githubusercontent.com/Leaflet/Leaflet/v1.9.4/dist/leaflet.css \
+              --output vendor/leaflet.css
+          fi
+
+          for image in marker-icon.png marker-icon-2x.png marker-shadow.png layers.png layers-2x.png; do
+            if [ ! -s "vendor/images/$image" ]; then
+              curl --fail --location --retry 3 \
+                "https://raw.githubusercontent.com/Leaflet/Leaflet/v1.9.4/dist/images/$image" \
+                --output "vendor/images/$image"
+            fi
+          done
+
+          if [ ! -s vendor/supabase.js ]; then
+            curl --fail --location --retry 3 \
+              https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js \
+              --output vendor/supabase.js \
+            || curl --fail --location --retry 3 \
+              https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js \
+              --output vendor/supabase.js
+          fi
+
+      - name: Patch pages to prefer local resources
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+
+          # Keep all root pages independent from third-party script CDNs.
+          for path in root.glob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              original = text
+              text = text.replace(
+                  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+                  'vendor/supabase.js'
+              )
+              text = text.replace(
+                  'https://unpkg.com/@supabase/supabase-js@2',
+                  'vendor/supabase.js'
+              )
+              text = text.replace(
+                  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+                  'vendor/leaflet.css'
+              )
+              text = text.replace(
+                  'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css',
+                  'vendor/leaflet.css'
+              )
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+
+          map_path = root / 'map.html'
+          text = map_path.read_text(encoding='utf-8')
+
+          text = text.replace(
+              'If iPhone blocks some external resources, the page will retry automatically.',
+              'Loading the interactive map…'
+          )
+          text = text.replace(
+              "showBootError('Leaflet was blocked by the browser. On iPhone this often happens with strict protection.');",
+              "showBootError('The map library could not load. Reload the page and try again.');"
+          )
+
+          # Local Leaflet is attempted first. External URLs remain only as emergency fallbacks.
+          leaflet_anchor = "loadScriptSequential([\n      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',"
+          leaflet_replacement = "loadScriptSequential([\n      'vendor/leaflet.js',\n      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',"
+          if leaflet_anchor in text and "loadScriptSequential([\n      'vendor/leaflet.js'," not in text:
+              text = text.replace(leaflet_anchor, leaflet_replacement, 1)
+
+          # The global CDN replacements above may create two identical local entries; keep one.
+          text = text.replace(
+              "loadScriptSequential([\n      'vendor/supabase.js',\n      'vendor/supabase.js'\n    ],",
+              "loadScriptSequential([\n      'vendor/supabase.js'\n    ],",
+              1
+          )
+
+          # Same-origin POI snapshot: used before the live Supabase refresh and available when
+          # Safari/content blockers prevent the cross-origin API request.
+          declaration_anchor = "    var localRows;\n    var idbRows;"
+          declaration_replacement = "    var localRows;\n    var idbRows;\n    var staticResponse;\n    var staticRows;"
+          if declaration_anchor in text and 'var staticResponse;' not in text:
+              text = text.replace(declaration_anchor, declaration_replacement, 1)
+
+          static_fallback = """
+
+      try {
+        staticResponse = await fetch('data/pois.json', {
+          cache: 'no-cache',
+          credentials: 'same-origin'
+        });
+        if (staticResponse.ok) {
+          staticRows = await staticResponse.json();
+          if (Array.isArray(staticRows) && staticRows.length) {
+            appendPOIRows(staticRows.slice(0, 1500), {
+              replaceExisting: !poiMarkers.length,
+              refresh: true,
+              keepRichData: true,
+              incremental: true
+            });
+            poiCoordsReady = true;
+            writeLocalPOIs(poiMarkers.map(function(entry) {
+              return entry && entry.poi ? entry.poi : null;
+            }).filter(Boolean));
+            renderBottomRailCards();
+          }
+        }
+      } catch (staticError) {
+        console.warn('Same-origin POI fallback unavailable:', staticError && staticError.message ? staticError.message : staticError);
+      }
+"""
+          supabase_anchor = "\n      if (!SUPABASE_READY || !supabaseClient) {"
+          if supabase_anchor in text and "fetch('data/pois.json'" not in text:
+              # Insert only inside loadPOIs, immediately before its Supabase availability check.
+              load_start = text.find('  async function loadPOIs()')
+              insert_at = text.find(supabase_anchor, load_start)
+              if load_start != -1 and insert_at != -1:
+                  text = text[:insert_at] + static_fallback + text[insert_at:]
+
+          map_path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Refresh same-origin public POI snapshot
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          source = Path('map.html').read_text(encoding='utf-8')
+          url_match = re.search(r"var SUPABASE_URL = '([^']+)'", source)
+          key_match = re.search(r"var SUPABASE_ANON_KEY = '([^']+)'", source)
+          if not url_match or not key_match:
+              raise SystemExit('Supabase public configuration not found in map.html')
+
+          base_url = url_match.group(1).rstrip('/')
+          anon_key = key_match.group(1)
+          endpoint = base_url + '/rest/v1/pois?' + urllib.parse.urlencode({
+              'select': '*',
+              'order': 'id.asc'
+          })
+          request = urllib.request.Request(endpoint, headers={
+              'apikey': anon_key,
+              'Authorization': 'Bearer ' + anon_key,
+              'Accept': 'application/json',
+              'User-Agent': '5TerreGo-static-fallback/1.0'
+          })
+          with urllib.request.urlopen(request, timeout=60) as response:
+              rows = json.load(response)
+
+          if not isinstance(rows, list):
+              raise SystemExit('Unexpected POI response')
+
+          Path('data').mkdir(exist_ok=True)
+          Path('data/pois.json').write_text(
+              json.dumps(rows, ensure_ascii=False, separators=(',', ':')),
+              encoding='utf-8'
+          )
+          print(f'Wrote {len(rows)} POIs to data/pois.json')
+          PY
+
+      - name: Commit compatibility assets and refreshed data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name '5TerreGo automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add map.html index.html '*.html' vendor data/pois.json
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Fix iPhone Safari loading and add local POI fallback'
+          git push
