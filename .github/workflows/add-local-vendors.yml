@@ -61,16 +61,17 @@ jobs:
         shell: bash
         env:
           SUPABASE_URL: https://jpflcbktcnhmlvaibzcw.supabase.co
-          SUPABASE_KEY: sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY
         run: |
           set -euo pipefail
           if ! curl --fail --location --retry 4 --retry-delay 2 \
             "$SUPABASE_URL/rest/v1/pois?select=id,created_at,name,coords,description,importance,type,emails,phone,discount,discount_info,active_codes,images&order=id.asc" \
-            -H "apikey: $SUPABASE_KEY" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H 'Accept: application/json' \
             --output data/pois.json; then
-            echo 'Supabase snapshot request failed; creating a valid empty fallback.'
-            printf '[]\n' > data/pois.json
+            echo 'Supabase snapshot request failed; preserving the current snapshot.'
+            git checkout -- data/pois.json 2>/dev/null || printf '[]\n' > data/pois.json
           fi
 
           python - <<'PY'
@@ -90,6 +91,6 @@ jobs:
           set -euo pipefail
           git add data/pois.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Add local POI snapshot'
+            git commit -m 'Refresh local POI snapshot'
             git push
           fi
