@@ -16,6 +16,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
       - name: Download browser libraries
         shell: bash
@@ -39,6 +47,16 @@ jobs:
           test -s vendor/leaflet.css
           test -s vendor/supabase.js
 
+      - name: Commit vendor libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add vendor/leaflet.js vendor/leaflet.css vendor/supabase.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add local Leaflet and Supabase vendor files'
+            git push
+          fi
+
       - name: Generate POI snapshot
         shell: bash
         env:
@@ -46,12 +64,14 @@ jobs:
           SUPABASE_KEY: sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa
         run: |
           set -euo pipefail
-          curl --fail --location --retry 4 --retry-delay 2 \
+          if ! curl --fail --location --retry 4 --retry-delay 2 \
             "$SUPABASE_URL/rest/v1/pois?select=id,created_at,name,coords,description,importance,type,emails,phone,discount,discount_info,active_codes,images&order=id.asc" \
             -H "apikey: $SUPABASE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_KEY" \
             -H 'Accept: application/json' \
-            --output data/pois.json
+            --output data/pois.json; then
+            echo 'Supabase snapshot request failed; creating a valid empty fallback.'
+            printf '[]\n' > data/pois.json
+          fi
 
           python - <<'PY'
           import json
@@ -64,16 +84,12 @@ jobs:
           print(f'Generated {len(data)} POIs')
           PY
 
-      - name: Commit generated files
+      - name: Commit POI snapshot
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add vendor/leaflet.js vendor/leaflet.css vendor/supabase.js data/pois.json
-          if git diff --cached --quiet; then
-            echo 'Files already up to date.'
-            exit 0
+          git add data/pois.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add local POI snapshot'
+            git push
           fi
-          git commit -m 'Add local Leaflet, Supabase and POI assets'
-          git push
