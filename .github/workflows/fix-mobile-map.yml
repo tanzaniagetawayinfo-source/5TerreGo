@@ -1,0 +1,122 @@
+name: Fix mobile map boot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-mobile-map.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-map:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch map boot and mobile dependencies
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('map.html')
+          text = path.read_text(encoding='utf-8')
+          original = text
+
+          external_css = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />'
+          local_css = '<link rel="stylesheet" href="vendor/leaflet.css" />'
+          if external_css in text:
+              text = text.replace(external_css, local_css, 1)
+          elif local_css not in text:
+              raise SystemExit('Leaflet stylesheet marker not found')
+
+          manifest_start = "  <script>\n    (function(){\n      var iconUrl = 'app.png';"
+          if manifest_start in text:
+              start = text.index(manifest_start)
+              end_marker = "    }());\n  </script>"
+              end = text.index(end_marker, start) + len(end_marker)
+              text = text[:start] + '  <link rel="manifest" href="manifest.webmanifest" />' + text[end:]
+
+          loader_start = "<script>\n(function(){\n  var bootStatus = document.getElementById('boot-status');"
+          loader_end = "  });\n}());\n</script>"
+          if loader_start in text:
+              start = text.index(loader_start)
+              end = text.index(loader_end, start) + len(loader_end)
+              replacement = '''<script src="vendor/leaflet.js"></script>
+          <script src="vendor/supabase.js"></script>
+          <script>
+          (function(){
+            var bootStatus = document.getElementById('boot-status');
+            var bootStatusText = document.getElementById('boot-status-text');
+            function setBootMessage(text) {
+              if (bootStatusText) bootStatusText.textContent = text;
+            }
+            function hideBootStatus() {
+              if (bootStatus) bootStatus.classList.add('hidden');
+            }
+            function showBootError(text) {
+              if (bootStatus) bootStatus.classList.remove('hidden');
+              setBootMessage(text || 'The map could not load its required local resources.');
+            }
+            window.__ftgHideBootStatus = hideBootStatus;
+            window.__ftgShowBootError = showBootError;
+            window.__ftgSetBootMessage = setBootMessage;
+            window.__ftgLibrariesReady = typeof window.L !== 'undefined';
+            if (window.__ftgLibrariesReady) {
+              setBootMessage('Preparing map…');
+            } else {
+              showBootError('Leaflet did not load from the local site files. Reload the page once.');
+            }
+          }());
+          </script>'''
+              text = text[:start] + replacement + text[end:]
+          elif 'vendor/leaflet.js' not in text:
+              raise SystemExit('Map boot loader marker not found')
+
+          old_boot_export = '  window.__ftgBoot = start;'
+          new_boot_export = '''  window.__ftgBoot = function () {
+            if (window.__ftgBootStarted) return;
+            if (!window.__ftgLibrariesReady || typeof window.L === 'undefined') {
+              if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The map libraries are not available. Reload the page once.');
+              return;
+            }
+            window.__ftgBootStarted = true;
+            try {
+              start();
+            } catch (error) {
+              window.__ftgBootStarted = false;
+              console.error('5TerreGo map boot failed', error);
+              if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The map could not start: ' + (error && error.message ? error.message : 'unknown error'));
+            }
+          };
+          if (window.__ftgLibrariesReady) window.__ftgBoot();'''
+          if old_boot_export in text:
+              text = text.replace(old_boot_export, new_boot_export, 1)
+          elif 'window.__ftgBoot = function ()' not in text:
+              raise SystemExit('Boot export marker not found')
+
+          if text == original:
+              raise SystemExit('No changes were made')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          grep -q 'href="vendor/leaflet.css"' map.html
+          grep -q 'src="vendor/leaflet.js"' map.html
+          grep -q 'src="vendor/supabase.js"' map.html
+          grep -q 'window.__ftgBootStarted' map.html
+          grep -q 'href="manifest.webmanifest"' map.html
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add map.html
+          git commit -m "Fix iPhone resources and Android map boot race"
+          git push origin main
