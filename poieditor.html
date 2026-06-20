@@ -136,9 +136,11 @@ body{
 }
 
 .page-hero{
+  position:relative;
+  overflow:hidden;
   padding:24px 22px;
   border-radius:30px;
-  background:rgba(255,255,255,0.88);
+  background:#ffffff;
   border:1px solid rgba(255,255,255,0.92);
   box-shadow:var(--soft-shadow);
   backdrop-filter:blur(14px);
@@ -161,16 +163,18 @@ body{
   color:var(--muted);
 }
 
-.hero-seo{
-  display:block;
-  width:100%;
-  max-width:220px;
-  height:auto;
-  margin:0 0 14px;
-  object-fit:contain;
+.hero-bg{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,0.58), rgba(255,255,255,0.58)),
+    url("seo.png") center center / cover no-repeat;
+  z-index:0;
 }
 
 .hero-quote-wrap{
+  position:relative;
+  z-index:1;
   width:50%;
   max-width:50%;
   min-width:50%;
@@ -413,13 +417,37 @@ body{
     padding:14px 16px;
   }
 }
+
+  .hero-quote-wrap{
+    width:50%;
+    max-width:50%;
+    min-width:50%;
+    height:124px;
+    min-height:124px;
+    max-height:124px;
+  }
+
+  #heroQuote{
+    height:82px;
+    min-height:82px;
+    max-height:82px;
+  }
+
+  .header{
+    gap:10px;
+  }
+
+  .add-btn{
+    padding:14px 16px;
+  }
+}
 </style>
 </head>
 <body>
 
 <div class="page-shell">
   <section class="page-hero">
-    <img src="seo.png" alt="" class="hero-seo" onerror="this.style.display='none'">
+    <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-quote-wrap">
       <h1 id="heroQuote">"Ti senti stressato? Compila una POI."</h1>
       <p class="hero-author">cit. Diego Ricci</p>
