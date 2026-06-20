@@ -1,0 +1,79 @@
+name: Add local vendor assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-local-vendors.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  add-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download browser libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p vendor data
+
+          curl --fail --location --retry 4 --retry-delay 2 \
+            'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js' \
+            --output vendor/leaflet.js
+
+          curl --fail --location --retry 4 --retry-delay 2 \
+            'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css' \
+            --output vendor/leaflet.css
+
+          curl --fail --location --retry 4 --retry-delay 2 \
+            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js' \
+            --output vendor/supabase.js
+
+          test -s vendor/leaflet.js
+          test -s vendor/leaflet.css
+          test -s vendor/supabase.js
+
+      - name: Generate POI snapshot
+        shell: bash
+        env:
+          SUPABASE_URL: https://jpflcbktcnhmlvaibzcw.supabase.co
+          SUPABASE_KEY: sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --retry-delay 2 \
+            "$SUPABASE_URL/rest/v1/pois?select=id,created_at,name,coords,description,importance,type,emails,phone,discount,discount_info,active_codes,images&order=id.asc" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H 'Accept: application/json' \
+            --output data/pois.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('data/pois.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          if not isinstance(data, list):
+              raise SystemExit('POI response is not a JSON array')
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(f'Generated {len(data)} POIs')
+          PY
+
+      - name: Commit generated files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add vendor/leaflet.js vendor/leaflet.css vendor/supabase.js data/pois.json
+          if git diff --cached --quiet; then
+            echo 'Files already up to date.'
+            exit 0
+          fi
+          git commit -m 'Add local Leaflet, Supabase and POI assets'
+          git push
