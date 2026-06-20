@@ -243,6 +243,28 @@ body{
   padding:20px 16px 84px;
 }
 
+.back-to-login{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:0 12px 28px rgba(20,50,110,0.10);
+  color:var(--text);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:800;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.back-to-login:active{
+  transform:scale(.985);
+}
+
 .page-hero{
   position:relative;
   overflow:hidden;
@@ -482,6 +504,12 @@ body{
 @media (max-width:640px){
   .page-shell{
     padding:14px 14px 74px;
+  }
+
+  .back-to-login{
+    margin-bottom:12px;
+    padding:11px 13px;
+    font-size:13px;
   }
 
   .page-hero{
@@ -819,6 +847,13 @@ button.delete{
 <body>
 
 <div class="page-shell">
+  <a href="login.html" class="back-to-login" aria-label="Torna a login">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M15 18l-6-6 6-6"></path>
+    </svg>
+    <span>Torna indietro</span>
+  </a>
+
   <section class="page-hero">
     <img src="seo.png" alt="" class="hero-bg" onerror="this.style.display='none'">
     <div class="hero-quote-wrap">
