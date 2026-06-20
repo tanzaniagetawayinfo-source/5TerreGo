@@ -1380,12 +1380,22 @@ function getMissingCorePois(){
   return [];
 }
 
+function shouldShowPoiInTasks(poi){
+  const missing = getMissingPoiFields(poi);
+  if(!missing.length) return false;
+
+  const isFontana = String((poi && poi.type) || "").toLowerCase() === "fontana";
+  if(isFontana && missing.includes("descrizione")) return false;
+
+  return true;
+}
+
 function renderTaskSlider(sourcePois){
   if(!taskSliderEl) return;
 
   taskSliderEl.innerHTML = "";
   const taskPois = (Array.isArray(sourcePois) ? sourcePois : [])
-    .filter((p) => getMissingPoiFields(p).length > 0)
+    .filter((p) => shouldShowPoiInTasks(p))
     .sort((a, b) => {
       const aMissing = getMissingPoiFields(a).length;
       const bMissing = getMissingPoiFields(b).length;
