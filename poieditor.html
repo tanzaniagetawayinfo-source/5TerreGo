@@ -663,6 +663,7 @@ let heroQuoteIndex = 0;
 let heroQuoteTimer = null;
 let searchDebounceTimer = null;
 let renderBatchToken = 0;
+const poiDetailCache = new Map();
 
 function setHeroQuote(nextText){
   if(!heroQuoteEl) return;
@@ -1183,15 +1184,21 @@ async function loadPois(){
   try{
     const hasUser = Boolean(getToken());
     const res = await fetch(
-      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type,emails,phone,discount,images&order=importance.desc.nullslast",
+      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,importance,type,discount",
       {
         method: "GET",
         headers: buildHeaders({ useUserToken: hasUser })
       }
     );
 
-    pois = await parseResponse(res);
-    if(!Array.isArray(pois)) pois = [];
+    const rows = await parseResponse(res);
+    pois = Array.isArray(rows)
+      ? rows
+          .slice()
+          .sort((a, b) => Number((b && b.importance) || 0) - Number((a && a.importance) || 0))
+          .map((row) => toListPoi(row))
+      : [];
+
     editingPoiId = null;
     renderPois(searchEl.value, { skipStatus: true });
   }catch(err){
@@ -1210,7 +1217,8 @@ async function loadPois(){
 
 function getMissingPoiFields(poi){
   const missingFields = [];
-  if(!String((poi && poi.description) || "").trim()) missingFields.push("descrizione");
+  const hasDescriptionField = poi && Object.prototype.hasOwnProperty.call(poi, "description");
+  if(hasDescriptionField && !String((poi && poi.description) || "").trim()) missingFields.push("descrizione");
   if(!String((poi && poi.coords) || "").trim()) missingFields.push("coordinate");
   return missingFields;
 }
@@ -1236,6 +1244,53 @@ function createTaskPill(text, isRed){
 
 function normalizeName(str){
   return String(str || "").toLowerCase().trim();
+}
+
+function buildPoiSearchText(poi){
+  return [poi && poi.name, poi && poi.type, poi && poi.description]
+    .filter((value) => value !== undefined && value !== null)
+    .map((value) => String(value || "").toLowerCase())
+    .join(" ");
+}
+
+function toListPoi(row){
+  const source = row || {};
+  const hasDescriptionField = Object.prototype.hasOwnProperty.call(source, "description");
+
+  return {
+    id: source.id,
+    name: source.name || "",
+    coords: source.coords || "",
+    importance: source.importance ?? null,
+    type: source.type || "",
+    discount: source.discount ?? 0,
+    ...(hasDescriptionField ? { description: source.description || "" } : {}),
+    _listOnly: !Object.prototype.hasOwnProperty.call(source, "emails")
+      && !Object.prototype.hasOwnProperty.call(source, "phone")
+      && !Object.prototype.hasOwnProperty.call(source, "images"),
+    _searchText: buildPoiSearchText(source)
+  };
+}
+
+function syncPoiIntoList(savedPoi){
+  if(!savedPoi || !savedPoi.id) return;
+
+  const nextPoi = toListPoi(savedPoi);
+  const index = pois.findIndex((item) => String(item.id) === String(nextPoi.id));
+
+  if(index >= 0){
+    pois[index] = { ...pois[index], ...nextPoi };
+  }else{
+    pois.unshift(nextPoi);
+  }
+
+  pois.sort((a, b) => Number(b && b.importance || 0) - Number(a && a.importance || 0));
+  renderPois(searchEl.value, { skipStatus: true });
+}
+
+function removePoiFromList(poiId){
+  pois = pois.filter((item) => String(item.id) !== String(poiId));
+  renderPois(searchEl.value, { skipStatus: true });
 }
 
 function getMissingCorePois(){
@@ -1317,30 +1372,6 @@ function createPoiCard(p){
 
   div.appendChild(title);
   div.appendChild(meta);
-
-  const images = normalizePoiImages(p.images);
-  if(images.length){
-    const strip = document.createElement("div");
-    strip.className = "poi-thumb-strip";
-
-    const thumb = document.createElement("img");
-    thumb.className = "poi-thumb";
-    thumb.src = images[0];
-    thumb.alt = p.name || "POI";
-    thumb.loading = "lazy";
-    thumb.decoding = "async";
-    strip.appendChild(thumb);
-
-    if(images.length > 1){
-      const more = document.createElement("div");
-      more.className = "poi-thumb-more";
-      more.innerText = "+" + String(images.length - 1);
-      strip.appendChild(more);
-    }
-
-    div.appendChild(strip);
-  }
-
   div.addEventListener("click", () => openModal(p));
   return div;
 }
@@ -1384,8 +1415,8 @@ function renderPoisChunked(items){
 function renderPois(filter = "", options = {}){
   const query = String(filter || "").trim().toLowerCase();
   const filtered = pois.filter((p) => {
-    const haystack = String((p && p.name) || "") + " " + String((p && p.type) || "") + " " + String((p && p.description) || "");
-    return !query || haystack.toLowerCase().includes(query);
+    const haystack = p && p._searchText ? p._searchText : buildPoiSearchText(p);
+    return !query || haystack.includes(query);
   });
 
   renderPoisChunked(filtered);
@@ -1397,6 +1428,37 @@ function renderPois(filter = "", options = {}){
   }
 }
 
+function patchPoiForm(poi){
+  nameEl.value = poi.name || "";
+  coordsEl.value = poi.coords || "";
+  descriptionEl.value = poi.description || "";
+  updateImportanceUI(poi.importance ?? 50);
+  typeEl.value = poi.type || "chiesa";
+  emailsEl.value = poi.emails || "";
+  phoneEl.value = poi.phone || "";
+  discountEl.value = poi.discount ?? "";
+  setPoiImages(poi.images);
+}
+
+async function fetchPoiDetail(poiId){
+  if(!poiId) return null;
+  if(poiDetailCache.has(poiId)) return poiDetailCache.get(poiId);
+
+  const hasUser = Boolean(getToken());
+  const res = await fetch(
+    SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) + "&select=id,name,coords,description,importance,type,emails,phone,discount,images",
+    {
+      method: "GET",
+      headers: buildHeaders({ useUserToken: hasUser })
+    }
+  );
+
+  const data = await parseResponse(res);
+  const fullPoi = Array.isArray(data) ? (data[0] || null) : null;
+  if(fullPoi) poiDetailCache.set(poiId, fullPoi);
+  return fullPoi;
+}
+
 function openSuggestedPoi(name){
   editingPoiId = null;
   openModal();
@@ -1406,26 +1468,30 @@ function openSuggestedPoi(name){
   scheduleAutomaticImageSuggestions();
 }
 
-function openModal(poi = null){
+async function openModal(poi = null){
   if(imageSuggestionsEl) imageSuggestionsEl.classList.remove("is-open");
   if(imageSuggestionGridEl) imageSuggestionGridEl.innerHTML = "";
   if(imageSuggestionsStatusEl) imageSuggestionsStatusEl.innerText = "Da Wikimedia Commons";
   deleteBtn.style.display = poi ? "block" : "none";
+
   if(poi){
     editingPoiId = poi.id;
     modalTitleEl.innerText = "Modifica POI";
-    nameEl.value = poi.name || "";
-    coordsEl.value = poi.coords || "";
-    descriptionEl.value = poi.description || "";
-    updateImportanceUI(poi.importance ?? 50);
-    typeEl.value = poi.type || "chiesa";
-    emailsEl.value = poi.emails || "";
-    phoneEl.value = poi.phone || "";
-    discountEl.value = poi.discount ?? "";
-    setPoiImages(poi.images);
+    patchPoiForm({
+      name: poi.name || "",
+      coords: poi.coords || "",
+      description: poi.description || "",
+      importance: poi.importance ?? 50,
+      type: poi.type || "chiesa",
+      emails: "",
+      phone: "",
+      discount: poi.discount ?? "",
+      images: []
+    });
   }else{
     editingPoiId = null;
     modalTitleEl.innerText = "Aggiungi POI";
+    deleteBtn.style.display = "none";
     clearForm(false);
   }
 
@@ -1433,6 +1499,23 @@ function openModal(poi = null){
   modalEl.setAttribute("aria-hidden", "false");
   syncMiniMapFromCoords();
   scheduleAutomaticImageSuggestions();
+
+  if(poi && poi._listOnly && poi.id){
+    modalTitleEl.innerText = "Modifica POI · caricamento...";
+    try{
+      const fullPoi = await fetchPoiDetail(poi.id);
+      if(fullPoi && editingPoiId === poi.id){
+        patchPoiForm(fullPoi);
+        modalTitleEl.innerText = "Modifica POI";
+        syncMiniMapFromCoords();
+      }
+    }catch(err){
+      console.error("DETAIL POI ERROR", err);
+      if(editingPoiId === poi.id){
+        modalTitleEl.innerText = "Modifica POI";
+      }
+    }
+  }
 }
 
 function closeModal(){
@@ -1502,11 +1585,13 @@ async function savePoi(){
       body: JSON.stringify(poi)
     });
 
-    await parseResponse(res);
+    const savedRows = await parseResponse(res);
+    const savedPoi = Array.isArray(savedRows) ? savedRows[0] : null;
+    if(savedPoi && savedPoi.id) poiDetailCache.set(savedPoi.id, savedPoi);
+    if(savedPoi) syncPoiIntoList(savedPoi);
     clearForm();
     closeModal();
-    startHeroQuoteRotation();
-    loadPois();
+    setStatus(saveTargetId ? "POI aggiornata" : "POI aggiunta");
   }catch(err){
     console.error("SAVE POI ERROR", err);
     const grantMsg = "SQL richiesto se è 42501:\nGRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;";
@@ -1531,9 +1616,13 @@ async function deletePoi(){
       headers: buildHeaders({ useUserToken: true })
     });
 
+    const deletedPoiId = editingPoiId;
     await parseResponse(res);
+    poiDetailCache.delete(deletedPoiId);
     closeModal();
-    await loadPois();
+    clearForm();
+    removePoiFromList(deletedPoiId);
+    setStatus("POI eliminata");
   }catch(err){
     console.error("DELETE POI ERROR", err);
     alert("Errore eliminazione: " + err.message);
