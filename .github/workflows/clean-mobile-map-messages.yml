@@ -1,0 +1,58 @@
+name: Clean mobile map messages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/clean-mobile-map-messages.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update mobile messages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('map.html')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              'If iPhone blocks some external resources, the page will retry automatically.',
+              'Loading local map resources…'
+          )
+          text = re.sub(
+              r'The map opened, but some remote data was blocked on this browser\.[^\']*',
+              'The map opened, but some live data is temporarily unavailable. Local map content remains available.',
+              text,
+              count=1
+          )
+          text = text.replace(
+              'Leaflet did not load from the local site files. Reload the page once.',
+              'A local map file did not load. Reload the page once.'
+          )
+          text = text.replace(
+              'The map libraries are not available. Reload the page once.',
+              'The local map libraries are not available. Reload the page once.'
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit changes
+        run: |
+          if git diff --quiet -- map.html; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add map.html
+          git commit -m "Clean mobile map loading messages"
+          git push origin main
