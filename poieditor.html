@@ -138,13 +138,11 @@ body{
 .page-hero{
   position:relative;
   overflow:hidden;
-  padding:24px 22px;
+  padding:0;
   border-radius:30px;
   background:#ffffff;
   border:1px solid rgba(255,255,255,0.92);
   box-shadow:var(--soft-shadow);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
 }
 
 .page-hero h1{
@@ -164,43 +162,37 @@ body{
 }
 
 .hero-bg{
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(rgba(255,255,255,0.58), rgba(255,255,255,0.58)),
-    url("seo.png") center center / cover no-repeat;
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  object-position:center center;
+  position:relative;
   z-index:0;
 }
 
 .hero-quote-wrap{
-  position:relative;
+  position:absolute;
+  top:22px;
+  left:22px;
   z-index:1;
   width:50%;
   max-width:50%;
   min-width:50%;
-  height:132px;
   min-height:132px;
-  max-height:132px;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  overflow:hidden;
 }
 
 #heroQuote{
   margin:10px 0 0;
   max-width:100%;
-  height:88px;
-  min-height:88px;
-  max-height:88px;
   font-size:20px;
   line-height:1.15;
   letter-spacing:-0.02em;
   color:#000;
-  display:-webkit-box;
-  -webkit-line-clamp:4;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
+  text-wrap:balance;
   transition:opacity .32s ease, transform .32s ease;
 }
 
@@ -385,7 +377,6 @@ body{
   }
 
   .page-hero{
-    padding:20px 18px;
     border-radius:24px;
   }
 
@@ -395,18 +386,12 @@ body{
   }
 
   .hero-quote-wrap{
-    width:50%;
-    max-width:50%;
-    min-width:50%;
-    height:124px;
-    min-height:124px;
-    max-height:124px;
-  }
-
-  #heroQuote{
-    height:82px;
-    min-height:82px;
-    max-height:82px;
+    top:16px;
+    left:16px;
+    width:58%;
+    max-width:58%;
+    min-width:58%;
+    min-height:108px;
   }
 
   .header{
@@ -447,7 +432,7 @@ body{
 
 <div class="page-shell">
   <section class="page-hero">
-    <div class="hero-bg" aria-hidden="true"></div>
+    <img src="seo.png" alt="" class="hero-bg" onerror="this.style.display='none'">
     <div class="hero-quote-wrap">
       <h1 id="heroQuote">"Ti senti stressato? Compila una POI."</h1>
       <p class="hero-author">cit. Diego Ricci</p>
