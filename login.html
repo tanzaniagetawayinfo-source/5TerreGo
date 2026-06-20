@@ -3,290 +3,451 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>5TerreGo | Login</title>
-
+<title>5TerreGo | Account</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-*{
-  box-sizing:border-box;
+:root{
+  --bg:#f4f7fb;
+  --text:#17336d;
+  --muted:#7083aa;
+  --line:#dbe4f2;
+  --primary:#163f95;
+  --accent:#ff7e57;
+  --danger:#ef6b52;
+  --shadow:0 22px 60px rgba(20,50,110,0.10);
 }
-
-html,
-body{
+*{box-sizing:border-box;}
+html,body{
   width:100%;
   min-height:100%;
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  background:#05070a;
-  color:#fff;
+  background:
+    radial-gradient(circle at top left, rgba(22,63,149,0.06), transparent 30%),
+    radial-gradient(circle at top right, rgba(255,126,87,0.07), transparent 24%),
+    linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+  color:var(--text);
 }
-
-body{
-  overflow:hidden;
-}
-
-.overlay{
-  position:fixed;
-  inset:0;
+body{overflow:auto;}
+button,input,select{font:inherit;}
+button{border:none;background:none;padding:0;}
+.shell{
+  min-height:100dvh;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(30,155,255,0.22), transparent 32%),
-    radial-gradient(circle at 80% 10%, rgba(255,138,29,0.18), transparent 30%),
-    rgba(0,0,0,0.58);
+  padding:24px 16px;
 }
-
-.modal{
-  position:relative;
+.app-card{
   width:100%;
-  max-width:380px;
-  padding:22px;
-  border-radius:24px;
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 24px 70px rgba(0,0,0,0.42);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  max-width:430px;
+  background:rgba(255,255,255,0.84);
+  border:1px solid rgba(255,255,255,0.88);
+  box-shadow:var(--shadow);
+  border-radius:34px;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  padding:18px;
+}
+.panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:44px;
+  margin-bottom:10px;
+}
+.nav-btn,.avatar-badge,.spacer-dot{
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 40px;
+}
+.nav-btn{
+  background:#f5f8fd;
+  border:1px solid var(--line);
+  color:var(--text);
+  cursor:pointer;
+}
+.panel-header-title{
+  flex:1;
+  text-align:center;
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:-0.03em;
+  color:var(--text);
+}
+.avatar-badge{
+  background:var(--primary);
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:0.02em;
+}
+.spacer-dot{opacity:0;pointer-events:none;}
+.brand-lockup{
+  padding:20px 8px 10px;
   text-align:center;
 }
-
-.brand{
-  margin-bottom:10px;
-  font-size:23px;
+.logo-wordmark{
+  display:inline-flex;
+  align-items:flex-end;
+  font-size:24px;
   font-weight:900;
-  letter-spacing:-0.04em;
+  letter-spacing:-0.05em;
 }
-
-.blue{color:#1e9bff;}
-.orange{color:#ff8a1d;}
-
-h2{
-  margin:0 0 14px;
-  font-size:25px;
-  letter-spacing:-0.04em;
+.logo-blue{color:var(--primary);}
+.logo-orange{color:var(--accent);}
+.logo-waves{
+  display:block;
+  margin:8px auto 0;
+  width:56px;
+  height:14px;
+  color:var(--primary);
 }
-
-input,
-select{
+.intro{
+  text-align:center;
+  padding:10px 8px 0;
+}
+.intro h1{
+  margin:0;
+  font-size:44px;
+  line-height:0.96;
+  letter-spacing:-0.06em;
+  color:var(--text);
+}
+.intro p{
+  margin:12px auto 0;
+  max-width:250px;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.5;
+}
+.form-grid{margin-top:24px;}
+.field-group{margin-top:14px;}
+.field-group label{
+  display:block;
+  margin:0 0 8px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+}
+.input-shell,.select-shell{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:58px;
+  padding:0 16px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 6px 20px rgba(19,56,125,0.04);
+}
+.input-icon{
+  width:20px;
+  height:20px;
+  color:#8ea0c3;
+  flex:0 0 20px;
+}
+input,select{
   width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
+  min-width:0;
+  border:none;
   outline:none;
-  background:rgba(255,255,255,0.1);
-  color:white;
+  background:transparent;
+  color:var(--text);
   font-size:16px;
 }
-
-input::placeholder{
-  color:rgba(255,255,255,0.52);
-}
-
-select option{
-  background:#05070a;
-  color:white;
-}
-
-button{
-  width:100%;
-  min-height:48px;
-  padding:14px;
-  margin-top:10px;
-  border-radius:14px;
-  border:none;
-  font-weight:800;
+input::placeholder{color:#9caacc;}
+select{appearance:none;-webkit-appearance:none;}
+.ghost-icon-btn{
+  width:24px;
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8ea0c3;
   cursor:pointer;
+}
+.primary-btn,.menu-card,.social-btn{
+  width:100%;
+  border-radius:18px;
+}
+.primary-btn{
+  margin-top:18px;
+  min-height:58px;
+  background:linear-gradient(180deg, #1949ab 0%, var(--primary) 100%);
+  color:#fff;
+  font-weight:800;
+  font-size:18px;
+  box-shadow:0 18px 32px rgba(22,63,149,0.22);
+  cursor:pointer;
+}
+.helper-stack{
+  margin-top:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.text-link{
+  color:var(--primary);
   font-size:15px;
+  font-weight:700;
+  cursor:pointer;
 }
-
-.primary{
-  background:white;
-  color:black;
-}
-
 .divider{
   display:flex;
   align-items:center;
-  gap:10px;
-  margin-top:13px;
-  color:rgba(255,255,255,0.62);
+  gap:12px;
+  margin:18px 0 0;
+  color:#95a5c6;
   font-size:12px;
-  text-transform:lowercase;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
 }
-
-.divider::before,
-.divider::after{
+.divider::before,.divider::after{
   content:"";
   flex:1;
   height:1px;
-  background:rgba(255,255,255,0.22);
+  background:var(--line);
 }
-
 .social-row{
   display:flex;
   gap:10px;
-  margin-top:10px;
+  margin-top:14px;
 }
-
-.social-row button{
-  position:relative;
-  width:50%;
-  margin-top:0;
+.social-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:52px;
+  background:#fff;
+  border:1px solid var(--line);
+  color:var(--text);
+  font-weight:700;
+  box-shadow:0 8px 18px rgba(19,56,125,0.04);
 }
-
-.social-row button.locked{
+.social-btn.locked{
+  opacity:0.55;
   cursor:not-allowed;
-  opacity:0.62;
   pointer-events:none;
 }
-
-.social-row button.locked::after{
-  content:"🔒";
-  position:absolute;
-  top:5px;
-  right:7px;
-  width:17px;
-  height:17px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:999px;
-  background:rgba(0,0,0,0.62);
-  color:white;
-  font-size:10px;
-  line-height:1;
-  box-shadow:0 4px 12px rgba(0,0,0,0.28);
-}
-
-.google{
-  background:white;
-  color:black;
-}
-
-.apple{
-  background:black;
-  color:white;
-  border:1px solid rgba(255,255,255,0.35);
-}
-
-.toggle{
-  margin-top:14px;
+.status{
+  min-height:20px;
+  margin-top:16px;
+  color:var(--muted);
   font-size:13px;
-  color:rgba(255,255,255,0.74);
-  cursor:pointer;
-}
-
-.toggle .toggle-link{
-  color:#1e9bff;
-  font-weight:900;
-}
-
-#status{
-  min-height:18px;
-  margin-top:12px;
-  color:rgba(255,255,255,0.74);
-  font-size:13px;
-  line-height:1.35;
+  line-height:1.45;
+  text-align:center;
   white-space:pre-wrap;
 }
-
-.close-btn{
-  position:absolute;
-  top:12px;
-  right:12px;
-  width:auto;
-  min-height:0;
-  height:auto;
-  padding:0;
-  margin:0;
-  background:transparent;
-  border:none;
+.footnote{
   display:flex;
   align-items:center;
   justify-content:center;
+  gap:8px;
+  margin-top:22px;
+  padding:18px 10px 6px;
+  color:var(--muted);
+  font-size:13px;
+}
+.account-panel{margin-top:6px;}
+.account-copy{
+  margin:0 0 14px;
+  text-align:left;
+}
+.account-copy .small-label{
+  display:block;
+  margin-bottom:6px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:0.08em;
+  color:#8ea0c3;
+  text-transform:uppercase;
+}
+.account-copy .small-email{
+  font-size:14px;
+  color:var(--muted);
+}
+.menu-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.menu-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-height:74px;
+  padding:0 18px;
+  background:#fff;
+  border:1px solid var(--line);
+  box-shadow:0 10px 24px rgba(19,56,125,0.06);
+  color:var(--text);
+  text-align:left;
   cursor:pointer;
-  z-index:999;
 }
-
-.account-panel{
-  margin-top:8px;
+.menu-icon{
+  width:24px;
+  height:24px;
+  color:var(--primary);
+  flex:0 0 24px;
 }
-
-.account-panel button{
-  width:100%;
+.menu-label{
+  flex:1;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:-0.03em;
 }
-
-.logout-btn{
-  background:#111;
-  color:#fff;
-  border:1px solid rgba(255,255,255,0.2);
+.menu-arrow{
+  width:20px;
+  height:20px;
+  color:#98a7c4;
+  flex:0 0 20px;
 }
-
-.hidden{
-  display:none !important;
+.menu-card.danger .menu-icon,
+.menu-card.danger .menu-label,
+.menu-card.danger .menu-arrow{color:var(--danger);}
+.hidden{display:none !important;}
+@media (max-width:480px){
+  .shell{padding:12px;}
+  .app-card{
+    min-height:calc(100dvh - 24px);
+    border-radius:28px;
+    padding:16px;
+  }
+  .intro h1{font-size:38px;}
+  .menu-label{font-size:17px;}
 }
 </style>
 </head>
 <body>
-
-<div class="overlay">
-  <main class="modal" aria-label="Accesso 5TerreGo">
-    <div class="brand" aria-label="5TerreGo.com">
-      <span class="blue">5Terre</span><span class="orange">Go</span><span class="blue">.com</span>
+<div class="shell">
+  <main class="app-card" aria-label="Accesso 5TerreGo">
+    <div class="panel-header">
+      <button id="close" class="nav-btn" aria-label="Torna indietro" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+      </button>
+      <div id="panel-header-title" class="panel-header-title"></div>
+      <div id="avatar-badge" class="avatar-badge hidden">MC</div>
+      <div id="header-spacer" class="spacer-dot"></div>
     </div>
 
-    <h2 id="title">Accedi</h2>
-
-    <input id="username" class="hidden" placeholder="Nome utente" autocomplete="username" />
-
-    <select id="language" class="hidden" aria-label="Lingua preferita">
-      <option value="it">Italiano</option>
-      <option value="en">English</option>
-      <option value="fr">Français</option>
-      <option value="de">Deutsch</option>
-      <option value="es">Español</option>
-    </select>
-
-    <input id="email" type="email" placeholder="Email" autocomplete="email" inputmode="email" />
-    <input id="phone" class="hidden" type="tel" placeholder="Telefono (opzionale)" autocomplete="tel" inputmode="tel" />
-    <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
-    <input id="repeat" type="password" class="hidden" placeholder="Ripeti password" autocomplete="new-password" />
-
-    <button id="action" class="primary" type="button">Accedi</button>
-
-    <div id="divider" class="divider">or</div>
-
-    <div id="social-row" class="social-row">
-      <button id="google" class="google locked" type="button" disabled aria-disabled="true" title="Disponibile prossimamente">
-        <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:8px">
-          <path fill="#4285F4" d="M22 12.2c0-.8-.1-1.6-.2-2.3H12v4.4h5.6c-.2 1.2-.9 2.2-1.9 2.9v2.4h3.1c1.8-1.7 3.2-4.3 3.2-7.4z"/>
-          <path fill="#34A853" d="M12 23c2.7 0 5-1 6.6-2.7l-3.1-2.4c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.2H3v2.6C4.6 20.6 8 23 12 23z"/>
-          <path fill="#FBBC05" d="M6.2 14.6c-.2-.6-.3-1.2-.3-1.8s.1-1.2.3-1.8V8.4H3C2.4 9.6 2 10.8 2 12s.4 2.4 1 3.6l3.2-1z"/>
-          <path fill="#EA4335" d="M12 5.2c1.5 0 2.9.5 4 1.5l3-3C17 1.7 14.7 1 12 1 8 1 4.6 3.4 3 6.8l3.2 2.6C7 7 9.3 5.2 12 5.2z"/>
+    <section id="auth-view">
+      <div class="brand-lockup">
+        <div class="logo-wordmark" aria-label="5TerreGo">
+          <span class="logo-blue">5Terre</span><span class="logo-orange">Go</span>
+        </div>
+        <svg class="logo-waves" viewBox="0 0 64 16" fill="none" aria-hidden="true">
+          <path d="M3 4c4 0 4 2 8 2s4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+          <path d="M3 12c4 0 4 2 8 2s4-2 8-2 4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity=".8"></path>
         </svg>
-        Google
-      </button>
-      <button id="apple" class="apple locked" type="button" disabled aria-disabled="true" title="Disponibile prossimamente">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="vertical-align:middle;margin-right:8px">
-          <path d="M16.365 1.43c0 1.14-.466 2.23-1.22 3.03-.78.83-2.05 1.47-3.18 1.38-.14-1.11.4-2.23 1.13-3 .8-.85 2.18-1.46 3.27-1.41zM20.92 17.13c-.54 1.25-.8 1.8-1.5 2.9-.97 1.6-2.34 3.6-4.03 3.62-1.5.02-1.9-.98-3.92-.97-2.02.01-2.45.99-3.95.97-1.69-.02-3-1.83-3.97-3.42-2.72-4.4-3-9.56-1.33-12.17 1.18-1.86 3.05-2.95 4.8-2.95 1.8 0 2.93 1 3.91 1 .96 0 2.46-1.24 4.15-1.06.71.03 2.7.29 3.98 2.17-.1.06-2.37 1.38-2.34 4.12.03 3.28 2.88 4.37 2.92 4.39z"/>
-        </svg>
-        Apple
-      </button>
-    </div>
+      </div>
 
-    <div id="toggle" class="toggle">Non hai un account? <span class="toggle-link">Crealo</span></div>
-    <div id="status" role="status" aria-live="polite"></div>
+      <div class="intro">
+        <h1 id="title">Welcome back</h1>
+        <p id="subtitle">Access your 5TerreGo account</p>
+      </div>
 
-    <button id="close" class="close-btn" aria-label="Chiudi" type="button">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 5 L19 19"></path>
-        <path d="M19 5 L5 19"></path>
-      </svg>
-    </button>
+      <div class="form-grid">
+        <div id="username-group" class="field-group hidden">
+          <label for="username">Username</label>
+          <div class="input-shell">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <input id="username" placeholder="Choose a username" autocomplete="username">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="email">Email</label>
+          <div class="input-shell">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>
+            <input id="email" type="email" placeholder="Enter your email" autocomplete="email" inputmode="email">
+          </div>
+        </div>
+
+        <div id="phone-group" class="field-group hidden">
+          <label for="phone">Phone</label>
+          <div class="input-shell">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3a2 2 0 0 1-.6 1.8l-1.2 1.2a16 16 0 0 0 6.4 6.4l1.2-1.2a2 2 0 0 1 1.8-.6l3 .5A2 2 0 0 1 22 16.9z"></path></svg>
+            <input id="phone" type="tel" placeholder="Optional phone number" autocomplete="tel" inputmode="tel">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="password">Password</label>
+          <div class="input-shell">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+            <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password">
+            <button id="password-toggle" class="ghost-icon-btn" type="button" aria-label="Mostra o nascondi password">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="repeat-group" class="field-group hidden">
+          <label for="repeat">Repeat password</label>
+          <div class="input-shell">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+            <input id="repeat" type="password" placeholder="Repeat your password" autocomplete="new-password">
+          </div>
+        </div>
+
+        <div id="language-group" class="field-group hidden">
+          <label for="language">Language</label>
+          <div class="select-shell">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h12"></path><path d="M10 5c0 8-2 12-6 14"></path><path d="M8 13h8"></path><path d="M15 3l5 18"></path><path d="M14 16l4-8 4 8"></path></svg>
+            <select id="language" aria-label="Lingua preferita">
+              <option value="it">Italiano</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="es">Español</option>
+            </select>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8ea0c3" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+        </div>
+
+        <button id="action" class="primary-btn" type="button">Log in</button>
+
+        <div class="helper-stack">
+          <button id="forgot" class="text-link" type="button">Forgot password?</button>
+          <button id="toggle" class="text-link" type="button">Create account</button>
+        </div>
+
+        <div id="divider" class="divider">or</div>
+
+        <div id="social-row" class="social-row">
+          <button id="google" class="social-btn locked" type="button" disabled aria-disabled="true" title="Disponibile prossimamente">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M22 12.2c0-.8-.1-1.6-.2-2.3H12v4.4h5.6c-.2 1.2-.9 2.2-1.9 2.9v2.4h3.1c1.8-1.7 3.2-4.3 3.2-7.4z"></path>
+              <path fill="#34A853" d="M12 23c2.7 0 5-1 6.6-2.7l-3.1-2.4c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.2H3v2.6C4.6 20.6 8 23 12 23z"></path>
+              <path fill="#FBBC05" d="M6.2 14.6c-.2-.6-.3-1.2-.3-1.8s.1-1.2.3-1.8V8.4H3C2.4 9.6 2 10.8 2 12s.4 2.4 1 3.6l3.2-1z"></path>
+              <path fill="#EA4335" d="M12 5.2c1.5 0 2.9.5 4 1.5l3-3C17 1.7 14.7 1 12 1 8 1 4.6 3.4 3 6.8l3.2 2.6C7 7 9.3 5.2 12 5.2z"></path>
+            </svg>
+            Google
+          </button>
+          <button id="apple" class="social-btn locked" type="button" disabled aria-disabled="true" title="Disponibile prossimamente">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 1.43c0 1.14-.47 2.23-1.23 3.03-.78.83-2.04 1.47-3.18 1.38-.13-1.1.41-2.22 1.14-3 .8-.85 2.17-1.46 3.27-1.41zM20.92 17.13c-.54 1.25-.8 1.8-1.5 2.9-.97 1.6-2.34 3.6-4.03 3.62-1.5.02-1.9-.98-3.92-.97-2.02.01-2.45.99-3.95.97-1.69-.02-3-1.83-3.97-3.42-2.72-4.4-3-9.56-1.33-12.17 1.18-1.86 3.05-2.95 4.8-2.95 1.8 0 2.93 1 3.91 1 .96 0 2.46-1.24 4.15-1.06.71.03 2.7.29 3.98 2.17-.1.06-2.37 1.38-2.34 4.12.03 3.28 2.88 4.37 2.92 4.39z"></path></svg>
+            Apple
+          </button>
+        </div>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="footnote">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"></path><path d="M9.5 12.5l1.8 1.8 3.7-4"></path></svg>
+        <span>Secure access for customers and partners</span>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -315,22 +476,36 @@ button{
 
   let isLogin = true;
 
+  const authView = document.getElementById('auth-view');
+  const title = document.getElementById('title');
+  const subtitle = document.getElementById('subtitle');
+  const panelHeaderTitle = document.getElementById('panel-header-title');
+  const avatarBadge = document.getElementById('avatar-badge');
+  const headerSpacer = document.getElementById('header-spacer');
+
   const username = document.getElementById('username');
-  const language = document.getElementById('language');
   const email = document.getElementById('email');
   const phone = document.getElementById('phone');
   const password = document.getElementById('password');
   const repeat = document.getElementById('repeat');
+  const language = document.getElementById('language');
+
+  const usernameGroup = document.getElementById('username-group');
+  const phoneGroup = document.getElementById('phone-group');
+  const repeatGroup = document.getElementById('repeat-group');
+  const languageGroup = document.getElementById('language-group');
+
   const actionBtn = document.getElementById('action');
   const toggle = document.getElementById('toggle');
-  const title = document.getElementById('title');
+  const forgotBtn = document.getElementById('forgot');
   const status = document.getElementById('status');
   const googleBtn = document.getElementById('google');
   const appleBtn = document.getElementById('apple');
   const divider = document.getElementById('divider');
   const socialRow = document.getElementById('social-row');
   const closeBtn = document.getElementById('close');
-  const modal = document.querySelector('.modal');
+  const passwordToggle = document.getElementById('password-toggle');
+  const appCard = document.querySelector('.app-card');
 
   function getRedirectUrl(){
     return REDIRECT_PATH;
@@ -340,86 +515,90 @@ button{
     status.innerText = message || '';
   }
 
+  function setHeaderState(titleText, showAvatar, avatarText){
+    panelHeaderTitle.innerText = titleText || '';
+
+    if(showAvatar){
+      avatarBadge.classList.remove('hidden');
+      headerSpacer.classList.add('hidden');
+      avatarBadge.innerText = avatarText || 'MC';
+    } else {
+      avatarBadge.classList.add('hidden');
+      headerSpacer.classList.remove('hidden');
+    }
+  }
+
   function removeAccountPanel(){
     const existingPanel = document.getElementById('account-panel');
     if(existingPanel) existingPanel.remove();
   }
 
-  function hideAuthForm(){
-    username.classList.add('hidden');
-    language.classList.add('hidden');
-    email.classList.add('hidden');
-    phone.classList.add('hidden');
-    password.classList.add('hidden');
-    repeat.classList.add('hidden');
-    actionBtn.classList.add('hidden');
-    divider.classList.add('hidden');
-    socialRow.classList.add('hidden');
-    toggle.classList.add('hidden');
+  function showAuthView(){
+    authView.classList.remove('hidden');
+    appCard.classList.remove('account-mode');
+    setHeaderState('', false, '');
   }
 
-  function showAuthBase(){
-    email.classList.remove('hidden');
-    password.classList.remove('hidden');
-    actionBtn.classList.remove('hidden');
-    toggle.classList.remove('hidden');
+  function hideAuthView(){
+    authView.classList.add('hidden');
+    appCard.classList.add('account-mode');
   }
 
   function setMode(){
     setStatus('');
     removeAccountPanel();
-    showAuthBase();
+    showAuthView();
 
     if(isLogin){
-      title.innerText = 'Accedi';
-      actionBtn.innerText = 'Accedi';
-      toggle.innerHTML = 'Non hai un account? <span class="toggle-link">Crealo</span>';
-      password.setAttribute('autocomplete','current-password');
-
-      username.classList.add('hidden');
-      language.classList.add('hidden');
-      phone.classList.add('hidden');
-      repeat.classList.add('hidden');
-
+      title.innerText = 'Welcome back';
+      subtitle.innerText = 'Access your 5TerreGo account';
+      actionBtn.innerText = 'Log in';
+      toggle.innerText = 'Create account';
+      forgotBtn.classList.remove('hidden');
       divider.classList.remove('hidden');
       socialRow.classList.remove('hidden');
+      usernameGroup.classList.add('hidden');
+      phoneGroup.classList.add('hidden');
+      repeatGroup.classList.add('hidden');
+      languageGroup.classList.add('hidden');
+      password.setAttribute('autocomplete', 'current-password');
+      repeat.setAttribute('autocomplete', 'new-password');
     } else {
-      title.innerText = 'Crea account';
-      actionBtn.innerText = 'Registrati';
-      toggle.innerText = 'Hai già un account? Accedi';
-      password.setAttribute('autocomplete','new-password');
-
-      username.classList.remove('hidden');
-      language.classList.remove('hidden');
-      phone.classList.remove('hidden');
-      repeat.classList.remove('hidden');
-
+      title.innerText = 'Create account';
+      subtitle.innerText = 'Set up your 5TerreGo access in a few simple steps';
+      actionBtn.innerText = 'Create account';
+      toggle.innerText = 'Back to login';
+      forgotBtn.classList.add('hidden');
       divider.classList.add('hidden');
       socialRow.classList.add('hidden');
+      usernameGroup.classList.remove('hidden');
+      phoneGroup.classList.remove('hidden');
+      repeatGroup.classList.remove('hidden');
+      languageGroup.classList.remove('hidden');
+      password.setAttribute('autocomplete', 'new-password');
     }
   }
 
   function isValidEmail(value){
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    const at = value.indexOf('@');
+    const dot = value.lastIndexOf('.');
+    return at > 0 && dot > at + 1 && dot < value.length - 1;
   }
 
   function getFastSession(){
     const keys = [];
-
     for(let i = 0; i < localStorage.length; i += 1){
       const key = localStorage.key(i);
       if(key && key.indexOf('auth-token') > -1){
         keys.push(key);
       }
     }
-
     keys.push('supabase.auth.token');
 
     for(const key of keys){
       try{
         const raw = localStorage.getItem(key);
         if(!raw) continue;
-
         const parsed = JSON.parse(raw);
         if(parsed && parsed.currentSession && parsed.currentSession.access_token){
           return parsed.currentSession;
@@ -449,28 +628,36 @@ button{
       const token = session && session.access_token ? session.access_token : '';
       const userEmail = session && session.user && session.user.email ? session.user.email.trim().toLowerCase() : '';
 
-      if(userEmail && OWNER_EMAILS.includes(userEmail)){
-        return true;
-      }
-
+      if(userEmail && OWNER_EMAILS.includes(userEmail)) return true;
       if(!token) return false;
 
       const res = await fetch(OWNER_CHECK_ENDPOINT, {
         method:'GET',
-        headers:{
-          'Authorization':'Bearer ' + token
-        }
+        headers:{ 'Authorization':'Bearer ' + token }
       });
 
-      if(!res.ok){
-        return false;
-      }
-
+      if(!res.ok) return false;
       const payload = await res.json();
       return payload && payload.isOwner === true;
     } catch(_err){
       return false;
     }
+  }
+
+  async function handleForgotPassword(){
+    const e = email.value.trim();
+    if(!isValidEmail(e)){
+      setStatus('Enter your email first to receive a reset link.');
+      return;
+    }
+
+    const result = await client.auth.resetPasswordForEmail(e, { redirectTo:getRedirectUrl() });
+    if(result.error){
+      setStatus(result.error.message);
+      return;
+    }
+
+    setStatus('Password reset email sent. Check your inbox.');
   }
 
   async function handleAuth(){
@@ -489,21 +676,17 @@ button{
 
     if(isLogin){
       const result = await client.auth.signInWithPassword({ email:e, password:p });
-      const error = result.error;
-
-      if(error){
-        setStatus(error.message);
+      if(result.error){
+        setStatus(result.error.message);
         return;
       }
 
-      setStatus('Accesso riuscito');
+      setStatus('Accesso riuscito. Reindirizzamento in corso…');
       const sessionResult = await client.auth.getSession();
       if(sessionResult.data && sessionResult.data.session){
         window.location.href = getRedirectUrl();
       } else {
-        setTimeout(function(){
-          window.location.href = getRedirectUrl();
-        }, 1000);
+        setTimeout(function(){ window.location.href = getRedirectUrl(); }, 900);
       }
       return;
     }
@@ -517,12 +700,10 @@ button{
       setStatus('Inserisci nome utente.');
       return;
     }
-
     if(p.length < 6){
       setStatus('La password deve avere almeno 6 caratteri.');
       return;
     }
-
     if(p !== r){
       setStatus('Le password non coincidono.');
       return;
@@ -532,11 +713,7 @@ button{
       email:e,
       password:p,
       options:{
-        data:{
-          username:u,
-          language:lang,
-          phone:phoneVal
-        },
+        data:{ username:u, language:lang, phone:phoneVal },
         emailRedirectTo:getRedirectUrl()
       }
     });
@@ -549,117 +726,94 @@ button{
     setStatus('Account creato. Controlla la tua email se Supabase richiede conferma.');
   }
 
-  async function oauth(provider){
-    const result = await client.auth.signInWithOAuth({
-      provider: provider,
-      options:{ redirectTo: getRedirectUrl() }
-    });
+  function parseEmailsList(value){
+    return String(value || '').split(',').map(function(item){ return item.trim().toLowerCase(); }).filter(Boolean);
+  }
 
-    if(result.error) setStatus(result.error.message);
+  function getUserDisplayName(user){
+    if(user && user.user_metadata && user.user_metadata.username) return user.user_metadata.username;
+    if(user && user.email) return user.email.split('@')[0];
+    return 'Account';
+  }
+
+  function getAvatarText(user){
+    const parts = getUserDisplayName(user).trim().split(' ').filter(Boolean).slice(0,2);
+    const letters = parts.map(function(part){ return part.charAt(0).toUpperCase(); }).join('');
+    return letters || 'MC';
+  }
+
+  function arrowIcon(){
+    return '<svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>';
+  }
+
+  function iconSvg(type){
+    const map = {
+      bookings:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>',
+      profile:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+      discounts:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4L13.4 20.6a2 2 0 0 1-2.8 0L3.4 13.4a2 2 0 0 1 0-2.8l7.2-7.2a2 2 0 0 1 1.4-.6H19a2 2 0 0 1 2 2v7a2 2 0 0 1-.4 1.2z"></path><circle cx="16" cy="8" r="1"></circle></svg>',
+      pois:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z"></path><circle cx="12" cy="11" r="2.5"></circle></svg>',
+      blog:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V4.5a2 2 0 0 1 2-2h12v17"></path><path d="M8 7h6M8 11h8M8 15h5"></path><path d="M4 19.5a2.5 2.5 0 0 0 2.5 2.5H20"></path></svg>',
+      trails:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6.5-11L13 15l3.5-6L21 20"></path><path d="M3 20h18"></path></svg>',
+      logout:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>'
+    };
+    return map[type] || map.profile;
+  }
+
+  function createMenuButton(config){
+    const button = document.createElement('button');
+    button.className = 'menu-card' + (config.danger ? ' danger' : '');
+    button.id = config.id;
+    button.type = 'button';
+    button.innerHTML = iconSvg(config.icon) + '<span class="menu-label">' + config.label + '</span>' + arrowIcon();
+    button.addEventListener('click', config.onClick);
+    return button;
   }
 
   function createAccountPanel(user){
     removeAccountPanel();
-
-    const panel = document.createElement('div');
+    const panel = document.createElement('section');
     panel.id = 'account-panel';
     panel.className = 'account-panel';
 
-    const welcome = document.createElement('div');
-    welcome.style.marginBottom = '16px';
-    welcome.style.textAlign = 'left';
-    welcome.style.borderBottom = '1px solid rgba(255,255,255,0.12)';
-    welcome.style.paddingBottom = '10px';
+    const copy = document.createElement('div');
+    copy.className = 'account-copy';
+    copy.innerHTML = '<span class="small-label">Signed in</span><div class="small-email">' + (user && user.email ? user.email : '') + '</div>';
 
-    let name = '';
-    if(user && user.user_metadata && user.user_metadata.username){
-      name = user.user_metadata.username;
-    } else if(user && user.email){
-      name = user.email.split('@')[0];
-    }
+    const list = document.createElement('div');
+    list.className = 'menu-list';
 
-    const emailVal = user && user.email ? user.email : '';
+    list.appendChild(createMenuButton({
+      id:'bookings', label:'My bookings', icon:'bookings',
+      onClick:function(){ window.location.href = '/bookings.html'; }
+    }));
 
-    const titleEl = document.createElement('div');
-    titleEl.style.fontWeight = '800';
-    titleEl.style.fontSize = '16px';
-    titleEl.innerText = 'Bentornato' + (name ? ', ' + name : '');
+    list.appendChild(createMenuButton({
+      id:'profile', label:'Edit profile', icon:'profile',
+      onClick:function(){ window.location.href = '/profile.html'; }
+    }));
 
-    const emailEl = document.createElement('div');
-    emailEl.style.fontSize = '12px';
-    emailEl.style.opacity = '0.7';
-    emailEl.innerText = emailVal;
+    list.appendChild(createMenuButton({
+      id:'logout', label:'Logout', icon:'logout', danger:true,
+      onClick:async function(){
+        await client.auth.signOut();
+        removeAccountPanel();
+        isLogin = true;
+        setMode();
+      }
+    }));
 
-    welcome.appendChild(titleEl);
-    welcome.appendChild(emailEl);
-    panel.appendChild(welcome);
-
-    const bookingsBtn = document.createElement('button');
-    bookingsBtn.className = 'primary';
-    bookingsBtn.id = 'bookings';
-    bookingsBtn.type = 'button';
-    bookingsBtn.textContent = 'Le mie prenotazioni';
-    bookingsBtn.onclick = function(){
-      window.location.href = '/bookings.html';
-    };
-
-    const profileBtn = document.createElement('button');
-    profileBtn.className = 'primary';
-    profileBtn.id = 'profile';
-    profileBtn.type = 'button';
-    profileBtn.textContent = 'Modifica profilo';
-    profileBtn.onclick = function(){
-      window.location.href = '/profile.html';
-    };
-
-    const trailsBtn = document.createElement('button');
-    trailsBtn.className = 'primary';
-    trailsBtn.id = 'trails-editor';
-    trailsBtn.type = 'button';
-    trailsBtn.textContent = 'Sentieri Editor';
-    trailsBtn.onclick = function(){
-      window.location.href = '/trakeditor.html';
-    };
-
-    const logoutBtn = document.createElement('button');
-    logoutBtn.className = 'logout-btn';
-    logoutBtn.id = 'logout';
-    logoutBtn.type = 'button';
-    logoutBtn.textContent = 'Logout';
-    logoutBtn.onclick = async function(){
-      await client.auth.signOut();
-      removeAccountPanel();
-      isLogin = true;
-      setMode();
-    };
-
-    panel.appendChild(bookingsBtn);
-    panel.appendChild(profileBtn);
-    panel.appendChild(logoutBtn);
-
-    modal.appendChild(panel);
-    return panel;
-  }
-
-  function parseEmailsList(value){
-    return String(value || '')
-      .split(',')
-      .map(function(item){ return item.trim().toLowerCase(); })
-      .filter(Boolean);
+    panel.appendChild(copy);
+    panel.appendChild(list);
+    appCard.appendChild(panel);
+    return list;
   }
 
   async function fetchPartnerDiscountStatus(){
     const session = await getReliableSession();
     const token = session && session.access_token ? session.access_token : '';
     const userEmail = session && session.user && session.user.email ? session.user.email.trim().toLowerCase() : '';
-
     if(!userEmail) return false;
 
-    /*
-      First check: Edge Function.
-      This is the cleanest path because the backend already checks whether the logged-in email
-      appears inside the POI `emails` field.
-    */
     if(token){
       try{
         const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
@@ -674,50 +828,29 @@ button{
 
         if(res.ok){
           const payload = await res.json();
-          if(payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0){
-            return true;
-          }
+          if(payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0) return true;
         }
       } catch(_err){}
     }
 
-    /*
-      Second check: direct Supabase JS query.
-      This keeps the menu working even if the Edge Function is not deployed yet.
-    */
     try{
-      const result = await client
-        .from('pois')
-        .select('id,emails')
-        .not('emails','is',null);
-
+      const result = await client.from('pois').select('id,emails').not('emails','is',null);
       if(!result.error && Array.isArray(result.data)){
-        const found = result.data.some(function(poi){
-          return parseEmailsList(poi.emails).includes(userEmail);
-        });
+        const found = result.data.some(function(poi){ return parseEmailsList(poi.emails).includes(userEmail); });
         if(found) return true;
       }
     } catch(_err){}
 
-    /*
-      Third check: raw REST fallback.
-      This avoids problems caused by older SDK/session state on iPhone/Android browsers.
-    */
     try{
       const restRes = await fetch(SUPABASE_URL + '/rest/v1/pois?select=id,emails&emails=not.is.null', {
         method:'GET',
-        headers:{
-          'apikey':SUPABASE_ANON_KEY,
-          'Authorization':'Bearer ' + SUPABASE_ANON_KEY
-        }
+        headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + SUPABASE_ANON_KEY }
       });
 
       if(restRes.ok){
         const rows = await restRes.json();
         if(Array.isArray(rows)){
-          return rows.some(function(poi){
-            return parseEmailsList(poi.emails).includes(userEmail);
-          });
+          return rows.some(function(poi){ return parseEmailsList(poi.emails).includes(userEmail); });
         }
       }
     } catch(_err){}
@@ -725,113 +858,58 @@ button{
     return false;
   }
 
-  async function maybeAddPartnerDiscountButton(panel){
+  async function maybeAddPartnerDiscountButton(menuList){
     const hasPartnerPois = await fetchPartnerDiscountStatus();
-    if(!hasPartnerPois) return;
+    if(!hasPartnerPois || document.getElementById('partner-discounts')) return;
 
-    if(document.getElementById('partner-discounts')) return;
-
-    const discountBtn = document.createElement('button');
-    discountBtn.className = 'primary';
-    discountBtn.id = 'partner-discounts';
-    discountBtn.type = 'button';
-    discountBtn.textContent = 'Gestisci sconti';
-    discountBtn.onclick = function(){
-      window.location.href = '/partner.html';
-    };
+    const discountBtn = createMenuButton({
+      id:'partner-discounts', label:'Manage discounts', icon:'discounts',
+      onClick:function(){ window.location.href = '/partner.html'; }
+    });
 
     const logoutButton = document.getElementById('logout');
-    if(logoutButton){
-      panel.insertBefore(discountBtn, logoutButton);
-    } else {
-      panel.appendChild(discountBtn);
-    }
+    menuList.insertBefore(discountBtn, logoutButton);
   }
 
-  async function maybeAddOwnerButton(panel){
+  async function maybeAddOwnerButton(menuList){
     const owner = await fetchOwnerStatus();
     if(!owner) return;
 
-    const firstButton = panel.children[1];
-
     if(!document.getElementById('poi-dashboard')){
-      const poiBtn = document.createElement('button');
-      poiBtn.className = 'primary';
-      poiBtn.id = 'poi-dashboard';
-      poiBtn.type = 'button';
-      poiBtn.textContent = 'Gestisci POI';
-      poiBtn.onclick = function(){
-        window.location.href = '/poieditor.html';
-      };
-
-      if(firstButton){
-        panel.insertBefore(poiBtn, firstButton);
-      } else {
-        panel.appendChild(poiBtn);
-      }
-    }
-
-    if(!document.getElementById('trails-editor')){
-      const trailsBtn = document.createElement('button');
-      trailsBtn.className = 'primary';
-      trailsBtn.id = 'trails-editor';
-      trailsBtn.type = 'button';
-      trailsBtn.textContent = 'Sentieri Editor';
-      trailsBtn.onclick = function(){
-        window.location.href = '/trakeditor.html';
-      };
-
-      const poiButton = document.getElementById('poi-dashboard');
-      const blogButton = document.getElementById('blog-dashboard');
-      if(blogButton && blogButton.nextSibling){
-        panel.insertBefore(trailsBtn, blogButton.nextSibling);
-      } else if(blogButton){
-        panel.appendChild(trailsBtn);
-      } else if(poiButton && poiButton.nextSibling){
-        panel.insertBefore(trailsBtn, poiButton.nextSibling);
-      } else if(poiButton){
-        panel.appendChild(trailsBtn);
-      } else if(firstButton){
-        panel.insertBefore(trailsBtn, firstButton);
-      } else {
-        panel.appendChild(trailsBtn);
-      }
+      const poiBtn = createMenuButton({
+        id:'poi-dashboard', label:'Manage POIs', icon:'pois',
+        onClick:function(){ window.location.href = '/poieditor.html'; }
+      });
+      menuList.insertBefore(poiBtn, document.getElementById('logout'));
     }
 
     if(!document.getElementById('blog-dashboard')){
-      const blogBtn = document.createElement('button');
-      blogBtn.className = 'primary';
-      blogBtn.id = 'blog-dashboard';
-      blogBtn.type = 'button';
-      blogBtn.textContent = 'Gestisci Blog';
-      blogBtn.onclick = function(){
-        window.location.href = '/blogeditor.html';
-      };
+      const blogBtn = createMenuButton({
+        id:'blog-dashboard', label:'Manage blog', icon:'blog',
+        onClick:function(){ window.location.href = '/blogeditor.html'; }
+      });
+      menuList.insertBefore(blogBtn, document.getElementById('logout'));
+    }
 
-      const poiButton = document.getElementById('poi-dashboard');
-      if(poiButton && poiButton.nextSibling){
-        panel.insertBefore(blogBtn, poiButton.nextSibling);
-      } else if(poiButton){
-        panel.appendChild(blogBtn);
-      } else if(firstButton){
-        panel.insertBefore(blogBtn, firstButton);
-      } else {
-        panel.appendChild(blogBtn);
-      }
+    if(!document.getElementById('trails-editor')){
+      const trailsBtn = createMenuButton({
+        id:'trails-editor', label:'Trails editor', icon:'trails',
+        onClick:function(){ window.location.href = '/trakeditor.html'; }
+      });
+      menuList.insertBefore(trailsBtn, document.getElementById('logout'));
     }
   }
 
   async function renderAccount(){
     removeAccountPanel();
-    hideAuthForm();
-    title.innerText = 'Account';
-    setStatus('');
-
+    hideAuthView();
     const session = await getReliableSession();
     const user = session && session.user ? session.user : null;
-    const panel = createAccountPanel(user);
-    await maybeAddPartnerDiscountButton(panel);
-    await maybeAddOwnerButton(panel);
+    setHeaderState('Account', true, getAvatarText(user));
+    setStatus('');
+    const menuList = createAccountPanel(user);
+    await maybeAddPartnerDiscountButton(menuList);
+    await maybeAddOwnerButton(menuList);
   }
 
   async function checkUser(){
@@ -843,14 +921,18 @@ button{
 
     const session = await getReliableSession();
     const user = session && session.user ? session.user : null;
-
     if(!user){
       removeAccountPanel();
+      isLogin = true;
       setMode();
       return;
     }
 
     await renderAccount();
+  }
+
+  function togglePasswordVisibility(){
+    password.type = password.type === 'password' ? 'text' : 'password';
   }
 
   function setupEvents(){
@@ -863,40 +945,31 @@ button{
     });
 
     actionBtn.addEventListener('click', handleAuth);
-
-    toggle.addEventListener('click', function(){
-      isLogin = !isLogin;
-      setMode();
-    });
+    toggle.addEventListener('click', function(){ isLogin = !isLogin; setMode(); });
+    forgotBtn.addEventListener('click', handleForgotPassword);
+    passwordToggle.addEventListener('click', togglePasswordVisibility);
 
     googleBtn.addEventListener('click', function(event){
       event.preventDefault();
       setStatus('Accesso con Google disponibile prossimamente.');
     });
+
     appleBtn.addEventListener('click', function(event){
       event.preventDefault();
       setStatus('Accesso con Apple disponibile prossimamente.');
     });
 
-    password.addEventListener('keydown', function(event){
-      if(event.key === 'Enter') handleAuth();
-    });
-
-    repeat.addEventListener('keydown', function(event){
-      if(event.key === 'Enter') handleAuth();
-    });
+    password.addEventListener('keydown', function(event){ if(event.key === 'Enter') handleAuth(); });
+    repeat.addEventListener('keydown', function(event){ if(event.key === 'Enter') handleAuth(); });
   }
 
   window.client = client;
-
   setupEvents();
+  setMode();
   checkUser();
 
   client.auth.onAuthStateChange(function(event){
-    if(event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION'){
-      checkUser();
-    }
-
+    if(event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') checkUser();
     if(event === 'SIGNED_OUT'){
       removeAccountPanel();
       isLogin = true;
@@ -905,6 +978,5 @@ button{
   });
 })();
 </script>
-
 </body>
 </html>
