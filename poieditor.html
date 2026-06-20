@@ -515,6 +515,305 @@ body{
     padding:14px 16px;
   }
 }
+
+.modal{
+  background:rgba(11,20,38,0.42);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  padding:16px;
+}
+
+.modal-content{
+  position:relative;
+  background:linear-gradient(180deg,#fbfdff 0%,#f3f7fd 100%);
+  border-radius:32px;
+  padding:96px 20px 28px;
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
+  border:1px solid rgba(255,255,255,0.92);
+  height:auto;
+  max-height:calc(100vh - 32px);
+  box-shadow:0 34px 80px rgba(18,45,99,0.22);
+  color:var(--text);
+}
+
+.close-btn{
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:46px;
+  height:46px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  font-size:26px;
+  box-shadow:0 12px 24px rgba(20,50,110,0.10);
+}
+
+#modalTitle{
+  position:absolute;
+  top:18px;
+  left:20px;
+  right:80px;
+  height:auto;
+  margin:0;
+  display:block;
+  background:transparent;
+  z-index:1;
+  font-size:30px;
+  line-height:1.02;
+  letter-spacing:-0.05em;
+  color:var(--text);
+}
+
+.modal-subtitle{
+  margin:0 0 18px;
+  font-size:14px;
+  line-height:1.55;
+  color:var(--muted);
+}
+
+.modal-section-card{
+  margin-top:14px;
+  padding:16px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:0 14px 30px rgba(20,50,110,0.08);
+}
+
+.modal-section-label{
+  margin:0 0 12px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--primary);
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea{
+  width:100%;
+  padding:13px 14px;
+  margin-top:10px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  outline:none;
+  box-shadow:0 8px 18px rgba(20,50,110,0.05);
+}
+
+.modal-content input::placeholder,
+.modal-content textarea::placeholder{
+  color:#95a5c5;
+}
+
+.modal-content select option{
+  color:#13254d;
+}
+
+.name-type-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 170px;
+  gap:10px;
+  align-items:center;
+}
+
+.name-type-row input,
+.name-type-row select{
+  margin-top:0;
+  height:54px;
+}
+
+.location-picker,
+.image-uploader,
+.range-card{
+  margin-top:14px;
+  padding:16px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,0.96);
+  background:rgba(255,255,255,0.88);
+  box-shadow:0 14px 30px rgba(20,50,110,0.08);
+}
+
+.location-picker-head,
+.image-uploader-head,
+.range-head{
+  color:var(--text);
+}
+
+.image-uploader-head,
+.location-picker-head,
+.range-head span:first-child{
+  font-weight:850;
+}
+
+.image-count,
+.range-value{
+  background:#eef3fb;
+  color:var(--text);
+  box-shadow:none;
+}
+
+.image-add-btn{
+  width:100%;
+  padding:13px 14px;
+  border-radius:16px;
+  border:1px dashed rgba(26,70,159,0.28);
+  background:rgba(26,70,159,0.06);
+  color:var(--primary);
+  font-weight:900;
+}
+
+.image-suggestions{
+  border-top:1px solid var(--line);
+}
+
+.image-suggestions-head,
+.image-suggestions-status,
+.image-suggestion-caption,
+.image-suggestion-credit{
+  color:var(--muted);
+}
+
+.image-suggestion{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  box-shadow:0 10px 22px rgba(20,50,110,0.06);
+}
+
+.image-suggestion-photo{
+  background:#eef3fb;
+}
+
+.image-preview{
+  background:#eef3fb;
+  border:1px solid var(--line);
+}
+
+.location-picker{
+  background:rgba(255,255,255,0.88);
+}
+
+.mini-map{
+  height:260px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#eef3fb;
+  box-shadow:0 12px 28px rgba(20,50,110,0.08);
+}
+
+.coords-row input{
+  height:54px;
+  background:#fff;
+}
+
+.coords-clear-inline{
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  box-shadow:0 8px 18px rgba(20,50,110,0.08);
+}
+
+.village-pill{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  box-shadow:0 8px 18px rgba(20,50,110,0.05);
+}
+
+.map-floating-style{
+  background:#fff;
+  color:var(--text);
+  box-shadow:0 10px 24px rgba(20,50,110,0.16);
+}
+
+.apple-range::-webkit-slider-runnable-track{
+  background:linear-gradient(90deg,var(--primary) var(--range-progress,50%),rgba(26,70,159,0.14) var(--range-progress,50%));
+}
+
+.apple-range::-moz-range-track{
+  background:rgba(26,70,159,0.14);
+}
+
+.apple-range::-moz-range-progress{
+  background:var(--primary);
+}
+
+.apple-range::-webkit-slider-thumb,
+.apple-range::-moz-range-thumb{
+  background:#fff;
+}
+
+.modal-actions{
+  position:sticky;
+  bottom:0;
+  margin-top:16px;
+  display:grid;
+  gap:10px;
+  padding-top:14px;
+  background:linear-gradient(180deg,rgba(243,247,253,0),rgba(243,247,253,0.94) 22%,rgba(243,247,253,1) 100%);
+}
+
+button.save{
+  width:100%;
+  padding:15px 16px;
+  margin-top:0;
+  border-radius:18px;
+  border:none;
+  background:linear-gradient(180deg,var(--primary) 0%,var(--primary-2) 100%);
+  color:#fff;
+  font-weight:900;
+  font-size:16px;
+  box-shadow:0 16px 34px rgba(26,70,159,0.22);
+}
+
+button.delete{
+  width:100%;
+  padding:15px 16px;
+  margin-top:0;
+  border-radius:18px;
+  border:1px solid rgba(201,75,86,0.18);
+  background:rgba(255,255,255,0.88);
+  color:#c94b56;
+  font-weight:900;
+  font-size:15px;
+}
+
+@media (max-width:640px){
+  .modal{
+    padding:10px;
+  }
+
+  .modal-content{
+    padding:88px 16px 22px;
+    border-radius:26px;
+    max-height:calc(100vh - 20px);
+  }
+
+  #modalTitle{
+    top:16px;
+    left:16px;
+    right:74px;
+    font-size:26px;
+  }
+
+  .name-type-row{
+    grid-template-columns:1fr 132px;
+  }
+
+  .mini-map{
+    height:230px;
+  }
+}
 </style>
 </head>
 <body>
@@ -549,8 +848,11 @@ body{
   <div class="modal-content" role="dialog" aria-modal="true">
     <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
     <h2 id="modalTitle">Aggiungi POI</h2>
+    <p class="modal-subtitle">Compila solo quello che serve davvero. Il resto puoi rifinirlo dopo.</p>
 
-    <div class="name-type-row">
+    <div class="modal-section-card">
+      <div class="modal-section-label">Base</div>
+      <div class="name-type-row">
       <input id="name" placeholder="Nome" />
       <select id="type">
         <option value="chiesa">chiesa</option>
@@ -573,6 +875,7 @@ body{
         <option value="piazza">piazza</option>
         <option value="unknown spot">unknown spot</option>
       </select>
+    </div>
     </div>
     <div class="location-picker">
       <div class="location-picker-head">
@@ -613,7 +916,9 @@ body{
       <div id="imagePreviewGrid" class="image-preview-grid"></div>
     </div>
 
-    <textarea id="description" placeholder="Descrizione"></textarea>
+    <div class="modal-section-card">
+      <div class="modal-section-label">Dettagli</div>
+      <textarea id="description" placeholder="Descrizione"></textarea>
     <div class="range-card">
       <div class="range-head">
         <span>Importanza</span>
@@ -621,14 +926,20 @@ body{
       </div>
       <input id="importance" class="apple-range" type="range" min="1" max="100" step="1" value="50" />
     </div>
+    </div>
 
-
-    <input id="emails" placeholder="Email autorizzate" />
+    <div class="modal-section-card">
+      <div class="modal-section-label">Contatti e sconto</div>
+      <input id="emails" placeholder="Email autorizzate" />
     <input id="phone" placeholder="Telefono" />
     <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
 
-    <button class="save" id="saveBtn" type="button">Salva</button>
-    <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina POI</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="save" id="saveBtn" type="button">Salva</button>
+      <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina POI</button>
+    </div>
   </div>
 </div>
 
