@@ -1248,7 +1248,7 @@
 <div id="boot-status" aria-live="polite">
   <div class="boot-status-card">
     <div class="boot-status-title">Loading map…</div>
-    <div id="boot-status-text" class="boot-status-text">If iPhone blocks some external resources, the page will retry automatically.</div>
+    <div id="boot-status-text" class="boot-status-text">Loading local map resources…</div>
   </div>
 </div>
 <div class="search-floating">
@@ -1371,7 +1371,7 @@
   if (window.__ftgLibrariesReady) {
     setBootMessage('Preparing map…');
   } else {
-    showBootError('Leaflet did not load from the local site files. Reload the page once.');
+    showBootError('A local map file did not load. Reload the page once.');
   }
 }());
 </script>
@@ -3987,7 +3987,7 @@
     }).catch(function(error) {
       console.error('POI load failed:', error);
       if (window.__ftgShowBootError) {
-        window.__ftgShowBootError('The map opened, but some remote data was blocked on this browser. Try Safari or reduce strict tracking protection only for this site.');
+        window.__ftgShowBootError('The map opened, but some live data is temporarily unavailable. Local map content remains available.');
       }
     });
     if (!isMapPreviewMode) loadTrails();
@@ -4000,7 +4000,7 @@
   window.__ftgBoot = function () {
   if (window.__ftgBootStarted) return;
   if (!window.__ftgLibrariesReady || typeof window.L === 'undefined') {
-    if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The map libraries are not available. Reload the page once.');
+    if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The local map libraries are not available. Reload the page once.');
     return;
   }
   window.__ftgBootStarted = true;
