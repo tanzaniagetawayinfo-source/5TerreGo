@@ -672,463 +672,468 @@
 (function () {
   "use strict";
 
-  if (window.FTG_GLOBAL_ACTIONBAR_BOOTED) return;
-  window.FTG_GLOBAL_ACTIONBAR_BOOTED = true;
+  function mountGlobalActionbar(targetRoot, passedConfig) {
+    var config = passedConfig || window.FTG_ACTIONBAR_CONFIG || {};
+    var activePage = config.activePage || "stories";
+    var userName = config.userName || "Guest";
+    var isLoggedIn = Boolean(config.isLoggedIn);
+    var aiTitle = config.aiTitle || "Ask 5TerreGo";
+    var aiSubtitle = config.aiSubtitle || "Fast travel helper";
+    var aiWelcome = config.aiWelcome || "Nuova actionbar a due righe attiva.";
+    var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
+    var currentLanguage = String(config.language || "en").toLowerCase();
+    var androidAppHref = config.androidAppHref || "#";
+    var privacyHref = config.privacyHref || "#privacy";
+    var termsHref = config.termsHref || "#terms";
+    var root = targetRoot || document.getElementById("ftg-global-actionbar-root");
+    var welcomed = false;
 
-  var config = window.FTG_ACTIONBAR_CONFIG || {};
-  var activePage = config.activePage || "stories";
-  var userName = config.userName || "Guest";
-  var isLoggedIn = Boolean(config.isLoggedIn);
-  var aiTitle = config.aiTitle || "Ask 5TerreGo";
-  var aiSubtitle = config.aiSubtitle || "Fast travel helper";
-  var aiWelcome = config.aiWelcome || "Nuova actionbar a due righe attiva.";
-  var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
-  var currentLanguage = String(config.language || "en").toLowerCase();
-  var androidAppHref = config.androidAppHref || "#";
-  var privacyHref = config.privacyHref || "#privacy";
-  var termsHref = config.termsHref || "#terms";
-  var root = document.getElementById("ftg-global-actionbar-root");
-  var welcomed = false;
+    if (!root) return null;
 
-  if (!root) return;
-  document.body.classList.add("ftg-actionbar-enabled");
+    root.innerHTML = "";
+    document.body.classList.add("ftg-actionbar-enabled");
 
-  var languages = config.languages || [
-    { code: "en", label: "English", flag: "🇬🇧" },
-    { code: "it", label: "Italiano", flag: "🇮🇹" },
-    { code: "fr", label: "Français", flag: "🇫🇷" },
-    { code: "de", label: "Deutsch", flag: "🇩🇪" },
-    { code: "zh", label: "中文", flag: "🇨🇳" }
-  ];
+    var languages = config.languages || [
+      { code: "en", label: "English", flag: "🇬🇧" },
+      { code: "it", label: "Italiano", flag: "🇮🇹" },
+      { code: "fr", label: "Français", flag: "🇫🇷" },
+      { code: "de", label: "Deutsch", flag: "🇩🇪" },
+      { code: "zh", label: "中文", flag: "🇨🇳" }
+    ];
 
-  var menuItems = config.menuItems || [
-    { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
-    { id: "stories", labelKey: "nav_stories", label: "Stories", href: "#stories" },
-    { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "#sentieri" },
-    { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "#discounts" },
-    { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "#trains" },
-    { id: "weather", labelKey: "nav_weather", label: "Weather", href: "#weather" },
-    { id: "updates", labelKey: "nav_updates", label: "Official Updates", href: "#updates" }
-  ];
+    var menuItems = config.menuItems || [
+      { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
+      { id: "stories", labelKey: "nav_stories", label: "Stories", href: "index.html" },
+      { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "sentieri.html" },
+      { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "discounts.html" },
+      { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "public-transport.html" },
+      { id: "weather", labelKey: "nav_weather", label: "Weather", href: "weather.html" },
+      { id: "updates", labelKey: "nav_updates", label: "Official Updates", href: "updates.html" }
+    ];
 
-  var translations = {
-    en: {
-      download_android: "Download the Android app",
-      legal_title: "Legal area",
-      privacy: "Privacy Policy",
-      terms: "Terms & Conditions",
-      choose_language: "Choose language",
-      nav_map: "Map",
-      nav_stories: "Stories",
-      nav_sentieri: "Trails",
-      nav_discounts: "Local Discounts",
-      nav_trains: "Public Transport",
-      nav_weather: "Weather",
-      nav_updates: "Official Updates"
-    },
-    it: {
-      download_android: "Scarica l'app per Android",
-      legal_title: "Area legale",
-      privacy: "Informativa sulla privacy",
-      terms: "Termini e condizioni",
-      choose_language: "Scegli la lingua",
-      nav_map: "Mappa",
-      nav_stories: "Stories",
-      nav_sentieri: "Sentieri",
-      nav_discounts: "Sconti locali",
-      nav_trains: "Trasporto pubblico",
-      nav_weather: "Meteo",
-      nav_updates: "Aggiornamenti ufficiali"
-    },
-    fr: {
-      download_android: "Télécharger l'app Android",
-      legal_title: "Espace légal",
-      privacy: "Politique de confidentialité",
-      terms: "Conditions générales",
-      choose_language: "Choisir la langue",
-      nav_map: "Carte",
-      nav_stories: "Stories",
-      nav_sentieri: "Sentiers",
-      nav_discounts: "Réductions locales",
-      nav_trains: "Transports publics",
-      nav_weather: "Météo",
-      nav_updates: "Mises à jour officielles"
-    },
-    de: {
-      download_android: "Android-App herunterladen",
-      legal_title: "Rechtliches",
-      privacy: "Datenschutzerklärung",
-      terms: "AGB",
-      choose_language: "Sprache wählen",
-      nav_map: "Karte",
-      nav_stories: "Stories",
-      nav_sentieri: "Wege",
-      nav_discounts: "Lokale Rabatte",
-      nav_trains: "Öffentliche Verkehrsmittel",
-      nav_weather: "Wetter",
-      nav_updates: "Offizielle Updates"
-    },
-    zh: {
-      download_android: "下载 Android 应用",
-      legal_title: "法律信息",
-      privacy: "隐私政策",
-      terms: "条款与条件",
-      choose_language: "选择语言",
-      nav_map: "地图",
-      nav_stories: "故事",
-      nav_sentieri: "步道",
-      nav_discounts: "本地优惠",
-      nav_trains: "公共交通",
-      nav_weather: "天气",
-      nav_updates: "官方更新"
-    }
-  };
-
-  function escapeHTML(value) {
-    return String(value || "").replace(/[&<>\"]/g, function (char) {
-      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char];
-    });
-  }
-
-  function resolveHref(href) {
-    var value = String(href || "").trim();
-    if (!value) return "";
-    if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
-    if (basePath) return basePath.replace(/\/+$/, "") + "/" + value.replace(/^\/+/, "");
-    return "/" + value.replace(/^\/+/, "");
-  }
-
-  function t(key, fallback) {
-    var group = translations[currentLanguage] || translations.en || {};
-    return group[key] || fallback || key;
-  }
-
-  function getLanguageMeta(code) {
-    var match = languages.find(function (lang) {
-      return String(lang.code || "").toLowerCase() === String(code || "").toLowerCase();
-    });
-    return match || languages[0] || { code: "en", label: "English", flag: "🇬🇧" };
-  }
-
-  function renderIconMarkup(id) {
-    if (id === "sentieri") {
-      return '<img src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F45F.png" alt="" aria-hidden="true">';
-    }
-
-    var icons = {
-      map: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4.5 15 2l6 2.5v15L15 22l-6-2.5L3 22V7z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 4.5v15" stroke-width="1.8"></path><path d="M15 2v20" stroke-width="1.8"></path></svg>',
-      stories: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
-      discounts: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5V6a2 2 0 0 1 2-2h8.8a2 2 0 0 1 1.4.6l3.2 3.2A2 2 0 0 1 20 9.2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="8" cy="8" r="1.25" stroke-width="1.8"></circle><path d="m9.5 14.5 5-5" stroke-width="1.8" stroke-linecap="round"></path></svg>',
-      trains: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
-      weather: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.5 1.5M6.8 17.2l-1.5 1.5M18.7 18.7l-1.5-1.5M6.8 6.8 5.3 5.3" stroke-width="1.8" stroke-linecap="round"></path></svg>',
-      updates: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5 5 8v4.8c0 3.4 2.2 6.6 7 8.7 4.8-2.1 7-5.3 7-8.7V8z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 9v4M12 16h.01" stroke-width="1.8" stroke-linecap="round"></path></svg>'
-    };
-    return icons[id] || '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle></svg>';
-  }
-
-  function buildNavPill(item) {
-    var active = item.id === activePage;
-    var label = t(item.labelKey || "", item.label || item.id || "");
-    return '<button class="ftg-nav-pill' + (active ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id) + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></button>';
-  }
-
-  function buildLanguageOptions() {
-    return languages.map(function (lang) {
-      var active = String(lang.code || "").toLowerCase() === currentLanguage;
-      return '<button class="ftg-language-option' + (active ? ' active' : '') + '" type="button" data-language-code="' + escapeHTML(lang.code || '') + '"><span class="ftg-menu-flag">' + escapeHTML(lang.flag || '🏳️') + '</span><span>' + escapeHTML(lang.label || lang.code || '') + '</span></button>';
-    }).join("");
-  }
-
-  root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
-
-  var topbar = document.getElementById("ftg-topbar");
-  var pillScroller = document.getElementById("ftg-pill-scroller");
-  var accountBtn = document.getElementById("ftg-account-btn");
-  var menuTrigger = document.getElementById("ftg-menu-trigger");
-  var menuPanel = document.getElementById("ftg-menu-panel");
-    var languageMenuItem = document.getElementById("ftg-language-menu-item");
-  var languageMenuFlag = document.getElementById("ftg-language-menu-flag");
-  var languageMenuLabel = document.getElementById("ftg-language-menu-label");
-    var languageTitle = document.getElementById("ftg-language-title");
-  var languageList = document.getElementById("ftg-language-list");
-  var legalTitle = document.getElementById("ftg-legal-title");
-  var privacyLabel = document.getElementById("ftg-privacy-label");
-  var termsLabel = document.getElementById("ftg-terms-label");
-  var androidAppLink = document.getElementById("ftg-android-app-link");
-  var androidAppLabel = document.getElementById("ftg-android-app-label");
-  var aiPanel = document.getElementById("ftg-ai-panel");
-  var aiClose = document.getElementById("ftg-ai-close");
-  var aiMessages = document.getElementById("ftg-ai-messages");
-  var aiInput = document.getElementById("ftg-ai-input");
-  var aiSend = document.getElementById("ftg-ai-send");
-  var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
-  var pillButtons = [];
-
-  function syncActiveButtons(pageId) {
-    activePage = pageId;
-    pillButtons.forEach(function (button) {
-      button.classList.toggle("active", button.getAttribute("data-page-target") === pageId);
-    });
-  }
-
-  function maybeMarkScrolled() {
-    if (!topbar) return;
-    topbar.classList.toggle("is-scrolled", window.scrollY > 10);
-  }
-
-  function syncMenuVisualState() {
-    var isOpen = menuPanel && menuPanel.classList.contains("open");
-    var isLanguageMode = menuPanel && menuPanel.classList.contains("is-language-mode");
-
-    if (menuTrigger) {
-      menuTrigger.classList.toggle("is-open", isOpen);
-      menuTrigger.setAttribute("aria-label", isOpen ? (isLanguageMode ? "Close language selector" : "Close menu") : "Open menu");
-    }
-
-    if (topbar) {
-      topbar.classList.toggle("menu-open", isOpen);
-    }
-  }
-
-  function openMenu() {
-    if (!menuPanel) return;
-    menuPanel.classList.add("open");
-    menuPanel.classList.remove("is-language-mode");
-    menuPanel.setAttribute("aria-hidden", "false");
-    document.body.classList.add("ftg-menu-open");
-    syncMenuVisualState();
-  }
-
-  function closeMenu() {
-    if (!menuPanel) return;
-    menuPanel.classList.remove("open");
-    menuPanel.classList.remove("is-language-mode");
-    menuPanel.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("ftg-menu-open");
-    syncMenuVisualState();
-  }
-
-  function openLanguagePanel() {
-    if (!menuPanel) return;
-    menuPanel.classList.add("open");
-    menuPanel.classList.add("is-language-mode");
-    menuPanel.setAttribute("aria-hidden", "false");
-    document.body.classList.add("ftg-menu-open");
-    syncMenuVisualState();
-  }
-
-  function closeLanguagePanel() {
-    if (!menuPanel) return;
-    menuPanel.classList.remove("is-language-mode");
-    syncMenuVisualState();
-  }
-
-  function navigateTo(itemId, href) {
-    var finalHref = resolveHref(href || "");
-    syncActiveButtons(itemId);
-    closeMenu();
-
-    if (typeof config.onNavigate === "function") {
-      config.onNavigate(itemId, { href: finalHref });
-      return;
-    }
-
-    if (itemId === "map") {
-      window.location.href = resolveHref("map.html");
-      return;
-    }
-
-    if (finalHref) {
-      if (finalHref.charAt(0) === "#") {
-        var target = document.querySelector(finalHref);
-        if (target && typeof target.scrollIntoView === "function") {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-          return;
-        }
+    var translations = {
+      en: {
+        download_android: "Download the Android app",
+        legal_title: "Legal area",
+        privacy: "Privacy Policy",
+        terms: "Terms & Conditions",
+        choose_language: "Choose language",
+        nav_map: "Map",
+        nav_stories: "Stories",
+        nav_sentieri: "Trails",
+        nav_discounts: "Local Discounts",
+        nav_trains: "Public Transport",
+        nav_weather: "Weather",
+        nav_updates: "Official Updates"
+      },
+      it: {
+        download_android: "Scarica l'app per Android",
+        legal_title: "Area legale",
+        privacy: "Informativa sulla privacy",
+        terms: "Termini e condizioni",
+        choose_language: "Scegli la lingua",
+        nav_map: "Mappa",
+        nav_stories: "Stories",
+        nav_sentieri: "Sentieri",
+        nav_discounts: "Sconti locali",
+        nav_trains: "Trasporto pubblico",
+        nav_weather: "Meteo",
+        nav_updates: "Aggiornamenti ufficiali"
+      },
+      fr: {
+        download_android: "Télécharger l'app Android",
+        legal_title: "Espace légal",
+        privacy: "Politique de confidentialité",
+        terms: "Conditions générales",
+        choose_language: "Choisir la langue",
+        nav_map: "Carte",
+        nav_stories: "Stories",
+        nav_sentieri: "Sentiers",
+        nav_discounts: "Réductions locales",
+        nav_trains: "Transports publics",
+        nav_weather: "Météo",
+        nav_updates: "Mises à jour officielles"
+      },
+      de: {
+        download_android: "Android-App herunterladen",
+        legal_title: "Rechtliches",
+        privacy: "Datenschutzerklärung",
+        terms: "AGB",
+        choose_language: "Sprache wählen",
+        nav_map: "Karte",
+        nav_stories: "Stories",
+        nav_sentieri: "Wege",
+        nav_discounts: "Lokale Rabatte",
+        nav_trains: "Öffentliche Verkehrsmittel",
+        nav_weather: "Wetter",
+        nav_updates: "Offizielle Updates"
+      },
+      zh: {
+        download_android: "下载 Android 应用",
+        legal_title: "法律信息",
+        privacy: "隐私政策",
+        terms: "条款与条件",
+        choose_language: "选择语言",
+        nav_map: "地图",
+        nav_stories: "故事",
+        nav_sentieri: "步道",
+        nav_discounts: "本地优惠",
+        nav_trains: "公共交通",
+        nav_weather: "天气",
+        nav_updates: "官方更新"
       }
-      window.location.href = finalHref;
-    }
-  }
+    };
 
-  function addAIMessage(text, isUser) {
-    if (!aiMessages) return;
-    var div = document.createElement("div");
-    div.className = "ftg-ai-msg " + (isUser ? "user" : "bot");
-    div.innerText = text;
-    aiMessages.appendChild(div);
-    aiMessages.scrollTop = aiMessages.scrollHeight;
-  }
-
-  function toggleAI(forceOpen) {
-    if (!aiPanel) return;
-    var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
-    aiPanel.classList.toggle("open", shouldOpen);
-    aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
-    if (shouldOpen && !welcomed) {
-      welcomed = true;
-      addAIMessage(aiWelcome, false);
-    }
-  }
-
-  function handleAISend(textFromButton) {
-    var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
-    if (!text) return;
-    addAIMessage(text, true);
-    if (aiInput) aiInput.value = "";
-    window.setTimeout(function () {
-      addAIMessage("Active section: " + activePage + ". Questa topbar a due righe tiene brand e controlli sopra, pillole pagina sotto.", false);
-    }, 120);
-  }
-
-  function bindPillEvents() {
-    pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
-    pillButtons.forEach(function (button) {
-      button.addEventListener("click", function () {
-        navigateTo(button.getAttribute("data-page-target"), button.getAttribute("data-page-href"));
+    function escapeHTML(value) {
+      return String(value || "").replace(/[&<>\"]/g, function (char) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char];
       });
-    });
-    syncActiveButtons(activePage);
-  }
+    }
 
-  function rebuildPills() {
-    if (!pillScroller) return;
-    pillScroller.innerHTML = menuItems.map(buildNavPill).join("");
-    bindPillEvents();
-  }
+    function resolveHref(href) {
+      var value = String(href || "").trim();
+      if (!value) return "";
+      if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
+      if (basePath) return basePath.replace(/\/+$/, "") + "/" + value.replace(/^\/+/, "");
+      return "/" + value.replace(/^\/+/, "");
+    }
 
-  function rebuildLanguageList() {
-    if (!languageList) return;
-    languageList.innerHTML = buildLanguageOptions();
-    Array.prototype.slice.call(languageList.querySelectorAll("[data-language-code]")).forEach(function (button) {
-      button.addEventListener("click", function (event) {
+    function t(key, fallback) {
+      var group = translations[currentLanguage] || translations.en || {};
+      return group[key] || fallback || key;
+    }
+
+    function getLanguageMeta(code) {
+      var match = languages.find(function (lang) {
+        return String(lang.code || "").toLowerCase() === String(code || "").toLowerCase();
+      });
+      return match || languages[0] || { code: "en", label: "English", flag: "🇬🇧" };
+    }
+
+    function renderIconMarkup(id) {
+      if (id === "sentieri") {
+        return '<img src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F45F.png" alt="" aria-hidden="true">';
+      }
+
+      var icons = {
+        map: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4.5 15 2l6 2.5v15L15 22l-6-2.5L3 22V7z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 4.5v15" stroke-width="1.8"></path><path d="M15 2v20" stroke-width="1.8"></path></svg>',
+        stories: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+        discounts: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5V6a2 2 0 0 1 2-2h8.8a2 2 0 0 1 1.4.6l3.2 3.2A2 2 0 0 1 20 9.2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="8" cy="8" r="1.25" stroke-width="1.8"></circle><path d="m9.5 14.5 5-5" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+        trains: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
+        weather: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.5 1.5M6.8 17.2l-1.5 1.5M18.7 18.7l-1.5-1.5M6.8 6.8 5.3 5.3" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+        updates: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5 5 8v4.8c0 3.4 2.2 6.6 7 8.7 4.8-2.1 7-5.3 7-8.7V8z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 9v4M12 16h.01" stroke-width="1.8" stroke-linecap="round"></path></svg>'
+      };
+      return icons[id] || '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle></svg>';
+    }
+
+    function buildNavPill(item) {
+      var active = item.id === activePage;
+      var label = t(item.labelKey || "", item.label || item.id || "");
+      return '<button class="ftg-nav-pill' + (active ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id) + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></button>';
+    }
+
+    function buildLanguageOptions() {
+      return languages.map(function (lang) {
+        var active = String(lang.code || "").toLowerCase() === currentLanguage;
+        return '<button class="ftg-language-option' + (active ? ' active' : '') + '" type="button" data-language-code="' + escapeHTML(lang.code || '') + '"><span class="ftg-menu-flag">' + escapeHTML(lang.flag || '🏳️') + '</span><span>' + escapeHTML(lang.label || lang.code || '') + '</span></button>';
+      }).join("");
+    }
+
+    root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
+
+    var topbar = root.querySelector("#ftg-topbar");
+    var pillScroller = root.querySelector("#ftg-pill-scroller");
+    var accountBtn = root.querySelector("#ftg-account-btn");
+    var menuTrigger = root.querySelector("#ftg-menu-trigger");
+    var menuPanel = root.querySelector("#ftg-menu-panel");
+    var languageMenuItem = root.querySelector("#ftg-language-menu-item");
+    var languageMenuFlag = root.querySelector("#ftg-language-menu-flag");
+    var languageMenuLabel = root.querySelector("#ftg-language-menu-label");
+    var languageTitle = root.querySelector("#ftg-language-title");
+    var languageList = root.querySelector("#ftg-language-list");
+    var legalTitle = root.querySelector("#ftg-legal-title");
+    var privacyLabel = root.querySelector("#ftg-privacy-label");
+    var termsLabel = root.querySelector("#ftg-terms-label");
+    var androidAppLink = root.querySelector("#ftg-android-app-link");
+    var androidAppLabel = root.querySelector("#ftg-android-app-label");
+    var aiPanel = root.querySelector("#ftg-ai-panel");
+    var aiClose = root.querySelector("#ftg-ai-close");
+    var aiMessages = root.querySelector("#ftg-ai-messages");
+    var aiInput = root.querySelector("#ftg-ai-input");
+    var aiSend = root.querySelector("#ftg-ai-send");
+    var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
+    var pillButtons = [];
+
+    function syncActiveButtons(pageId) {
+      activePage = pageId;
+      pillButtons.forEach(function (button) {
+        button.classList.toggle("active", button.getAttribute("data-page-target") === pageId);
+      });
+    }
+
+    function maybeMarkScrolled() {
+      if (!topbar) return;
+      topbar.classList.toggle("is-scrolled", window.scrollY > 10);
+    }
+
+    function syncMenuVisualState() {
+      var isOpen = menuPanel && menuPanel.classList.contains("open");
+      var isLanguageMode = menuPanel && menuPanel.classList.contains("is-language-mode");
+
+      if (menuTrigger) {
+        menuTrigger.classList.toggle("is-open", isOpen);
+        menuTrigger.setAttribute("aria-label", isOpen ? (isLanguageMode ? "Close language selector" : "Close menu") : "Open menu");
+      }
+
+      if (topbar) {
+        topbar.classList.toggle("menu-open", isOpen);
+      }
+    }
+
+    function openMenu() {
+      if (!menuPanel) return;
+      menuPanel.classList.add("open");
+      menuPanel.classList.remove("is-language-mode");
+      menuPanel.setAttribute("aria-hidden", "false");
+      document.body.classList.add("ftg-menu-open");
+      syncMenuVisualState();
+    }
+
+    function closeMenu() {
+      if (!menuPanel) return;
+      menuPanel.classList.remove("open");
+      menuPanel.classList.remove("is-language-mode");
+      menuPanel.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("ftg-menu-open");
+      syncMenuVisualState();
+    }
+
+    function openLanguagePanel() {
+      if (!menuPanel) return;
+      menuPanel.classList.add("open");
+      menuPanel.classList.add("is-language-mode");
+      menuPanel.setAttribute("aria-hidden", "false");
+      document.body.classList.add("ftg-menu-open");
+      syncMenuVisualState();
+    }
+
+    function closeLanguagePanel() {
+      if (!menuPanel) return;
+      menuPanel.classList.remove("is-language-mode");
+      syncMenuVisualState();
+    }
+
+    function navigateTo(itemId, href) {
+      var finalHref = resolveHref(href || "");
+      syncActiveButtons(itemId);
+      closeMenu();
+
+      if (typeof config.onNavigate === "function") {
+        config.onNavigate(itemId, { href: finalHref });
+        return;
+      }
+
+      if (finalHref) {
+        if (finalHref.charAt(0) === "#") {
+          var target = document.querySelector(finalHref);
+          if (target && typeof target.scrollIntoView === "function") {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+        }
+        window.location.href = finalHref;
+      }
+    }
+
+    function addAIMessage(text, isUser) {
+      if (!aiMessages) return;
+      var div = document.createElement("div");
+      div.className = "ftg-ai-msg " + (isUser ? "user" : "bot");
+      div.innerText = text;
+      aiMessages.appendChild(div);
+      aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function toggleAI(forceOpen) {
+      if (!aiPanel) return;
+      var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
+      aiPanel.classList.toggle("open", shouldOpen);
+      aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+      if (shouldOpen && !welcomed) {
+        welcomed = true;
+        addAIMessage(aiWelcome, false);
+      }
+    }
+
+    function handleAISend(textFromButton) {
+      var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
+      if (!text) return;
+      addAIMessage(text, true);
+      if (aiInput) aiInput.value = "";
+      window.setTimeout(function () {
+        addAIMessage("Active section: " + activePage + ". Questa topbar a due righe tiene brand e controlli sopra, pillole pagina sotto.", false);
+      }, 120);
+    }
+
+    function bindPillEvents() {
+      pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
+      pillButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          navigateTo(button.getAttribute("data-page-target"), button.getAttribute("data-page-href"));
+        });
+      });
+      syncActiveButtons(activePage);
+    }
+
+    function rebuildPills() {
+      if (!pillScroller) return;
+      pillScroller.innerHTML = menuItems.map(buildNavPill).join("");
+      bindPillEvents();
+    }
+
+    function rebuildLanguageList() {
+      if (!languageList) return;
+      languageList.innerHTML = buildLanguageOptions();
+      Array.prototype.slice.call(languageList.querySelectorAll("[data-language-code]")).forEach(function (button) {
+        button.addEventListener("click", function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
+          applyTranslations();
+          closeLanguagePanel();
+          if (typeof config.onLanguageChange === "function") {
+            config.onLanguageChange(currentLanguage);
+          }
+        });
+      });
+    }
+
+    function updateMenuDynamicItems() {
+      var languageMeta = getLanguageMeta(currentLanguage);
+      if (languageMenuFlag) languageMenuFlag.innerText = languageMeta.flag || "🏳️";
+      if (languageMenuLabel) languageMenuLabel.innerText = languageMeta.label || languageMeta.code || "Language";
+      if (languageTitle) languageTitle.innerText = t("choose_language", "Choose language");
+      if (legalTitle) legalTitle.innerText = t("legal_title", "Legal area");
+      if (privacyLabel) privacyLabel.innerText = t("privacy", "Privacy Policy");
+      if (termsLabel) termsLabel.innerText = t("terms", "Terms & Conditions");
+      if (androidAppLabel) androidAppLabel.innerText = t("download_android", "Download the Android app");
+      if (androidAppLink) {
+        var isAndroid = /android/i.test(navigator.userAgent || "");
+        androidAppLink.style.display = isAndroid ? "flex" : "none";
+      }
+    }
+
+    function applyTranslations() {
+      rebuildPills();
+      rebuildLanguageList();
+      updateMenuDynamicItems();
+    }
+
+    if (accountBtn) {
+      accountBtn.addEventListener("click", function () {
+        window.location.href = resolveHref("login.html");
+      });
+    }
+
+    if (menuPanel) {
+      menuPanel.addEventListener("click", function (event) {
+        event.stopPropagation();
+      });
+    }
+
+    if (menuTrigger && menuPanel) {
+      menuTrigger.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
-        currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
-        applyTranslations();
-        closeLanguagePanel();
-        if (typeof config.onLanguageChange === "function") {
-          config.onLanguageChange(currentLanguage);
+        var isOpen = menuPanel.classList.contains("open");
+        var isLanguageMode = menuPanel.classList.contains("is-language-mode");
+
+        if (!isOpen) {
+          openMenu();
+          return;
         }
+
+        if (isLanguageMode) {
+          closeLanguagePanel();
+          return;
+        }
+
+        closeMenu();
+      });
+    }
+
+    if (languageMenuItem) {
+      languageMenuItem.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openLanguagePanel();
+      });
+    }
+
+    if (aiClose) {
+      aiClose.addEventListener("click", function () {
+        toggleAI(false);
+      });
+    }
+
+    if (aiSend) {
+      aiSend.addEventListener("click", function () {
+        handleAISend();
+      });
+    }
+
+    if (aiInput) {
+      aiInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") handleAISend();
+      });
+    }
+
+    aiSuggestions.forEach(function (button) {
+      button.addEventListener("click", function () {
+        handleAISend(button.innerText);
       });
     });
-  }
 
-  function updateMenuDynamicItems() {
-    var languageMeta = getLanguageMeta(currentLanguage);
-    if (languageMenuFlag) languageMenuFlag.innerText = languageMeta.flag || "🏳️";
-    if (languageMenuLabel) languageMenuLabel.innerText = languageMeta.label || languageMeta.code || "Language";
-        if (languageTitle) languageTitle.innerText = t("choose_language", "Choose language");
-    if (legalTitle) legalTitle.innerText = t("legal_title", "Legal area");
-    if (privacyLabel) privacyLabel.innerText = t("privacy", "Privacy Policy");
-    if (termsLabel) termsLabel.innerText = t("terms", "Terms & Conditions");
-    if (androidAppLabel) androidAppLabel.innerText = t("download_android", "Download the Android app");
-    if (androidAppLink) {
-      var isAndroid = /android/i.test(navigator.userAgent || "");
-      androidAppLink.style.display = isAndroid ? "flex" : "none";
-    }
-  }
-
-  function applyTranslations() {
-    rebuildPills();
-    rebuildLanguageList();
-    updateMenuDynamicItems();
-  }
-
-  if (accountBtn) {
-    accountBtn.addEventListener("click", function () {
-      window.location.href = resolveHref("login.html");
-    });
-  }
-
-  if (menuPanel) {
-    menuPanel.addEventListener("click", function (event) {
-      event.stopPropagation();
-    });
-  }
-
-  if (menuTrigger && menuPanel) {
-    menuTrigger.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      var isOpen = menuPanel.classList.contains("open");
-      var isLanguageMode = menuPanel.classList.contains("is-language-mode");
-
-      if (!isOpen) {
-        openMenu();
-        return;
+    window.addEventListener("scroll", maybeMarkScrolled, { passive: true });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        toggleAI(false);
+        closeMenu();
       }
+    });
 
-      if (isLanguageMode) {
-        closeLanguagePanel();
-        return;
+    document.addEventListener("click", function (event) {
+      if (!menuPanel || !menuTrigger) return;
+      if (!menuPanel.classList.contains("open")) return;
+      if (!menuPanel.contains(event.target) && !menuTrigger.contains(event.target)) {
+        closeMenu();
       }
-
-      closeMenu();
     });
+
+    applyTranslations();
+    syncMenuVisualState();
+    maybeMarkScrolled();
+
+    var api = {
+      navigateToPage: function (pageId) {
+        var match = menuItems.find(function (item) { return item.id === pageId; }) || {};
+        navigateTo(pageId, match.href || "");
+      },
+      toggleAI: toggleAI,
+      getCurrentPage: function () { return activePage; },
+      setActivePage: function (pageId) { syncActiveButtons(pageId); },
+      remount: function (nextRoot, nextConfig) { return mountGlobalActionbar(nextRoot || root, nextConfig || config); }
+    };
+
+    window.FTG_GLOBAL_ACTIONBAR = api;
+    return api;
   }
 
-  if (languageMenuItem) {
-    languageMenuItem.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      openLanguagePanel();
-    });
+  window.FTG_MOUNT_GLOBAL_ACTIONBAR = mountGlobalActionbar;
+
+  var standaloneRoot = document.getElementById("ftg-global-actionbar-root");
+  if (standaloneRoot && !standaloneRoot.childElementCount) {
+    mountGlobalActionbar(standaloneRoot, window.FTG_ACTIONBAR_CONFIG || {});
   }
-
-  
-
-  if (aiClose) {
-    aiClose.addEventListener("click", function () {
-      toggleAI(false);
-    });
-  }
-
-  if (aiSend) {
-    aiSend.addEventListener("click", function () {
-      handleAISend();
-    });
-  }
-
-  if (aiInput) {
-    aiInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") handleAISend();
-    });
-  }
-
-  aiSuggestions.forEach(function (button) {
-    button.addEventListener("click", function () {
-      handleAISend(button.innerText);
-    });
-  });
-
-  window.addEventListener("scroll", maybeMarkScrolled, { passive: true });
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
-      toggleAI(false);
-      closeMenu();
-    }
-  });
-
-  document.addEventListener("click", function (event) {
-    if (!menuPanel || !menuTrigger) return;
-    if (!menuPanel.classList.contains("open")) return;
-    if (!menuPanel.contains(event.target) && !menuTrigger.contains(event.target)) {
-      closeMenu();
-    }
-  });
-
-  applyTranslations();
-  syncMenuVisualState();
-  maybeMarkScrolled();
-
-  window.FTG_GLOBAL_ACTIONBAR = {
-    navigateToPage: function (pageId) {
-      var match = menuItems.find(function (item) { return item.id === pageId; }) || {};
-      navigateTo(pageId, match.href || "");
-    },
-    toggleAI: toggleAI,
-    getCurrentPage: function () { return activePage; },
-    setActivePage: function (pageId) { syncActiveButtons(pageId); }
-  };
 }());
 </script>
