@@ -227,6 +227,7 @@
     border: 0;
     background: transparent;
     color: #111827;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -706,7 +707,7 @@
       { id: "stories", labelKey: "nav_stories", label: "Stories", href: "index.html" },
       { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "sentieri.html" },
       { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "discounts.html" },
-      { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "public-transport.html" },
+      { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "publictransport.html" },
       { id: "weather", labelKey: "nav_weather", label: "Weather", href: "weather.html" },
       { id: "updates", labelKey: "nav_updates", label: "Official Updates", href: "updates.html" }
     ];
@@ -830,7 +831,7 @@
       var active = item.id === activePage;
       var label = t(item.labelKey || "", item.label || item.id || "");
       var href = resolveHref(item.href || "");
-      return '<a class="ftg-nav-pill' + (active ? ' active' : '') + '" href="' + escapeHTML(href) + '" data-page-target="' + escapeHTML(item.id) + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></a>';
+      return '<a class="ftg-nav-pill' + (active ? ' active' : '') + '" href="' + escapeHTML(href) + '" target="_top" data-page-target="' + escapeHTML(item.id) + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></a>';
     }
 
     function buildLanguageOptions() {
