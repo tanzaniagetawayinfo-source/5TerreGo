@@ -880,14 +880,6 @@
         </span>
       </button>
 
-      <section class="live-strip" aria-label="Realtime train status">
-        <div class="live-main">
-          <span class="live-dot" id="liveDot"></span>
-          <span class="live-title" id="liveTitle">Connecting live trains</span>
-        </div>
-        <div class="live-meta" id="liveMeta">Only real departures are shown</div>
-      </section>
-
       <section class="best-card" aria-label="Best next option">
         <div class="best-label">BEST NEXT OPTION</div>
         <div class="best-grid">
@@ -1597,6 +1589,7 @@
       '</article>';
     }
     function updateLiveStrip(){
+      if (!liveDot || !liveTitle || !liveMeta) return;
       liveDot.classList.remove('is-live', 'is-error');
       if (liveState.mode === 'live') {
         liveDot.classList.add('is-live');
