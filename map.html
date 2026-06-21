@@ -826,7 +826,7 @@
       justify-content: flex-end;
       padding: 12px;
       gap: 4px;
-      color: #111;
+      color: #fff;
     }
     .bottom-rail-kicker {
       font-size: 10px;
@@ -834,7 +834,8 @@
       font-weight: 900;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: rgba(17,17,17,.56);
+      color: rgba(255,255,255,.76);
+      text-shadow: 0 4px 14px rgba(0,0,0,.34);
     }
     .bottom-rail-discover {
       margin-top: 6px;
@@ -843,14 +844,16 @@
       font-weight: 950;
       letter-spacing: .10em;
       text-transform: uppercase;
-      color: rgba(17,17,17,.88);
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 4px 14px rgba(0,0,0,.34);
     }
     .bottom-rail-title {
       font-size: 16px;
       line-height: 1.05;
       letter-spacing: -.04em;
       font-weight: 950;
-      text-shadow: none;
+      color: #fff;
+      text-shadow: 0 6px 18px rgba(0,0,0,.34);
       text-wrap: balance;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -2991,7 +2994,7 @@
   }
   function isBottomRailVillageSheetEnabled() {
     var label = getBottomRailVillageLabel();
-    return Boolean(label && label !== getDiscoverLabel());
+    return Boolean(label);
   }
   function getVillageCalendarConfig(name) {
     if (!villageCalendarData[name]) villageCalendarData[name] = createVillageCalendarSeed(name);
