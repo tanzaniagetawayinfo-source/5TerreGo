@@ -3659,6 +3659,39 @@
       return fallback;
     }
   }
+  function safeGetStorageItem(storage, key, fallback) {
+    try {
+      if (!storage || !key) return fallback;
+      var value = storage.getItem(key);
+      return value === null || value === undefined ? fallback : value;
+    } catch (error) {
+      return fallback;
+    }
+  }
+  function safeSetStorageItem(storage, key, value) {
+    try {
+      if (!storage || !key) return false;
+      storage.setItem(key, value);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  async function fetchLocalPOIsAsset() {
+    var candidates = ['data/pois.json', './data/pois.json', '/data/pois.json'];
+    var i;
+    var response;
+    var data;
+    for (i = 0; i < candidates.length; i += 1) {
+      try {
+        response = await fetch(candidates[i], { cache: 'force-cache' });
+        if (!response.ok) continue;
+        data = await response.json();
+        if (Array.isArray(data) && data.length) return data;
+      } catch (error) {}
+    }
+    return [];
+  }
   function sortCachedPOIRows(rows) {
     return (Array.isArray(rows) ? rows.slice() : []).sort(function(a, b) {
       return Number(b && (b.importance || b.relevance || b.score || 0)) - Number(a && (a.importance || a.relevance || a.score || 0));
@@ -3719,10 +3752,10 @@
   }
   function filterUsableCachedPOIRows(rows) { return (Array.isArray(rows) ? rows : []).filter(function(row) { var parsed = parseCoords(row || {}); return Number.isFinite(parsed.lat) && Number.isFinite(parsed.lng); }); }
   function readLocalPOIs() {
-    var localRows = filterUsableCachedPOIRows(safeParseJSON(localStorage.getItem(LOCAL_POI_KEY) || '[]', []));
+    var localRows = filterUsableCachedPOIRows(safeParseJSON(safeGetStorageItem(localStorage, LOCAL_POI_KEY, '[]'), []));
     var hotRows = [];
     FTG_POI_HOT_CACHE_KEYS.some(function(key) {
-      var cached = filterUsableCachedPOIRows(safeParseJSON(localStorage.getItem(key) || 'null', null));
+      var cached = filterUsableCachedPOIRows(safeParseJSON(safeGetStorageItem(localStorage, key, 'null'), null));
       if (cached.length) { hotRows = cached; return true; }
       return false;
     });
@@ -3741,13 +3774,11 @@
     var serialized;
     trimmed = sortCachedPOIRows(rows).slice(0, 1200);
     serialized = JSON.stringify(trimmed);
-    try {
-      localStorage.setItem(LOCAL_POI_KEY, serialized);
-    } catch (error) {}
+    safeSetStorageItem(localStorage, LOCAL_POI_KEY, serialized);
     FTG_POI_HOT_CACHE_KEYS.forEach(function(key) {
-      try { localStorage.setItem(key, JSON.stringify(trimmed.slice(0, 260))); } catch (error) {}
+      safeSetStorageItem(localStorage, key, JSON.stringify(trimmed.slice(0, 260)));
     });
-    try { localStorage.setItem(FTG_POI_HOT_CACHE_TS_KEY, String(Date.now())); } catch (error) {}
+    safeSetStorageItem(localStorage, FTG_POI_HOT_CACHE_TS_KEY, String(Date.now()));
     writeFullPOICacheToIDB(trimmed);
   }
   function getInitialViewportPOIBounds() {
@@ -3879,6 +3910,7 @@
     var localRows;
     var idbRows;
     var mergedCacheRows = [];
+    var localAssetRows = [];
     var seenIds = Object.create(null);
 
     function refreshPOIViews(renderRail) {
@@ -3911,6 +3943,12 @@
       idbRows = await readFullPOICacheFromIDB();
       if (generation !== poiLoadGeneration) return;
       mergeCachedRows(idbRows);
+
+      if (!mergedCacheRows.length) {
+        localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
+        if (generation !== poiLoadGeneration) return;
+        mergeCachedRows(localAssetRows);
+      }
 
       if (mergedCacheRows.length) {
         appendPOIRows(sortCachedPOIRows(mergedCacheRows).slice(0, 900), {
@@ -3965,6 +4003,19 @@
       }
 
       if (generation !== poiLoadGeneration) return;
+
+      if (!poiMarkers.length) {
+        localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
+        if (generation !== poiLoadGeneration) return;
+        if (localAssetRows.length) {
+          appendPOIRows(localAssetRows, {
+            replaceExisting: true,
+            refresh: false,
+            keepRichData: true,
+            incremental: false
+          });
+        }
+      }
 
       poiCoordsReady = poiMarkers.length > 0;
       writeLocalPOIs(poiMarkers.map(function(entry) {
