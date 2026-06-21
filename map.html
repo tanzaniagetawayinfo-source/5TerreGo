@@ -63,8 +63,6 @@
       min-height: -webkit-fill-available;
       background: #071424;
       touch-action: none;
-      background: #071424;
-      touch-action: none;
     }
     
     
@@ -3568,140 +3566,106 @@
   }
   async function loadPOIs() {
     var generation = ++poiLoadGeneration;
-    var initialCoordsPageSize = 80;
-    var coordsPageSize = 220;
-    var lightPageSize = 180;
-    var fullPageSize = 80;
+    var remotePageSize = 250;
     var from = 0;
     var response;
     var rows;
     var localRows;
     var idbRows;
+    var mergedCacheRows = [];
+    var seenIds = Object.create(null);
+
+    function refreshPOIViews(renderRail) {
+      updateExclusiveDiscountFilterVisibility();
+      updatePOIVisibility();
+      if (renderRail) renderBottomRailCards();
+    }
+
+    function mergeCachedRows(list) {
+      (Array.isArray(list) ? list : []).forEach(function(row) {
+        var id = String(row && (row.id || row._id || '') || '').trim() || ('coords:' + String(row && row.coords || ''));
+        if (seenIds[id]) return;
+        seenIds[id] = true;
+        mergedCacheRows.push(row);
+      });
+    }
 
     poiDataLoaded = false;
     refreshMapLoadingState();
+
     poiMarkers.forEach(function(entry) {
       if (entry && entry.marker && map && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
     });
     poiMarkers = [];
-    
 
     try {
       localRows = readLocalPOIs();
-      if (Array.isArray(localRows) && localRows.length) {
-        appendPOIRows(localRows.slice(0, 220), { replaceExisting: true, refresh: true, keepRichData: true, incremental: true });
-        poiCoordsReady = true;
-        renderBottomRailCards();
-      }
+      mergeCachedRows(localRows);
 
       idbRows = await readFullPOICacheFromIDB();
       if (generation !== poiLoadGeneration) return;
-      if (Array.isArray(idbRows) && idbRows.length) {
-        appendPOIRows(idbRows.slice(0, 900), { replaceExisting: !poiMarkers.length, refresh: true, keepRichData: true, incremental: true });
+      mergeCachedRows(idbRows);
+
+      if (mergedCacheRows.length) {
+        appendPOIRows(sortCachedPOIRows(mergedCacheRows).slice(0, 900), {
+          replaceExisting: true,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
         poiCoordsReady = true;
-        renderBottomRailCards();
+        refreshPOIViews(true);
       }
 
       if (!SUPABASE_READY || !supabaseClient) {
-        poiCoordsReady = poiMarkers.length > 0 || 0 > 0;
+        poiCoordsReady = poiMarkers.length > 0;
         renderBottomRailCards();
         await loadFerryTimetable();
         await loadBlogPosts();
         return;
       }
 
-      response = await supabaseClient
-        .from('pois')
-        .select('id,coords,lat,lng,importance,relevance,score')
-        .order('id', { ascending: true })
-        .range(0, initialCoordsPageSize - 1);
-
-      if (response.error) {
-        console.warn('Supabase initial coord-only POI load failed:', response.error.message);
-      } else {
-        rows = Array.isArray(response.data) ? response.data : [];
-        if (rows.length) {
-          appendPOIRows(rows, { replaceExisting: false, refresh: true, keepRichData: false, incremental: true });
-          poiCoordsReady = true;
-          writeLocalPOIs(poiMarkers.map(function(entry) { return entry && entry.poi ? entry.poi : null; }).filter(Boolean));
-          renderBottomRailCards();
-        }
-      }
-
-      from = initialCoordsPageSize;
-      while (generation === poiLoadGeneration) {
-        response = await supabaseClient
-          .from('pois')
-          .select('id,coords,lat,lng,importance,relevance,score')
-          .order('id', { ascending: true })
-          .range(from, from + coordsPageSize - 1);
-
-        if (response.error) {
-          console.warn('Supabase coord-only POI load failed:', response.error.message);
-          break;
-        }
-
-        rows = Array.isArray(response.data) ? response.data : [];
-        if (!rows.length) break;
-
-        appendPOIRows(rows, { replaceExisting: false, refresh: true, keepRichData: false, incremental: true });
-        poiCoordsReady = true;
-        writeLocalPOIs(poiMarkers.map(function(entry) { return entry && entry.poi ? entry.poi : null; }).filter(Boolean));
-        from += rows.length;
-        if (rows.length < coordsPageSize) break;
-        await new Promise(function(resolve) { window.setTimeout(resolve, 0); });
-      }
-
-      from = 0;
-      while (generation === poiLoadGeneration) {
-        response = await supabaseClient
-          .from('pois')
-          .select('id,name,type,coords,lat,lng,importance,relevance,score,discount')
-          .order('id', { ascending: true })
-          .range(from, from + lightPageSize - 1);
-
-        if (response.error) {
-          console.warn('Supabase lightweight POI load failed:', response.error.message);
-          break;
-        }
-
-        rows = Array.isArray(response.data) ? response.data : [];
-        if (!rows.length) break;
-
-        appendPOIRows(rows, { replaceExisting: false, refresh: true, keepRichData: false, incremental: true });
-        from += rows.length;
-        if (rows.length < lightPageSize) break;
-        await new Promise(function(resolve) { window.setTimeout(resolve, 0); });
-      }
-
-      from = 0;
       while (generation === poiLoadGeneration) {
         response = await supabaseClient
           .from('pois')
           .select('*')
           .order('id', { ascending: true })
-          .range(from, from + fullPageSize - 1);
+          .range(from, from + remotePageSize - 1);
 
         if (response.error) {
-          console.warn('Supabase full POI load failed:', response.error.message);
+          console.warn('Supabase POI load failed:', response.error.message);
           break;
         }
 
         rows = Array.isArray(response.data) ? response.data : [];
         if (!rows.length) break;
 
-        appendPOIRows(rows, { replaceExisting: false, refresh: from === 0 || rows.length < fullPageSize, keepRichData: true, incremental: true });
+        appendPOIRows(rows, {
+          replaceExisting: false,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
+
         from += rows.length;
-        if (rows.length < fullPageSize) break;
-        await new Promise(function(resolve) { window.setTimeout(resolve, 0); });
+        poiCoordsReady = poiMarkers.length > 0;
+
+        if (rows.length < remotePageSize || from % (remotePageSize * 2) === 0) {
+          refreshPOIViews(rows.length < remotePageSize);
+        }
+
+        if (rows.length < remotePageSize) break;
+        await new Promise(function(resolve) { window.requestAnimationFrame(resolve); });
       }
 
       if (generation !== poiLoadGeneration) return;
-      poiCoordsReady = poiMarkers.length > 0 || 0 > 0;
-      writeLocalPOIs(poiMarkers.map(function(entry) { return entry && entry.poi ? entry.poi : null; }).filter(Boolean));
-      updateExclusiveDiscountFilterVisibility();
-      updatePOIVisibility();
-      renderBottomRailCards();
+
+      poiCoordsReady = poiMarkers.length > 0;
+      writeLocalPOIs(poiMarkers.map(function(entry) {
+        return entry && entry.poi ? entry.poi : null;
+      }).filter(Boolean));
+
+      refreshPOIViews(true);
       addFerryRoutes();
       await loadFerryTimetable();
       await loadBlogPosts();
@@ -3709,7 +3673,7 @@
     } finally {
       if (generation === poiLoadGeneration) {
         poiDataLoaded = true;
-        if (!poiCoordsReady) poiCoordsReady = poiMarkers.length > 0 || 0 > 0;
+        if (!poiCoordsReady) poiCoordsReady = poiMarkers.length > 0;
         refreshMapLoadingState();
       }
     }
@@ -4101,19 +4065,11 @@
           searchTypeButtons.forEach(function (item) { item.classList.toggle('is-active', item === button); });
           renderSearchSuggestions(searchInput.value);
           scheduleMapRefresh({ rail: true, auto: false });
-          if (searchFitTimer) window.clearTimeout(searchFitTimer);
-          searchFitTimer = window.setTimeout(function () {
-            fitMapToSearchResults(searchInput.value);
-          }, 120);
         });
       });
       searchInput.addEventListener('input', function () {
         renderSearchSuggestions(searchInput.value);
         scheduleMapRefresh({ rail: true, auto: false });
-        if (searchFitTimer) window.clearTimeout(searchFitTimer);
-        searchFitTimer = window.setTimeout(function () {
-          fitMapToSearchResults(searchInput.value);
-        }, 120);
       });
 
       searchInput.addEventListener('keydown', function (event) {
