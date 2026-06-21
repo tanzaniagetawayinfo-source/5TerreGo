@@ -35,9 +35,20 @@
       -webkit-text-size-adjust: 100%;
     }
     body.ftg-actionbar-enabled { padding-top: 0 !important; }
+    body:not(.ftg-global-actionbar-ready) .search-floating,
+    body:not(.ftg-global-actionbar-ready) #map-style-btn,
+    body:not(.ftg-global-actionbar-ready) #user-location-btn,
+    body:not(.ftg-global-actionbar-ready) #user-location-toast,
+    body:not(.ftg-global-actionbar-ready) #bottom-rail,
+    body:not(.ftg-global-actionbar-ready) #tour-nav,
+    body:not(.ftg-global-actionbar-ready) #poi-card,
+    body:not(.ftg-global-actionbar-ready) #trail-card,
+    body:not(.ftg-global-actionbar-ready) #discount-modal {
+      display: none !important;
+    }
     #ftg-global-actionbar-root {
       position: relative;
-      z-index: 80;
+      z-index: 100000;
     }
     #ftg-global-actionbar-root .ftg-topbar {
       position: relative !important;
@@ -1271,8 +1282,11 @@
 
     #boot-status {
       position: fixed;
-      inset: 0;
-      z-index: 99999;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      z-index: 9990;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1281,6 +1295,9 @@
       color: #111;
       text-align: center;
       transition: opacity .28s ease, visibility .28s ease;
+    }
+    body.ftg-global-actionbar-ready #boot-status {
+      top: var(--ftg-header-height, 98px);
     }
     #boot-status.hidden {
       opacity: 0;
@@ -1450,12 +1467,12 @@
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
 
   function notifyActionbarReady() {
+    if (document.body) document.body.classList.add('ftg-global-actionbar-ready');
     if (window.__ftgActionbarReadyDone) return;
     window.__ftgActionbarReadyDone = true;
     if (typeof window.__ftgBoot === 'function' && window.__ftgLibrariesReady) {
@@ -1507,7 +1524,6 @@
             var el;
             if (!href) return;
             if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
-
             el = document.createElement('link');
             el.rel = 'stylesheet';
             el.href = href;
@@ -1519,7 +1535,6 @@
             var key = 'ftg-actionbar-style-' + i + '-' + index;
             var el;
             if (document.getElementById(key)) return;
-
             el = document.createElement('style');
             el.id = key;
             el.textContent = style.textContent || '';
@@ -1564,6 +1579,9 @@
 
   function observeActionbarRoot() {
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
+    if (rootActionbar && rootActionbar.childElementCount > 0 && document.body) {
+      document.body.classList.add('ftg-global-actionbar-ready');
+    }
     if (actionbarObserver || !rootActionbar || typeof MutationObserver === 'undefined') return;
 
     actionbarObserver = new MutationObserver(function () {
@@ -1574,6 +1592,7 @@
       setTimeout(function () {
         actionbarMountScheduled = false;
         if (rootActionbar.childElementCount === 0) {
+          if (document.body) document.body.classList.remove('ftg-global-actionbar-ready');
           mountActionbar(true);
         }
       }, 120);
@@ -1585,14 +1604,12 @@
   async function mountActionbar(force) {
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
     var bootText = document.getElementById('boot-status-text');
-    var mounted = false;
-
     if (bootText) bootText.textContent = 'Loading navigation…';
     window.__ftgActionbarMountStarted = true;
-
+    var mounted = false;
     if (!rootActionbar) return;
 
-    window.FTG_ACTIONBAR_CONFIG = Object.assign({}, window.FTG_ACTIONBAR_CONFIG || {}, {
+    window.FTG_ACTIONBAR_CONFIG = {
       activePage: 'map',
       language: getInitialActionbarLanguage(),
       userName: 'Guest',
@@ -1610,12 +1627,10 @@
         { id: 'updates', labelKey: 'nav_updates', label: 'Official Updates', href: 'updates.html' }
       ],
       onLanguageChange: function (lang) {
-        try {
-          localStorage.setItem('ftg_language', String(lang || 'en').toLowerCase());
-        } catch (_error) {}
+        try { localStorage.setItem('ftg_language', String(lang || 'en').toLowerCase()); } catch (_error) {}
         mountActionbar(true);
       }
-    });
+    };
 
     observeActionbarRoot();
     await loadGlobalActionbarPartial();
@@ -1625,6 +1640,7 @@
         rootActionbar.innerHTML = '';
         window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
         rootActionbar.dataset.ftgMounted = 'true';
+        if (rootActionbar.childElementCount > 0 && document.body) document.body.classList.add('ftg-global-actionbar-ready');
         mounted = true;
       }
 
@@ -1642,25 +1658,20 @@
       rootActionbar.innerHTML = '';
       delete rootActionbar.dataset.ftgMounted;
       console.warn('FTG_MOUNT_GLOBAL_ACTIONBAR not available');
-      notifyActionbarReady();
     }
   }
 
   if (document.getElementById('ftg-global-actionbar-root')) {
     mountActionbar();
   } else if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      mountActionbar();
-    }, { once: true });
+    document.addEventListener('DOMContentLoaded', function () { mountActionbar(); }, { once: true });
   } else {
     mountActionbar();
   }
 
   window.addEventListener('pageshow', function () {
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
-    if (rootActionbar && rootActionbar.childElementCount === 0) {
-      mountActionbar(true);
-    }
+    if (rootActionbar && rootActionbar.childElementCount === 0) mountActionbar(true);
   });
 }());
 </script>
