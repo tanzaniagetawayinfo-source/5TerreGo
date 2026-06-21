@@ -35,16 +35,10 @@
     html {
       scroll-behavior: smooth;
       -webkit-text-size-adjust: 100%;
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
     }
 
     body {
       margin: 0;
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
         radial-gradient(circle at top right, rgba(255, 122, 24, 0.12), transparent 26%),
@@ -72,21 +66,11 @@
       color: inherit;
     }
 
-    img {
-      max-width: 100%;
-    }
-
-    #ftg-global-actionbar-root {
-      width: 100%;
-      max-width: 100%;
-    }
-
     .page-shell {
       width: 100%;
-      max-width: min(100%, var(--page-max));
+      max-width: var(--page-max);
       margin: 0 auto;
       padding: 18px 16px calc(var(--actionbar-safe-space) + env(safe-area-inset-bottom, 0px));
-      overflow-x: clip;
     }
 
     .top-glow {
@@ -127,7 +111,6 @@
 
     .section {
       margin-top: 22px;
-      min-width: 0;
     }
 
     .section-header {
@@ -140,7 +123,6 @@
 
     .section-title-wrap {
       min-width: 0;
-      max-width: 100%;
     }
 
     .section-eyebrow {
@@ -237,7 +219,6 @@
     .featured-scroll {
       display: flex;
       gap: 14px;
-      max-width: 100%;
       overflow-x: auto;
       scroll-snap-type: x proximity;
       padding: 4px 0 2px;
@@ -248,7 +229,6 @@
     .featured-card {
       position: relative;
       flex: 0 0 min(84vw, 320px);
-      min-width: 0;
       scroll-snap-align: start;
       overflow: hidden;
       background: rgba(255,255,255,0.94);
@@ -378,7 +358,6 @@
     .discount-card {
       display: grid;
       grid-template-columns: 96px minmax(0, 1fr);
-      max-width: 100%;
       gap: 12px;
       align-items: start;
       background: rgba(255,255,255,0.96);
@@ -947,84 +926,160 @@
   </script>
 
   <script>
-    async function loadAndMountGlobalActionbar() {
-      const root = document.getElementById("ftg-global-actionbar-root");
-      if (!root) return;
+    const ACTIONBAR_PARTIAL_CANDIDATES = [
+      'global-actionbar.html',
+      './global-actionbar.html',
+      '/global-actionbar.html'
+    ];
 
-      const mountIfReady = () => {
-        if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === "function") {
+    let actionbarLoadPromise = null;
+    let actionbarObserver = null;
+    let actionbarMountScheduled = false;
+
+    async function loadGlobalActionbarPartial() {
+      let response = null;
+      let html = '';
+      let parser = null;
+      let doc = null;
+      let scripts = [];
+      let links = [];
+      let styles = [];
+
+      if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+      if (actionbarLoadPromise) return actionbarLoadPromise;
+
+      actionbarLoadPromise = (async function () {
+        for (let i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
           try {
-            window.FTG_MOUNT_GLOBAL_ACTIONBAR(root, window.FTG_ACTIONBAR_CONFIG || {});
-            return true;
-          } catch (error) {
-            console.error("FTG actionbar mount error:", error);
-          }
-        }
-        return false;
-      };
+            response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
+            if (!response.ok) continue;
 
-      if (mountIfReady()) return;
+            html = await response.text();
+            if (!html) continue;
 
-      const fallbackPaths = [
-        "global-actionbar-two-rows.html",
-        "./global-actionbar-two-rows.html",
-        "/global-actionbar-two-rows.html",
-        "../global-actionbar-two-rows.html",
-        "global-actionbar.html",
-        "./global-actionbar.html",
-        "/global-actionbar.html",
-        "../global-actionbar.html"
-      ];
+            parser = new DOMParser();
+            doc = parser.parseFromString(html, 'text/html');
+            links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+            styles = Array.from(doc.querySelectorAll('style'));
+            scripts = Array.from(doc.querySelectorAll('script'));
 
-      for (const path of fallbackPaths) {
-        try {
-          const response = await fetch(path, { cache: "no-store" });
-          if (!response.ok) continue;
+            links.forEach(function (link) {
+              const href = link.getAttribute('href') || '';
+              if (!href) return;
+              if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+              const el = document.createElement('link');
+              el.rel = 'stylesheet';
+              el.href = href;
+              el.setAttribute('data-ftg-actionbar-link', href);
+              document.head.appendChild(el);
+            });
 
-          const html = await response.text();
-          if (!html || !html.trim()) continue;
+            styles.forEach(function (style, index) {
+              const key = 'ftg-actionbar-style-' + i + '-' + index;
+              if (document.getElementById(key)) return;
+              const el = document.createElement('style');
+              el.id = key;
+              el.textContent = style.textContent || '';
+              document.head.appendChild(el);
+            });
 
-          const temp = document.createElement("div");
-          temp.innerHTML = html;
+            for (let s = 0; s < scripts.length; s += 1) {
+              const original = scripts[s];
+              const src = original.getAttribute('src');
+              await new Promise(function (resolve) {
+                const scriptEl = document.createElement('script');
+                let done = false;
 
-          const scripts = Array.from(temp.querySelectorAll("script"));
-          scripts.forEach(script => script.remove());
+                function finish() {
+                  if (done) return;
+                  done = true;
+                  resolve();
+                }
 
-          const nestedRoot = temp.querySelector("#ftg-global-actionbar-root");
-          root.innerHTML = nestedRoot ? nestedRoot.innerHTML : temp.innerHTML;
+                if (src) {
+                  scriptEl.src = src;
+                  scriptEl.onload = finish;
+                  scriptEl.onerror = finish;
+                } else {
+                  scriptEl.textContent = original.textContent || '';
+                }
 
-          for (const oldScript of scripts) {
-            const newScript = document.createElement("script");
-            for (const attr of oldScript.attributes) {
-              newScript.setAttribute(attr.name, attr.value);
-            }
-
-            if (oldScript.src) {
-              await new Promise((resolve, reject) => {
-                newScript.onload = resolve;
-                newScript.onerror = reject;
-                document.body.appendChild(newScript);
+                document.head.appendChild(scriptEl);
+                if (!src) finish();
               });
-            } else {
-              newScript.textContent = oldScript.textContent;
-              document.body.appendChild(newScript);
             }
+
+            if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+          } catch (_error) {
           }
-
-          await new Promise(resolve => requestAnimationFrame(resolve));
-          if (mountIfReady()) return;
-        } catch (error) {
-          console.warn("Actionbar fallback failed for", path, error);
         }
-      }
 
-      console.warn("Global actionbar could not be mounted.");
+        return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+      }());
+
+      return actionbarLoadPromise;
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", loadAndMountGlobalActionbar, { once: true });
+    function observeActionbarRoot() {
+      const rootActionbar = document.getElementById('ftg-global-actionbar-root');
+      if (actionbarObserver || !rootActionbar || typeof MutationObserver === 'undefined') return;
+
+      actionbarObserver = new MutationObserver(function () {
+        if (actionbarMountScheduled) return;
+        if (rootActionbar.childElementCount > 0) return;
+
+        actionbarMountScheduled = true;
+        setTimeout(function () {
+          actionbarMountScheduled = false;
+          if (rootActionbar.childElementCount === 0) {
+            mountActionbar(true);
+          }
+        }, 120);
+      });
+
+      actionbarObserver.observe(rootActionbar, { childList: true });
+    }
+
+    async function mountActionbar(force) {
+      const rootActionbar = document.getElementById('ftg-global-actionbar-root');
+      let mounted = false;
+      if (!rootActionbar) return;
+
+      window.FTG_ACTIONBAR_CONFIG = Object.assign({}, window.FTG_ACTIONBAR_CONFIG || {}, {
+        activePage: 'discounts'
+      });
+
+      observeActionbarRoot();
+      await loadGlobalActionbarPartial();
+
+      if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
+        if (force || rootActionbar.childElementCount === 0 || !rootActionbar.dataset.ftgMounted) {
+          rootActionbar.innerHTML = '';
+          window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
+          rootActionbar.dataset.ftgMounted = 'true';
+          mounted = true;
+        }
+
+        if (mounted) {
+          requestAnimationFrame(function () {
+            if (rootActionbar.childElementCount === 0) {
+              setTimeout(function () { mountActionbar(true); }, 180);
+            }
+          });
+        }
+      } else {
+        rootActionbar.innerHTML = '';
+        delete rootActionbar.dataset.ftgMounted;
+        console.warn('FTG_MOUNT_GLOBAL_ACTIONBAR not available');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        mountActionbar();
+      }, { once: true });
     } else {
-      loadAndMountGlobalActionbar();
+      mountActionbar();
     }
   </script>
 </body>
