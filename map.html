@@ -683,12 +683,196 @@
     }
     #bottom-rail.sheet-title-only .bottom-rail-track,
     #bottom-rail.sheet-title-only .bottom-rail-calendar {
+      pointer-events: none;
+    }
+    #bottom-rail.sheet-disabled {
+      transition: opacity .22s ease, box-shadow .22s ease;
+      transform: translateY(0) !important;
+      height: auto;
+      max-height: none;
+    }
+    #bottom-rail.sheet-disabled .bottom-rail-sheet-content {
+      height: auto;
+      overflow: visible;
+      padding-top: 12px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    #bottom-rail.sheet-disabled .bottom-rail-sheet-handle,
+    #bottom-rail.sheet-disabled .bottom-rail-calendar {
+      display: none !important;
+    }
+    .bottom-rail-sheet-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      touch-action: none;
+      cursor: grab;
+    }
+    .bottom-rail-sheet-handle::before {
+      content: '';
+      width: 44px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(17,17,17,.18);
+      box-shadow: none;
+    }
+    .bottom-rail-sheet-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 30px 10px calc(18px + env(safe-area-inset-bottom));
+      touch-action: pan-y;
+    }
+    .bottom-rail-sheet-content::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .bottom-rail-village-title {
+      width: 100%;
+      text-align: center;
+      margin: 0 0 12px;
+      color: rgba(17,17,17,.96);
+      font-size: 14px;
+      font-weight: 980;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      text-shadow: none;
+      user-select: none;
+      touch-action: none;
+    }
+    .bottom-rail-village-title.is-visible {
+      display: block;
+    }
+    .bottom-rail-track {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 4px 2px 4px;
+      pointer-events: auto;
+      touch-action: pan-x;
+    }
+    .bottom-rail-track::-webkit-scrollbar { display: none; }
+    .bottom-rail-card {
+      position: relative;
+      flex: 0 0 auto;
+      width: min(34vw, 148px);
+      aspect-ratio: 1 / 1;
+      min-height: 0;
+      border: 1px solid rgba(17,17,17,.08);
+      border-radius: 24px;
+      overflow: hidden;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 18px 42px rgba(0,0,0,.10);
+      backdrop-filter: blur(18px) saturate(1.04);
+      -webkit-backdrop-filter: blur(18px) saturate(1.04);
+      scroll-snap-align: start;
+      cursor: pointer;
+      text-align: left;
+    }
+    .bottom-rail-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(17,17,17,.10));
+      pointer-events: none;
+      z-index: 1;
+    }
+    .bottom-rail-card.is-empty {
+      width: min(34vw, 148px);
+      aspect-ratio: 1 / 1;
+      min-width: 120px;
+      min-height: 0;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(17,17,17,.62);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .bottom-rail-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      z-index: 0;
+      transform: scale(1.01);
+    }
+    .bottom-rail-body {
+      position: relative;
+      z-index: 2;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px;
+      gap: 4px;
+      color: #111;
+    }
+    .bottom-rail-kicker {
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(17,17,17,.56);
+    }
+    .bottom-rail-discover {
+      margin-top: 6px;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(17,17,17,.88);
+    }
+    .bottom-rail-title {
+      font-size: 16px;
+      line-height: 1.05;
+      letter-spacing: -.04em;
+      font-weight: 950;
+      text-shadow: none;
+      text-wrap: balance;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .bottom-rail-meta,
+    .bottom-rail-badge,
+    .bottom-rail-shadow-edge {
+      display: none !important;
+    }
+    .bottom-rail-calendar {
       margin-top: 16px;
       padding: 16px;
       border-radius: 26px;
       background: rgba(17,17,17,.03);
       border: 1px solid rgba(17,17,17,.06);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 16px 40px rgba(0,0,0,.06);direction: column;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 16px 40px rgba(0,0,0,.06);
+    }
+    .bottom-rail-calendar-head {
+      display: flex;
+      flex-direction: column;
       gap: 4px;
       margin-bottom: 14px;
     }
@@ -726,14 +910,14 @@
       font-weight: 900;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: rgba(17,17,17,.38);
+      color: rgba(17,17,17,.40);
     }
     .bottom-rail-calendar-day {
       position: relative;
       min-height: 42px;
       border-radius: 14px;
       border: 1px solid rgba(17,17,17,.07);
-      background: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.94);
       display: flex;
       align-items: flex-start;
       justify-content: flex-start;
@@ -764,7 +948,7 @@
     .bottom-rail-calendar-events-wrap {
       margin-top: 16px;
       padding-top: 14px;
-      border-top: 1px solid rgba(255,255,255,.08);
+      border-top: 1px solid rgba(17,17,17,.08);
     }
     .bottom-rail-calendar-events-title {
       font-size: 11px;
@@ -812,7 +996,7 @@
     .bottom-rail-calendar-event-meta {
       font-size: 12px;
       font-weight: 750;
-      color: rgba(17,17,17,.54);
+      color: rgba(17,17,17,.56);
     }
     .bottom-rail-calendar-empty {
       padding: 16px;
@@ -2920,7 +3104,7 @@
   }
   function setBottomRailSheetExpanded(expanded, animated) {
     if (!isBottomRailVillageSheetEnabled()) {
-      bottomRailSheetMode = 'title';
+      bottomRailSheetMode = 'peek';
       bottomRailSheetExpanded = false;
       bottomRailSheetCollapsedY = 0;
       applyBottomRailTranslate(0, false);
@@ -3125,7 +3309,7 @@
       bottomRailSheetCollapsedY = 0;
       applyBottomRailTranslate(0, false);
     } else {
-      syncBottomRailSheetLayout(bottomRailSheetMode === 'expanded' ? 'expanded' : 'title');
+      syncBottomRailSheetLayout(bottomRailSheetMode === 'expanded' ? 'expanded' : (bottomRailSheetMode === 'title' ? 'title' : 'peek'));
     }
     if (bottomRailVillageTitle) {
       if (villageLabel) {
