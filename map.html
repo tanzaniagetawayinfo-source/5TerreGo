@@ -662,7 +662,7 @@
       left: 8px;
       right: 8px;
       bottom: 0;
-      z-index: 1105;
+      z-index: 1650;
       height: min(82dvh, 640px);
       border-radius: 28px 28px 0 0;
       background: rgba(255,255,255,.98);
@@ -679,7 +679,7 @@
       touch-action: pan-y;
     }
     #bottom-rail.sheet-expanded {
-      box-shadow: 0 -28px 78px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.94);
+      box-shadow: 0 -32px 92px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.94);
     }
     #bottom-rail.sheet-title-only .bottom-rail-track,
     #bottom-rail.sheet-title-only .bottom-rail-calendar {
@@ -3064,10 +3064,10 @@
   }
   function getBottomRailPeekHeight() {
     var viewportHeight = Math.max(window.innerHeight || 0, document.documentElement ? document.documentElement.clientHeight : 0, 1);
-    return Math.min(Math.max(viewportHeight * 0.25, 230), 300);
+    return Math.min(Math.max(viewportHeight * 0.07, 58), 74);
   }
   function getBottomRailTitleOnlyHeight() {
-    return 78;
+    return 92;
   }
   function measureBottomRailCollapsedY() {
     var totalHeight = bottomRail ? bottomRail.getBoundingClientRect().height : 0;
@@ -3180,8 +3180,8 @@
       bottomRailSheetDragging = false;
       if (bottomRail) bottomRail.style.transition = '';
       measureBottomRailCollapsedY();
-      expandedThreshold = bottomRailSheetPeekY * 0.52;
-      titleThreshold = bottomRailSheetPeekY + ((bottomRailSheetTitleOnlyY - bottomRailSheetPeekY) * 0.54);
+      expandedThreshold = bottomRailSheetPeekY * 0.48;
+      titleThreshold = bottomRailSheetPeekY + ((bottomRailSheetTitleOnlyY - bottomRailSheetPeekY) * 0.58);
       if (bottomRailSheetTranslateY <= expandedThreshold) {
         bottomRailSheetMode = 'expanded';
       } else if (bottomRailSheetTranslateY >= titleThreshold) {
