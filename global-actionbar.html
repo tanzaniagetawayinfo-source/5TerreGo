@@ -1,841 +1,1134 @@
-<!-- global-actionbar.html -->
+<!-- global-actionbar-two-rows.html -->
 <div id="ftg-global-actionbar-root"></div>
 
 <style>
   :root {
-    --ftg-fab-right: max(12px, env(safe-area-inset-right));
-    --ftg-fab-top: calc(12px + env(safe-area-inset-top));
-    --ftg-fab-bottom: calc(12px + env(safe-area-inset-bottom));
-    --ftg-surface: rgba(8,12,16,.76);
-    --ftg-surface-strong: rgba(8,12,16,.9);
-    --ftg-border: rgba(255,255,255,.12);
-    --ftg-text: #fff;
-    --ftg-text-soft: rgba(255,255,255,.68);
-    --ftg-shadow: 0 20px 54px rgba(0,0,0,.28);
+    --ftg-header-height: calc(104px + env(safe-area-inset-top));
+    --ftg-safe-top: env(safe-area-inset-top);
+    --ftg-text: #111827;
+    --ftg-text-soft: #111827;
+    --ftg-line: rgba(15, 23, 42, .08);
+    --ftg-line-strong: rgba(15, 23, 42, .12);
+    --ftg-pill: #f5f7fb;
+    --ftg-pill-active: #fff3e8;
+    --ftg-primary: #003b95;
+    --ftg-orange: #ff7a00;
+    --ftg-shadow: 0 14px 34px rgba(15, 23, 42, .08);
+    --ftg-shadow-strong: 0 22px 44px rgba(15, 23, 42, .14);
   }
 
   body.ftg-actionbar-enabled {
-    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    padding-top: var(--ftg-header-height);
+    background: #fff;
   }
 
-  .ftg-fab {
+  body.ftg-menu-open {
+    overflow: hidden;
+  }
+
+  .ftg-topbar {
     position: fixed;
-    width: 56px;
-    height: 56px;
-    border: 1px solid rgba(255,255,255,.16);
-    border-radius: 50%;
-    background: var(--ftg-surface);
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10080;
+    padding-top: var(--ftg-safe-top);
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+    border-bottom: 1px solid var(--ftg-line);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+    transition: box-shadow .22s ease, background .22s ease, border-color .22s ease;
+  }
+
+  .ftg-topbar.is-scrolled {
+    background: rgba(255,255,255,.98);
+    border-bottom-color: var(--ftg-line-strong);
     box-shadow: var(--ftg-shadow);
-    backdrop-filter: blur(18px) saturate(1.12);
-    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  }
+
+  .ftg-topbar-shell {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 10px 14px 10px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .ftg-topbar-row-1 {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .ftg-brand {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .ftg-brand-title {
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -.055em;
+    font-weight: 950;
+    color: var(--ftg-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ftg-brand-title .go {
+    color: var(--ftg-orange);
+  }
+
+  .ftg-brand-title .dotcom {
+    color: var(--ftg-text);
+  }
+
+  .ftg-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 10140;
+  }
+
+  .ftg-account-btn,
+  .ftg-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
     color: var(--ftg-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
     cursor: pointer;
-    z-index: 10080;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .22s ease, background .22s ease, border-color .22s ease;
-  }
-  .ftg-fab:active {
-    transform: scale(.96);
-  }
-  .ftg-fab.open {
-    background: rgba(8,12,16,.88);
-    color: #fff;
-    border-color: rgba(255,255,255,.18);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, .04);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
   }
 
-  .ftg-more-fab {
-    width: 52px;
-    height: 52px;
-    top: var(--ftg-fab-top);
-    right: var(--ftg-fab-right);
-    z-index: 10082;
-    isolation: isolate;
-    background: rgba(8,12,16,.76);
-    color: #fff;
-    border-color: rgba(255,255,255,.16);
-    box-shadow: 0 20px 54px rgba(0,0,0,.28);
-    backdrop-filter: blur(18px) saturate(1.12);
-    -webkit-backdrop-filter: blur(18px) saturate(1.12);
-  }
-
-  .ftg-more-icon {
+  .ftg-icon-btn {
     position: relative;
-    width: 20px;
-    height: 20px;
-  }
-  .ftg-more-icon span {
-    position: absolute;
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: currentColor;
-    transition:
-      transform .28s cubic-bezier(.2,.9,.2,1),
-      width .24s ease,
-      height .24s ease,
-      opacity .18s ease,
-      top .28s cubic-bezier(.2,.9,.2,1),
-      left .28s cubic-bezier(.2,.9,.2,1);
-  }
-  .ftg-more-icon span:nth-child(1) {
-    top: 1px;
-    left: 1px;
-  }
-  .ftg-more-icon span:nth-child(2) {
-    top: 1px;
-    right: 1px;
-  }
-  .ftg-more-icon span:nth-child(3) {
-    bottom: 1px;
-    left: 1px;
-  }
-  .ftg-more-icon span:nth-child(4) {
-    bottom: 1px;
-    right: 1px;
-  }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(1),
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(4) {
-    width: 14px;
-    height: 3px;
-    top: 8px;
-    left: 3px;
-    border-radius: 999px;
-  }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(1) {
-    transform: rotate(45deg);
-  }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(4) {
-    transform: rotate(-45deg);
-  }
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(2),
-  .ftg-more-fab.open .ftg-more-icon span:nth-child(3) {
-    opacity: 0;
-    transform: scale(.2);
-    top: 8px;
-    left: 8px;
+    z-index: 10150;
   }
 
-  .ftg-ai-fab {
-    right: var(--ftg-fab-right);
-    bottom: var(--ftg-fab-bottom);
-    overflow: hidden;
+  .ftg-account-btn:active,
+  .ftg-icon-btn:active {
+    transform: scale(.98);
   }
-  .ftg-ai-fab video {
+
+  .ftg-profile-avatar {
     width: 100%;
     height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center 0%;
-    transform: scale(1.22);
-    pointer-events: none;
-  }
-
-  .ftg-more-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10074;
-    display: none;
-    background: transparent;
-  }
-  .ftg-more-overlay.open {
-    display: block;
-  }
-
-  .ftg-more-panel {
-    position: fixed;
-    top: calc(var(--ftg-fab-top) - 14px);
-    left: 6px;
-    right: calc(var(--ftg-fab-right) - 14px);
-    z-index: 10079;
-    width: auto;
-    max-width: none;
-    padding: 16px 10px 12px 10px;
-    border-radius: 0 0 0 30px;
-    background: var(--ftg-surface-strong);
-    border: 1px solid var(--ftg-border);
-    box-shadow: 0 28px 80px rgba(0,0,0,.34);
-    backdrop-filter: blur(22px) saturate(1.14);
-    -webkit-backdrop-filter: blur(22px) saturate(1.14);
-    opacity: 0;
-    transform-origin: top right;
-    transform: translate(10px, -10px) scale(.84);
-    pointer-events: none;
-    transition: transform .34s cubic-bezier(.2,.9,.2,1), opacity .24s ease;
-    overflow: hidden;
-  }
-  .ftg-more-panel.open {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-    pointer-events: auto;
-    overflow: visible;
-  }
-  .ftg-more-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,0) 38%);
-    pointer-events: none;
-  }
-  .ftg-more-panel::after {
-    content: none;
-    display: none;
-  }
-
-  .ftg-more-head {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 12px;
-    margin-bottom: 14px;
-    padding-right: 70px;
-    min-height: 44px;
-  }
-  .ftg-more-primary {
-    min-height: 38px;
-    padding: 0 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.94);
-    color: #111;
-    font-size: 14px;
-    font-weight: 950;
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
-    text-decoration: none;
-    box-shadow: 0 10px 26px rgba(0,0,0,.16);
+    color: #94a3b8;
+    background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+    border-radius: 999px;
   }
 
-  .ftg-more-language-row {
+  .ftg-profile-avatar svg {
+    width: 19px;
+    height: 19px;
+    display: block;
+  }
+
+  .ftg-hamburger {
+    width: 18px;
+    height: 14px;
     position: relative;
-    z-index: 1;
+    display: inline-block;
+  }
+
+  .ftg-hamburger span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--ftg-text);
+    transition: transform .22s ease, opacity .18s ease, top .22s ease, bottom .22s ease;
+    transform-origin: center;
+  }
+
+  .ftg-hamburger span:nth-child(1) { top: 0; }
+  .ftg-hamburger span:nth-child(2) { top: 6px; }
+  .ftg-hamburger span:nth-child(3) { bottom: 0; }
+
+  .ftg-icon-btn.is-open .ftg-hamburger span:nth-child(1) {
+    top: 6px;
+    transform: rotate(45deg);
+  }
+
+  .ftg-icon-btn.is-open .ftg-hamburger span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .ftg-icon-btn.is-open .ftg-hamburger span:nth-child(3) {
+    bottom: 6px;
+    transform: rotate(-45deg);
+  }
+
+  .ftg-topbar-row-2 {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .ftg-topbar.menu-open {
+    z-index: 10130;
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
+  }
+
+  .ftg-topbar.menu-open .ftg-brand,
+  .ftg-topbar.menu-open .ftg-topbar-row-2,
+  .ftg-topbar.menu-open .ftg-account-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ftg-topbar.menu-open .ftg-icon-btn,
+  .ftg-topbar.menu-open .ftg-topbar-actions {
+    pointer-events: auto;
+  }
+
+  .ftg-pill-scroller {
     display: flex;
     gap: 8px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    scroll-snap-type: x proximity;
     padding-bottom: 2px;
-    margin-bottom: 12px;
   }
-  .ftg-more-language-row::-webkit-scrollbar {
+
+  .ftg-pill-scroller::-webkit-scrollbar {
     display: none;
   }
-  .ftg-more-language-btn {
+
+  .ftg-nav-pill {
     flex: 0 0 auto;
-    min-height: 34px;
-    padding: 7px 11px;
+    min-height: 38px;
+    padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.08);
-    color: rgba(255,255,255,.84);
-    font-size: 11px;
-    font-weight: 900;
-    cursor: pointer;
+    border: 0;
+    background: transparent;
+    color: #111827;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-  }
-  .ftg-more-language-btn.active {
-    background: rgba(255,255,255,.94);
-    color: #111;
-  }
-
-  .ftg-more-featured {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-  .ftg-more-featured .ftg-more-item {
-    width: min(100%, 280px);
-    min-height: 96px;
-    padding: 12px 14px;
-    border-radius: 24px;
-  }
-  .ftg-more-featured .ftg-more-item-label {
-    font-size: 15px;
-  }
-
-  .ftg-more-grid {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-bottom: 10px;
-  }
-  .ftg-more-item {
-    position: relative;
-    min-height: 84px;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 22px;
-    background: rgba(255,255,255,.08);
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    color: var(--ftg-text);
-    text-decoration: none;
-    padding: 10px 11px;
-    display: grid;
-    align-content: space-between;
-    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.02em;
     cursor: pointer;
-    overflow: hidden;
-    transition: transform .22s ease, background .22s ease, border-color .22s ease;
+    scroll-snap-align: start;
+    white-space: nowrap;
+    box-shadow: none;
+    transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    opacity: .72;
   }
-  .ftg-more-item::before {
-    content: '';
-    position: absolute;
+
+  .ftg-nav-pill:hover {
+    color: var(--ftg-text);
+    opacity: 1;
+  }
+
+  .ftg-nav-pill:active {
+    transform: scale(.985);
+  }
+
+  .ftg-nav-pill.active {
+    min-height: 42px;
+    padding: 0 16px;
+    background: var(--ftg-pill-active);
+    color: #111827;
+    opacity: 1;
+    box-shadow: 0 10px 22px rgba(255,122,0,.10);
+  }
+
+  .ftg-nav-pill-emoji {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    background: transparent;
+    box-shadow: none;
+    flex: 0 0 18px;
+  }
+
+  .ftg-nav-pill-emoji svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
+  }
+
+  .ftg-nav-pill-emoji img {
+    width: 18px;
+    height: 18px;
+    display: block;
+    object-fit: contain;
+  }
+
+  .ftg-nav-pill.active .ftg-nav-pill-emoji {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    background: rgba(255,255,255,.88);
+    box-shadow: inset 0 0 0 1px rgba(255,122,0,.10);
+  }
+
+  .ftg-nav-pill.active .ftg-nav-pill-emoji svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ftg-nav-pill.active .ftg-nav-pill-emoji img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ftg-menu-panel {
+    position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, rgba(8,12,16,.16), rgba(8,12,16,.72));
-    pointer-events: none;
+    z-index: 10120;
+    display: none;
+    flex-direction: column;
+    background: rgba(255,255,255,.985);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
   }
-  .ftg-more-item:active {
-    transform: scale(.98);
+
+  .ftg-menu-panel.open {
+    display: flex;
   }
-  .ftg-more-item.active {
-    background-color: rgba(255,255,255,.14);
-    border-color: rgba(255,255,255,.18);
+
+  .ftg-menu-panel-shell {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: calc(18px + var(--ftg-safe-top)) 16px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
-  .ftg-more-item-top {
-    position: relative;
-    z-index: 1;
+
+  .ftg-menu-panel-head {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 16px;
   }
-  .ftg-more-item-icon {
+
+  .ftg-menu-panel-title {
+    min-width: 0;
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: -.05em;
+    font-weight: 950;
+    color: var(--ftg-text);
+  }
+
+  .ftg-menu-panel-title .go {
+    color: var(--ftg-orange);
+  }
+
+  
+
+  .ftg-menu-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .ftg-menu-item {
+    min-height: 44px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--ftg-text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ftg-menu-item:hover {
+    color: var(--ftg-orange);
+  }
+
+  .ftg-menu-item-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ftg-menu-flag {
+    font-size: 18px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    flex: 0 0 20px;
+  }
+
+  .ftg-menu-section-title {
+    margin: 18px 0 6px;
+    font-size: 13px;
+    line-height: 1.2;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--ftg-text-soft);
+  }
+
+  .ftg-menu-main,
+  .ftg-language-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .ftg-language-panel {
+    display: none;
+    gap: 4px;
+  }
+
+  .ftg-menu-panel.is-language-mode .ftg-menu-main {
     display: none;
   }
-  .ftg-more-item-arrow {
-    color: rgba(255,255,255,.48);
-    font-size: 16px;
-    line-height: 1;
-  }
-  .ftg-more-item-label {
-    position: relative;
-    z-index: 1;
-    font-size: 13px;
-    line-height: 1.05;
-    letter-spacing: -.02em;
-    font-weight: 900;
-    text-align: left;
-    text-wrap: balance;
-  }
 
-  .ftg-more-footer {
-    position: relative;
-    z-index: 1;
+  .ftg-menu-panel.is-language-mode .ftg-language-panel {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    padding-top: 2px;
-  }
-  .ftg-more-footer a {
-    color: rgba(255,255,255,.62);
-    font-size: 12px;
-    font-weight: 800;
-    text-decoration: underline;
-    text-underline-offset: 3px;
   }
 
-  .ftg-ai-chat {
+  
+
+  .ftg-language-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .ftg-language-option {
+    min-height: 46px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--ftg-text);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1.1;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ftg-language-option.active {
+    color: var(--ftg-orange);
+  }
+
+  .ftg-language-option .ftg-menu-flag {
+    font-size: 22px;
+  }
+
+  .ftg-ai-panel {
     position: fixed;
-    left: 10px;
-    right: 10px;
-    top: calc(72px + env(safe-area-inset-top));
-    bottom: calc(74px + env(safe-area-inset-bottom));
-    z-index: 10100;
+    top: calc(var(--ftg-header-height) + 8px);
+    right: 14px;
+    width: min(380px, calc(100vw - 28px));
+    max-height: min(70vh, 620px);
+    z-index: 10090;
     display: none;
     flex-direction: column;
     overflow: hidden;
     border-radius: 26px;
-    border: 1px solid rgba(255,255,255,.34);
-    background: rgba(255,255,255,.78);
-    box-shadow: 0 24px 70px rgba(0,0,0,.28);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    color: #111;
+    border: 1px solid rgba(12,24,44,.08);
+    background: rgba(255,255,255,.96);
+    box-shadow: var(--ftg-shadow-strong);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
   }
-  .ftg-ai-chat.ai-open {
+
+  .ftg-ai-panel.open {
     display: flex;
   }
+
   .ftg-ai-head {
-    padding: 14px 14px 12px;
-    border-bottom: 1px solid rgba(0,0,0,.07);
+    padding: 14px;
+    border-bottom: 1px solid var(--ftg-line);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
-  .ftg-ai-head-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
-  }
-  .ftg-ai-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex: 0 0 42px;
-    background: rgba(255,255,255,.85);
-    border: 1px solid rgba(0,0,0,.08);
-    box-shadow: 0 4px 14px rgba(0,0,0,.12);
-  }
-  .ftg-ai-avatar video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center 0%;
-    transform: scale(1.22);
-  }
-  .ftg-ai-title {
-    font-size: 15px;
-    font-weight: 900;
-    letter-spacing: -.03em;
-    line-height: 1.1;
-    color: #111;
-  }
-  .ftg-ai-subtitle {
-    margin-top: 3px;
-    font-size: 12px;
-    color: rgba(0,0,0,.52);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.15;
-  }
+
+  .ftg-ai-head-copy { min-width: 0; }
+  .ftg-ai-title { font-size: 15px; font-weight: 900; letter-spacing: -.03em; color: var(--ftg-text); }
+  .ftg-ai-subtitle { margin-top: 3px; font-size: 12px; color: var(--ftg-text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   .ftg-ai-close {
-    width: 32px;
-    height: 32px;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(0,0,0,.07);
-    color: #111;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
     font-size: 18px;
-    font-weight: 800;
+    font-weight: 900;
     cursor: pointer;
   }
+
   .ftg-ai-messages {
     flex: 1;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
     overflow-y: auto;
     padding: 12px;
-    font-size: 14px;
-    line-height: 1.35;
-    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
+
   .ftg-ai-msg {
-    max-width: 84%;
-    word-break: break-word;
-    margin-bottom: 8px;
+    max-width: 88%;
     padding: 10px 12px;
     border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.35;
     white-space: pre-line;
+    word-break: break-word;
   }
+
   .ftg-ai-msg.user {
     margin-left: auto;
-    background: #111;
+    background: var(--ftg-primary);
     color: #fff;
-    border-bottom-right-radius: 6px;
+    border-bottom-right-radius: 8px;
   }
+
   .ftg-ai-msg.bot {
     margin-right: auto;
-    background: rgba(0,0,0,.07);
-    color: #111;
-    border-bottom-left-radius: 6px;
+    background: #f4f7fb;
+    color: var(--ftg-text);
+    border-bottom-left-radius: 8px;
   }
+
   .ftg-ai-suggestions {
     display: flex;
     gap: 7px;
-    padding: 0 12px 10px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    padding: 0 12px 10px;
   }
-  .ftg-ai-suggestions::-webkit-scrollbar {
-    display: none;
-  }
+
+  .ftg-ai-suggestions::-webkit-scrollbar { display: none; }
+
   .ftg-ai-suggestion {
     flex: 0 0 auto;
-    border: 0;
+    min-height: 34px;
+    padding: 0 12px;
     border-radius: 999px;
-    padding: 8px 10px;
-    background: rgba(0,0,0,.07);
-    color: #111;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
+    white-space: nowrap;
   }
+
   .ftg-ai-input-row {
-    padding: 10px;
     display: flex;
     gap: 8px;
-    border-top: 1px solid rgba(0,0,0,.07);
-    background: rgba(255,255,255,.36);
+    padding: 10px;
+    border-top: 1px solid var(--ftg-line);
+    background: rgba(255,255,255,.88);
   }
+
   .ftg-ai-input {
     flex: 1;
     min-width: 0;
-    border: 0;
-    outline: 0;
+    min-height: 42px;
     border-radius: 999px;
-    background: rgba(0,0,0,.07);
-    color: #111;
-    padding: 11px 13px;
-    font-size: 15px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    padding: 0 14px;
+    color: var(--ftg-text);
+    font-size: 14px;
+    outline: none;
   }
+
   .ftg-ai-send {
     width: 42px;
     height: 42px;
+    border-radius: 999px;
     border: 0;
-    border-radius: 50%;
-    background: #111;
+    background: var(--ftg-primary);
     color: #fff;
     font-weight: 900;
     cursor: pointer;
   }
 
-  body.ftg-ai-chat-active .ftg-more-fab,
-  body.ftg-ai-chat-active .ftg-more-panel,
-  body.ftg-ai-chat-active .ftg-more-overlay,
-  body.ftg-ai-chat-active .ftg-ai-fab {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-  }
-
-  @media (min-width: 700px) {
-    .ftg-ai-chat {
-      max-width: 380px;
+  @media (max-width: 760px) {
+    :root {
+      --ftg-header-height: calc(98px + env(safe-area-inset-top));
     }
-    .ftg-ai-chat {
-      left: max(10px, calc(50% - 190px));
-      right: max(10px, calc(50% - 190px));
+
+    .ftg-topbar-shell {
+      padding: 9px 12px 9px;
+      gap: 8px;
+    }
+
+    .ftg-topbar-row-1 {
+      grid-template-columns: minmax(0,1fr) auto;
+      gap: 10px;
+    }
+
+    .ftg-brand-title {
+      font-size: 24px;
+    }
+
+    .ftg-account-btn,
+    .ftg-icon-btn {
+      width: 40px;
+      height: 40px;
+    }
+
+    .ftg-nav-pill {
+      min-height: 36px;
+      padding: 0 8px;
+      font-size: 13px;
+      color: #111827;
+    }
+
+    .ftg-nav-pill.active {
+      min-height: 40px;
+      padding: 0 14px;
+    }
+
+    .ftg-menu-panel-shell {
+      padding: calc(16px + var(--ftg-safe-top)) 12px 22px;
+      gap: 16px;
+    }
+
+    .ftg-menu-panel-title {
+      font-size: 26px;
+    }
+
+    .ftg-menu-list {
+      max-width: 100%;
+    }
+
+    .ftg-menu-item {
+      font-size: 17px;
+    }
+
+    .ftg-ai-panel {
+      left: 12px;
+      right: 12px;
+      width: auto;
     }
   }
 </style>
 
 <script>
-  (function () {
-    'use strict';
+(function () {
+  "use strict";
 
-    if (window.FTG_GLOBAL_ACTIONBAR_BOOTED) return;
-    window.FTG_GLOBAL_ACTIONBAR_BOOTED = true;
+  if (window.FTG_GLOBAL_ACTIONBAR_BOOTED) return;
+  window.FTG_GLOBAL_ACTIONBAR_BOOTED = true;
 
-    var config = window.FTG_ACTIONBAR_CONFIG || {};
-    var activePage = config.activePage || 'home';
-    var userName = config.userName || 'Utente';
-    var isLoggedIn = Boolean(config.isLoggedIn);
-    var accountPillLabel = isLoggedIn ? ('Hi, ' + userName) : 'Accedi';
-    var aiTitle = config.aiTitle || 'Captain Gull';
-    var aiSubtitle = config.aiSubtitle || 'Global actionbar';
-    var aiWelcome = config.aiWelcome || 'Actionbar globale pronta. Ora puoi riusarla su tutte le pagine del sito.';
-    var pages = config.pages || {
-      map: { label: 'Mappa', emoji: '🗺️', href: 'map.html' },
-      home: { label: 'Home', emoji: '🏠', href: '#home' },
-      guide: { label: 'Guide', emoji: '📖', href: '#guide' }
+  var config = window.FTG_ACTIONBAR_CONFIG || {};
+  var activePage = config.activePage || "stories";
+  var userName = config.userName || "Guest";
+  var isLoggedIn = Boolean(config.isLoggedIn);
+  var aiTitle = config.aiTitle || "Ask 5TerreGo";
+  var aiSubtitle = config.aiSubtitle || "Fast travel helper";
+  var aiWelcome = config.aiWelcome || "Nuova actionbar a due righe attiva.";
+  var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
+  var currentLanguage = String(config.language || "en").toLowerCase();
+  var androidAppHref = config.androidAppHref || "#";
+  var privacyHref = config.privacyHref || "#privacy";
+  var termsHref = config.termsHref || "#terms";
+  var root = document.getElementById("ftg-global-actionbar-root");
+  var welcomed = false;
+
+  if (!root) return;
+  document.body.classList.add("ftg-actionbar-enabled");
+
+  var languages = config.languages || [
+    { code: "en", label: "English", flag: "🇬🇧" },
+    { code: "it", label: "Italiano", flag: "🇮🇹" },
+    { code: "fr", label: "Français", flag: "🇫🇷" },
+    { code: "de", label: "Deutsch", flag: "🇩🇪" },
+    { code: "zh", label: "中文", flag: "🇨🇳" }
+  ];
+
+  var menuItems = config.menuItems || [
+    { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
+    { id: "stories", labelKey: "nav_stories", label: "Stories", href: "#stories" },
+    { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "#sentieri" },
+    { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "#discounts" },
+    { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "#trains" },
+    { id: "weather", labelKey: "nav_weather", label: "Weather", href: "#weather" },
+    { id: "updates", labelKey: "nav_updates", label: "Official Updates", href: "#updates" }
+  ];
+
+  var translations = {
+    en: {
+      download_android: "Download the Android app",
+      legal_title: "Legal area",
+      privacy: "Privacy Policy",
+      terms: "Terms & Conditions",
+      choose_language: "Choose language",
+      nav_map: "Map",
+      nav_stories: "Stories",
+      nav_sentieri: "Trails",
+      nav_discounts: "Local Discounts",
+      nav_trains: "Public Transport",
+      nav_weather: "Weather",
+      nav_updates: "Official Updates"
+    },
+    it: {
+      download_android: "Scarica l'app per Android",
+      legal_title: "Area legale",
+      privacy: "Informativa sulla privacy",
+      terms: "Termini e condizioni",
+      choose_language: "Scegli la lingua",
+      nav_map: "Mappa",
+      nav_stories: "Stories",
+      nav_sentieri: "Sentieri",
+      nav_discounts: "Sconti locali",
+      nav_trains: "Trasporto pubblico",
+      nav_weather: "Meteo",
+      nav_updates: "Aggiornamenti ufficiali"
+    },
+    fr: {
+      download_android: "Télécharger l'app Android",
+      legal_title: "Espace légal",
+      privacy: "Politique de confidentialité",
+      terms: "Conditions générales",
+      choose_language: "Choisir la langue",
+      nav_map: "Carte",
+      nav_stories: "Stories",
+      nav_sentieri: "Sentiers",
+      nav_discounts: "Réductions locales",
+      nav_trains: "Transports publics",
+      nav_weather: "Météo",
+      nav_updates: "Mises à jour officielles"
+    },
+    de: {
+      download_android: "Android-App herunterladen",
+      legal_title: "Rechtliches",
+      privacy: "Datenschutzerklärung",
+      terms: "AGB",
+      choose_language: "Sprache wählen",
+      nav_map: "Karte",
+      nav_stories: "Stories",
+      nav_sentieri: "Wege",
+      nav_discounts: "Lokale Rabatte",
+      nav_trains: "Öffentliche Verkehrsmittel",
+      nav_weather: "Wetter",
+      nav_updates: "Offizielle Updates"
+    },
+    zh: {
+      download_android: "下载 Android 应用",
+      legal_title: "法律信息",
+      privacy: "隐私政策",
+      terms: "条款与条件",
+      choose_language: "选择语言",
+      nav_map: "地图",
+      nav_stories: "故事",
+      nav_sentieri: "步道",
+      nav_discounts: "本地优惠",
+      nav_trains: "公共交通",
+      nav_weather: "天气",
+      nav_updates: "官方更新"
+    }
+  };
+
+  function escapeHTML(value) {
+    return String(value || "").replace(/[&<>\"]/g, function (char) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char];
+    });
+  }
+
+  function resolveHref(href) {
+    var value = String(href || "").trim();
+    if (!value) return "";
+    if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
+    if (basePath) return basePath.replace(/\/+$/, "") + "/" + value.replace(/^\/+/, "");
+    return "/" + value.replace(/^\/+/, "");
+  }
+
+  function t(key, fallback) {
+    var group = translations[currentLanguage] || translations.en || {};
+    return group[key] || fallback || key;
+  }
+
+  function getLanguageMeta(code) {
+    var match = languages.find(function (lang) {
+      return String(lang.code || "").toLowerCase() === String(code || "").toLowerCase();
+    });
+    return match || languages[0] || { code: "en", label: "English", flag: "🇬🇧" };
+  }
+
+  function renderIconMarkup(id) {
+    if (id === "sentieri") {
+      return '<img src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F45F.png" alt="" aria-hidden="true">';
+    }
+
+    var icons = {
+      map: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4.5 15 2l6 2.5v15L15 22l-6-2.5L3 22V7z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 4.5v15" stroke-width="1.8"></path><path d="M15 2v20" stroke-width="1.8"></path></svg>',
+      stories: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      discounts: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5V6a2 2 0 0 1 2-2h8.8a2 2 0 0 1 1.4.6l3.2 3.2A2 2 0 0 1 20 9.2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="8" cy="8" r="1.25" stroke-width="1.8"></circle><path d="m9.5 14.5 5-5" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      trains: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
+      weather: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.5 1.5M6.8 17.2l-1.5 1.5M18.7 18.7l-1.5-1.5M6.8 6.8 5.3 5.3" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      updates: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5 5 8v4.8c0 3.4 2.2 6.6 7 8.7 4.8-2.1 7-5.3 7-8.7V8z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 9v4M12 16h.01" stroke-width="1.8" stroke-linecap="round"></path></svg>'
     };
-    var menuItems = config.menuItems || [
-      { id: 'map', label: pages.map && pages.map.label || 'Map', href: 'map.html' },
-      { id: 'home', label: pages.home && pages.home.label || 'Home', href: pages.home && pages.home.href || '#home' },
-      { id: 'guide', label: pages.guide && pages.guide.label || 'Guide', href: pages.guide && pages.guide.href || 'https://5terrego.com/site-stories-section' },
-      { id: 'places', label: 'Places', href: '#places', backgroundImage: 'https://images.pexels.com/photos/7118987/pexels-photo-7118987.jpeg?_gl=1*1ygueye*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2NDE0JGo1OSRsMCRoMA..' },
-      { id: 'local-discounts', label: 'Local Discounts', href: '#local-discounts', backgroundImage: 'https://images.pexels.com/photos/34342746/pexels-photo-34342746.jpeg?_gl=1*1j2vzz9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2NjgzJGoxMiRsMCRoMA..' },
-      { id: 'sentieri', label: 'Sentieri', href: '#sentieri', backgroundImage: 'https://images.pexels.com/photos/13368981/pexels-photo-13368981.jpeg?_gl=1*oqh5qj*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODEyMDU2NjkkbzM3JGcxJHQxNzgxMjA2OTQwJGo1OCRsMCRoMA..' }
-    ];
-    var legalLinks = config.legalLinks || [
-      { label: 'Privacy', href: '#privacy' },
-      { label: 'Policy', href: '#policy' }
-    ];
-    var languages = config.languages || [
-      { code: 'it', label: '🇮🇹 Italiano' },
-      { code: 'en', label: '🇬🇧 English' },
-      { code: 'fr', label: '🇫🇷 Français' },
-      { code: 'de', label: '🇩🇪 Deutsch' }
-    ];
-    var currentLanguage = config.language || (languages[0] && languages[0].code) || 'it';
-    var basePath = typeof config.basePath === 'string' ? config.basePath.trim() : '';
-    var root = document.getElementById('ftg-global-actionbar-root');
-    var welcomed = false;
+    return icons[id] || '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle></svg>';
+  }
 
-    if (!root) return;
-    document.body.classList.add('ftg-actionbar-enabled');
+  function buildNavPill(item) {
+    var active = item.id === activePage;
+    var label = t(item.labelKey || "", item.label || item.id || "");
+    return '<button class="ftg-nav-pill' + (active ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id) + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></button>';
+  }
 
-    function escapeHTML(value) {
-      return String(value || '').replace(/[&<>\"]/g, function (char) {
-        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
+  function buildLanguageOptions() {
+    return languages.map(function (lang) {
+      var active = String(lang.code || "").toLowerCase() === currentLanguage;
+      return '<button class="ftg-language-option' + (active ? ' active' : '') + '" type="button" data-language-code="' + escapeHTML(lang.code || '') + '"><span class="ftg-menu-flag">' + escapeHTML(lang.flag || '🏳️') + '</span><span>' + escapeHTML(lang.label || lang.code || '') + '</span></button>';
+    }).join("");
+  }
+
+  root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
+
+  var topbar = document.getElementById("ftg-topbar");
+  var pillScroller = document.getElementById("ftg-pill-scroller");
+  var accountBtn = document.getElementById("ftg-account-btn");
+  var menuTrigger = document.getElementById("ftg-menu-trigger");
+  var menuPanel = document.getElementById("ftg-menu-panel");
+    var languageMenuItem = document.getElementById("ftg-language-menu-item");
+  var languageMenuFlag = document.getElementById("ftg-language-menu-flag");
+  var languageMenuLabel = document.getElementById("ftg-language-menu-label");
+    var languageTitle = document.getElementById("ftg-language-title");
+  var languageList = document.getElementById("ftg-language-list");
+  var legalTitle = document.getElementById("ftg-legal-title");
+  var privacyLabel = document.getElementById("ftg-privacy-label");
+  var termsLabel = document.getElementById("ftg-terms-label");
+  var androidAppLink = document.getElementById("ftg-android-app-link");
+  var androidAppLabel = document.getElementById("ftg-android-app-label");
+  var aiPanel = document.getElementById("ftg-ai-panel");
+  var aiClose = document.getElementById("ftg-ai-close");
+  var aiMessages = document.getElementById("ftg-ai-messages");
+  var aiInput = document.getElementById("ftg-ai-input");
+  var aiSend = document.getElementById("ftg-ai-send");
+  var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
+  var pillButtons = [];
+
+  function syncActiveButtons(pageId) {
+    activePage = pageId;
+    pillButtons.forEach(function (button) {
+      button.classList.toggle("active", button.getAttribute("data-page-target") === pageId);
+    });
+  }
+
+  function maybeMarkScrolled() {
+    if (!topbar) return;
+    topbar.classList.toggle("is-scrolled", window.scrollY > 10);
+  }
+
+  function syncMenuVisualState() {
+    var isOpen = menuPanel && menuPanel.classList.contains("open");
+    var isLanguageMode = menuPanel && menuPanel.classList.contains("is-language-mode");
+
+    if (menuTrigger) {
+      menuTrigger.classList.toggle("is-open", isOpen);
+      menuTrigger.setAttribute("aria-label", isOpen ? (isLanguageMode ? "Close language selector" : "Close menu") : "Open menu");
+    }
+
+    if (topbar) {
+      topbar.classList.toggle("menu-open", isOpen);
+    }
+  }
+
+  function openMenu() {
+    if (!menuPanel) return;
+    menuPanel.classList.add("open");
+    menuPanel.classList.remove("is-language-mode");
+    menuPanel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ftg-menu-open");
+    syncMenuVisualState();
+  }
+
+  function closeMenu() {
+    if (!menuPanel) return;
+    menuPanel.classList.remove("open");
+    menuPanel.classList.remove("is-language-mode");
+    menuPanel.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("ftg-menu-open");
+    syncMenuVisualState();
+  }
+
+  function openLanguagePanel() {
+    if (!menuPanel) return;
+    menuPanel.classList.add("open");
+    menuPanel.classList.add("is-language-mode");
+    menuPanel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ftg-menu-open");
+    syncMenuVisualState();
+  }
+
+  function closeLanguagePanel() {
+    if (!menuPanel) return;
+    menuPanel.classList.remove("is-language-mode");
+    syncMenuVisualState();
+  }
+
+  function navigateTo(itemId, href) {
+    var finalHref = resolveHref(href || "");
+    syncActiveButtons(itemId);
+    closeMenu();
+
+    if (typeof config.onNavigate === "function") {
+      config.onNavigate(itemId, { href: finalHref });
+      return;
+    }
+
+    if (itemId === "map") {
+      window.location.href = resolveHref("map.html");
+      return;
+    }
+
+    if (finalHref) {
+      if (finalHref.charAt(0) === "#") {
+        var target = document.querySelector(finalHref);
+        if (target && typeof target.scrollIntoView === "function") {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+      }
+      window.location.href = finalHref;
+    }
+  }
+
+  function addAIMessage(text, isUser) {
+    if (!aiMessages) return;
+    var div = document.createElement("div");
+    div.className = "ftg-ai-msg " + (isUser ? "user" : "bot");
+    div.innerText = text;
+    aiMessages.appendChild(div);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+  }
+
+  function toggleAI(forceOpen) {
+    if (!aiPanel) return;
+    var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
+    aiPanel.classList.toggle("open", shouldOpen);
+    aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+    if (shouldOpen && !welcomed) {
+      welcomed = true;
+      addAIMessage(aiWelcome, false);
+    }
+  }
+
+  function handleAISend(textFromButton) {
+    var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
+    if (!text) return;
+    addAIMessage(text, true);
+    if (aiInput) aiInput.value = "";
+    window.setTimeout(function () {
+      addAIMessage("Active section: " + activePage + ". Questa topbar a due righe tiene brand e controlli sopra, pillole pagina sotto.", false);
+    }, 120);
+  }
+
+  function bindPillEvents() {
+    pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
+    pillButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        navigateTo(button.getAttribute("data-page-target"), button.getAttribute("data-page-href"));
       });
-    }
+    });
+    syncActiveButtons(activePage);
+  }
 
-    function resolveHref(href) {
-      var value = String(href || '').trim();
-      if (!value) return '';
-      if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
-      if (basePath) return basePath.replace(/\/+$/, '') + '/' + value.replace(/^\/+/, '');
-      return '/' + value.replace(/^\/+/, '');
-    }
+  function rebuildPills() {
+    if (!pillScroller) return;
+    pillScroller.innerHTML = menuItems.map(buildNavPill).join("");
+    bindPillEvents();
+  }
 
-    function getCurrentFlag() {
-      var current = languages.find(function(lang){ return lang.code === currentLanguage; }) || languages[0] || { label: '🇮🇹' };
-      return String(current.label || '🌐').split(' ')[0];
-    }
-
-    function buildMenuCard(item) {
-      var isActive = activePage === item.id;
-      var backgroundStyle = item.backgroundImage ? ' style="background-image:url(' + "'" + escapeHTML(item.backgroundImage) + "'" + ')"' : '';
-      return '<button class="ftg-more-item' + (isActive ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id || '') + '" data-page-href="' + escapeHTML(item.href || '') + '"' + backgroundStyle + '><span class="ftg-more-item-top"><span class="ftg-more-item-arrow">›</span></span><span class="ftg-more-item-label">' + escapeHTML(item.label || item.id || '') + '</span></button>';
-    }
-
-    function getFeaturedMenuItem() {
-      var featuredId = activePage === 'map' ? 'home' : 'map';
-      return menuItems.find(function (item) { return item.id === featuredId; }) || null;
-    }
-
-    function getSecondaryMenuItems() {
-      var featured = getFeaturedMenuItem();
-      return menuItems.filter(function (item) {
-        if (featured && item.id === featured.id) return false;
-        if (activePage !== 'map' && item.id === 'home') return false;
-        if (activePage === 'map' && item.id === 'map') return false;
-        return true;
+  function rebuildLanguageList() {
+    if (!languageList) return;
+    languageList.innerHTML = buildLanguageOptions();
+    Array.prototype.slice.call(languageList.querySelectorAll("[data-language-code]")).forEach(function (button) {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
+        applyTranslations();
+        closeLanguagePanel();
+        if (typeof config.onLanguageChange === "function") {
+          config.onLanguageChange(currentLanguage);
+        }
       });
+    });
+  }
+
+  function updateMenuDynamicItems() {
+    var languageMeta = getLanguageMeta(currentLanguage);
+    if (languageMenuFlag) languageMenuFlag.innerText = languageMeta.flag || "🏳️";
+    if (languageMenuLabel) languageMenuLabel.innerText = languageMeta.label || languageMeta.code || "Language";
+        if (languageTitle) languageTitle.innerText = t("choose_language", "Choose language");
+    if (legalTitle) legalTitle.innerText = t("legal_title", "Legal area");
+    if (privacyLabel) privacyLabel.innerText = t("privacy", "Privacy Policy");
+    if (termsLabel) termsLabel.innerText = t("terms", "Terms & Conditions");
+    if (androidAppLabel) androidAppLabel.innerText = t("download_android", "Download the Android app");
+    if (androidAppLink) {
+      var isAndroid = /android/i.test(navigator.userAgent || "");
+      androidAppLink.style.display = isAndroid ? "flex" : "none";
     }
+  }
 
-    var featuredMenuItem = getFeaturedMenuItem();
+  function applyTranslations() {
+    rebuildPills();
+    rebuildLanguageList();
+    updateMenuDynamicItems();
+  }
 
-    root.innerHTML = '' +
-      '<button class="ftg-fab ftg-more-fab" id="ftg-more-fab" type="button" aria-label="Open menu">' +
-        '<span class="ftg-more-icon"><span></span><span></span><span></span><span></span></span>' +
-      '</button>' +
-      '<div class="ftg-more-overlay" id="ftg-more-overlay"></div>' +
-      '<aside class="ftg-more-panel" id="ftg-more-panel" aria-hidden="true">' +
-        '<div class="ftg-more-head">' +
-          '<button class="ftg-more-primary" id="ftg-more-primary" type="button">' + escapeHTML(accountPillLabel) + '</button>' +
-        '</div>' +
-        '<div class="ftg-more-language-row" id="ftg-more-language-row">' +
-          languages.map(function (lang) {
-            return '<button class="ftg-more-language-btn' + (lang.code === currentLanguage ? ' active' : '') + '" type="button" data-lang="' + escapeHTML(lang.code) + '">' + escapeHTML(lang.label) + '</button>';
-          }).join('') +
-        '</div>' +
-        (featuredMenuItem ? '<div class="ftg-more-featured">' + buildMenuCard(featuredMenuItem) + '</div>' : '') +
-        '<div class="ftg-more-grid">' + getSecondaryMenuItems().map(buildMenuCard).join('') + '</div>' +
-        '<div class="ftg-more-footer">' +
-          legalLinks.map(function (link) {
-            return '<a href="' + escapeHTML(link.href || '#') + '">' + escapeHTML(link.label || '') + '</a>';
-          }).join('') +
-        '</div>' +
-      '</aside>' +
-      '<button class="ftg-fab ftg-ai-fab" id="ftg-ai-chat-btn" type="button" aria-label="Open AI Guide">' +
-        '<video id="ftg-ai-mascot-video" autoplay muted loop playsinline preload="auto">' +
-          '<source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm">' +
-          '<source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm">' +
-        '</video>' +
-      '</button>' +
-      '<div id="ftg-ai-chat" class="ftg-ai-chat" aria-hidden="true">' +
-        '<div class="ftg-ai-head">' +
-          '<div class="ftg-ai-head-left">' +
-            '<div class="ftg-ai-avatar">' +
-              '<video id="ftg-ai-header-video" autoplay muted loop playsinline preload="auto">' +
-                '<source src="https://tanzaniagetawayinfo-source.github.io/5TerreGo/mascotterelax.webm" type="video/webm">' +
-                '<source src="https://raw.githubusercontent.com/tanzaniagetawayinfo-source/5TerreGo/main/mascotterelax.webm" type="video/webm">' +
-              '</video>' +
-            '</div>' +
-            '<div><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div>' +
-          '</div>' +
-          '<button id="ftg-ai-close" class="ftg-ai-close" type="button" aria-label="Close AI">×</button>' +
-        '</div>' +
-        '<div id="ftg-ai-messages" class="ftg-ai-messages"></div>' +
-        '<div class="ftg-ai-suggestions">' +
-          '<button class="ftg-ai-suggestion" type="button">come organizziamo il menu?</button>' +
-          '<button class="ftg-ai-suggestion" type="button">quale pagina è attiva?</button>' +
-          '<button class="ftg-ai-suggestion" type="button">portiamolo su tutto il sito</button>' +
-        '</div>' +
-        '<div class="ftg-ai-input-row">' +
-          '<input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask the guide..." autocomplete="off" />' +
-          '<button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button>' +
-        '</div>' +
-      '</div>';
+  if (accountBtn) {
+    accountBtn.addEventListener("click", function () {
+      window.location.href = resolveHref("login.html");
+    });
+  }
 
-    var moreFab = document.getElementById('ftg-more-fab');
-    var moreOverlay = document.getElementById('ftg-more-overlay');
-    var morePanel = document.getElementById('ftg-more-panel');
-    var morePrimary = document.getElementById('ftg-more-primary');
-    var menuButtons = Array.prototype.slice.call(root.querySelectorAll('[data-page-target]'));
-    var languageButtons = Array.prototype.slice.call(root.querySelectorAll('.ftg-more-language-btn'));
-    var aiBtn = document.getElementById('ftg-ai-chat-btn');
-    var aiChat = document.getElementById('ftg-ai-chat');
-    var aiClose = document.getElementById('ftg-ai-close');
-    var aiMessages = document.getElementById('ftg-ai-messages');
-    var aiInput = document.getElementById('ftg-ai-input');
-    var aiSend = document.getElementById('ftg-ai-send');
-    var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll('.ftg-ai-suggestion'));
+  if (menuPanel) {
+    menuPanel.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+  }
 
-    function syncActiveButtons(pageId) {
-      activePage = pageId;
-      menuButtons.forEach(function (button) {
-        button.classList.toggle('active', button.getAttribute('data-page-target') === pageId);
-      });
-    }
+  if (menuTrigger && menuPanel) {
+    menuTrigger.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var isOpen = menuPanel.classList.contains("open");
+      var isLanguageMode = menuPanel.classList.contains("is-language-mode");
 
-    function closeMorePanel() {
-      morePanel.classList.remove('open');
-      morePanel.setAttribute('aria-hidden', 'true');
-      moreOverlay.classList.remove('open');
-      moreFab.classList.remove('open');
-      document.body.classList.remove('ftg-more-open');
-    }
-
-    function openMorePanel() {
-      morePanel.classList.add('open');
-      morePanel.setAttribute('aria-hidden', 'false');
-      moreOverlay.classList.add('open');
-      moreFab.classList.add('open');
-      document.body.classList.add('ftg-more-open');
-    }
-
-    function toggleMorePanel(forceOpen) {
-      var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !morePanel.classList.contains('open');
-      if (shouldOpen) openMorePanel(); else closeMorePanel();
-    }
-
-    function navigateTo(itemId, href) {
-      var finalHref = itemId === 'map' ? resolveHref('map.html') : resolveHref(href || '');
-      syncActiveButtons(itemId);
-      closeMorePanel();
-
-      if (itemId === 'map') {
-        window.location.href = finalHref;
+      if (!isOpen) {
+        openMenu();
         return;
       }
 
-      if (typeof config.onNavigate === 'function') {
-        config.onNavigate(itemId, { href: finalHref });
+      if (isLanguageMode) {
+        closeLanguagePanel();
         return;
       }
 
-      if (finalHref) window.location.href = finalHref;
-    }
-
-    function forceMascotVideos() {
-      ['ftg-ai-mascot-video', 'ftg-ai-header-video'].forEach(function (id) {
-        var video = document.getElementById(id);
-        if (!video) return;
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.setAttribute('muted', '');
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        video.load();
-        var playPromise = video.play();
-        if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(function () {});
-      });
-    }
-
-    function addAIMessage(text, isUser) {
-      var div = document.createElement('div');
-      div.className = 'ftg-ai-msg ' + (isUser ? 'user' : 'bot');
-      div.innerText = text;
-      aiMessages.appendChild(div);
-      aiMessages.scrollTop = aiMessages.scrollHeight;
-    }
-
-    function toggleAI(open) {
-      var shouldOpen = typeof open === 'boolean' ? open : !aiChat.classList.contains('ai-open');
-      aiChat.classList.toggle('ai-open', shouldOpen);
-      aiChat.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
-      document.body.classList.toggle('ftg-ai-chat-active', shouldOpen);
-      if (shouldOpen) closeMorePanel();
-      if (shouldOpen && !welcomed) {
-        welcomed = true;
-        addAIMessage(aiWelcome, false);
-      }
-    }
-
-    function handleAISend(textFromButton) {
-      var text = String(textFromButton || aiInput.value || '').trim();
-      if (!text) return;
-      addAIMessage(text, true);
-      aiInput.value = '';
-      window.setTimeout(function () {
-        addAIMessage('Pagina attiva: ' + activePage + '. Questa è la base shared della nuova actionbar minimale.', false);
-      }, 120);
-    }
-
-    if (moreFab) moreFab.addEventListener('click', function () { toggleMorePanel(); });
-    if (moreOverlay) moreOverlay.addEventListener('click', closeMorePanel);
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
-        closeMorePanel();
-        toggleAI(false);
-      }
+      closeMenu();
     });
+  }
 
-    menuButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        navigateTo(button.getAttribute('data-page-target'), button.getAttribute('data-page-href'));
-      });
+  if (languageMenuItem) {
+    languageMenuItem.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openLanguagePanel();
     });
+  }
 
-    if (morePrimary) {
-      morePrimary.addEventListener('click', function () {
-        closeMorePanel();
-        window.location.href = resolveHref('login.html');
-      });
+  
+
+  if (aiClose) {
+    aiClose.addEventListener("click", function () {
+      toggleAI(false);
+    });
+  }
+
+  if (aiSend) {
+    aiSend.addEventListener("click", function () {
+      handleAISend();
+    });
+  }
+
+  if (aiInput) {
+    aiInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") handleAISend();
+    });
+  }
+
+  aiSuggestions.forEach(function (button) {
+    button.addEventListener("click", function () {
+      handleAISend(button.innerText);
+    });
+  });
+
+  window.addEventListener("scroll", maybeMarkScrolled, { passive: true });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      toggleAI(false);
+      closeMenu();
     }
+  });
 
-    languageButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        currentLanguage = button.getAttribute('data-lang') || currentLanguage;
-        languageButtons.forEach(function (item) { item.classList.remove('active'); });
-        button.classList.add('active');
-        if (typeof config.onLanguageChange === 'function') config.onLanguageChange(currentLanguage);
-      });
-    });
+  document.addEventListener("click", function (event) {
+    if (!menuPanel || !menuTrigger) return;
+    if (!menuPanel.classList.contains("open")) return;
+    if (!menuPanel.contains(event.target) && !menuTrigger.contains(event.target)) {
+      closeMenu();
+    }
+  });
 
-    if (aiBtn) aiBtn.addEventListener('click', function () { toggleAI(); });
-    if (aiClose) aiClose.addEventListener('click', function () { toggleAI(false); });
-    if (aiSend) aiSend.addEventListener('click', function () { handleAISend(); });
-    if (aiInput) aiInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') handleAISend(); });
-    aiSuggestions.forEach(function (button) {
-      button.addEventListener('click', function () { handleAISend(button.innerText); });
-    });
+  applyTranslations();
+  syncMenuVisualState();
+  maybeMarkScrolled();
 
-    forceMascotVideos();
-    window.addEventListener('load', forceMascotVideos);
-    document.addEventListener('touchstart', forceMascotVideos, { passive: true, once: true });
-    document.addEventListener('click', forceMascotVideos, { passive: true, once: true });
-
-    window.FTG_GLOBAL_ACTIONBAR = {
-      navigateToPage: function (pageId) {
-        var match = menuItems.find(function(item){ return item.id === pageId; }) || {};
-        navigateTo(pageId, match.href || '');
-      },
-      openMorePanel: openMorePanel,
-      closeMorePanel: closeMorePanel,
-      toggleAI: toggleAI,
-      getCurrentPage: function () { return activePage; },
-      setActivePage: function (pageId) { syncActiveButtons(pageId); activePage = pageId; }
-    };
-  }());
+  window.FTG_GLOBAL_ACTIONBAR = {
+    navigateToPage: function (pageId) {
+      var match = menuItems.find(function (item) { return item.id === pageId; }) || {};
+      navigateTo(pageId, match.href || "");
+    },
+    toggleAI: toggleAI,
+    getCurrentPage: function () { return activePage; },
+    setActivePage: function (pageId) { syncActiveButtons(pageId); }
+  };
+}());
 </script>
