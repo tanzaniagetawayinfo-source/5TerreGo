@@ -1104,15 +1104,24 @@
     var modeClasses = { train:'train', ferry:'ferry', bus:'bus' };
     var statusClasses = { ok:'status-ok', warn:'status-warn', neutral:'status-neutral', danger:'status-danger' };
     var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var VT_DIRECT_BASES = ['https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno'];
+    var VT_STATION_ALIASES = {
+      monterosso: ['Monterosso'],
+      monterossoalmare: ['Monterosso'],
+      vernazza: ['Vernazza'],
+      corniglia: ['Corniglia'],
+      manarola: ['Manarola'],
+      riomaggiore: ['Riomaggiore'],
+      laspezia: ['La Spezia Centrale', 'La Spezia'],
+      laspeziacentrale: ['La Spezia Centrale'],
+      levanto: ['Levanto']
+    };
     var TRAIN_RT_ENDPOINTS = [
       window.FTG_TRAIN_RT_ENDPOINT,
       window.FTG_TRANSPORT_ENDPOINT,
       window.FTG_PUBLIC_TRANSPORT_ENDPOINT,
       window.__TRAIN_RT_ENDPOINT,
-      '/api/trains/realtime',
-      '/api/public-transport/trains',
-      '/api/public-transport/realtime',
-      '/api/transport/realtime'
+      '/api/trains/realtime'
     ].filter(Boolean);
     var ACTIVE_TRAIN_RT_ENDPOINT = '';
     var LAST_RT_ERROR = '';
@@ -1163,7 +1172,8 @@
     var liveState = {
       mode: TRAIN_RT_ENDPOINTS.length ? 'loading' : 'fallback',
       updatedAt: '',
-      message: TRAIN_RT_ENDPOINTS.length ? 'Connecting to realtime trains…' : 'No realtime endpoint configured'
+      message: TRAIN_RT_ENDPOINTS.length ? 'Connecting to realtime trains…' : 'No realtime endpoint configured',
+      debugMessage: ''
     };
 
     function getItalianNow(){
@@ -1316,6 +1326,7 @@
       return diff + ' min';
     }
     function normalizeRealtimeRow(row){
+      if (row && row.__normalized) return row;
       var departure = normalizeTime(row.departure || row.departureTime || row.scheduledDeparture || row.orarioPartenza);
       var arrival = normalizeTime(row.arrival || row.arrivalTime || row.scheduledArrival || row.orarioArrivo) || '—';
       var platform = row.platform || row.binario || row.platformDeparture || row.platformCode || '';
@@ -1350,6 +1361,185 @@
         direct: row.direct || row.note || row.notes || 'Real time'
       };
     }
+    async function fetchTextStrict(url){
+      var response = await fetch(url, { cache:'no-store' });
+      if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + url);
+      return response.text();
+    }
+
+    async function fetchJsonStrict(url){
+      var response = await fetch(url, { cache:'no-store' });
+      if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + url);
+      return response.json();
+    }
+
+    function normalizeStationKey(value){
+      var text = String(value || '').toLowerCase();
+      var normalized = text.normalize ? text.normalize('NFD') : text;
+      var output = '';
+      var index = 0;
+      var code = 0;
+      var char = '';
+      for (index = 0; index < normalized.length; index += 1) {
+        char = normalized.charAt(index);
+        code = normalized.charCodeAt(index);
+        if (code >= 768 && code <= 879) continue;
+        if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) output += char;
+      }
+      return output;
+    }
+
+    function stationAliasList(name){
+      var key = normalizeStationKey(name);
+      return VT_STATION_ALIASES[key] || [name];
+    }
+
+    function parseAutocompleteText(text){
+      return String(text || '')
+        .split(String.fromCharCode(10))
+        .map(function(line){ return line.split(String.fromCharCode(13)).join('').trim(); })
+        .filter(Boolean)
+        .map(function(line){
+          var parts = line.split('|');
+          return { label: (parts[0] || '').trim(), code: (parts[1] || '').trim() };
+        })
+        .filter(function(row){ return row.label && row.code; });
+    }
+
+    async function resolveStationViaViaggiaTreno(name){
+      var aliases = stationAliasList(name);
+      var b = 0;
+      var a = 0;
+      for (b = 0; b < VT_DIRECT_BASES.length; b += 1) {
+        for (a = 0; a < aliases.length; a += 1) {
+          var text = await fetchTextStrict(VT_DIRECT_BASES[b] + '/autocompletaStazione/' + encodeURIComponent(aliases[a]));
+          var rows = parseAutocompleteText(text);
+          if (rows.length) {
+            return {
+              base: VT_DIRECT_BASES[b],
+              code: rows[0].code,
+              label: rows[0].label,
+              requested: name
+            };
+          }
+        }
+      }
+      throw new Error('Station not found for ' + name);
+    }
+
+    function buildViaggiaTrenoDateTime(date, time){
+      var parts = String(date || '').split('-');
+      var jsDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      var weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return weekdays[jsDate.getDay()] + ' ' + months[jsDate.getMonth()] + ' ' + jsDate.getDate() + ' ' + jsDate.getFullYear() + ' ' + time + ':00';
+    }
+
+    function stopMatchesStation(stop, station){
+      var stopKey = '';
+      var stationKey = '';
+      var labelKey = '';
+      if (!stop || !station) return false;
+      if (String(stop.id || '') === String(station.code || '')) return true;
+      stopKey = normalizeStationKey(stop.stazione || '');
+      stationKey = normalizeStationKey(station.requested || '');
+      labelKey = normalizeStationKey(station.label || '');
+      return stopKey === stationKey || stopKey === labelKey || stopKey.indexOf(stationKey) > -1 || stationKey.indexOf(stopKey) > -1 || stopKey.indexOf(labelKey) > -1 || labelKey.indexOf(stopKey) > -1;
+    }
+
+    function findStopIndex(stops, station, startIndex){
+      var index = 0;
+      for (index = startIndex || 0; index < stops.length; index += 1) {
+        if (stopMatchesStation(stops[index], station)) return index;
+      }
+      return -1;
+    }
+
+    function pickMillis(){
+      var index = 0;
+      for (index = 0; index < arguments.length; index += 1) {
+        var value = arguments[index];
+        var parsed = Number(value);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      return null;
+    }
+
+    function formatMillisToTime(value){
+      if (!value) return '—';
+      return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Rome',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).format(new Date(value));
+    }
+
+    async function enrichViaggiaTrenoDeparture(base, row, fromStation, toStation){
+      var originCode = row.codOrigine || fromStation.code;
+      var trainNumber = row.numeroTreno;
+      var departureKey = row.millisDataPartenza || row.dataPartenzaTreno;
+      var andamento = null;
+      var stops = [];
+      var fromIndex = -1;
+      var toIndex = -1;
+      var fromStop = null;
+      var toStop = null;
+      var departureMillis = null;
+      var arrivalMillis = null;
+      var platform = '';
+      var routeLabel = '';
+      if (!originCode || !trainNumber || !departureKey) return null;
+      andamento = await fetchJsonStrict(base + '/andamentoTreno/' + encodeURIComponent(originCode) + '/' + encodeURIComponent(trainNumber) + '/' + encodeURIComponent(departureKey));
+      stops = Array.isArray(andamento && andamento.fermate) ? andamento.fermate : [];
+      if (!stops.length) return null;
+      fromIndex = findStopIndex(stops, fromStation, 0);
+      toIndex = findStopIndex(stops, toStation, Math.max(0, fromIndex + 1));
+      if (fromIndex === -1 || toIndex === -1 || toIndex <= fromIndex) return null;
+      fromStop = stops[fromIndex];
+      toStop = stops[toIndex];
+      departureMillis = pickMillis(fromStop.partenzaReale, fromStop.effettiva, fromStop.partenza_teorica, fromStop.programmata, row.orarioPartenza, row.partenzaTreno);
+      arrivalMillis = pickMillis(toStop.arrivoReale, toStop.effettiva, toStop.arrivo_teorico, toStop.programmata);
+      platform = fromStop.binarioEffettivoPartenzaDescrizione || fromStop.binarioProgrammatoPartenzaDescrizione || row.binarioEffettivoPartenzaDescrizione || row.binarioProgrammatoPartenzaDescrizione || '';
+      routeLabel = String((row.categoriaDescrizione || row.categoria || 'Train') + ' ' + trainNumber).trim();
+      return {
+        __normalized: true,
+        id: String(trainNumber) + '-' + String(departureKey),
+        mode: 'train',
+        route: routeLabel || ('Train ' + trainNumber),
+        from: fromSelect.value.trim(),
+        to: toSelect.value.trim(),
+        departure: formatMillisToTime(departureMillis),
+        arrival: formatMillisToTime(arrivalMillis),
+        duration: inferDuration(formatMillisToTime(departureMillis), formatMillisToTime(arrivalMillis)),
+        status: 'neutral',
+        statusLabel: 'Live',
+        meta: platform ? 'Platform ' + platform : 'Official feed',
+        direct: 'Direct'
+      };
+    }
+
+    async function fetchOfficialTrainRows(){
+      var fromStation = await resolveStationViaViaggiaTreno(fromSelect.value.trim());
+      var toStation = await resolveStationViaViaggiaTreno(toSelect.value.trim());
+      var base = fromStation.base;
+      var stamp = buildViaggiaTrenoDateTime(currentSelection.date, currentSelection.time);
+      var departures = await fetchJsonStrict(base + '/partenze/' + encodeURIComponent(fromStation.code) + '/' + encodeURIComponent(stamp));
+      var items = [];
+      var index = 0;
+      var limit = 0;
+      if (!Array.isArray(departures) || !departures.length) return [];
+      limit = Math.min(departures.length, 8);
+      for (index = 0; index < limit; index += 1) {
+        try {
+          var item = await enrichViaggiaTrenoDeparture(base, departures[index], fromStation, toStation);
+          if (item && item.departure && item.departure !== '—') items.push(item);
+        } catch (_error) {
+        }
+      }
+      return items.sort(function(a, b){ return toMinutes(a.departure) - toMinutes(b.departure); });
+    }
+
     function getMergedDepartures(){
       return realtimeDepartures.slice();
     }
@@ -1434,8 +1624,13 @@
       url.searchParams.set('time', currentSelection.time);
       return url.toString();
     }
-    function refreshLiveState(mode, updatedAt, message){
-      liveState = { mode: mode, updatedAt: updatedAt || '', message: message || '' };
+    function refreshLiveState(mode, updatedAt, message, debugMessage){
+      liveState = {
+        mode: mode,
+        updatedAt: updatedAt || '',
+        message: message || '',
+        debugMessage: debugMessage || ''
+      };
     }
     async function fetchRealtimeDepartures(silent){
       var response = null;
@@ -1446,23 +1641,36 @@
       var i = 0;
       syncLiveNowSelection();
 
+      if (!silent && liveState.mode !== 'live') {
+        refreshLiveState('loading', '', 'Trying official train feed');
+        updateLiveStrip();
+      }
+
+      LAST_RT_ERROR = '';
+
+      try {
+        realtimeDepartures = await fetchOfficialTrainRows();
+        if (realtimeDepartures.length) {
+          refreshLiveState('live', getItalianNow().time, 'Connected to official train feed · refresh every 30s');
+        } else {
+          refreshLiveState('empty', '', 'No real departures found for this route and time');
+        }
+        render();
+        return;
+      } catch (directError) {
+        LAST_RT_ERROR = directError && directError.message ? directError.message : 'Unable to read official train feed in browser';
+      }
+
       endpoints = ACTIVE_TRAIN_RT_ENDPOINT
         ? [ACTIVE_TRAIN_RT_ENDPOINT].concat(TRAIN_RT_ENDPOINTS.filter(function(item){ return item !== ACTIVE_TRAIN_RT_ENDPOINT; }))
         : TRAIN_RT_ENDPOINTS.slice();
 
       if (!endpoints.length) {
-        refreshLiveState('empty', '', 'No realtime endpoint configured in this page');
+        refreshLiveState('error', '', 'Official feed is blocked and no site endpoint is available', LAST_RT_ERROR);
         realtimeDepartures = [];
         render();
         return;
       }
-
-      if (!silent && liveState.mode !== 'live') {
-        refreshLiveState('loading', '', 'Trying ' + endpoints.length + ' realtime endpoint' + (endpoints.length > 1 ? 's' : ''));
-        updateLiveStrip();
-      }
-
-      LAST_RT_ERROR = '';
 
       for (i = 0; i < endpoints.length; i += 1) {
         try {
@@ -1475,7 +1683,7 @@
           realtimeDepartures = rows.map(normalizeRealtimeRow).filter(function(item){ return item && item.departure && item.departure !== '—'; });
           ACTIVE_TRAIN_RT_ENDPOINT = endpoints[i];
           if (realtimeDepartures.length) {
-            refreshLiveState('live', getItalianNow().time, 'Updated ' + getItalianNow().time + ' · refresh every 30s');
+            refreshLiveState('live', getItalianNow().time, 'Connected to site train feed · refresh every 30s');
           } else {
             refreshLiveState('empty', '', 'No real departures found for this route and time');
           }
@@ -1487,13 +1695,8 @@
       }
 
       realtimeDepartures = [];
-      refreshLiveState(
-        'error',
-        '',
-        LAST_RT_ERROR
-          ? ('No working realtime endpoint found · ' + LAST_RT_ERROR)
-          : ('No working realtime endpoint found among ' + attemptedUrls.length + ' candidate URLs')
-      );
+      refreshLiveState('error', '', 'Unable to reach a train data feed right now', LAST_RT_ERROR);
+      if (LAST_RT_ERROR) console.warn('Train realtime feed error:', LAST_RT_ERROR);
       render();
     }
     function scheduleRefresh(){
