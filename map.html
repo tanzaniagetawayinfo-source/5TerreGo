@@ -2780,14 +2780,7 @@
     return stored || htmlLang || String(navigator.language || 'en').trim().toLowerCase();
   }
   function getDiscoverLabel() {
-    var lang = getSelectedLanguageCode();
-    if (lang.indexOf('it') === 0) return 'Scopri';
-    if (lang.indexOf('fr') === 0) return 'Découvrir';
-    if (lang.indexOf('es') === 0) return 'Descubre';
-    if (lang.indexOf('de') === 0) return 'Entdecken';
-    if (lang.indexOf('pt') === 0) return 'Descobrir';
-    if (lang.indexOf('sw') === 0) return 'Gundua';
-    return 'Discover';
+    return 'Explore Cinque Terre';
   }
   function getCurrentUILocale() { return getSelectedLanguageCode() || 'en-GB'; }
   function formatWeatherDate(value) { var date = new Date(String(value || '') + 'T12:00:00'); if (!Number.isFinite(date.getTime())) return String(value || ''); return new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short', day: '2-digit', month: 'short' }).format(date); }
@@ -2962,27 +2955,28 @@
     var center;
     var closest;
     var hasVisibleViewportPOIs;
-    if (!map || !bottomRailVillageTitle) return '';
-    if (map.getZoom() < minZoomForVillageLabel) return '';
-    if (!poiMarkers.length) return '';
+    if (!map || !bottomRailVillageTitle) return getDiscoverLabel();
+    if (map.getZoom() < minZoomForVillageLabel) return getDiscoverLabel();
+    if (!poiMarkers.length) return getDiscoverLabel();
     hasVisibleViewportPOIs = poiMarkers.some(function(entry) {
       return entry && entry.poi && isValidCoords(entry.poi.coords) && map.getBounds().contains(entry.poi.coords) && isPOIMatchFilter(entry.poi, currentMapFilter) && railTypeMatchesSearchType(entry.poi.type);
     });
-    if (!hasVisibleViewportPOIs) return '';
+    if (!hasVisibleViewportPOIs) return getDiscoverLabel();
     center = map.getCenter();
     closest = places.map(function(place) {
       return { place: place, distance: distanceMeters([center.lat, center.lng], place.coords) };
     }).sort(function(a, b) {
       return a.distance - b.distance;
     })[0];
-    if (!closest || !closest.place) return '';
-    return closest.distance <= 420 ? closest.place.name : '';
+    if (!closest || !closest.place) return getDiscoverLabel();
+    return closest.distance <= 420 ? closest.place.name : getDiscoverLabel();
   }
   function getBottomRailActiveVillageName() {
     var label = getBottomRailVillageLabel();
     var center;
     var closest;
     if (label && label !== getDiscoverLabel()) return label;
+    if (label === getDiscoverLabel()) return getDiscoverLabel();
     if (!map) return places[0] ? places[0].name : 'Riomaggiore';
     center = map.getCenter();
     closest = places.map(function(place) {
@@ -2993,8 +2987,7 @@
     return closest && closest.place ? closest.place.name : (places[0] ? places[0].name : 'Riomaggiore');
   }
   function isBottomRailVillageSheetEnabled() {
-    var label = getBottomRailVillageLabel();
-    return Boolean(label);
+    return Boolean(bottomRail);
   }
   function getVillageCalendarConfig(name) {
     if (!villageCalendarData[name]) villageCalendarData[name] = createVillageCalendarSeed(name);
@@ -3041,7 +3034,7 @@
     daysInMonth = new Date(config.year, config.monthIndex + 1, 0).getDate();
     weekdays = getCalendarWeekdayLabels();
 
-    bottomRailCalendarTitle.textContent = villageName + ' calendar';
+    bottomRailCalendarTitle.textContent = villageName === getDiscoverLabel() ? getDiscoverLabel() : (villageName + ' calendar');
     bottomRailCalendarMonth.textContent = getCalendarMonthLabel(config.year, config.monthIndex);
     bottomRailCalendarWeekdays.innerHTML = weekdays.map(function(label) {
       return '<div class="bottom-rail-calendar-weekday">' + escapeHTML(label) + '</div>';
@@ -3058,7 +3051,7 @@
     bottomRailCalendarGrid.innerHTML = cells.join('');
 
     if (!events.length) {
-      bottomRailCalendarEvents.innerHTML = '<div class="bottom-rail-calendar-empty">' + escapeHTML(config.emptyText || ('Add ' + villageName + ' events here.')) + '</div>';
+      bottomRailCalendarEvents.innerHTML = '<div class="bottom-rail-calendar-empty">' + escapeHTML(villageName === getDiscoverLabel() ? 'Pull up to explore Cinque Terre cards here.' : (config.emptyText || ('Add ' + villageName + ' events here.'))) + '</div>';
       return;
     }
 
@@ -3303,7 +3296,7 @@
     items = getBottomRailViewportItems();
     if (!items.length) items = getBottomRailGeneralItems();
     villageLabel = getBottomRailVillageLabel();
-    villageSheetEnabled = Boolean(villageLabel && villageLabel !== getDiscoverLabel());
+    villageSheetEnabled = Boolean(villageLabel);
     if (bottomRail) bottomRail.classList.toggle('sheet-disabled', !villageSheetEnabled);
     if (!villageSheetEnabled) {
       bottomRailSheetMode = 'peek';
@@ -3315,7 +3308,7 @@
     }
     if (bottomRailVillageTitle) {
       if (villageLabel) {
-        bottomRailVillageTitle.textContent = '— ' + villageLabel + ' —';
+        bottomRailVillageTitle.textContent = villageLabel;
         bottomRailVillageTitle.classList.add('is-visible');
       } else {
         bottomRailVillageTitle.textContent = '';
@@ -3333,7 +3326,7 @@
     }
     bottomRailTrack.innerHTML = items.map(function(item) {
       var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
-      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div><div class="bottom-rail-discover">' + escapeHTML(getDiscoverLabel()) + '</div></div></button>';
+      return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div></div></button>';
     }).join('');
   }
   function handleBottomRailClick(event) {
