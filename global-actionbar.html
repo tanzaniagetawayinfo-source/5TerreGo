@@ -795,7 +795,7 @@
       if (!value) return "";
       if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
       if (basePath) return basePath.replace(/\/+$/, "") + "/" + value.replace(/^\/+/, "");
-      return "/" + value.replace(/^\/+/, "");
+      return value.replace(/^\/+/, "");
     }
 
     function t(key, fallback) {
@@ -829,7 +829,8 @@
     function buildNavPill(item) {
       var active = item.id === activePage;
       var label = t(item.labelKey || "", item.label || item.id || "");
-      return '<button class="ftg-nav-pill' + (active ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id) + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></button>';
+      var href = resolveHref(item.href || "");
+      return '<a class="ftg-nav-pill' + (active ? ' active' : '') + '" href="' + escapeHTML(href) + '" data-page-target="' + escapeHTML(item.id) + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></a>';
     }
 
     function buildLanguageOptions() {
@@ -925,28 +926,10 @@
 
     function navigateTo(itemId, href) {
       var finalHref = resolveHref(href || "");
-      var handled = false;
       syncActiveButtons(itemId);
       closeMenu();
-
-      if (typeof config.onNavigate === "function") {
-        try {
-          handled = config.onNavigate(itemId, { href: finalHref }) === true;
-        } catch (_error) {
-          handled = false;
-        }
-        if (handled) return;
-      }
-
       if (finalHref) {
-        if (finalHref.charAt(0) === "#") {
-          var target = document.querySelector(finalHref);
-          if (target && typeof target.scrollIntoView === "function") {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-            return;
-          }
-        }
-        window.location.href = finalHref;
+        window.location.assign(finalHref);
       }
     }
 
@@ -984,7 +967,7 @@
       pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
       pillButtons.forEach(function (button) {
         button.addEventListener("click", function () {
-          navigateTo(button.getAttribute("data-page-target"), button.getAttribute("data-page-href"));
+          syncActiveButtons(button.getAttribute("data-page-target"));
         });
       });
       syncActiveButtons(activePage);
