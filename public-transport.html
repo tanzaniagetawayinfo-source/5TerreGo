@@ -298,6 +298,51 @@
     flex:0 0 36px;
   }
 
+  .loading-block{
+    display:none;
+    width:100%;
+    min-width:0;
+    padding:18px 16px;
+    border-radius:22px;
+    background:rgba(255,255,255,.92);
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow-soft);
+  }
+
+  .loading-block.is-visible{display:block}
+
+  .loading-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .loading-spinner{
+    width:18px;
+    height:18px;
+    border-radius:999px;
+    border:2px solid #ffd7c4;
+    border-top-color:var(--accent);
+    animation:ftg-spin .8s linear infinite;
+    flex:0 0 18px;
+  }
+
+  .loading-copy{
+    font-size:14px;
+    line-height:1.35;
+    color:#667085;
+    font-weight:700;
+  }
+
+  .is-hidden{
+    display:none !important;
+  }
+
+  @keyframes ftg-spin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+  }
+
   .mode-filters{
     width:100%;
     min-width:0;
@@ -880,7 +925,14 @@
         </span>
       </button>
 
-      <section class="best-card" aria-label="Best next option">
+      <section class="loading-block" id="loadingBlock" aria-live="polite">
+        <div class="loading-row">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span class="loading-copy">Loading live train departures…</span>
+        </div>
+      </section>
+
+      <section class="best-card" id="bestCard" aria-label="Best next option">
         <div class="best-label">BEST NEXT OPTION</div>
         <div class="best-grid">
           <div class="transport-badge train" id="bestIconWrap">
@@ -1140,6 +1192,8 @@
     var timeHelper = document.getElementById('timeHelper');
     var modeButtons = Array.from(document.querySelectorAll('.mode-pill'));
     var departuresList = document.getElementById('departuresList');
+    var loadingBlock = document.getElementById('loadingBlock');
+    var bestCard = document.getElementById('bestCard');
     var alertRow = document.getElementById('alertRow');
     var bestMode = document.getElementById('bestMode');
     var bestIn = document.getElementById('bestIn');
@@ -1161,6 +1215,7 @@
     var viewYear = italianNow.year;
     var viewMonth = italianNow.monthIndex;
     var realtimeDepartures = [];
+    var isLoadingDepartures = true;
     var refreshTimer = null;
     var liveState = {
       mode: TRAIN_RT_ENDPOINTS.length ? 'loading' : 'fallback',
@@ -1297,6 +1352,10 @@
     }
     function openSheet(){
       syncLiveNowSelection();
+      if (!silent) {
+        isLoadingDepartures = true;
+        render();
+      }
       italianNow = getItalianNow();
       draftSelection = { date: currentSelection.date, time: currentSelection.time, now: currentSelection.now };
       viewYear = parseInt(draftSelection.date.split('-')[0], 10);
@@ -1642,6 +1701,7 @@
       if (!endpoints.length) {
         refreshLiveState('error', '', 'No train data endpoint configured on this page');
         realtimeDepartures = [];
+        isLoadingDepartures = false;
         render();
         return;
       }
@@ -1665,8 +1725,10 @@
           ACTIVE_TRAIN_RT_ENDPOINT = endpoints[i];
           if (realtimeDepartures.length) {
             refreshLiveState('live', getItalianNow().time, 'Connected to live train feed · refresh every 30s');
+            isLoadingDepartures = false;
           } else {
             refreshLiveState('empty', '', 'No real departures found for this route and time');
+            isLoadingDepartures = false;
           }
           render();
           return;
@@ -1676,6 +1738,7 @@
       }
 
       realtimeDepartures = [];
+      isLoadingDepartures = false;
       refreshLiveState('error', '', 'Unable to reach the live train feed right now', LAST_RT_ERROR);
       if (LAST_RT_ERROR) console.warn('Train realtime feed error:', LAST_RT_ERROR);
       render();
@@ -1687,12 +1750,23 @@
         fetchRealtimeDepartures(true);
       }, REALTIME_REFRESH_MS);
     }
+    function updateLoadingState(){
+      if (loadingBlock) loadingBlock.classList.toggle('is-visible', isLoadingDepartures);
+      if (bestCard) bestCard.classList.toggle('is-hidden', isLoadingDepartures);
+      if (departuresList) departuresList.classList.toggle('is-hidden', isLoadingDepartures);
+    }
+
     function render(){
       italianNow = getItalianNow();
       syncLiveNowSelection();
       var items = normalizeFiltered();
       updateTriggerText();
       updateLiveStrip();
+      updateLoadingState();
+      if (isLoadingDepartures) {
+        departuresList.innerHTML = '';
+        return;
+      }
       updateBestCard(items);
       departuresList.innerHTML = items.map(cardTemplate).join('');
       if (!items.length) {
