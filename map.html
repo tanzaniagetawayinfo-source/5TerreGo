@@ -1467,6 +1467,7 @@
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
+  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v1';
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -1491,20 +1492,100 @@
     return lang || 'en';
   }
 
-  async function loadGlobalActionbarPartial() {
-    var i;
-    var response;
-    var html;
+    async function injectGlobalActionbarPartialHTML(html, cacheKeyPrefix) {
     var parser;
     var doc;
     var scripts;
     var links;
     var styles;
 
+    if (!html) return false;
+
+    parser = new DOMParser();
+    doc = parser.parseFromString(html, 'text/html');
+    links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+    styles = Array.from(doc.querySelectorAll('style'));
+    scripts = Array.from(doc.querySelectorAll('script'));
+
+    links.forEach(function (link) {
+      var href = link.getAttribute('href') || '';
+      var el;
+      if (!href) return;
+      if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+      el = document.createElement('link');
+      el.rel = 'stylesheet';
+      el.href = href;
+      el.setAttribute('data-ftg-actionbar-link', href);
+      document.head.appendChild(el);
+    });
+
+    styles.forEach(function (style, index) {
+      var key = 'ftg-actionbar-style-' + cacheKeyPrefix + '-' + index;
+      var el;
+      if (document.getElementById(key)) return;
+      el = document.createElement('style');
+      el.id = key;
+      el.textContent = style.textContent || '';
+      document.head.appendChild(el);
+    });
+
+    for (var s = 0; s < scripts.length; s += 1) {
+      await new Promise(function (resolve) {
+        var original = scripts[s];
+        var src = original.getAttribute('src');
+        var scriptEl = document.createElement('script');
+        var done = false;
+
+        function finish() {
+          if (done) return;
+          done = true;
+          resolve();
+        }
+
+        if (src) {
+          scriptEl.src = src;
+          scriptEl.onload = finish;
+          scriptEl.onerror = finish;
+        } else {
+          scriptEl.textContent = original.textContent || '';
+        }
+
+        document.head.appendChild(scriptEl);
+        if (!src) finish();
+      });
+    }
+
+    return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+  }
+
+  function cacheGlobalActionbarHTML(html) {
+    try {
+      sessionStorage.setItem(ACTIONBAR_SESSION_HTML_KEY, String(html || ''));
+    } catch (_error) {}
+  }
+
+  async function loadGlobalActionbarPartial() {
+    var i;
+    var response;
+    var html;
+    var cachedHtml = '';
+
     if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
     if (actionbarLoadPromise) return actionbarLoadPromise;
 
     actionbarLoadPromise = (async function () {
+      try {
+        cachedHtml = sessionStorage.getItem(ACTIONBAR_SESSION_HTML_KEY) || '';
+      } catch (_error) {
+        cachedHtml = '';
+      }
+
+      if (cachedHtml) {
+        try {
+          if (await injectGlobalActionbarPartialHTML(cachedHtml, 'session')) return true;
+        } catch (_error) {}
+      }
+
       for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
         try {
           response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
@@ -1513,61 +1594,8 @@
           html = await response.text();
           if (!html) continue;
 
-          parser = new DOMParser();
-          doc = parser.parseFromString(html, 'text/html');
-          links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
-          styles = Array.from(doc.querySelectorAll('style'));
-          scripts = Array.from(doc.querySelectorAll('script'));
-
-          links.forEach(function (link) {
-            var href = link.getAttribute('href') || '';
-            var el;
-            if (!href) return;
-            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
-            el = document.createElement('link');
-            el.rel = 'stylesheet';
-            el.href = href;
-            el.setAttribute('data-ftg-actionbar-link', href);
-            document.head.appendChild(el);
-          });
-
-          styles.forEach(function (style, index) {
-            var key = 'ftg-actionbar-style-' + i + '-' + index;
-            var el;
-            if (document.getElementById(key)) return;
-            el = document.createElement('style');
-            el.id = key;
-            el.textContent = style.textContent || '';
-            document.head.appendChild(el);
-          });
-
-          for (var s = 0; s < scripts.length; s += 1) {
-            await new Promise(function (resolve) {
-              var original = scripts[s];
-              var src = original.getAttribute('src');
-              var scriptEl = document.createElement('script');
-              var done = false;
-
-              function finish() {
-                if (done) return;
-                done = true;
-                resolve();
-              }
-
-              if (src) {
-                scriptEl.src = src;
-                scriptEl.onload = finish;
-                scriptEl.onerror = finish;
-              } else {
-                scriptEl.textContent = original.textContent || '';
-              }
-
-              document.head.appendChild(scriptEl);
-              if (!src) finish();
-            });
-          }
-
-          if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+          cacheGlobalActionbarHTML(html);
+          if (await injectGlobalActionbarPartialHTML(html, i)) return true;
         } catch (_error) {}
       }
 
@@ -1729,6 +1757,8 @@
   var FTG_POI_PREFETCH_DB_NAME = 'ftg-prefetch-cache-v1';
   var FTG_POI_PREFETCH_STORE = 'kv';
   var FTG_POI_FULL_CACHE_IDB_KEY = 'pois-full-v1';
+  var FTG_MAP_SESSION_STATE_KEY = 'ftg-map-state-v1';
+  var FTG_MAP_SESSION_STATE_MAX_AGE_MS = 1000 * 60 * 45;
   var RIOMAGGIORE_IMAGE = 'https://images.pexels.com/photos/11518065/pexels-photo-11518065.jpeg';
   var FALLBACK_RAIL_POIS = [
     { id: 'fallback-castello-riomaggiore', name: 'Castello di Riomaggiore', type: 'Castle', coords: [44.1003, 9.7389], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', description: 'Historic hilltop castle above the village with panoramic views over the harbor and coastline.', relevance: 96 },
@@ -1766,9 +1796,98 @@
     return place && place.name === 'Monterosso' ? 14.4 : 15.2;
   }
 
+  function clampSessionMapZoom(value) {
+    var zoom = Number(value);
+    if (!Number.isFinite(zoom)) return null;
+    return Math.max(11, Math.min(20, zoom));
+  }
+
+  function readSessionMapState() {
+    var raw;
+    var parsed;
+    var age;
+    var lat;
+    var lng;
+    var zoom;
+    var currentIndexValue;
+
+    if (isMapPreviewMode) return null;
+
+    try {
+      raw = sessionStorage.getItem(FTG_MAP_SESSION_STATE_KEY) || '';
+    } catch (_error) {
+      raw = '';
+    }
+
+    if (!raw) return null;
+    parsed = safeParseJSON(raw, null);
+    if (!parsed || !Array.isArray(parsed.center) || parsed.center.length < 2) return null;
+
+    age = Number(parsed.savedAt || 0);
+    if (age && Date.now() - age > FTG_MAP_SESSION_STATE_MAX_AGE_MS) return null;
+
+    lat = Number(parsed.center[0]);
+    lng = Number(parsed.center[1]);
+    zoom = clampSessionMapZoom(parsed.zoom);
+    currentIndexValue = Number(parsed.currentIndex);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || zoom === null) return null;
+
+    return {
+      center: [lat, lng],
+      zoom: zoom,
+      currentIndex: Number.isFinite(currentIndexValue) ? Math.max(0, Math.min(places.length - 1, Math.round(currentIndexValue))) : null
+    };
+  }
+
+  function writeSessionMapState() {
+    var center;
+    var payload;
+
+    if (isMapPreviewMode || !map) return;
+
+    center = map.getCenter();
+    if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
+
+    payload = {
+      center: [Number(center.lat.toFixed(6)), Number(center.lng.toFixed(6))],
+      zoom: Number((map.getZoom() || 11).toFixed(2)),
+      currentIndex: Number.isFinite(currentIndex) ? currentIndex : getClosestVillageIndexForCenter(),
+      savedAt: Date.now()
+    };
+
+    try {
+      sessionStorage.setItem(FTG_MAP_SESSION_STATE_KEY, JSON.stringify(payload));
+    } catch (_error) {}
+  }
+
+  var saveSessionMapStateTimer = 0;
+  function scheduleSessionMapStateSave() {
+    if (saveSessionMapStateTimer) window.clearTimeout(saveSessionMapStateTimer);
+    saveSessionMapStateTimer = window.setTimeout(function() {
+      saveSessionMapStateTimer = 0;
+      writeSessionMapState();
+    }, 120);
+  }
+
   function getInitialMapState() {
-    var index = randomInitialVillageIndex >= 0 ? randomInitialVillageIndex : 2;
-    var place = places[index] || places[2] || places[0];
+    var sessionState = readSessionMapState();
+    var index;
+    var place;
+
+    if (sessionState) {
+      index = Number.isFinite(sessionState.currentIndex) ? sessionState.currentIndex : 0;
+      place = places[index] || places[0];
+      return {
+        index: index,
+        place: place,
+        center: sessionState.center,
+        zoom: sessionState.zoom
+      };
+    }
+
+    index = randomInitialVillageIndex >= 0 ? randomInitialVillageIndex : 2;
+    place = places[index] || places[2] || places[0];
     return {
       index: index,
       place: place,
@@ -2896,7 +3015,7 @@
     });
   }
   function updateFerryVisibilityForFilter() { var showFerries = currentMapFilter === 'all' || currentMapFilter === 'ferry'; if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
-  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); }
+  function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); scheduleSessionMapStateSave(); }
   function getSelectedLanguageCode() {
     var htmlLang = document.documentElement && document.documentElement.lang ? String(document.documentElement.lang).trim().toLowerCase() : '';
     var stored = '';
@@ -3349,6 +3468,9 @@
     }
     window.addEventListener('resize', function() {
       syncBottomRailSheetLayout(bottomRailSheetExpanded ? 'expanded' : 'collapsed');
+    });
+    window.addEventListener('pagehide', function() {
+      writeSessionMapState();
     });
     window.requestAnimationFrame(function() {
       syncBottomRailSheetLayout('peek');
@@ -4068,6 +4190,7 @@
     syncMapStyleButton();
     if (!skipPersist) setStoredMapMode(currentBaseMapMode);
     updateMapVisualByZoom();
+    scheduleSessionMapStateSave();
   }
   function toggleBaseMapMode() {
     applyBaseMapMode(currentBaseMapMode === 'satellite' ? 'map' : 'satellite');
@@ -4389,6 +4512,7 @@
 
     map.on('zoomend moveend', function () {
       scheduleMapRefresh({ rail: true, auto: true });
+      scheduleSessionMapStateSave();
     });
 
     map.on('dragstart zoomstart', function () {
@@ -4419,6 +4543,7 @@
     if (!isMapPreviewMode) {
       applyMapFilterUI(currentMapFilter);
       renderBottomRailCards();
+      scheduleSessionMapStateSave();
     }
     loadPOIs().then(function() {
       if (isMapPreviewMode && map && poiMarkers.length) {
