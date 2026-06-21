@@ -1158,6 +1158,7 @@
       '/api/transport/realtime'
     ].filter(Boolean);
     var ACTIVE_TRAIN_RT_ENDPOINT = '';
+    var LAST_RT_ERROR = '';
     var REALTIME_REFRESH_MS = 30000;
 
     var fromSelect = document.getElementById('fromSelect');
@@ -1445,17 +1446,17 @@
       if (liveState.mode === 'live') {
         liveDot.classList.add('is-live');
         liveTitle.textContent = 'Live trains connected';
-        liveMeta.textContent = 'Updated ' + liveState.updatedAt + ' · refresh every 30s';
+        liveMeta.textContent = liveState.message || ('Updated ' + liveState.updatedAt + ' · refresh every 30s');
       } else if (liveState.mode === 'loading') {
         liveTitle.textContent = 'Connecting live trains';
-        liveMeta.textContent = 'Looking for a realtime feed';
+        liveMeta.textContent = liveState.message || 'Looking for a realtime feed';
       } else if (liveState.mode === 'error') {
         liveDot.classList.add('is-error');
         liveTitle.textContent = 'Live trains unavailable';
-        liveMeta.textContent = 'Using fallback timetable';
+        liveMeta.textContent = liveState.message || 'Using fallback timetable';
       } else {
-        liveTitle.textContent = 'Live trains not set up yet';
-        liveMeta.textContent = 'Showing fallback timetable';
+        liveTitle.textContent = 'Fallback timetable active';
+        liveMeta.textContent = liveState.message || 'Live feed not configured';
       }
     }
     function buildRealtimeUrl(endpoint){
@@ -1477,6 +1478,7 @@
       var payload = null;
       var rows = [];
       var endpoints = [];
+      var attemptedUrls = [];
       var i = 0;
       syncLiveNowSelection();
 
@@ -1485,7 +1487,7 @@
         : TRAIN_RT_ENDPOINTS.slice();
 
       if (!endpoints.length) {
-        refreshLiveState('fallback', '', 'No realtime endpoint configured');
+        refreshLiveState('fallback', '', 'No realtime endpoint configured in this page');
         realtimeDepartures = [];
         render();
         return;
@@ -1496,23 +1498,34 @@
         updateLiveStrip();
       }
 
+      LAST_RT_ERROR = '';
+
       for (i = 0; i < endpoints.length; i += 1) {
         try {
-          response = await fetch(buildRealtimeUrl(endpoints[i]), { cache:'no-store' });
-          if (!response.ok) throw new Error('HTTP ' + response.status);
+          var requestUrl = buildRealtimeUrl(endpoints[i]);
+          attemptedUrls.push(requestUrl);
+          response = await fetch(requestUrl, { cache:'no-store' });
+          if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + requestUrl);
           payload = await response.json();
           rows = Array.isArray(payload) ? payload : (payload.trains || payload.departures || payload.services || payload.data || []);
           realtimeDepartures = rows.map(normalizeRealtimeRow).filter(function(item){ return item && item.departure && item.departure !== '—'; });
           ACTIVE_TRAIN_RT_ENDPOINT = endpoints[i];
-          refreshLiveState('live', getItalianNow().time, '');
+          refreshLiveState('live', getItalianNow().time, realtimeDepartures.length ? ('Updated ' + getItalianNow().time + ' · refresh every 30s') : 'Live endpoint reached but returned no train rows');
           render();
           return;
-        } catch (_error) {
+        } catch (error) {
+          LAST_RT_ERROR = error && error.message ? error.message : 'Unknown realtime fetch error';
         }
       }
 
       realtimeDepartures = [];
-      refreshLiveState('fallback', '', 'No reachable realtime endpoint found');
+      refreshLiveState(
+        'error',
+        '',
+        LAST_RT_ERROR
+          ? ('No working realtime endpoint found · ' + LAST_RT_ERROR)
+          : ('No working realtime endpoint found among ' + attemptedUrls.length + ' candidate URLs')
+      );
       render();
     }
     function scheduleRefresh(){
