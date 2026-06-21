@@ -34,6 +34,25 @@
       overscroll-behavior: none;
       -webkit-text-size-adjust: 100%;
     }
+    body.ftg-actionbar-enabled { padding-top: 0 !important; }
+    #ftg-global-actionbar-root {
+      position: relative;
+      z-index: 80;
+    }
+    #ftg-global-actionbar-root .ftg-topbar {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      inset: auto !important;
+      width: 100% !important;
+    }
+    #ftg-global-actionbar-root .ftg-menu-panel {
+      position: fixed !important;
+    }
+    body.ftg-actionbar-enabled .search-floating {
+      top: calc(var(--ftg-header-height, 98px) + 8px);
+    }
     #map {
       position: fixed;
       inset: 0;
@@ -1245,6 +1264,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body class="park-presentation-mode">
+<div id="ftg-global-actionbar-root"></div>
 <div id="boot-status" aria-live="polite">
   <div class="boot-status-card">
     <div class="boot-status-title">Loading map…</div>
@@ -1348,6 +1368,199 @@
   </div>
 </div>
 
+<script>
+(function () {
+  'use strict';
+
+  var ACTIONBAR_PARTIAL_CANDIDATES = [
+    'global-actionbar.html',
+    './global-actionbar.html',
+    '/global-actionbar.html'
+  ];
+  var actionbarLoadPromise = null;
+  var actionbarObserver = null;
+  var actionbarMountScheduled = false;
+
+  function getInitialActionbarLanguage() {
+    var stored = '';
+    var lang = '';
+    try {
+      stored = localStorage.getItem('selectedLanguage') || localStorage.getItem('ftg_language') || localStorage.getItem('language') || '';
+    } catch (_error) {}
+    lang = String(document.documentElement.lang || stored || navigator.language || 'en').toLowerCase();
+    if (lang.indexOf('-') >= 0) lang = lang.split('-')[0];
+    return lang || 'en';
+  }
+
+  async function loadGlobalActionbarPartial() {
+    var i;
+    var response;
+    var html;
+    var parser;
+    var doc;
+    var scripts;
+    var links;
+    var styles;
+
+    if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+    if (actionbarLoadPromise) return actionbarLoadPromise;
+
+    actionbarLoadPromise = (async function () {
+      for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
+        try {
+          response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
+          if (!response.ok) continue;
+
+          html = await response.text();
+          if (!html) continue;
+
+          parser = new DOMParser();
+          doc = parser.parseFromString(html, 'text/html');
+          links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+          styles = Array.from(doc.querySelectorAll('style'));
+          scripts = Array.from(doc.querySelectorAll('script'));
+
+          links.forEach(function (link) {
+            var href = link.getAttribute('href') || '';
+            var el;
+            if (!href) return;
+            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+            el = document.createElement('link');
+            el.rel = 'stylesheet';
+            el.href = href;
+            el.setAttribute('data-ftg-actionbar-link', href);
+            document.head.appendChild(el);
+          });
+
+          styles.forEach(function (style, index) {
+            var key = 'ftg-actionbar-style-' + i + '-' + index;
+            var el;
+            if (document.getElementById(key)) return;
+            el = document.createElement('style');
+            el.id = key;
+            el.textContent = style.textContent || '';
+            document.head.appendChild(el);
+          });
+
+          for (var s = 0; s < scripts.length; s += 1) {
+            await new Promise(function (resolve) {
+              var original = scripts[s];
+              var src = original.getAttribute('src');
+              var scriptEl = document.createElement('script');
+              var done = false;
+
+              function finish() {
+                if (done) return;
+                done = true;
+                resolve();
+              }
+
+              if (src) {
+                scriptEl.src = src;
+                scriptEl.onload = finish;
+                scriptEl.onerror = finish;
+              } else {
+                scriptEl.textContent = original.textContent || '';
+              }
+
+              document.head.appendChild(scriptEl);
+              if (!src) finish();
+            });
+          }
+
+          if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+        } catch (_error) {}
+      }
+
+      return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+    }());
+
+    return actionbarLoadPromise;
+  }
+
+  function observeActionbarRoot() {
+    var rootActionbar = document.getElementById('ftg-global-actionbar-root');
+    if (actionbarObserver || !rootActionbar || typeof MutationObserver === 'undefined') return;
+
+    actionbarObserver = new MutationObserver(function () {
+      if (actionbarMountScheduled) return;
+      if (rootActionbar.childElementCount > 0) return;
+
+      actionbarMountScheduled = true;
+      setTimeout(function () {
+        actionbarMountScheduled = false;
+        if (rootActionbar.childElementCount === 0) mountActionbar(true);
+      }, 120);
+    });
+
+    actionbarObserver.observe(rootActionbar, { childList: true });
+  }
+
+  async function mountActionbar(force) {
+    var rootActionbar = document.getElementById('ftg-global-actionbar-root');
+    var mounted = false;
+    if (!rootActionbar) return;
+
+    window.FTG_ACTIONBAR_CONFIG = {
+      activePage: 'map',
+      language: getInitialActionbarLanguage(),
+      userName: 'Guest',
+      isLoggedIn: false,
+      androidAppHref: '#android',
+      privacyHref: '#privacy',
+      termsHref: '#terms',
+      menuItems: [
+        { id: 'map', labelKey: 'nav_map', label: 'Map', href: 'map.html' },
+        { id: 'stories', labelKey: 'nav_stories', label: 'Stories', href: 'index.html' },
+        { id: 'sentieri', labelKey: 'nav_sentieri', label: 'Sentieri', href: 'sentieri.html' },
+        { id: 'discounts', labelKey: 'nav_discounts', label: 'Local Discounts', href: 'discounts.html' },
+        { id: 'trains', labelKey: 'nav_trains', label: 'Public Transport', href: 'public-transport.html' },
+        { id: 'weather', labelKey: 'nav_weather', label: 'Weather', href: 'weather.html' },
+        { id: 'updates', labelKey: 'nav_updates', label: 'Official Updates', href: 'updates.html' }
+      ],
+      onLanguageChange: function (lang) {
+        try { localStorage.setItem('ftg_language', String(lang || 'en').toLowerCase()); } catch (_error) {}
+        mountActionbar(true);
+      }
+    };
+
+    observeActionbarRoot();
+    await loadGlobalActionbarPartial();
+
+    if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
+      if (force || rootActionbar.childElementCount === 0 || !rootActionbar.dataset.ftgMounted) {
+        rootActionbar.innerHTML = '';
+        window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
+        rootActionbar.dataset.ftgMounted = 'true';
+        mounted = true;
+      }
+
+      if (mounted) {
+        requestAnimationFrame(function () {
+          if (rootActionbar.childElementCount === 0) {
+            setTimeout(function () { mountActionbar(true); }, 180);
+          }
+        });
+      }
+    } else {
+      rootActionbar.innerHTML = '';
+      delete rootActionbar.dataset.ftgMounted;
+      console.warn('FTG_MOUNT_GLOBAL_ACTIONBAR not available');
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { mountActionbar(); }, { once: true });
+  } else {
+    mountActionbar();
+  }
+
+  window.addEventListener('pageshow', function () {
+    var rootActionbar = document.getElementById('ftg-global-actionbar-root');
+    if (rootActionbar && rootActionbar.childElementCount === 0) mountActionbar(true);
+  });
+}());
+</script>
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/supabase.js"></script>
 <script>
