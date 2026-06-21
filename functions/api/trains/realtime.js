@@ -1,70 +1,200 @@
-const DEFAULT_BASES = [
-  'https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno',
-  'https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno/'
-];
+const VT_BASE = 'http://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno';
+const ROME_TIMEZONE = 'Europe/Rome';
 
-const NAME_ALIASES = {
-  'monterosso': 'Monterosso',
-  'monterosso al mare': 'Monterosso',
-  'vernazza': 'Vernazza',
-  'corniglia': 'Corniglia',
-  'manarola': 'Manarola',
-  'riomaggiore': 'Riomaggiore',
-  'la spezia': 'La Spezia Centrale',
-  'la spezia centrale': 'La Spezia Centrale',
-  'levanto': 'Levanto'
+const STATION_ALIASES = {
+  Monterosso: ['Monterosso'],
+  Vernazza: ['Vernazza'],
+  Corniglia: ['Corniglia'],
+  Manarola: ['Manarola'],
+  Riomaggiore: ['Riomaggiore'],
+  'La Spezia': ['La Spezia Centrale', 'La Spezia'],
+  Levanto: ['Levanto']
 };
 
+const stationCache = new Map();
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders()
+  });
+}
+
+export async function onRequestGet(context) {
+  try {
+    const url = new URL(context.request.url);
+    const from = (url.searchParams.get('from') || '').trim();
+    const to = (url.searchParams.get('to') || '').trim();
+    const date = (url.searchParams.get('date') || '').trim();
+    const time = normalizeHourMinute(url.searchParams.get('time') || '');
+
+    if (!from || !to || !date || !time) {
+      return json(
+        {
+          error: 'Missing required query parameters. Expected from, to, date, time.',
+          example: '/api/trains/realtime?from=Monterosso&to=Vernazza&date=2026-06-21&time=16:20'
+        },
+        400
+      );
+    }
+
+    const fromStation = await resolveStation(from);
+    const toStation = await resolveStation(to);
+    const requestDateTime = buildViaggiaTrenoDateTime(date, time);
+    const departures = await fetchJsonArray(
+      `${VT_BASE}/partenze/${encodeURIComponent(fromStation.code)}/${encodeURIComponent(requestDateTime)}`
+    );
+
+    const candidateRows = departures
+      .filter((row) => row && row.numeroTreno != null)
+      .slice(0, 12);
+
+    const trains = (await mapLimit(candidateRows, 4, async (row) => {
+      try {
+        return await enrichDeparture(row, fromStation, toStation);
+      } catch (_error) {
+        return null;
+      }
+    }))
+      .filter(Boolean)
+      .sort((a, b) => toMinutes(a.departureTime) - toMinutes(b.departureTime));
+
+    return json({
+      source: 'viaggiatreno',
+      updatedAt: new Date().toISOString(),
+      requested: { from, to, date, time },
+      resolved: {
+        from: { label: fromStation.displayName, code: fromStation.code },
+        to: { label: toStation.displayName, code: toStation.code }
+      },
+      trains: dedupeBy(trains, (item) => item.id)
+    });
+  } catch (error) {
+    return json(
+      {
+        error: 'Unable to load realtime trains from ViaggiaTreno.',
+        details: error && error.message ? error.message : 'Unknown error'
+      },
+      502
+    );
+  }
+}
+
+function corsHeaders() {
+  return {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, OPTIONS',
+    'access-control-allow-headers': 'Content-Type'
+  };
+}
+
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(data, null, 2), {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET, OPTIONS',
-      'access-control-allow-headers': 'content-type'
+      'cache-control': 'public, max-age=15, s-maxage=15, stale-while-revalidate=45',
+      ...corsHeaders()
     }
   });
 }
 
-function normalizeName(value = '') {
-  const key = String(value).trim().toLowerCase();
-  return NAME_ALIASES[key] || String(value || '').trim();
+function normalizeHourMinute(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return '';
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return '';
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
-function normalizeTime(value) {
-  if (value == null) return '';
-  const raw = String(value).trim();
-  const hhmm = raw.match(/(\d{1,2}):(\d{2})/);
-  if (hhmm) return `${hhmm[1].padStart(2, '0')}:${hhmm[2]}`;
-  const compact = raw.match(/^(\d{1,2})(\d{2})$/);
-  if (compact) return `${compact[1].padStart(2, '0')}:${compact[2]}`;
+function normalizeText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '')
+    .toLowerCase();
+}
+
+function titleCase(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) return '';
+  return text.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    if (value !== null && value !== undefined && String(value).trim()) return String(value).trim();
+  }
   return '';
 }
 
-function toMinutes(value) {
-  const [h = '0', m = '0'] = String(value || '00:00').split(':');
-  return (parseInt(h, 10) || 0) * 60 + (parseInt(m, 10) || 0);
+function pickNumber(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined || value === '') continue;
+    const number = Number(value);
+    if (Number.isFinite(number)) return number;
+  }
+  return null;
 }
 
-function inferDuration(departure, arrival) {
-  if (!departure || !arrival) return '—';
-  const diff = toMinutes(arrival) - toMinutes(departure);
-  return diff > 0 ? `${diff} min` : '—';
+function formatTimeFromMillis(value) {
+  if (!Number.isFinite(value)) return '—';
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: ROME_TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).format(new Date(value));
+}
+
+function computeDuration(departureMillis, arrivalMillis) {
+  if (!Number.isFinite(departureMillis) || !Number.isFinite(arrivalMillis)) return '—';
+  const diffMinutes = Math.round((arrivalMillis - departureMillis) / 60000);
+  if (!Number.isFinite(diffMinutes) || diffMinutes <= 0) return '—';
+  if (diffMinutes < 60) return `${diffMinutes} min`;
+  const hours = Math.floor(diffMinutes / 60);
+  const minutes = diffMinutes % 60;
+  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+function buildViaggiaTrenoDateTime(date, time) {
+  const match = String(date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) throw new Error('Invalid date format. Expected YYYY-MM-DD.');
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const probe = new Date(Date.UTC(year, monthIndex, day));
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${weekdays[probe.getUTCDay()]} ${months[monthIndex]} ${day} ${year} ${time}:00`;
 }
 
 async function fetchText(url) {
   const response = await fetch(url, {
-    headers: {
-      'accept': 'application/json,text/plain,*/*',
-      'user-agent': '5TerreGo/1.0'
-    }
+    method: 'GET',
+    headers: { accept: 'text/plain,application/json' },
+    cf: { cacheTtl: 15, cacheEverything: false }
   });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`Upstream ${response.status} for ${url}`);
   return response.text();
+}
+
+async function fetchJson(url) {
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { accept: 'application/json,text/plain' },
+    cf: { cacheTtl: 15, cacheEverything: false }
+  });
+  if (!response.ok) throw new Error(`Upstream ${response.status} for ${url}`);
+  return response.json();
+}
+
+async function fetchJsonArray(url) {
+  const payload = await fetchJson(url);
+  return Array.isArray(payload) ? payload : [];
 }
 
 function parseAutocomplete(text) {
@@ -73,181 +203,226 @@ function parseAutocomplete(text) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [label, code] = line.split('|');
-      return { label: (label || '').trim(), code: (code || '').trim() };
+      const parts = line.split('|');
+      return {
+        label: (parts[0] || '').trim(),
+        code: (parts[1] || '').trim()
+      };
     })
-    .filter((row) => row.label && row.code);
+    .filter((item) => item.label && item.code);
 }
 
-async function resolveStation(base, name) {
-  const query = encodeURIComponent(normalizeName(name));
-  const text = await fetchText(`${base.replace(/\/$/, '')}/autocompleteStazione/${query}`);
-  const rows = parseAutocomplete(text);
-  const wanted = normalizeName(name).toLowerCase();
-  return rows.find((row) => row.label.toLowerCase().includes(wanted)) || rows[0] || null;
-}
+async function resolveStation(label) {
+  const cacheKey = normalizeText(label);
+  if (stationCache.has(cacheKey)) return stationCache.get(cacheKey);
 
-function parseMaybeJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch (_error) {
-    return null;
+  const aliases = STATION_ALIASES[label] || [label];
+  for (const alias of aliases) {
+    const entries = parseAutocomplete(
+      await fetchText(`${VT_BASE}/autocompletaStazione/${encodeURIComponent(alias)}`)
+    );
+    const match = pickBestStation(entries, label, alias);
+    if (match) {
+      const resolved = {
+        code: match.code,
+        displayName: titleCase(match.label),
+        rawLabel: match.label,
+        normalizedKeys: new Set([
+          normalizeText(label),
+          normalizeText(alias),
+          normalizeText(match.label),
+          normalizeText(titleCase(match.label))
+        ])
+      };
+      stationCache.set(cacheKey, resolved);
+      return resolved;
+    }
   }
+
+  throw new Error(`Station not found: ${label}`);
 }
 
-function normalizeRealtimeRow(row, fallbackFrom, fallbackTo) {
-  const departure = normalizeTime(
-    row.departure || row.departureTime || row.orarioPartenza || row.orarioPartenzaZero || row.partenza
+function pickBestStation(entries, requestedLabel, alias) {
+  const wanted = normalizeText(requestedLabel);
+  const wantedAlias = normalizeText(alias);
+  let best = null;
+  let bestScore = -1;
+
+  for (const entry of entries) {
+    const normalized = normalizeText(entry.label);
+    let score = 0;
+    if (normalized === wanted) score = 100;
+    else if (normalized === wantedAlias) score = 98;
+    else if (normalized.includes(wanted) || wanted.includes(normalized)) score = 80;
+    else if (normalized.includes(wantedAlias) || wantedAlias.includes(normalized)) score = 78;
+    else if (wanted === 'laspezia' && normalized.includes('laspeziacentrale')) score = 110;
+    if (score > bestScore) {
+      best = entry;
+      bestScore = score;
+    }
+  }
+
+  return best || entries[0] || null;
+}
+
+function stopMatchesStation(stop, station) {
+  if (!stop || !station) return false;
+  const stopId = String(stop.id || '').trim();
+  const stopName = normalizeText(stop.stazione || stop.nomeLungo || stop.nomeBreve || '');
+  if (stopId && stopId === station.code) return true;
+  for (const key of station.normalizedKeys) {
+    if (!key) continue;
+    if (stopName === key || stopName.includes(key) || key.includes(stopName)) return true;
+  }
+  return false;
+}
+
+function findStopIndex(stops, station, startIndex = 0) {
+  for (let index = startIndex; index < stops.length; index += 1) {
+    if (stopMatchesStation(stops[index], station)) return index;
+  }
+  return -1;
+}
+
+function pickDepartureMillis(stop, fallbackRow) {
+  return pickNumber(
+    stop && stop.partenzaReale,
+    stop && stop.effettiva,
+    stop && stop.partenza_teorica,
+    stop && stop.programmata,
+    fallbackRow && fallbackRow.partenzaTreno,
+    fallbackRow && fallbackRow.orarioPartenza
   );
-  const arrival = normalizeTime(
-    row.arrival || row.arrivalTime || row.orarioArrivo || row.arrivo
-  ) || '—';
+}
 
-  const rawDelay = row.delayMinutes ?? row.delay ?? row.ritardo ?? row.ritardoPartenza;
-  const delay = Number.parseInt(rawDelay, 10);
-  const rawStatus = String(row.status || row.stato || '').toLowerCase();
-  const cancelled = Boolean(row.cancelled || row.canceled || row.soppresso || row.suppressed || rawStatus === 'cancelled');
+function pickArrivalMillis(stop) {
+  return pickNumber(
+    stop && stop.arrivoReale,
+    stop && stop.effettiva,
+    stop && stop.arrivo_teorico,
+    stop && stop.programmata
+  );
+}
 
-  let status = 'ok';
-  let statusLabel = 'On time';
-  if (cancelled) {
-    status = 'danger';
-    statusLabel = 'Cancelled';
-  } else if (!Number.isNaN(delay) && delay > 0) {
-    status = 'warn';
-    statusLabel = `+${delay} min`;
-  } else if (rawStatus === 'scheduled') {
-    status = 'neutral';
-    statusLabel = 'Scheduled';
+function buildRouteLabel(row) {
+  const category = firstNonEmpty(row.categoriaDescrizione, row.categoria).replace(/^\s+/, '');
+  const number = firstNonEmpty(row.numeroTreno);
+  return firstNonEmpty(`${category} ${number}`.trim(), `Train ${number}`, 'Train');
+}
+
+function buildStatus(row, andamento, delayMinutes) {
+  if (Number(row.provvedimento) === 1 || String(andamento && andamento.tipoTreno || '') === 'ST') {
+    return { status: 'danger', label: 'Cancelled' };
   }
+  if (Number.isFinite(delayMinutes) && delayMinutes >= 5) {
+    return { status: 'warn', label: `+${delayMinutes} min` };
+  }
+  if (Number.isFinite(delayMinutes) && delayMinutes <= -1) {
+    return { status: 'ok', label: `${Math.abs(delayMinutes)} min early` };
+  }
+  if (row.inStazione || row.circolante) {
+    return { status: 'ok', label: 'Live' };
+  }
+  return { status: 'ok', label: 'On time' };
+}
 
-  const platform = row.platform || row.binario || row.binarioEffettivoPartenzaDescrizione || row.binarioProgrammatoPartenzaDescrizione || '';
-  const route = row.route || row.service || row.name || row.numeroTreno || row.trainNumber || row.compNumeroTreno || 'Train';
-  const to = row.to || row.destination || row.destinazione || row.destinazioneFinale || fallbackTo;
-  const from = row.from || row.origin || row.origine || fallbackFrom;
+async function fetchAndamento(originCode, trainNumber, departureMillis) {
+  return fetchJson(
+    `${VT_BASE}/andamentoTreno/${encodeURIComponent(originCode)}/${encodeURIComponent(trainNumber)}/${encodeURIComponent(departureMillis)}`
+  );
+}
+
+async function enrichDeparture(row, fromStation, toStation) {
+  const trainNumber = firstNonEmpty(row.numeroTreno);
+  const originCode = firstNonEmpty(row.codOrigine, fromStation.code);
+  const departureMillis = firstNonEmpty(row.millisDataPartenza, row.dataPartenzaTreno);
+
+  if (!trainNumber || !originCode || !departureMillis) return null;
+
+  const andamento = await fetchAndamento(originCode, trainNumber, departureMillis);
+  const stops = Array.isArray(andamento && andamento.fermate) ? andamento.fermate : [];
+  if (!stops.length) return null;
+
+  const fromIndex = findStopIndex(stops, fromStation, 0);
+  const toIndex = fromIndex === -1 ? -1 : findStopIndex(stops, toStation, fromIndex + 1);
+  if (fromIndex === -1 || toIndex === -1 || toIndex <= fromIndex) return null;
+
+  const fromStop = stops[fromIndex];
+  const toStop = stops[toIndex];
+  const plannedDeparture = pickDepartureMillis(fromStop, row);
+  const plannedArrival = pickArrivalMillis(toStop);
+  const delayMinutes = pickNumber(
+    toStop.ritardoArrivo,
+    fromStop.ritardoPartenza,
+    toStop.ritardo,
+    fromStop.ritardo,
+    row.ritardo,
+    0
+  );
+  const platform = firstNonEmpty(
+    fromStop.binarioEffettivoPartenzaDescrizione,
+    fromStop.binarioProgrammatoPartenzaDescrizione,
+    row.binarioEffettivoPartenzaDescrizione,
+    row.binarioProgrammatoPartenzaDescrizione
+  );
+  const status = buildStatus(row, andamento, delayMinutes);
 
   return {
-    id: row.id || row.numeroTreno || row.trainNumber || `${route}-${departure}`,
+    id: `${trainNumber}-${originCode}-${departureMillis}-${toStation.code}`,
     mode: 'train',
-    route: String(route),
-    from: String(from),
-    to: String(to),
-    departure: departure || '—',
-    arrival,
-    duration: row.duration || inferDuration(departure, arrival),
-    status,
-    statusLabel,
-    meta: platform ? `Platform ${platform}` : 'Live update',
-    direct: row.note || row.direct || 'Real time'
+    trainNumber,
+    route: buildRouteLabel(row),
+    from: fromStation.displayName,
+    to: toStation.displayName,
+    departureTime: formatTimeFromMillis(plannedDeparture),
+    arrivalTime: formatTimeFromMillis(plannedArrival),
+    duration: computeDuration(plannedDeparture, plannedArrival),
+    platform,
+    delayMinutes: Number.isFinite(delayMinutes) ? delayMinutes : 0,
+    status: status.status,
+    statusLabel: status.label,
+    direct: 'Direct',
+    meta: platform ? `Platform ${platform}` : 'Live via ViaggiaTreno',
+    origin: titleCase(firstNonEmpty(andamento && andamento.origine, row.origine, fromStation.rawLabel)),
+    destination: titleCase(firstNonEmpty(row.destinazione, toStation.rawLabel))
   };
 }
 
-function extractRows(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (!payload || typeof payload !== 'object') return [];
-  return payload.trains || payload.departures || payload.services || payload.data || payload.soluzioni || payload.solutions || [];
-}
+async function mapLimit(items, limit, mapper) {
+  const results = new Array(items.length);
+  let cursor = 0;
 
-async function tryJourney(base, fromCode, toCode, isoDate, time) {
-  const stamp = `${isoDate}T${time}:00`;
-  const epoch = String(Date.parse(stamp));
-  const urls = [
-    `${base.replace(/\/$/, '')}/soluzioniViaggioNew/${fromCode}/${toCode}/${epoch}`,
-    `${base.replace(/\/$/, '')}/soluzioniViaggioNew/${fromCode}/${toCode}/${encodeURIComponent(stamp)}`,
-    `${base.replace(/\/$/, '')}/soluzioniViaggioNew/${fromCode}/${toCode}/${encodeURIComponent(`${isoDate} ${time}`)}`
-  ];
-
-  for (const url of urls) {
-    try {
-      const text = await fetchText(url);
-      const payload = parseMaybeJson(text);
-      const rows = extractRows(payload);
-      if (rows.length) return rows;
-    } catch (_error) {
-    }
-  }
-  return [];
-}
-
-async function tryDepartures(base, fromCode, isoDate, time) {
-  const stamp = `${isoDate}T${time}:00`;
-  const epoch = String(Date.parse(stamp));
-  const urls = [
-    `${base.replace(/\/$/, '')}/partenze/${fromCode}/${epoch}`,
-    `${base.replace(/\/$/, '')}/partenze/${fromCode}/${encodeURIComponent(stamp)}`,
-    `${base.replace(/\/$/, '')}/partenze/${fromCode}`
-  ];
-
-  for (const url of urls) {
-    try {
-      const text = await fetchText(url);
-      const payload = parseMaybeJson(text);
-      const rows = extractRows(payload);
-      if (rows.length) return rows;
-    } catch (_error) {
-    }
-  }
-  return [];
-}
-
-function filterRows(rows, fromName, toName, time) {
-  const wantedTo = normalizeName(toName).toLowerCase();
-  const minMinutes = toMinutes(time);
-
-  return rows
-    .map((row) => normalizeRealtimeRow(row, normalizeName(fromName), normalizeName(toName)))
-    .filter((row) => row.departure && row.departure !== '—')
-    .filter((row) => row.to.toLowerCase().includes(wantedTo) || wantedTo.includes(row.to.toLowerCase()))
-    .filter((row) => toMinutes(row.departure) >= minMinutes)
-    .sort((a, b) => toMinutes(a.departure) - toMinutes(b.departure))
-    .slice(0, 12);
-}
-
-export async function onRequestOptions() {
-  return json({ ok: true });
-}
-
-export async function onRequestGet(context) {
-  const url = new URL(context.request.url);
-  const from = normalizeName(url.searchParams.get('from') || 'Monterosso');
-  const to = normalizeName(url.searchParams.get('to') || 'Vernazza');
-  const date = url.searchParams.get('date') || new Date().toISOString().slice(0, 10);
-  const time = normalizeTime(url.searchParams.get('time') || '00:00') || '00:00';
-  const bases = [context.env?.TRAIN_UPSTREAM_BASE, context.env?.VIAGGIATRENO_BASE, ...DEFAULT_BASES].filter(Boolean);
-
-  for (const base of bases) {
-    try {
-      const fromStation = await resolveStation(base, from);
-      const toStation = await resolveStation(base, to);
-      if (!fromStation || !toStation) continue;
-
-      let rows = await tryJourney(base, fromStation.code, toStation.code, date, time);
-      if (!rows.length) {
-        rows = await tryDepartures(base, fromStation.code, date, time);
-      }
-
-      const normalized = filterRows(rows, from, to, time);
-      if (normalized.length) {
-        return json({
-          source: 'realtime',
-          provider: 'train-upstream',
-          from,
-          to,
-          date,
-          time,
-          departures: normalized
-        });
-      }
-    } catch (_error) {
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await mapper(items[index], index);
     }
   }
 
-  return json({
-    source: 'fallback',
-    from,
-    to,
-    date,
-    time,
-    departures: []
-  }, 200);
+  const workers = [];
+  const workerCount = Math.max(1, Math.min(limit, items.length));
+  for (let index = 0; index < workerCount; index += 1) workers.push(worker());
+  await Promise.all(workers);
+  return results;
+}
+
+function dedupeBy(items, getKey) {
+  const seen = new Set();
+  const output = [];
+  for (const item of items) {
+    const key = getKey(item);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    output.push(item);
+  }
+  return output;
+}
+
+function toMinutes(value) {
+  const text = String(value || '00:00');
+  const parts = text.split(':');
+  const hour = Number(parts[0]) || 0;
+  const minute = Number(parts[1]) || 0;
+  return (hour * 60) + minute;
 }
