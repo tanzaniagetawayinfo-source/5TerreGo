@@ -4,118 +4,578 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Blog Editor</title>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#05070a;color:#fff}
-.header{position:sticky;top:0;background:#05070a;padding:16px;display:flex;gap:10px;align-items:center;z-index:10}
-.search{flex:1;min-width:0;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;outline:none;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,0.25);transition:all .2s ease}
-.search::placeholder{color:rgba(255,255,255,0.5)}
-.search:focus{border:1px solid rgba(255,255,255,0.25);background:linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.06));box-shadow:0 10px 30px rgba(0,0,0,0.35)}
-.add-btn{padding:14px 18px;border-radius:16px;border:none;background:linear-gradient(135deg,#ffffff,#eaeaea);color:black;font-weight:800;cursor:pointer;white-space:nowrap;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.3);transition:all .18s ease}
-.add-btn:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(0,0,0,0.4)}
-.add-btn:active{transform:scale(.96);box-shadow:0 4px 12px rgba(0,0,0,0.25)}
-.status{padding:0 16px 8px;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.45}
-.status.error{color:#ffb4b4}
-.status code{display:inline-block;color:#fff;background:rgba(255,255,255,0.08);padding:3px 6px;border-radius:6px;margin-top:4px;word-break:break-word}
-.top-title{padding:18px 16px 4px}
-.top-title h1{margin:0;font-size:26px;letter-spacing:-.04em}
-.top-title p{margin:6px 0 0;color:rgba(255,255,255,.62);font-size:13px;line-height:1.4}
-.list{padding:16px}
-.post{position:relative;min-height:108px;padding:14px;padding-left:106px;padding-right:124px;border-radius:14px;background:rgba(255,255,255,0.06);margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform .15s ease,background .15s ease;overflow:hidden}
-.post-thumb{position:absolute;left:10px;top:10px;width:82px;height:82px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.1)}
-.post-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.post-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;color:rgba(255,255,255,.5)}
-.post:active{transform:scale(.99);background:rgba(255,255,255,0.09)}
-.post-title{font-weight:800;margin-bottom:5px;line-height:1.25}
-.post-meta{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.35}
-.post-excerpt{margin-top:6px;font-size:13px;color:rgba(255,255,255,0.72);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.post-alert{position:absolute;right:10px;max-width:112px;padding:5px 7px;border-radius:999px;font-size:9px;font-weight:800;line-height:1;text-align:center;text-transform:uppercase;letter-spacing:.01em;pointer-events:none;white-space:nowrap}
-.post-alert.draft{top:10px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966}
-.post-alert.missing{top:36px;background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
-.empty{padding:24px;text-align:center;color:rgba(255,255,255,0.55)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
-.modal.is-open{display:flex}
-.modal-content{position:relative;background:#0a0c10;border-radius:18px;padding:18px;padding-top:60px;width:100%;max-width:560px;border:1px solid rgba(255,255,255,0.12);max-height:90vh;overflow:auto}
-.close-btn{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:18px;cursor:pointer}
-input,select,textarea{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;outline:none;font-size:14px}
-.image-upload-box{margin-top:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.1)}
-.image-upload-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.image-upload-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:14px;background:#fff;color:#000;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.25)}
-.image-upload-btn input{display:none}
-.image-clear-btn{padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;font-weight:800;cursor:pointer}
-.image-upload-help{margin-top:8px;font-size:12px;line-height:1.35;color:rgba(255,255,255,.58)}
-.image-preview{display:none;margin-top:10px;border-radius:14px;overflow:hidden;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1)}
-.image-preview img{display:block;width:100%;max-height:220px;object-fit:cover}
-.image-preview-meta{padding:8px 10px;font-size:11px;color:rgba(255,255,255,.62);line-height:1.35}
-textarea{min-height:110px;resize:vertical;line-height:1.45}
-#content{min-height:260px}
-select option{color:#111}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button.save{width:100%;padding:14px;margin-top:14px;border-radius:12px;border:none;background:white;color:black;font-weight:800;cursor:pointer}
-button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:none;background:#ff3b30;color:white;font-weight:800;cursor:pointer}
-.slug-preview{margin-top:8px;font-size:12px;color:rgba(255,255,255,.58);word-break:break-all}
-.slug-preview strong{color:#fff}
-.preview-card{margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08)}
-.preview-image{display:none;margin-bottom:10px;width:100%;height:170px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09)}
-.preview-image img{width:100%;height:100%;object-fit:cover;display:block}
-.preview-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);font-weight:800;margin-bottom:8px}
-.preview-title{font-weight:900;font-size:18px;line-height:1.15;letter-spacing:-.03em}
-.preview-excerpt{margin-top:6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.68)}
-.task-slider{display:flex;gap:10px;overflow-x:auto;padding:12px 16px 4px;scroll-snap-type:x mandatory}
+:root{
+  --page-bg:#f3f7fd;
+  --surface:#ffffff;
+  --surface-2:#f8fbff;
+  --text:#18366f;
+  --muted:#6f84ad;
+  --line:#dde6f3;
+  --primary:#1a469f;
+  --primary-2:#123b8f;
+  --accent:#ff8059;
+  --warn:#ffcc00;
+  --danger:#ff5b57;
+  --soft-shadow:0 18px 42px rgba(20,50,110,0.10);
+}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(26,70,159,0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(255,128,89,0.08), transparent 20%),
+    linear-gradient(180deg,#f9fbff 0%,var(--page-bg) 100%);
+  color:var(--text);
+}
+.page-shell{
+  width:100%;
+  max-width:980px;
+  margin:0 auto;
+  padding:20px 16px 84px;
+}
+.back-to-login{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:0 12px 28px rgba(20,50,110,0.10);
+  color:var(--text);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:800;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.back-to-login:active{transform:scale(.985)}
+.page-hero{
+  position:relative;
+  overflow:hidden;
+  padding:0;
+  border-radius:30px;
+  background:#ffffff;
+  border:1px solid rgba(255,255,255,0.92);
+  box-shadow:var(--soft-shadow);
+}
+.hero-bg{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  object-position:center center;
+  position:relative;
+  z-index:0;
+}
+.hero-quote-wrap{
+  position:absolute;
+  top:22px;
+  left:22px;
+  z-index:1;
+  width:50%;
+  max-width:50%;
+  min-width:50%;
+  min-height:132px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+#heroQuote{
+  margin:10px 0 0;
+  max-width:100%;
+  font-size:20px;
+  line-height:1.15;
+  letter-spacing:-0.02em;
+  color:#000;
+  text-wrap:balance;
+  transition:opacity .32s ease, transform .32s ease;
+}
+#heroQuote.is-changing{opacity:0;transform:translateY(8px)}
+.hero-author{
+  margin:10px 0 0;
+  max-width:none;
+  font-size:12px;
+  line-height:1.3;
+  color:var(--muted);
+  font-style:italic;
+  animation:heroAuthorFloat 2.8s ease-in-out infinite;
+  transform-origin:left center;
+}
+@keyframes heroAuthorFloat{
+  0%{opacity:.55;transform:translateY(0px)}
+  50%{opacity:1;transform:translateY(-2px)}
+  100%{opacity:.55;transform:translateY(0px)}
+}
+.task-section{margin-top:14px}
+.task-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.task-section-title{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--primary);
+}
+.task-count{
+  min-width:30px;
+  height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:0 10px 22px rgba(20,50,110,0.08);
+  color:var(--text);
+  font-size:12px;
+  font-weight:900;
+}
+.task-slider{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:2px 0 4px;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+}
 .task-slider::-webkit-scrollbar{display:none}
-.task-card{position:relative;flex:0 0 auto;min-width:150px;max-width:175px;padding:12px;padding-top:34px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);scroll-snap-align:start;cursor:pointer}
-.task-title{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.task-pill{font-size:9px;padding:4px 7px;border-radius:999px;background:rgba(255,204,0,0.16);border:1px solid rgba(255,204,0,0.38);color:#ffd966;display:inline-block;font-weight:800;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;line-height:1;margin-right:4px;margin-top:4px}
-.task-pill.red{background:rgba(255,59,48,0.16);border:1px solid rgba(255,59,48,0.4);color:#ff8a80}
-.poi-link-card{margin-top:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.1)}
-.poi-link-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.55);margin-bottom:8px}
+.task-card{
+  position:relative;
+  flex:0 0 196px;
+  min-height:118px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:var(--soft-shadow);
+  color:var(--text);
+  scroll-snap-align:start;
+  cursor:pointer;
+  text-align:left;
+}
+.task-card:active{transform:scale(.985)}
+.task-card.empty{cursor:default;flex-basis:240px}
+.task-title{
+  margin:0 0 8px;
+  font-size:15px;
+  line-height:1.15;
+  font-weight:850;
+  letter-spacing:-.02em;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.task-meta{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.35}
+.task-pill{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:0 9px;
+  border-radius:999px;
+  background:rgba(255,204,0,0.14);
+  border:1px solid rgba(255,204,0,0.34);
+  color:#b48700;
+  font-size:10px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-right:6px;
+  margin-top:6px;
+  white-space:nowrap;
+}
+.task-pill.red{
+  background:rgba(255,91,87,0.12);
+  border:1px solid rgba(255,91,87,0.26);
+  color:#cb4f5a;
+}
+.header{
+  position:static;
+  padding:14px 0 0;
+  background:transparent;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.search{
+  flex:1;
+  min-width:0;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--text);
+  outline:none;
+  font-size:14px;
+  box-shadow:0 10px 24px rgba(20,50,110,0.06);
+}
+.search::placeholder{color:#91a2c2}
+.search:focus{
+  border-color:rgba(26,70,159,0.26);
+  background:var(--surface);
+  box-shadow:0 14px 30px rgba(20,50,110,0.10);
+}
+.add-btn{
+  padding:14px 18px;
+  border-radius:16px;
+  border:none;
+  background:linear-gradient(180deg,var(--primary) 0%,var(--primary-2) 100%);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+  font-size:14px;
+  box-shadow:0 14px 30px rgba(26,70,159,0.24);
+}
+.add-btn:hover{box-shadow:0 18px 34px rgba(26,70,159,0.30)}
+.add-btn:active{transform:scale(.96);box-shadow:0 8px 18px rgba(26,70,159,0.22)}
+.status{
+  margin-top:12px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.78);
+  border:1px solid rgba(255,255,255,0.90);
+  box-shadow:0 10px 24px rgba(20,50,110,0.05);
+  color:var(--muted);
+  font-size:13px;
+}
+.status.error{color:#c94b56;background:rgba(255,245,246,0.95);border-color:rgba(233,177,186,0.9)}
+.status code{color:var(--text);background:#eef3fb;padding:3px 6px;border-radius:6px;word-break:break-word}
+.list{padding:16px 0 0;display:grid;gap:14px}
+.post{
+  position:relative;
+  min-height:132px;
+  padding:18px;
+  padding-left:104px;
+  padding-right:122px;
+  border-radius:26px;
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:var(--soft-shadow);
+  color:var(--text);
+  cursor:pointer;
+}
+.post:active{transform:scale(.992);background:#fff}
+.post-thumb{
+  position:absolute;
+  left:18px;
+  top:18px;
+  width:70px;
+  height:70px;
+  border-radius:16px;
+  overflow:hidden;
+  background:#eef3fb;
+  border:1px solid rgba(24,54,111,0.08);
+}
+.post-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.post-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#90a1c1}
+.post-alert{
+  position:absolute;
+  right:16px;
+  max-width:106px;
+  padding:6px 8px;
+  border-radius:999px;
+  font-size:9px;
+  letter-spacing:.05em;
+  text-align:center;
+  white-space:nowrap;
+  font-weight:900;
+}
+.post-alert.draft{top:18px;background:rgba(255,204,0,0.15);border:1px solid rgba(255,204,0,0.35);color:#b48700}
+.post-alert.missing{top:46px;background:rgba(255,91,87,0.12);border:1px solid rgba(255,91,87,0.26);color:#cb4f5a}
+.post-title{margin-bottom:6px;font-size:18px;font-weight:850;line-height:1.08;letter-spacing:-.03em;color:var(--text)}
+.post-meta{font-size:13px;color:var(--muted);line-height:1.5}
+.post-excerpt{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.linked-pois-line{margin-top:9px;display:flex;gap:6px;flex-wrap:wrap}
+.linked-poi-mini{font-size:10px;font-weight:800;padding:5px 8px;border-radius:999px;background:#eef3fb;color:var(--text)}
+.empty{
+  padding:34px 24px;
+  border-radius:26px;
+  text-align:center;
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(255,255,255,0.92);
+  box-shadow:var(--soft-shadow);
+  color:var(--muted);
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(11,20,38,0.42);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:50;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.modal.is-open{display:flex}
+.modal-content{
+  position:relative;
+  background:linear-gradient(180deg,#fbfdff 0%,#f3f7fd 100%);
+  border-radius:32px;
+  padding:96px 20px 28px;
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
+  border:1px solid rgba(255,255,255,0.92);
+  max-height:calc(100vh - 32px);
+  overflow:auto;
+  box-shadow:0 34px 80px rgba(18,45,99,0.22);
+  color:var(--text);
+}
+.close-btn{
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:46px;
+  height:46px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  font-size:26px;
+  box-shadow:0 12px 24px rgba(20,50,110,0.10);
+  cursor:pointer;
+}
+#modalTitle{
+  position:absolute;
+  top:18px;
+  left:20px;
+  right:80px;
+  margin:0;
+  font-size:30px;
+  line-height:1.02;
+  letter-spacing:-0.05em;
+  color:var(--text);
+}
+.modal-subtitle{margin:0 0 18px;font-size:14px;line-height:1.55;color:var(--muted)}
+.modal-section-card,.image-uploader,.poi-link-card,.preview-card{
+  margin-top:14px;
+  padding:16px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(255,255,255,0.96);
+  box-shadow:0 14px 30px rgba(20,50,110,0.08);
+}
+.modal-section-label,.poi-link-title,.preview-label{
+  margin:0 0 12px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--primary);
+}
+.modal-content input,.modal-content select,.modal-content textarea{
+  width:100%;
+  padding:13px 14px;
+  margin-top:10px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  outline:none;
+  box-shadow:0 8px 18px rgba(20,50,110,0.05);
+  font-size:14px;
+}
+.modal-content input::placeholder,.modal-content textarea::placeholder{color:#95a5c5}
+.modal-content select option{color:#13254d}
+textarea{min-height:110px;resize:vertical;line-height:1.45}
+#content{min-height:280px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.image-upload-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.image-upload-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:13px 14px;
+  border-radius:16px;
+  border:1px dashed rgba(26,70,159,0.28);
+  background:rgba(26,70,159,0.06);
+  color:var(--primary);
+  font-weight:900;
+  cursor:pointer;
+}
+.image-upload-btn input{display:none}
+.image-clear-btn{
+  padding:13px 14px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  font-weight:800;
+  cursor:pointer;
+}
+.image-upload-help,.slug-preview,.image-preview-meta,.task-meta-note{margin-top:8px;font-size:12px;line-height:1.35;color:var(--muted)}
+.image-preview{display:none;margin-top:10px;border-radius:16px;overflow:hidden;background:#eef3fb;border:1px solid var(--line)}
+.image-preview img{display:block;width:100%;max-height:240px;object-fit:cover}
 .poi-search{margin-top:0}
 .poi-results{margin-top:8px;display:flex;gap:7px;overflow-x:auto;padding-bottom:2px}
 .poi-results::-webkit-scrollbar{display:none}
-.poi-result{flex:0 0 auto;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
-.poi-result.is-selected{background:#fff;color:#000;border-color:#fff}
+.poi-result{
+  flex:0 0 auto;
+  padding:8px 10px;
+  border-radius:999px;
+  background:#eef3fb;
+  border:1px solid rgba(24,54,111,0.08);
+  color:var(--text);
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.poi-result.is-selected{background:linear-gradient(180deg,var(--primary) 0%,var(--primary-2) 100%);color:#fff;border-color:transparent}
 .selected-pois{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
-.selected-poi{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.16);font-size:12px;font-weight:800;color:#fff}
-.selected-poi button{width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;line-height:18px;padding:0;cursor:pointer}
-.linked-pois-line{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
-.linked-poi-mini{font-size:10px;font-weight:800;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.74)}
-@media(max-width:520px){.row{grid-template-columns:1fr}.post{padding-left:94px;padding-right:100px}.post-thumb{width:72px;height:72px}.header{padding:12px}.add-btn{padding-left:14px;padding-right:14px}}
+.selected-poi{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 9px;
+  border-radius:999px;
+  background:#eef3fb;
+  border:1px solid rgba(24,54,111,0.08);
+  font-size:12px;
+  font-weight:800;
+  color:var(--text);
+}
+.selected-poi button{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:none;
+  background:rgba(24,54,111,.14);
+  color:var(--text);
+  line-height:18px;
+  padding:0;
+  cursor:pointer;
+}
+.preview-title{font-weight:900;font-size:20px;line-height:1.12;letter-spacing:-.03em;color:var(--text)}
+.preview-excerpt{margin-top:6px;font-size:13px;line-height:1.45;color:var(--muted)}
+.preview-image{display:none;margin-bottom:10px;width:100%;height:190px;border-radius:16px;overflow:hidden;background:#eef3fb;border:1px solid var(--line)}
+.preview-image img{width:100%;height:100%;object-fit:cover;display:block}
+.modal-actions{
+  position:sticky;
+  bottom:0;
+  margin-top:16px;
+  display:grid;
+  gap:10px;
+  padding-top:14px;
+  background:linear-gradient(180deg,rgba(243,247,253,0),rgba(243,247,253,0.94) 22%,rgba(243,247,253,1) 100%);
+}
+button.save{
+  width:100%;
+  padding:15px 16px;
+  margin-top:0;
+  border-radius:18px;
+  border:none;
+  background:linear-gradient(180deg,var(--primary) 0%,var(--primary-2) 100%);
+  color:#fff;
+  font-weight:900;
+  font-size:16px;
+  box-shadow:0 16px 34px rgba(26,70,159,0.22);
+  cursor:pointer;
+}
+button.delete{
+  width:100%;
+  padding:15px 16px;
+  margin-top:0;
+  border-radius:18px;
+  border:1px solid rgba(201,75,86,0.18);
+  background:rgba(255,255,255,0.88);
+  color:#c94b56;
+  font-weight:900;
+  font-size:15px;
+  cursor:pointer;
+}
+@media (min-width:760px){.list{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:640px){
+  .page-shell{padding:14px 14px 74px}
+  .back-to-login{margin-bottom:12px;padding:11px 13px;font-size:13px}
+  .page-hero{border-radius:24px}
+  .page-hero h1,#heroQuote{font-size:18px}
+  .hero-quote-wrap{top:16px;left:16px;width:58%;max-width:58%;min-width:58%;min-height:108px}
+  .task-card{flex-basis:176px;min-height:110px}
+  .header{gap:10px}
+  .add-btn{padding:14px 16px}
+  .post{padding-left:96px;padding-right:110px}
+  .post-thumb{left:16px;top:16px;width:64px;height:64px}
+  .modal{padding:10px}
+  .modal-content{padding:88px 16px 22px;border-radius:26px;max-height:calc(100vh - 20px)}
+  #modalTitle{top:16px;left:16px;right:74px;font-size:26px}
+  .row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
+<div class="page-shell">
+  <a href="login.html" class="back-to-login" aria-label="Torna a login">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M15 18l-6-6 6-6"></path>
+    </svg>
+    <span>Torna indietro</span>
+  </a>
 
-<div class="top-title">
-  <h1>Blog Editor</h1>
-  <p>Gestisci articoli, guide e contenuti editoriali di 5TerreGo.</p>
+  <section class="page-hero">
+    <img src="seo.png" alt="" class="hero-bg" onerror="this.style.display='none'">
+    <div class="hero-quote-wrap">
+      <h1 id="heroQuote">"Hai una crisi editoriale? Pubblica una bozza."</h1>
+      <p class="hero-author">cit. Diego Ricci</p>
+    </div>
+  </section>
+
+  <section class="task-section" aria-label="Tasks articoli incompleti">
+    <div class="task-section-head">
+      <div class="task-section-title">Tasks</div>
+      <div id="taskCount" class="task-count">0</div>
+    </div>
+    <div id="taskMetaNote" class="task-meta-note">Qui compaiono gli articoli con titolo presente ma testo ancora incompleto.</div>
+    <div id="taskSlider" class="task-slider"></div>
+  </section>
+
+  <div class="header">
+    <input id="search" class="search" placeholder="Cerca articoli..." />
+    <button id="addBtn" class="add-btn" type="button">Nuovo articolo</button>
+  </div>
+
+  <div id="status" class="status">Caricamento articoli...</div>
+  <div id="list" class="list"></div>
 </div>
-
-<div id="taskSlider" class="task-slider"></div>
-
-<div class="header">
-  <input id="search" class="search" placeholder="Cerca articoli..." />
-  <button id="addBtn" class="add-btn" type="button">Aggiungi</button>
-</div>
-
-<div id="status" class="status">Caricamento articoli...</div>
-<div id="list" class="list"></div>
 
 <div id="modal" class="modal" aria-hidden="true">
   <div class="modal-content" role="dialog" aria-modal="true">
     <button id="closeBtn" class="close-btn" type="button" aria-label="Chiudi">×</button>
     <h2 id="modalTitle">Aggiungi articolo</h2>
+    <p class="modal-subtitle">Stessa logica del POI editor, ma pensata per articoli, guide e contenuti del blog.</p>
 
-    <input id="titleInput" placeholder="Titolo articolo" />
-    <input id="slug" placeholder="Slug URL, es: best-beaches-cinque-terre" />
-    <div id="slugPreview" class="slug-preview">URL: <strong>/blog/</strong></div>
+    <div class="modal-section-card">
+      <div class="modal-section-label">Base</div>
+      <input id="titleInput" placeholder="Titolo articolo" />
+      <input id="slug" placeholder="Slug URL, es: best-beaches-cinque-terre" />
+      <div id="slugPreview" class="slug-preview">URL: <strong>/blog/</strong></div>
+    </div>
 
-    <textarea id="excerpt" placeholder="Estratto breve per card e anteprima"></textarea>
-    <textarea id="content" placeholder="Contenuto completo articolo"></textarea>
+    <div class="modal-section-card">
+      <div class="modal-section-label">Testi</div>
+      <textarea id="excerpt" placeholder="Estratto breve per card e anteprima"></textarea>
+      <textarea id="content" placeholder="Contenuto completo articolo"></textarea>
+    </div>
 
-    <input id="coverImage" placeholder="URL immagine copertina oppure immagine compressa automatica" />
-
-    <div class="image-upload-box">
-      <div class="poi-link-title">Immagine da galleria</div>
+    <div class="image-uploader">
+      <div class="modal-section-label">Cover</div>
+      <input id="coverImage" placeholder="URL immagine copertina oppure immagine compressa automatica" />
       <div class="image-upload-actions">
         <label class="image-upload-btn">
           📷 Carica immagine
@@ -132,33 +592,34 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
 
     <div class="poi-link-card">
       <div class="poi-link-title">POI collegati</div>
-      <input id="poiSearch" class="poi-search" placeholder="Cerca POI da collegare all’articolo..." autocomplete="off" oninput="handlePoiSearchInput()" onkeyup="handlePoiSearchInput()" />
+      <input id="poiSearch" class="poi-search" placeholder="Cerca POI da collegare all’articolo..." autocomplete="off" />
       <div id="poiSearchCount" class="slug-preview">POI caricati: 0</div>
       <div id="poiResults" class="poi-results"></div>
       <div id="selectedPois" class="selected-pois"></div>
     </div>
 
-    <div class="row">
-      <select id="category">
-        <option value="guide">guide</option>
-        <option value="beaches">beaches</option>
-        <option value="trails">trails</option>
-        <option value="food">food</option>
-        <option value="transport">transport</option>
-        <option value="tips">tips</option>
-        <option value="news">news</option>
-      </select>
-
-      <select id="statusSelect">
-        <option value="draft">draft</option>
-        <option value="published">published</option>
-        <option value="hidden">hidden</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <input id="author" placeholder="Autore" />
-      <input id="publishedAt" type="datetime-local" placeholder="Data pubblicazione" />
+    <div class="modal-section-card">
+      <div class="modal-section-label">Publishing</div>
+      <div class="row">
+        <select id="category">
+          <option value="guide">guide</option>
+          <option value="beaches">beaches</option>
+          <option value="trails">trails</option>
+          <option value="food">food</option>
+          <option value="transport">transport</option>
+          <option value="tips">tips</option>
+          <option value="news">news</option>
+        </select>
+        <select id="statusSelect">
+          <option value="draft">draft</option>
+          <option value="published">published</option>
+          <option value="hidden">hidden</option>
+        </select>
+      </div>
+      <div class="row">
+        <input id="author" placeholder="Autore" />
+        <input id="publishedAt" type="datetime-local" placeholder="Data pubblicazione" />
+      </div>
     </div>
 
     <div class="preview-card">
@@ -170,36 +631,60 @@ button.delete{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:
       <div id="previewExcerpt" class="preview-excerpt">Estratto breve dell’articolo...</div>
     </div>
 
-    <button class="save" id="saveBtn" type="button">Salva</button>
-    <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina articolo</button>
+    <div class="modal-actions">
+      <button class="save" id="saveBtn" type="button">Salva</button>
+      <button class="delete" id="deleteBtn" type="button" style="display:none">Elimina articolo</button>
+    </div>
   </div>
 </div>
 
-
 <script>
-/*
-  IMPORTANTE:
-  Sostituisci ANON_KEY sotto con la stessa anon key REST lunga che usi in poieditor.html.
-  Nel tuo POI editor è questa:
-  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-*/
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
-const SUPABASE_ANON_REST_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
-const OWNER_EMAILS = [
-  "5terrego.info@gmail.com",
-  "verofili96@icloud.com"
-];
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+if(supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.startAutoRefresh === "function"){
+  supabaseClient.auth.startAutoRefresh();
+}
+
 const BLOG_TABLE = "blog_posts";
 const POIS_TABLE = "pois";
+const OWNER_EMAILS = [
+  "5terrego.info@gmail.com",
+  "verofili96@icloud.com",
+  "tanzaniagetaway.info@gmail.com"
+];
+
+const HERO_QUOTES = [
+  "Hai una crisi editoriale? Pubblica una bozza.",
+  "La SEO non dorme mai. Tu però salva prima di chiudere.",
+  "Non hai ispirazione? Scrivi almeno l’estratto.",
+  "Ogni articolo incompleto è solo un POI che ha studiato lettere.",
+  "La perfezione non esiste. Il pulsante Salva sì.",
+  "Sei confuso? Metti una cover e nessuno farà domande.",
+  "Il blocco dello scrittore passa. Il draft resta.",
+  "Un articolo pubblicato batte dieci idee geniali mai salvate."
+];
 
 let posts = [];
 let pois = [];
 let selectedPoiIds = [];
 let editingPostId = null;
+let heroQuoteIndex = 0;
+let heroQuoteTimer = null;
+let renderBatchToken = 0;
+let searchDebounceTimer = null;
 
+const taskSliderEl = document.getElementById("taskSlider");
+const taskCountEl = document.getElementById("taskCount");
+const taskMetaNoteEl = document.getElementById("taskMetaNote");
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
-const taskSliderEl = document.getElementById("taskSlider");
 const modalEl = document.getElementById("modal");
 const modalTitleEl = document.getElementById("modalTitle");
 const searchEl = document.getElementById("search");
@@ -207,6 +692,7 @@ const addBtn = document.getElementById("addBtn");
 const closeBtn = document.getElementById("closeBtn");
 const saveBtn = document.getElementById("saveBtn");
 const deleteBtn = document.getElementById("deleteBtn");
+const heroQuoteEl = document.getElementById("heroQuote");
 
 const titleInputEl = document.getElementById("titleInput");
 const slugEl = document.getElementById("slug");
@@ -231,87 +717,146 @@ const poiSearchEl = document.getElementById("poiSearch");
 const poiResultsEl = document.getElementById("poiResults");
 const selectedPoisEl = document.getElementById("selectedPois");
 const poiSearchCountEl = document.getElementById("poiSearchCount");
+const imageUploadHelpEl = document.getElementById("imageUploadHelp");
 
+function setHeroQuote(nextText){
+  if(!heroQuoteEl) return;
+  heroQuoteEl.classList.add("is-changing");
+  setTimeout(() => {
+    heroQuoteEl.textContent = '"' + nextText + '"';
+    heroQuoteEl.classList.remove("is-changing");
+  }, 170);
+}
+function startHeroQuoteRotation(){
+  if(!heroQuoteEl) return;
+  heroQuoteEl.textContent = '"' + HERO_QUOTES[0] + '"';
+  if(heroQuoteTimer) clearInterval(heroQuoteTimer);
+  heroQuoteTimer = setInterval(() => {
+    heroQuoteIndex = (heroQuoteIndex + 1) % HERO_QUOTES.length;
+    setHeroQuote(HERO_QUOTES[heroQuoteIndex]);
+  }, 6000);
+}
 function setStatus(message, isError = false){
   statusEl.innerHTML = message;
   statusEl.classList.toggle("error", Boolean(isError));
 }
-
-function getAuthSession(){
-  for(const key of Object.keys(localStorage)){
-    if(key.startsWith("sb-") && key.endsWith("-auth-token")){
-      try{
-        const parsed = JSON.parse(localStorage.getItem(key));
-        if(parsed && parsed.access_token) return parsed;
-        if(parsed && parsed.currentSession && parsed.currentSession.access_token) return parsed.currentSession;
-      }catch(err){
-        console.warn("Auth token non leggibile", err);
-      }
+function isAuthExpiredMessage(value){
+  const lower = String(value || "").toLowerCase();
+  return lower.includes("jwt expired")
+    || lower.includes("expired jwt")
+    || lower.includes("token is expired")
+    || lower.includes("session expired")
+    || lower.includes("invalid refresh token")
+    || lower.includes("refresh token not found");
+}
+async function getValidSession({ required = false, forceRefresh = false } = {}){
+  const { data, error } = await supabaseClient.auth.getSession();
+  if(error) throw error;
+  let session = data && data.session ? data.session : null;
+  const expiresSoon = Boolean(session && session.expires_at && ((session.expires_at * 1000) - Date.now() < 90000));
+  if(session && (forceRefresh || expiresSoon)){
+    const { data: refreshedData, error: refreshError } = await supabaseClient.auth.refreshSession();
+    if(refreshError){
+      if(required) throw refreshError;
+    }else if(refreshedData && refreshedData.session){
+      session = refreshedData.session;
     }
   }
-  return null;
+  if(required && (!session || !session.access_token)) throw new Error("Sessione scaduta");
+  return session;
 }
-
-function getToken(){
-  const session = getAuthSession();
-  return session && session.access_token ? session.access_token : null;
+async function requireActiveSession(){
+  const session = await getValidSession({ required: true });
+  if(!session || !session.access_token) throw new Error("Sessione scaduta");
+  return session;
 }
-
-function getUserEmail(){
-  const session = getAuthSession();
-  return String((session && session.user && session.user.email) || "").toLowerCase();
+async function tryRefreshSession(){
+  const { data, error } = await supabaseClient.auth.refreshSession();
+  return Boolean(!error && data && data.session && data.session.access_token);
 }
-
-function buildHeaders({ useUserToken = false, extra = {} } = {}){
-  const token = useUserToken ? getToken() : null;
+async function warmSession(){
+  try{ await getValidSession({ required:false }); }catch(err){ console.warn("SESSION WARMUP ERROR", err); }
+}
+async function getUserEmail(){
+  try{
+    const session = await getValidSession({ required:false });
+    return String((session && session.user && session.user.email) || "").toLowerCase();
+  }catch(err){
+    return "";
+  }
+}
+function buildHeaders({ token = null, extra = {} } = {}){
   return {
-    apikey: SUPABASE_ANON_REST_KEY,
-    Authorization: "Bearer " + (token || SUPABASE_ANON_REST_KEY),
+    apikey: ANON_KEY,
+    Authorization: "Bearer " + (token || ANON_KEY),
     Accept: "application/json",
     "Content-Type": "application/json",
     ...extra
   };
 }
+async function authFetch(url, { useUserToken = false, allowAnonFallback = false, retryOnAuthError = true, ...requestInit } = {}){
+  let token = null;
+  if(useUserToken){
+    try{
+      const session = await getValidSession({ required:false });
+      token = session && session.access_token ? session.access_token : null;
+    }catch(err){
+      console.warn("SESSION READ ERROR", err);
+    }
+  }
+  let response = await fetch(url, {
+    ...requestInit,
+    headers: buildHeaders({ token, extra: requestInit.headers || {} })
+  });
+  if(!retryOnAuthError || !useUserToken) return response;
 
+  let responseText = "";
+  try{ responseText = await response.clone().text(); }catch(err){ responseText = ""; }
+  if(response.status !== 401 && !isAuthExpiredMessage(responseText)) return response;
+
+  const refreshed = await tryRefreshSession();
+  if(refreshed){
+    const refreshedSession = await getValidSession({ required:false, forceRefresh:true });
+    const refreshedToken = refreshedSession && refreshedSession.access_token ? refreshedSession.access_token : null;
+    return fetch(url, {
+      ...requestInit,
+      headers: buildHeaders({ token: refreshedToken, extra: requestInit.headers || {} })
+    });
+  }
+
+  if(allowAnonFallback){
+    return fetch(url, {
+      ...requestInit,
+      headers: buildHeaders({ token:null, extra: requestInit.headers || {} })
+    });
+  }
+
+  throw new Error("Sessione scaduta");
+}
 async function parseResponse(res){
   const text = await res.text();
   let data = null;
-
-  try{
-    data = text ? JSON.parse(text) : null;
-  }catch(err){
-    data = text;
-  }
-
+  try{ data = text ? JSON.parse(text) : null; }catch(err){ data = text; }
   if(!res.ok){
-    const message = typeof data === "object" && data
-      ? (data.message || data.hint || JSON.stringify(data))
-      : String(data || res.statusText);
+    const message = typeof data === "object" && data ? (data.message || data.hint || JSON.stringify(data)) : String(data || res.statusText);
     const error = new Error(message);
     error.payload = data;
     error.status = res.status;
     throw error;
   }
-
   return data;
 }
-
 function isPermissionError(err){
   const text = String((err && err.message) || "") + " " + JSON.stringify((err && err.payload) || {});
   const lower = text.toLowerCase();
+  if(isAuthExpiredMessage(lower) || lower.includes("sessione scaduta")) return false;
   return (err && (err.status === 401 || err.status === 403)) || lower.includes("42501") || lower.includes("permission denied") || lower.includes("grant select");
 }
-
 function permissionHelp(){
   return "Errore permessi Supabase.<br><br>Se non esiste ancora, crea la tabella blog_posts in SQL Editor:<br>" +
     "<code>create table public.blog_posts (id uuid default gen_random_uuid() primary key, title text not null, slug text unique, excerpt text, content text, cover_image text, related_pois jsonb default '[]'::jsonb, category text, status text default 'draft', author text, published_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());</code><br><br>" +
-    "Se la tabella esiste già aggiungi solo la colonna:<br>" +
-    "<code>alter table public.blog_posts add column if not exists related_pois jsonb default '[]'::jsonb;</code><br><br>" +
-    "Poi esegui:<br>" +
-    "<code>GRANT SELECT ON public.blog_posts TO anon;</code><br>" +
-    "<code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.blog_posts TO authenticated;</code>";
+    "Poi esegui:<br><code>GRANT SELECT ON public.blog_posts TO anon;</code><br><code>GRANT SELECT, INSERT, UPDATE, DELETE ON public.blog_posts TO authenticated;</code>";
 }
-
 function slugify(value){
   return String(value || "")
     .toLowerCase()
@@ -321,7 +866,6 @@ function slugify(value){
     .replace(/^-+|-+$/g, "")
     .slice(0, 90);
 }
-
 function formatDateForInput(value){
   if(!value) return "";
   const d = new Date(value);
@@ -329,35 +873,29 @@ function formatDateForInput(value){
   const pad = n => String(n).padStart(2,"0");
   return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
 }
-
 function formatDateForDisplay(value){
   if(!value) return "non pubblicato";
   const d = new Date(value);
   if(Number.isNaN(d.getTime())) return "data non valida";
   return d.toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
 }
-
 function normalizeSearchText(value){
   return String(value || "")
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim();
 }
-
 function getPoiId(poi){
   return String((poi && poi.id) || (poi && poi._id) || (poi && poi.uuid) || (poi && poi.slug) || (poi && poi.name) || "");
 }
-
 function getPoiLabel(poi){
   return String((poi && poi.name) || (poi && poi.title) || (poi && poi.nome) || "POI");
 }
-
 function getPoiNameById(id){
   const poi = pois.find(p => getPoiId(p) === String(id));
   return poi ? getPoiLabel(poi) : String(id || "POI");
 }
-
 function normalizeRelatedPois(value){
   if(Array.isArray(value)) return value.map(String).filter(Boolean);
   if(typeof value === "string" && value.trim()){
@@ -370,60 +908,40 @@ function normalizeRelatedPois(value){
   }
   return [];
 }
-
 function togglePoiSelection(poiId){
   const id = String(poiId || "");
   if(!id) return;
-
   if(selectedPoiIds.includes(id)){
     selectedPoiIds = selectedPoiIds.filter(x => x !== id);
-  } else {
+  }else{
     selectedPoiIds.push(id);
   }
-
   renderPoiPicker(poiSearchEl.value);
 }
-
 function removeSelectedPoi(poiId){
   selectedPoiIds = selectedPoiIds.filter(x => x !== String(poiId));
   renderPoiPicker(poiSearchEl.value);
 }
-
-function handlePoiSearchInput(){
-  renderPoiPicker(poiSearchEl.value);
-}
-
 function renderPoiPicker(filter = ""){
   poiResultsEl.innerHTML = "";
   selectedPoisEl.innerHTML = "";
-
   const query = normalizeSearchText(filter);
-  const matches = pois.filter(p=>{
+  const matches = pois.filter(p => {
     const label = normalizeSearchText(getPoiLabel(p));
-    const secondary = normalizeSearchText([
-      p.type,
-      p.category,
-      p.coords
-    ].join(" "));
-
+    const secondary = normalizeSearchText([p.type, p.category, p.coords].join(" "));
     if(!query) return true;
     return label.includes(query) || secondary.includes(query);
   });
   const filtered = matches.slice(0, 30);
-
   poiResultsEl.scrollLeft = 0;
-  poiSearchCountEl.innerText = query
-    ? (matches.length + " POI trovati per: " + filter)
-    : (pois.length + " POI caricati");
-
+  poiSearchCountEl.innerText = query ? (matches.length + " POI trovati per: " + filter) : (pois.length + " POI caricati");
   if(!filtered.length){
     const empty = document.createElement("div");
     empty.className = "poi-result";
     empty.innerText = pois.length ? "Nessun POI trovato" : "Nessun POI caricato";
     poiResultsEl.appendChild(empty);
   }
-
-  filtered.forEach(poi=>{
+  filtered.forEach(poi => {
     const id = getPoiId(poi);
     const btn = document.createElement("button");
     btn.type = "button";
@@ -432,31 +950,26 @@ function renderPoiPicker(filter = ""){
     btn.addEventListener("click", () => togglePoiSelection(id));
     poiResultsEl.appendChild(btn);
   });
-
-  selectedPoiIds.forEach(id=>{
+  selectedPoiIds.forEach(id => {
     const chip = document.createElement("span");
     chip.className = "selected-poi";
     chip.innerHTML = "<span>" + getPoiNameById(id) + "</span>";
-
     const remove = document.createElement("button");
     remove.type = "button";
     remove.innerText = "×";
     remove.addEventListener("click", () => removeSelectedPoi(id));
-
     chip.appendChild(remove);
     selectedPoisEl.appendChild(chip);
   });
 }
-
 async function loadPoisForBlog(){
   try{
-    const hasUser = Boolean(getToken());
-    const res = await fetch(SUPABASE_URL + "/rest/v1/" + POIS_TABLE + "?select=*&order=importance.desc.nullslast", {
-      method:"GET",
-      headers:buildHeaders({ useUserToken:hasUser })
-    });
-
-    pois = await parseResponse(res);
+    const res = await authFetch(
+      SUPABASE_URL + "/rest/v1/" + POIS_TABLE + "?select=id,name,type,coords&order=importance.desc.nullslast",
+      { method:"GET", useUserToken:true, allowAnonFallback:true }
+    );
+    const rows = await parseResponse(res);
+    pois = Array.isArray(rows) ? rows : [];
     renderPoiPicker(poiSearchEl.value);
   }catch(err){
     console.warn("LOAD POIS FOR BLOG ERROR", err);
@@ -464,7 +977,6 @@ async function loadPoisForBlog(){
     renderPoiPicker(poiSearchEl.value);
   }
 }
-
 function getMissingPostFields(post){
   const missing = [];
   if(!String((post && post.title) || "").trim()) missing.push("titolo");
@@ -475,20 +987,68 @@ function getMissingPostFields(post){
   return missing;
 }
 
-function renderTaskSlider(filteredPosts){
+function cleanTaskText(value){
+  const div = document.createElement("div");
+  div.innerHTML = String(value || "").replaceAll("&nbsp;", " ").replaceAll("&NBSP;", " ");
+  let text = String(div.textContent || div.innerText || "");
+  text = text.split("\n").join(" ").split("\r").join(" ").split("\t").join(" ");
+  while(text.includes("  ")) text = text.replaceAll("  ", " ");
+  return text.trim();
+}
+
+function getMissingTaskTextFields(post){
+  const missing = [];
+  const excerpt = cleanTaskText(post && post.excerpt);
+  const content = cleanTaskText(post && post.content);
+
+  if(!excerpt) missing.push("estratto");
+  else if(excerpt.length < 24) missing.push("estratto corto");
+
+  if(!content){
+    missing.push("contenuto");
+  }else if(content.length < 80){
+    missing.push("testo corto");
+  }
+
+  return missing;
+}
+
+function shouldShowPostInTasks(post){
+  const hasTitle = Boolean(cleanTaskText(post && post.title));
+  if(!hasTitle) return false;
+
+  const missingText = getMissingTaskTextFields(post);
+  return missingText.length > 0;
+}
+function createTaskPill(text, isRed = false){
+  const pill = document.createElement("div");
+  pill.className = isRed ? "task-pill red" : "task-pill";
+  pill.innerText = text;
+  return pill;
+}
+function renderTaskSlider(sourcePosts){
   taskSliderEl.innerHTML = "";
-  const taskPosts = filteredPosts.filter(p => getMissingPostFields(p).length > 0 || p.status !== "published");
+  const basePosts = Array.isArray(sourcePosts) ? sourcePosts : [];
+  const taskPosts = basePosts.filter(post => shouldShowPostInTasks(post));
+  taskCountEl.innerText = String(taskPosts.length);
+  taskSliderEl.style.display = "flex";
+
+  if(taskMetaNoteEl){
+    taskMetaNoteEl.innerText = taskPosts.length
+      ? (taskPosts.length + " task trovate in Supabase: articoli con titolo presente ma testo non ancora completo.")
+      : "Nessuna task trovata in Supabase: al momento non risultano articoli con testo mancante.";
+  }
 
   if(!taskPosts.length){
     const card = document.createElement("div");
-    card.className = "task-card";
-    card.innerHTML = '<div class="task-title">Tutto ok</div><div class="task-pill">nessun problema</div>';
+    card.className = "task-card empty";
+    card.innerHTML = '<div class="task-title">Nessuna task aperta</div><div class="task-meta">Qui compaiono solo articoli con titolo ma senza testo completo.</div>';
     taskSliderEl.appendChild(card);
     return;
   }
 
-  taskPosts.forEach(post=>{
-    const missing = getMissingPostFields(post);
+  taskPosts.forEach(post => {
+    const missingText = getMissingTaskTextFields(post);
     const card = document.createElement("div");
     card.className = "task-card";
     card.addEventListener("click", () => openModal(post));
@@ -496,44 +1056,155 @@ function renderTaskSlider(filteredPosts){
     const title = document.createElement("div");
     title.className = "task-title";
     title.innerText = post.title || "Articolo senza titolo";
+
+    const meta = document.createElement("div");
+    meta.className = "task-meta";
+    meta.innerText = String(post.category || "-") + (post.status ? (" • " + String(post.status)) : "");
+
     card.appendChild(title);
+    card.appendChild(meta);
 
-    if(post.status !== "published"){
-      const pill = document.createElement("div");
-      pill.className = "task-pill";
-      pill.innerText = post.status || "draft";
-      card.appendChild(pill);
-    }
-
-    missing.slice(0,3).forEach(field=>{
-      const pill = document.createElement("div");
-      pill.className = field === "contenuto" || field === "cover" ? "task-pill red" : "task-pill";
-      pill.innerText = "manca " + field;
-      card.appendChild(pill);
+    missingText.forEach(field => {
+      const label = field === "contenuto" ? "manca contenuto" : field;
+      const isRed = field === "contenuto" || field === "testo corto";
+      card.appendChild(createTaskPill(label, isRed));
     });
 
     taskSliderEl.appendChild(card);
   });
 }
-
+function createPostCard(post){
+  const div = document.createElement("div");
+  div.className = "post";
+  const thumb = document.createElement("div");
+  thumb.className = "post-thumb";
+  const coverValue = String(post.cover_image || "").trim();
+  if(coverValue){
+    const img = document.createElement("img");
+    img.alt = post.title || "Anteprima articolo";
+    img.src = coverValue;
+    img.loading = "lazy";
+    img.onerror = function(){ thumb.innerHTML = '<div class="post-thumb-placeholder">🖼️</div>'; };
+    thumb.appendChild(img);
+  }else{
+    thumb.innerHTML = '<div class="post-thumb-placeholder">📝</div>';
+  }
+  div.appendChild(thumb);
+  if(post.status !== "published"){
+    const badge = document.createElement("div");
+    badge.className = "post-alert draft";
+    badge.innerText = post.status || "draft";
+    div.appendChild(badge);
+  }
+  const missing = getMissingPostFields(post);
+  if(missing.length){
+    const badge = document.createElement("div");
+    badge.className = "post-alert missing";
+    badge.innerText = "manca " + missing[0];
+    div.appendChild(badge);
+  }
+  const title = document.createElement("div");
+  title.className = "post-title";
+  title.innerText = post.title || "Articolo senza titolo";
+  const meta = document.createElement("div");
+  meta.className = "post-meta";
+  meta.innerText = String(post.category || "-") + " • " + String(post.status || "draft") + " • " + formatDateForDisplay(post.published_at);
+  const excerpt = document.createElement("div");
+  excerpt.className = "post-excerpt";
+  excerpt.innerText = post.excerpt || "";
+  div.appendChild(title);
+  div.appendChild(meta);
+  if(post.excerpt) div.appendChild(excerpt);
+  const related = normalizeRelatedPois(post.related_pois);
+  if(related.length){
+    const linkedLine = document.createElement("div");
+    linkedLine.className = "linked-pois-line";
+    related.slice(0,4).forEach(id => {
+      const mini = document.createElement("span");
+      mini.className = "linked-poi-mini";
+      mini.innerText = getPoiNameById(id);
+      linkedLine.appendChild(mini);
+    });
+    if(related.length > 4){
+      const more = document.createElement("span");
+      more.className = "linked-poi-mini";
+      more.innerText = "+" + (related.length - 4);
+      linkedLine.appendChild(more);
+    }
+    div.appendChild(linkedLine);
+  }
+  div.addEventListener("click", () => openModal(post));
+  return div;
+}
+function renderPostsChunked(items){
+  listEl.innerHTML = "";
+  if(!items.length){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerText = posts.length ? "Nessun articolo trovato" : "Nessun articolo disponibile";
+    listEl.appendChild(empty);
+    return;
+  }
+  const token = ++renderBatchToken;
+  let index = 0;
+  const chunkSize = 16;
+  function appendChunk(){
+    if(token !== renderBatchToken) return;
+    const fragment = document.createDocumentFragment();
+    const end = Math.min(index + chunkSize, items.length);
+    for(let i = index; i < end; i++) fragment.appendChild(createPostCard(items[i]));
+    listEl.appendChild(fragment);
+    index = end;
+    if(index < items.length) requestAnimationFrame(appendChunk);
+  }
+  requestAnimationFrame(appendChunk);
+}
+function renderPosts(filter = "", options = {}){
+  const query = String(filter || "").trim().toLowerCase();
+  const filtered = posts.filter(post => {
+    const relatedNames = normalizeRelatedPois(post.related_pois).map(getPoiNameById).join(" ");
+    const haystack = [post.title, post.slug, post.category, post.excerpt, post.content, relatedNames].join(" ").toLowerCase();
+    return !query || haystack.includes(query);
+  });
+  renderTaskSlider(posts);
+  renderPostsChunked(filtered);
+  if(!options.skipStatus){
+    setStatus(query ? (String(filtered.length) + " risultati") : (String(filtered.length) + " articoli caricati"));
+  }else if(!statusEl.classList.contains("error")){
+    setStatus(query ? (String(filtered.length) + " risultati") : (String(filtered.length) + " articoli caricati"));
+  }
+}
 async function loadPosts(){
   setStatus("Caricamento articoli...");
-
   try{
-    const hasUser = Boolean(getToken());
-    const res = await fetch(SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?select=*&order=created_at.desc", {
-      method:"GET",
-      headers:buildHeaders({ useUserToken:hasUser })
-    });
+    const session = await getValidSession({ required:false });
+    if(!session || !session.access_token){
+      posts = [];
+      renderTaskSlider([]);
+      renderPostsChunked([]);
+      setStatus("Sessione non trovata: il blog editor sta leggendo come anon, quindi i draft non arrivano e le tasks restano vuote. Rientra da login.html.", true);
+      return;
+    }
 
-    posts = await parseResponse(res);
+    const res = await authFetch(
+      SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?select=*&order=created_at.desc",
+      { method:"GET", useUserToken:true, allowAnonFallback:false }
+    );
+
+    const rows = await parseResponse(res);
+    posts = Array.isArray(rows) ? rows : [];
     editingPostId = null;
-    renderPosts(searchEl.value);
-    setStatus(String(posts.length) + " articoli caricati");
+    renderPosts(searchEl.value, { skipStatus:true });
   }catch(err){
     console.error("LOAD POSTS ERROR", err);
     posts = [];
-    renderPosts(searchEl.value);
+    renderTaskSlider([]);
+    renderPostsChunked([]);
+
+    if(isAuthExpiredMessage(err && err.message) || String((err && err.message) || "").toLowerCase().includes("sessione scaduta")){
+      setStatus("Sessione scaduta o non valida: effettua di nuovo l'accesso da login.html per vedere draft e tasks.", true);
+      return;
+    }
 
     if(isPermissionError(err)){
       setStatus(permissionHelp() + "<br><br>Dettaglio: " + err.message, true);
@@ -543,109 +1214,12 @@ async function loadPosts(){
     setStatus("Errore caricamento articoli: " + err.message, true);
   }
 }
-
-function renderPosts(filter = ""){
-  listEl.innerHTML = "";
-
-  const query = String(filter || "").trim().toLowerCase();
-  const filtered = posts.filter(post=>{
-    const relatedNames = normalizeRelatedPois(post.related_pois).map(getPoiNameById).join(" ");
-    const haystack = String(post.title || "") + " " + String(post.slug || "") + " " + String(post.category || "") + " " + String(post.excerpt || "") + " " + String(post.content || "") + " " + relatedNames;
-    return !query || haystack.toLowerCase().includes(query);
-  });
-
-  renderTaskSlider(filtered);
-
-  if(!filtered.length){
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.innerText = posts.length ? "Nessun articolo trovato" : "Nessun articolo disponibile";
-    listEl.appendChild(empty);
-    return;
-  }
-
-  filtered.forEach(post=>{
-    const div = document.createElement("div");
-    div.className = "post";
-
-    const thumb = document.createElement("div");
-    thumb.className = "post-thumb";
-    const coverValue = String(post.cover_image || "").trim();
-    if(coverValue){
-      const img = document.createElement("img");
-      img.alt = post.title || "Anteprima articolo";
-      img.src = coverValue;
-      img.onerror = function(){
-        thumb.innerHTML = '<div class="post-thumb-placeholder">🖼️</div>';
-      };
-      thumb.appendChild(img);
-    } else {
-      thumb.innerHTML = '<div class="post-thumb-placeholder">📝</div>';
-    }
-    div.appendChild(thumb);
-
-    if(post.status !== "published"){
-      const badge = document.createElement("div");
-      badge.className = "post-alert draft";
-      badge.innerText = post.status || "draft";
-      div.appendChild(badge);
-    }
-
-    const missing = getMissingPostFields(post);
-    if(missing.length){
-      const badge = document.createElement("div");
-      badge.className = "post-alert missing";
-      badge.innerText = "manca " + missing[0];
-      div.appendChild(badge);
-    }
-
-    const title = document.createElement("div");
-    title.className = "post-title";
-    title.innerText = post.title || "Articolo senza titolo";
-
-    const meta = document.createElement("div");
-    meta.className = "post-meta";
-    meta.innerText = String(post.category || "-") + " • " + String(post.status || "draft") + " • " + formatDateForDisplay(post.published_at);
-
-    const excerpt = document.createElement("div");
-    excerpt.className = "post-excerpt";
-    excerpt.innerText = post.excerpt || "";
-
-    div.appendChild(title);
-    div.appendChild(meta);
-    if(post.excerpt) div.appendChild(excerpt);
-
-    const related = normalizeRelatedPois(post.related_pois);
-    if(related.length){
-      const linkedLine = document.createElement("div");
-      linkedLine.className = "linked-pois-line";
-      related.slice(0,4).forEach(id=>{
-        const mini = document.createElement("span");
-        mini.className = "linked-poi-mini";
-        mini.innerText = getPoiNameById(id);
-        linkedLine.appendChild(mini);
-      });
-      if(related.length > 4){
-        const more = document.createElement("span");
-        more.className = "linked-poi-mini";
-        more.innerText = "+" + (related.length - 4);
-        linkedLine.appendChild(more);
-      }
-      div.appendChild(linkedLine);
-    }
-
-    div.addEventListener("click", () => openModal(post));
-    listEl.appendChild(div);
-  });
-}
-
 function bytesToReadableSize(bytes){
   const size = Number(bytes || 0);
   if(size < 1024) return size + " B";
   if(size < 1024 * 1024) return Math.round(size / 1024) + " KB";
   return (size / 1024 / 1024).toFixed(2) + " MB";
 }
-
 function dataUrlToBytes(dataUrl){
   const value = String(dataUrl || "");
   const commaIndex = value.indexOf(",");
@@ -653,10 +1227,8 @@ function dataUrlToBytes(dataUrl){
   const base64 = value.slice(commaIndex + 1);
   return Math.round(base64.length * 0.75);
 }
-
 function updateCoverImagePreview(){
   const value = String(coverImageEl.value || "").trim();
-
   if(!value){
     coverImagePreviewEl.style.display = "none";
     coverImagePreviewImgEl.removeAttribute("src");
@@ -665,72 +1237,52 @@ function updateCoverImagePreview(){
     previewImageImgEl.removeAttribute("src");
     return;
   }
-
   coverImagePreviewEl.style.display = "block";
   coverImagePreviewImgEl.src = value;
   previewImageEl.style.display = "block";
   previewImageImgEl.src = value;
-
-  coverImagePreviewImgEl.onerror = function(){
-    coverImagePreviewMetaEl.innerText = "Anteprima non disponibile: controlla che l’URL immagine sia corretto.";
-  };
-
-  previewImageImgEl.onerror = function(){
-    previewImageEl.style.display = "none";
-  };
-
+  coverImagePreviewImgEl.onerror = function(){ coverImagePreviewMetaEl.innerText = "Anteprima non disponibile: controlla che l’URL immagine sia corretto."; };
+  previewImageImgEl.onerror = function(){ previewImageEl.style.display = "none"; };
   if(value.startsWith("data:image/")){
     coverImagePreviewMetaEl.innerText = "Immagine compressa salvata nel campo cover_image • circa " + bytesToReadableSize(dataUrlToBytes(value));
-  } else {
+  }else{
     coverImagePreviewMetaEl.innerText = "URL immagine salvato nel campo cover_image";
   }
 }
-
 function resizeImageToCanvas(img, maxWidth, maxHeight){
   const originalWidth = img.naturalWidth || img.width;
   const originalHeight = img.naturalHeight || img.height;
   const scale = Math.min(1, maxWidth / originalWidth, maxHeight / originalHeight);
   const width = Math.max(1, Math.round(originalWidth * scale));
   const height = Math.max(1, Math.round(originalHeight * scale));
-
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-
   const ctx = canvas.getContext("2d", { alpha:false });
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, 0, 0, width, height);
-
   return canvas;
 }
-
 async function compressImageFile(file){
-  if(!file || !file.type || !file.type.startsWith("image/")){
-    throw new Error("Seleziona un file immagine valido.");
-  }
-
+  if(!file || !file.type || !file.type.startsWith("image/")) throw new Error("Seleziona un file immagine valido.");
   const objectUrl = URL.createObjectURL(file);
-
   try{
-    const img = await new Promise((resolve, reject)=>{
+    const img = await new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = () => resolve(image);
       image.onerror = () => reject(new Error("Impossibile leggere l’immagine."));
       image.src = objectUrl;
     });
-
     const canvas = resizeImageToCanvas(img, 1400, 1000);
     const supportsWebp = canvas.toDataURL("image/webp", 0.82).startsWith("data:image/webp");
     const mimeType = supportsWebp ? "image/webp" : "image/jpeg";
     let quality = 0.78;
     let dataUrl = canvas.toDataURL(mimeType, quality);
-
     while(dataUrlToBytes(dataUrl) > 450 * 1024 && quality > 0.42){
       quality = Math.max(0.42, quality - 0.08);
       dataUrl = canvas.toDataURL(mimeType, quality);
     }
-
     return {
       dataUrl,
       originalBytes:file.size,
@@ -739,49 +1291,41 @@ async function compressImageFile(file){
       height:canvas.height,
       mimeType
     };
-  } finally {
+  }finally{
     URL.revokeObjectURL(objectUrl);
   }
 }
-
 async function handleCoverImageFileChange(event){
   const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
   if(!file) return;
-
-  const oldHelp = document.getElementById("imageUploadHelp");
-  oldHelp.innerText = "Compressione immagine in corso...";
-
+  imageUploadHelpEl.innerText = "Compressione immagine in corso...";
   try{
     const result = await compressImageFile(file);
     coverImageEl.value = result.dataUrl;
     updateCoverImagePreview();
-    oldHelp.innerText = "Compressione completata: " + bytesToReadableSize(result.originalBytes) + " → " + bytesToReadableSize(result.compressedBytes) + " • " + result.width + "×" + result.height + " • " + result.mimeType.replace("image/", "").toUpperCase();
+    imageUploadHelpEl.innerText = "Compressione completata: " + bytesToReadableSize(result.originalBytes) + " → " + bytesToReadableSize(result.compressedBytes) + " • " + result.width + "×" + result.height + " • " + result.mimeType.replace("image/", "").toUpperCase();
   }catch(err){
     alert(err.message || "Errore durante il caricamento immagine.");
-    oldHelp.innerText = "Seleziona una foto dal telefono: verrà ridimensionata e compressa automaticamente per occupare meno memoria.";
+    imageUploadHelpEl.innerText = "Seleziona una foto dal telefono: verrà ridimensionata e compressa automaticamente per occupare meno memoria.";
   }finally{
     event.target.value = "";
   }
 }
-
 function clearCoverImage(){
   coverImageEl.value = "";
   updateCoverImagePreview();
-  document.getElementById("imageUploadHelp").innerText = "Immagine rimossa. Puoi inserire un URL oppure caricare una nuova foto dalla galleria.";
+  imageUploadHelpEl.innerText = "Immagine rimossa. Puoi inserire un URL oppure caricare una nuova foto dalla galleria.";
 }
-
 function updateSlugAndPreview(){
   if(!editingPostId && !slugEl.value.trim()){
     slugEl.value = slugify(titleInputEl.value);
-  } else {
+  }else{
     slugEl.value = slugify(slugEl.value);
   }
-
   slugPreviewEl.innerHTML = "URL: <strong>/blog/" + (slugEl.value || "") + "</strong>";
   previewTitleEl.innerText = titleInputEl.value.trim() || "Titolo articolo";
   previewExcerptEl.innerText = excerptEl.value.trim() || "Estratto breve dell’articolo...";
 }
-
 function clearForm(resetEditing = true){
   if(resetEditing) editingPostId = null;
   titleInputEl.value = "";
@@ -796,13 +1340,12 @@ function clearForm(resetEditing = true){
   statusSelectEl.value = "draft";
   authorEl.value = "5TerreGo";
   publishedAtEl.value = "";
+  imageUploadHelpEl.innerText = "Seleziona una foto dal telefono: verrà ridimensionata e compressa automaticamente per occupare meno memoria.";
   updateSlugAndPreview();
   renderPoiPicker();
 }
-
 function openModal(post = null){
   deleteBtn.style.display = post ? "block" : "none";
-
   if(post){
     editingPostId = post.id;
     modalTitleEl.innerText = "Modifica articolo";
@@ -818,27 +1361,23 @@ function openModal(post = null){
     statusSelectEl.value = post.status || "draft";
     authorEl.value = post.author || "5TerreGo";
     publishedAtEl.value = formatDateForInput(post.published_at);
-  } else {
+  }else{
     editingPostId = null;
     modalTitleEl.innerText = "Aggiungi articolo";
     clearForm(false);
   }
-
   updateSlugAndPreview();
   renderPoiPicker();
   modalEl.classList.add("is-open");
   modalEl.setAttribute("aria-hidden", "false");
 }
-
 function closeModal(){
   modalEl.classList.remove("is-open");
   modalEl.setAttribute("aria-hidden", "true");
 }
-
 function readPostForm(){
   const publishedAtValue = publishedAtEl.value ? new Date(publishedAtEl.value).toISOString() : null;
   const now = new Date().toISOString();
-
   return {
     title:titleInputEl.value.trim(),
     slug:slugify(slugEl.value.trim() || titleInputEl.value.trim()),
@@ -853,7 +1392,6 @@ function readPostForm(){
     updated_at:now
   };
 }
-
 function buildPostSaveRequest(postId){
   const isEdit = Boolean(postId);
   return {
@@ -861,74 +1399,68 @@ function buildPostSaveRequest(postId){
     method:isEdit ? "PATCH" : "POST"
   };
 }
-
 async function assertOwner(){
-  const token = getToken();
-  const email = getUserEmail();
-
-  if(!token){
+  const session = await getValidSession({ required:false });
+  const email = await getUserEmail();
+  if(!session || !session.access_token){
     alert("Devi essere loggato per modificare il blog.");
     return false;
   }
-
   if(!OWNER_EMAILS.includes(email)){
     alert("Utente non autorizzato: " + (email || "email non trovata"));
     return false;
   }
-
   return true;
 }
-
 async function savePost(){
   if(!(await assertOwner())) return;
-
   const post = readPostForm();
   const saveTargetId = editingPostId;
   const request = buildPostSaveRequest(saveTargetId);
-
-  if(!post.title){
-    alert("Titolo obbligatorio");
-    return;
-  }
-
-  if(!post.slug){
-    alert("Slug obbligatorio");
-    return;
-  }
-
+  if(!post.title){ alert("Titolo obbligatorio"); return; }
+  if(!post.slug){ alert("Slug obbligatorio"); return; }
   try{
-    const res = await fetch(request.url, {
+    await requireActiveSession();
+    const res = await authFetch(request.url, {
       method:request.method,
-      headers:buildHeaders({ useUserToken:true, extra:{ Prefer:"return=representation" } }),
+      useUserToken:true,
+      headers:{ Prefer:"return=representation" },
       body:JSON.stringify(post)
     });
-
     await parseResponse(res);
     clearForm();
     closeModal();
     await loadPosts();
   }catch(err){
     console.error("SAVE POST ERROR", err);
+    if(isAuthExpiredMessage(err && err.message) || String((err && err.message) || "").toLowerCase().includes("sessione scaduta")){
+      alert("Sessione scaduta. Effettua di nuovo l'accesso.");
+      window.location.href = "login.html";
+      return;
+    }
     alert("Errore salvataggio: " + err.message + "\n\nSe è 42501 esegui i GRANT indicati nella pagina.");
   }
 }
-
 async function deletePost(){
   if(!editingPostId) return;
   if(!(await assertOwner())) return;
   if(!confirm("Sei sicuro di voler eliminare questo articolo?")) return;
-
   try{
-    const res = await fetch(SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?id=eq." + encodeURIComponent(editingPostId), {
+    await requireActiveSession();
+    const res = await authFetch(SUPABASE_URL + "/rest/v1/" + BLOG_TABLE + "?id=eq." + encodeURIComponent(editingPostId), {
       method:"DELETE",
-      headers:buildHeaders({ useUserToken:true })
+      useUserToken:true
     });
-
     await parseResponse(res);
     closeModal();
     await loadPosts();
   }catch(err){
     console.error("DELETE POST ERROR", err);
+    if(isAuthExpiredMessage(err && err.message) || String((err && err.message) || "").toLowerCase().includes("sessione scaduta")){
+      alert("Sessione scaduta. Effettua di nuovo l'accesso.");
+      window.location.href = "login.html";
+      return;
+    }
     alert("Errore eliminazione: " + err.message);
   }
 }
@@ -937,18 +1469,21 @@ addBtn.addEventListener("click", () => openModal());
 deleteBtn.addEventListener("click", deletePost);
 closeBtn.addEventListener("click", closeModal);
 saveBtn.addEventListener("click", savePost);
-searchEl.addEventListener("input", () => renderPosts(searchEl.value));
+searchEl.addEventListener("input", () => {
+  if(searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => renderPosts(searchEl.value), 180);
+});
 titleInputEl.addEventListener("input", updateSlugAndPreview);
 slugEl.addEventListener("input", updateSlugAndPreview);
 excerptEl.addEventListener("input", updateSlugAndPreview);
 coverImageEl.addEventListener("input", updateCoverImagePreview);
 coverImageFileEl.addEventListener("change", handleCoverImageFileChange);
 clearCoverImageBtn.addEventListener("click", clearCoverImage);
-poiSearchEl.addEventListener("input", handlePoiSearchInput);
-poiSearchEl.addEventListener("keyup", handlePoiSearchInput);
-poiSearchEl.addEventListener("change", handlePoiSearchInput);
+poiSearchEl.addEventListener("input", () => renderPoiPicker(poiSearchEl.value));
 modalEl.addEventListener("click", event => { if(event.target === modalEl) closeModal(); });
 document.addEventListener("keydown", event => { if(event.key === "Escape") closeModal(); });
+window.addEventListener("focus", warmSession);
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") warmSession(); });
 
 function runTests(){
   console.assert(typeof loadPosts === "function", "loadPosts deve esistere");
@@ -963,16 +1498,16 @@ function runTests(){
   console.assert(typeof compressImageFile === "function", "compressImageFile deve esistere");
   console.assert(typeof updateCoverImagePreview === "function", "updateCoverImagePreview deve esistere");
   console.assert(Boolean(previewImageEl), "preview immagine card deve esistere");
-  console.assert(normalizeRelatedPois('["a","b"]').length === 2, "related_pois json string corretto");
+  console.assert(normalizeRelatedPois('[\"a\",\"b\"]').length === 2, "related_pois json string corretto");
   console.assert(normalizeSearchText('Vernazzà') === 'vernazza', 'ricerca senza accenti corretta');
 }
-
 async function loadEditorData(){
   await loadPoisForBlog();
   await loadPosts();
 }
-
 runTests();
+startHeroQuoteRotation();
+warmSession();
 loadEditorData();
 </script>
 </body>
