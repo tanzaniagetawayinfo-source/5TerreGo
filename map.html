@@ -1450,7 +1450,7 @@
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-  var ACTIONBAR_CACHE_KEY = 'ftg-global-actionbar-html-v1';
+
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -1474,120 +1474,84 @@
     return lang || 'en';
   }
 
-  async function injectGlobalActionbarHTML(html, cacheBucketIndex) {
+  async function loadGlobalActionbarPartial() {
+    var i;
+    var response;
+    var html;
     var parser;
     var doc;
     var scripts;
     var links;
     var styles;
-    var s;
-
-    if (!html) return false;
-
-    parser = new DOMParser();
-    doc = parser.parseFromString(html, 'text/html');
-    links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
-    styles = Array.from(doc.querySelectorAll('style'));
-    scripts = Array.from(doc.querySelectorAll('script'));
-
-    links.forEach(function (link) {
-      var href = link.getAttribute('href') || '';
-      var el;
-      if (!href) return;
-      if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
-      el = document.createElement('link');
-      el.rel = 'stylesheet';
-      el.href = href;
-      el.setAttribute('data-ftg-actionbar-link', href);
-      document.head.appendChild(el);
-    });
-
-    styles.forEach(function (style, index) {
-      var key = 'ftg-actionbar-style-' + String(cacheBucketIndex || 'cached') + '-' + index;
-      var el;
-      if (document.getElementById(key)) return;
-      el = document.createElement('style');
-      el.id = key;
-      el.textContent = style.textContent || '';
-      document.head.appendChild(el);
-    });
-
-    for (s = 0; s < scripts.length; s += 1) {
-      await new Promise(function (resolve) {
-        var original = scripts[s];
-        var src = original.getAttribute('src');
-        var existing;
-        var scriptEl;
-        var done = false;
-
-        function finish() {
-          if (done) return;
-          done = true;
-          resolve();
-        }
-
-        if (src) {
-          existing = document.querySelector('script[data-ftg-actionbar-script-src="' + src.replace(/"/g, '&quot;') + '"]');
-          if (existing) {
-            finish();
-            return;
-          }
-        }
-
-        scriptEl = document.createElement('script');
-        if (src) {
-          scriptEl.src = src;
-          scriptEl.setAttribute('data-ftg-actionbar-script-src', src);
-          scriptEl.onload = finish;
-          scriptEl.onerror = finish;
-        } else {
-          scriptEl.textContent = original.textContent || '';
-        }
-
-        document.head.appendChild(scriptEl);
-        if (!src) finish();
-      });
-    }
-
-    return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
-  }
-
-  async function loadGlobalActionbarPartial() {
-    var i;
-    var response;
-    var html;
-    var cachedHtml = '';
 
     if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
     if (actionbarLoadPromise) return actionbarLoadPromise;
 
     actionbarLoadPromise = (async function () {
-      try {
-        cachedHtml = sessionStorage.getItem(ACTIONBAR_CACHE_KEY) || '';
-      } catch (_cacheReadError) {
-        cachedHtml = '';
-      }
-
-      if (cachedHtml) {
-        try {
-          await injectGlobalActionbarHTML(cachedHtml, 'cached');
-          if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
-        } catch (_cachedInjectError) {}
-      }
-
       for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
         try {
-          response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'force-cache' });
+          response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
           if (!response.ok) continue;
 
           html = await response.text();
           if (!html) continue;
 
-          try {
-            sessionStorage.setItem(ACTIONBAR_CACHE_KEY, html);
-          } catch (_cacheWriteError) {}
+          parser = new DOMParser();
+          doc = parser.parseFromString(html, 'text/html');
+          links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+          styles = Array.from(doc.querySelectorAll('style'));
+          scripts = Array.from(doc.querySelectorAll('script'));
 
-          await injectGlobalActionbarHTML(html, i);
+          links.forEach(function (link) {
+            var href = link.getAttribute('href') || '';
+            var el;
+            if (!href) return;
+            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+
+            el = document.createElement('link');
+            el.rel = 'stylesheet';
+            el.href = href;
+            el.setAttribute('data-ftg-actionbar-link', href);
+            document.head.appendChild(el);
+          });
+
+          styles.forEach(function (style, index) {
+            var key = 'ftg-actionbar-style-' + i + '-' + index;
+            var el;
+            if (document.getElementById(key)) return;
+
+            el = document.createElement('style');
+            el.id = key;
+            el.textContent = style.textContent || '';
+            document.head.appendChild(el);
+          });
+
+          for (var s = 0; s < scripts.length; s += 1) {
+            await new Promise(function (resolve) {
+              var original = scripts[s];
+              var src = original.getAttribute('src');
+              var scriptEl = document.createElement('script');
+              var done = false;
+
+              function finish() {
+                if (done) return;
+                done = true;
+                resolve();
+              }
+
+              if (src) {
+                scriptEl.src = src;
+                scriptEl.onload = finish;
+                scriptEl.onerror = finish;
+              } else {
+                scriptEl.textContent = original.textContent || '';
+              }
+
+              document.head.appendChild(scriptEl);
+              if (!src) finish();
+            });
+          }
+
           if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
         } catch (_error) {}
       }
@@ -1609,7 +1573,9 @@
       actionbarMountScheduled = true;
       setTimeout(function () {
         actionbarMountScheduled = false;
-        if (rootActionbar.childElementCount === 0) mountActionbar(true);
+        if (rootActionbar.childElementCount === 0) {
+          mountActionbar(true);
+        }
       }, 120);
     });
 
@@ -1619,12 +1585,14 @@
   async function mountActionbar(force) {
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
     var bootText = document.getElementById('boot-status-text');
+    var mounted = false;
+
     if (bootText) bootText.textContent = 'Loading navigation…';
     window.__ftgActionbarMountStarted = true;
-    var mounted = false;
+
     if (!rootActionbar) return;
 
-    window.FTG_ACTIONBAR_CONFIG = {
+    window.FTG_ACTIONBAR_CONFIG = Object.assign({}, window.FTG_ACTIONBAR_CONFIG || {}, {
       activePage: 'map',
       language: getInitialActionbarLanguage(),
       userName: 'Guest',
@@ -1642,10 +1610,12 @@
         { id: 'updates', labelKey: 'nav_updates', label: 'Official Updates', href: 'updates.html' }
       ],
       onLanguageChange: function (lang) {
-        try { localStorage.setItem('ftg_language', String(lang || 'en').toLowerCase()); } catch (_error) {}
+        try {
+          localStorage.setItem('ftg_language', String(lang || 'en').toLowerCase());
+        } catch (_error) {}
         mountActionbar(true);
       }
-    };
+    });
 
     observeActionbarRoot();
     await loadGlobalActionbarPartial();
@@ -1679,14 +1649,18 @@
   if (document.getElementById('ftg-global-actionbar-root')) {
     mountActionbar();
   } else if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { mountActionbar(); }, { once: true });
+    document.addEventListener('DOMContentLoaded', function () {
+      mountActionbar();
+    }, { once: true });
   } else {
     mountActionbar();
   }
 
   window.addEventListener('pageshow', function () {
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
-    if (rootActionbar && rootActionbar.childElementCount === 0) mountActionbar(true);
+    if (rootActionbar && rootActionbar.childElementCount === 0) {
+      mountActionbar(true);
+    }
   });
 }());
 </script>
