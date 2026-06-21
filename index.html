@@ -191,66 +191,191 @@
     margin-top:14px;
   }
 
-  .featured-card{
+  .hero-article-card{
     position:relative;
     overflow:hidden;
     min-height:286px;
     border-radius:28px;
     box-shadow:var(--shadow);
-    background:
-      linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.42) 100%),
-      url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    background:#dfe7f3;
     border:1px solid rgba(255,255,255,.55);
     display:flex;
     align-items:flex-end;
     padding:20px;
+    cursor:pointer;
+    transition:transform .16s ease, box-shadow .16s ease;
   }
 
-  .featured-card::before{
+  .hero-article-card:active{transform:scale(.992)}
+
+  .hero-article-card::before{
     content:"";
     position:absolute;
     inset:0;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.02) 0%, rgba(0,0,0,.45) 100%),
-      radial-gradient(circle at top right, rgba(255,214,184,.18), transparent 24%);
-  }
-
-  .featured-content{
-    position:relative;
+    background:linear-gradient(180deg, rgba(0,0,0,.04) 0%, rgba(0,0,0,.48) 100%);
     z-index:1;
-    width:100%;
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:14px;
   }
 
-  .featured-title{
-    max-width:72%;
+  .hero-article-thumb{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border-radius:0;
+    overflow:hidden;
+    background:#e8eef7;
+  }
+
+  .hero-article-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .hero-article-body{
+    position:relative;
+    z-index:2;
+    min-width:0;
+    max-width:78%;
+    padding-top:0;
+  }
+
+  .hero-article-title{
     margin:0;
+    font-size:30px;
+    line-height:.96;
+    letter-spacing:-.055em;
     color:#fff;
-    font-size:26px;
-    line-height:1.02;
-    letter-spacing:-.05em;
-    font-weight:850;
+    font-weight:900;
     text-shadow:0 8px 18px rgba(0,0,0,.25);
   }
 
-  .time-badge{
-    flex:0 0 auto;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    min-height:42px;
-    padding:0 14px;
-    border-radius:999px;
-    background:rgba(20,33,61,.68);
-    color:#fff;
+  .hero-article-preview,
+  .hero-article-meta,
+  .hero-article-save{
+    display:none !important;
+  }
+
+  .reader-modal{
+    position:fixed;
+    inset:0;
+    z-index:1600;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    padding:16px;
+    background:rgba(12,18,32,.34);
     backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
-    box-shadow:0 8px 22px rgba(0,0,0,.2);
+  }
+
+  .reader-modal.is-open{display:flex}
+
+  .reader-sheet{
+    width:min(100%,780px);
+    max-height:min(92dvh,920px);
+    overflow:hidden;
+    border-radius:30px;
+    background:#fff;
+    border:1px solid rgba(255,255,255,.95);
+    box-shadow:0 28px 80px rgba(17,24,39,.22);
+    display:flex;
+    flex-direction:column;
+  }
+
+  .reader-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 14px 0;
+  }
+
+  .reader-close{
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    background:#f3f5fa;
+    color:#111827;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    font-weight:400;
+    box-shadow:0 8px 18px rgba(17,24,39,.05);
+  }
+
+  .reader-scroll{
+    overflow:auto;
+    padding:0 18px 24px;
+  }
+
+  .reader-cover{
+    width:100%;
+    height:240px;
+    border-radius:24px;
+    overflow:hidden;
+    background:#e8eef7;
+    margin-top:10px;
+  }
+
+  .reader-cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .reader-body{
+    padding:18px 4px 0;
+  }
+
+  .reader-kicker{
+    margin:0 0 10px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#98a2b3;
+  }
+
+  .reader-title{
+    margin:0;
+    font-size:34px;
+    line-height:.95;
+    letter-spacing:-.055em;
+    color:#0f172a;
+    font-weight:900;
+  }
+
+  .reader-meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:16px 0 0;
+    color:#667085;
     font-size:14px;
     font-weight:700;
+  }
+
+  .reader-content{
+    margin-top:18px;
+    color:#344054;
+    font-size:16px;
+    line-height:1.72;
+  }
+
+  .reader-content p{
+    margin:0 0 16px;
+  }
+
+  .reader-content h3{
+    margin:26px 0 10px;
+    font-size:22px;
+    line-height:1.08;
+    letter-spacing:-.04em;
+    color:#111827;
   }
 
   .stories-list{
@@ -494,13 +619,18 @@
 
     .chip{min-height:40px;padding:0 16px;font-size:14px}
 
-    .featured-card{
+    .hero-article-card{
       min-height:240px;
-      border-radius:24px;
       padding:16px;
+      border-radius:24px;
     }
 
-    .featured-title{font-size:22px;max-width:74%}
+    .hero-article-title{font-size:24px}
+
+    .reader-modal{padding:10px}
+    .reader-sheet{border-radius:24px}
+    .reader-cover{height:190px;border-radius:20px}
+    .reader-title{font-size:28px}
 
     .story-card{
       grid-template-columns:104px minmax(0,1fr) 24px;
@@ -535,10 +665,14 @@
   <div id="ftg-global-actionbar-root"></div>
   <main class="page">
     <section class="hero" aria-label="Featured story">
-      <article id="featuredCard" class="featured-card" data-tags="all">
-        <div class="featured-content">
-          <h2 id="featuredTitle" class="featured-title">Loading stories...</h2>
-          <div class="time-badge">
+      <article id="featuredCard" class="hero-article-card" data-tags="all">
+        <div class="hero-article-thumb">
+          <img id="featuredImage" src="" alt="Featured story" />
+        </div>
+        <div class="hero-article-body">
+          <h2 id="featuredTitle" class="hero-article-title">Loading stories...</h2>
+          <p id="featuredPreview" class="hero-article-preview">One of the biggest dilemmas for travelers</p>
+          <div class="hero-article-meta">
             <span class="clock-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="9"></circle>
@@ -548,6 +682,9 @@
             <span id="featuredTime">...</span>
           </div>
         </div>
+        <button class="hero-article-save" id="featuredSaveButton" type="button" aria-label="Save story">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1z"></path></svg>
+        </button>
       </article>
 
       <div class="search-wrap">
@@ -590,6 +727,32 @@
       <div id="savedList" class="saved-list"></div>
     </section>
   </main>
+
+  <div id="readerModal" class="reader-modal" aria-hidden="true">
+    <div class="reader-sheet" role="dialog" aria-modal="true" aria-labelledby="readerTitle">
+      <div class="reader-topbar">
+        <div></div>
+        <button id="readerClose" class="reader-close" type="button" aria-label="Close article">×</button>
+      </div>
+      <div class="reader-scroll">
+        <div class="reader-cover"><img id="readerImage" src="" alt="Article cover" /></div>
+        <div class="reader-body">
+          <p id="readerKicker" class="reader-kicker">Guide</p>
+          <h2 id="readerTitle" class="reader-title">Article title</h2>
+          <div class="reader-meta">
+            <span class="clock-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v5l3 2"></path>
+              </svg>
+            </span>
+            <span id="readerTime">3 min</span>
+          </div>
+          <div id="readerContent" class="reader-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
   (function () {
@@ -665,8 +828,11 @@
     var chipsNav = document.getElementById('chipsNav');
     var searchInput = document.getElementById('searchInput');
     var featuredCard = document.getElementById('featuredCard');
+    var featuredImage = document.getElementById('featuredImage');
     var featuredTitle = document.getElementById('featuredTitle');
+    var featuredPreview = document.getElementById('featuredPreview');
     var featuredTime = document.getElementById('featuredTime');
+    var featuredSaveButton = document.getElementById('featuredSaveButton');
     var storiesList = document.getElementById('storiesList');
     var emptyState = document.getElementById('emptyState');
     var emptyTitle = document.getElementById('emptyTitle');
@@ -674,6 +840,13 @@
     var savedSection = document.getElementById('savedSection');
     var savedList = document.getElementById('savedList');
     var savedSeeAll = document.getElementById('savedSeeAll');
+    var readerModal = document.getElementById('readerModal');
+    var readerClose = document.getElementById('readerClose');
+    var readerImage = document.getElementById('readerImage');
+    var readerKicker = document.getElementById('readerKicker');
+    var readerTitle = document.getElementById('readerTitle');
+    var readerTime = document.getElementById('readerTime');
+    var readerContent = document.getElementById('readerContent');
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
     var savedTitleNode = document.querySelector('#savedSection .section-title span:last-child');
 
@@ -803,6 +976,60 @@
       return '/stories/' + slug + '.html';
     }
 
+    function getFeaturedHeroPost(list) {
+      var bySlug = (Array.isArray(list) ? list : []).find(function (post) {
+        return post && post.slug === 'what-is-the-best-month-to-visit-cinque-terre';
+      });
+      if (bySlug) return bySlug;
+      return (Array.isArray(list) ? list : [])[0] || null;
+    }
+
+    function sanitizeArticleHTML(html) {
+      var container = document.createElement('div');
+      var nodes;
+      container.innerHTML = String(html || '');
+      nodes = container.querySelectorAll('script,style,iframe,object,embed');
+      Array.from(nodes).forEach(function (node) { node.remove(); });
+      Array.from(container.querySelectorAll('*')).forEach(function (node) {
+        Array.from(node.attributes).forEach(function (attr) {
+          if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
+        });
+      });
+      return container.innerHTML.trim();
+    }
+
+    function buildReaderHTML(post) {
+      var html = sanitizeArticleHTML(post.content || '');
+      var preview;
+      if (html) return html;
+      preview = escapeHTML(getPreview(post));
+      return '<p>' + preview + '</p><p>' + escapeHTML(t('open_guide')) + '</p>';
+    }
+
+    function openReader(post) {
+      if (!post || !readerModal) return;
+      readerImage.src = getCardImage(post);
+      readerImage.alt = post.title;
+      readerKicker.textContent = getCategoryLabel(post.category);
+      readerTitle.textContent = post.title;
+      readerTime.textContent = post.readingMinutes + ' min';
+      readerContent.innerHTML = buildReaderHTML(post);
+      readerModal.classList.add('is-open');
+      readerModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeReader() {
+      if (!readerModal) return;
+      readerModal.classList.remove('is-open');
+      readerModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function getPostBySlug(slug) {
+      return posts.find(function (post) { return post.slug === slug; }) || null;
+    }
+
     function getCardImage(post) {
       return post.cover_image || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80';
     }
@@ -874,15 +1101,21 @@
     }
 
     function renderFeatured(post) {
+      var saved = false;
       if (!post) {
         featuredCard.style.display = 'none';
         return;
       }
-      featuredCard.style.display = 'flex';
-      featuredCard.style.backgroundImage = 'linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.42) 100%), url("' + getCardImage(post) + '")';
+      saved = getSavedSlugs().indexOf(post.slug) >= 0;
+      featuredCard.style.display = 'grid';
+      featuredImage.src = getCardImage(post);
+      featuredImage.alt = post.title;
       featuredTitle.textContent = post.title;
+      featuredPreview.textContent = getPreview(post);
       featuredTime.textContent = post.readingMinutes + ' min';
-      featuredCard.onclick = function () { window.location.href = resolveStoryHref(post.slug); };
+      featuredSaveButton.classList.toggle('active', saved);
+      featuredSaveButton.setAttribute('data-save-slug', post.slug);
+      featuredCard.setAttribute('data-slug', post.slug);
     }
 
     function render() {
@@ -913,7 +1146,7 @@
 
     function useFallbackData() {
       posts = FALLBACK_POSTS.map(normalizePost).filter(function (post) { return post.slug && post.title; });
-      featuredPost = posts[0] || null;
+      featuredPost = getFeaturedHeroPost(posts);
       render();
     }
 
@@ -932,7 +1165,7 @@
         }
         rows = await response.json();
         posts = Array.isArray(rows) ? rows.map(normalizePost).filter(function (post) { return post.slug && post.title; }) : [];
-        featuredPost = posts[0] || null;
+        featuredPost = getFeaturedHeroPost(posts);
         if (!posts.length) {
           useFallbackData();
           return;
@@ -1249,14 +1482,30 @@
     document.addEventListener('click', function (event) {
       var saveButton = event.target.closest('[data-save-slug]');
       var storyCard = null;
+      var post = null;
       if (saveButton) {
         event.preventDefault();
         event.stopPropagation();
         toggleSavedSlug(saveButton.getAttribute('data-save-slug'));
         return;
       }
-      storyCard = event.target.closest('.story-card, .saved-card');
-      if (storyCard && storyCard.dataset.slug) window.location.href = resolveStoryHref(storyCard.dataset.slug);
+      storyCard = event.target.closest('.story-card, .saved-card, #featuredCard');
+      if (storyCard && storyCard.dataset.slug) {
+        post = getPostBySlug(storyCard.dataset.slug);
+        if (post) openReader(post);
+      }
+    });
+
+    if (readerClose) {
+      readerClose.addEventListener('click', closeReader);
+    }
+    if (readerModal) {
+      readerModal.addEventListener('click', function (event) {
+        if (event.target === readerModal) closeReader();
+      });
+    }
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeReader();
     });
 
     searchInput.addEventListener('input', render);
