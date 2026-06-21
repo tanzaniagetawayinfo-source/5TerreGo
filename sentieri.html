@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <title>5TerreGo | Sentieri</title>
+
+  <style>
+    :root {
+      --ftg-header-height: 98px;
+      --bg: #07111f;
+      --text: #ffffff;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      color: var(--text);
+    }
+
+    #ftg-global-actionbar-root {
+      position: relative;
+      z-index: 1000;
+    }
+
+    .page {
+      position: relative;
+      min-height: 100svh;
+      width: 100%;
+      overflow: hidden;
+      background-image:
+        linear-gradient(180deg, rgba(5, 10, 20, 0.18) 0%, rgba(5, 10, 20, 0.38) 45%, rgba(5, 10, 20, 0.62) 100%),
+        url("https://images.pexels.com/photos/13368981/pexels-photo-13368981.jpeg?_gl=1*8oygea*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIwNzY4MzckbzQxJGcxJHQxNzgyMDc3OTgwJGozOCRsMCRoMA..");
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding:
+        calc(var(--ftg-header-height, 98px) + 24px)
+        20px
+        calc(32px + env(safe-area-inset-bottom))
+        20px;
+    }
+
+    .overlay-card {
+      width: min(100%, 760px);
+      text-align: center;
+      color: #fff;
+      padding: 24px 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #ffffff;
+      opacity: 0.9;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 7vw, 62px);
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+      font-weight: 900;
+      text-wrap: balance;
+      text-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    p {
+      margin: 16px auto 0;
+      max-width: 30ch;
+      font-size: clamp(15px, 3.4vw, 20px);
+      line-height: 1.45;
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 500;
+      text-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    @media (max-width: 640px) {
+      :root {
+        --ftg-header-height: 92px;
+      }
+
+      .page {
+        align-items: flex-end;
+        padding:
+          calc(var(--ftg-header-height, 92px) + 20px)
+          16px
+          calc(34px + env(safe-area-inset-bottom))
+          16px;
+      }
+
+      .overlay-card {
+        padding: 20px 8px 8px;
+      }
+
+      .eyebrow {
+        margin-bottom: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="ftg-global-actionbar-root"></div>
+
+  <main class="page">
+    <section class="overlay-card" aria-label="Sentieri coming soon">
+      <div class="eyebrow">Cinque Terre Trails</div>
+      <h1>La sezione sentieri arriverà presto</h1>
+      <p>
+        Stiamo preparando una nuova esperienza per esplorare i percorsi delle
+        Cinque Terre in modo semplice e chiaro.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      window.FTG_ACTIONBAR_CONFIG = Object.assign({}, window.FTG_ACTIONBAR_CONFIG || {}, {
+        activePage: "sentieri"
+      });
+
+      var ACTIONBAR_PARTIAL_CANDIDATES = [
+        "global-actionbar.html",
+        "./global-actionbar.html",
+        "/global-actionbar.html"
+      ];
+
+      var actionbarLoadPromise = null;
+      var actionbarObserver = null;
+      var actionbarMountScheduled = false;
+
+      function getInitialActionbarLanguage() {
+        var stored = "";
+        var lang = "";
+        try {
+          stored =
+            localStorage.getItem("selectedLanguage") ||
+            localStorage.getItem("ftg_language") ||
+            localStorage.getItem("language") ||
+            "";
+        } catch (_error) {}
+        lang = String(document.documentElement.lang || stored || navigator.language || "en").toLowerCase();
+        if (lang.indexOf("-") >= 0) lang = lang.split("-")[0];
+        return lang || "en";
+      }
+
+      async function loadGlobalActionbarPartial() {
+        var i;
+        var response;
+        var html;
+        var parser;
+        var doc;
+        var scripts;
+        var links;
+        var styles;
+
+        if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === "function") return true;
+        if (actionbarLoadPromise) return actionbarLoadPromise;
+
+        actionbarLoadPromise = (async function () {
+          for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
+            try {
+              response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: "no-store" });
+              if (!response.ok) continue;
+
+              html = await response.text();
+              if (!html) continue;
+
+              parser = new DOMParser();
+              doc = parser.parseFromString(html, "text/html");
+              links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+              styles = Array.from(doc.querySelectorAll("style"));
+              scripts = Array.from(doc.querySelectorAll("script"));
+
+              links.forEach(function (link) {
+                var href = link.getAttribute("href") || "";
+                var el;
+                if (!href) return;
+                if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, "&quot;") + '"]')) return;
+
+                el = document.createElement("link");
+                el.rel = "stylesheet";
+                el.href = href;
+                el.setAttribute("data-ftg-actionbar-link", href);
+                document.head.appendChild(el);
+              });
+
+              styles.forEach(function (style, index) {
+                var key = "ftg-actionbar-style-" + i + "-" + index;
+                var el;
+                if (document.getElementById(key)) return;
+
+                el = document.createElement("style");
+                el.id = key;
+                el.textContent = style.textContent || "";
+                document.head.appendChild(el);
+              });
+
+              for (var s = 0; s < scripts.length; s += 1) {
+                await new Promise(function (resolve) {
+                  var original = scripts[s];
+                  var src = original.getAttribute("src");
+                  var scriptEl = document.createElement("script");
+                  var done = false;
+
+                  function finish() {
+                    if (done) return;
+                    done = true;
+                    resolve();
+                  }
+
+                  if (src) {
+                    scriptEl.src = src;
+                    scriptEl.onload = finish;
+                    scriptEl.onerror = finish;
+                  } else {
+                    scriptEl.textContent = original.textContent || "";
+                  }
+
+                  document.head.appendChild(scriptEl);
+                  if (!src) finish();
+                });
+              }
+
+              if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === "function") return true;
+            } catch (_error) {}
+          }
+
+          return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === "function";
+        }());
+
+        return actionbarLoadPromise;
+      }
+
+      function observeActionbarRoot() {
+        var rootActionbar = document.getElementById("ftg-global-actionbar-root");
+        if (actionbarObserver || !rootActionbar || typeof MutationObserver === "undefined") return;
+
+        actionbarObserver = new MutationObserver(function () {
+          if (actionbarMountScheduled) return;
+          if (rootActionbar.childElementCount > 0) return;
+
+          actionbarMountScheduled = true;
+          setTimeout(function () {
+            actionbarMountScheduled = false;
+            if (rootActionbar.childElementCount === 0) {
+              mountActionbar(true);
+            }
+          }, 120);
+        });
+
+        actionbarObserver.observe(rootActionbar, { childList: true });
+      }
+
+      async function mountActionbar(force) {
+        var rootActionbar = document.getElementById("ftg-global-actionbar-root");
+        var mounted = false;
+
+        if (!rootActionbar) return;
+
+        window.FTG_ACTIONBAR_CONFIG = Object.assign({}, window.FTG_ACTIONBAR_CONFIG || {}, {
+          activePage: "sentieri",
+          language: getInitialActionbarLanguage()
+        });
+
+        observeActionbarRoot();
+        await loadGlobalActionbarPartial();
+
+        if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === "function") {
+          if (force || rootActionbar.childElementCount === 0 || !rootActionbar.dataset.ftgMounted) {
+            rootActionbar.innerHTML = "";
+            window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
+            rootActionbar.dataset.ftgMounted = "true";
+            mounted = true;
+          }
+
+          if (mounted) {
+            requestAnimationFrame(function () {
+              if (rootActionbar.childElementCount === 0) {
+                setTimeout(function () {
+                  mountActionbar(true);
+                }, 180);
+              }
+            });
+          }
+        } else {
+          rootActionbar.innerHTML = "";
+          delete rootActionbar.dataset.ftgMounted;
+          console.warn("FTG_MOUNT_GLOBAL_ACTIONBAR not available");
+        }
+      }
+
+      if (document.getElementById("ftg-global-actionbar-root")) {
+        mountActionbar();
+      } else if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+          mountActionbar();
+        }, { once: true });
+      } else {
+        mountActionbar();
+      }
+
+      window.addEventListener("pageshow", function () {
+        var rootActionbar = document.getElementById("ftg-global-actionbar-root");
+        if (rootActionbar && rootActionbar.childElementCount === 0) {
+          mountActionbar(true);
+        }
+      });
+    }());
+  </script>
+</body>
+</html>
