@@ -1117,6 +1117,7 @@
       levanto: ['Levanto']
     };
     var TRAIN_RT_ENDPOINTS = [
+      'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime',
       window.FTG_TRAIN_RT_ENDPOINT,
       window.FTG_TRANSPORT_ENDPOINT,
       window.FTG_PUBLIC_TRANSPORT_ENDPOINT,
@@ -1641,36 +1642,23 @@
       var i = 0;
       syncLiveNowSelection();
 
-      if (!silent && liveState.mode !== 'live') {
-        refreshLiveState('loading', '', 'Trying official train feed');
-        updateLiveStrip();
-      }
-
-      LAST_RT_ERROR = '';
-
-      try {
-        realtimeDepartures = await fetchOfficialTrainRows();
-        if (realtimeDepartures.length) {
-          refreshLiveState('live', getItalianNow().time, 'Connected to official train feed · refresh every 30s');
-        } else {
-          refreshLiveState('empty', '', 'No real departures found for this route and time');
-        }
-        render();
-        return;
-      } catch (directError) {
-        LAST_RT_ERROR = directError && directError.message ? directError.message : 'Unable to read official train feed in browser';
-      }
-
       endpoints = ACTIVE_TRAIN_RT_ENDPOINT
         ? [ACTIVE_TRAIN_RT_ENDPOINT].concat(TRAIN_RT_ENDPOINTS.filter(function(item){ return item !== ACTIVE_TRAIN_RT_ENDPOINT; }))
         : TRAIN_RT_ENDPOINTS.slice();
 
       if (!endpoints.length) {
-        refreshLiveState('error', '', 'Official feed is blocked and no site endpoint is available', LAST_RT_ERROR);
+        refreshLiveState('error', '', 'No train data endpoint configured on this page');
         realtimeDepartures = [];
         render();
         return;
       }
+
+      if (!silent && liveState.mode !== 'live') {
+        refreshLiveState('loading', '', 'Connecting to train data feed');
+        updateLiveStrip();
+      }
+
+      LAST_RT_ERROR = '';
 
       for (i = 0; i < endpoints.length; i += 1) {
         try {
@@ -1683,7 +1671,7 @@
           realtimeDepartures = rows.map(normalizeRealtimeRow).filter(function(item){ return item && item.departure && item.departure !== '—'; });
           ACTIVE_TRAIN_RT_ENDPOINT = endpoints[i];
           if (realtimeDepartures.length) {
-            refreshLiveState('live', getItalianNow().time, 'Connected to site train feed · refresh every 30s');
+            refreshLiveState('live', getItalianNow().time, 'Connected to live train feed · refresh every 30s');
           } else {
             refreshLiveState('empty', '', 'No real departures found for this route and time');
           }
@@ -1695,7 +1683,7 @@
       }
 
       realtimeDepartures = [];
-      refreshLiveState('error', '', 'Unable to reach a train data feed right now', LAST_RT_ERROR);
+      refreshLiveState('error', '', 'Unable to reach the live train feed right now', LAST_RT_ERROR);
       if (LAST_RT_ERROR) console.warn('Train realtime feed error:', LAST_RT_ERROR);
       render();
     }
