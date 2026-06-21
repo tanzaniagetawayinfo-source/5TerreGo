@@ -795,9 +795,8 @@
     function resolveHref(href) {
       var value = String(href || "").trim();
       if (!value) return "";
-      if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
-      if (basePath) return basePath.replace(/\/+$/, "") + "/" + value.replace(/^\/+/, "");
-      return value.replace(/^\/+/, "");
+      if (/^(https?:|mailto:|tel:|#)/i.test(value)) return value;
+      return "/" + value.replace(/^\/+/, "");
     }
 
     function t(key, fallback) {
@@ -832,7 +831,7 @@
       var active = item.id === activePage;
       var label = t(item.labelKey || "", item.label || item.id || "");
       var href = resolveHref(item.href || "");
-      return '<a class="ftg-nav-pill' + (active ? ' active' : '') + '" href="' + escapeHTML(href) + '" target="_top" data-page-target="' + escapeHTML(item.id) + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></a>';
+      return '<a class="ftg-nav-pill' + (active ? ' active' : '') + '" href="' + escapeHTML(href) + '" data-page-target="' + escapeHTML(item.id) + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></a>';
     }
 
     function buildLanguageOptions() {
@@ -928,10 +927,9 @@
 
     function navigateTo(itemId, href) {
       var finalHref = resolveHref(href || "");
-      syncActiveButtons(itemId);
       closeMenu();
       if (finalHref) {
-        window.location.assign(finalHref);
+        window.location.href = finalHref;
       }
     }
 
@@ -967,11 +965,6 @@
 
     function bindPillEvents() {
       pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
-      pillButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-          syncActiveButtons(button.getAttribute("data-page-target"));
-        });
-      });
       syncActiveButtons(activePage);
     }
 
