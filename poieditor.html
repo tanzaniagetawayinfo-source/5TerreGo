@@ -979,9 +979,21 @@ button.delete{
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+
+if(supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.startAutoRefresh === "function"){
+  supabaseClient.auth.startAutoRefresh();
+}
 
 const REQUIRED_POIS = [
   "Blue Trail (Sentiero Azzurro)",
@@ -1270,29 +1282,67 @@ function syncMiniMapFromCoords(){
 }
 
 
-function getAuthSession(){
-  for(const key of Object.keys(localStorage)){
-    if(key.startsWith("sb-") && key.endsWith("-auth-token")){
-      try{
-        const parsed = JSON.parse(localStorage.getItem(key));
-        if(parsed && parsed.access_token) return parsed;
-        if(parsed && parsed.currentSession && parsed.currentSession.access_token) return parsed.currentSession;
-      }catch(err){
-        console.warn("Auth token non leggibile", err);
-      }
+function isAuthExpiredMessage(value){
+  const lower = String(value || "").toLowerCase();
+  return lower.includes("jwt expired")
+    || lower.includes("expired jwt")
+    || lower.includes("token is expired")
+    || lower.includes("session expired")
+    || lower.includes("invalid refresh token")
+    || lower.includes("refresh token not found");
+}
+
+async function getValidSession({ required = false, forceRefresh = false } = {}){
+  const { data, error } = await supabaseClient.auth.getSession();
+  if(error) throw error;
+
+  let session = data && data.session ? data.session : null;
+  const expiresSoon = Boolean(session && session.expires_at && ((session.expires_at * 1000) - Date.now() < 90000));
+
+  if(session && (forceRefresh || expiresSoon)){
+    const { data: refreshedData, error: refreshError } = await supabaseClient.auth.refreshSession();
+    if(refreshError){
+      if(required) throw refreshError;
+    }else if(refreshedData && refreshedData.session){
+      session = refreshedData.session;
     }
   }
-  return null;
+
+  if(required && (!session || !session.access_token)){
+    throw new Error("Sessione scaduta");
+  }
+
+  return session;
 }
 
-function getToken(){
-  const session = getAuthSession();
-  return session && session.access_token ? session.access_token : null;
+async function requireActiveSession(){
+  const session = await getValidSession({ required: true });
+  if(!session || !session.access_token){
+    throw new Error("Sessione scaduta");
+  }
+  return session;
 }
 
-function getUserEmail(){
-  const session = getAuthSession();
-  return String((session && session.user && session.user.email) || "").toLowerCase();
+async function tryRefreshSession(){
+  const { data, error } = await supabaseClient.auth.refreshSession();
+  return Boolean(!error && data && data.session && data.session.access_token);
+}
+
+async function warmSession(){
+  try{
+    await getValidSession({ required: false });
+  }catch(err){
+    console.warn("SESSION WARMUP ERROR", err);
+  }
+}
+
+async function getUserEmail(){
+  try{
+    const session = await getValidSession({ required: false });
+    return String((session && session.user && session.user.email) || "").toLowerCase();
+  }catch(err){
+    return "";
+  }
 }
 
 function clampNumber(value, min, max, fallback){
@@ -1561,8 +1611,7 @@ function updateImportanceUI(value = importanceEl.value){
   importanceEl.style.setProperty("--range-progress", progress + "%");
 }
 
-function buildHeaders({ useUserToken = false, extra = {} } = {}){
-  const token = useUserToken ? getToken() : null;
+function buildHeaders({ token = null, extra = {} } = {}){
   return {
     apikey: ANON_KEY,
     Authorization: "Bearer " + (token || ANON_KEY),
@@ -1570,6 +1619,59 @@ function buildHeaders({ useUserToken = false, extra = {} } = {}){
     "Content-Type": "application/json",
     ...extra
   };
+}
+
+async function authFetch(url, { useUserToken = false, allowAnonFallback = false, retryOnAuthError = true, ...requestInit } = {}){
+  let token = null;
+
+  if(useUserToken){
+    try{
+      const session = await getValidSession({ required: false });
+      token = session && session.access_token ? session.access_token : null;
+    }catch(err){
+      console.warn("SESSION READ ERROR", err);
+    }
+  }
+
+  let response = await fetch(url, {
+    ...requestInit,
+    headers: buildHeaders({ token, extra: requestInit.headers || {} })
+  });
+
+  if(!retryOnAuthError || !useUserToken){
+    return response;
+  }
+
+  let responseText = "";
+  try{
+    responseText = await response.clone().text();
+  }catch(err){
+    responseText = "";
+  }
+
+  if(response.status !== 401 && !isAuthExpiredMessage(responseText)){
+    return response;
+  }
+
+  const refreshed = await tryRefreshSession();
+  if(refreshed){
+    const refreshedSession = await getValidSession({ required: false, forceRefresh: true });
+    const refreshedToken = refreshedSession && refreshedSession.access_token ? refreshedSession.access_token : null;
+
+    return fetch(url, {
+      ...requestInit,
+      headers: buildHeaders({ token: refreshedToken, extra: requestInit.headers || {} })
+    });
+  }
+
+  if(allowAnonFallback){
+    return fetch(url, {
+      ...requestInit,
+      headers: buildHeaders({ token: null, extra: requestInit.headers || {} })
+    });
+  }
+
+  throw new Error("Sessione scaduta");
 }
 
 async function parseResponse(res){
@@ -1598,6 +1700,7 @@ async function parseResponse(res){
 function isPermissionError(err){
   const text = String((err && err.message) || "") + " " + JSON.stringify((err && err.payload) || {});
   const lower = text.toLowerCase();
+  if(isAuthExpiredMessage(lower) || lower.includes("sessione scaduta")) return false;
   return (err && (err.status === 401 || err.status === 403)) || lower.includes("42501") || lower.includes("permission denied") || lower.includes("grant select");
 }
 
@@ -1611,12 +1714,12 @@ async function loadPois(){
   setStatus("Caricamento POI...");
 
   try{
-    const hasUser = Boolean(getToken());
-    const res = await fetch(
+    const res = await authFetch(
       SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type,discount",
       {
         method: "GET",
-        headers: buildHeaders({ useUserToken: hasUser })
+        useUserToken: true,
+        allowAnonFallback: true
       }
     );
 
@@ -1895,12 +1998,12 @@ async function fetchPoiDetail(poiId){
   if(!poiId) return null;
   if(poiDetailCache.has(poiId)) return poiDetailCache.get(poiId);
 
-  const hasUser = Boolean(getToken());
-  const res = await fetch(
+  const res = await authFetch(
     SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) + "&select=id,name,coords,description,importance,type,emails,phone,discount,images",
     {
       method: "GET",
-      headers: buildHeaders({ useUserToken: hasUser })
+      useUserToken: true,
+      allowAnonFallback: true
     }
   );
 
@@ -2014,7 +2117,6 @@ function buildPoiSaveRequest(poiId){
 }
 
 async function savePoi(){
-  const token = getToken();
   const poi = readPoiForm();
   const saveTargetId = editingPoiId;
   const request = buildPoiSaveRequest(saveTargetId);
@@ -2024,15 +2126,13 @@ async function savePoi(){
     return;
   }
 
-  if(!token){
-    alert("Devi essere loggato per salvare.");
-    return;
-  }
-
   try{
-    const res = await fetch(request.url, {
+    await requireActiveSession();
+
+    const res = await authFetch(request.url, {
       method: request.method,
-      headers: buildHeaders({ useUserToken: true, extra: { Prefer: "return=representation" } }),
+      useUserToken: true,
+      headers: { Prefer: "return=representation" },
       body: JSON.stringify(poi)
     });
 
@@ -2045,6 +2145,11 @@ async function savePoi(){
     setStatus(saveTargetId ? "POI aggiornata" : "POI aggiunta");
   }catch(err){
     console.error("SAVE POI ERROR", err);
+    if(isAuthExpiredMessage(err && err.message) || String((err && err.message) || "").toLowerCase().includes("sessione scaduta")){
+      alert("Sessione scaduta. Effettua di nuovo l'accesso.");
+      window.location.href = "login.html";
+      return;
+    }
     const grantMsg = "SQL richiesto se è 42501:\nGRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;";
     alert("Errore salvataggio: " + err.message + "\n\n" + grantMsg);
   }
@@ -2054,17 +2159,12 @@ async function deletePoi(){
   if(!editingPoiId) return;
   if(!confirm("Sei sicuro di voler eliminare questo POI?")) return;
 
-  const token = getToken();
-
-  if(!token){
-    alert("Devi essere loggato per eliminare.");
-    return;
-  }
-
   try{
-    const res = await fetch(SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(editingPoiId), {
+    await requireActiveSession();
+
+    const res = await authFetch(SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(editingPoiId), {
       method: "DELETE",
-      headers: buildHeaders({ useUserToken: true })
+      useUserToken: true
     });
 
     const deletedPoiId = editingPoiId;
@@ -2076,6 +2176,11 @@ async function deletePoi(){
     setStatus("POI eliminata");
   }catch(err){
     console.error("DELETE POI ERROR", err);
+    if(isAuthExpiredMessage(err && err.message) || String((err && err.message) || "").toLowerCase().includes("sessione scaduta")){
+      alert("Sessione scaduta. Effettua di nuovo l'accesso.");
+      window.location.href = "login.html";
+      return;
+    }
     alert("Errore eliminazione: " + err.message);
   }
 }
@@ -2140,7 +2245,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+window.addEventListener("focus", warmSession);
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible") warmSession();
+});
+
 startHeroQuoteRotation();
+warmSession();
 loadPois();
 </script>
 </body>
