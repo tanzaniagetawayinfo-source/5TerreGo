@@ -730,6 +730,7 @@ select{appearance:none;-webkit-appearance:none;}
       pois:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z"></path><circle cx="12" cy="11" r="2.5"></circle></svg>',
       blog:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V4.5a2 2 0 0 1 2-2h12v17"></path><path d="M8 7h6M8 11h8M8 15h5"></path><path d="M4 19.5a2.5 2.5 0 0 0 2.5 2.5H20"></path></svg>',
       trails:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6.5-11L13 15l3.5-6L21 20"></path><path d="M3 20h18"></path></svg>',
+      visitors:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"></path><path d="M6 16v-4"></path><path d="M12 16V8"></path><path d="M18 16v-7"></path></svg>',
       logout:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>'
     };
     return map[type] || map.profile;
@@ -873,6 +874,14 @@ select{appearance:none;-webkit-appearance:none;}
         onClick:function(){ window.location.href = '/trakeditor.html'; }
       });
       menuList.insertBefore(trailsBtn, document.getElementById('logout'));
+    }
+
+    if(!document.getElementById('visitors-dashboard')){
+      const visitorsBtn = createMenuButton({
+        id:'visitors-dashboard', label:'Visitors dashboard', icon:'visitors',
+        onClick:function(){ window.location.href = '/visitors.html'; }
+      });
+      menuList.insertBefore(visitorsBtn, document.getElementById('logout'));
     }
   }
 
