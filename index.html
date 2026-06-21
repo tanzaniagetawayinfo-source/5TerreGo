@@ -930,51 +930,6 @@
       }
     }
 
-    function mountFallbackActionbar() {
-      var styleId = 'ftg-fallback-actionbar-style';
-      var existingStyle = document.getElementById(styleId);
-      var langLabel = currentLanguage === 'it' ? 'Italiano' : currentLanguage === 'fr' ? 'Français' : currentLanguage === 'de' ? 'Deutsch' : currentLanguage === 'zh' ? '中文' : 'English';
-      var langFlag = currentLanguage === 'it' ? '🇮🇹' : currentLanguage === 'fr' ? '🇫🇷' : currentLanguage === 'de' ? '🇩🇪' : currentLanguage === 'zh' ? '🇨🇳' : '🇬🇧';
-      var isAndroid = (navigator.userAgent || '').toLowerCase().indexOf('android') >= 0;
-      if (!existingStyle) {
-        existingStyle = document.createElement('style');
-        existingStyle.id = styleId;
-        existingStyle.textContent = '#ftg-global-actionbar-root .ftg-fallback-bar{max-width:780px;margin:0 auto;padding:10px 16px 8px;}#ftg-global-actionbar-root .ftg-fallback-shell{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(221,228,239,.9);border-radius:28px;box-shadow:0 18px 42px rgba(17,24,39,.08);overflow:hidden;}#ftg-global-actionbar-root .ftg-fallback-row1{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;}#ftg-global-actionbar-root .ftg-fallback-brand{font-size:22px;font-weight:800;letter-spacing:-.05em;color:#111827;}#ftg-global-actionbar-root .ftg-fallback-brand .go{color:#ff7e57;}#ftg-global-actionbar-root .ftg-fallback-actions{display:flex;align-items:center;gap:10px;}#ftg-global-actionbar-root .ftg-fallback-circle,#ftg-global-actionbar-root .ftg-fallback-menu-btn{width:42px;height:42px;border-radius:999px;border:1px solid #dde4ef;background:#fff;display:flex;align-items:center;justify-content:center;color:#111827;cursor:pointer;}#ftg-global-actionbar-root .ftg-fallback-menu-btn{position:relative;}#ftg-global-actionbar-root .ftg-fallback-ham{width:18px;height:14px;position:relative;display:inline-block;}#ftg-global-actionbar-root .ftg-fallback-ham span{position:absolute;left:0;right:0;height:2px;border-radius:999px;background:#111827;transition:all .2s ease;}#ftg-global-actionbar-root .ftg-fallback-ham span:nth-child(1){top:0;}#ftg-global-actionbar-root .ftg-fallback-ham span:nth-child(2){top:6px;}#ftg-global-actionbar-root .ftg-fallback-ham span:nth-child(3){bottom:0;}#ftg-global-actionbar-root .ftg-fallback-menu-btn.open .ftg-fallback-ham span:nth-child(1){top:6px;transform:rotate(45deg);}#ftg-global-actionbar-root .ftg-fallback-menu-btn.open .ftg-fallback-ham span:nth-child(2){opacity:0;}#ftg-global-actionbar-root .ftg-fallback-menu-btn.open .ftg-fallback-ham span:nth-child(3){bottom:6px;transform:rotate(-45deg);}#ftg-global-actionbar-root .ftg-fallback-row2{display:flex;gap:12px;overflow-x:auto;padding:0 16px 14px;scrollbar-width:none;}#ftg-global-actionbar-root .ftg-fallback-row2::-webkit-scrollbar{display:none;}#ftg-global-actionbar-root .ftg-fallback-pill{flex:0 0 auto;color:#111827;text-decoration:none;font-size:15px;font-weight:500;padding:10px 0;}#ftg-global-actionbar-root .ftg-fallback-pill.active{background:#fff3e8;border:1px solid #ffd7c5;border-radius:999px;padding:10px 16px;}#ftg-global-actionbar-root .ftg-fallback-menu{position:fixed;inset:0;background:#fbfdff;z-index:140;display:none;padding:22px 24px;}#ftg-global-actionbar-root .ftg-fallback-menu.open{display:block;}#ftg-global-actionbar-root .ftg-fallback-menu-list{display:flex;flex-direction:column;gap:18px;margin-top:44px;}#ftg-global-actionbar-root .ftg-fallback-menu-item,#ftg-global-actionbar-root .ftg-fallback-language-item{font-size:18px;color:#111827;text-decoration:none;display:flex;align-items:center;gap:10px;}#ftg-global-actionbar-root .ftg-fallback-language-list{display:none;flex-direction:column;gap:16px;margin-top:44px;}#ftg-global-actionbar-root .ftg-fallback-menu.lang-open .ftg-fallback-menu-list{display:none;}#ftg-global-actionbar-root .ftg-fallback-menu.lang-open .ftg-fallback-language-list{display:flex;}#ftg-global-actionbar-root .ftg-fallback-section-title{margin-top:10px;font-size:13px;color:#98a2b3;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}@media (max-width:640px){#ftg-global-actionbar-root .ftg-fallback-bar{padding:8px 14px 6px;}#ftg-global-actionbar-root .ftg-fallback-shell{border-radius:24px;}#ftg-global-actionbar-root .ftg-fallback-brand{font-size:21px;}}';
-        document.head.appendChild(existingStyle);
-      }
-      rootActionbar.innerHTML = '<div class="ftg-fallback-bar"><div class="ftg-fallback-shell"><div class="ftg-fallback-row1"><div class="ftg-fallback-brand">5Terre<span class="go">Go</span>.com</div><div class="ftg-fallback-actions"><a class="ftg-fallback-circle" href="login.html" aria-label="Login"><svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></a><button id="ftgFallbackMenuBtn" class="ftg-fallback-menu-btn" type="button" aria-label="Menu"><span class="ftg-fallback-ham"><span></span><span></span><span></span></span></button></div></div><div class="ftg-fallback-row2"><a class="ftg-fallback-pill" href="map.html">Map</a><a class="ftg-fallback-pill active" href="#">Stories</a><a class="ftg-fallback-pill" href="#sentieri">Sentieri</a><a class="ftg-fallback-pill" href="#discounts">Local Discounts</a><a class="ftg-fallback-pill" href="#trains">Public Transport</a><a class="ftg-fallback-pill" href="#weather">Weather</a></div></div></div><div id="ftgFallbackMenu" class="ftg-fallback-menu"><div class="ftg-fallback-menu-list"><button id="ftgFallbackLangBtn" class="ftg-fallback-language-item" type="button"><span>' + langFlag + '</span><span>' + langLabel + '</span></button>' + (isAndroid ? '<a class="ftg-fallback-menu-item" href="#android">Download Android app</a>' : '') + '<div class="ftg-fallback-section-title">Legal area</div><a class="ftg-fallback-menu-item" href="#privacy">Privacy Policy</a><a class="ftg-fallback-menu-item" href="#terms">Terms &amp; Conditions</a></div><div class="ftg-fallback-language-list"><button class="ftg-fallback-language-item" type="button" data-lang="en">🇬🇧 English</button><button class="ftg-fallback-language-item" type="button" data-lang="it">🇮🇹 Italiano</button><button class="ftg-fallback-language-item" type="button" data-lang="fr">🇫🇷 Français</button><button class="ftg-fallback-language-item" type="button" data-lang="de">🇩🇪 Deutsch</button><button class="ftg-fallback-language-item" type="button" data-lang="zh">🇨🇳 中文</button></div></div>';
-      (function bindFallback() {
-        var menuBtn = document.getElementById('ftgFallbackMenuBtn');
-        var menu = document.getElementById('ftgFallbackMenu');
-        var langBtn = document.getElementById('ftgFallbackLangBtn');
-        var langItems = Array.from(rootActionbar.querySelectorAll('[data-lang]'));
-        function closeMenu() {
-          menu.classList.remove('open');
-          menu.classList.remove('lang-open');
-          menuBtn.classList.remove('open');
-        }
-        menuBtn.addEventListener('click', function () {
-          if (!menu.classList.contains('open')) {
-            menu.classList.add('open');
-            menuBtn.classList.add('open');
-            return;
-          }
-          if (menu.classList.contains('lang-open')) {
-            menu.classList.remove('lang-open');
-            return;
-          }
-          closeMenu();
-        });
-        langBtn.addEventListener('click', function () { menu.classList.add('lang-open'); });
-        langItems.forEach(function (button) {
-          button.addEventListener('click', function () {
-            setLanguage(button.getAttribute('data-lang') || 'en');
-            mountFallbackActionbar();
-          });
-        });
-      }());
-    }
-
     async function loadGlobalActionbarPartial() {
       var i = 0;
       var response = null;
@@ -1076,7 +1031,8 @@
       if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
         window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
       } else {
-        mountFallbackActionbar();
+        rootActionbar.innerHTML = '';
+        console.warn('FTG_MOUNT_GLOBAL_ACTIONBAR not available');
       }
     }
 
