@@ -672,6 +672,9 @@
     var featuredPost = null;
     var activeFilter = 'all';
     var currentLanguage = getInitialLanguage();
+    var actionbarLoadPromise = null;
+    var actionbarObserver = null;
+    var actionbarMountScheduled = false;
 
     function getInitialLanguage() {
       var stored = '';
@@ -941,72 +944,94 @@
       var styles = [];
 
       if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+      if (actionbarLoadPromise) return actionbarLoadPromise;
 
-      for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
-        try {
-          response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
-          if (!response.ok) continue;
-          html = await response.text();
-          if (!html) continue;
+      actionbarLoadPromise = (async function () {
+        for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
+          try {
+            response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
+            if (!response.ok) continue;
+            html = await response.text();
+            if (!html) continue;
 
-          parser = new DOMParser();
-          doc = parser.parseFromString(html, 'text/html');
-          links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
-          styles = Array.from(doc.querySelectorAll('style'));
-          scripts = Array.from(doc.querySelectorAll('script'));
+            parser = new DOMParser();
+            doc = parser.parseFromString(html, 'text/html');
+            links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+            styles = Array.from(doc.querySelectorAll('style'));
+            scripts = Array.from(doc.querySelectorAll('script'));
 
-          links.forEach(function (link) {
-            var href = link.getAttribute('href') || '';
-            if (!href) return;
-            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
-            var el = document.createElement('link');
-            el.rel = 'stylesheet';
-            el.href = href;
-            el.setAttribute('data-ftg-actionbar-link', href);
-            document.head.appendChild(el);
-          });
-
-          styles.forEach(function (style, index) {
-            var key = 'ftg-actionbar-style-' + i + '-' + index;
-            if (document.getElementById(key)) return;
-            var el = document.createElement('style');
-            el.id = key;
-            el.textContent = style.textContent || '';
-            document.head.appendChild(el);
-          });
-
-          for (var s = 0; s < scripts.length; s += 1) {
-            var original = scripts[s];
-            var src = original.getAttribute('src');
-            await new Promise(function (resolve) {
-              var scriptEl = document.createElement('script');
-              var done = false;
-              function finish() {
-                if (done) return;
-                done = true;
-                resolve();
-              }
-              if (src) {
-                scriptEl.src = src;
-                scriptEl.onload = finish;
-                scriptEl.onerror = finish;
-              } else {
-                scriptEl.textContent = original.textContent || '';
-              }
-              document.head.appendChild(scriptEl);
-              if (!src) finish();
+            links.forEach(function (link) {
+              var href = link.getAttribute('href') || '';
+              if (!href) return;
+              if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+              var el = document.createElement('link');
+              el.rel = 'stylesheet';
+              el.href = href;
+              el.setAttribute('data-ftg-actionbar-link', href);
+              document.head.appendChild(el);
             });
+
+            styles.forEach(function (style, index) {
+              var key = 'ftg-actionbar-style-' + i + '-' + index;
+              if (document.getElementById(key)) return;
+              var el = document.createElement('style');
+              el.id = key;
+              el.textContent = style.textContent || '';
+              document.head.appendChild(el);
+            });
+
+            for (var s = 0; s < scripts.length; s += 1) {
+              var original = scripts[s];
+              var src = original.getAttribute('src');
+              await new Promise(function (resolve) {
+                var scriptEl = document.createElement('script');
+                var done = false;
+                function finish() {
+                  if (done) return;
+                  done = true;
+                  resolve();
+                }
+                if (src) {
+                  scriptEl.src = src;
+                  scriptEl.onload = finish;
+                  scriptEl.onerror = finish;
+                } else {
+                  scriptEl.textContent = original.textContent || '';
+                }
+                document.head.appendChild(scriptEl);
+                if (!src) finish();
+              });
+            }
+
+            if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+          } catch (_error) {
           }
-
-          if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
-        } catch (_error) {
         }
-      }
 
-      return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+        return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+      }());
+
+      return actionbarLoadPromise;
     }
 
-    async function mountActionbar() {
+    function observeActionbarRoot() {
+      if (actionbarObserver || !rootActionbar || typeof MutationObserver === 'undefined') return;
+      actionbarObserver = new MutationObserver(function () {
+        if (actionbarMountScheduled) return;
+        if (rootActionbar.childElementCount > 0) return;
+        actionbarMountScheduled = true;
+        setTimeout(function () {
+          actionbarMountScheduled = false;
+          if (rootActionbar.childElementCount === 0) {
+            mountActionbar(true);
+          }
+        }, 120);
+      });
+      actionbarObserver.observe(rootActionbar, { childList: true });
+    }
+
+    async function mountActionbar(force) {
+      var mounted = false;
       window.FTG_ACTIONBAR_CONFIG = {
         activePage: 'stories',
         language: currentLanguage,
@@ -1026,12 +1051,26 @@
         onLanguageChange: function (lang) { setLanguage(lang || 'en'); }
       };
 
+      observeActionbarRoot();
       await loadGlobalActionbarPartial();
 
       if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
-        window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
+        if (force || rootActionbar.childElementCount === 0 || !rootActionbar.dataset.ftgMounted) {
+          rootActionbar.innerHTML = '';
+          window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
+          rootActionbar.dataset.ftgMounted = 'true';
+          mounted = true;
+        }
+        if (mounted) {
+          requestAnimationFrame(function () {
+            if (rootActionbar.childElementCount === 0) {
+              setTimeout(function () { mountActionbar(true); }, 180);
+            }
+          });
+        }
       } else {
         rootActionbar.innerHTML = '';
+        delete rootActionbar.dataset.ftgMounted;
         console.warn('FTG_MOUNT_GLOBAL_ACTIONBAR not available');
       }
     }
@@ -1041,6 +1080,7 @@
       try { localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage); } catch (_error) {}
       applyStaticTranslations();
       render();
+      mountActionbar(true);
     }
 
     document.addEventListener('click', function (event) {
