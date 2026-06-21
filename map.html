@@ -1865,7 +1865,7 @@
   var heroPreviewCycleTimer = null;
   var heroPreviewCycleIndex = 0;
   var currentBaseMapMode = 'satellite';
-  var bottomRailSheetMode = 'title';
+  var bottomRailSheetMode = 'peek';
   var bottomRailSheetExpanded = false;
   var bottomRailSheetTranslateY = 0;
   var bottomRailSheetCollapsedY = 0;
@@ -2963,7 +2963,7 @@
     var closest;
     var hasVisibleViewportPOIs;
     if (!map || !bottomRailVillageTitle) return '';
-    if (map.getZoom() < minZoomForVillageLabel) return getDiscoverLabel();
+    if (map.getZoom() < minZoomForVillageLabel) return '';
     if (!poiMarkers.length) return '';
     hasVisibleViewportPOIs = poiMarkers.some(function(entry) {
       return entry && entry.poi && isValidCoords(entry.poi.coords) && map.getBounds().contains(entry.poi.coords) && isPOIMatchFilter(entry.poi, currentMapFilter) && railTypeMatchesSearchType(entry.poi.type);
@@ -3107,7 +3107,6 @@
   }
   function setBottomRailSheetExpanded(expanded, animated) {
     if (!isBottomRailVillageSheetEnabled()) {
-      bottomRailSheetMode = 'peek';
       bottomRailSheetExpanded = false;
       bottomRailSheetCollapsedY = 0;
       applyBottomRailTranslate(0, false);
@@ -3233,7 +3232,7 @@
       syncBottomRailSheetLayout(bottomRailSheetExpanded ? 'expanded' : 'collapsed');
     });
     window.requestAnimationFrame(function() {
-      syncBottomRailSheetLayout('title');
+      syncBottomRailSheetLayout('peek');
     });
   }
   function getBottomRailViewportItems() {
@@ -3312,7 +3311,7 @@
       bottomRailSheetCollapsedY = 0;
       applyBottomRailTranslate(0, false);
     } else {
-      syncBottomRailSheetLayout(bottomRailSheetMode === 'expanded' ? 'expanded' : (bottomRailSheetMode === 'title' ? 'title' : 'peek'));
+      syncBottomRailSheetLayout(bottomRailSheetMode === 'expanded' ? 'expanded' : 'peek');
     }
     if (bottomRailVillageTitle) {
       if (villageLabel) {
