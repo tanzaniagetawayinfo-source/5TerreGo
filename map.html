@@ -752,6 +752,36 @@
       user-select: none;
       touch-action: none;
     }
+    .bottom-rail-village-nav {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      max-width: 100%;
+    }
+    .bottom-rail-village-nav-btn {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      background: transparent;
+      color: rgba(17,17,17,.88);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      flex: 0 0 auto;
+      padding: 0;
+    }
+    .bottom-rail-village-nav-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .bottom-rail-village-title.is-visible {
       display: block;
     }
@@ -1703,6 +1733,76 @@
     { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU', description: 'Manarola is famous for sunset views, colorful houses and the cliffside postcard panorama.' },
     { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' }
   ];
+
+  var randomInitialVillageIndex = isMapPreviewMode ? -1 : Math.floor(Math.random() * places.length);
+
+  function getVillageCenterZoom(place) {
+    return place && place.name === 'Monterosso' ? 14.4 : 15.2;
+  }
+
+  function getInitialMapState() {
+    var index = randomInitialVillageIndex >= 0 ? randomInitialVillageIndex : 2;
+    var place = places[index] || places[2] || places[0];
+    return {
+      index: index,
+      place: place,
+      center: place && place.coords ? place.coords : [44.12, 9.71],
+      zoom: isMapPreviewMode ? 13.9 : getVillageCenterZoom(place)
+    };
+  }
+
+  function getVillageIndexByName(name) {
+    var normalized = normalizeText(name || '');
+    return places.findIndex(function(place) {
+      return normalizeText(place && place.name || '') === normalized;
+    });
+  }
+
+  function getClosestVillageIndexForCenter() {
+    var center;
+    var closest;
+    if (!map) return randomInitialVillageIndex >= 0 ? randomInitialVillageIndex : 0;
+    center = map.getCenter();
+    closest = places.map(function(place, index) {
+      return {
+        index: index,
+        distance: distanceMeters([center.lat, center.lng], place.coords)
+      };
+    }).sort(function(a, b) {
+      return a.distance - b.distance;
+    })[0];
+    return closest ? closest.index : (randomInitialVillageIndex >= 0 ? randomInitialVillageIndex : 0);
+  }
+
+  function getActiveVillageIndexForRailNav() {
+    var label = getBottomRailVillageLabel();
+    var index;
+    if (!label || label === getDiscoverLabel()) return getClosestVillageIndexForCenter();
+    index = getVillageIndexByName(label);
+    return index >= 0 ? index : getClosestVillageIndexForCenter();
+  }
+
+  function focusVillageByIndex(index) {
+    var total = places.length;
+    var safeIndex;
+    var place;
+    if (!map || !total) return;
+    safeIndex = ((Number(index) % total) + total) % total;
+    place = places[safeIndex];
+    currentDataset = 'places';
+    currentIndex = safeIndex;
+    currentPOI = null;
+    currentTrail = null;
+    cityCardManuallyClosed = false;
+    closePOICard(true);
+    closeTrailCard(true);
+    isProgrammaticMove = true;
+    map.flyTo(place.coords, getVillageCenterZoom(place), { duration: 0.92 });
+    window.setTimeout(function() {
+      isProgrammaticMove = false;
+      scheduleMapRefresh({ rail: true, auto: true });
+    }, 1050);
+  }
 
   function createVillageCalendarSeed(name) {
     var now = new Date();
@@ -3308,7 +3408,11 @@
     }
     if (bottomRailVillageTitle) {
       if (villageLabel) {
-        bottomRailVillageTitle.textContent = villageLabel;
+        if (villageLabel === getDiscoverLabel()) {
+          bottomRailVillageTitle.textContent = villageLabel;
+        } else {
+          bottomRailVillageTitle.innerHTML = '<div class="bottom-rail-village-nav"><button class="bottom-rail-village-nav-btn" type="button" data-village-nav="prev" aria-label="Previous village">‹</button><span class="bottom-rail-village-nav-label">' + escapeHTML(villageLabel) + '</span><button class="bottom-rail-village-nav-btn" type="button" data-village-nav="next" aria-label="Next village">›</button></div>';
+        }
         bottomRailVillageTitle.classList.add('is-visible');
       } else {
         bottomRailVillageTitle.textContent = '';
@@ -3942,7 +4046,50 @@
   function toggleBaseMapMode() {
     applyBaseMapMode(currentBaseMapMode === 'satellite' ? 'map' : 'satellite');
   }
-  function initMap() { if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.'); map = L.map('map', { minZoom: 11, maxZoom: 20, zoomControl: false, preferCanvas: true, inertia: true, zoomSnap: 0.25, zoomDelta: 0.25, wheelPxPerZoomLevel: 80, dragging: !isMapPreviewMode, scrollWheelZoom: !isMapPreviewMode, doubleClickZoom: !isMapPreviewMode, boxZoom: !isMapPreviewMode, keyboard: !isMapPreviewMode, touchZoom: !isMapPreviewMode }).setView([44.12, 9.71], isMapPreviewMode ? 13.9 : 11); map.createPane('trailPane'); map.getPane('trailPane').style.zIndex = 640; map.createPane('poiPane'); map.getPane('poiPane').style.zIndex = 690; map.createPane('poiGroupPane'); map.getPane('poiGroupPane').style.zIndex = 705; satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map); roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map); whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map); ferryRoutesLayer = L.layerGroup().addTo(map); ferryVehiclesLayer = L.layerGroup().addTo(map); trailsLayer = L.layerGroup().addTo(map); poiOverlapLayer = L.layerGroup().addTo(map); map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80])); }
+  function initMap() {
+    var initialState;
+
+    if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
+
+    initialState = getInitialMapState();
+    currentDataset = 'places';
+    currentIndex = initialState.index;
+
+    map = L.map('map', {
+      minZoom: 11,
+      maxZoom: 20,
+      zoomControl: false,
+      preferCanvas: true,
+      inertia: true,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25,
+      wheelPxPerZoomLevel: 80,
+      dragging: !isMapPreviewMode,
+      scrollWheelZoom: !isMapPreviewMode,
+      doubleClickZoom: !isMapPreviewMode,
+      boxZoom: !isMapPreviewMode,
+      keyboard: !isMapPreviewMode,
+      touchZoom: !isMapPreviewMode
+    }).setView(initialState.center, initialState.zoom);
+
+    map.createPane('trailPane');
+    map.getPane('trailPane').style.zIndex = 640;
+    map.createPane('poiPane');
+    map.getPane('poiPane').style.zIndex = 690;
+    map.createPane('poiGroupPane');
+    map.getPane('poiGroupPane').style.zIndex = 705;
+
+    satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, detectRetina: false, keepBuffer: 8, noWrap: true }).addTo(map);
+    roadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map);
+    detailedRoadsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, noWrap: true }).addTo(map);
+    whiteLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map);
+    labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 20, maxNativeZoom: 19, opacity: 0, subdomains: 'abcd', noWrap: true }).addTo(map);
+    ferryRoutesLayer = L.layerGroup().addTo(map);
+    ferryVehiclesLayer = L.layerGroup().addTo(map);
+    trailsLayer = L.layerGroup().addTo(map);
+    poiOverlapLayer = L.layerGroup().addTo(map);
+    map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
+  }
   function updateMapVisualByZoom() {
     var z, raw, t;
     if (!map || !satelliteLayer || !roadsLayer || !detailedRoadsLayer || !whiteLayer || !labelsLayer) return;
@@ -4189,6 +4336,18 @@
 
       if (bottomRailTrack) {
         bottomRailTrack.addEventListener('click', handleBottomRailClick);
+      }
+
+      if (bottomRailVillageTitle) {
+        bottomRailVillageTitle.addEventListener('click', function(event) {
+          var button = event.target.closest('[data-village-nav]');
+          var direction;
+          var activeIndex;
+          if (!button) return;
+          direction = button.getAttribute('data-village-nav');
+          activeIndex = getActiveVillageIndexForRailNav();
+          focusVillageByIndex(activeIndex + (direction === 'next' ? 1 : -1));
+        });
       }
 
       document.addEventListener('click', function (event) {
