@@ -925,12 +925,17 @@
 
     function navigateTo(itemId, href) {
       var finalHref = resolveHref(href || "");
+      var handled = false;
       syncActiveButtons(itemId);
       closeMenu();
 
       if (typeof config.onNavigate === "function") {
-        config.onNavigate(itemId, { href: finalHref });
-        return;
+        try {
+          handled = config.onNavigate(itemId, { href: finalHref }) === true;
+        } catch (_error) {
+          handled = false;
+        }
+        if (handled) return;
       }
 
       if (finalHref) {
