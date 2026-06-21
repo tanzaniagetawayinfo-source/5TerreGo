@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>5TerreGo Public Transport</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --text:#101828;
+    --muted:#667085;
+    --line:#dfe6f0;
+    --accent:#ff7e57;
+    --accent-soft:#fff1e7;
+    --train:#ff8a17;
+    --ferry:#2f80ed;
+    --bus:#41ad49;
+    --ok-bg:#e8f5de;
+    --ok-text:#2f8f36;
+    --warn-bg:#fff0df;
+    --warn-text:#d97706;
+    --neutral-bg:#efeff4;
+    --neutral-text:#6b7280;
+    --danger-bg:#ffe8e8;
+    --danger-text:#dc2626;
+    --alert-bg:#fff3f1;
+    --alert-line:#f4b6af;
+    --shadow:0 18px 42px rgba(16,24,40,.08);
+    --shadow-soft:0 10px 24px rgba(16,24,40,.05);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+  body{
+    max-width:100%;
+    overflow-x:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(23,59,143,.05), transparent 28%),
+      radial-gradient(circle at top right, rgba(255,126,87,.08), transparent 24%),
+      linear-gradient(180deg,#fcfdff 0%,var(--bg) 100%);
+  }
+
+  button,input,select{font:inherit}
+  button{border:none;background:none;padding:0;cursor:pointer}
+
+  .page{
+    width:min(100%,780px);
+    max-width:780px;
+    margin:0 auto;
+    padding:12px 16px 34px;
+    overflow-x:clip;
+  }
+
+  .transport-shell{
+    display:grid;
+    gap:14px;
+    width:100%;
+    min-width:0;
+  }
+
+  .actionbar{
+    width:100%;
+    min-width:0;
+    background:rgba(255,255,255,.9);
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow);
+    border-radius:32px;
+    padding:14px 14px 10px;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+
+  .actionbar-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:2px 4px 12px;
+  }
+
+  .brand{
+    font-size:24px;
+    font-weight:900;
+    letter-spacing:-.06em;
+    color:#111827;
+  }
+
+  .brand .go{color:var(--accent)}
+  .brand .dotcom{font-size:.74em;font-weight:800;margin-left:2px}
+
+  .top-actions{display:flex;align-items:center;gap:10px}
+
+  .icon-circle,
+  .menu-btn{
+    width:44px;
+    height:44px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#111827;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .pills-row{
+    display:flex;
+    align-items:center;
+    gap:24px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:2px 4px 4px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .pills-row::-webkit-scrollbar{display:none}
+
+  .top-pill{
+    flex:0 0 auto;
+    color:#111827;
+    font-size:15px;
+    font-weight:500;
+    white-space:nowrap;
+    text-decoration:none;
+  }
+
+  .top-pill.active{
+    min-height:42px;
+    padding:0 20px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    background:var(--accent-soft);
+    font-weight:800;
+  }
+
+  .selectors{
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);
+    gap:8px;
+    align-items:center;
+  }
+
+  .location-card{
+    min-width:0;
+    min-height:68px;
+    border-radius:18px;
+    background:#fff;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-soft);
+    padding:10px 12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:4px;
+  }
+
+  .location-label,
+  .datetime-label{
+    font-size:12px;
+    line-height:1;
+    color:var(--muted);
+    font-weight:600;
+  }
+
+  .location-value-row,
+  .datetime-value-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+  }
+
+  .location-select-card{cursor:default}
+
+  .station-select{
+    width:100%;
+    min-width:0;
+    border:none;
+    outline:none;
+    background:transparent;
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    font-size:17px;
+    line-height:1.1;
+    letter-spacing:-.03em;
+    font-weight:800;
+    color:#111827;
+    padding:0;
+  }
+
+  .station-select option{font-size:16px;font-weight:500;color:#111827}
+
+  .select-arrow{
+    width:14px;
+    height:14px;
+    flex:0 0 14px;
+    color:#667085;
+  }
+
+  .swap-btn{
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    justify-self:center;
+    align-self:center;
+    color:#111827;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .datetime-trigger{
+    width:100%;
+    min-width:0;
+    min-height:68px;
+    border-radius:18px;
+    background:#fff;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-soft);
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    text-align:left;
+  }
+
+  .datetime-trigger-main{
+    min-width:0;
+    display:grid;
+    gap:4px;
+  }
+
+  .datetime-trigger-value{
+    font-size:17px;
+    line-height:1.1;
+    letter-spacing:-.03em;
+    font-weight:800;
+    color:#111827;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .datetime-trigger-meta{
+    font-size:13px;
+    line-height:1.25;
+    color:var(--muted);
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .datetime-trigger-icon{
+    width:36px;
+    height:36px;
+    border-radius:999px;
+    background:var(--accent-soft);
+    color:#ef6c14;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 36px;
+  }
+
+  .mode-filters{
+    width:100%;
+    min-width:0;
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .mode-filters::-webkit-scrollbar{display:none}
+
+  .mode-pill{
+    flex:0 0 auto;
+    min-height:44px;
+    padding:0 18px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:#111827;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-weight:700;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .mode-pill.active{
+    background:#111111;
+    border-color:#111111;
+    color:#fff;
+  }
+
+  .live-strip{
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:6px;
+    padding:12px 14px;
+    border-radius:18px;
+    background:rgba(255,255,255,.88);
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow-soft);
+  }
+
+  .live-main{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .live-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+    flex:0 0 10px;
+    background:#c1c7d1;
+    box-shadow:0 0 0 4px rgba(193,199,209,.18);
+  }
+
+  .live-dot.is-live{
+    background:#22c55e;
+    box-shadow:0 0 0 4px rgba(34,197,94,.14);
+  }
+
+  .live-dot.is-error{
+    background:#ef4444;
+    box-shadow:0 0 0 4px rgba(239,68,68,.12);
+  }
+
+  .live-title{
+    min-width:0;
+    font-size:14px;
+    line-height:1.2;
+    font-weight:800;
+    color:#111827;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .live-meta{
+    min-width:0;
+    font-size:13px;
+    line-height:1.35;
+    color:#667085;
+    padding-left:20px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .best-card{
+    width:100%;
+    min-width:0;
+    position:relative;
+    overflow:hidden;
+    border-radius:28px;
+    background:linear-gradient(135deg,#fff9f5 0%,#fffefc 100%);
+    border:1px solid #f6d7bf;
+    box-shadow:var(--shadow);
+    padding:16px;
+  }
+
+  .best-label{
+    display:inline-flex;
+    align-items:center;
+    min-height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    background:#fff0e2;
+    color:#ef6c14;
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:-.02em;
+    margin-bottom:12px;
+  }
+
+  .best-grid{
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:92px minmax(0,1fr) 108px 16px;
+    gap:14px;
+    align-items:center;
+  }
+
+  .transport-badge{
+    width:92px;
+    height:92px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    box-shadow:0 14px 26px rgba(0,0,0,.14);
+  }
+
+  .transport-badge.train{background:linear-gradient(180deg,#ff9e2c 0%,#ff7e17 100%)}
+  .transport-badge.ferry{background:linear-gradient(180deg,#46a0ff 0%,#2f80ed 100%)}
+  .transport-badge.bus{background:linear-gradient(180deg,#62c96a 0%,#41ad49 100%)}
+
+  .best-main{min-width:0}
+  .best-main h2{margin:0;font-size:24px;line-height:1;letter-spacing:-.05em;font-weight:900}
+
+  .best-meta{
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#475467;
+    font-size:14px;
+    font-weight:600;
+  }
+
+  .best-time{
+    word-break:break-word;
+    margin-top:8px;
+    font-size:26px;
+    line-height:1.02;
+    letter-spacing:-.06em;
+    font-weight:900;
+  }
+
+  .best-sub{
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#475467;
+    font-size:14px;
+    font-weight:600;
+  }
+
+  .status-col{display:grid;justify-items:end;gap:12px}
+
+  .status-badge{
+    min-height:40px;
+    padding:0 14px;
+    border-radius:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:14px;
+    white-space:nowrap;
+  }
+
+  .status-ok{background:var(--ok-bg);color:var(--ok-text)}
+  .status-warn{background:var(--warn-bg);color:var(--warn-text)}
+  .status-neutral{background:var(--neutral-bg);color:var(--neutral-text)}
+  .status-danger{background:var(--danger-bg);color:var(--danger-text)}
+
+  .duration-block{text-align:right}
+  .duration-main{font-size:18px;line-height:1;font-weight:900;letter-spacing:-.04em}
+  .duration-sub{margin-top:6px;font-size:14px;color:var(--muted);font-weight:600}
+
+  .chevron{color:#6b7280;display:flex;align-items:center;justify-content:center}
+
+  .alert-row{
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:52px minmax(0,1fr) 16px;
+    gap:14px;
+    align-items:center;
+    padding:16px;
+    border-radius:24px;
+    background:var(--alert-bg);
+    border:1px solid var(--alert-line);
+    color:#111827;
+  }
+
+  .alert-icon{
+    width:52px;
+    height:52px;
+    border-radius:999px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#ef4444;
+  }
+
+  .alert-title{font-size:17px;line-height:1.08;font-weight:900;letter-spacing:-.03em}
+  .alert-copy{margin-top:6px;color:#667085;font-size:14px;line-height:1.4}
+
+  .list{width:100%;min-width:0;display:grid;gap:10px}
+
+  .departure-card{
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:70px 76px minmax(0,1fr) 110px 16px;
+    gap:14px;
+    align-items:center;
+    padding:14px;
+    border-radius:24px;
+    background:rgba(255,255,255,.92);
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow-soft);
+  }
+
+  .icon-round{width:58px;height:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#fff}
+  .icon-round.train{background:var(--train)}
+  .icon-round.ferry{background:var(--ferry)}
+  .icon-round.bus{background:var(--bus)}
+
+  .time-col{font-size:20px;line-height:1;font-weight:900;letter-spacing:-.05em;color:#111827}
+  .route-title{min-width:0;font-size:18px;line-height:1.08;font-weight:900;letter-spacing:-.03em}
+  .route-line{min-width:0;overflow-wrap:anywhere;margin-top:4px;font-size:14px;line-height:1.35;color:#475467;font-weight:500}
+  .route-meta{min-width:0;overflow-wrap:anywhere;margin-top:8px;display:flex;align-items:center;gap:7px;color:#667085;font-size:14px;font-weight:600}
+  .right-col{min-width:0;display:grid;justify-items:end;gap:10px}
+  .arrival-time{font-size:14px;color:#344054;font-weight:700}
+  .mini-duration{font-size:14px;color:#667085;font-weight:600}
+
+  .bottom-facts{
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:0;
+    background:rgba(255,255,255,.92);
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow-soft);
+    border-radius:24px;
+    overflow:hidden;
+  }
+
+  .fact{min-width:0;padding:16px 16px 18px;display:grid;gap:8px}
+  .fact + .fact{border-left:1px solid var(--line)}
+  .fact-head{display:flex;align-items:center;gap:10px;font-size:14px;color:#344054;font-weight:700}
+  .fact-time{font-size:20px;line-height:1;font-weight:900;letter-spacing:-.05em}
+  .fact-copy{color:#667085;font-size:14px;line-height:1.45}
+
+  .datetime-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(16,24,40,.28);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .22s ease;
+    z-index:120;
+  }
+
+  .datetime-backdrop.open{opacity:1;pointer-events:auto}
+
+  .datetime-sheet{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    transform:translate(-50%, 24px);
+    width:min(100%,780px);
+    max-width:780px;
+    background:rgba(255,255,255,.96);
+    border-radius:28px 28px 0 0;
+    box-shadow:0 -24px 60px rgba(16,24,40,.18);
+    padding:12px 16px calc(20px + env(safe-area-inset-bottom));
+    opacity:0;
+    pointer-events:none;
+    transition:transform .22s ease,opacity .22s ease;
+    z-index:130;
+    max-height:min(86vh,780px);
+    overflow:auto;
+  }
+
+  .datetime-sheet.open{transform:translate(-50%, 0);opacity:1;pointer-events:auto}
+  .sheet-handle{width:44px;height:5px;border-radius:999px;background:#d0d6e1;margin:2px auto 14px}
+  .sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .sheet-title{font-size:24px;line-height:1;font-weight:900;letter-spacing:-.05em;color:#111827;margin:0}
+  .sheet-sub{margin:6px 0 0;font-size:14px;color:#667085;line-height:1.4}
+
+  .sheet-close{
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#111827;
+    box-shadow:var(--shadow-soft);
+    flex:0 0 40px;
+  }
+
+  .sheet-now{
+    margin-top:14px;
+    min-height:42px;
+    padding:0 16px;
+    border-radius:999px;
+    border:1px solid #ffd6c1;
+    background:var(--accent-soft);
+    color:#ef6c14;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .calendar-shell{
+    margin-top:16px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:14px;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .calendar-month{font-size:18px;font-weight:900;letter-spacing:-.04em;color:#111827}
+  .calendar-navs{display:flex;gap:8px}
+
+  .calendar-nav{
+    width:36px;
+    height:36px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#111827;
+  }
+
+  .calendar-nav[disabled]{opacity:.35;cursor:not-allowed}
+  .calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+  .calendar-weekdays{margin-top:14px}
+  .weekday{font-size:12px;font-weight:700;color:#98a2b3;text-align:center}
+  .calendar-grid{margin-top:10px}
+
+  .calendar-day{
+    aspect-ratio:1/1;
+    min-height:42px;
+    border-radius:16px;
+    border:1px solid transparent;
+    background:transparent;
+    color:#111827;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    font-weight:700;
+  }
+
+  .calendar-day.empty{pointer-events:none;background:transparent}
+  .calendar-day.disabled{color:#c1c7d1;pointer-events:none}
+  .calendar-day.today{border-color:#ffd6c1;background:#fff7f2;color:#ef6c14}
+  .calendar-day.selected{background:#111111;color:#fff;border-color:#111111}
+
+  .time-shell{
+    margin-top:14px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:14px;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .time-head{font-size:13px;font-weight:700;color:#667085;margin-bottom:10px}
+  .time-pill{
+    min-height:58px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:#f9fbff;
+    padding:0 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .time-input{
+    width:100%;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:#111827;
+    font-size:24px;
+    line-height:1;
+    letter-spacing:-.05em;
+    font-weight:900;
+    padding:0;
+  }
+
+  .time-helper{margin-top:10px;font-size:13px;color:#667085;line-height:1.4}
+  .sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+
+  .sheet-btn{
+    min-height:50px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:#111827;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .sheet-btn.primary{background:#111111;border-color:#111111;color:#fff}
+
+  @media (max-width:640px){
+    .page{padding:10px 12px 28px}
+    .actionbar{padding:12px 12px 10px;border-radius:28px}
+    .brand{font-size:22px}
+    .pills-row{gap:18px}
+    .top-pill{font-size:14px}
+    .top-pill.active{min-height:40px;padding:0 16px}
+
+    .selectors{grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);gap:8px;align-items:center}
+    .location-card{min-height:64px;padding:10px 12px;border-radius:18px}
+    .station-select{font-size:15px}
+    .location-label,.datetime-label{font-size:11px}
+    .swap-btn{width:38px;height:38px}
+    .swap-btn svg{width:18px;height:18px}
+    .select-arrow{width:12px;height:12px;flex:0 0 12px}
+
+    .datetime-trigger{min-height:64px;padding:10px 12px;border-radius:18px}
+    .datetime-trigger-value{font-size:15px}
+    .datetime-trigger-meta{font-size:12px}
+    .datetime-trigger-icon{width:34px;height:34px;flex:0 0 34px}
+
+    .live-strip{padding:11px 12px;border-radius:16px;gap:4px}
+    .live-title{font-size:13px}
+    .live-meta{font-size:12px;padding-left:20px}
+
+    .best-grid{
+      grid-template-columns:64px minmax(0,1fr) 12px;
+      grid-template-areas:
+        "icon main chev"
+        "status status status";
+      gap:12px;
+      align-items:start;
+    }
+    .transport-badge{grid-area:icon;width:64px;height:64px}
+    .best-main{grid-area:main}
+    .status-col{grid-area:status;grid-template-columns:minmax(0,1fr) auto;justify-items:start;align-items:center}
+    .chevron{grid-area:chev;align-self:center}
+    .best-main h2{font-size:22px}
+    .best-time{font-size:24px}
+    .duration-block{text-align:right}
+
+    .mode-pill{min-height:40px;padding:0 15px;font-size:14px}
+
+    .alert-row{grid-template-columns:44px minmax(0,1fr) 12px;gap:12px;padding:14px;border-radius:20px}
+    .alert-icon{width:44px;height:44px}
+    .alert-title{font-size:16px}
+
+    .departure-card{
+      grid-template-columns:50px 60px minmax(0,1fr) 12px;
+      grid-template-areas:
+        "icon time info chev"
+        "icon . right chev";
+      gap:10px;
+      padding:12px;
+      border-radius:20px;
+      align-items:start;
+    }
+    .icon-round{grid-area:icon;width:50px;height:50px}
+    .time-col{grid-area:time;font-size:18px;padding-top:4px}
+    .departure-card > div:nth-child(3){grid-area:info;min-width:0}
+    .right-col{grid-area:right;justify-items:start;align-items:start}
+    .departure-card > .chevron{grid-area:chev;align-self:center}
+    .route-title{font-size:16px}
+    .route-line,.route-meta,.arrival-time,.mini-duration{font-size:13px}
+    .status-badge{min-height:34px;padding:0 12px;font-size:13px}
+
+    .bottom-facts{grid-template-columns:1fr}
+    .fact + .fact{border-left:none;border-top:1px solid var(--line)}
+
+    .datetime-sheet{padding:12px 12px calc(18px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0}
+    .sheet-title{font-size:22px}
+    .calendar-shell,.time-shell{padding:12px;border-radius:20px}
+    .calendar-grid,.calendar-weekdays{gap:6px}
+    .calendar-day{min-height:40px;border-radius:14px;font-size:14px}
+    .time-input{font-size:22px}
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <div class="transport-shell">
+      <header class="actionbar">
+        <div class="actionbar-top">
+          <div class="brand">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div>
+          <div class="top-actions">
+            <button class="icon-circle" type="button" aria-label="Open profile">
+              <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+            </button>
+            <button class="menu-btn" type="button" aria-label="Open menu">
+              <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <nav class="pills-row" aria-label="Main sections">
+          <a class="top-pill" href="#">Stories</a>
+          <a class="top-pill" href="#">Map</a>
+          <a class="top-pill active" href="#">Public Transport</a>
+          <a class="top-pill" href="#">Sentieri</a>
+          <a class="top-pill" href="#">Local Discounts</a>
+          <a class="top-pill" href="#">Weather</a>
+        </nav>
+      </header>
+
+      <section class="selectors" aria-label="Route selectors">
+        <label class="location-card location-select-card" for="fromSelect">
+          <span class="location-label">From</span>
+          <span class="location-value-row">
+            <select class="station-select" id="fromSelect" aria-label="Select departure station">
+              <option>Monterosso</option>
+              <option>Vernazza</option>
+              <option>Corniglia</option>
+              <option>Manarola</option>
+              <option>Riomaggiore</option>
+              <option>La Spezia</option>
+              <option>Levanto</option>
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </span>
+        </label>
+
+        <button class="swap-btn" id="swapBtn" type="button" aria-label="Swap origin and destination">
+          <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true"><path d="M7 7h11m0 0-3-3m3 3-3 3M17 17H6m0 0 3 3m-3-3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+
+        <label class="location-card location-select-card" for="toSelect">
+          <span class="location-label">To</span>
+          <span class="location-value-row">
+            <select class="station-select" id="toSelect" aria-label="Select destination station">
+              <option>Vernazza</option>
+              <option>Monterosso</option>
+              <option>Corniglia</option>
+              <option>Manarola</option>
+              <option>Riomaggiore</option>
+              <option>La Spezia</option>
+              <option>Levanto</option>
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </span>
+        </label>
+      </section>
+
+      <button class="datetime-trigger" id="datetimeTrigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+        <div class="datetime-trigger-main">
+          <span class="datetime-label">When</span>
+          <span class="datetime-trigger-value" id="datetimeTriggerValue">Now</span>
+          <span class="datetime-trigger-meta" id="datetimeTriggerMeta">Today · --:--</span>
+        </div>
+        <span class="datetime-trigger-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 3.5v3M16 3.5v3M4 9.5h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        </span>
+      </button>
+
+      <section class="live-strip" aria-label="Realtime train status">
+        <div class="live-main">
+          <span class="live-dot" id="liveDot"></span>
+          <span class="live-title" id="liveTitle">Train feed not connected</span>
+        </div>
+        <div class="live-meta" id="liveMeta">Using fallback schedule</div>
+      </section>
+
+      <section class="best-card" aria-label="Best next option">
+        <div class="best-label">BEST NEXT OPTION</div>
+        <div class="best-grid">
+          <div class="transport-badge train" id="bestIconWrap">
+            <svg viewBox="0 0 24 24" fill="none" width="42" height="42" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>
+          </div>
+          <div class="best-main">
+            <h2 id="bestMode">Train</h2>
+            <div class="best-meta"><span>◷</span><span>Departs in <strong id="bestIn">8 min</strong></span></div>
+            <div class="best-time"><span id="bestDeparture">09:42</span> → <span id="bestArrival">09:46</span></div>
+            <div class="best-sub"><span>⌁</span><span id="bestMeta">Platform 2</span></div>
+          </div>
+          <div class="status-col">
+            <span class="status-badge status-ok" id="bestStatus">On time</span>
+            <div class="duration-block">
+              <div class="duration-main" id="bestDuration">4 min</div>
+              <div class="duration-sub" id="bestDirect">Direct</div>
+            </div>
+          </div>
+          <div class="chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </div>
+        </div>
+      </section>
+
+      <nav class="mode-filters" aria-label="Transport mode filters">
+        <button class="mode-pill active" data-mode="all" type="button">All</button>
+        <button class="mode-pill" data-mode="train" type="button">Trains</button>
+        <button class="mode-pill" data-mode="ferry" type="button">Ferries</button>
+        <button class="mode-pill" data-mode="bus" type="button">Buses</button>
+        <button class="mode-pill" data-mode="alert" type="button">Alerts</button>
+      </nav>
+
+      <div class="alert-row" id="alertRow">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24" fill="none" width="26" height="26" aria-hidden="true"><path d="M12 3 2.8 19a1 1 0 0 0 .87 1.5h16.66A1 1 0 0 0 21.2 19L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 9v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><circle cx="12" cy="16.8" r=".8" fill="currentColor" stroke="none"></circle></svg>
+        </div>
+        <div>
+          <div class="alert-title">Ferry service suspended due to sea conditions</div>
+          <div class="alert-copy">Check for updates before traveling.</div>
+        </div>
+        <div class="chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
+      </div>
+
+      <section class="list" id="departuresList" aria-label="Unified departures list"></section>
+
+      <section class="bottom-facts" aria-label="Useful transport facts">
+        <article class="fact">
+          <div class="fact-head"><span style="color:#f59e0b">☾</span><span>Last train tonight</span></div>
+          <div class="fact-time">23:15</div>
+          <div class="fact-copy">to La Spezia<br>Platform 1</div>
+        </article>
+        <article class="fact">
+          <div class="fact-head"><span style="color:#2f80ed">☼</span><span>First ferry tomorrow</span></div>
+          <div class="fact-time">08:30</div>
+          <div class="fact-copy">to Vernazza<br>Pier A</div>
+        </article>
+        <article class="fact">
+          <div class="fact-head"><span style="color:#41ad49">🚌</span><span>Bus to Corniglia</span></div>
+          <div class="fact-time">10:30</div>
+          <div class="fact-copy">from Piazza<br>Line 782</div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <div class="datetime-backdrop" id="datetimeBackdrop"></div>
+  <section class="datetime-sheet" id="datetimeSheet" role="dialog" aria-modal="true" aria-labelledby="datetimeSheetTitle">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div>
+        <h2 class="sheet-title" id="datetimeSheetTitle">Choose date & time</h2>
+        <p class="sheet-sub">Past dates are disabled. If you choose today, times before the current Italian time are not available.</p>
+      </div>
+      <button class="sheet-close" id="datetimeCloseBtn" type="button" aria-label="Close date and time selector">
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+      </button>
+    </div>
+
+    <button class="sheet-now" id="datetimeNowBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"></circle><path d="M12 7.5v4.5l2.8 1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+      <span>Now</span>
+    </button>
+
+    <div class="calendar-shell">
+      <div class="calendar-head">
+        <div class="calendar-month" id="calendarMonthLabel">Month</div>
+        <div class="calendar-navs">
+          <button class="calendar-nav" id="prevMonthBtn" type="button" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+          <button class="calendar-nav" id="nextMonthBtn" type="button" aria-label="Next month">
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div class="calendar-weekdays" aria-hidden="true">
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+        <div class="weekday">Sun</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="time-shell">
+      <div class="time-head">Selected time</div>
+      <div class="time-pill">
+        <input class="time-input" id="sheetTimeInput" type="time" aria-label="Selected travel time" />
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"></circle><path d="M12 7.5v4.5l2.8 1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+      </div>
+      <div class="time-helper" id="timeHelper">Times earlier than the current Italian time are disabled for today.</div>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="sheet-btn" id="datetimeCancelBtn" type="button">Cancel</button>
+      <button class="sheet-btn primary" id="datetimeApplyBtn" type="button">Apply</button>
+    </div>
+  </section>
+
+<script>
+  (function(){
+    'use strict';
+
+    var fallbackDepartures = [
+      { id:'t1', mode:'train', route:'Regionale 12307', from:'Monterosso', to:'Vernazza', departure:'09:42', arrival:'09:46', duration:'4 min', status:'ok', statusLabel:'On time', meta:'Platform 2', direct:'Direct' },
+      { id:'f1', mode:'ferry', route:'5 Terre Express', from:'Monterosso', to:'Vernazza', departure:'10:15', arrival:'10:37', duration:'22 min', status:'warn', statusLabel:'+12 min', meta:'Pier A', direct:'Scenic ride' },
+      { id:'b1', mode:'bus', route:'Bus Line 782', from:'Monterosso', to:'Vernazza', departure:'10:30', arrival:'11:05', duration:'35 min', status:'ok', statusLabel:'On time', meta:'Stop: Piazza', direct:'Local bus' },
+      { id:'t2', mode:'train', route:'Regionale 12311', from:'Monterosso', to:'Vernazza', departure:'11:12', arrival:'11:16', duration:'4 min', status:'neutral', statusLabel:'Scheduled', meta:'Platform 2', direct:'Direct' },
+      { id:'f2', mode:'ferry', route:'Battello Linea 2', from:'Monterosso', to:'Vernazza', departure:'12:00', arrival:'—', duration:'—', status:'danger', statusLabel:'Cancelled', meta:'Pier A', direct:'Sea conditions' },
+      { id:'t3', mode:'train', route:'Regionale 12329', from:'Monterosso', to:'Riomaggiore', departure:'10:02', arrival:'10:16', duration:'14 min', status:'ok', statusLabel:'On time', meta:'Platform 2', direct:'1 change in Levanto' },
+      { id:'b2', mode:'bus', route:'Bus Line 210', from:'La Spezia', to:'Riomaggiore', departure:'09:50', arrival:'10:18', duration:'28 min', status:'neutral', statusLabel:'Scheduled', meta:'Stop: Station', direct:'Road transfer' }
+    ];
+
+    var modeIcons = {
+      train:'<svg viewBox="0 0 24 24" fill="none" width="26" height="26" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
+      ferry:'<svg viewBox="0 0 24 24" fill="none" width="26" height="26" aria-hidden="true"><path d="M5 15.5 12 18l7-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 13.5h9l-1.2-5.3a1 1 0 0 0-1-.8h-4.6a1 1 0 0 0-1 .8L7.5 13.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M10 7V4.5h4V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      bus:'<svg viewBox="0 0 24 24" fill="none" width="26" height="26" aria-hidden="true"><rect x="5.5" y="4" width="13" height="11.5" rx="3" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 18.5 7 20M17 18.5 18 20M8 9.5h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"></circle></svg>'
+    };
+
+    var modeClasses = { train:'train', ferry:'ferry', bus:'bus' };
+    var statusClasses = { ok:'status-ok', warn:'status-warn', neutral:'status-neutral', danger:'status-danger' };
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var TRAIN_RT_ENDPOINTS = [
+      window.FTG_TRAIN_RT_ENDPOINT,
+      window.FTG_TRANSPORT_ENDPOINT,
+      window.FTG_PUBLIC_TRANSPORT_ENDPOINT,
+      window.__TRAIN_RT_ENDPOINT,
+      '/api/trains/realtime',
+      '/api/public-transport/trains',
+      '/api/public-transport/realtime',
+      '/api/transport/realtime'
+    ].filter(Boolean);
+    var ACTIVE_TRAIN_RT_ENDPOINT = '';
+    var REALTIME_REFRESH_MS = 30000;
+
+    var fromSelect = document.getElementById('fromSelect');
+    var toSelect = document.getElementById('toSelect');
+    var swapBtn = document.getElementById('swapBtn');
+    var datetimeTrigger = document.getElementById('datetimeTrigger');
+    var datetimeTriggerValue = document.getElementById('datetimeTriggerValue');
+    var datetimeTriggerMeta = document.getElementById('datetimeTriggerMeta');
+    var backdrop = document.getElementById('datetimeBackdrop');
+    var sheet = document.getElementById('datetimeSheet');
+    var closeBtn = document.getElementById('datetimeCloseBtn');
+    var cancelBtn = document.getElementById('datetimeCancelBtn');
+    var applyBtn = document.getElementById('datetimeApplyBtn');
+    var nowBtn = document.getElementById('datetimeNowBtn');
+    var monthLabel = document.getElementById('calendarMonthLabel');
+    var prevMonthBtn = document.getElementById('prevMonthBtn');
+    var nextMonthBtn = document.getElementById('nextMonthBtn');
+    var calendarGrid = document.getElementById('calendarGrid');
+    var sheetTimeInput = document.getElementById('sheetTimeInput');
+    var timeHelper = document.getElementById('timeHelper');
+    var modeButtons = Array.from(document.querySelectorAll('.mode-pill'));
+    var departuresList = document.getElementById('departuresList');
+    var alertRow = document.getElementById('alertRow');
+    var bestMode = document.getElementById('bestMode');
+    var bestIn = document.getElementById('bestIn');
+    var bestDeparture = document.getElementById('bestDeparture');
+    var bestArrival = document.getElementById('bestArrival');
+    var bestMeta = document.getElementById('bestMeta');
+    var bestStatus = document.getElementById('bestStatus');
+    var bestDuration = document.getElementById('bestDuration');
+    var bestDirect = document.getElementById('bestDirect');
+    var bestIconWrap = document.getElementById('bestIconWrap');
+    var liveDot = document.getElementById('liveDot');
+    var liveTitle = document.getElementById('liveTitle');
+    var liveMeta = document.getElementById('liveMeta');
+
+    var activeMode = 'all';
+    var italianNow = getItalianNow();
+    var currentSelection = { date: italianNow.isoDate, time: italianNow.time, now: true };
+    var draftSelection = { date: italianNow.isoDate, time: italianNow.time, now: true };
+    var viewYear = italianNow.year;
+    var viewMonth = italianNow.monthIndex;
+    var realtimeDepartures = [];
+    var refreshTimer = null;
+    var liveState = {
+      mode: TRAIN_RT_ENDPOINTS.length ? 'loading' : 'fallback',
+      updatedAt: '',
+      message: TRAIN_RT_ENDPOINTS.length ? 'Connecting to realtime trains…' : 'No realtime endpoint configured'
+    };
+
+    function getItalianNow(){
+      var parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Rome',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(new Date());
+      var map = {};
+      parts.forEach(function(part){ map[part.type] = part.value; });
+      return {
+        year: parseInt(map.year, 10),
+        monthIndex: (parseInt(map.month, 10) || 1) - 1,
+        day: parseInt(map.day, 10),
+        isoDate: map.year + '-' + map.month + '-' + map.day,
+        time: map.hour + ':' + map.minute
+      };
+    }
+
+    function pad(value){ return String(value).length === 1 ? '0' + value : String(value); }
+    function dateToISO(year, monthIndex, day){ return year + '-' + pad(monthIndex + 1) + '-' + pad(day); }
+    function addDaysISO(isoDate, amount){
+      var parts = isoDate.split('-');
+      var date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      date.setDate(date.getDate() + amount);
+      return dateToISO(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+    function sameSelection(a, b){ return a.date === b.date && a.time === b.time; }
+    function isTodayISO(isoDate){ return isoDate === italianNow.isoDate; }
+    function isTomorrowISO(isoDate){ return isoDate === addDaysISO(italianNow.isoDate, 1); }
+    function formatReadableDate(isoDate){
+      if (isTodayISO(isoDate)) return 'Today';
+      if (isTomorrowISO(isoDate)) return 'Tomorrow';
+      var parts = isoDate.split('-');
+      return pad(parts[2]) + '/' + pad(parts[1]);
+    }
+    function toMinutes(value){
+      var parts = String(value || '00:00').split(':');
+      var hours = parseInt(parts[0], 10) || 0;
+      var minutes = parseInt(parts[1], 10) || 0;
+      return (hours * 60) + minutes;
+    }
+    function normalizeTime(value){
+      var raw = String(value || '').trim();
+      var parts = [];
+      if (!raw) return '';
+      if (raw.indexOf(':') > -1) {
+        parts = raw.split(':');
+        if (parts.length > 1) return pad(parts[0]) + ':' + String(parts[1]).slice(0, 2);
+      }
+      if (raw.length === 4 && !isNaN(parseInt(raw, 10))) return raw.slice(0, 2) + ':' + raw.slice(2);
+      return '';
+    }
+    function inferDuration(departure, arrival){
+      if (!departure || !arrival || arrival === '—') return '—';
+      var diff = toMinutes(arrival) - toMinutes(departure);
+      if (diff <= 0) return '—';
+      return diff + ' min';
+    }
+    function syncLiveNowSelection(){
+      if (currentSelection.now) {
+        italianNow = getItalianNow();
+        currentSelection.date = italianNow.isoDate;
+        currentSelection.time = italianNow.time;
+      }
+    }
+    function clampDraftTime(){
+      if (isTodayISO(draftSelection.date) && toMinutes(draftSelection.time) < toMinutes(italianNow.time)) draftSelection.time = italianNow.time;
+    }
+    function updateTriggerText(){
+      var isLiveNow = currentSelection.now && isTodayISO(currentSelection.date) && currentSelection.time === italianNow.time;
+      datetimeTriggerValue.textContent = isLiveNow ? 'Now' : formatReadableDate(currentSelection.date) + ' · ' + currentSelection.time;
+      datetimeTriggerMeta.textContent = formatReadableDate(currentSelection.date) + ' · ' + currentSelection.time;
+    }
+    function updateTimeInput(){
+      clampDraftTime();
+      sheetTimeInput.value = draftSelection.time;
+      if (isTodayISO(draftSelection.date)) {
+        sheetTimeInput.min = italianNow.time;
+        timeHelper.textContent = 'For today, you can only choose a time from ' + italianNow.time + ' onward.';
+      } else {
+        sheetTimeInput.min = '00:00';
+        timeHelper.textContent = 'You can choose any departure time for future dates.';
+      }
+    }
+    function renderCalendar(){
+      var todayMonthKey = italianNow.year + '-' + italianNow.monthIndex;
+      var viewMonthKey = viewYear + '-' + viewMonth;
+      var firstDay = new Date(viewYear, viewMonth, 1);
+      var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      var startOffset = (firstDay.getDay() + 6) % 7;
+      var index = 0;
+      monthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
+      calendarGrid.innerHTML = '';
+      prevMonthBtn.disabled = viewMonthKey <= todayMonthKey;
+      while (index < startOffset) {
+        var empty = document.createElement('div');
+        empty.className = 'calendar-day empty';
+        calendarGrid.appendChild(empty);
+        index += 1;
+      }
+      for (var day = 1; day <= daysInMonth; day += 1) {
+        var iso = dateToISO(viewYear, viewMonth, day);
+        var dayBtn = document.createElement('button');
+        dayBtn.type = 'button';
+        dayBtn.className = 'calendar-day';
+        dayBtn.textContent = String(day);
+        dayBtn.setAttribute('data-iso', iso);
+        if (iso < italianNow.isoDate) {
+          dayBtn.classList.add('disabled');
+          dayBtn.disabled = true;
+        } else {
+          if (iso === italianNow.isoDate) dayBtn.classList.add('today');
+          if (iso === draftSelection.date) dayBtn.classList.add('selected');
+          dayBtn.addEventListener('click', function(event){
+            draftSelection.date = event.currentTarget.getAttribute('data-iso');
+            draftSelection.now = false;
+            updateTimeInput();
+            renderCalendar();
+          });
+        }
+        calendarGrid.appendChild(dayBtn);
+      }
+    }
+    function openSheet(){
+      syncLiveNowSelection();
+      italianNow = getItalianNow();
+      draftSelection = { date: currentSelection.date, time: currentSelection.time, now: currentSelection.now };
+      viewYear = parseInt(draftSelection.date.split('-')[0], 10);
+      viewMonth = parseInt(draftSelection.date.split('-')[1], 10) - 1;
+      renderCalendar();
+      updateTimeInput();
+      backdrop.classList.add('open');
+      sheet.classList.add('open');
+      datetimeTrigger.setAttribute('aria-expanded', 'true');
+    }
+    function closeSheet(){
+      backdrop.classList.remove('open');
+      sheet.classList.remove('open');
+      datetimeTrigger.setAttribute('aria-expanded', 'false');
+    }
+    function leadTextFor(item){
+      if (!isTodayISO(currentSelection.date)) return formatReadableDate(currentSelection.date);
+      var diff = toMinutes(item.departure) - toMinutes(currentSelection.time);
+      if (diff <= 0) return 'Now';
+      return diff + ' min';
+    }
+    function normalizeRealtimeRow(row){
+      var departure = normalizeTime(row.departure || row.departureTime || row.scheduledDeparture || row.orarioPartenza);
+      var arrival = normalizeTime(row.arrival || row.arrivalTime || row.scheduledArrival || row.orarioArrivo) || '—';
+      var platform = row.platform || row.binario || row.platformDeparture || row.platformCode || '';
+      var rawDelay = row.delayMinutes != null ? row.delayMinutes : row.delay;
+      var delay = parseInt(rawDelay, 10);
+      var rawStatus = String(row.status || '').toLowerCase();
+      var cancelled = !!(row.cancelled || row.canceled || row.suppressed || row.soppressed || rawStatus === 'cancelled');
+      var status = 'ok';
+      var statusLabel = 'On time';
+      if (cancelled) {
+        status = 'danger';
+        statusLabel = 'Cancelled';
+      } else if (!isNaN(delay) && delay > 0) {
+        status = 'warn';
+        statusLabel = '+' + delay + ' min';
+      } else if (rawStatus === 'scheduled') {
+        status = 'neutral';
+        statusLabel = 'Scheduled';
+      }
+      return {
+        id: row.id || row.trainId || row.number || row.trainNumber || departure,
+        mode:'train',
+        route: row.route || row.service || row.name || (row.trainNumber ? 'Train ' + row.trainNumber : 'Train'),
+        from: row.from || row.origin || row.originName || row.partenza || fromSelect.value,
+        to: row.to || row.destination || row.destinationName || row.arrivo || toSelect.value,
+        departure: departure || '—',
+        arrival: arrival,
+        duration: row.duration || inferDuration(departure, arrival),
+        status: status,
+        statusLabel: statusLabel,
+        meta: platform ? 'Platform ' + platform : (row.meta || 'Live update'),
+        direct: row.direct || row.note || row.notes || 'Real time'
+      };
+    }
+    function getMergedDepartures(){
+      var staticNonTrains = fallbackDepartures.filter(function(item){ return item.mode !== 'train'; });
+      var trains = realtimeDepartures.length ? realtimeDepartures : fallbackDepartures.filter(function(item){ return item.mode === 'train'; });
+      return trains.concat(staticNonTrains);
+    }
+    function normalizeFiltered(){
+      var from = fromSelect.value.trim();
+      var to = toSelect.value.trim();
+      var selectedMinutes = isTodayISO(currentSelection.date) ? toMinutes(currentSelection.time) : 0;
+      return getMergedDepartures().filter(function(item){
+        var routeMatch = item.from === from && item.to === to;
+        var modeMatch = activeMode === 'all' ? true : item.mode === activeMode;
+        var timeMatch = toMinutes(item.departure) >= selectedMinutes;
+        if (activeMode === 'alert') return false;
+        return routeMatch && modeMatch && timeMatch;
+      }).sort(function(a, b){ return toMinutes(a.departure) - toMinutes(b.departure); });
+    }
+    function updateBestCard(items){
+      var best = items[0] || getMergedDepartures()[0] || fallbackDepartures[0];
+      bestIconWrap.className = 'transport-badge ' + modeClasses[best.mode];
+      bestIconWrap.innerHTML = modeIcons[best.mode];
+      bestMode.textContent = best.mode.charAt(0).toUpperCase() + best.mode.slice(1);
+      bestIn.textContent = leadTextFor(best);
+      bestDeparture.textContent = best.departure;
+      bestArrival.textContent = best.arrival;
+      bestMeta.textContent = best.meta;
+      bestStatus.className = 'status-badge ' + statusClasses[best.status];
+      bestStatus.textContent = best.statusLabel;
+      bestDuration.textContent = best.duration;
+      bestDirect.textContent = best.direct;
+    }
+    function cardTemplate(item){
+      return '<article class="departure-card">' +
+        '<div class="icon-round ' + modeClasses[item.mode] + '">' + modeIcons[item.mode] + '</div>' +
+        '<div class="time-col">' + item.departure + '</div>' +
+        '<div>' +
+          '<div class="route-title">' + item.route + '</div>' +
+          '<div class="route-line">' + item.from + ' → ' + item.to + '</div>' +
+          '<div class="route-meta">' + item.meta + '</div>' +
+        '</div>' +
+        '<div class="right-col">' +
+          '<span class="status-badge ' + statusClasses[item.status] + '">' + item.statusLabel + '</span>' +
+          '<div class="arrival-time">' + item.arrival + '</div>' +
+          '<div class="mini-duration">' + item.duration + '</div>' +
+        '</div>' +
+        '<div class="chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>' +
+      '</article>';
+    }
+    function updateLiveStrip(){
+      liveDot.classList.remove('is-live', 'is-error');
+      if (liveState.mode === 'live') {
+        liveDot.classList.add('is-live');
+        liveTitle.textContent = 'Live trains connected';
+        liveMeta.textContent = 'Updated ' + liveState.updatedAt + ' · refresh every 30s';
+      } else if (liveState.mode === 'loading') {
+        liveTitle.textContent = 'Connecting live trains';
+        liveMeta.textContent = 'Looking for a realtime feed';
+      } else if (liveState.mode === 'error') {
+        liveDot.classList.add('is-error');
+        liveTitle.textContent = 'Live trains unavailable';
+        liveMeta.textContent = 'Using fallback timetable';
+      } else {
+        liveTitle.textContent = 'Live trains not set up yet';
+        liveMeta.textContent = 'Showing fallback timetable';
+      }
+    }
+    function buildRealtimeUrl(endpoint){
+      var base = endpoint || ACTIVE_TRAIN_RT_ENDPOINT;
+      var url = null;
+      if (!base) return '';
+      url = new URL(base, window.location.origin);
+      url.searchParams.set('from', fromSelect.value.trim());
+      url.searchParams.set('to', toSelect.value.trim());
+      url.searchParams.set('date', currentSelection.date);
+      url.searchParams.set('time', currentSelection.time);
+      return url.toString();
+    }
+    function refreshLiveState(mode, updatedAt, message){
+      liveState = { mode: mode, updatedAt: updatedAt || '', message: message || '' };
+    }
+    async function fetchRealtimeDepartures(silent){
+      var response = null;
+      var payload = null;
+      var rows = [];
+      var endpoints = [];
+      var i = 0;
+      syncLiveNowSelection();
+
+      endpoints = ACTIVE_TRAIN_RT_ENDPOINT
+        ? [ACTIVE_TRAIN_RT_ENDPOINT].concat(TRAIN_RT_ENDPOINTS.filter(function(item){ return item !== ACTIVE_TRAIN_RT_ENDPOINT; }))
+        : TRAIN_RT_ENDPOINTS.slice();
+
+      if (!endpoints.length) {
+        refreshLiveState('fallback', '', 'No realtime endpoint configured');
+        realtimeDepartures = [];
+        render();
+        return;
+      }
+
+      if (!silent && liveState.mode !== 'live') {
+        refreshLiveState('loading', '', 'Trying ' + endpoints.length + ' realtime endpoint' + (endpoints.length > 1 ? 's' : ''));
+        updateLiveStrip();
+      }
+
+      for (i = 0; i < endpoints.length; i += 1) {
+        try {
+          response = await fetch(buildRealtimeUrl(endpoints[i]), { cache:'no-store' });
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          payload = await response.json();
+          rows = Array.isArray(payload) ? payload : (payload.trains || payload.departures || payload.services || payload.data || []);
+          realtimeDepartures = rows.map(normalizeRealtimeRow).filter(function(item){ return item && item.departure && item.departure !== '—'; });
+          ACTIVE_TRAIN_RT_ENDPOINT = endpoints[i];
+          refreshLiveState('live', getItalianNow().time, '');
+          render();
+          return;
+        } catch (_error) {
+        }
+      }
+
+      realtimeDepartures = [];
+      refreshLiveState('fallback', '', 'No reachable realtime endpoint found');
+      render();
+    }
+    function scheduleRefresh(){
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(function(){
+        if (document.hidden) return;
+        fetchRealtimeDepartures(true);
+      }, REALTIME_REFRESH_MS);
+    }
+    function render(){
+      italianNow = getItalianNow();
+      syncLiveNowSelection();
+      var items = normalizeFiltered();
+      updateTriggerText();
+      updateLiveStrip();
+      updateBestCard(items);
+      departuresList.innerHTML = items.map(cardTemplate).join('');
+      alertRow.style.display = activeMode === 'alert' || activeMode === 'all' || activeMode === 'ferry' ? 'grid' : 'none';
+      if (activeMode === 'alert') departuresList.innerHTML = '';
+      if (!items.length && activeMode !== 'alert') {
+        departuresList.innerHTML = '<article class="departure-card"><div class="time-col">—</div><div style="grid-column:span 3"><div class="route-title">No departures in this view</div><div class="route-line">Try another time, change route, or switch mode.</div></div><div></div></article>';
+      }
+    }
+
+    datetimeTrigger.addEventListener('click', openSheet);
+    backdrop.addEventListener('click', closeSheet);
+    closeBtn.addEventListener('click', closeSheet);
+    cancelBtn.addEventListener('click', closeSheet);
+    nowBtn.addEventListener('click', function(){
+      italianNow = getItalianNow();
+      draftSelection = { date: italianNow.isoDate, time: italianNow.time, now: true };
+      viewYear = italianNow.year;
+      viewMonth = italianNow.monthIndex;
+      renderCalendar();
+      updateTimeInput();
+    });
+    prevMonthBtn.addEventListener('click', function(){
+      if (prevMonthBtn.disabled) return;
+      viewMonth -= 1;
+      if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; }
+      renderCalendar();
+    });
+    nextMonthBtn.addEventListener('click', function(){
+      viewMonth += 1;
+      if (viewMonth > 11) { viewMonth = 0; viewYear += 1; }
+      renderCalendar();
+    });
+    sheetTimeInput.addEventListener('input', function(){
+      draftSelection.time = sheetTimeInput.value || draftSelection.time;
+      draftSelection.now = false;
+      clampDraftTime();
+      sheetTimeInput.value = draftSelection.time;
+    });
+    applyBtn.addEventListener('click', function(){
+      currentSelection = { date: draftSelection.date, time: draftSelection.time, now: draftSelection.now };
+      closeSheet();
+      render();
+      fetchRealtimeDepartures(false);
+    });
+    fromSelect.addEventListener('change', function(){ render(); fetchRealtimeDepartures(false); });
+    toSelect.addEventListener('change', function(){ render(); fetchRealtimeDepartures(false); });
+    swapBtn.addEventListener('click', function(){
+      var from = fromSelect.value;
+      fromSelect.value = toSelect.value;
+      toSelect.value = from;
+      render();
+      fetchRealtimeDepartures(false);
+    });
+    modeButtons.forEach(function(button){
+      button.addEventListener('click', function(){
+        activeMode = button.dataset.mode || 'all';
+        modeButtons.forEach(function(item){ item.classList.toggle('active', item === button); });
+        render();
+      });
+    });
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden) fetchRealtimeDepartures(true);
+    });
+
+    render();
+    fetchRealtimeDepartures(false);
+    scheduleRefresh();
+  }());
+</script>
+</body>
+</html>
