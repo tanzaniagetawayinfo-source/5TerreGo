@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>5TerreGo Meteo</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --surface-2:#f9fbff;
+    --text:#101828;
+    --muted:#667085;
+    --line:#dfe6f0;
+    --accent:#ff7e57;
+    --accent-soft:#fff1e7;
+    --blue:#2f80ed;
+    --green:#3ba55c;
+    --shadow:0 18px 42px rgba(16,24,40,.08);
+    --shadow-soft:0 10px 24px rgba(16,24,40,.05);
+    --radius-xl:30px;
+    --radius-lg:24px;
+    --radius-md:18px;
+    --radius-sm:14px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+  body{
+    max-width:100%;
+    overflow-x:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(47,128,237,.07), transparent 28%),
+      radial-gradient(circle at top right, rgba(255,126,87,.08), transparent 24%),
+      linear-gradient(180deg,#fcfdff 0%,var(--bg) 100%);
+  }
+
+  body.ftg-actionbar-enabled{padding-top:0 !important}
+
+  #ftg-global-actionbar-root{position:relative;z-index:80}
+  #ftg-global-actionbar-root .ftg-topbar{
+    position:relative !important;
+    top:auto !important;
+    left:auto !important;
+    right:auto !important;
+    inset:auto !important;
+    width:100% !important;
+  }
+  #ftg-global-actionbar-root .ftg-menu-panel{position:fixed !important}
+
+  button,input{font:inherit}
+  button{border:none;background:none;padding:0;cursor:pointer}
+
+  .page{
+    width:min(100%,780px);
+    max-width:780px;
+    margin:0 auto;
+    padding:10px 12px 28px;
+    overflow-x:clip;
+  }
+
+  .weather-shell{display:grid;gap:12px;width:100%;min-width:0}
+
+  .loading-block{
+    display:none;
+    width:100%;
+    padding:18px 16px;
+    border-radius:22px;
+    background:rgba(255,255,255,.92);
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow-soft);
+  }
+  .loading-block.is-visible{display:block}
+  .loading-row{display:flex;align-items:center;gap:12px}
+  .loading-spinner{
+    width:18px;
+    height:18px;
+    border-radius:999px;
+    border:2px solid #cfe1ff;
+    border-top-color:var(--blue);
+    animation:ftg-spin .8s linear infinite;
+    flex:0 0 18px;
+  }
+  .loading-copy{font-size:14px;line-height:1.35;color:var(--muted);font-weight:700}
+  @keyframes ftg-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+  .overview-card{
+    position:relative;
+    overflow:hidden;
+    border-radius:24px;
+    background:#ffffff;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-soft);
+    padding:16px;
+    display:grid;
+    gap:12px;
+  }
+
+  .overview-sky{display:none}
+
+  .overview-top{
+    position:relative;
+    z-index:1;
+    padding:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:10px;
+    align-items:start;
+  }
+
+  .section-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    min-height:28px;
+    padding:0 10px;
+    border-radius:999px;
+    background:#ffffff;
+    color:#2870cf;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:-.02em;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .overview-title{
+    margin:10px 0 0;
+    font-size:34px;
+    line-height:.95;
+    letter-spacing:-.07em;
+    font-weight:900;
+    color:#0f2850;
+  }
+
+  .overview-sub{
+    margin:8px 0 0;
+    font-size:14px;
+    line-height:1.45;
+    color:#54657d;
+    max-width:30ch;
+  }
+
+  .current-wrap{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .current-icon{font-size:50px;line-height:1}
+  .current-main{display:grid;gap:2px}
+  .current-temp{font-size:52px;line-height:.9;letter-spacing:-.08em;font-weight:900;color:#0f2850}
+  .current-feel{font-size:16px;font-weight:700;color:#54657d}
+
+  .overview-photo{display:none}
+
+  .overview-stats{
+    position:relative;
+    z-index:1;
+    margin:0;
+    padding:10px 6px;
+    border-radius:18px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    box-shadow:none;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:0;
+  }
+  .stat{padding:6px 8px;display:grid;gap:5px;text-align:center}
+  .stat + .stat{border-left:1px solid var(--line)}
+  .stat-top{font-size:20px;line-height:1}
+  .stat-value{font-size:16px;line-height:1;font-weight:900;letter-spacing:-.04em;color:#14213d}
+  .stat-label{font-size:12px;line-height:1.3;color:#667085;font-weight:700}
+
+  .village-strip{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    padding:2px 1px 2px;
+  }
+  .village-strip::-webkit-scrollbar{display:none}
+  .village-mini{
+    flex:0 0 104px;
+    min-width:104px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:10px 8px;
+    box-shadow:var(--shadow-soft);
+    display:grid;
+    gap:6px;
+    cursor:pointer;
+  }
+  .village-mini.active{border-color:#ffc7a6;box-shadow:0 14px 28px rgba(255,126,87,.12)}
+  .village-name{font-size:13px;line-height:1.05;font-weight:900;letter-spacing:-.03em;color:#14213d;text-align:center}
+  .mini-main{display:flex;align-items:center;justify-content:center;gap:8px}
+  .mini-icon{font-size:26px;line-height:1}
+  .mini-temp{font-size:22px;line-height:1;font-weight:900;letter-spacing:-.06em;color:#14213d}
+  .mini-range{font-size:11px;line-height:1;color:#ef6c14;font-weight:800;text-align:center}
+  .mini-meta{display:grid;gap:4px;color:#667085;font-size:10px;font-weight:700;text-align:center}
+
+  .selected-card{
+    background:#fff;
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow);
+    border-radius:26px;
+    padding:16px;
+    display:grid;
+    gap:14px;
+  }
+  .selected-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .selected-left{min-width:0}
+  .selected-title{margin:0;font-size:24px;line-height:.98;letter-spacing:-.06em;font-weight:900;color:#14213d}
+  .selected-copy{margin:8px 0 0;font-size:13px;line-height:1.45;color:#667085;max-width:34ch}
+  .selected-right{display:grid;justify-items:end;gap:8px}
+  .selected-big{font-size:44px;line-height:.9;font-weight:900;letter-spacing:-.08em;color:#14213d}
+  .selected-feel{font-size:13px;font-weight:700;color:#667085}
+  .selected-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .mini-stat{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:12px 10px;
+    display:grid;
+    gap:6px;
+  }
+  .mini-stat-top{display:flex;align-items:center;gap:8px;color:#2870cf;font-size:16px}
+  .mini-stat-value{font-size:16px;line-height:1;font-weight:900;color:#14213d}
+  .mini-stat-label{font-size:12px;line-height:1.35;color:#667085;font-weight:700}
+  .mini-stat.accent{background:#fff8f2;border-color:#ffd8c2}
+
+  .section-card{
+    background:#fff;
+    border:1px solid rgba(255,255,255,.98);
+    box-shadow:var(--shadow-soft);
+    border-radius:22px;
+    padding:14px;
+    display:grid;
+    gap:12px;
+  }
+  .section-head{display:flex;align-items:end;justify-content:space-between;gap:12px}
+  .section-title{margin:0;font-size:22px;line-height:.98;letter-spacing:-.05em;font-weight:900;color:#14213d}
+  .section-sub{font-size:12px;color:#667085;font-weight:700}
+
+  .hourly-strip{
+    display:grid;
+    grid-template-columns:repeat(8,minmax(0,1fr));
+    gap:6px;
+  }
+  .hour-card{
+    min-width:0;
+    padding:10px 8px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    display:grid;
+    gap:8px;
+    justify-items:center;
+  }
+  .hour-time{font-size:12px;font-weight:800;color:#667085}
+  .hour-icon{font-size:24px;line-height:1}
+  .hour-temp{font-size:18px;line-height:1;font-weight:900;letter-spacing:-.05em;color:#14213d}
+  .hour-rain{font-size:12px;font-weight:700;color:#4f9cff}
+
+  .daily-grid{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:8px;
+  }
+  .day-card{
+    min-width:0;
+    padding:12px 10px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:#fff;
+    display:grid;
+    gap:8px;
+    justify-items:center;
+    text-align:center;
+  }
+  .day-card.today{border-color:#ffc7a6;background:#fff8f2}
+  .day-name{font-size:14px;font-weight:900;color:#14213d}
+  .day-icon{font-size:24px;line-height:1}
+  .day-range{font-size:13px;font-weight:900;color:#14213d}
+  .day-rain{font-size:12px;font-weight:700;color:#4f9cff}
+
+  .conditions-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  .condition-card{
+    min-width:0;
+    padding:14px 12px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:#fff;
+    box-shadow:var(--shadow-soft);
+    display:grid;
+    gap:10px;
+  }
+  .condition-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .condition-icon{font-size:28px;line-height:1}
+  .condition-badge{
+    min-height:30px;
+    padding:0 10px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:900;
+  }
+  .condition-badge.good{background:#eaf7ec;color:#2f8f36}
+  .condition-badge.watch{background:#fff0df;color:#d97706}
+  .condition-badge.info{background:#e9f3ff;color:#2870cf}
+  .condition-title{font-size:18px;line-height:1;font-weight:900;letter-spacing:-.04em;color:#14213d}
+  .condition-copy{font-size:13px;line-height:1.45;color:#667085;font-weight:600}
+
+  .footer-note{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:#667085;
+    font-size:13px;
+    font-weight:700;
+    padding-top:4px;
+  }
+
+  .error-card{
+    display:none;
+    padding:16px;
+    border-radius:22px;
+    background:#fff2f2;
+    border:1px solid #ffd0d0;
+    color:#9f1d1d;
+    font-size:14px;
+    font-weight:700;
+    line-height:1.45;
+  }
+  .error-card.is-visible{display:block}
+
+  @media (max-width:720px){
+    .page{padding:8px 10px 24px}
+    .weather-shell{gap:10px}
+    .overview-card{padding:14px;gap:10px}
+    .overview-top{grid-template-columns:minmax(0,1fr);gap:8px;padding:0}
+    .overview-title{font-size:30px}
+    .overview-sub{font-size:13px;max-width:26ch}
+    .current-wrap{gap:10px;margin-top:8px}
+    .current-icon{font-size:42px}
+    .current-temp{font-size:46px}
+    .current-feel{font-size:14px}
+    .overview-stats{grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 4px;margin:0}
+    .stat{padding:4px 6px;gap:4px}
+    .stat + .stat{border-left:1px solid var(--line)}
+    .stat:nth-child(3){border-left:1px solid var(--line)}
+    .stat:nth-child(3), .stat:nth-child(4){border-top:none}
+    .stat-top{font-size:18px}
+    .stat-value{font-size:14px}
+    .stat-label{font-size:11px}
+        .village-strip{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:2px 1px 2px}
+    .village-mini{flex:0 0 98px;min-width:98px;padding:9px 7px;border-radius:16px}
+    .village-name{font-size:12px}
+    .mini-icon{font-size:24px}
+    .mini-temp{font-size:20px}
+    .mini-range{font-size:10px;text-align:center}
+    .mini-meta{font-size:9px}
+    .selected-card{padding:14px;border-radius:22px}
+    .selected-title{font-size:22px}
+    .selected-big{font-size:38px}
+    .selected-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .mini-stat{padding:12px 10px;border-radius:16px}
+    .mini-stat-value{font-size:16px}
+    .mini-stat-label{font-size:12px}
+    .section-card{padding:12px;border-radius:20px}
+    .section-title{font-size:20px}
+    .hourly-strip{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+    .daily-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+    .day-card{padding:10px 8px}
+    .day-name{font-size:12px}
+    .day-icon{font-size:22px}
+    .day-range{font-size:12px}
+    .day-rain{font-size:11px}
+    .conditions-grid{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+</head>
+<body>
+  <div id="ftg-global-actionbar-root"></div>
+
+  <main class="page">
+    <div class="weather-shell">
+      <section class="loading-block" id="loadingBlock" aria-live="polite">
+        <div class="loading-row">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span class="loading-copy">Caricamento meteo in tempo reale…</span>
+        </div>
+      </section>
+
+      <section class="error-card" id="errorCard"></section>
+
+      <section class="overview-card" id="overviewCard">
+                <div class="overview-top">
+          <div>
+            <div class="section-eyebrow">METEO GENERALE COSTA</div>
+            <h1 class="overview-title">Cinque Terre oggi</h1>
+            <p class="overview-sub">Una panoramica unica della costa, con dettagli dedicati per ogni borgo qui sotto.</p>
+            <div class="current-wrap">
+              <div class="current-icon" id="overviewIcon">⛅</div>
+              <div class="current-main">
+                <div class="current-temp" id="overviewTemp">--°</div>
+                <div class="current-feel" id="overviewFeel">Percepita --°</div>
+              </div>
+            </div>
+          </div>
+                  </div>
+        <div class="overview-stats">
+          <div class="stat">
+            <div class="stat-top">🌧️</div>
+            <div class="stat-value" id="overviewRain">--%</div>
+            <div class="stat-label">Prob. pioggia</div>
+          </div>
+          <div class="stat">
+            <div class="stat-top">🌬️</div>
+            <div class="stat-value" id="overviewWind">-- km/h</div>
+            <div class="stat-label" id="overviewWindDir">Direzione --</div>
+          </div>
+          <div class="stat">
+            <div class="stat-top">🌊</div>
+            <div class="stat-value" id="overviewSea">-- m</div>
+            <div class="stat-label">Altezza onde</div>
+          </div>
+          <div class="stat">
+            <div class="stat-top">☀️</div>
+            <div class="stat-value" id="overviewUv">--</div>
+            <div class="stat-label">UV massimo</div>
+          </div>
+        </div>
+      </section>
+
+            <section class="village-strip" id="villageStrip" aria-label="Meteo rapido per borgo"></section>
+
+      <section class="selected-card">
+        <div class="selected-head">
+          <div class="selected-left">
+            <h2 class="selected-title" id="selectedVillageTitle">Monterosso</h2>
+            <p class="selected-copy" id="selectedVillageCopy">Dettaglio locale per il borgo selezionato.</p>
+          </div>
+          <div class="selected-right">
+            <div class="current-icon" id="selectedVillageIcon">⛅</div>
+            <div class="selected-big" id="selectedVillageTemp">--°</div>
+            <div class="selected-feel" id="selectedVillageFeel">Percepita --°</div>
+          </div>
+        </div>
+        <div class="selected-grid">
+          <article class="mini-stat accent">
+            <div class="mini-stat-top"><span>🌡️</span><span>Massima / minima</span></div>
+            <div class="mini-stat-value" id="selectedVillageRange">--° / --°</div>
+            <div class="mini-stat-label">Escursione termica giornaliera</div>
+          </article>
+          <article class="mini-stat">
+            <div class="mini-stat-top"><span>💧</span><span>Umidità</span></div>
+            <div class="mini-stat-value" id="selectedVillageHumidity">--%</div>
+            <div class="mini-stat-label">Umidità relativa attuale</div>
+          </article>
+          <article class="mini-stat">
+            <div class="mini-stat-top"><span>☀️</span><span>UV</span></div>
+            <div class="mini-stat-value" id="selectedVillageUv">--</div>
+            <div class="mini-stat-label">Indice UV massimo previsto</div>
+          </article>
+          <article class="mini-stat">
+            <div class="mini-stat-top"><span>🌊</span><span>Onde</span></div>
+            <div class="mini-stat-value" id="selectedVillageWave">-- m</div>
+            <div class="mini-stat-label">Altezza onde lungo costa</div>
+          </article>
+          <article class="mini-stat">
+            <div class="mini-stat-top"><span>🌬️</span><span>Vento</span></div>
+            <div class="mini-stat-value" id="selectedVillageWind">-- km/h</div>
+            <div class="mini-stat-label" id="selectedVillageWindDir">Direzione --</div>
+          </article>
+          <article class="mini-stat">
+            <div class="mini-stat-top"><span>🌧️</span><span>Pioggia</span></div>
+            <div class="mini-stat-value" id="selectedVillageRain">--%</div>
+            <div class="mini-stat-label">Probabilità massima nelle prossime 24 ore</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <h2 class="section-title">Previsioni orarie</h2>
+          <div class="section-sub">Prossime ore</div>
+        </div>
+        <div class="hourly-strip" id="hourlyStrip"></div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <h2 class="section-title">Previsioni 5 giorni</h2>
+          <div class="section-sub">Borgo selezionato</div>
+        </div>
+        <div class="daily-grid" id="dailyGrid"></div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <h2 class="section-title">Condizioni utili</h2>
+          <div class="section-sub">Per il tuo viaggio</div>
+        </div>
+        <div class="conditions-grid" id="conditionsGrid"></div>
+      </section>
+
+      <div class="footer-note" id="footerNote">Dati aggiornati ora</div>
+    </div>
+  </main>
+
+<script>
+(function(){
+  'use strict';
+
+  var WEATHER_BASE = 'https://api.open-meteo.com/v1/forecast';
+  var MARINE_BASE = 'https://marine-api.open-meteo.com/v1/marine';
+  var REFRESH_MS = 15 * 60 * 1000;
+  var CACHE_TTL_MS = 15 * 60 * 1000;
+  var REQUEST_DELAY_MS = 180;
+  var CACHE_KEY = 'ftg-weather-cache-v2';
+  var OVERVIEW_COORDS = { lat: 44.118, lon: 9.701 };
+  var MARINE_COORDS = { lat: 44.105, lon: 9.72 };
+  var VILLAGES = [
+    { id:'monterosso', name:'Monterosso', lat:44.148, lon:9.654, icon:'🏖️' },
+    { id:'vernazza', name:'Vernazza', lat:44.135, lon:9.683, icon:'🏘️' },
+    { id:'corniglia', name:'Corniglia', lat:44.119, lon:9.709, icon:'🌿' },
+    { id:'manarola', name:'Manarola', lat:44.107, lon:9.728, icon:'🛟' },
+    { id:'riomaggiore', name:'Riomaggiore', lat:44.099, lon:9.739, icon:'⛵' }
+  ];
+
+  var state = {
+    selectedVillageId: 'monterosso',
+    overview: null,
+    marine: null,
+    villages: {},
+    loading: true,
+    lastUpdatedAt: null
+  };
+
+  window.FTG_ACTIONBAR_CONFIG = {
+    activePage: 'weather',
+    language: 'en',
+    userName: 'Guest',
+    isLoggedIn: false,
+    androidAppHref: '#android',
+    privacyHref: '#privacy',
+    termsHref: '#terms',
+    menuItems: [
+      { id: 'map', labelKey: 'nav_map', label: 'Map', href: 'map.html' },
+      { id: 'stories', labelKey: 'nav_stories', label: 'Stories', href: 'index.html' },
+      { id: 'sentieri', labelKey: 'nav_sentieri', label: 'Sentieri', href: 'sentieri.html' },
+      { id: 'discounts', labelKey: 'nav_discounts', label: 'Local Discounts', href: 'discounts.html' },
+      { id: 'trains', labelKey: 'nav_trains', label: 'Public Transport', href: 'public-transport.html' },
+      { id: 'weather', labelKey: 'nav_weather', label: 'Weather', href: 'weather.html' },
+      { id: 'updates', labelKey: 'nav_updates', label: 'Official Updates', href: 'updates.html' }
+    ]
+  };
+
+  async function loadAndMountGlobalActionbar(){
+    var root = document.getElementById('ftg-global-actionbar-root');
+    var candidates = [
+      'global-actionbar.html',
+      './global-actionbar.html',
+      '/global-actionbar.html',
+      'https://5terrego.com/global-actionbar.html'
+    ];
+    var i = 0;
+    var response = null;
+    var html = '';
+    var parser = null;
+    var doc = null;
+    var links = [];
+    var styles = [];
+    var scripts = [];
+
+    if (!root) return;
+    if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
+      root.innerHTML = '';
+      window.FTG_MOUNT_GLOBAL_ACTIONBAR(root, window.FTG_ACTIONBAR_CONFIG);
+      return;
+    }
+
+    for (i = 0; i < candidates.length; i += 1) {
+      try {
+        response = await fetch(candidates[i], { cache: 'no-store' });
+        if (!response.ok) continue;
+        html = await response.text();
+        if (!html) continue;
+
+        parser = new DOMParser();
+        doc = parser.parseFromString(html, 'text/html');
+        links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+        styles = Array.from(doc.querySelectorAll('style'));
+        scripts = Array.from(doc.querySelectorAll('script'));
+
+        links.forEach(function(link){
+          var href = link.getAttribute('href') || '';
+          if (!href) return;
+          if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+          var el = document.createElement('link');
+          el.rel = 'stylesheet';
+          el.href = href;
+          el.setAttribute('data-ftg-actionbar-link', href);
+          document.head.appendChild(el);
+        });
+
+        styles.forEach(function(style, index){
+          var key = 'ftg-actionbar-style-' + i + '-' + index;
+          if (document.getElementById(key)) return;
+          var el = document.createElement('style');
+          el.id = key;
+          el.textContent = style.textContent || '';
+          document.head.appendChild(el);
+        });
+
+        for (var s = 0; s < scripts.length; s += 1) {
+          var original = scripts[s];
+          var src = original.getAttribute('src');
+          await new Promise(function(resolve){
+            var scriptEl = document.createElement('script');
+            var done = false;
+            function finish(){
+              if (done) return;
+              done = true;
+              resolve();
+            }
+            if (src) {
+              scriptEl.src = src;
+              scriptEl.onload = finish;
+              scriptEl.onerror = finish;
+            } else {
+              scriptEl.textContent = original.textContent || '';
+            }
+            document.head.appendChild(scriptEl);
+            if (!src) finish();
+          });
+        }
+
+        if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
+          root.innerHTML = '';
+          window.FTG_MOUNT_GLOBAL_ACTIONBAR(root, window.FTG_ACTIONBAR_CONFIG);
+          return;
+        }
+      } catch (_error) {
+      }
+    }
+  }
+
+  function $(id){ return document.getElementById(id); }
+
+  function weatherIcon(code, isDay){
+    if (code === 0) return isDay ? '☀️' : '🌙';
+    if ([1,2].indexOf(code) > -1) return isDay ? '🌤️' : '☁️';
+    if (code === 3) return '☁️';
+    if ([45,48].indexOf(code) > -1) return '🌫️';
+    if ([51,53,55,56,57].indexOf(code) > -1) return '🌦️';
+    if ([61,63,65,66,67,80,81,82].indexOf(code) > -1) return '🌧️';
+    if ([71,73,75,77,85,86].indexOf(code) > -1) return '🌨️';
+    if ([95,96,99].indexOf(code) > -1) return '⛈️';
+    return '⛅';
+  }
+
+  function weatherLabel(code){
+    if (code === 0) return 'Cielo sereno';
+    if (code === 1) return 'Poco nuvoloso';
+    if (code === 2) return 'Parzialmente nuvoloso';
+    if (code === 3) return 'Coperto';
+    if ([45,48].indexOf(code) > -1) return 'Nebbia';
+    if ([51,53,55,56,57].indexOf(code) > -1) return 'Pioviggine';
+    if ([61,63,65,66,67,80,81,82].indexOf(code) > -1) return 'Pioggia';
+    if ([71,73,75,77,85,86].indexOf(code) > -1) return 'Neve';
+    if ([95,96,99].indexOf(code) > -1) return 'Temporale';
+    return 'Variabile';
+  }
+
+  function windDirectionLabel(degrees){
+    var dirs = ['N','NE','E','SE','S','SO','O','NO'];
+    var index = Math.round((((Number(degrees) || 0) % 360) / 45)) % 8;
+    return dirs[index];
+  }
+
+  function formatTemp(value){
+    if (value == null || Number.isNaN(Number(value))) return '--°';
+    return Math.round(Number(value)) + '°';
+  }
+
+  function formatPercent(value){
+    if (value == null || Number.isNaN(Number(value))) return '--%';
+    return Math.round(Number(value)) + '%';
+  }
+
+  function formatKm(value){
+    if (value == null || Number.isNaN(Number(value))) return '-- km/h';
+    return Math.round(Number(value)) + ' km/h';
+  }
+
+  function formatMeters(value){
+    if (value == null || Number.isNaN(Number(value))) return '-- m';
+    return Number(value).toFixed(1) + ' m';
+  }
+
+  function formatTimeLabel(iso){
+    var date = new Date(iso);
+    return new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(date);
+  }
+
+  function formatDayLabel(iso){
+    var date = new Date(iso);
+    var label = new Intl.DateTimeFormat('it-IT', { weekday: 'long' }).format(date);
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  function nowIsoHour(){
+    var now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).getTime();
+  }
+
+  function nearestIndex(times, targetTime){
+    var bestIndex = 0;
+    var bestDiff = Infinity;
+    times.forEach(function(item, index){
+      var diff = Math.abs(new Date(item).getTime() - targetTime);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        bestIndex = index;
+      }
+    });
+    return bestIndex;
+  }
+
+  function firstFutureIndex(times){
+    var target = nowIsoHour();
+    for (var index = 0; index < times.length; index += 1) {
+      if (new Date(times[index]).getTime() >= target) return index;
+    }
+    return 0;
+  }
+
+  function buildForecastUrl(lat, lon, extra){
+    var params = new URLSearchParams();
+    params.set('latitude', String(lat));
+    params.set('longitude', String(lon));
+    params.set('timezone', 'auto');
+    params.set('forecast_days', String(extra.forecastDays || 5));
+    if (extra.current && extra.current.length) params.set('current', extra.current.join(','));
+    if (extra.hourly && extra.hourly.length) params.set('hourly', extra.hourly.join(','));
+    if (extra.daily && extra.daily.length) params.set('daily', extra.daily.join(','));
+    if (extra.cellSelection) params.set('cell_selection', extra.cellSelection);
+    return extra.base + '?' + params.toString();
+  }
+
+  async function fetchJson(url){
+    var response = await fetch(url, { cache:'no-store' });
+    if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + url);
+    return response.json();
+  }
+
+  async function fetchOverview(){
+    var forecastUrl = buildForecastUrl(OVERVIEW_COORDS.lat, OVERVIEW_COORDS.lon, {
+      base: WEATHER_BASE,
+      forecastDays: 5,
+      current: ['temperature_2m','apparent_temperature','precipitation_probability','wind_speed_10m','wind_direction_10m','weather_code','is_day'],
+      hourly: ['precipitation_probability'],
+      daily: ['uv_index_max']
+    });
+    var marineUrl = buildForecastUrl(MARINE_COORDS.lat, MARINE_COORDS.lon, {
+      base: MARINE_BASE,
+      forecastDays: 3,
+      hourly: ['wave_height'],
+      cellSelection: 'sea'
+    });
+
+    var results = await Promise.all([fetchJson(forecastUrl), fetchJson(marineUrl)]);
+    return { forecast: results[0], marine: results[1] };
+  }
+
+  function delay(ms){
+    return new Promise(function(resolve){ setTimeout(resolve, ms); });
+  }
+
+  function readWeatherCache(ignoreTtl){
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      var parsed = raw ? JSON.parse(raw) : null;
+      if (!parsed || !parsed.savedAt || !parsed.overview || !parsed.marine || !parsed.villages) return null;
+      if (!ignoreTtl && (Date.now() - parsed.savedAt > CACHE_TTL_MS)) return null;
+      return parsed;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function writeWeatherCache(){
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        overview: state.overview,
+        marine: state.marine,
+        villages: state.villages,
+        lastUpdatedAt: state.lastUpdatedAt ? state.lastUpdatedAt.toISOString() : null
+      }));
+    } catch (_error) {
+    }
+  }
+
+  async function fetchVillageBundle(village){
+    var url = buildForecastUrl(village.lat, village.lon, {
+      base: WEATHER_BASE,
+      forecastDays: 5,
+      current: ['temperature_2m','apparent_temperature','relative_humidity_2m','wind_speed_10m','wind_direction_10m','weather_code','is_day'],
+      hourly: ['temperature_2m','precipitation_probability','weather_code','is_day'],
+      daily: ['weather_code','temperature_2m_max','temperature_2m_min','precipitation_probability_max','uv_index_max']
+    });
+    return fetchJson(url);
+  }
+
+  function renderOverview(){
+    if (!state.overview || !state.marine) return;
+    var current = state.overview.current || {};
+    var daily = state.overview.daily || {};
+    var marineHourly = state.marine.hourly || {};
+    var marineTimes = marineHourly.time || [];
+    var marineHeights = marineHourly.wave_height || [];
+    var marineIndex = marineTimes.length ? nearestIndex(marineTimes, Date.now()) : -1;
+    $('overviewIcon').textContent = weatherIcon(current.weather_code, Number(current.is_day) === 1);
+    $('overviewTemp').textContent = formatTemp(current.temperature_2m);
+    $('overviewFeel').textContent = 'Percepita ' + formatTemp(current.apparent_temperature);
+    $('overviewRain').textContent = formatPercent(current.precipitation_probability);
+    $('overviewWind').textContent = formatKm(current.wind_speed_10m);
+    $('overviewWindDir').textContent = 'Direzione ' + windDirectionLabel(current.wind_direction_10m);
+    $('overviewSea').textContent = formatMeters(marineIndex > -1 ? marineHeights[marineIndex] : null);
+    $('overviewUv').textContent = daily.uv_index_max && daily.uv_index_max.length ? String(Math.round(daily.uv_index_max[0])) : '--';
+  }
+
+    function renderVillageStrip(){
+    $('villageStrip').innerHTML = VILLAGES.map(function(village){
+      var payload = state.villages[village.id];
+      var current = payload && payload.current ? payload.current : {};
+      var daily = payload && payload.daily ? payload.daily : {};
+      var active = village.id === state.selectedVillageId ? ' active' : '';
+      return '<article class="village-mini' + active + '" data-village-id="' + village.id + '">' +
+        '<div class="village-name">' + village.name + '</div>' +
+        '<div class="mini-main">' +
+          '<div class="mini-icon">' + weatherIcon(current.weather_code, Number(current.is_day) === 1) + '</div>' +
+          '<div class="mini-temp">' + formatTemp(current.temperature_2m) + '</div>' +
+        '</div>' +
+        '<div class="mini-range">' + formatTemp(daily.temperature_2m_max ? daily.temperature_2m_max[0] : null) + ' / ' + formatTemp(daily.temperature_2m_min ? daily.temperature_2m_min[0] : null) + '</div>' +
+        '<div class="mini-meta">' +
+          '<div>🌬️ ' + formatKm(current.wind_speed_10m) + ' ' + windDirectionLabel(current.wind_direction_10m) + '</div>' +
+          '<div>💧 ' + formatPercent(daily.precipitation_probability_max ? daily.precipitation_probability_max[0] : null) + '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    Array.from(document.querySelectorAll('.village-mini')).forEach(function(card){
+      card.addEventListener('click', function(){
+        var nextId = card.getAttribute('data-village-id');
+        if (!nextId || nextId === state.selectedVillageId) return;
+        state.selectedVillageId = nextId;
+        renderVillageStrip();
+        loadSelectedVillageDetail();
+      });
+    });
+  }
+
+  function renderSelectedVillage(detail){
+    var current = detail.current || {};
+    var daily = detail.daily || {};
+    var selectedVillage = VILLAGES.find(function(item){ return item.id === state.selectedVillageId; }) || VILLAGES[0];
+    $('selectedVillageTitle').textContent = selectedVillage.name;
+    $('selectedVillageCopy').textContent = weatherLabel(current.weather_code) + ' con dettaglio completo per comfort, mare e condizioni utili nel borgo selezionato.';
+    $('selectedVillageIcon').textContent = weatherIcon(current.weather_code, Number(current.is_day) === 1);
+    $('selectedVillageTemp').textContent = formatTemp(current.temperature_2m);
+    $('selectedVillageFeel').textContent = 'Percepita ' + formatTemp(current.apparent_temperature);
+    $('selectedVillageRange').textContent = formatTemp(daily.temperature_2m_max ? daily.temperature_2m_max[0] : null) + ' / ' + formatTemp(daily.temperature_2m_min ? daily.temperature_2m_min[0] : null);
+    $('selectedVillageHumidity').textContent = formatPercent(current.relative_humidity_2m);
+    $('selectedVillageUv').textContent = daily.uv_index_max && daily.uv_index_max.length ? String(Math.round(daily.uv_index_max[0])) : '--';
+    $('selectedVillageWave').textContent = $('overviewSea').textContent || '-- m';
+    $('selectedVillageRain').textContent = formatPercent(daily.precipitation_probability_max ? daily.precipitation_probability_max[0] : null);
+    $('selectedVillageWind').textContent = formatKm(current.wind_speed_10m);
+    $('selectedVillageWindDir').textContent = 'Direzione ' + windDirectionLabel(current.wind_direction_10m);
+  }
+
+  function renderHourly(detail){
+    var hourly = detail.hourly || {};
+    var start = firstFutureIndex(hourly.time || []);
+    var cards = [];
+    for (var index = start; index < Math.min(start + 8, (hourly.time || []).length); index += 1) {
+      cards.push('<article class="hour-card">' +
+        '<div class="hour-time">' + formatTimeLabel(hourly.time[index]) + '</div>' +
+        '<div class="hour-icon">' + weatherIcon(hourly.weather_code[index], Number(hourly.is_day[index]) === 1) + '</div>' +
+        '<div class="hour-temp">' + formatTemp(hourly.temperature_2m[index]) + '</div>' +
+        '<div class="hour-rain">' + formatPercent(hourly.precipitation_probability[index]) + '</div>' +
+      '</article>');
+    }
+    $('hourlyStrip').innerHTML = cards.join('');
+  }
+
+  function renderDaily(detail){
+    var daily = detail.daily || {};
+    var cards = [];
+    for (var index = 0; index < Math.min(5, (daily.time || []).length); index += 1) {
+      cards.push('<article class="day-card' + (index === 0 ? ' today' : '') + '">' +
+        '<div class="day-name">' + (index === 0 ? 'Oggi' : formatDayLabel(daily.time[index])) + '</div>' +
+        '<div class="day-icon">' + weatherIcon(daily.weather_code[index], true) + '</div>' +
+        '<div class="day-range">' + formatTemp(daily.temperature_2m_max[index]) + ' / ' + formatTemp(daily.temperature_2m_min[index]) + '</div>' +
+        '<div class="day-rain">' + formatPercent(daily.precipitation_probability_max[index]) + '</div>' +
+      '</article>');
+    }
+    $('dailyGrid').innerHTML = cards.join('');
+  }
+
+  function conditionBadge(kind, label){
+    return '<span class="condition-badge ' + kind + '">' + label + '</span>';
+  }
+
+  function renderConditions(detail){
+    var current = detail.current || {};
+    var daily = detail.daily || {};
+    var rain = Number(daily.precipitation_probability_max && daily.precipitation_probability_max[0] || 0);
+    var wind = Number(current.wind_speed_10m || 0);
+    var waveMeters = Number($('overviewSea').textContent.replace(',', '.')) || 0;
+
+    var trailBadge = rain <= 25 ? conditionBadge('good', 'Buono') : rain <= 50 ? conditionBadge('watch', 'Attenzione') : conditionBadge('watch', 'Bagnato');
+    var seaBadge = waveMeters <= 0.7 ? conditionBadge('good', 'Buono') : waveMeters <= 1.2 ? conditionBadge('watch', 'Mosso') : conditionBadge('watch', 'Attenzione');
+    var windBadge = wind <= 18 ? conditionBadge('info', 'Leggero') : wind <= 28 ? conditionBadge('watch', 'Moderato') : conditionBadge('watch', 'Forte');
+
+    $('conditionsGrid').innerHTML = [
+      '<article class="condition-card"><div class="condition-head"><div class="condition-icon">🥾</div>' + trailBadge + '</div><div class="condition-title">Sentieri</div><div class="condition-copy">' + (rain <= 25 ? 'Probabile fondo asciutto e buona visibilità lungo i percorsi principali.' : 'Valuta scarpe adatte e controlla l’evoluzione della pioggia prima di partire.') + '</div></article>',
+      '<article class="condition-card"><div class="condition-head"><div class="condition-icon">🌊</div>' + seaBadge + '</div><div class="condition-title">Mare</div><div class="condition-copy">' + (waveMeters <= 0.7 ? 'Mare generalmente calmo, più favorevole per soste in spiaggia e battelli.' : 'Condizioni più mosse del normale: utile ricontrollare il mare prima di partire.') + '</div></article>',
+      '<article class="condition-card"><div class="condition-head"><div class="condition-icon">🌬️</div>' + windBadge + '</div><div class="condition-title">Vento</div><div class="condition-copy">' + (wind <= 18 ? 'Vento contenuto, sensazione più gradevole nelle ore centrali.' : 'Raffiche più presenti lungo costa e punti panoramici esposti.') + '</div></article>'
+    ].join('');
+  }
+
+  function setLoading(isLoading){
+    state.loading = isLoading;
+    $('loadingBlock').classList.toggle('is-visible', isLoading);
+    $('overviewCard').style.display = isLoading ? 'none' : 'block';
+    $('errorCard').classList.toggle('is-visible', false);
+  }
+
+  function showError(message){
+    $('errorCard').textContent = message;
+    $('errorCard').classList.add('is-visible');
+  }
+
+  function loadSelectedVillageDetail(){
+    var village = VILLAGES.find(function(item){ return item.id === state.selectedVillageId; }) || VILLAGES[0];
+    var detail = state.villages[village.id];
+    if (!detail) return;
+    renderSelectedVillage(detail);
+    renderHourly(detail);
+    renderDaily(detail);
+    renderConditions(detail);
+    if (!state.lastUpdatedAt) state.lastUpdatedAt = new Date();
+    $('footerNote').textContent = 'Dati aggiornati alle ' + new Intl.DateTimeFormat('it-IT', { hour:'2-digit', minute:'2-digit' }).format(state.lastUpdatedAt);
+  }
+
+  async function loadAll(){
+    var cached = null;
+    var staleCache = null;
+    var overviewResult = null;
+    var index = 0;
+
+    try {
+      setLoading(true);
+      await loadAndMountGlobalActionbar();
+
+      cached = readWeatherCache(false);
+      if (cached) {
+        state.overview = cached.overview;
+        state.marine = cached.marine;
+        state.villages = cached.villages || {};
+        state.lastUpdatedAt = cached.lastUpdatedAt ? new Date(cached.lastUpdatedAt) : new Date(cached.savedAt);
+        renderOverview();
+        renderVillageStrip();
+        loadSelectedVillageDetail();
+        setLoading(false);
+        return;
+      }
+
+      overviewResult = await fetchOverview();
+      state.overview = overviewResult.forecast;
+      state.marine = overviewResult.marine;
+      state.villages = {};
+
+      for (index = 0; index < VILLAGES.length; index += 1) {
+        state.villages[VILLAGES[index].id] = await fetchVillageBundle(VILLAGES[index]);
+        if (index < VILLAGES.length - 1) await delay(REQUEST_DELAY_MS);
+      }
+
+      state.lastUpdatedAt = new Date();
+      writeWeatherCache();
+      renderOverview();
+      renderVillageStrip();
+      loadSelectedVillageDetail();
+      setLoading(false);
+    } catch (error) {
+      staleCache = readWeatherCache(true);
+      if (staleCache) {
+        state.overview = staleCache.overview;
+        state.marine = staleCache.marine;
+        state.villages = staleCache.villages || {};
+        state.lastUpdatedAt = staleCache.lastUpdatedAt ? new Date(staleCache.lastUpdatedAt) : new Date(staleCache.savedAt);
+        renderOverview();
+        renderVillageStrip();
+        loadSelectedVillageDetail();
+        setLoading(false);
+        showError('Open-Meteo sta limitando le richieste in questo momento. Ti mostro gli ultimi dati salvati.');
+        console.error(error);
+        return;
+      }
+
+      setLoading(false);
+      showError('Impossibile caricare il meteo in questo momento. Riprova tra poco.');
+      console.error(error);
+    }
+  }
+
+  loadAll();
+  setInterval(function(){
+    if (document.hidden) return;
+    loadAll();
+  }, REFRESH_MS);
+}());
+</script>
+</body>
+</html>
