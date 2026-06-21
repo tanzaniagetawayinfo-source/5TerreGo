@@ -1,1116 +1,1134 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>5TerreGo Stories</title>
+<!-- global-actionbar-two-rows.html -->
+<div id="ftg-global-actionbar-root"></div>
+
 <style>
-  :root{
-    --bg:#f4f7fb;
-    --surface:#ffffff;
-    --surface-2:#f9fbff;
-    --text:#111827;
-    --muted:#6b7280;
-    --line:#dde4ef;
-    --line-2:#e9eef6;
-    --primary:#173b8f;
-    --accent:#ff7e57;
-    --accent-soft:#fff3e8;
-    --shadow:0 18px 42px rgba(17,24,39,.08);
-    --shadow-soft:0 10px 24px rgba(17,24,39,.05);
-    --radius-xl:30px;
-    --radius-lg:24px;
-    --radius-md:18px;
-    --radius-sm:14px;
+  :root {
+    --ftg-header-height: calc(104px + env(safe-area-inset-top));
+    --ftg-safe-top: env(safe-area-inset-top);
+    --ftg-text: #111827;
+    --ftg-text-soft: #111827;
+    --ftg-line: rgba(15, 23, 42, .08);
+    --ftg-line-strong: rgba(15, 23, 42, .12);
+    --ftg-pill: #f5f7fb;
+    --ftg-pill-active: #fff3e8;
+    --ftg-primary: #003b95;
+    --ftg-orange: #ff7a00;
+    --ftg-shadow: 0 14px 34px rgba(15, 23, 42, .08);
+    --ftg-shadow-strong: 0 22px 44px rgba(15, 23, 42, .14);
   }
 
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    color:var(--text);
-    background:
-      radial-gradient(circle at top left, rgba(23,59,143,.06), transparent 30%),
-      radial-gradient(circle at top right, rgba(255,126,87,.08), transparent 24%),
-      linear-gradient(180deg,#fbfdff 0%,var(--bg) 100%);
+  body.ftg-actionbar-enabled {
+    padding-top: var(--ftg-header-height);
+    background: #fff;
   }
 
-  button,input{font:inherit}
-  button{border:none;background:none;padding:0;cursor:pointer}
-
-  body.ftg-actionbar-enabled{padding-top:0 !important}
-
-  #ftg-global-actionbar-root{
-    position:relative;
-    z-index:80;
+  body.ftg-menu-open {
+    overflow: hidden;
   }
 
-  #ftg-global-actionbar-root .ftg-topbar{
-    position:relative !important;
-    top:auto !important;
-    left:auto !important;
-    right:auto !important;
-    inset:auto !important;
-    width:100% !important;
+  .ftg-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10080;
+    padding-top: var(--ftg-safe-top);
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+    border-bottom: 1px solid var(--ftg-line);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+    transition: box-shadow .22s ease, background .22s ease, border-color .22s ease;
   }
 
-  #ftg-global-actionbar-root .ftg-menu-panel{
-    position:fixed !important;
+  .ftg-topbar.is-scrolled {
+    background: rgba(255,255,255,.98);
+    border-bottom-color: var(--ftg-line-strong);
+    box-shadow: var(--ftg-shadow);
   }
 
-  .page{
-    width:100%;
-    max-width:780px;
-    margin:0 auto;
-    padding:6px 16px 40px;
+  .ftg-topbar-shell {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 10px 14px 10px;
+    display: grid;
+    gap: 10px;
   }
 
-  .hero{
-    position:relative;
-    overflow:visible;
-    border-radius:0;
-    background:transparent;
-    border:none;
-    box-shadow:none;
-    padding:0;
-    min-height:auto;
+  .ftg-topbar-row-1 {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 12px;
+    align-items: center;
   }
 
-  .hero-copy{
-    position:relative;
-    z-index:2;
-    max-width:56%;
-    padding-top:6px;
+  .ftg-brand {
+    min-width: 0;
+    display: flex;
+    align-items: center;
   }
 
-  .hero h1{
-    margin:0;
-    font-size:34px;
-    line-height:.96;
-    letter-spacing:-.06em;
-    color:#0f172a;
+  .ftg-brand-title {
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -.055em;
+    font-weight: 950;
+    color: var(--ftg-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .hero p{
-    margin:12px 0 0;
-    font-size:15px;
-    line-height:1.52;
-    color:#667085;
+  .ftg-brand-title .go {
+    color: var(--ftg-orange);
   }
 
-  .hero-illustration{
-    position:absolute;
-    right:-6px;
-    top:-8px;
-    bottom:auto;
-    width:52%;
-    display:flex;
-    align-items:flex-start;
-    justify-content:flex-end;
-    opacity:.74;
-    pointer-events:none;
+  .ftg-brand-title .dotcom {
+    color: var(--ftg-text);
   }
 
-  .hero-illustration svg{
-    width:100%;
-    height:100%;
-    display:block;
+  .ftg-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 10140;
   }
 
-  .search-wrap{
-    margin-top:14px;
-    position:relative;
+  .ftg-account-btn,
+  .ftg-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, .04);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
   }
 
-  .search{
-    width:100%;
-    height:58px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:#fff;
-    box-shadow:0 14px 30px rgba(17,24,39,.06);
-    padding:0 18px 0 54px;
-    color:var(--text);
-    outline:none;
-    font-size:17px;
+  .ftg-icon-btn {
+    position: relative;
+    z-index: 10150;
   }
 
-  .search::placeholder{color:#98a2b3}
-
-  .search-icon{
-    position:absolute;
-    left:18px;
-    top:50%;
-    transform:translateY(-50%);
-    width:22px;
-    height:22px;
-    color:#667085;
-    pointer-events:none;
+  .ftg-account-btn:active,
+  .ftg-icon-btn:active {
+    transform: scale(.98);
   }
 
-  .chips{
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-    padding:6px 1px 4px;
-    scroll-snap-type:x proximity;
+  .ftg-profile-avatar {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+    border-radius: 999px;
   }
 
-  .chips-top{
-    margin-bottom:10px;
+  .ftg-profile-avatar svg {
+    width: 19px;
+    height: 19px;
+    display: block;
   }
 
-  .chips::-webkit-scrollbar{display:none}
-
-  .chip{
-    flex:0 0 auto;
-    min-height:44px;
-    padding:0 18px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:#f3f5fa;
-    color:#202939;
-    font-size:15px;
-    font-weight:700;
-    box-shadow:0 8px 18px rgba(17,24,39,.03);
-    scroll-snap-align:start;
-    transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease;
+  .ftg-hamburger {
+    width: 18px;
+    height: 14px;
+    position: relative;
+    display: inline-block;
   }
 
-  .chip:active{transform:scale(.98)}
-  .chip.active{
-    background:var(--accent-soft);
-    border-color:#ffd7c5;
-    color:#a24d2f;
+  .ftg-hamburger span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--ftg-text);
+    transition: transform .22s ease, opacity .18s ease, top .22s ease, bottom .22s ease;
+    transform-origin: center;
   }
 
-  .section{
-    margin-top:14px;
+  .ftg-hamburger span:nth-child(1) { top: 0; }
+  .ftg-hamburger span:nth-child(2) { top: 6px; }
+  .ftg-hamburger span:nth-child(3) { bottom: 0; }
+
+  .ftg-icon-btn.is-open .ftg-hamburger span:nth-child(1) {
+    top: 6px;
+    transform: rotate(45deg);
   }
 
-  .featured-card{
-    position:relative;
-    overflow:hidden;
-    min-height:286px;
-    border-radius:28px;
-    box-shadow:var(--shadow);
-    background:
-      linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.42) 100%),
-      url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
-    border:1px solid rgba(255,255,255,.55);
-    display:flex;
-    align-items:flex-end;
-    padding:20px;
+  .ftg-icon-btn.is-open .ftg-hamburger span:nth-child(2) {
+    opacity: 0;
   }
 
-  .featured-card::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.02) 0%, rgba(0,0,0,.45) 100%),
-      radial-gradient(circle at top right, rgba(255,214,184,.18), transparent 24%);
+  .ftg-icon-btn.is-open .ftg-hamburger span:nth-child(3) {
+    bottom: 6px;
+    transform: rotate(-45deg);
   }
 
-  .featured-content{
-    position:relative;
-    z-index:1;
-    width:100%;
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:14px;
+  .ftg-topbar-row-2 {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
   }
 
-  .featured-title{
-    max-width:72%;
-    margin:0;
-    color:#fff;
-    font-size:26px;
-    line-height:1.02;
-    letter-spacing:-.05em;
-    font-weight:850;
-    text-shadow:0 8px 18px rgba(0,0,0,.25);
+  .ftg-topbar.menu-open {
+    z-index: 10130;
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
   }
 
-  .time-badge{
-    flex:0 0 auto;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    min-height:42px;
-    padding:0 14px;
-    border-radius:999px;
-    background:rgba(20,33,61,.68);
-    color:#fff;
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    box-shadow:0 8px 22px rgba(0,0,0,.2);
-    font-size:14px;
-    font-weight:700;
+  .ftg-topbar.menu-open .ftg-brand,
+  .ftg-topbar.menu-open .ftg-topbar-row-2,
+  .ftg-topbar.menu-open .ftg-account-btn {
+    opacity: 0;
+    pointer-events: none;
   }
 
-  .stories-list{
-    display:grid;
-    gap:12px;
-    margin-top:0;
+  .ftg-topbar.menu-open .ftg-icon-btn,
+  .ftg-topbar.menu-open .ftg-topbar-actions {
+    pointer-events: auto;
   }
 
-  .story-card{
-    display:grid;
-    grid-template-columns:124px minmax(0,1fr) 30px;
-    gap:14px;
-    align-items:center;
-    padding:14px;
-    border-radius:24px;
-    background:rgba(255,255,255,.9);
-    border:1px solid rgba(255,255,255,.95);
-    box-shadow:var(--shadow-soft);
-    transition:transform .16s ease, box-shadow .16s ease;
+  .ftg-pill-scroller {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    padding-bottom: 2px;
   }
 
-  .story-card:active{transform:scale(.992)}
-
-  .story-thumb{
-    width:124px;
-    height:124px;
-    border-radius:18px;
-    overflow:hidden;
-    position:relative;
-    background:#e8eef7;
+  .ftg-pill-scroller::-webkit-scrollbar {
+    display: none;
   }
 
-  .story-thumb img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
+  .ftg-nav-pill {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 0;
+    background: transparent;
+    color: #111827;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    cursor: pointer;
+    scroll-snap-align: start;
+    white-space: nowrap;
+    box-shadow: none;
+    transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    opacity: .72;
   }
 
-  .story-body{
-    min-width:0;
+  .ftg-nav-pill:hover {
+    color: var(--ftg-text);
+    opacity: 1;
   }
 
-  .story-title{
-    margin:0;
-    font-size:18px;
-    line-height:1.08;
-    letter-spacing:-.03em;
-    color:#111827;
-    font-weight:800;
+  .ftg-nav-pill:active {
+    transform: scale(.985);
   }
 
-  .story-preview{
-    margin:8px 0 10px;
-    font-size:14px;
-    line-height:1.42;
-    color:#667085;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+  .ftg-nav-pill.active {
+    min-height: 42px;
+    padding: 0 16px;
+    background: var(--ftg-pill-active);
+    color: #111827;
+    opacity: 1;
+    box-shadow: 0 10px 22px rgba(255,122,0,.10);
   }
 
-  .meta{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    color:#667085;
-    font-size:14px;
-    font-weight:600;
+  .ftg-nav-pill-emoji {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    background: transparent;
+    box-shadow: none;
+    flex: 0 0 18px;
   }
 
-  .bookmark{
-    width:30px;
-    height:30px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#8b96a8;
+  .ftg-nav-pill-emoji svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
   }
 
-  .bookmark.active{color:var(--accent)}
-
-  .section-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    margin:18px 0 10px;
+  .ftg-nav-pill-emoji img {
+    width: 18px;
+    height: 18px;
+    display: block;
+    object-fit: contain;
   }
 
-  .section-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-size:16px;
-    font-weight:850;
-    letter-spacing:-.03em;
-    color:#111827;
+  .ftg-nav-pill.active .ftg-nav-pill-emoji {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    background: rgba(255,255,255,.88);
+    box-shadow: inset 0 0 0 1px rgba(255,122,0,.10);
   }
 
-  .section-link{
-    color:var(--accent);
-    font-size:15px;
-    font-weight:800;
-    text-decoration:none;
+  .ftg-nav-pill.active .ftg-nav-pill-emoji svg {
+    width: 16px;
+    height: 16px;
   }
 
-  .saved-list{
-    display:grid;
-    gap:10px;
+  .ftg-nav-pill.active .ftg-nav-pill-emoji img {
+    width: 16px;
+    height: 16px;
   }
 
-  .saved-card{
-    display:grid;
-    grid-template-columns:90px minmax(0,1fr) 22px;
-    gap:14px;
-    align-items:center;
-    padding:12px;
-    border-radius:22px;
-    background:rgba(255,255,255,.88);
-    border:1px solid rgba(255,255,255,.94);
-    box-shadow:var(--shadow-soft);
+  .ftg-menu-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 10120;
+    display: none;
+    flex-direction: column;
+    background: rgba(255,255,255,.985);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
   }
 
-  .saved-thumb{
-    width:90px;
-    height:90px;
-    border-radius:16px;
-    overflow:hidden;
-    background:#e8eef7;
+  .ftg-menu-panel.open {
+    display: flex;
   }
 
-  .saved-thumb img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
+  .ftg-menu-panel-shell {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: calc(18px + var(--ftg-safe-top)) 16px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
 
-  .saved-title{
-    margin:0;
-    font-size:16px;
-    line-height:1.1;
-    letter-spacing:-.02em;
-    font-weight:800;
+  .ftg-menu-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
   }
 
-  .saved-preview{
-    margin:6px 0 8px;
-    color:#667085;
-    font-size:14px;
-    line-height:1.42;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+  .ftg-menu-panel-title {
+    min-width: 0;
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: -.05em;
+    font-weight: 950;
+    color: var(--ftg-text);
   }
 
-  .saved-meta{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-    color:#667085;
-    font-size:13px;
-    font-weight:600;
+  .ftg-menu-panel-title .go {
+    color: var(--ftg-orange);
   }
 
-  .dot{width:4px;height:4px;border-radius:999px;background:#c4ccd8}
+  
 
-  .empty-state{
-    display:none;
-    margin-top:14px;
-    padding:26px 20px;
-    border-radius:24px;
-    text-align:center;
-    background:rgba(255,255,255,.84);
-    border:1px solid rgba(255,255,255,.94);
-    box-shadow:var(--shadow-soft);
+  .ftg-menu-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    max-width: 440px;
   }
 
-  .empty-state.is-visible{display:block}
-
-  .empty-state h3{
-    margin:0;
-    font-size:20px;
-    letter-spacing:-.04em;
+  .ftg-menu-item {
+    min-height: 44px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--ftg-text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
   }
 
-  .empty-state p{
-    margin:10px auto 0;
-    max-width:320px;
-    color:#667085;
-    font-size:14px;
-    line-height:1.5;
+  .ftg-menu-item:hover {
+    color: var(--ftg-orange);
   }
 
-  .clock-icon,
-  .search-icon svg,
-  .section-title svg,
-  .bookmark svg,
-  .menu-dots svg{
-    width:100%;
-    height:100%;
-    display:block;
+  .ftg-menu-item-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
   }
 
-  .clock-icon{
-    width:18px;
-    height:18px;
+  .ftg-menu-flag {
+    font-size: 18px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    flex: 0 0 20px;
   }
 
-  .section-title .download-icon{
-    width:20px;
-    height:20px;
-    color:#111827;
+  .ftg-menu-section-title {
+    margin: 18px 0 6px;
+    font-size: 13px;
+    line-height: 1.2;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--ftg-text-soft);
   }
 
-  .menu-dots{
-    width:22px;
-    height:22px;
-    color:#98a2b3;
+  .ftg-menu-main,
+  .ftg-language-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 440px;
   }
 
-  @media (max-width:640px){
-    .page{padding:4px 14px 34px}
+  .ftg-language-panel {
+    display: none;
+    gap: 4px;
+  }
 
-    .hero{
-      min-height:auto;
-      border-radius:0;
-      padding:0;
+  .ftg-menu-panel.is-language-mode .ftg-menu-main {
+    display: none;
+  }
+
+  .ftg-menu-panel.is-language-mode .ftg-language-panel {
+    display: flex;
+  }
+
+  
+
+  .ftg-language-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .ftg-language-option {
+    min-height: 46px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--ftg-text);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1.1;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ftg-language-option.active {
+    color: var(--ftg-orange);
+  }
+
+  .ftg-language-option .ftg-menu-flag {
+    font-size: 22px;
+  }
+
+  .ftg-ai-panel {
+    position: fixed;
+    top: calc(var(--ftg-header-height) + 8px);
+    right: 14px;
+    width: min(380px, calc(100vw - 28px));
+    max-height: min(70vh, 620px);
+    z-index: 10090;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 26px;
+    border: 1px solid rgba(12,24,44,.08);
+    background: rgba(255,255,255,.96);
+    box-shadow: var(--ftg-shadow-strong);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  }
+
+  .ftg-ai-panel.open {
+    display: flex;
+  }
+
+  .ftg-ai-head {
+    padding: 14px;
+    border-bottom: 1px solid var(--ftg-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .ftg-ai-head-copy { min-width: 0; }
+  .ftg-ai-title { font-size: 15px; font-weight: 900; letter-spacing: -.03em; color: var(--ftg-text); }
+  .ftg-ai-subtitle { margin-top: 3px; font-size: 12px; color: var(--ftg-text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .ftg-ai-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .ftg-ai-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ftg-ai-msg {
+    max-width: 88%;
+    padding: 10px 12px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.35;
+    white-space: pre-line;
+    word-break: break-word;
+  }
+
+  .ftg-ai-msg.user {
+    margin-left: auto;
+    background: var(--ftg-primary);
+    color: #fff;
+    border-bottom-right-radius: 8px;
+  }
+
+  .ftg-ai-msg.bot {
+    margin-right: auto;
+    background: #f4f7fb;
+    color: var(--ftg-text);
+    border-bottom-left-radius: 8px;
+  }
+
+  .ftg-ai-suggestions {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 12px 10px;
+  }
+
+  .ftg-ai-suggestions::-webkit-scrollbar { display: none; }
+
+  .ftg-ai-suggestion {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .ftg-ai-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--ftg-line);
+    background: rgba(255,255,255,.88);
+  }
+
+  .ftg-ai-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 42px;
+    border-radius: 999px;
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    padding: 0 14px;
+    color: var(--ftg-text);
+    font-size: 14px;
+    outline: none;
+  }
+
+  .ftg-ai-send {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--ftg-primary);
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  @media (max-width: 760px) {
+    :root {
+      --ftg-header-height: calc(98px + env(safe-area-inset-top));
     }
 
-    .hero-copy{max-width:63%;padding-top:2px}
-
-    .hero h1{font-size:30px}
-    .hero p{font-size:14px}
-
-    .search{height:54px;font-size:16px}
-
-    .chip{min-height:40px;padding:0 16px;font-size:14px}
-
-    .featured-card{
-      min-height:240px;
-      border-radius:24px;
-      padding:16px;
+    .ftg-topbar-shell {
+      padding: 9px 12px 9px;
+      gap: 8px;
     }
 
-    .featured-title{font-size:22px;max-width:74%}
-
-    .story-card{
-      grid-template-columns:104px minmax(0,1fr) 24px;
-      gap:12px;
-      padding:12px;
-      border-radius:20px;
+    .ftg-topbar-row-1 {
+      grid-template-columns: minmax(0,1fr) auto;
+      gap: 10px;
     }
 
-    .story-thumb{
-      width:104px;
-      height:104px;
-      border-radius:15px;
+    .ftg-brand-title {
+      font-size: 24px;
     }
 
-    .story-title{font-size:17px}
-    .story-preview{font-size:13px}
-
-    .saved-card{
-      grid-template-columns:78px minmax(0,1fr) 18px;
-      gap:12px;
-      padding:10px;
-      border-radius:18px;
+    .ftg-account-btn,
+    .ftg-icon-btn {
+      width: 40px;
+      height: 40px;
     }
 
-    .saved-thumb{width:78px;height:78px;border-radius:14px}
-    .saved-title{font-size:15px}
-    .saved-preview{font-size:13px}
+    .ftg-nav-pill {
+      min-height: 36px;
+      padding: 0 8px;
+      font-size: 13px;
+      color: #111827;
+    }
+
+    .ftg-nav-pill.active {
+      min-height: 40px;
+      padding: 0 14px;
+    }
+
+    .ftg-menu-panel-shell {
+      padding: calc(16px + var(--ftg-safe-top)) 12px 22px;
+      gap: 16px;
+    }
+
+    .ftg-menu-panel-title {
+      font-size: 26px;
+    }
+
+    .ftg-menu-list {
+      max-width: 100%;
+    }
+
+    .ftg-menu-item {
+      font-size: 17px;
+    }
+
+    .ftg-ai-panel {
+      left: 12px;
+      right: 12px;
+      width: auto;
+    }
   }
 </style>
-</head>
-<body>
-  <div id="ftg-global-actionbar-root"></div>
-  <main class="page">
-    <section class="hero" aria-label="Featured story">
-      <article id="featuredCard" class="featured-card" data-tags="all">
-        <div class="featured-content">
-          <h2 id="featuredTitle" class="featured-title">Loading stories...</h2>
-          <div class="time-badge">
-            <span class="clock-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="9"></circle>
-                <path d="M12 7v5l3 2"></path>
-              </svg>
-            </span>
-            <span id="featuredTime">...</span>
-          </div>
-        </div>
-      </article>
-
-      <div class="search-wrap">
-        <div class="search-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.5-3.5"></path>
-          </svg>
-        </div>
-        <input id="searchInput" class="search" placeholder="Search stories..." autocomplete="off" />
-      </div>
-
-      <nav id="chipsNav" class="chips chips-top" aria-label="Stories categories"></nav>
-    </section>
-
-    <section class="section">
-      <div id="storiesList" class="stories-list"></div>
-
-      <div id="emptyState" class="empty-state is-visible">
-        <h3 id="emptyTitle">Loading stories</h3>
-        <p id="emptyText">Sto leggendo gli articoli reali da Supabase.</p>
-      </div>
-    </section>
-
-    <section id="savedSection" class="section" hidden>
-      <div class="section-head">
-        <div class="section-title">
-          <span class="download-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M12 7v7"></path>
-              <path d="m8.5 11.5 3.5 3.5 3.5-3.5"></path>
-            </svg>
-          </span>
-          <span>Saved for offline</span>
-        </div>
-        <a href="#" id="savedSeeAll" class="section-link">See all</a>
-      </div>
-
-      <div id="savedList" class="saved-list"></div>
-    </section>
-  </main>
 
 <script>
-  (function () {
-    'use strict';
+(function () {
+  "use strict";
 
-    var SUPABASE_URL = window.FTG_SUPABASE_URL || window.SUPABASE_URL || 'https://jpflcbktcnhmlvaibzcw.supabase.co';
-    var SUPABASE_ANON_KEY = window.FTG_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || window.APP_SUPABASE_ANON_KEY || '';
-    var AUTH_STORAGE_KEY = 'sb-jpflcbktcnhmlvaibzcw-auth-token';
-    var STORY_SAVE_KEY = 'ftg_saved_story_slugs';
-    var LANGUAGE_STORAGE_KEY = 'ftg_language';
-    var ACTIONBAR_PARTIAL_CANDIDATES = [
-      'global-actionbar.html',
-      './global-actionbar.html',
-      '/global-actionbar.html'
-    ];
+  if (window.FTG_GLOBAL_ACTIONBAR_BOOTED) return;
+  window.FTG_GLOBAL_ACTIONBAR_BOOTED = true;
 
-    var FALLBACK_POSTS = [
-      {
-        id: '2f76282a-2d30-4ec6-97c2-183c4ecec832',
-        title: 'Wines from Cinque Terre are expensive …true or false?',
-        slug: 'wines-from-cinque-terre-are-expensive-true-or-false',
-        excerpt: 'One of the most common questions',
-        content: '',
-        cover_image: 'https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?_gl=1*1ra6yno*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzU0NzckajU5JGwwJGgw',
-        category: 'food'
-      },
-      {
-        id: '6ea16ffa-8b12-446a-b2a9-bb324d1bd799',
-        title: 'Pickpockets in the Cinque Terre!',
-        slug: 'pickpoters-in-the-cinque-terre',
-        excerpt: 'The level of thieves in the Cinque Terre didn’t increase recently, but they still exist.',
-        content: '',
-        cover_image: 'https://images.pexels.com/photos/13706810/pexels-photo-13706810.jpeg?_gl=1*1fsj5ek*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzYxNjUkajM2JGwwJGgw',
-        category: 'tips'
-      },
-      {
-        id: 'bed31a44-1273-46d8-9499-2945cc92af52',
-        title: 'What is the best month to visit Cinque Terre?',
-        slug: 'what-is-the-best-month-to-visit-cinque-terre',
-        excerpt: 'One of the biggest dilemmas for travelers',
-        content: '',
-        cover_image: 'https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg?_gl=1*vvo0j0*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzY1MjMkajE3JGwwJGgw',
-        category: 'guide'
-      },
-      {
-        id: '9a9498b5-9933-464f-890a-b9eb227ed8c8',
-        title: 'The History of Riomaggiore',
-        slug: 'the-history-of-riomaggiore-the-village-born-in-a-narrow-valley-between-rock-and-sea',
-        excerpt: 'The narrow village between rocks and sea',
-        content: '',
-        cover_image: 'https://images.pexels.com/photos/7611304/pexels-photo-7611304.jpeg?_gl=1*jj1pvm*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3ODAwMDIzNDUkbzIkZzEkdDE3ODAwMDM0MzgkajckbDAkaDA.',
-        category: 'guide'
-      }
-    ];
+  var config = window.FTG_ACTIONBAR_CONFIG || {};
+  var activePage = config.activePage || "stories";
+  var userName = config.userName || "Guest";
+  var isLoggedIn = Boolean(config.isLoggedIn);
+  var aiTitle = config.aiTitle || "Ask 5TerreGo";
+  var aiSubtitle = config.aiSubtitle || "Fast travel helper";
+  var aiWelcome = config.aiWelcome || "Nuova actionbar a due righe attiva.";
+  var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
+  var currentLanguage = String(config.language || "en").toLowerCase();
+  var androidAppHref = config.androidAppHref || "#";
+  var privacyHref = config.privacyHref || "#privacy";
+  var termsHref = config.termsHref || "#terms";
+  var root = document.getElementById("ftg-global-actionbar-root");
+  var welcomed = false;
 
-    var PAGE_TEXT = {
-      en: { search: 'Search stories...', all: 'All', guide: 'Guides', food: 'Food', transport: 'Public Transport', tips: 'Tips', trails: 'Trails', villages: 'Villages', loading_title: 'Loading stories', loading_text: 'Reading real articles from Supabase.', empty_title: 'No stories found', empty_text: 'Try another keyword or switch category to see more guides and local tips.', saved: 'Saved for offline', see_all: 'See all', saved_state: 'Saved', open_guide: 'Open this article to read the full guide.' },
-      it: { search: 'Cerca articoli...', all: 'Tutti', guide: 'Guide', food: 'Food', transport: 'Trasporto pubblico', tips: 'Consigli', trails: 'Sentieri', villages: 'Borghi', loading_title: 'Caricamento articoli', loading_text: 'Sto leggendo gli articoli reali da Supabase.', empty_title: 'Nessun articolo trovato', empty_text: 'Prova un altro termine o cambia categoria per vedere più guide e consigli locali.', saved: 'Salvati offline', see_all: 'Vedi tutto', saved_state: 'Salvato', open_guide: 'Apri questo articolo per leggere la guida completa.' },
-      fr: { search: 'Rechercher des articles...', all: 'Tous', guide: 'Guides', food: 'Food', transport: 'Transports publics', tips: 'Conseils', trails: 'Sentiers', villages: 'Villages', loading_title: 'Chargement des articles', loading_text: 'Lecture des vrais articles depuis Supabase.', empty_title: 'Aucun article trouvé', empty_text: 'Essayez un autre mot-clé ou changez de catégorie pour voir plus de guides et de conseils locaux.', saved: 'Enregistrés hors ligne', see_all: 'Voir tout', saved_state: 'Enregistré', open_guide: 'Ouvrez cet article pour lire le guide complet.' },
-      de: { search: 'Artikel suchen...', all: 'Alle', guide: 'Guides', food: 'Food', transport: 'Öffentliche Verkehrsmittel', tips: 'Tipps', trails: 'Wege', villages: 'Dörfer', loading_title: 'Artikel werden geladen', loading_text: 'Echte Artikel werden aus Supabase geladen.', empty_title: 'Keine Artikel gefunden', empty_text: 'Versuche ein anderes Stichwort oder wechsle die Kategorie, um mehr Guides und lokale Tipps zu sehen.', saved: 'Offline gespeichert', see_all: 'Alle ansehen', saved_state: 'Gespeichert', open_guide: 'Öffne diesen Artikel, um den vollständigen Guide zu lesen.' },
-      zh: { search: '搜索文章...', all: '全部', guide: '指南', food: '美食', transport: '公共交通', tips: '建议', trails: '步道', villages: '村庄', loading_title: '正在加载文章', loading_text: '正在从 Supabase 读取真实文章。', empty_title: '未找到文章', empty_text: '试试其他关键词或切换分类，查看更多指南和本地建议。', saved: '离线保存', see_all: '查看全部', saved_state: '已保存', open_guide: '打开这篇文章以阅读完整指南。' }
+  if (!root) return;
+  document.body.classList.add("ftg-actionbar-enabled");
+
+  var languages = config.languages || [
+    { code: "en", label: "English", flag: "🇬🇧" },
+    { code: "it", label: "Italiano", flag: "🇮🇹" },
+    { code: "fr", label: "Français", flag: "🇫🇷" },
+    { code: "de", label: "Deutsch", flag: "🇩🇪" },
+    { code: "zh", label: "中文", flag: "🇨🇳" }
+  ];
+
+  var menuItems = config.menuItems || [
+    { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
+    { id: "stories", labelKey: "nav_stories", label: "Stories", href: "#stories" },
+    { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "#sentieri" },
+    { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "#discounts" },
+    { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "#trains" },
+    { id: "weather", labelKey: "nav_weather", label: "Weather", href: "#weather" },
+    { id: "updates", labelKey: "nav_updates", label: "Official Updates", href: "#updates" }
+  ];
+
+  var translations = {
+    en: {
+      download_android: "Download the Android app",
+      legal_title: "Legal area",
+      privacy: "Privacy Policy",
+      terms: "Terms & Conditions",
+      choose_language: "Choose language",
+      nav_map: "Map",
+      nav_stories: "Stories",
+      nav_sentieri: "Trails",
+      nav_discounts: "Local Discounts",
+      nav_trains: "Public Transport",
+      nav_weather: "Weather",
+      nav_updates: "Official Updates"
+    },
+    it: {
+      download_android: "Scarica l'app per Android",
+      legal_title: "Area legale",
+      privacy: "Informativa sulla privacy",
+      terms: "Termini e condizioni",
+      choose_language: "Scegli la lingua",
+      nav_map: "Mappa",
+      nav_stories: "Stories",
+      nav_sentieri: "Sentieri",
+      nav_discounts: "Sconti locali",
+      nav_trains: "Trasporto pubblico",
+      nav_weather: "Meteo",
+      nav_updates: "Aggiornamenti ufficiali"
+    },
+    fr: {
+      download_android: "Télécharger l'app Android",
+      legal_title: "Espace légal",
+      privacy: "Politique de confidentialité",
+      terms: "Conditions générales",
+      choose_language: "Choisir la langue",
+      nav_map: "Carte",
+      nav_stories: "Stories",
+      nav_sentieri: "Sentiers",
+      nav_discounts: "Réductions locales",
+      nav_trains: "Transports publics",
+      nav_weather: "Météo",
+      nav_updates: "Mises à jour officielles"
+    },
+    de: {
+      download_android: "Android-App herunterladen",
+      legal_title: "Rechtliches",
+      privacy: "Datenschutzerklärung",
+      terms: "AGB",
+      choose_language: "Sprache wählen",
+      nav_map: "Karte",
+      nav_stories: "Stories",
+      nav_sentieri: "Wege",
+      nav_discounts: "Lokale Rabatte",
+      nav_trains: "Öffentliche Verkehrsmittel",
+      nav_weather: "Wetter",
+      nav_updates: "Offizielle Updates"
+    },
+    zh: {
+      download_android: "下载 Android 应用",
+      legal_title: "法律信息",
+      privacy: "隐私政策",
+      terms: "条款与条件",
+      choose_language: "选择语言",
+      nav_map: "地图",
+      nav_stories: "故事",
+      nav_sentieri: "步道",
+      nav_discounts: "本地优惠",
+      nav_trains: "公共交通",
+      nav_weather: "天气",
+      nav_updates: "官方更新"
+    }
+  };
+
+  function escapeHTML(value) {
+    return String(value || "").replace(/[&<>\"]/g, function (char) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char];
+    });
+  }
+
+  function resolveHref(href) {
+    var value = String(href || "").trim();
+    if (!value) return "";
+    if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
+    if (basePath) return basePath.replace(/\/+$/, "") + "/" + value.replace(/^\/+/, "");
+    return "/" + value.replace(/^\/+/, "");
+  }
+
+  function t(key, fallback) {
+    var group = translations[currentLanguage] || translations.en || {};
+    return group[key] || fallback || key;
+  }
+
+  function getLanguageMeta(code) {
+    var match = languages.find(function (lang) {
+      return String(lang.code || "").toLowerCase() === String(code || "").toLowerCase();
+    });
+    return match || languages[0] || { code: "en", label: "English", flag: "🇬🇧" };
+  }
+
+  function renderIconMarkup(id) {
+    if (id === "sentieri") {
+      return '<img src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F45F.png" alt="" aria-hidden="true">';
+    }
+
+    var icons = {
+      map: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4.5 15 2l6 2.5v15L15 22l-6-2.5L3 22V7z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 4.5v15" stroke-width="1.8"></path><path d="M15 2v20" stroke-width="1.8"></path></svg>',
+      stories: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      discounts: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5V6a2 2 0 0 1 2-2h8.8a2 2 0 0 1 1.4.6l3.2 3.2A2 2 0 0 1 20 9.2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="8" cy="8" r="1.25" stroke-width="1.8"></circle><path d="m9.5 14.5 5-5" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      trains: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
+      weather: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.5 1.5M6.8 17.2l-1.5 1.5M18.7 18.7l-1.5-1.5M6.8 6.8 5.3 5.3" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+      updates: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5 5 8v4.8c0 3.4 2.2 6.6 7 8.7 4.8-2.1 7-5.3 7-8.7V8z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 9v4M12 16h.01" stroke-width="1.8" stroke-linecap="round"></path></svg>'
     };
+    return icons[id] || '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle></svg>';
+  }
 
-    var chipsNav = document.getElementById('chipsNav');
-    var searchInput = document.getElementById('searchInput');
-    var featuredCard = document.getElementById('featuredCard');
-    var featuredTitle = document.getElementById('featuredTitle');
-    var featuredTime = document.getElementById('featuredTime');
-    var storiesList = document.getElementById('storiesList');
-    var emptyState = document.getElementById('emptyState');
-    var emptyTitle = document.getElementById('emptyTitle');
-    var emptyText = document.getElementById('emptyText');
-    var savedSection = document.getElementById('savedSection');
-    var savedList = document.getElementById('savedList');
-    var savedSeeAll = document.getElementById('savedSeeAll');
-    var rootActionbar = document.getElementById('ftg-global-actionbar-root');
-    var savedTitleNode = document.querySelector('#savedSection .section-title span:last-child');
+  function buildNavPill(item) {
+    var active = item.id === activePage;
+    var label = t(item.labelKey || "", item.label || item.id || "");
+    return '<button class="ftg-nav-pill' + (active ? ' active' : '') + '" type="button" data-page-target="' + escapeHTML(item.id) + '" data-page-href="' + escapeHTML(item.href || '') + '"><span class="ftg-nav-pill-emoji">' + renderIconMarkup(item.id) + '</span><span>' + escapeHTML(label) + '</span></button>';
+  }
 
-    var posts = [];
-    var featuredPost = null;
-    var activeFilter = 'all';
-    var currentLanguage = getInitialLanguage();
+  function buildLanguageOptions() {
+    return languages.map(function (lang) {
+      var active = String(lang.code || "").toLowerCase() === currentLanguage;
+      return '<button class="ftg-language-option' + (active ? ' active' : '') + '" type="button" data-language-code="' + escapeHTML(lang.code || '') + '"><span class="ftg-menu-flag">' + escapeHTML(lang.flag || '🏳️') + '</span><span>' + escapeHTML(lang.label || lang.code || '') + '</span></button>';
+    }).join("");
+  }
 
-    function getInitialLanguage() {
-      var stored = '';
-      var lang = '';
-      try { stored = localStorage.getItem(LANGUAGE_STORAGE_KEY) || ''; } catch (_error) {}
-      lang = String(window.FTG_LANGUAGE || window.APP_LANGUAGE || window.FTG_ACTIONBAR_LANGUAGE || stored || 'en').toLowerCase();
-      if (lang.indexOf('-') >= 0) lang = lang.split('-')[0];
-      if (!PAGE_TEXT[lang]) lang = 'en';
-      return lang;
+  root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
+
+  var topbar = document.getElementById("ftg-topbar");
+  var pillScroller = document.getElementById("ftg-pill-scroller");
+  var accountBtn = document.getElementById("ftg-account-btn");
+  var menuTrigger = document.getElementById("ftg-menu-trigger");
+  var menuPanel = document.getElementById("ftg-menu-panel");
+    var languageMenuItem = document.getElementById("ftg-language-menu-item");
+  var languageMenuFlag = document.getElementById("ftg-language-menu-flag");
+  var languageMenuLabel = document.getElementById("ftg-language-menu-label");
+    var languageTitle = document.getElementById("ftg-language-title");
+  var languageList = document.getElementById("ftg-language-list");
+  var legalTitle = document.getElementById("ftg-legal-title");
+  var privacyLabel = document.getElementById("ftg-privacy-label");
+  var termsLabel = document.getElementById("ftg-terms-label");
+  var androidAppLink = document.getElementById("ftg-android-app-link");
+  var androidAppLabel = document.getElementById("ftg-android-app-label");
+  var aiPanel = document.getElementById("ftg-ai-panel");
+  var aiClose = document.getElementById("ftg-ai-close");
+  var aiMessages = document.getElementById("ftg-ai-messages");
+  var aiInput = document.getElementById("ftg-ai-input");
+  var aiSend = document.getElementById("ftg-ai-send");
+  var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
+  var pillButtons = [];
+
+  function syncActiveButtons(pageId) {
+    activePage = pageId;
+    pillButtons.forEach(function (button) {
+      button.classList.toggle("active", button.getAttribute("data-page-target") === pageId);
+    });
+  }
+
+  function maybeMarkScrolled() {
+    if (!topbar) return;
+    topbar.classList.toggle("is-scrolled", window.scrollY > 10);
+  }
+
+  function syncMenuVisualState() {
+    var isOpen = menuPanel && menuPanel.classList.contains("open");
+    var isLanguageMode = menuPanel && menuPanel.classList.contains("is-language-mode");
+
+    if (menuTrigger) {
+      menuTrigger.classList.toggle("is-open", isOpen);
+      menuTrigger.setAttribute("aria-label", isOpen ? (isLanguageMode ? "Close language selector" : "Close menu") : "Open menu");
     }
 
-    function t(key) {
-      return PAGE_TEXT[currentLanguage][key] || PAGE_TEXT.en[key] || key;
+    if (topbar) {
+      topbar.classList.toggle("menu-open", isOpen);
+    }
+  }
+
+  function openMenu() {
+    if (!menuPanel) return;
+    menuPanel.classList.add("open");
+    menuPanel.classList.remove("is-language-mode");
+    menuPanel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ftg-menu-open");
+    syncMenuVisualState();
+  }
+
+  function closeMenu() {
+    if (!menuPanel) return;
+    menuPanel.classList.remove("open");
+    menuPanel.classList.remove("is-language-mode");
+    menuPanel.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("ftg-menu-open");
+    syncMenuVisualState();
+  }
+
+  function openLanguagePanel() {
+    if (!menuPanel) return;
+    menuPanel.classList.add("open");
+    menuPanel.classList.add("is-language-mode");
+    menuPanel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ftg-menu-open");
+    syncMenuVisualState();
+  }
+
+  function closeLanguagePanel() {
+    if (!menuPanel) return;
+    menuPanel.classList.remove("is-language-mode");
+    syncMenuVisualState();
+  }
+
+  function navigateTo(itemId, href) {
+    var finalHref = resolveHref(href || "");
+    syncActiveButtons(itemId);
+    closeMenu();
+
+    if (typeof config.onNavigate === "function") {
+      config.onNavigate(itemId, { href: finalHref });
+      return;
     }
 
-    function escapeHTML(value) {
-      return String(value || '').split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;');
+    if (itemId === "map") {
+      window.location.href = resolveHref("map.html");
+      return;
     }
 
-    function collapseSpaces(text) {
-      var out = String(text || '');
-      out = out.split(String.fromCharCode(10)).join(' ');
-      out = out.split(String.fromCharCode(13)).join(' ');
-      out = out.split(String.fromCharCode(9)).join(' ');
-      while (out.indexOf('  ') !== -1) {
-        out = out.split('  ').join(' ');
-      }
-      return out.trim();
-    }
-
-    function stripHTML(value) {
-      var div = document.createElement('div');
-      div.innerHTML = String(value || '');
-      return collapseSpaces(div.textContent || div.innerText || '');
-    }
-
-    function getStoredSessionToken() {
-      try {
-        var raw = localStorage.getItem(AUTH_STORAGE_KEY);
-        var parsed = null;
-        if (!raw) return '';
-        parsed = JSON.parse(raw);
-        return (parsed && parsed.access_token) || (parsed && parsed.currentSession && parsed.currentSession.access_token) || (parsed && parsed.session && parsed.session.access_token) || '';
-      } catch (_error) {
-        return '';
-      }
-    }
-
-    function getSavedSlugs() {
-      try {
-        var raw = localStorage.getItem(STORY_SAVE_KEY);
-        var parsed = JSON.parse(raw || '[]');
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (_error) {
-        return [];
-      }
-    }
-
-    function setSavedSlugs(slugs) {
-      localStorage.setItem(STORY_SAVE_KEY, JSON.stringify(slugs));
-    }
-
-    function toggleSavedSlug(slug) {
-      var current = getSavedSlugs();
-      var next = current.indexOf(slug) >= 0 ? current.filter(function (item) { return item !== slug; }) : current.concat(slug);
-      setSavedSlugs(next);
-      render();
-    }
-
-    function getPreview(post) {
-      var excerpt = stripHTML(post.excerpt);
-      var content = stripHTML(post.content);
-      if (excerpt) return excerpt;
-      if (content) return content.slice(0, 150) + (content.length > 150 ? '…' : '');
-      return t('open_guide');
-    }
-
-    function getReadingMinutes(post) {
-      var source = collapseSpaces([post.title, post.excerpt, post.content].map(stripHTML).join(' '));
-      var words = source ? source.split(' ').filter(Boolean).length : 0;
-      return Math.max(3, Math.ceil(words / 180));
-    }
-
-    function normalizePost(row) {
-      return {
-        id: row.id,
-        title: String(row.title || 'Untitled story').trim(),
-        slug: String(row.slug || '').trim(),
-        excerpt: row.excerpt || '',
-        content: row.content || '',
-        cover_image: row.cover_image || '',
-        category: String(row.category || 'guide').toLowerCase(),
-        readingMinutes: getReadingMinutes(row)
-      };
-    }
-
-    function createHeaders() {
-      var headers = { 'Content-Type': 'application/json' };
-      var token = getStoredSessionToken();
-      if (SUPABASE_ANON_KEY) {
-        headers.apikey = SUPABASE_ANON_KEY;
-        headers.Authorization = 'Bearer ' + SUPABASE_ANON_KEY;
-      }
-      if (token) headers.Authorization = 'Bearer ' + token;
-      return headers;
-    }
-
-    function resolveStoryHref(slug) {
-      var base = '';
-      if (typeof window.FTG_BUILD_STORY_URL === 'function') return window.FTG_BUILD_STORY_URL(slug);
-      if (window.FTG_STORY_BASE_PATH) {
-        base = String(window.FTG_STORY_BASE_PATH);
-        if (base.charAt(base.length - 1) === '/') base = base.slice(0, -1);
-        return base + '/' + slug + '.html';
-      }
-      return '/stories/' + slug + '.html';
-    }
-
-    function getCardImage(post) {
-      return post.cover_image || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80';
-    }
-
-    function getCategoryLabel(category) {
-      return t(category) || category;
-    }
-
-    function applyStaticTranslations() {
-      searchInput.placeholder = t('search');
-      if (!posts.length) {
-        emptyTitle.textContent = t('loading_title');
-        emptyText.textContent = t('loading_text');
-      }
-      if (savedTitleNode) savedTitleNode.textContent = t('saved');
-      savedSeeAll.textContent = t('see_all');
-    }
-
-    function buildChips() {
-      var categories = Array.from(new Set(posts.map(function (post) { return post.category; }).filter(Boolean)));
-      var ordered = ['guide', 'food', 'transport', 'tips', 'trails', 'villages'].filter(function (category) { return categories.indexOf(category) >= 0; });
-      var finalCategories = ['all'].concat(ordered);
-      chipsNav.innerHTML = finalCategories.map(function (category) {
-        var active = category === activeFilter;
-        var label = category === 'all' ? t('all') : getCategoryLabel(category);
-        return '<button class="chip' + (active ? ' active' : '') + '" data-filter="' + escapeHTML(category) + '" type="button">' + escapeHTML(label) + '</button>';
-      }).join('');
-      Array.from(chipsNav.querySelectorAll('.chip')).forEach(function (chip) {
-        chip.addEventListener('click', function () {
-          activeFilter = chip.dataset.filter || 'all';
-          render();
-        });
-      });
-    }
-
-    function storyCardMarkup(post) {
-      var saved = getSavedSlugs().indexOf(post.slug) >= 0;
-      return '<article class="story-card" data-slug="' + escapeHTML(post.slug) + '">' +
-        '<div class="story-thumb"><img src="' + escapeHTML(getCardImage(post)) + '" alt="' + escapeHTML(post.title) + '" loading="lazy" /></div>' +
-        '<div class="story-body">' +
-          '<h3 class="story-title">' + escapeHTML(post.title) + '</h3>' +
-          '<p class="story-preview">' + escapeHTML(getPreview(post)) + '</p>' +
-          '<div class="meta">' +
-            '<span class="clock-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>' +
-            '<span>' + post.readingMinutes + ' min</span>' +
-          '</div>' +
-        '</div>' +
-        '<button class="bookmark' + (saved ? ' active' : '') + '" type="button" data-save-slug="' + escapeHTML(post.slug) + '" aria-label="Save story">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1z"></path></svg>' +
-        '</button>' +
-      '</article>';
-    }
-
-    function savedCardMarkup(post) {
-      return '<article class="saved-card" data-slug="' + escapeHTML(post.slug) + '">' +
-        '<div class="saved-thumb"><img src="' + escapeHTML(getCardImage(post)) + '" alt="' + escapeHTML(post.title) + '" loading="lazy" /></div>' +
-        '<div>' +
-          '<h3 class="saved-title">' + escapeHTML(post.title) + '</h3>' +
-          '<p class="saved-preview">' + escapeHTML(getPreview(post)) + '</p>' +
-          '<div class="saved-meta">' +
-            '<span class="clock-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>' +
-            '<span>' + post.readingMinutes + ' min</span>' +
-            '<span class="dot"></span>' +
-            '<span>' + escapeHTML(t('saved_state')) + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="menu-dots" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></div>' +
-      '</article>';
-    }
-
-    function renderFeatured(post) {
-      if (!post) {
-        featuredCard.style.display = 'none';
-        return;
-      }
-      featuredCard.style.display = 'flex';
-      featuredCard.style.backgroundImage = 'linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.42) 100%), url("' + getCardImage(post) + '")';
-      featuredTitle.textContent = post.title;
-      featuredTime.textContent = post.readingMinutes + ' min';
-      featuredCard.onclick = function () { window.location.href = resolveStoryHref(post.slug); };
-    }
-
-    function render() {
-      var query = String(searchInput.value || '').trim().toLowerCase();
-      var filtered = posts.filter(function (post) {
-        var filterOk = activeFilter === 'all' || post.category === activeFilter;
-        var haystack = (post.title + ' ' + getPreview(post) + ' ' + getCategoryLabel(post.category)).toLowerCase();
-        var searchOk = !query || haystack.indexOf(query) >= 0;
-        return filterOk && searchOk;
-      });
-      var savedSlugs = getSavedSlugs();
-      var savedPosts = posts.filter(function (post) { return savedSlugs.indexOf(post.slug) >= 0; });
-      applyStaticTranslations();
-      buildChips();
-      renderFeatured(featuredPost);
-      storiesList.innerHTML = filtered.map(storyCardMarkup).join('');
-      if (filtered.length === 0) {
-        emptyTitle.textContent = t('empty_title');
-        emptyText.textContent = t('empty_text');
-        emptyState.classList.add('is-visible');
-      } else {
-        emptyState.classList.remove('is-visible');
-      }
-      savedSection.hidden = savedPosts.length === 0;
-      savedList.innerHTML = savedPosts.map(savedCardMarkup).join('');
-      savedSeeAll.style.display = savedPosts.length > 2 ? 'inline' : 'none';
-    }
-
-    function useFallbackData() {
-      posts = FALLBACK_POSTS.map(normalizePost).filter(function (post) { return post.slug && post.title; });
-      featuredPost = posts[0] || null;
-      render();
-    }
-
-    async function loadPosts() {
-      var response = null;
-      var rows = null;
-      if (!SUPABASE_ANON_KEY) {
-        useFallbackData();
-        return;
-      }
-      try {
-        response = await fetch(SUPABASE_URL + '/rest/v1/blog_posts?select=id,title,slug,excerpt,content,cover_image,category,status,published_at,created_at&status=eq.published&order=created_at.desc', { headers: createHeaders() });
-        if (!response.ok) {
-          useFallbackData();
+    if (finalHref) {
+      if (finalHref.charAt(0) === "#") {
+        var target = document.querySelector(finalHref);
+        if (target && typeof target.scrollIntoView === "function") {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
           return;
         }
-        rows = await response.json();
-        posts = Array.isArray(rows) ? rows.map(normalizePost).filter(function (post) { return post.slug && post.title; }) : [];
-        featuredPost = posts[0] || null;
-        if (!posts.length) {
-          useFallbackData();
-          return;
-        }
-        render();
-      } catch (_error) {
-        useFallbackData();
       }
+      window.location.href = finalHref;
     }
+  }
 
-    function mountFallbackActionbar() {
-      var styleId = 'ftg-fallback-actionbar-style';
-      var existingStyle = document.getElementById(styleId);
-      var langLabel = currentLanguage === 'it' ? 'Italiano' : currentLanguage === 'fr' ? 'Français' : currentLanguage === 'de' ? 'Deutsch' : currentLanguage === 'zh' ? '中文' : 'English';
-      var langFlag = currentLanguage === 'it' ? '🇮🇹' : currentLanguage === 'fr' ? '🇫🇷' : currentLanguage === 'de' ? '🇩🇪' : currentLanguage === 'zh' ? '🇨🇳' : '🇬🇧';
-      var isAndroid = (navigator.userAgent || '').toLowerCase().indexOf('android') >= 0;
-      if (!existingStyle) {
-        existingStyle = document.createElement('style');
-        existingStyle.id = styleId;
-        existingStyle.textContent = '#ftg-global-actionbar-root .ftg-fallback-bar{max-width:780px;margin:0 auto;padding:10px 16px 8px;}#ftg-global-actionbar-root .ftg-fallback-shell{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(221,228,239,.9);border-radius:28px;box-shadow:0 18px 42px rgba(17,24,39,.08);overflow:hidden;}#ftg-global-actionbar-root .ftg-fallback-row1{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;}#ftg-global-actionbar-root .ftg-fallback-brand{font-size:22px;font-weight:800;letter-spacing:-.05em;color:#111827;}#ftg-global-actionbar-root .ftg-fallback-brand .go{color:#ff7e57;}#ftg-global-actionbar-root .ftg-fallback-actions{display:flex;align-items:center;gap:10px;}#ftg-global-actionbar-root .ftg-fallback-circle,#ftg-global-actionbar-root .ftg-fallback-menu-btn{width:42px;height:42px;border-radius:999px;border:1px solid #dde4ef;background:#fff;display:flex;align-items:center;justify-content:center;color:#111827;cursor:pointer;}#ftg-global-actionbar-root .ftg-fallback-menu-btn{position:relative;}#ftg-global-actionbar-root .ftg-fallback-ham{width:18px;height:14px;position:relative;display:inline-block;}#ftg-global-actionbar-root .ftg-fallback-ham span{position:absolute;left:0;right:0;height:2px;border-radius:999px;background:#111827;transition:all .2s ease;}#ftg-global-actionbar-root .ftg-fallback-ham span:nth-child(1){top:0;}#ftg-global-actionbar-root .ftg-fallback-ham span:nth-child(2){top:6px;}#ftg-global-actionbar-root .ftg-fallback-ham span:nth-child(3){bottom:0;}#ftg-global-actionbar-root .ftg-fallback-menu-btn.open .ftg-fallback-ham span:nth-child(1){top:6px;transform:rotate(45deg);}#ftg-global-actionbar-root .ftg-fallback-menu-btn.open .ftg-fallback-ham span:nth-child(2){opacity:0;}#ftg-global-actionbar-root .ftg-fallback-menu-btn.open .ftg-fallback-ham span:nth-child(3){bottom:6px;transform:rotate(-45deg);}#ftg-global-actionbar-root .ftg-fallback-row2{display:flex;gap:12px;overflow-x:auto;padding:0 16px 14px;scrollbar-width:none;}#ftg-global-actionbar-root .ftg-fallback-row2::-webkit-scrollbar{display:none;}#ftg-global-actionbar-root .ftg-fallback-pill{flex:0 0 auto;color:#111827;text-decoration:none;font-size:15px;font-weight:500;padding:10px 0;}#ftg-global-actionbar-root .ftg-fallback-pill.active{background:#fff3e8;border:1px solid #ffd7c5;border-radius:999px;padding:10px 16px;}#ftg-global-actionbar-root .ftg-fallback-menu{position:fixed;inset:0;background:#fbfdff;z-index:140;display:none;padding:22px 24px;}#ftg-global-actionbar-root .ftg-fallback-menu.open{display:block;}#ftg-global-actionbar-root .ftg-fallback-menu-list{display:flex;flex-direction:column;gap:18px;margin-top:44px;}#ftg-global-actionbar-root .ftg-fallback-menu-item,#ftg-global-actionbar-root .ftg-fallback-language-item{font-size:18px;color:#111827;text-decoration:none;display:flex;align-items:center;gap:10px;}#ftg-global-actionbar-root .ftg-fallback-language-list{display:none;flex-direction:column;gap:16px;margin-top:44px;}#ftg-global-actionbar-root .ftg-fallback-menu.lang-open .ftg-fallback-menu-list{display:none;}#ftg-global-actionbar-root .ftg-fallback-menu.lang-open .ftg-fallback-language-list{display:flex;}#ftg-global-actionbar-root .ftg-fallback-section-title{margin-top:10px;font-size:13px;color:#98a2b3;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}@media (max-width:640px){#ftg-global-actionbar-root .ftg-fallback-bar{padding:8px 14px 6px;}#ftg-global-actionbar-root .ftg-fallback-shell{border-radius:24px;}#ftg-global-actionbar-root .ftg-fallback-brand{font-size:21px;}}';
-        document.head.appendChild(existingStyle);
-      }
-      rootActionbar.innerHTML = '<div class="ftg-fallback-bar"><div class="ftg-fallback-shell"><div class="ftg-fallback-row1"><div class="ftg-fallback-brand">5Terre<span class="go">Go</span>.com</div><div class="ftg-fallback-actions"><a class="ftg-fallback-circle" href="login.html" aria-label="Login"><svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></a><button id="ftgFallbackMenuBtn" class="ftg-fallback-menu-btn" type="button" aria-label="Menu"><span class="ftg-fallback-ham"><span></span><span></span><span></span></span></button></div></div><div class="ftg-fallback-row2"><a class="ftg-fallback-pill" href="map.html">Map</a><a class="ftg-fallback-pill active" href="#">Stories</a><a class="ftg-fallback-pill" href="#sentieri">Sentieri</a><a class="ftg-fallback-pill" href="#discounts">Local Discounts</a><a class="ftg-fallback-pill" href="#trains">Public Transport</a><a class="ftg-fallback-pill" href="#weather">Weather</a></div></div></div><div id="ftgFallbackMenu" class="ftg-fallback-menu"><div class="ftg-fallback-menu-list"><button id="ftgFallbackLangBtn" class="ftg-fallback-language-item" type="button"><span>' + langFlag + '</span><span>' + langLabel + '</span></button>' + (isAndroid ? '<a class="ftg-fallback-menu-item" href="#android">Download Android app</a>' : '') + '<div class="ftg-fallback-section-title">Legal area</div><a class="ftg-fallback-menu-item" href="#privacy">Privacy Policy</a><a class="ftg-fallback-menu-item" href="#terms">Terms &amp; Conditions</a></div><div class="ftg-fallback-language-list"><button class="ftg-fallback-language-item" type="button" data-lang="en">🇬🇧 English</button><button class="ftg-fallback-language-item" type="button" data-lang="it">🇮🇹 Italiano</button><button class="ftg-fallback-language-item" type="button" data-lang="fr">🇫🇷 Français</button><button class="ftg-fallback-language-item" type="button" data-lang="de">🇩🇪 Deutsch</button><button class="ftg-fallback-language-item" type="button" data-lang="zh">🇨🇳 中文</button></div></div>';
-      (function bindFallback() {
-        var menuBtn = document.getElementById('ftgFallbackMenuBtn');
-        var menu = document.getElementById('ftgFallbackMenu');
-        var langBtn = document.getElementById('ftgFallbackLangBtn');
-        var langItems = Array.from(rootActionbar.querySelectorAll('[data-lang]'));
-        function closeMenu() {
-          menu.classList.remove('open');
-          menu.classList.remove('lang-open');
-          menuBtn.classList.remove('open');
-        }
-        menuBtn.addEventListener('click', function () {
-          if (!menu.classList.contains('open')) {
-            menu.classList.add('open');
-            menuBtn.classList.add('open');
-            return;
-          }
-          if (menu.classList.contains('lang-open')) {
-            menu.classList.remove('lang-open');
-            return;
-          }
-          closeMenu();
-        });
-        langBtn.addEventListener('click', function () { menu.classList.add('lang-open'); });
-        langItems.forEach(function (button) {
-          button.addEventListener('click', function () {
-            setLanguage(button.getAttribute('data-lang') || 'en');
-            mountFallbackActionbar();
-          });
-        });
-      }());
+  function addAIMessage(text, isUser) {
+    if (!aiMessages) return;
+    var div = document.createElement("div");
+    div.className = "ftg-ai-msg " + (isUser ? "user" : "bot");
+    div.innerText = text;
+    aiMessages.appendChild(div);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+  }
+
+  function toggleAI(forceOpen) {
+    if (!aiPanel) return;
+    var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
+    aiPanel.classList.toggle("open", shouldOpen);
+    aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+    if (shouldOpen && !welcomed) {
+      welcomed = true;
+      addAIMessage(aiWelcome, false);
     }
+  }
 
-    async function loadGlobalActionbarPartial() {
-      var i = 0;
-      var response = null;
-      var html = '';
-      var parser = null;
-      var doc = null;
-      var scripts = [];
-      var links = [];
-      var styles = [];
+  function handleAISend(textFromButton) {
+    var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
+    if (!text) return;
+    addAIMessage(text, true);
+    if (aiInput) aiInput.value = "";
+    window.setTimeout(function () {
+      addAIMessage("Active section: " + activePage + ". Questa topbar a due righe tiene brand e controlli sopra, pillole pagina sotto.", false);
+    }, 120);
+  }
 
-      if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+  function bindPillEvents() {
+    pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
+    pillButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        navigateTo(button.getAttribute("data-page-target"), button.getAttribute("data-page-href"));
+      });
+    });
+    syncActiveButtons(activePage);
+  }
 
-      for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
-        try {
-          response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
-          if (!response.ok) continue;
-          html = await response.text();
-          if (!html) continue;
+  function rebuildPills() {
+    if (!pillScroller) return;
+    pillScroller.innerHTML = menuItems.map(buildNavPill).join("");
+    bindPillEvents();
+  }
 
-          parser = new DOMParser();
-          doc = parser.parseFromString(html, 'text/html');
-          links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
-          styles = Array.from(doc.querySelectorAll('style'));
-          scripts = Array.from(doc.querySelectorAll('script'));
-
-          links.forEach(function (link) {
-            var href = link.getAttribute('href') || '';
-            if (!href) return;
-            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
-            var el = document.createElement('link');
-            el.rel = 'stylesheet';
-            el.href = href;
-            el.setAttribute('data-ftg-actionbar-link', href);
-            document.head.appendChild(el);
-          });
-
-          styles.forEach(function (style, index) {
-            var key = 'ftg-actionbar-style-' + i + '-' + index;
-            if (document.getElementById(key)) return;
-            var el = document.createElement('style');
-            el.id = key;
-            el.textContent = style.textContent || '';
-            document.head.appendChild(el);
-          });
-
-          for (var s = 0; s < scripts.length; s += 1) {
-            var original = scripts[s];
-            var src = original.getAttribute('src');
-            await new Promise(function (resolve) {
-              var scriptEl = document.createElement('script');
-              var done = false;
-              function finish() {
-                if (done) return;
-                done = true;
-                resolve();
-              }
-              if (src) {
-                scriptEl.src = src;
-                scriptEl.onload = finish;
-                scriptEl.onerror = finish;
-              } else {
-                scriptEl.textContent = original.textContent || '';
-              }
-              document.head.appendChild(scriptEl);
-              if (!src) finish();
-            });
-          }
-
-          if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
-        } catch (_error) {
-        }
-      }
-
-      return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
-    }
-
-    async function mountActionbar() {
-      window.FTG_ACTIONBAR_CONFIG = {
-        activePage: 'stories',
-        language: currentLanguage,
-        userName: 'Guest',
-        isLoggedIn: false,
-        androidAppHref: '#android',
-        privacyHref: '#privacy',
-        termsHref: '#terms',
-        menuItems: [
-          { id: 'map', labelKey: 'nav_map', label: 'Map', href: 'map.html' },
-          { id: 'stories', labelKey: 'nav_stories', label: 'Stories', href: '#' },
-          { id: 'sentieri', labelKey: 'nav_sentieri', label: 'Sentieri', href: '#sentieri' },
-          { id: 'discounts', labelKey: 'nav_discounts', label: 'Local Discounts', href: '#discounts' },
-          { id: 'trains', labelKey: 'nav_trains', label: 'Public Transport', href: '#trains' },
-          { id: 'weather', labelKey: 'nav_weather', label: 'Weather', href: '#weather' }
-        ],
-        onLanguageChange: function (lang) { setLanguage(lang || 'en'); }
-      };
-
-      await loadGlobalActionbarPartial();
-
-      if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
-        window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, window.FTG_ACTIONBAR_CONFIG);
-      } else {
-        mountFallbackActionbar();
-      }
-    }
-
-    function setLanguage(lang) {
-      currentLanguage = PAGE_TEXT[lang] ? lang : 'en';
-      try { localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage); } catch (_error) {}
-      applyStaticTranslations();
-      render();
-    }
-
-    document.addEventListener('click', function (event) {
-      var saveButton = event.target.closest('[data-save-slug]');
-      var storyCard = null;
-      if (saveButton) {
+  function rebuildLanguageList() {
+    if (!languageList) return;
+    languageList.innerHTML = buildLanguageOptions();
+    Array.prototype.slice.call(languageList.querySelectorAll("[data-language-code]")).forEach(function (button) {
+      button.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
-        toggleSavedSlug(saveButton.getAttribute('data-save-slug'));
+        currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
+        applyTranslations();
+        closeLanguagePanel();
+        if (typeof config.onLanguageChange === "function") {
+          config.onLanguageChange(currentLanguage);
+        }
+      });
+    });
+  }
+
+  function updateMenuDynamicItems() {
+    var languageMeta = getLanguageMeta(currentLanguage);
+    if (languageMenuFlag) languageMenuFlag.innerText = languageMeta.flag || "🏳️";
+    if (languageMenuLabel) languageMenuLabel.innerText = languageMeta.label || languageMeta.code || "Language";
+        if (languageTitle) languageTitle.innerText = t("choose_language", "Choose language");
+    if (legalTitle) legalTitle.innerText = t("legal_title", "Legal area");
+    if (privacyLabel) privacyLabel.innerText = t("privacy", "Privacy Policy");
+    if (termsLabel) termsLabel.innerText = t("terms", "Terms & Conditions");
+    if (androidAppLabel) androidAppLabel.innerText = t("download_android", "Download the Android app");
+    if (androidAppLink) {
+      var isAndroid = /android/i.test(navigator.userAgent || "");
+      androidAppLink.style.display = isAndroid ? "flex" : "none";
+    }
+  }
+
+  function applyTranslations() {
+    rebuildPills();
+    rebuildLanguageList();
+    updateMenuDynamicItems();
+  }
+
+  if (accountBtn) {
+    accountBtn.addEventListener("click", function () {
+      window.location.href = resolveHref("login.html");
+    });
+  }
+
+  if (menuPanel) {
+    menuPanel.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+  }
+
+  if (menuTrigger && menuPanel) {
+    menuTrigger.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var isOpen = menuPanel.classList.contains("open");
+      var isLanguageMode = menuPanel.classList.contains("is-language-mode");
+
+      if (!isOpen) {
+        openMenu();
         return;
       }
-      storyCard = event.target.closest('.story-card, .saved-card');
-      if (storyCard && storyCard.dataset.slug) window.location.href = resolveStoryHref(storyCard.dataset.slug);
-    });
 
-    searchInput.addEventListener('input', render);
-    savedSeeAll.addEventListener('click', function (event) {
+      if (isLanguageMode) {
+        closeLanguagePanel();
+        return;
+      }
+
+      closeMenu();
+    });
+  }
+
+  if (languageMenuItem) {
+    languageMenuItem.addEventListener("click", function (event) {
       event.preventDefault();
-      window.scrollTo({ top: savedSection.offsetTop - 16, behavior: 'smooth' });
+      event.stopPropagation();
+      openLanguagePanel();
     });
+  }
 
-    applyStaticTranslations();
-    buildChips();
-    loadPosts();
-    mountActionbar();
-  }());
+  
+
+  if (aiClose) {
+    aiClose.addEventListener("click", function () {
+      toggleAI(false);
+    });
+  }
+
+  if (aiSend) {
+    aiSend.addEventListener("click", function () {
+      handleAISend();
+    });
+  }
+
+  if (aiInput) {
+    aiInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") handleAISend();
+    });
+  }
+
+  aiSuggestions.forEach(function (button) {
+    button.addEventListener("click", function () {
+      handleAISend(button.innerText);
+    });
+  });
+
+  window.addEventListener("scroll", maybeMarkScrolled, { passive: true });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      toggleAI(false);
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!menuPanel || !menuTrigger) return;
+    if (!menuPanel.classList.contains("open")) return;
+    if (!menuPanel.contains(event.target) && !menuTrigger.contains(event.target)) {
+      closeMenu();
+    }
+  });
+
+  applyTranslations();
+  syncMenuVisualState();
+  maybeMarkScrolled();
+
+  window.FTG_GLOBAL_ACTIONBAR = {
+    navigateToPage: function (pageId) {
+      var match = menuItems.find(function (item) { return item.id === pageId; }) || {};
+      navigateTo(pageId, match.href || "");
+    },
+    toggleAI: toggleAI,
+    getCurrentPage: function () { return activePage; },
+    setActivePage: function (pageId) { syncActiveButtons(pageId); }
+  };
+}());
 </script>
-</body>
-</html>
