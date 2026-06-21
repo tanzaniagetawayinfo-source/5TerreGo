@@ -605,6 +605,15 @@
       './global-actionbar.html',
       '/global-actionbar.html'
     ];
+    var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v1';
+    var MAP_PREWARM_SESSION_KEY = 'ftg-map-prewarm-v1';
+    var MAP_PREWARM_MAX_AGE_MS = 1000 * 60 * 20;
+    var LOCAL_POI_KEY = '5terrego_pois_backup';
+    var FTG_POI_HOT_CACHE_KEYS = ['ftg-pois-hot-v1', '5terrego-pois-hot-v1', 'ftg-map-pois-hot-v1'];
+    var FTG_POI_HOT_CACHE_TS_KEY = 'ftg-pois-hot-ts-v1';
+    var FTG_POI_PREFETCH_DB_NAME = 'ftg-prefetch-cache-v1';
+    var FTG_POI_PREFETCH_STORE = 'kv';
+    var FTG_POI_FULL_CACHE_IDB_KEY = 'pois-full-v1';
 
     var FALLBACK_POSTS = [
       {
@@ -675,6 +684,7 @@
     var actionbarLoadPromise = null;
     var actionbarObserver = null;
     var actionbarMountScheduled = false;
+    var mapPrewarmPromise = null;
 
     function getInitialLanguage() {
       var stored = '';
@@ -933,77 +943,188 @@
       }
     }
 
+    function cacheActionbarHTML(html) {
+      try { sessionStorage.setItem(ACTIONBAR_SESSION_HTML_KEY, String(html || '')); } catch (_error) {}
+    }
+
+    function preloadResource(href, rel, asValue) {
+      var selector;
+      var link;
+      if (!href) return;
+      selector = 'link[data-ftg-prewarm="' + href.replace(/"/g, '&quot;') + '"]';
+      if (document.querySelector(selector)) return;
+      link = document.createElement('link');
+      link.rel = rel;
+      link.href = href;
+      if (asValue) link.as = asValue;
+      link.setAttribute('data-ftg-prewarm', href);
+      document.head.appendChild(link);
+    }
+
+    function openPOIPrefetchDB() {
+      return new Promise(function(resolve) {
+        var request;
+        if (!('indexedDB' in window)) { resolve(null); return; }
+        try {
+          request = indexedDB.open(FTG_POI_PREFETCH_DB_NAME, 1);
+          request.onupgradeneeded = function(event) {
+            var db = event.target.result;
+            if (db && !db.objectStoreNames.contains(FTG_POI_PREFETCH_STORE)) {
+              db.createObjectStore(FTG_POI_PREFETCH_STORE);
+            }
+          };
+          request.onsuccess = function() { resolve(request.result || null); };
+          request.onerror = function() { resolve(null); };
+        } catch (_error) {
+          resolve(null);
+        }
+      });
+    }
+
+    function writeFullPOICacheToIDB(rows) {
+      return openPOIPrefetchDB().then(function(db) {
+        return new Promise(function(resolve) {
+          var transaction;
+          var store;
+          if (!db || !Array.isArray(rows) || !rows.length) { resolve(); return; }
+          try {
+            transaction = db.transaction(FTG_POI_PREFETCH_STORE, 'readwrite');
+            store = transaction.objectStore(FTG_POI_PREFETCH_STORE);
+            store.put(rows, FTG_POI_FULL_CACHE_IDB_KEY);
+            transaction.oncomplete = function() { resolve(); };
+            transaction.onerror = function() { resolve(); };
+          } catch (_error) {
+            resolve();
+          }
+        });
+      }).catch(function() {});
+    }
+
+    function writeLocalPOIPrewarm(rows) {
+      var trimmed;
+      var serialized;
+      trimmed = (Array.isArray(rows) ? rows : []).slice(0, 1200);
+      if (!trimmed.length) return;
+      serialized = JSON.stringify(trimmed);
+      try { localStorage.setItem(LOCAL_POI_KEY, serialized); } catch (_error) {}
+      FTG_POI_HOT_CACHE_KEYS.forEach(function(key) {
+        try { localStorage.setItem(key, JSON.stringify(trimmed.slice(0, 260))); } catch (_error) {}
+      });
+      try { localStorage.setItem(FTG_POI_HOT_CACHE_TS_KEY, String(Date.now())); } catch (_error) {}
+      writeFullPOICacheToIDB(trimmed);
+    }
+
+    function getMapPrewarmState() {
+      var raw = '';
+      var parsed = null;
+      try { raw = sessionStorage.getItem(MAP_PREWARM_SESSION_KEY) || ''; } catch (_error) {}
+      if (!raw) return null;
+      parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    }
+
+    function isMapPrewarmFresh() {
+      var state = getMapPrewarmState();
+      var ts = state && Number(state.savedAt || 0);
+      return Boolean(ts && (Date.now() - ts) < MAP_PREWARM_MAX_AGE_MS);
+    }
+
+    function markMapPrewarmDone(extra) {
+      var payload = Object.assign({ savedAt: Date.now() }, extra || {});
+      try { sessionStorage.setItem(MAP_PREWARM_SESSION_KEY, JSON.stringify(payload)); } catch (_error) {}
+    }
+
+    async function injectGlobalActionbarHTML(html, cacheKeyPrefix) {
+      var parser;
+      var doc;
+      var scripts;
+      var links;
+      var styles;
+      var s;
+
+      if (!html) return false;
+
+      parser = new DOMParser();
+      doc = parser.parseFromString(html, 'text/html');
+      links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+      styles = Array.from(doc.querySelectorAll('style'));
+      scripts = Array.from(doc.querySelectorAll('script'));
+
+      links.forEach(function (link) {
+        var href = link.getAttribute('href') || '';
+        var el;
+        if (!href) return;
+        if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+        el = document.createElement('link');
+        el.rel = 'stylesheet';
+        el.href = href;
+        el.setAttribute('data-ftg-actionbar-link', href);
+        document.head.appendChild(el);
+      });
+
+      styles.forEach(function (style, index) {
+        var key = 'ftg-actionbar-style-' + cacheKeyPrefix + '-' + index;
+        var el;
+        if (document.getElementById(key)) return;
+        el = document.createElement('style');
+        el.id = key;
+        el.textContent = style.textContent || '';
+        document.head.appendChild(el);
+      });
+
+      for (s = 0; s < scripts.length; s += 1) {
+        await new Promise(function (resolve) {
+          var original = scripts[s];
+          var src = original.getAttribute('src');
+          var scriptEl = document.createElement('script');
+          var done = false;
+
+          function finish() {
+            if (done) return;
+            done = true;
+            resolve();
+          }
+
+          if (src) {
+            scriptEl.src = src;
+            scriptEl.onload = finish;
+            scriptEl.onerror = finish;
+          } else {
+            scriptEl.textContent = original.textContent || '';
+          }
+          document.head.appendChild(scriptEl);
+          if (!src) finish();
+        });
+      }
+
+      return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+    }
+
     async function loadGlobalActionbarPartial() {
       var i = 0;
       var response = null;
       var html = '';
-      var parser = null;
-      var doc = null;
-      var scripts = [];
-      var links = [];
-      var styles = [];
+      var cachedHtml = '';
 
       if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
       if (actionbarLoadPromise) return actionbarLoadPromise;
 
       actionbarLoadPromise = (async function () {
+        try { cachedHtml = sessionStorage.getItem(ACTIONBAR_SESSION_HTML_KEY) || ''; } catch (_error) {}
+        if (cachedHtml) {
+          try {
+            if (await injectGlobalActionbarHTML(cachedHtml, 'session')) return true;
+          } catch (_error) {}
+        }
+
         for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
           try {
             response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
             if (!response.ok) continue;
             html = await response.text();
             if (!html) continue;
-
-            parser = new DOMParser();
-            doc = parser.parseFromString(html, 'text/html');
-            links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
-            styles = Array.from(doc.querySelectorAll('style'));
-            scripts = Array.from(doc.querySelectorAll('script'));
-
-            links.forEach(function (link) {
-              var href = link.getAttribute('href') || '';
-              if (!href) return;
-              if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
-              var el = document.createElement('link');
-              el.rel = 'stylesheet';
-              el.href = href;
-              el.setAttribute('data-ftg-actionbar-link', href);
-              document.head.appendChild(el);
-            });
-
-            styles.forEach(function (style, index) {
-              var key = 'ftg-actionbar-style-' + i + '-' + index;
-              if (document.getElementById(key)) return;
-              var el = document.createElement('style');
-              el.id = key;
-              el.textContent = style.textContent || '';
-              document.head.appendChild(el);
-            });
-
-            for (var s = 0; s < scripts.length; s += 1) {
-              var original = scripts[s];
-              var src = original.getAttribute('src');
-              await new Promise(function (resolve) {
-                var scriptEl = document.createElement('script');
-                var done = false;
-                function finish() {
-                  if (done) return;
-                  done = true;
-                  resolve();
-                }
-                if (src) {
-                  scriptEl.src = src;
-                  scriptEl.onload = finish;
-                  scriptEl.onerror = finish;
-                } else {
-                  scriptEl.textContent = original.textContent || '';
-                }
-                document.head.appendChild(scriptEl);
-                if (!src) finish();
-              });
-            }
-
-            if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return true;
+            cacheActionbarHTML(html);
+            if (await injectGlobalActionbarHTML(html, i)) return true;
           } catch (_error) {
           }
         }
@@ -1012,6 +1133,47 @@
       }());
 
       return actionbarLoadPromise;
+    }
+
+    async function prewarmMapSession() {
+      var headers;
+      var response;
+      var rows;
+      var fetchedActionbar = false;
+      if (mapPrewarmPromise) return mapPrewarmPromise;
+
+      mapPrewarmPromise = (async function () {
+        preloadResource('vendor/leaflet.css', 'preload', 'style');
+        preloadResource('vendor/leaflet.js', 'preload', 'script');
+        preloadResource('map.html', 'prefetch', 'document');
+
+        if (!isMapPrewarmFresh()) {
+          for (var i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
+            try {
+              response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
+              if (!response.ok) continue;
+              cacheActionbarHTML(await response.text());
+              fetchedActionbar = true;
+              break;
+            } catch (_error) {}
+          }
+
+          try {
+            headers = createHeaders();
+            response = await fetch(SUPABASE_URL + '/rest/v1/pois?select=*&order=id.asc&limit=1200', { headers: headers });
+            if (response.ok) {
+              rows = await response.json();
+              if (Array.isArray(rows) && rows.length) writeLocalPOIPrewarm(rows);
+            }
+          } catch (_error) {}
+
+          markMapPrewarmDone({ actionbar: fetchedActionbar || Boolean(sessionStorage.getItem(ACTIONBAR_SESSION_HTML_KEY) || '') });
+        }
+
+        return true;
+      }());
+
+      return mapPrewarmPromise;
     }
 
     function observeActionbarRoot() {
@@ -1107,6 +1269,11 @@
     buildChips();
     loadPosts();
     mountActionbar();
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(function () { prewarmMapSession(); }, { timeout: 1200 });
+    } else {
+      window.setTimeout(function () { prewarmMapSession(); }, 180);
+    }
   }());
 </script>
 </body>
