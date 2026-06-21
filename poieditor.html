@@ -2150,8 +2150,11 @@ async function savePoi(){
       window.location.href = "login.html";
       return;
     }
-    const grantMsg = "SQL richiesto se è 42501:\nGRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;";
-    alert("Errore salvataggio: " + err.message + "\n\n" + grantMsg);
+    const grantMsg = `SQL richiesto se è 42501:
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.pois TO authenticated;`;
+    alert(`Errore salvataggio: ${err.message}
+
+${grantMsg}`);
   }
 }
 
