@@ -1384,6 +1384,9 @@
 (function () {
   'use strict';
 
+  window.__ftgActionbarReadyDone = false;
+  window.__ftgActionbarMountStarted = false;
+
   var ACTIONBAR_PARTIAL_CANDIDATES = [
     'global-actionbar.html',
     './global-actionbar.html',
@@ -1392,6 +1395,14 @@
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
+
+  function notifyActionbarReady() {
+    if (window.__ftgActionbarReadyDone) return;
+    window.__ftgActionbarReadyDone = true;
+    if (typeof window.__ftgBoot === 'function' && window.__ftgLibrariesReady) {
+      window.__ftgBoot();
+    }
+  }
 
   function getInitialActionbarLanguage() {
     var stored = '';
@@ -1510,6 +1521,9 @@
 
   async function mountActionbar(force) {
     var rootActionbar = document.getElementById('ftg-global-actionbar-root');
+    var bootText = document.getElementById('boot-status-text');
+    if (bootText) bootText.textContent = 'Loading navigation…';
+    window.__ftgActionbarMountStarted = true;
     var mounted = false;
     if (!rootActionbar) return;
 
@@ -1548,16 +1562,20 @@
       }
 
       if (mounted) {
+        notifyActionbarReady();
         requestAnimationFrame(function () {
           if (rootActionbar.childElementCount === 0) {
             setTimeout(function () { mountActionbar(true); }, 180);
           }
         });
+      } else if (rootActionbar.childElementCount > 0) {
+        notifyActionbarReady();
       }
     } else {
       rootActionbar.innerHTML = '';
       delete rootActionbar.dataset.ftgMounted;
       console.warn('FTG_MOUNT_GLOBAL_ACTIONBAR not available');
+      notifyActionbarReady();
     }
   }
 
@@ -4216,6 +4234,7 @@
     }
   }
   window.__ftgBoot = function () {
+  if (!window.__ftgActionbarReadyDone) return;
   if (window.__ftgBootStarted) return;
   if (!window.__ftgLibrariesReady || typeof window.L === 'undefined') {
     if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The local map libraries are not available. Reload the page once.');
@@ -4230,7 +4249,7 @@
     if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The map could not start: ' + (error && error.message ? error.message : 'unknown error'));
   }
 };
-if (window.__ftgLibrariesReady) window.__ftgBoot();
+if (window.__ftgLibrariesReady && window.__ftgActionbarReadyDone) window.__ftgBoot();
 }());
 </script>
 </body>
