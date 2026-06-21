@@ -676,7 +676,7 @@
 
   function mountGlobalActionbar(targetRoot, passedConfig) {
     var config = passedConfig || window.FTG_ACTIONBAR_CONFIG || {};
-    var activePage = config.activePage || "stories";
+    var activePage = config.activePage || "";
     var userName = config.userName || "Guest";
     var isLoggedIn = Boolean(config.isLoggedIn);
     var aiTitle = config.aiTitle || "Ask 5TerreGo";
@@ -712,6 +712,8 @@
       { id: "weather", labelKey: "nav_weather", label: "Weather", href: "weather.html" },
       { id: "updates", labelKey: "nav_updates", label: "Official Updates", href: "updates.html" }
     ];
+
+    activePage = resolveActivePage(activePage);
 
     var translations = {
       en: {
@@ -795,8 +797,23 @@
     function resolveHref(href) {
       var value = String(href || "").trim();
       if (!value) return "";
-      if (/^(https?:|mailto:|tel:|#)/i.test(value)) return value;
-      return "/" + value.replace(/^\/+/, "");
+      if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) return value;
+      return value;
+    }
+
+    function resolveActivePage(preferredPage) {
+      var pathname = String(window.location.pathname || "").toLowerCase();
+      var fileName = pathname.split("/").pop() || "index.html";
+      var mapByFile = {
+        "index.html": "stories",
+        "map.html": "map",
+        "sentieri.html": "sentieri",
+        "discounts.html": "discounts",
+        "public-transport.html": "trains",
+        "weather.html": "weather",
+        "updates.html": "updates"
+      };
+      return mapByFile[fileName] || preferredPage || "stories";
     }
 
     function t(key, fallback) {
@@ -965,7 +982,6 @@
 
     function bindPillEvents() {
       pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
-      syncActiveButtons(activePage);
     }
 
     function rebuildPills() {
@@ -1104,7 +1120,10 @@
       },
       toggleAI: toggleAI,
       getCurrentPage: function () { return activePage; },
-      setActivePage: function (pageId) { syncActiveButtons(pageId); },
+      setActivePage: function (pageId) {
+        activePage = pageId;
+        rebuildPills();
+      },
       remount: function (nextRoot, nextConfig) { return mountGlobalActionbar(nextRoot || root, nextConfig || config); }
     };
 
