@@ -10,9 +10,11 @@
     --ftg-line: rgba(15, 23, 42, .08);
     --ftg-line-strong: rgba(15, 23, 42, .12);
     --ftg-pill: #f5f7fb;
-    --ftg-pill-active: #fff3e8;
-    --ftg-primary: #003b95;
+    --ftg-pill-active: rgba(255,255,255,.10);
+    --ftg-primary: #0b5ed7;
     --ftg-orange: #ff7a00;
+    --ftg-celeste: #38bdf8;
+    --ftg-white: #ffffff;
     --ftg-shadow: 0 14px 34px rgba(15, 23, 42, .08);
     --ftg-shadow-strong: 0 22px 44px rgba(15, 23, 42, .14);
   }
@@ -33,17 +35,17 @@
     right: 0;
     z-index: 10080;
     padding-top: var(--ftg-safe-top);
-    background: rgba(255,255,255,.94);
+    background: rgba(11,94,215,.96);
     backdrop-filter: blur(18px) saturate(1.08);
     -webkit-backdrop-filter: blur(18px) saturate(1.08);
-    border-bottom: 1px solid var(--ftg-line);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+    border-bottom: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
     transition: box-shadow .22s ease, background .22s ease, border-color .22s ease;
   }
 
   .ftg-topbar.is-scrolled {
-    background: rgba(255,255,255,.98);
-    border-bottom-color: var(--ftg-line-strong);
+    background: rgba(11,94,215,.99);
+    border-bottom-color: rgba(255,255,255,.22);
     box-shadow: var(--ftg-shadow);
   }
 
@@ -73,7 +75,7 @@
     line-height: 1;
     letter-spacing: -.055em;
     font-weight: 950;
-    color: var(--ftg-text);
+    color: var(--ftg-white);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -84,7 +86,7 @@
   }
 
   .ftg-brand-title .dotcom {
-    color: var(--ftg-text);
+    color: var(--ftg-white);
   }
 
   .ftg-topbar-actions {
@@ -102,15 +104,15 @@
     width: 42px;
     height: 42px;
     border-radius: 999px;
-    border: 1px solid var(--ftg-line);
-    background: #fff;
-    color: var(--ftg-text);
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: var(--ftg-white);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     cursor: pointer;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, .04);
+    box-shadow: none;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
   }
 
@@ -130,8 +132,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #94a3b8;
-    background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+    color: var(--ftg-white);
+    background: transparent;
     border-radius: 999px;
   }
 
@@ -154,7 +156,7 @@
     right: 0;
     height: 2px;
     border-radius: 999px;
-    background: var(--ftg-text);
+    background: var(--ftg-white);
     transition: transform .22s ease, opacity .18s ease, top .22s ease, bottom .22s ease;
     transform-origin: center;
   }
@@ -226,7 +228,7 @@
     border-radius: 999px;
     border: 2px solid transparent;
     background: transparent;
-    color: #111827;
+    color: var(--ftg-white);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -243,7 +245,7 @@
   }
 
   .ftg-nav-pill:hover {
-    color: var(--ftg-text);
+    color: var(--ftg-white);
     opacity: 1;
   }
 
@@ -254,9 +256,9 @@
   .ftg-nav-pill.active {
     min-height: 42px;
     padding: 0 16px;
-    background: transparent;
+    background: rgba(255,255,255,.10);
     border: 2px solid var(--ftg-orange);
-    color: #111827;
+    color: var(--ftg-white);
     opacity: 1;
     box-shadow: none;
   }
@@ -312,7 +314,7 @@
     z-index: 10120;
     display: none;
     flex-direction: column;
-    background: rgba(255,255,255,.985);
+    background: rgba(11,94,215,.985);
     backdrop-filter: blur(18px) saturate(1.08);
     -webkit-backdrop-filter: blur(18px) saturate(1.08);
   }
@@ -345,11 +347,15 @@
     line-height: 1;
     letter-spacing: -.05em;
     font-weight: 950;
-    color: var(--ftg-text);
+    color: var(--ftg-white);
   }
 
   .ftg-menu-panel-title .go {
     color: var(--ftg-orange);
+  }
+
+  .ftg-menu-panel-title .dotcom {
+    color: var(--ftg-white);
   }
 
   
@@ -382,7 +388,7 @@
   }
 
   .ftg-menu-item:hover {
-    color: var(--ftg-orange);
+    color: rgba(255,255,255,.82);
   }
 
   .ftg-menu-item-main {
@@ -408,7 +414,7 @@
     letter-spacing: .14em;
     text-transform: uppercase;
     font-weight: 800;
-    color: var(--ftg-text-soft);
+    color: rgba(255,255,255,.72);
   }
 
   .ftg-menu-main,
@@ -462,7 +468,8 @@
   }
 
   .ftg-language-option.active {
-    color: var(--ftg-orange);
+    color: var(--ftg-white);
+    font-weight: 800;
   }
 
   .ftg-language-option .ftg-menu-flag {
@@ -508,9 +515,9 @@
     width: 34px;
     height: 34px;
     border-radius: 999px;
-    border: 1px solid var(--ftg-line);
-    background: #fff;
-    color: var(--ftg-text);
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: var(--ftg-white);
     font-size: 18px;
     font-weight: 900;
     cursor: pointer;
@@ -567,9 +574,9 @@
     min-height: 34px;
     padding: 0 12px;
     border-radius: 999px;
-    border: 1px solid var(--ftg-line);
-    background: #fff;
-    color: var(--ftg-text);
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: var(--ftg-white);
     font-size: 12px;
     font-weight: 800;
     cursor: pointer;
@@ -589,7 +596,7 @@
     min-width: 0;
     min-height: 42px;
     border-radius: 999px;
-    border: 1px solid var(--ftg-line);
+    border: 1px solid rgba(255,255,255,.22);
     background: #fff;
     padding: 0 14px;
     color: var(--ftg-text);
@@ -637,7 +644,7 @@
       min-height: 36px;
       padding: 0 8px;
       font-size: 13px;
-      color: #111827;
+      color: var(--ftg-white);
     }
 
     .ftg-nav-pill.active {
