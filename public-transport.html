@@ -43,6 +43,26 @@
       linear-gradient(180deg,#fcfdff 0%,var(--bg) 100%);
   }
 
+  body.ftg-actionbar-enabled{padding-top:0 !important}
+
+  #ftg-global-actionbar-root{
+    position:relative;
+    z-index:80;
+  }
+
+  #ftg-global-actionbar-root .ftg-topbar{
+    position:relative !important;
+    top:auto !important;
+    left:auto !important;
+    right:auto !important;
+    inset:auto !important;
+    width:100% !important;
+  }
+
+  #ftg-global-actionbar-root .ftg-menu-panel{
+    position:fixed !important;
+  }
+
   button,input,select{font:inherit}
   button{border:none;background:none;padding:0;cursor:pointer}
 
@@ -807,30 +827,9 @@
 </style>
 </head>
 <body>
+  <div id="ftg-global-actionbar-root"></div>
   <main class="page">
     <div class="transport-shell">
-      <header class="actionbar">
-        <div class="actionbar-top">
-          <div class="brand">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div>
-          <div class="top-actions">
-            <button class="icon-circle" type="button" aria-label="Open profile">
-              <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
-            </button>
-            <button class="menu-btn" type="button" aria-label="Open menu">
-              <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
-            </button>
-          </div>
-        </div>
-
-        <nav class="pills-row" aria-label="Main sections">
-          <a class="top-pill" href="index.html">Stories</a>
-          <a class="top-pill" href="map.html">Map</a>
-          <a class="top-pill active" href="public-transport.html" aria-current="page">Public Transport</a>
-          <a class="top-pill" href="sentieri.html">Sentieri</a>
-          <a class="top-pill" href="discounts.html">Local Discounts</a>
-          <a class="top-pill" href="weather.html">Weather</a>
-        </nav>
-      </header>
 
       <section class="selectors" aria-label="Route selectors">
         <label class="location-card location-select-card" for="fromSelect">
@@ -1017,6 +1016,117 @@
 <script>
   (function(){
     'use strict';
+
+    window.FTG_ACTIONBAR_CONFIG = {
+      activePage: 'trains',
+      language: 'en',
+      userName: 'Guest',
+      isLoggedIn: false,
+      androidAppHref: '#android',
+      privacyHref: '#privacy',
+      termsHref: '#terms',
+      menuItems: [
+        { id: 'map', labelKey: 'nav_map', label: 'Map', href: 'map.html' },
+        { id: 'stories', labelKey: 'nav_stories', label: 'Stories', href: 'index.html' },
+        { id: 'sentieri', labelKey: 'nav_sentieri', label: 'Sentieri', href: 'sentieri.html' },
+        { id: 'discounts', labelKey: 'nav_discounts', label: 'Local Discounts', href: 'discounts.html' },
+        { id: 'trains', labelKey: 'nav_trains', label: 'Public Transport', href: 'public-transport.html' },
+        { id: 'weather', labelKey: 'nav_weather', label: 'Weather', href: 'weather.html' },
+        { id: 'updates', labelKey: 'nav_updates', label: 'Official Updates', href: 'updates.html' }
+      ]
+    };
+
+    async function loadAndMountGlobalActionbar(){
+      var root = document.getElementById('ftg-global-actionbar-root');
+      var candidates = [
+        'global-actionbar.html',
+        './global-actionbar.html',
+        '/global-actionbar.html',
+        'https://5terrego.com/global-actionbar.html'
+      ];
+      var i = 0;
+      var response = null;
+      var html = '';
+      var parser = null;
+      var doc = null;
+      var links = [];
+      var styles = [];
+      var scripts = [];
+
+      if (!root) return;
+      if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
+        root.innerHTML = '';
+        window.FTG_MOUNT_GLOBAL_ACTIONBAR(root, window.FTG_ACTIONBAR_CONFIG);
+        return;
+      }
+
+      for (i = 0; i < candidates.length; i += 1) {
+        try {
+          response = await fetch(candidates[i], { cache: 'no-store' });
+          if (!response.ok) continue;
+          html = await response.text();
+          if (!html) continue;
+
+          parser = new DOMParser();
+          doc = parser.parseFromString(html, 'text/html');
+          links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+          styles = Array.from(doc.querySelectorAll('style'));
+          scripts = Array.from(doc.querySelectorAll('script'));
+
+          links.forEach(function(link){
+            var href = link.getAttribute('href') || '';
+            if (!href) return;
+            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+            var el = document.createElement('link');
+            el.rel = 'stylesheet';
+            el.href = href;
+            el.setAttribute('data-ftg-actionbar-link', href);
+            document.head.appendChild(el);
+          });
+
+          styles.forEach(function(style, index){
+            var key = 'ftg-actionbar-style-' + i + '-' + index;
+            if (document.getElementById(key)) return;
+            var el = document.createElement('style');
+            el.id = key;
+            el.textContent = style.textContent || '';
+            document.head.appendChild(el);
+          });
+
+          for (var s = 0; s < scripts.length; s += 1) {
+            var original = scripts[s];
+            var src = original.getAttribute('src');
+            await new Promise(function(resolve){
+              var scriptEl = document.createElement('script');
+              var done = false;
+              function finish(){
+                if (done) return;
+                done = true;
+                resolve();
+              }
+              if (src) {
+                scriptEl.src = src;
+                scriptEl.onload = finish;
+                scriptEl.onerror = finish;
+              } else {
+                scriptEl.textContent = original.textContent || '';
+              }
+              document.head.appendChild(scriptEl);
+              if (!src) finish();
+            });
+          }
+
+          if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
+            root.innerHTML = '';
+            window.FTG_MOUNT_GLOBAL_ACTIONBAR(root, window.FTG_ACTIONBAR_CONFIG);
+            return;
+          }
+        } catch (_error) {
+        }
+      }
+    }
+
+    loadAndMountGlobalActionbar();
 
     var fallbackDepartures = [
       { id:'t1', mode:'train', route:'Regionale 12307', from:'Monterosso', to:'Vernazza', departure:'09:42', arrival:'09:46', duration:'4 min', status:'ok', statusLabel:'On time', meta:'Platform 2', direct:'Direct' },
