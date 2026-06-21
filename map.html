@@ -85,6 +85,14 @@
       pointer-events: auto;
       align-items: stretch;
     }
+    .search-floating.is-collapsed {
+      right: auto;
+      width: 56px;
+    }
+    .search-floating.is-collapsed .search-wrap,
+    .search-floating.is-collapsed .search-type-pills {
+      display: none;
+    }
     .search-top-row {
       display: flex;
       align-items: center;
@@ -92,7 +100,7 @@
       width: 100%;
       min-width: 0;
     }
-    .search-home-btn {
+    .search-toggle-btn {
       flex: 0 0 56px;
       width: 56px;
       height: 56px;
@@ -108,11 +116,13 @@
       backdrop-filter: blur(18px) saturate(1.12);
       -webkit-backdrop-filter: blur(18px) saturate(1.12);
       overflow: hidden;
+      cursor: pointer;
     }
-    .search-home-btn span {
+    .search-toggle-btn span {
       font-size: 24px;
       line-height: 1;
       transform: translateY(-1px);
+      font-weight: 700;
     }
     .search-wrap {
       position: relative;
@@ -284,15 +294,19 @@
         left: 8px;
         right: 8px;
       }
+      .search-floating.is-collapsed {
+        right: auto;
+        width: 50px;
+      }
       .search-top-row {
         gap: 6px;
       }
-      .search-home-btn {
+      .search-toggle-btn {
         flex-basis: 50px;
         width: 50px;
         height: 50px;
       }
-      .search-home-btn span {
+      .search-toggle-btn span {
         font-size: 22px;
       }
       .search-wrap {
@@ -1269,9 +1283,9 @@
     <div id="boot-status-text" class="boot-status-text">Loading local map resources…</div>
   </div>
 </div>
-<div class="search-floating">
+<div class="search-floating is-collapsed" id="search-floating">
   <div class="search-top-row">
-    <a class="search-home-btn" href="index.html" aria-label="Go home"><span>⌂</span></a>
+    <button class="search-toggle-btn" id="search-toggle-btn" type="button" aria-label="Open search" aria-expanded="false"><span>⌕</span></button>
     <div class="search-wrap">
     <input id="search" type="search" placeholder="Search POIs and trails" autocomplete="off" />
     <a id="search-login-btn" class="search-login-btn" href="login.html" aria-label="Open login"><img src="app.png" alt="Login" /></a>
@@ -1668,6 +1682,8 @@
   var weatherEl = null;
   var poiDotCanvas = null;
 
+  var searchFloating = document.getElementById('search-floating');
+  var searchToggleBtn = document.getElementById('search-toggle-btn');
   var searchInput = document.getElementById('search');
   var searchResults = document.getElementById('search-results');
   var poiCard = document.getElementById('poi-card');
@@ -3972,6 +3988,29 @@
       startHeroPreviewCycle();
     }, { passive: true });
   }
+  function setSearchCollapsed(collapsed) {
+    if (!searchFloating || !searchToggleBtn) return;
+    searchFloating.classList.toggle('is-collapsed', collapsed);
+    searchToggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    searchToggleBtn.setAttribute('aria-label', collapsed ? 'Open search' : 'Close search');
+    searchToggleBtn.innerHTML = '<span>' + (collapsed ? '⌕' : '×') + '</span>';
+    if (collapsed) {
+      if (searchResults) {
+        searchResults.style.display = 'none';
+        searchResults.innerHTML = '';
+      }
+      if (searchInput) searchInput.blur();
+    }
+  }
+  function toggleSearchFloating() {
+    var isCollapsed;
+    if (!searchFloating) return;
+    isCollapsed = searchFloating.classList.contains('is-collapsed');
+    setSearchCollapsed(!isCollapsed);
+    if (isCollapsed && searchInput) {
+      window.setTimeout(function () { searchInput.focus(); }, 40);
+    }
+  }
   function setupEvents() {
     if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = function () {
@@ -4057,6 +4096,12 @@
       });
     }
 
+    if (searchToggleBtn) {
+      searchToggleBtn.addEventListener('click', function (event) {
+        markExplicitPermissionGesture(event);
+        toggleSearchFloating();
+      });
+    }
     if (searchInput && searchResults) {
       var searchTypeButtons = Array.prototype.slice.call(document.querySelectorAll('[data-search-type]'));
       searchTypeButtons.forEach(function (button) {
@@ -4068,6 +4113,7 @@
         });
       });
       searchInput.addEventListener('input', function () {
+        if (searchFloating && searchFloating.classList.contains('is-collapsed')) setSearchCollapsed(false);
         renderSearchSuggestions(searchInput.value);
         scheduleMapRefresh({ rail: true, auto: false });
       });
@@ -4082,11 +4128,13 @@
         if (first && selectSearchResult(first)) {
           searchResults.style.display = 'none';
           searchInput.blur();
+          setSearchCollapsed(true);
           return;
         }
         geocodeSearch(query).then(function () {
           searchResults.style.display = 'none';
           searchInput.blur();
+          setSearchCollapsed(true);
         });
       });
 
@@ -4098,6 +4146,7 @@
         selectSearchResult(universalSearchResults[index] || item.getAttribute('data-name'));
         searchResults.style.display = 'none';
         searchInput.blur();
+        setSearchCollapsed(true);
       });
 
       if (bottomRailTrack) {
@@ -4105,7 +4154,7 @@
       }
 
       document.addEventListener('click', function (event) {
-        if (!searchResults.contains(event.target) && event.target !== searchInput) {
+        if (!searchResults.contains(event.target) && event.target !== searchInput && event.target !== searchToggleBtn && !event.target.closest('#search-toggle-btn')) {
           searchResults.style.display = 'none';
         }
       });
