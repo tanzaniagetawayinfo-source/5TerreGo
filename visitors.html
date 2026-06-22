@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>5TerreGo | Visitors</title>
+  <title>5TerreGo | Dashboard visite</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
@@ -16,110 +16,385 @@
       --primary:#163f95;
       --accent:#ff7e57;
       --ok:#16a34a;
-      --shadow:0 22px 60px rgba(20,50,110,.10);
-      --radius-xl:30px;
-      --radius-lg:22px;
-      --radius-md:18px;
+      --shadow:0 18px 50px rgba(20,50,110,.08);
+      --radius-xl:26px;
+      --radius-lg:20px;
+      --radius-md:16px;
     }
+
     *{box-sizing:border-box;}
-    html,body{margin:0;padding:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text);}
-    body{padding:18px;}
-    .shell{max-width:1100px;margin:0 auto;display:grid;gap:16px;}
-    .hero,.panel,.metric{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow);}
-    .hero{border-radius:var(--radius-xl);padding:22px;display:grid;gap:10px;}
-    .eyebrow{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8ea0c3;}
-    h1{margin:0;font-size:38px;line-height:.95;letter-spacing:-.06em;}
-    .subtitle{margin:0;color:var(--muted);font-size:15px;line-height:1.55;max-width:720px;}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
-    .btn{min-height:46px;padding:0 16px;border:none;border-radius:999px;background:#fff;color:var(--text);font-weight:800;cursor:pointer;border:1px solid var(--line);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
-    .btn.primary{background:linear-gradient(180deg,#1949ab 0%,var(--primary) 100%);color:#fff;border:none;}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
-    .metric{border-radius:var(--radius-lg);padding:18px;display:grid;gap:8px;}
-    .metric .label{font-size:12px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;color:#8ea0c3;}
-    .metric .value{font-size:32px;font-weight:900;letter-spacing:-.05em;line-height:1;}
-    .metric .meta{font-size:13px;color:var(--muted);}
-    .panel{border-radius:var(--radius-lg);padding:18px;display:grid;gap:14px;}
-    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-    .panel h2{margin:0;font-size:24px;line-height:1;letter-spacing:-.04em;}
-    .filters{display:flex;gap:8px;flex-wrap:wrap;}
-    .chip{min-height:38px;padding:0 14px;border-radius:999px;background:#f2f6fc;border:1px solid var(--line);font-weight:700;color:var(--text);cursor:pointer;}
-    .chip.active{background:#fff1eb;border-color:#ffd8ca;color:#a24d2f;}
-    .split{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;}
-    .bars,.table{display:grid;gap:10px;}
-    .bar-row{display:grid;gap:6px;}
-    .bar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;}
-    .bar-track{height:12px;border-radius:999px;background:#eef3fb;overflow:hidden;}
-    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#1949ab 0%,#5f8ef0 100%);}
-    table{width:100%;border-collapse:collapse;}
-    th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top;}
-    th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8ea0c3;}
-    .muted{color:var(--muted);}
-    .empty,.gate{padding:20px;border-radius:var(--radius-lg);background:var(--surface-soft);border:1px dashed var(--line);color:var(--muted);}
-    .ok{color:var(--ok);font-weight:800;}
-    @media (max-width:980px){
-      .grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .split{grid-template-columns:1fr;}
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
+      color:var(--text);
     }
-    @media (max-width:640px){
-      body{padding:12px;}
-      h1{font-size:32px;}
-      .grid{grid-template-columns:1fr;}
-      .hero,.panel,.metric{padding:16px;}
-      th:nth-child(3),td:nth-child(3){display:none;}
+
+    body{
+      padding:110px 14px 20px;
+    }
+
+    #ftg-global-actionbar-root{
+      position:relative;
+      z-index:9999;
+    }
+
+    .shell{
+      max-width:1100px;
+      margin:0 auto;
+      display:grid;
+      gap:14px;
+    }
+
+    .panel,
+    .metric,
+    .gate{
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.95);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:var(--shadow);
+    }
+
+    .toolbar-compact{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:0 2px;
+    }
+
+    .toolbar-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      min-height:42px;
+      padding:0 14px;
+      border:none;
+      border-radius:999px;
+      background:#fff;
+      color:var(--text);
+      font-weight:800;
+      cursor:pointer;
+      border:1px solid var(--line);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+
+    .btn.primary{
+      background:linear-gradient(180deg,#1949ab 0%,var(--primary) 100%);
+      color:#fff;
+      border:none;
+    }
+
+    .status-inline{
+      font-size:13px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .status-inline.ok{
+      color:var(--ok);
+      font-weight:800;
+    }
+
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .metric{
+      border-radius:var(--radius-lg);
+      padding:16px;
+      display:grid;
+      gap:8px;
+      min-width:0;
+    }
+
+    .metric .label{
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#8ea0c3;
+      line-height:1.2;
+    }
+
+    .metric .value{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.05em;
+      line-height:1;
+      color:var(--text);
+      word-break:break-word;
+    }
+
+    .panel{
+      border-radius:var(--radius-lg);
+      padding:16px;
+      display:grid;
+      gap:14px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .panel h2{
+      margin:0;
+      font-size:22px;
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+
+    .filters{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      background:#f2f6fc;
+      border:1px solid var(--line);
+      font-weight:700;
+      color:var(--text);
+      cursor:pointer;
+    }
+
+    .chip.active{
+      background:#fff1eb;
+      border-color:#ffd8ca;
+      color:#a24d2f;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:14px;
+    }
+
+    .bars,.table{
+      display:grid;
+      gap:10px;
+    }
+
+    .bar-row{
+      display:grid;
+      gap:6px;
+    }
+
+    .bar-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-size:14px;
+    }
+
+    .bar-track{
+      height:12px;
+      border-radius:999px;
+      background:#eef3fb;
+      overflow:hidden;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#1949ab 0%,#5f8ef0 100%);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th,td{
+      text-align:left;
+      padding:12px 10px;
+      border-bottom:1px solid var(--line);
+      font-size:14px;
+      vertical-align:top;
+    }
+
+    th{
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#8ea0c3;
+    }
+
+    .muted{color:var(--muted);}
+
+    .empty,.gate{
+      padding:18px;
+      border-radius:var(--radius-lg);
+      background:var(--surface-soft);
+      border:1px dashed var(--line);
+      color:var(--muted);
+    }
+
+    .hidden{display:none !important;}
+
+    @media (max-width: 980px){
+      .split{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 768px){
+      body{
+        padding:102px 12px 18px;
+      }
+
+      .metrics{
+        display:flex;
+        overflow-x:auto;
+        gap:10px;
+        padding-bottom:2px;
+        scrollbar-width:none;
+        -ms-overflow-style:none;
+      }
+
+      .metrics::-webkit-scrollbar{
+        display:none;
+      }
+
+      .metric{
+        flex:0 0 auto;
+        min-width:155px;
+        padding:14px;
+      }
+
+      .metric .label{
+        font-size:11px;
+      }
+
+      .metric .value{
+        font-size:26px;
+      }
+
+      th:nth-child(3), td:nth-child(3){
+        display:none;
+      }
+    }
+
+    @media (max-width: 560px){
+      .toolbar-compact{
+        align-items:flex-start;
+      }
+
+      .toolbar-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .btn{
+        min-height:40px;
+        padding:0 12px;
+      }
     }
   </style>
 </head>
 <body>
+  <div id="ftg-global-actionbar-root"></div>
+
   <main class="shell">
-    <section class="hero">
-      <div class="eyebrow">Owner dashboard</div>
-      <h1>Visitors overview</h1>
-      <p class="subtitle">Private analytics for 5TerreGo. This page is visible only to the owner account <strong>5terrego.info@gmail.com</strong>.</p>
-      <div class="actions">
-        <button id="refreshBtn" class="btn primary" type="button">Refresh data</button>
-        <a class="btn" href="login.html">Account</a>
-        <a class="btn" href="map.html">Open map</a>
+    <section id="gate" class="gate">Controllo sessione…</section>
+
+    <section id="dashboard" class="hidden">
+      <div class="metrics">
+        <article class="metric">
+          <div class="label">Visualizzazioni totali</div>
+          <div id="totalVisits" class="value">—</div>
+        </article>
+
+        <article class="metric">
+          <div class="label">Visitatori unici</div>
+          <div id="uniqueVisitors" class="value">—</div>
+        </article>
+
+        <article class="metric">
+          <div class="label">Visualizzazioni oggi</div>
+          <div id="todayVisits" class="value">—</div>
+        </article>
+
+        <article class="metric">
+          <div class="label">Pagina top</div>
+          <div id="topPage" class="value" style="font-size:20px;line-height:1.15;">—</div>
+        </article>
       </div>
-      <div id="status" class="muted">Checking access…</div>
-    </section>
 
-    <section id="gate" class="gate">Checking session…</section>
-
-    <section id="dashboard" hidden>
-      <div class="grid">
-        <article class="metric"><div class="label">Total visits</div><div id="totalVisits" class="value">—</div><div class="meta">All visits in the selected window</div></article>
-        <article class="metric"><div class="label">Approx. unique visitors</div><div id="uniqueVisitors" class="value">—</div><div class="meta">Estimated from anonymous session signals</div></article>
-        <article class="metric"><div class="label">Visits today</div><div id="todayVisits" class="value">—</div><div class="meta">Based on your local time</div></article>
-        <article class="metric"><div class="label">Top page</div><div id="topPage" class="value" style="font-size:22px;line-height:1.15;">—</div><div class="meta">Most viewed page right now</div></article>
+      <div class="toolbar-compact">
+        <div class="toolbar-actions">
+          <button id="refreshBtn" class="btn primary" type="button">Aggiorna</button>
+          <a class="btn" href="map.html">Apri mappa</a>
+        </div>
+        <span id="status" class="status-inline">Caricamento…</span>
       </div>
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Time window</h2>
+          <h2>Intervallo</h2>
           <div class="filters" id="filters">
-            <button class="chip active" type="button" data-days="7">7 days</button>
-            <button class="chip" type="button" data-days="30">30 days</button>
-            <button class="chip" type="button" data-days="90">90 days</button>
+            <button class="chip active" type="button" data-days="7">7 giorni</button>
+            <button class="chip" type="button" data-days="30">30 giorni</button>
+            <button class="chip" type="button" data-days="90">90 giorni</button>
           </div>
         </div>
+
         <div class="split">
           <div class="panel">
-            <div class="panel-head"><h2>Visits by page</h2><div id="pageCount" class="muted">—</div></div>
+            <div class="panel-head">
+              <h2>Pagine più viste</h2>
+              <div id="pageCount" class="muted">—</div>
+            </div>
             <div id="pageBars" class="bars"></div>
           </div>
+
           <div class="panel">
-            <div class="panel-head"><h2>Last 14 days</h2><div id="dailyCount" class="muted">—</div></div>
+            <div class="panel-head">
+              <h2>Ultimi 14 giorni</h2>
+              <div id="dailyCount" class="muted">—</div>
+            </div>
             <div id="dailyBars" class="bars"></div>
           </div>
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-head"><h2>Recent visits</h2><div id="recentMeta" class="muted">Latest page loads</div></div>
+        <div class="panel-head">
+          <h2>Visite recenti</h2>
+          <div id="recentMeta" class="muted">—</div>
+        </div>
+
         <div class="table">
           <table>
             <thead>
-              <tr><th>When</th><th>Page</th><th>Referrer</th><th>Country</th></tr>
+              <tr>
+                <th>Quando</th>
+                <th>Pagina</th>
+                <th>Referrer</th>
+                <th>Paese</th>
+              </tr>
             </thead>
             <tbody id="recentTable"></tbody>
           </table>
@@ -129,6 +404,30 @@
   </main>
 
   <script>
+    const ACTIONBAR_PARTIAL_CANDIDATES = [
+      '/global-actionbar.html',
+      'global-actionbar.html'
+    ];
+
+    async function mountGlobalActionbar(){
+      const root = document.getElementById('ftg-global-actionbar-root');
+      if(!root) return;
+
+      for(const candidate of ACTIONBAR_PARTIAL_CANDIDATES){
+        try{
+          const res = await fetch(candidate, { cache: 'no-store' });
+          if(!res.ok) continue;
+          const html = await res.text();
+          root.innerHTML = html;
+          return;
+        }catch(_err){}
+      }
+    }
+
+    mountGlobalActionbar();
+  </script>
+
+  <script>
     (function () {
       'use strict';
 
@@ -136,6 +435,7 @@
       var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
       var OWNER_EMAIL = '5terrego.info@gmail.com';
       var DAYS = 7;
+
       var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
@@ -145,13 +445,16 @@
       var status = document.getElementById('status');
       var refreshBtn = document.getElementById('refreshBtn');
       var filters = document.getElementById('filters');
+
       var totalVisits = document.getElementById('totalVisits');
       var uniqueVisitors = document.getElementById('uniqueVisitors');
       var todayVisits = document.getElementById('todayVisits');
       var topPage = document.getElementById('topPage');
+
       var pageBars = document.getElementById('pageBars');
       var dailyBars = document.getElementById('dailyBars');
       var recentTable = document.getElementById('recentTable');
+
       var pageCount = document.getElementById('pageCount');
       var dailyCount = document.getElementById('dailyCount');
       var recentMeta = document.getElementById('recentMeta');
@@ -168,13 +471,20 @@
       }
 
       function formatReferrer(value) {
-        if (!value) return 'Direct';
-        try { return new URL(value).hostname || 'Direct'; } catch (_error) { return value; }
+        if (!value) return 'Diretto';
+        try { return new URL(value).hostname || 'Diretto'; }
+        catch (_error) { return value; }
       }
 
       function formatDateTime(value) {
         var date = new Date(value);
-        return date.toLocaleString([], { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+        return date.toLocaleString('it-IT', {
+          year:'numeric',
+          month:'short',
+          day:'numeric',
+          hour:'2-digit',
+          minute:'2-digit'
+        });
       }
 
       function startOfToday() {
@@ -187,29 +497,42 @@
         var map = {};
         var list = [];
         var i;
+
         for (i = bucketDays - 1; i >= 0; i -= 1) {
           var day = new Date();
           day.setHours(0,0,0,0);
           day.setDate(day.getDate() - i);
           var key = day.toISOString().slice(0,10);
           map[key] = 0;
-          list.push({ key:key, label: day.toLocaleDateString([], { month:'short', day:'numeric' }), count:0 });
+          list.push({
+            key:key,
+            label: day.toLocaleDateString('it-IT', { month:'short', day:'numeric' }),
+            count:0
+          });
         }
+
         rows.forEach(function (row) {
           var key = String(row.created_at || '').slice(0,10);
           if (Object.prototype.hasOwnProperty.call(map, key)) map[key] += 1;
         });
-        list.forEach(function (item) { item.count = map[item.key] || 0; });
+
+        list.forEach(function (item) {
+          item.count = map[item.key] || 0;
+        });
+
         return list;
       }
 
       function aggregateBy(rows, getter) {
         var map = {};
         rows.forEach(function (row) {
-          var key = getter(row) || 'Unknown';
+          var key = getter(row) || 'Sconosciuto';
           map[key] = (map[key] || 0) + 1;
         });
-        return Object.keys(map).map(function (key) { return { key:key, count:map[key] }; }).sort(function (a,b) { return b.count - a.count; });
+
+        return Object.keys(map)
+          .map(function (key) { return { key:key, count:map[key] }; })
+          .sort(function (a,b) { return b.count - a.count; });
       }
 
       function renderBars(target, items, emptyText) {
@@ -218,55 +541,87 @@
           target.innerHTML = '<div class="empty">' + escapeHTML(emptyText) + '</div>';
           return;
         }
+
         target.innerHTML = items.map(function (item) {
           var pct = max ? Math.max(6, Math.round((item.count / max) * 100)) : 0;
-          return '<div class="bar-row"><div class="bar-top"><strong>' + escapeHTML(item.key || item.label) + '</strong><span class="muted">' + item.count + '</span></div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div></div>';
+          return ''
+            + '<div class="bar-row">'
+            +   '<div class="bar-top">'
+            +     '<strong>' + escapeHTML(item.key || item.label) + '</strong>'
+            +     '<span class="muted">' + item.count + '</span>'
+            +   '</div>'
+            +   '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>'
+            + '</div>';
         }).join('');
       }
 
       function renderRecent(rows) {
         if (!rows.length) {
-          recentTable.innerHTML = '<tr><td colspan="4" class="muted">No visits yet.</td></tr>';
+          recentTable.innerHTML = '<tr><td colspan="4" class="muted">Nessuna visita disponibile.</td></tr>';
           return;
         }
+
         recentTable.innerHTML = rows.slice(0, 20).map(function (row) {
-          return '<tr><td>' + escapeHTML(formatDateTime(row.created_at)) + '</td><td><strong>' + escapeHTML(formatPage(row.page_path)) + '</strong></td><td>' + escapeHTML(formatReferrer(row.referrer)) + '</td><td>' + escapeHTML(row.country || '—') + '</td></tr>';
+          return ''
+            + '<tr>'
+            +   '<td>' + escapeHTML(formatDateTime(row.created_at)) + '</td>'
+            +   '<td><strong>' + escapeHTML(formatPage(row.page_path)) + '</strong></td>'
+            +   '<td>' + escapeHTML(formatReferrer(row.referrer)) + '</td>'
+            +   '<td>' + escapeHTML(row.country || '—') + '</td>'
+            + '</tr>';
         }).join('');
       }
 
       async function ensureOwner() {
         var result = await supabase.auth.getSession();
         var session = result && result.data ? result.data.session : null;
-        var email = session && session.user && session.user.email ? String(session.user.email).trim().toLowerCase() : '';
+        var email = session && session.user && session.user.email
+          ? String(session.user.email).trim().toLowerCase()
+          : '';
+
         if (!email) {
-          gate.innerHTML = 'You need to log in first with the owner account.';
-          status.textContent = 'Not signed in';
+          gate.textContent = 'Non hai effettuato l’accesso.';
+          status.textContent = 'Non autenticato';
+          status.className = 'status-inline';
           return false;
         }
+
         if (email !== OWNER_EMAIL) {
-          gate.innerHTML = 'Access denied. This page is reserved for the owner account only.';
-          status.textContent = 'Signed in as ' + email;
+          gate.textContent = 'Accesso negato. Questa dashboard è riservata all’owner.';
+          status.textContent = 'Accesso negato';
+          status.className = 'status-inline';
           return false;
         }
-        gate.hidden = true;
-        dashboard.hidden = false;
-        status.innerHTML = '<span class="ok">Signed in as owner</span> · ' + email;
+
+        gate.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        status.textContent = 'Accesso owner attivo';
+        status.className = 'status-inline ok';
         return true;
       }
 
       async function loadRows() {
         var cutoff = new Date();
         cutoff.setDate(cutoff.getDate() - DAYS);
-        var query = supabase.from('site_visits').select('created_at,page_path,referrer,country,session_id,ip_hash').gte('created_at', cutoff.toISOString()).order('created_at', { ascending:false }).limit(5000);
-        var result = await query;
+
+        var result = await supabase
+          .from('site_visits')
+          .select('created_at,page_path,referrer,country,session_id,ip_hash')
+          .gte('created_at', cutoff.toISOString())
+          .order('created_at', { ascending:false })
+          .limit(5000);
+
         if (result.error) throw result.error;
         return Array.isArray(result.data) ? result.data : [];
       }
 
       async function refresh() {
         try {
-          status.textContent = 'Loading visits…';
+          status.textContent = 'Caricamento…';
+          status.className = 'status-inline';
+
           if (!(await ensureOwner())) return;
+
           var rows = await loadRows();
           var pageStats = aggregateBy(rows, function (row) { return formatPage(row.page_path); });
           var dailyStats = buildDailyBuckets(rows, 14);
@@ -275,7 +630,7 @@
           var visitsToday = 0;
 
           rows.forEach(function (row) {
-            var key = row.ip_hash || row.session_id || '';
+            var key = row.session_id || row.ip_hash || '';
             if (key) unique[key] = true;
             if (new Date(row.created_at) >= todayStart) visitsToday += 1;
           });
@@ -284,30 +639,42 @@
           uniqueVisitors.textContent = String(Object.keys(unique).length || 0);
           todayVisits.textContent = String(visitsToday);
           topPage.textContent = pageStats.length ? pageStats[0].key : '—';
-          pageCount.textContent = pageStats.length + ' pages';
-          dailyCount.textContent = 'Last 14 days';
-          recentMeta.textContent = rows.length ? ('Showing ' + Math.min(rows.length, 20) + ' of ' + rows.length + ' visits') : 'No visits yet';
 
-          renderBars(pageBars, pageStats.slice(0, 8), 'No page views in this window yet.');
-          renderBars(dailyBars, dailyStats.map(function (item) { return { key:item.label, count:item.count }; }), 'No daily traffic yet.');
+          pageCount.textContent = pageStats.length + ' pagine';
+          dailyCount.textContent = '14 giorni';
+          recentMeta.textContent = rows.length
+            ? ('Mostrate ' + Math.min(rows.length, 20) + ' di ' + rows.length + ' visite')
+            : 'Nessuna visita';
+
+          renderBars(pageBars, pageStats.slice(0, 8), 'Nessuna pagina vista in questo intervallo.');
+          renderBars(
+            dailyBars,
+            dailyStats.map(function (item) { return { key:item.label, count:item.count }; }),
+            'Nessun traffico negli ultimi giorni.'
+          );
           renderRecent(rows);
 
-          status.textContent = 'Updated just now';
+          status.textContent = 'Aggiornato ora';
+          status.className = 'status-inline ok';
         } catch (error) {
-          gate.hidden = false;
-          dashboard.hidden = true;
-          gate.textContent = error && error.message ? error.message : 'Unable to load visitor data.';
-          status.textContent = 'Load failed';
+          gate.classList.remove('hidden');
+          dashboard.classList.add('hidden');
+          gate.textContent = error && error.message ? error.message : 'Impossibile caricare i dati.';
+          status.textContent = 'Errore caricamento';
+          status.className = 'status-inline';
         }
       }
 
       filters.addEventListener('click', function (event) {
         var button = event.target.closest('[data-days]');
         if (!button) return;
+
         DAYS = Number(button.getAttribute('data-days') || 7);
+
         Array.prototype.forEach.call(filters.querySelectorAll('.chip'), function (chip) {
           chip.classList.toggle('active', chip === button);
         });
+
         refresh();
       });
 
