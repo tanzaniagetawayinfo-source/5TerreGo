@@ -35,17 +35,17 @@
     right: 0;
     z-index: 10080;
     padding-top: var(--ftg-safe-top);
-    background: rgba(11,94,215,.96);
+    background: rgba(255,255,255,.96);
     backdrop-filter: blur(18px) saturate(1.08);
     -webkit-backdrop-filter: blur(18px) saturate(1.08);
-    border-bottom: 1px solid rgba(255,255,255,.16);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+    border-bottom: 1px solid var(--ftg-line);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
     transition: box-shadow .22s ease, background .22s ease, border-color .22s ease;
   }
 
   .ftg-topbar.is-scrolled {
-    background: rgba(11,94,215,.99);
-    border-bottom-color: rgba(255,255,255,.22);
+    background: rgba(255,255,255,.99);
+    border-bottom-color: var(--ftg-line-strong);
     box-shadow: var(--ftg-shadow);
   }
 
@@ -75,7 +75,7 @@
     line-height: 1;
     letter-spacing: -.055em;
     font-weight: 950;
-    color: var(--ftg-white);
+    color: var(--ftg-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -86,7 +86,7 @@
   }
 
   .ftg-brand-title .dotcom {
-    color: var(--ftg-white);
+    color: var(--ftg-text);
   }
 
   .ftg-topbar-actions {
@@ -104,9 +104,9 @@
     width: 42px;
     height: 42px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.22);
-    background: rgba(255,255,255,.08);
-    color: var(--ftg-white);
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -132,7 +132,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--ftg-white);
+    color: var(--ftg-text);
     background: transparent;
     border-radius: 999px;
   }
@@ -156,7 +156,7 @@
     right: 0;
     height: 2px;
     border-radius: 999px;
-    background: var(--ftg-white);
+    background: var(--ftg-text);
     transition: transform .22s ease, opacity .18s ease, top .22s ease, bottom .22s ease;
     transform-origin: center;
   }
@@ -228,7 +228,7 @@
     border-radius: 999px;
     border: 2px solid transparent;
     background: transparent;
-    color: var(--ftg-white);
+    color: var(--ftg-text);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -245,7 +245,7 @@
   }
 
   .ftg-nav-pill:hover {
-    color: var(--ftg-white);
+    color: var(--ftg-text);
     opacity: 1;
   }
 
@@ -256,9 +256,9 @@
   .ftg-nav-pill.active {
     min-height: 42px;
     padding: 0 16px;
-    background: rgba(255,255,255,.10);
+    background: #fff;
     border: 2px solid var(--ftg-orange);
-    color: var(--ftg-white);
+    color: var(--ftg-text);
     opacity: 1;
     box-shadow: none;
   }
@@ -314,7 +314,7 @@
     z-index: 10120;
     display: none;
     flex-direction: column;
-    background: rgba(11,94,215,.985);
+    background: rgba(255,255,255,.985);
     backdrop-filter: blur(18px) saturate(1.08);
     -webkit-backdrop-filter: blur(18px) saturate(1.08);
   }
@@ -347,7 +347,7 @@
     line-height: 1;
     letter-spacing: -.05em;
     font-weight: 950;
-    color: var(--ftg-white);
+    color: var(--ftg-text);
   }
 
   .ftg-menu-panel-title .go {
@@ -355,7 +355,7 @@
   }
 
   .ftg-menu-panel-title .dotcom {
-    color: var(--ftg-white);
+    color: var(--ftg-text);
   }
 
   
@@ -388,7 +388,7 @@
   }
 
   .ftg-menu-item:hover {
-    color: rgba(255,255,255,.82);
+    color: var(--ftg-text);
   }
 
   .ftg-menu-item-main {
@@ -414,7 +414,7 @@
     letter-spacing: .14em;
     text-transform: uppercase;
     font-weight: 800;
-    color: rgba(255,255,255,.72);
+    color: var(--ftg-text-soft);
   }
 
   .ftg-menu-main,
@@ -468,7 +468,7 @@
   }
 
   .ftg-language-option.active {
-    color: var(--ftg-white);
+    color: var(--ftg-text);
     font-weight: 800;
   }
 
@@ -515,9 +515,9 @@
     width: 34px;
     height: 34px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.22);
-    background: rgba(255,255,255,.08);
-    color: var(--ftg-white);
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
     font-size: 18px;
     font-weight: 900;
     cursor: pointer;
@@ -574,9 +574,9 @@
     min-height: 34px;
     padding: 0 12px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.22);
-    background: rgba(255,255,255,.08);
-    color: var(--ftg-white);
+    border: 1px solid var(--ftg-line);
+    background: #fff;
+    color: var(--ftg-text);
     font-size: 12px;
     font-weight: 800;
     cursor: pointer;
@@ -644,7 +644,7 @@
       min-height: 36px;
       padding: 0 8px;
       font-size: 13px;
-      color: var(--ftg-white);
+      color: var(--ftg-text);
     }
 
     .ftg-nav-pill.active {
@@ -676,6 +676,8 @@
     }
   }
 </style>
+
+<script src="site-analytics.js"></script>
 
 <script>
 (function () {
