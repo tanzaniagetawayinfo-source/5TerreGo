@@ -33,6 +33,7 @@
       --radius-md: 20px;
       --radius-sm: 16px;
       --stage-height: 100svh;
+      --actionbar-live-height: 0px;
       
     }
 
@@ -84,12 +85,15 @@
     .video-stage {
       position: relative;
       margin-top: 16px;
+      height: calc(var(--stage-height) - var(--actionbar-live-height));
+      overflow: hidden;
+      isolation: isolate;
     }
 
     .video-backdrop {
-      position: sticky;
-      top: 0;
-      height: var(--stage-height);
+      position: absolute;
+      inset: 0;
+      height: 100%;
       width: 100%;
       overflow: hidden;
       background: #0d1729;
@@ -135,11 +139,25 @@
       pointer-events: none;
     }
 
+    .video-scroll-shell {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .video-scroll-shell::-webkit-scrollbar {
+      display: none;
+    }
+
     .video-scroll {
       position: relative;
       z-index: 2;
-      margin-top: calc(-1 * var(--stage-height));
-      padding-bottom: 8px;
+      min-height: 100%;
+      padding-bottom: 24px;
     }
 
     .video-scroll > * {
@@ -149,7 +167,7 @@
 
     .hero {
       position: relative;
-      min-height: var(--stage-height);
+      min-height: calc(var(--stage-height) - var(--actionbar-live-height));
       border-radius: 0;
       overflow: hidden;
       background: transparent;
@@ -722,15 +740,15 @@
       }
       .video-backdrop {
         width: 100%;
-        height: var(--stage-height);
+        height: 100%;
         border-radius: 0;
         box-shadow: none;
       }
-      .video-scroll {
-        margin-top: calc(-1 * var(--stage-height));
+      .video-scroll-shell {
+        height: 100%;
       }
       .hero {
-        min-height: var(--stage-height);
+        min-height: calc(var(--stage-height) - var(--actionbar-live-height));
         border-radius: 0;
       }
       .hero-copy {
@@ -777,6 +795,7 @@
         <img class="bg-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
       </div>
 
+      <div class="video-scroll-shell">
       <div class="video-scroll">
         <section class="hero">
           <div class="hero-copy">
@@ -872,6 +891,7 @@
             <div><span class="badge">In orario</span></div>
           </a>
         </section>
+      </div>
       </div>
     </section>
 
@@ -1139,6 +1159,11 @@
 
       
 
+      function syncActionbarLiveHeight() {
+        var height = Math.round(rootActionbar.getBoundingClientRect().height || 0);
+        document.documentElement.style.setProperty('--actionbar-live-height', height + 'px');
+      }
+
       loadGlobalActionbarPartial().then(function () {
         if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR !== 'function' || !rootActionbar) return;
         window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, {
@@ -1148,8 +1173,12 @@
           termsHref: '#',
           androidAppHref: '#'
         });
-        
+        syncActionbarLiveHeight();
+        requestAnimationFrame(syncActionbarLiveHeight);
+        setTimeout(syncActionbarLiveHeight, 120);
       }).catch(function () {});
+
+      window.addEventListener('resize', syncActionbarLiveHeight);
     }());
   </script>
 </body>
