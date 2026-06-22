@@ -32,6 +32,7 @@
       --radius-lg: 24px;
       --radius-md: 20px;
       --radius-sm: 16px;
+      --stage-height: 100svh;
     }
 
     * { box-sizing: border-box; }
@@ -46,7 +47,7 @@
     }
 
     a { color: inherit; text-decoration: none; }
-    img { display: block; max-width: 100%; }
+    img, video { display: block; max-width: 100%; }
     button, input { font: inherit; }
     body.ftg-actionbar-enabled { padding-top: 0 !important; }
 
@@ -79,16 +80,22 @@
       margin-top: 16px;
     }
 
-    .hero {
+    .video-stage {
       position: relative;
-      min-height: 600px;
+      margin-top: 16px;
+    }
+
+    .video-backdrop {
+      position: sticky;
+      top: 8px;
+      height: calc(var(--stage-height) - 8px);
+      border-radius: 0 0 32px 32px;
       overflow: hidden;
-      border-radius: 32px;
-      background: #dbe3ed;
+      background: #0d1729;
       box-shadow: var(--shadow);
     }
 
-    .hero img {
+    .video-backdrop video {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -96,19 +103,44 @@
       object-fit: cover;
     }
 
-    .hero::after {
+    .video-backdrop::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(15,23,42,.06) 0%, rgba(15,23,42,.22) 42%, rgba(15,23,42,.74) 100%);
+      background:
+        linear-gradient(180deg, rgba(8,14,24,.08) 0%, rgba(8,14,24,.18) 32%, rgba(8,14,24,.68) 100%),
+        radial-gradient(circle at center, transparent 0%, rgba(8,14,24,.14) 100%);
+      pointer-events: none;
+    }
+
+    .video-scroll {
+      position: relative;
+      z-index: 2;
+      margin-top: calc(-1 * (var(--stage-height) - 8px));
+      padding-bottom: 8px;
+    }
+
+    .video-scroll > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero {
+      position: relative;
+      min-height: calc(var(--stage-height) - 8px);
+      display: flex;
+      align-items: flex-end;
+      border-radius: 0 0 32px 32px;
+      overflow: hidden;
+      background: transparent;
+      box-shadow: none;
     }
 
     .hero-copy {
-      position: absolute;
+      position: relative;
       z-index: 2;
-      left: 24px;
-      right: 24px;
-      bottom: 24px;
+      width: 100%;
+      padding: 0 24px 24px;
       color: #fff;
     }
 
@@ -119,6 +151,7 @@
       line-height: .92;
       letter-spacing: -.07em;
       font-weight: 950;
+      text-shadow: 0 10px 24px rgba(0,0,0,.18);
     }
 
     .hero p {
@@ -127,6 +160,7 @@
       font-size: 18px;
       line-height: 1.5;
       color: rgba(255,255,255,.94);
+      text-shadow: 0 8px 18px rgba(0,0,0,.14);
     }
 
     .hero-actions {
@@ -142,10 +176,11 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      border: 1px solid rgba(255,255,255,.4);
+      border: 1px solid rgba(255,255,255,.36);
       font-size: 16px;
       font-weight: 850;
       letter-spacing: -.02em;
+      box-shadow: 0 12px 28px rgba(8,15,24,.14);
     }
 
     .hero-btn.primary {
@@ -155,10 +190,10 @@
     }
 
     .hero-btn.secondary {
-      background: rgba(8,15,24,.35);
+      background: rgba(8,15,24,.28);
       color: #fff;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .section-title,
@@ -171,6 +206,12 @@
       letter-spacing: -.03em;
       text-transform: uppercase;
       color: var(--text);
+    }
+
+    .video-panel .section-title,
+    .video-panel .eyebrow {
+      color: #ffffff;
+      text-shadow: 0 8px 18px rgba(0,0,0,.16);
     }
 
     .feature-grid,
@@ -189,9 +230,11 @@
       min-height: 186px;
       padding: 18px 16px;
       border-radius: 22px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      box-shadow: 0 4px 14px rgba(15,23,42,.04);
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.48);
+      box-shadow: 0 4px 14px rgba(15,23,42,.06);
+      backdrop-filter: blur(16px) saturate(1.08);
+      -webkit-backdrop-filter: blur(16px) saturate(1.08);
       color: var(--text);
       overflow: hidden;
       gap: 12px;
@@ -241,10 +284,12 @@
     .feature-card.gold .ficon { background: var(--gold-soft); color: var(--gold); }
 
     .small-card {
-      background: var(--surface);
+      background: rgba(255,255,255,.9);
       border-radius: 18px;
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,.48);
+      box-shadow: 0 4px 14px rgba(15,23,42,.06);
+      backdrop-filter: blur(16px) saturate(1.08);
+      -webkit-backdrop-filter: blur(16px) saturate(1.08);
       padding: 16px 14px;
       min-height: 108px;
       display: flex;
@@ -290,9 +335,11 @@
       gap: 14px;
       align-items: center;
       border-radius: 22px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow-soft);
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.48);
+      box-shadow: 0 4px 14px rgba(15,23,42,.06);
+      backdrop-filter: blur(16px) saturate(1.08);
+      -webkit-backdrop-filter: blur(16px) saturate(1.08);
       padding: 18px;
     }
 
@@ -651,8 +698,27 @@
     }
 
     @media (max-width: 560px) {
-      .page { padding: 8px 10px 34px; }
-      .hero { min-height: 560px; }
+      .page { padding: 0 10px 34px; }
+      .video-stage {
+        margin-top: 0;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+      }
+      .video-backdrop {
+        top: 0;
+        height: var(--stage-height);
+        border-radius: 0 0 28px 28px;
+      }
+      .video-scroll {
+        margin-top: calc(-1 * var(--stage-height));
+      }
+      .hero {
+        min-height: var(--stage-height);
+        border-radius: 0 0 28px 28px;
+      }
+      .hero-copy {
+        padding: 0 18px 20px;
+      }
       .hero h1 { font-size: 52px; }
       .hero p { max-width: 90%; font-size: 17px; }
       .feature-card { min-height: 180px; }
@@ -666,105 +732,112 @@
   <div id="ftg-global-actionbar-root"></div>
 
   <main class="page">
-    <section class="section hero">
-      <img src="https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Vista sulle Cinque Terre" />
-      <div class="hero-copy">
-        <h1>Cinque Terre made simple</h1>
-        <p>Mappe, treni, sentieri, meteo e tutto ciò che serve per vivere al meglio le Cinque Terre.</p>
-        <div class="hero-actions">
-          <a class="hero-btn primary" href="map.html">🗺 ESPLORA LA MAPPA</a>
-          <a class="hero-btn secondary" href="public-transport.html">🚆 TRASPORTI E TRENI</a>
-        </div>
+    <section class="video-stage" aria-label="Hero con video fisso">
+      <div class="video-backdrop">
+        <video src="videohome.mp4" autoplay muted loop playsinline preload="auto"></video>
       </div>
-    </section>
 
-    <section class="section">
-      <h2 class="section-title">Tutto quello che ti serve</h2>
-      <div class="feature-grid">
-        <a class="feature-card orange" href="public-transport.html">
-          <div class="ficon">🚆</div>
-          <div>
-            <h2>Treni e trasporti</h2>
-            <p>Orari, stazioni e collegamenti in tempo reale</p>
+      <div class="video-scroll">
+        <section class="hero">
+          <div class="hero-copy">
+            <h1>Cinque Terre made simple</h1>
+            <p>Mappe, treni, sentieri, meteo e tutto ciò che serve per vivere al meglio le Cinque Terre.</p>
+            <div class="hero-actions">
+              <a class="hero-btn primary" href="map.html">🗺 ESPLORA LA MAPPA</a>
+              <a class="hero-btn secondary" href="public-transport.html">🚆 TRASPORTI E TRENI</a>
+            </div>
           </div>
-          <div>›</div>
-        </a>
-        <a class="feature-card green" href="sentieri.html">
-          <div class="ficon">🥾</div>
-          <div>
-            <h2>Sentieri</h2>
-            <p>Stato sentieri, difficoltà e info utili</p>
+        </section>
+
+        <section class="section video-panel">
+          <h2 class="section-title">Tutto quello che ti serve</h2>
+          <div class="feature-grid">
+            <a class="feature-card orange" href="public-transport.html">
+              <div class="ficon">🚆</div>
+              <div>
+                <h2>Treni e trasporti</h2>
+                <p>Orari, stazioni e collegamenti in tempo reale</p>
+              </div>
+              <div>›</div>
+            </a>
+            <a class="feature-card green" href="sentieri.html">
+              <div class="ficon">🥾</div>
+              <div>
+                <h2>Sentieri</h2>
+                <p>Stato sentieri, difficoltà e info utili</p>
+              </div>
+              <div>›</div>
+            </a>
+            <a class="feature-card blue" href="weather.html">
+              <div class="ficon">☁</div>
+              <div>
+                <h2>Meteo</h2>
+                <p>Previsioni e condizioni mare in tempo reale</p>
+              </div>
+              <div>›</div>
+            </a>
+            <a class="feature-card purple" href="discounts.html">
+              <div class="ficon">◈</div>
+              <div>
+                <h2>Sconti locali</h2>
+                <p>Offerte, card e vantaggi esclusivi</p>
+              </div>
+              <div>›</div>
+            </a>
+            <a class="feature-card red" href="index.html">
+              <div class="ficon">▤</div>
+              <div>
+                <h2>Aggiornamenti</h2>
+                <p>Info ufficiali da fonti locali e trasporti</p>
+              </div>
+              <div>›</div>
+            </a>
+            <a class="feature-card gold" href="index.html">
+              <div class="ficon">i</div>
+              <div>
+                <h2>Guida completa</h2>
+                <p>Consigli, itinerari e cosa vedere</p>
+              </div>
+              <div>›</div>
+            </a>
           </div>
-          <div>›</div>
-        </a>
-        <a class="feature-card blue" href="weather.html">
-          <div class="ficon">☁</div>
-          <div>
-            <h2>Meteo</h2>
-            <p>Previsioni e condizioni mare in tempo reale</p>
+        </section>
+
+        <section class="section video-panel">
+          <h2 class="eyebrow">Live now</h2>
+          <div class="live-grid">
+            <div class="small-card">
+              <div class="metric"><span class="bubble">☀</span><strong>22°</strong></div>
+              <p>Soleggiato<br>Monterosso</p>
+            </div>
+            <div class="small-card">
+              <div class="metric"><span class="bubble" style="background:var(--green-soft);color:var(--green);">🥾</span><strong>12 / 13</strong></div>
+              <p>Sentieri aperti<br>su 13</p>
+            </div>
+            <div class="small-card">
+              <div class="metric"><span class="bubble" style="background:var(--purple-soft);color:var(--purple);">👥</span><strong>Media</strong></div>
+              <p>Affollamento</p>
+            </div>
+            <div class="small-card">
+              <div class="metric"><span class="bubble" style="background:var(--blue-soft);color:var(--blue);">≋</span><strong>Mare calmo</strong></div>
+              <p>Condizioni ottime</p>
+            </div>
           </div>
-          <div>›</div>
-        </a>
-        <a class="feature-card purple" href="discounts.html">
-          <div class="ficon">◈</div>
-          <div>
-            <h2>Sconti locali</h2>
-            <p>Offerte, card e vantaggi esclusivi</p>
-          </div>
-          <div>›</div>
-        </a>
-        <a class="feature-card red" href="index.html">
-          <div class="ficon">▤</div>
-          <div>
-            <h2>Aggiornamenti</h2>
-            <p>Info ufficiali da fonti locali e trasporti</p>
-          </div>
-          <div>›</div>
-        </a>
-        <a class="feature-card gold" href="index.html">
-          <div class="ficon">i</div>
-          <div>
-            <h2>Guida completa</h2>
-            <p>Consigli, itinerari e cosa vedere</p>
-          </div>
-          <div>›</div>
-        </a>
+        </section>
+
+        <section class="section video-panel">
+          <h2 class="eyebrow">Prossimo treno</h2>
+          <a class="train-card" href="public-transport.html">
+            <div class="big-icon">🚆</div>
+            <div>
+              <p class="route">Monterosso → Vernazza</p>
+              <span class="time-strong">16:13 → 16:16</span>
+              <p>⌁ Piattaforma 3</p>
+            </div>
+            <div><span class="badge">In orario</span></div>
+          </a>
+        </section>
       </div>
-    </section>
-
-    <section class="section">
-      <h2 class="eyebrow">Live now</h2>
-      <div class="live-grid">
-        <div class="small-card">
-          <div class="metric"><span class="bubble">☀</span><strong>22°</strong></div>
-          <p>Soleggiato<br>Monterosso</p>
-        </div>
-        <div class="small-card">
-          <div class="metric"><span class="bubble" style="background:var(--green-soft);color:var(--green);">🥾</span><strong>12 / 13</strong></div>
-          <p>Sentieri aperti<br>su 13</p>
-        </div>
-        <div class="small-card">
-          <div class="metric"><span class="bubble" style="background:var(--purple-soft);color:var(--purple);">👥</span><strong>Media</strong></div>
-          <p>Affollamento</p>
-        </div>
-        <div class="small-card">
-          <div class="metric"><span class="bubble" style="background:var(--blue-soft);color:var(--blue);">≋</span><strong>Mare calmo</strong></div>
-          <p>Condizioni ottime</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2 class="eyebrow">Prossimo treno</h2>
-      <a class="train-card" href="public-transport.html">
-        <div class="big-icon">🚆</div>
-        <div>
-          <p class="route">Monterosso → Vernazza</p>
-          <span class="time-strong">16:13 → 16:16</span>
-          <p>⌁ Piattaforma 3</p>
-        </div>
-        <div><span class="badge">In orario</span></div>
-      </a>
     </section>
 
     <section class="section">
