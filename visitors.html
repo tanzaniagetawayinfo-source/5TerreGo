@@ -423,7 +423,7 @@
     <section id="dashboard" class="dashboard hidden">
       <div class="stats-strip">
         <div class="stat">
-          <div class="stat-label">Visitatori</div>
+          <div class="stat-label">Visitatori oggi</div>
           <div id="uniqueVisitors" class="stat-value">—</div>
         </div>
 
@@ -431,17 +431,11 @@
           <div class="stat-label">Ricariche pagina</div>
           <div id="totalVisits" class="stat-value">—</div>
         </div>
-
-        <div class="stat">
-          <div class="stat-label">Pagina top</div>
-          <div id="topPage" class="stat-value" style="font-size:13px; line-height:1.15; letter-spacing:-.02em;">—</div>
-        </div>
       </div>
 
       <div class="toolbar">
         <div class="toolbar-actions">
           <button id="refreshBtn" class="btn primary" type="button">Aggiorna</button>
-          <a class="btn" href="map.html">Apri mappa</a>
         </div>
         <span id="status" class="status-inline">Caricamento…</span>
       </div>
@@ -560,8 +554,7 @@
 
       var totalVisits = document.getElementById('totalVisits');
       var uniqueVisitors = document.getElementById('uniqueVisitors');
-      var topPage = document.getElementById('topPage');
-
+      
       var pageBars = document.getElementById('pageBars');
       var dailyBars = document.getElementById('dailyBars');
       var recentTable = document.getElementById('recentTable');
@@ -731,16 +724,21 @@
           var rows = await loadRows();
           var pageStats = aggregateBy(rows, function (row) { return formatPage(row.page_path); });
           var dailyStats = buildDailyBuckets(rows, 14);
-          var unique = {};
+          var todayUnique = {};
+          var todayStart = new Date();
+          todayStart.setHours(0,0,0,0);
+          var todayReloads = 0;
 
           rows.forEach(function (row) {
             var key = row.session_id || row.ip_hash || '';
-            if (key) unique[key] = true;
+            if (new Date(row.created_at) >= todayStart) {
+              todayReloads += 1;
+              if (key) todayUnique[key] = true;
+            }
           });
 
-          uniqueVisitors.textContent = String(Object.keys(unique).length || 0);
-          totalVisits.textContent = String(rows.length);
-          topPage.textContent = pageStats.length ? pageStats[0].key : '—';
+          uniqueVisitors.textContent = String(Object.keys(todayUnique).length || 0);
+          totalVisits.textContent = String(todayReloads);
 
           pageCount.textContent = pageStats.length + ' pagine';
           dailyCount.textContent = '14 giorni';
