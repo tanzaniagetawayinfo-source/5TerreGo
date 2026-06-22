@@ -109,6 +109,7 @@
       transform-origin: center center;
       transition: opacity 2s ease;
       will-change: opacity, transform;
+      backface-visibility: hidden;
     }
 
     @keyframes ftgDroneZoom {
@@ -186,6 +187,7 @@
       color: #fff;
       pointer-events: none;
       will-change: opacity, transform;
+      --swipe-rise: 0px;
     }
 
     .hero-swipe-label {
@@ -263,6 +265,18 @@
     .video-panel {
       padding-left: 14px;
       padding-right: 14px;
+      contain: layout paint;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    .feature-grid,
+    .live-grid,
+    .train-card,
+    .feature-card,
+    .small-card {
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
 
     .video-panel .section-title,
@@ -1056,11 +1070,19 @@
     (function () {
       var hero = document.querySelector('.hero');
       var swipe = document.querySelector('.hero-swipe');
+      var actionbarRoot = document.getElementById('ftg-global-actionbar-root');
       var ticking = false;
+      var actionbarHeight = 0;
       if (!hero || !swipe) return;
 
       function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
+      }
+
+      function measureActionbar() {
+        var topbar = actionbarRoot ? actionbarRoot.querySelector('.ftg-topbar') : null;
+        var rect = topbar ? topbar.getBoundingClientRect() : (actionbarRoot ? actionbarRoot.getBoundingClientRect() : null);
+        actionbarHeight = rect ? Math.max(0, Math.round(rect.height || 0)) : 0;
       }
 
       function updateSwipe() {
@@ -1068,8 +1090,9 @@
         var scrolled = Math.max(0, -rect.top);
         var fadeEnd = Math.min(window.innerHeight * 0.22, 180);
         var progress = clamp(scrolled / Math.max(1, fadeEnd), 0, 1);
+        var rise = actionbarHeight || 96;
         swipe.style.opacity = String(1 - progress);
-        swipe.style.transform = 'translateX(-50%) translateY(' + (progress * 18) + 'px)';
+        swipe.style.transform = 'translateX(-50%) translateY(' + (-progress * rise) + 'px)';
         ticking = false;
       }
 
@@ -1079,9 +1102,16 @@
         window.requestAnimationFrame(updateSwipe);
       }
 
+      function handleResize() {
+        measureActionbar();
+        requestUpdate();
+      }
+
       window.addEventListener('scroll', requestUpdate, { passive: true });
-      window.addEventListener('resize', requestUpdate);
+      window.addEventListener('resize', handleResize);
+      measureActionbar();
       requestUpdate();
+      setTimeout(handleResize, 160);
     }());
   </script>
   <script>
