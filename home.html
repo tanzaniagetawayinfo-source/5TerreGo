@@ -33,8 +33,7 @@
       --radius-md: 20px;
       --radius-sm: 16px;
       --stage-height: 100svh;
-      --actionbar-offset: 0px;
-      --visible-stage-height: calc(var(--stage-height) - var(--actionbar-offset));
+      
     }
 
     * { box-sizing: border-box; }
@@ -88,13 +87,22 @@
     }
 
     .video-backdrop {
-      position: sticky;
-      top: 8px;
-      height: calc(var(--visible-stage-height) - 8px);
-      border-radius: 0;
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 100vw;
+      height: var(--stage-height);
+      transform: translateX(-50%);
       overflow: hidden;
       background: #0d1729;
       box-shadow: var(--shadow);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .video-backdrop.is-fixed {
+      position: fixed;
+      top: 0;
     }
 
     .video-backdrop .bg-slide {
@@ -136,7 +144,6 @@
     .video-scroll {
       position: relative;
       z-index: 2;
-      margin-top: calc(-1 * (var(--visible-stage-height) - 8px));
       padding-bottom: 8px;
     }
 
@@ -147,7 +154,7 @@
 
     .hero {
       position: relative;
-      min-height: calc(var(--visible-stage-height) - 8px);
+      min-height: var(--stage-height);
       border-radius: 0;
       overflow: hidden;
       background: transparent;
@@ -286,11 +293,9 @@
       min-height: 186px;
       padding: 18px 16px;
       border-radius: 22px;
-      background: rgba(255,255,255,.9);
-      border: 1px solid rgba(255,255,255,.48);
-      box-shadow: 0 4px 14px rgba(15,23,42,.06);
-      backdrop-filter: blur(16px) saturate(1.08);
-      -webkit-backdrop-filter: blur(16px) saturate(1.08);
+      background: rgba(255,255,255,.96);
+      border: 1px solid #eef2f7;
+      box-shadow: 0 4px 14px rgba(15,23,42,.04);
       color: var(--text);
       overflow: hidden;
       gap: 12px;
@@ -391,11 +396,9 @@
       gap: 14px;
       align-items: center;
       border-radius: 22px;
-      background: rgba(255,255,255,.9);
-      border: 1px solid rgba(255,255,255,.48);
-      box-shadow: 0 4px 14px rgba(15,23,42,.06);
-      backdrop-filter: blur(16px) saturate(1.08);
-      -webkit-backdrop-filter: blur(16px) saturate(1.08);
+      background: rgba(255,255,255,.96);
+      border: 1px solid #eef2f7;
+      box-shadow: 0 4px 14px rgba(15,23,42,.04);
       padding: 18px;
     }
 
@@ -761,15 +764,12 @@
         margin-right: calc(50% - 50vw);
       }
       .video-backdrop {
-        top: 0;
-        height: var(--visible-stage-height);
+        width: 100vw;
+        height: var(--stage-height);
         border-radius: 0;
       }
-      .video-scroll {
-        margin-top: calc(-1 * var(--visible-stage-height));
-      }
       .hero {
-        min-height: var(--visible-stage-height);
+        min-height: var(--stage-height);
         border-radius: 0;
       }
       .hero-copy {
@@ -1058,31 +1058,49 @@
   </script>
   <script>
     (function () {
+      var stage = document.querySelector('.video-stage');
+      var backdrop = document.querySelector('.video-backdrop');
       var hero = document.querySelector('.hero');
       var swipe = document.querySelector('.hero-swipe');
       var ticking = false;
-      if (!hero || !swipe) return;
+      if (!stage || !backdrop || !hero) return;
 
       function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
       }
 
-      function updateSwipe() {
-        var rect = hero.getBoundingClientRect();
-        var scrolled = Math.max(0, -rect.top);
+      function updateStage() {
+        var stageRect = stage.getBoundingClientRect();
+        var stageHeight = stage.offsetHeight;
+        var viewportHeight = window.innerHeight;
+        var maxFixed = Math.max(0, stageHeight - viewportHeight);
+        var scrolledIntoStage = Math.max(0, -stageRect.top);
+        var pinned = clamp(scrolledIntoStage, 0, maxFixed);
+        var shouldFix = stageRect.top <= 0 && scrolledIntoStage < maxFixed;
         var fadeStart = 10;
-        var fadeEnd = Math.min(window.innerHeight * 0.26, 220);
-        var progress = clamp((scrolled - fadeStart) / Math.max(1, fadeEnd - fadeStart), 0, 1);
-        var opacity = 1 - progress;
-        swipe.style.opacity = String(opacity);
-        swipe.style.transform = 'translateX(-50%) translateY(' + (progress * 18) + 'px)';
+        var fadeEnd = Math.min(viewportHeight * 0.26, 220);
+        var progress = clamp((Math.max(0, -hero.getBoundingClientRect().top) - fadeStart) / Math.max(1, fadeEnd - fadeStart), 0, 1);
+
+        if (shouldFix) {
+          backdrop.classList.add('is-fixed');
+          backdrop.style.top = '0px';
+        } else {
+          backdrop.classList.remove('is-fixed');
+          backdrop.style.top = pinned + 'px';
+        }
+
+        if (swipe) {
+          swipe.style.opacity = String(1 - progress);
+          swipe.style.transform = 'translateX(-50%) translateY(' + (progress * 18) + 'px)';
+        }
+
         ticking = false;
       }
 
       function requestUpdate() {
         if (ticking) return;
         ticking = true;
-        window.requestAnimationFrame(updateSwipe);
+        window.requestAnimationFrame(updateStage);
       }
 
       window.addEventListener('scroll', requestUpdate, { passive: true });
@@ -1104,13 +1122,7 @@
       var actionbarLoadPromise = null;
       var rootActionbar = document.getElementById('ftg-global-actionbar-root');
 
-      function syncActionbarOffset() {
-        var height = 0;
-        try {
-          height = rootActionbar ? Math.round(rootActionbar.getBoundingClientRect().height || rootActionbar.offsetHeight || 0) : 0;
-        } catch (_error) {}
-        document.documentElement.style.setProperty('--actionbar-offset', Math.max(0, height) + 'px');
-      }
+      
 
       function injectGlobalActionbarHTML(html, cacheKeyPrefix) {
         return new Promise(function (resolve) {
@@ -1212,7 +1224,6 @@
       }
 
       function getInitialLanguage() {
-        syncActionbarOffset();
         var raw = '';
         try { raw = localStorage.getItem('ftg_language') || ''; } catch (_error) {}
         raw = String(raw || 'en').toLowerCase();
@@ -1220,7 +1231,7 @@
         return raw || 'en';
       }
 
-      window.addEventListener('resize', syncActionbarOffset);
+      
 
       loadGlobalActionbarPartial().then(function () {
         if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR !== 'function' || !rootActionbar) return;
@@ -1231,9 +1242,7 @@
           termsHref: '#',
           androidAppHref: '#'
         });
-        syncActionbarOffset();
-        requestAnimationFrame(syncActionbarOffset);
-        setTimeout(syncActionbarOffset, 120);
+        
       }).catch(function () {});
     }());
   </script>
