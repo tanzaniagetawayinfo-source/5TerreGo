@@ -82,24 +82,34 @@
       margin-top: 16px;
     }
 
+    .after-stage {
+      position: relative;
+      z-index: 3;
+      background:
+        radial-gradient(circle at top left, rgba(55,119,255,.05), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,138,31,.06), transparent 22%),
+        linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
+      margin-top: 0;
+      padding-top: 16px;
+    }
+
     .video-stage {
       position: relative;
       margin-top: 16px;
-      height: calc(var(--stage-height) - var(--actionbar-live-height));
-      overflow: hidden;
       isolation: isolate;
+      overflow: hidden;
     }
 
     .video-backdrop {
       position: absolute;
       inset: 0;
-      height: 100%;
       width: 100%;
+      height: 100%;
       overflow: hidden;
       background: #0d1729;
-      box-shadow: var(--shadow);
       z-index: 0;
       pointer-events: none;
+      margin-bottom: 0;
     }
 
     .video-backdrop .bg-slide {
@@ -139,82 +149,73 @@
       pointer-events: none;
     }
 
-    .video-scroll-shell {
+    .video-stage-flow {
       position: relative;
       z-index: 2;
-      height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .video-scroll-shell::-webkit-scrollbar {
-      display: none;
-    }
-
-    .video-scroll {
-      position: relative;
-      z-index: 2;
-      min-height: 100%;
+      margin-top: 0;
+      padding-top: 0;
       padding-bottom: 24px;
     }
 
-    .video-scroll > * {
+    .video-stage-flow > * {
       position: relative;
       z-index: 2;
     }
 
     .hero {
       position: relative;
-      min-height: calc(var(--stage-height) - var(--actionbar-live-height));
+      min-height: clamp(260px, 50svh, calc(var(--stage-height) - var(--actionbar-live-height)));
       border-radius: 0;
       overflow: hidden;
       background: transparent;
       box-shadow: none;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 26px 0 18px;
     }
 
     .hero-copy {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      position: relative;
+      left: auto;
+      top: auto;
+      transform: none;
       z-index: 2;
-      width: calc(100% - 48px);
+      width: calc(100% - 28px);
       max-width: 680px;
-      padding: 0;
+      padding: 0 14px;
       color: #fff;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
+      align-items: flex-start;
+      text-align: left;
     }
 
     .video-panel.first-peek {
-      margin-top: -148px;
+      margin-top: 16px;
       position: relative;
-      z-index: 3;
+      z-index: 2;
     }
 
     .hero h1 {
-      margin: 0 auto;
+      margin: 0;
       max-width: 640px;
       font-size: 58px;
       line-height: .92;
       letter-spacing: -.07em;
       font-weight: 950;
       text-shadow: 0 10px 24px rgba(0,0,0,.18);
-      text-align: center;
+      text-align: left;
     }
 
     .hero p {
-      margin: 16px auto 0;
+      margin: 14px 0 0;
       max-width: 520px;
       font-size: 18px;
       line-height: 1.5;
       color: rgba(255,255,255,.94);
       text-shadow: 0 8px 18px rgba(0,0,0,.14);
-      text-align: center;
+      text-align: left;
     }
 
     
@@ -232,20 +233,9 @@
     }
 
     .video-panel {
+      position: relative;
       padding-left: 14px;
       padding-right: 14px;
-      contain: layout paint;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
-
-    .feature-grid,
-    .live-grid,
-    .train-card,
-    .feature-card,
-    .small-card {
-      transform: translateZ(0);
-      backface-visibility: hidden;
     }
 
     .video-panel .section-title,
@@ -254,13 +244,63 @@
       text-shadow: 0 8px 18px rgba(0,0,0,.16);
     }
 
-    .feature-grid,
-    .live-grid {
+    .feature-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       width: 100%;
       align-items: stretch;
+    }
+
+    .section-head {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .live-switcher {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .live-switcher::-webkit-scrollbar {
+      display: none;
+    }
+
+    .live-tab {
+      border: 0;
+      background: rgba(255,255,255,.82);
+      color: #0b2345;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 8px 22px rgba(7,20,43,.10);
+      cursor: pointer;
+    }
+
+    .live-tab.active {
+      background: #0b2345;
+      color: #fff;
+    }
+
+    .live-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .events-wide {
+      grid-column: 1 / -1;
+      border-radius: 0 0 28px 28px;
+      min-height: 124px;
     }
 
     .feature-card {
@@ -322,16 +362,20 @@
     .feature-card.gold .ficon { background: var(--gold-soft); color: var(--gold); }
 
     .small-card {
-      background: rgba(255,255,255,.96);
-      border-radius: 18px;
+      background: rgba(255,255,255,.92);
       border: 1px solid #eef2f7;
-      box-shadow: 0 4px 14px rgba(15,23,42,.04);
-      padding: 16px 14px;
-      min-height: 108px;
+      box-shadow: 0 12px 30px rgba(8,18,38,.10);
+      padding: 18px 18px 16px;
+      min-height: 150px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
+
+    .small-card.card-tl { border-radius: 28px 0 0 0; }
+    .small-card.card-tr { border-radius: 0 28px 0 0; }
+    .small-card.card-bl { border-radius: 0 0 0 28px; }
+    .small-card.card-br { border-radius: 0 0 28px 0; }
 
     .metric {
       display: flex;
@@ -354,15 +398,193 @@
     }
 
     .metric strong {
-      font-size: 20px;
+      font-size: 22px;
+      line-height: 1;
       letter-spacing: -.04em;
     }
 
     .small-card p {
-      margin: 0;
+      margin: 18px 0 0;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.35;
+    }
+
+    .weather-card {
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .weather-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 2px;
+    }
+
+    .weather-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .weather-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .weather-temp {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.04em;
+      color: var(--text);
+    }
+
+    .weather-location {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .weather-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .weather-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .weather-line .label {
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    .weather-line .value {
+      color: var(--text);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .weather-line.is-crowd .value {
+      color: #6f42c1;
+    }
+
+    .loading-note {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .events-card {
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .events-wide .events-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .events-wide .train-divider {
+      display: none;
+    }
+
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .event-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .event-time {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: var(--muted);
+    }
+
+    .event-title {
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1.2;
+      color: var(--text);
+    }
+
+    .event-place {
+      font-size: 12px;
+      line-height: 1.3;
+      color: var(--muted);
+    }
+
+    .train-dual {
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .train-dual .metric {
+      margin-bottom: 2px;
+    }
+
+    .train-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .train-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .train-destination {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: var(--muted);
+    }
+
+    .train-time {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.04em;
+      color: var(--text);
+    }
+
+    .train-meta {
+      font-size: 12px;
+      line-height: 1.3;
+      color: var(--muted);
+    }
+
+    .train-divider {
+      height: 1px;
+      background: #e9eef5;
+      width: 100%;
     }
 
     .train-card {
@@ -481,7 +703,31 @@
 
     .cta-card { min-height: 286px; }
 
-    .discover-card img,
+    .discover-carousel {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .discover-carousel .discover-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.02) translate3d(0, 0, 0);
+      transform-origin: center center;
+      transition: opacity 2s ease;
+      will-change: opacity, transform;
+      backface-visibility: hidden;
+    }
+
+    .discover-carousel .discover-slide.is-active {
+      opacity: 1;
+    }
+
     .cta-card img {
       position: absolute;
       inset: 0;
@@ -500,6 +746,30 @@
 
     .cta-card::after {
       background: linear-gradient(180deg, rgba(12,25,44,.10), rgba(17,33,54,.58));
+    }
+
+    .discover-pill {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 4;
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.9);
+      color: #0b2345;
+      font-size: 12px;
+      font-weight: 850;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .villages-wrap {
+      margin-top: 10px;
     }
 
     .discover-copy,
@@ -744,27 +1014,29 @@
         border-radius: 0;
         box-shadow: none;
       }
-      .video-scroll-shell {
-        height: 100%;
+      .video-stage-flow {
+        margin-top: 0;
+        padding-top: 0;
       }
       .hero {
-        min-height: calc(var(--stage-height) - var(--actionbar-live-height));
+        min-height: 44svh;
         border-radius: 0;
+        padding: 20px 0 14px;
       }
       .hero-copy {
-        width: calc(100% - 36px);
+        width: calc(100% - 20px);
         max-width: 640px;
-        padding: 0;
+        padding: 0 10px;
       }
       .video-panel {
         padding-left: 10px;
         padding-right: 10px;
       }
       .video-panel.first-peek {
-        margin-top: -126px;
+        margin-top: 16px;
       }
-      .hero h1 { font-size: 52px; max-width: 92%; }
-      .hero p { max-width: 92%; font-size: 17px; }
+      .hero h1 { font-size: 48px; max-width: 92%; }
+      .hero p { max-width: 92%; font-size: 16px; }
       .hero-swipe {
         width: calc(100% - 28px);
         bottom: 22px;
@@ -774,6 +1046,26 @@
       }
       .hero-swipe-icon {
         font-size: 16px;
+      }
+      .live-grid {
+        gap: 5px;
+      }
+      .small-card {
+        min-height: 138px;
+        padding: 16px 16px 14px;
+      }
+      .events-wide {
+        min-height: 112px;
+      }
+      .events-wide .events-list {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .metric strong {
+        font-size: 20px;
+      }
+      .train-time {
+        font-size: 21px;
       }
       .feature-card { min-height: 180px; }
       .feature-card h2 { font-size: 17px; }
@@ -795,14 +1087,28 @@
         <img class="bg-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
       </div>
 
-      <div class="video-scroll-shell">
-      <div class="video-scroll">
+      <div class="video-stage-flow">
         <section class="hero">
           <div class="hero-copy">
             <h1>Cinque Terre made simple</h1>
             <p>Mappe, treni, sentieri, meteo e tutto ciò che serve per vivere al meglio le Cinque Terre.</p>
             </div>
         </section>
+
+        <section class="section video-panel">
+          <div class="section-head">
+            <h2 class="eyebrow">Live now</h2>
+            <div class="live-switcher" id="liveNowTabs">
+              <button class="live-tab active" data-place="monterosso">Monterosso now</button>
+              <button class="live-tab" data-place="vernazza">Vernazza now</button>
+              <button class="live-tab" data-place="corniglia">Corniglia now</button>
+              <button class="live-tab" data-place="manarola">Manarola now</button>
+              <button class="live-tab" data-place="riomaggiore">Riomaggiore now</button>
+            </div>
+          </div>
+          <div class="live-grid" id="liveNowGrid"></div>
+        </section>
+
 
         <section class="section video-panel first-peek">
           <div class="feature-grid">
@@ -856,63 +1162,35 @@
             </a>
           </div>
         </section>
-
-        <section class="section video-panel">
-          <h2 class="eyebrow">Live now</h2>
-          <div class="live-grid">
-            <div class="small-card">
-              <div class="metric"><span class="bubble">☀</span><strong>22°</strong></div>
-              <p>Soleggiato<br>Monterosso</p>
-            </div>
-            <div class="small-card">
-              <div class="metric"><span class="bubble" style="background:var(--green-soft);color:var(--green);">🥾</span><strong>12 / 13</strong></div>
-              <p>Sentieri aperti<br>su 13</p>
-            </div>
-            <div class="small-card">
-              <div class="metric"><span class="bubble" style="background:var(--purple-soft);color:var(--purple);">👥</span><strong>Media</strong></div>
-              <p>Affollamento</p>
-            </div>
-            <div class="small-card">
-              <div class="metric"><span class="bubble" style="background:var(--blue-soft);color:var(--blue);">≋</span><strong>Mare calmo</strong></div>
-              <p>Condizioni ottime</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="section video-panel">
-          <h2 class="eyebrow">Prossimo treno</h2>
-          <a class="train-card" href="public-transport.html">
-            <div class="big-icon">🚆</div>
-            <div>
-              <p class="route">Monterosso → Vernazza</p>
-              <span class="time-strong">16:13 → 16:16</span>
-              <p>⌁ Piattaforma 3</p>
-            </div>
-            <div><span class="badge">In orario</span></div>
-          </a>
-        </section>
-      </div>
       </div>
     </section>
 
+    <div class="after-stage">
     <section class="section">
       <h2 class="eyebrow">Esplora 5 Terre</h2>
-      <div class="villages">
-        <a class="village-mini" href="map.html#monterosso"><img src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="Monterosso"><span>Monterosso</span></a>
-        <a class="village-mini" href="map.html#vernazza"><img src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="Vernazza"><span>Vernazza</span></a>
-        <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="Corniglia"><span>Corniglia</span></a>
-        <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="Manarola"><span>Manarola</span></a>
-        <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="Riomaggiore"><span>Riomaggiore</span></a>
-      </div>
-    </section>
-
-    <section class="section discover-card">
-      <a href="map.html" style="position:absolute;inset:0;z-index:3" aria-label="Scopri i borghi"></a>
-      <img src="https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Scopri i borghi" />
-      <div class="discover-copy">
-        <h2>Scopri i borghi</h2>
-        <p>Cinque paesi, un’esperienza indimenticabile.</p>
-        <span class="mini-btn">SCOPRI DI PIÙ</span>
+      <section class="discover-card">
+        <a href="map.html" style="position:absolute;inset:0;z-index:3" aria-label="Vai alla mappa interattiva"></a>
+        <div class="discover-carousel" aria-hidden="true">
+          <img class="discover-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
+          <img class="discover-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
+          <img class="discover-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
+          <img class="discover-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
+          <img class="discover-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
+        </div>
+        <span class="discover-pill">VAI ALLA MAPPA INTERATTIVA</span>
+        <div class="discover-copy">
+          <h2>Scopri i borghi</h2>
+          <p>Seleziona un borgo per aprirlo nella mappa interattiva, poi solleva la tendina per aprire la panoramica villaggio.</p>
+        </div>
+      </section>
+      <div class="villages-wrap">
+        <div class="villages">
+          <a class="village-mini" href="map.html#monterosso"><img src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="Monterosso"><span>Monterosso</span></a>
+          <a class="village-mini" href="map.html#vernazza"><img src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="Vernazza"><span>Vernazza</span></a>
+          <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="Corniglia"><span>Corniglia</span></a>
+          <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="Manarola"><span>Manarola</span></a>
+          <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="Riomaggiore"><span>Riomaggiore</span></a>
+        </div>
       </div>
     </section>
 
@@ -1003,12 +1281,618 @@
       © 2025 5TerreGo.com<br>
       by Rosetta Ventures FZ-LLC
     </div>
+    </div>
   </main>
 
   <script src="site-analytics.js?v=3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const VILLAGE_LABELS = {
+      monterosso: 'Monterosso',
+      vernazza: 'Vernazza',
+      corniglia: 'Corniglia',
+      manarola: 'Manarola',
+      riomaggiore: 'Riomaggiore'
+    };
+
+    const VILLAGE_COORDS = {
+      monterosso: { latitude: 44.1463, longitude: 9.6545 },
+      vernazza: { latitude: 44.1349, longitude: 9.6827 },
+      corniglia: { latitude: 44.1198, longitude: 9.7086 },
+      manarola: { latitude: 44.1060, longitude: 9.7271 },
+      riomaggiore: { latitude: 44.0992, longitude: 9.7387 }
+    };
+
+    const WEATHER_CODE_LABELS = {
+      0: { day: '☀️', night: '🌙' },
+      1: { day: '🌤️', night: '🌙' },
+      2: { day: '⛅', night: '☁️' },
+      3: { day: '☁️', night: '☁️' },
+      45: { day: '🌫️', night: '🌫️' },
+      48: { day: '🌫️', night: '🌫️' },
+      51: { day: '🌦️', night: '🌧️' },
+      53: { day: '🌦️', night: '🌧️' },
+      55: { day: '🌧️', night: '🌧️' },
+      61: { day: '🌦️', night: '🌧️' },
+      63: { day: '🌧️', night: '🌧️' },
+      65: { day: '🌧️', night: '🌧️' },
+      71: { day: '🌨️', night: '🌨️' },
+      73: { day: '🌨️', night: '🌨️' },
+      75: { day: '❄️', night: '❄️' },
+      80: { day: '🌦️', night: '🌧️' },
+      81: { day: '🌧️', night: '🌧️' },
+      82: { day: '⛈️', night: '⛈️' },
+      95: { day: '⛈️', night: '⛈️' },
+      96: { day: '⛈️', night: '⛈️' },
+      99: { day: '⛈️', night: '⛈️' }
+    };
+
+    const liveNowFallback = {
+      monterosso: {
+        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Media' },
+        trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
+        crowd: { value: 'Media', sub: 'spiaggia e centro' },
+        events: []
+      },
+      vernazza: {
+        weather: { temperature_c: 21, condition_emoji: '⛅', uv_label: 'UV 5', crowd_label: 'Alta' },
+        trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
+        crowd: { value: 'Alta', sub: 'piazzetta' },
+        events: []
+      },
+      corniglia: {
+        weather: { temperature_c: 21, condition_emoji: '☀️', uv_label: 'UV 5', crowd_label: 'Bassa' },
+        trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
+        crowd: { value: 'Bassa', sub: 'borgo' },
+        events: []
+      },
+      manarola: {
+        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Alta' },
+        trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
+        crowd: { value: 'Alta', sub: 'belvedere' },
+        events: []
+      },
+      riomaggiore: {
+        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Media' },
+        trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
+        crowd: { value: 'Media', sub: 'porto' },
+        events: []
+      }
+    };
+
+    const TRAIN_RT_ENDPOINTS = [
+      'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime',
+      window.FTG_TRAIN_RT_ENDPOINT,
+      window.FTG_TRANSPORT_ENDPOINT,
+      window.FTG_PUBLIC_TRANSPORT_ENDPOINT,
+      window.__TRAIN_RT_ENDPOINT,
+      '/api/trains/realtime'
+    ].filter(Boolean);
+
+    const VT_DIRECT_BASES = ['https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno'];
+    const VT_STATION_ALIASES = {
+      monterosso: ['Monterosso'],
+      monterossoalmare: ['Monterosso'],
+      vernazza: ['Vernazza'],
+      corniglia: ['Corniglia'],
+      manarola: ['Manarola'],
+      riomaggiore: ['Riomaggiore'],
+      laspezia: ['La Spezia Centrale', 'La Spezia'],
+      laspeziacentrale: ['La Spezia Centrale'],
+      levanto: ['Levanto']
+    };
+
+    function getWeatherEmoji(weatherCode, isDay) {
+      var entry = WEATHER_CODE_LABELS[weatherCode] || { day: '🌤️', night: '☁️' };
+      return isDay ? entry.day : entry.night;
+    }
+
+    async function fetchOpenMeteoWeather(village) {
+      var coords = VILLAGE_COORDS[village] || VILLAGE_COORDS.monterosso;
+      var url = new URL('https://api.open-meteo.com/v1/forecast');
+      url.searchParams.set('latitude', coords.latitude);
+      url.searchParams.set('longitude', coords.longitude);
+      url.searchParams.set('current', 'temperature_2m,weather_code,is_day');
+      url.searchParams.set('daily', 'uv_index_max');
+      url.searchParams.set('timezone', 'auto');
+      url.searchParams.set('forecast_days', '1');
+      var response = await fetch(url.toString(), { cache: 'no-store' });
+      if (!response.ok) throw new Error('Open-Meteo HTTP ' + response.status);
+      var payload = await response.json();
+      var current = payload.current || {};
+      var daily = payload.daily || {};
+      var uv = Array.isArray(daily.uv_index_max) ? daily.uv_index_max[0] : null;
+      return {
+        temperature_c: current.temperature_2m,
+        condition_emoji: getWeatherEmoji(current.weather_code, current.is_day === 1),
+        uv_label: uv != null ? 'UV ' + Math.round(Number(uv)) : '—'
+      };
+    }
+
+    function getSupabaseClient() {
+      if (window.__ftgSupabaseClient) return window.__ftgSupabaseClient;
+      if (window.ftgSupabase) return window.ftgSupabase;
+      if (window.supabaseClient) return window.supabaseClient;
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') return null;
+
+      var url = window.FTG_SUPABASE_URL || window.SUPABASE_URL || '';
+      var anonKey = window.FTG_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || '';
+      if (!url || !anonKey) return null;
+
+      window.__ftgSupabaseClient = window.supabase.createClient(url, anonKey);
+      return window.__ftgSupabaseClient;
+    }
+
+    function getItalianNow() {
+      var parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Rome',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(new Date());
+      var map = {};
+      parts.forEach(function (part) { map[part.type] = part.value; });
+      return {
+        isoDate: map.year + '-' + map.month + '-' + map.day,
+        time: map.hour + ':' + map.minute
+      };
+    }
+
+    function pad(value) {
+      return String(value).length === 1 ? '0' + value : String(value);
+    }
+
+    function toMinutes(value) {
+      var parts = String(value || '00:00').split(':');
+      return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+    }
+
+    function normalizeTime(value) {
+      var raw = String(value || '').trim();
+      var parts = [];
+      if (!raw) return '';
+      if (raw.indexOf(':') > -1) {
+        parts = raw.split(':');
+        if (parts.length > 1) return pad(parts[0]) + ':' + String(parts[1]).slice(0, 2);
+      }
+      if (raw.length === 4 && !isNaN(parseInt(raw, 10))) return raw.slice(0, 2) + ':' + raw.slice(2);
+      return '';
+    }
+
+    function inferDuration(departure, arrival) {
+      if (!departure || !arrival || arrival === '—') return '—';
+      var diff = toMinutes(arrival) - toMinutes(departure);
+      if (diff <= 0) return '—';
+      return diff + ' min';
+    }
+
+    function formatTime(value) {
+      if (!value) return '—';
+      var date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '—';
+      return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatMillisToTime(value) {
+      if (!value) return '—';
+      return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Rome',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).format(new Date(value));
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    async function fetchTextStrict(url) {
+      var response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + url);
+      return response.text();
+    }
+
+    async function fetchJsonStrict(url) {
+      var response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + url);
+      return response.json();
+    }
+
+    function normalizeStationKey(value) {
+      var text = String(value || '').toLowerCase();
+      var normalized = text.normalize ? text.normalize('NFD') : text;
+      var output = '';
+      for (var i = 0; i < normalized.length; i += 1) {
+        var ch = normalized.charAt(i);
+        var code = normalized.charCodeAt(i);
+        if (code >= 768 && code <= 879) continue;
+        if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) output += ch;
+      }
+      return output;
+    }
+
+    function stationAliasList(name) {
+      var key = normalizeStationKey(name);
+      return VT_STATION_ALIASES[key] || [name];
+    }
+
+    function parseAutocompleteText(text) {
+      return String(text || '')
+        .split(String.fromCharCode(10))
+        .map(function (line) { return line.split(String.fromCharCode(13)).join('').trim(); })
+        .filter(Boolean)
+        .map(function (line) {
+          var parts = line.split('|');
+          return { label: (parts[0] || '').trim(), code: (parts[1] || '').trim() };
+        })
+        .filter(function (row) { return row.label && row.code; });
+    }
+
+    async function resolveStationViaViaggiaTreno(name) {
+      var aliases = stationAliasList(name);
+      for (var b = 0; b < VT_DIRECT_BASES.length; b += 1) {
+        for (var a = 0; a < aliases.length; a += 1) {
+          var text = await fetchTextStrict(VT_DIRECT_BASES[b] + '/autocompletaStazione/' + encodeURIComponent(aliases[a]));
+          var rows = parseAutocompleteText(text);
+          if (rows.length) {
+            return {
+              base: VT_DIRECT_BASES[b],
+              code: rows[0].code,
+              label: rows[0].label,
+              requested: name
+            };
+          }
+        }
+      }
+      throw new Error('Station not found for ' + name);
+    }
+
+    function buildViaggiaTrenoDateTime(date, time) {
+      var parts = String(date || '').split('-');
+      var jsDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return weekdays[jsDate.getDay()] + ' ' + months[jsDate.getMonth()] + ' ' + jsDate.getDate() + ' ' + jsDate.getFullYear() + ' ' + time + ':00';
+    }
+
+    function stopMatchesStation(stop, station) {
+      if (!stop || !station) return false;
+      if (String(stop.id || '') === String(station.code || '')) return true;
+      var stopKey = normalizeStationKey(stop.stazione || '');
+      var stationKey = normalizeStationKey(station.requested || '');
+      var labelKey = normalizeStationKey(station.label || '');
+      return stopKey === stationKey || stopKey === labelKey || stopKey.indexOf(stationKey) > -1 || stationKey.indexOf(stopKey) > -1 || stopKey.indexOf(labelKey) > -1 || labelKey.indexOf(stopKey) > -1;
+    }
+
+    function findStopIndex(stops, station, startIndex) {
+      for (var i = startIndex || 0; i < stops.length; i += 1) {
+        if (stopMatchesStation(stops[i], station)) return i;
+      }
+      return -1;
+    }
+
+    function pickMillis() {
+      for (var i = 0; i < arguments.length; i += 1) {
+        var parsed = Number(arguments[i]);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      return null;
+    }
+
+    async function enrichViaggiaTrenoDeparture(base, row, fromStation, toStation) {
+      var originCode = row.codOrigine || fromStation.code;
+      var trainNumber = row.numeroTreno;
+      var departureKey = row.millisDataPartenza || row.dataPartenzaTreno;
+      if (!originCode || !trainNumber || !departureKey) return null;
+
+      var andamento = await fetchJsonStrict(base + '/andamentoTreno/' + encodeURIComponent(originCode) + '/' + encodeURIComponent(trainNumber) + '/' + encodeURIComponent(departureKey));
+      var stops = Array.isArray(andamento && andamento.fermate) ? andamento.fermate : [];
+      if (!stops.length) return null;
+
+      var fromIndex = findStopIndex(stops, fromStation, 0);
+      var toIndex = findStopIndex(stops, toStation, Math.max(0, fromIndex + 1));
+      if (fromIndex === -1 || toIndex === -1 || toIndex <= fromIndex) return null;
+
+      var fromStop = stops[fromIndex];
+      var toStop = stops[toIndex];
+      var departureMillis = pickMillis(fromStop.partenzaReale, fromStop.effettiva, fromStop.partenza_teorica, fromStop.programmata, row.orarioPartenza, row.partenzaTreno);
+      var arrivalMillis = pickMillis(toStop.arrivoReale, toStop.effettiva, toStop.arrivo_teorico, toStop.programmata);
+      var platform = fromStop.binarioEffettivoPartenzaDescrizione || fromStop.binarioProgrammatoPartenzaDescrizione || row.binarioEffettivoPartenzaDescrizione || row.binarioProgrammatoPartenzaDescrizione || '';
+
+      return {
+        destination: toStation.requested,
+        departure_at: departureMillis ? new Date(departureMillis).toISOString() : null,
+        arrival_at: arrivalMillis ? new Date(arrivalMillis).toISOString() : null,
+        platform: platform || '',
+        status_label: 'Live',
+        duration: inferDuration(formatMillisToTime(departureMillis), formatMillisToTime(arrivalMillis))
+      };
+    }
+
+    function buildHomeRealtimeUrl(endpoint, fromName, toName) {
+      var now = getItalianNow();
+      var url = new URL(endpoint, window.location.origin);
+      url.searchParams.set('from', fromName);
+      url.searchParams.set('to', toName);
+      url.searchParams.set('date', now.isoDate);
+      url.searchParams.set('time', now.time);
+      return url.toString();
+    }
+
+    function normalizeRealtimeRow(row, fromName, toName) {
+      var departure = normalizeTime(row.departure || row.departureTime || row.scheduledDeparture || row.orarioPartenza);
+      var platform = row.platform || row.binario || row.platformDeparture || row.platformCode || '';
+      var rawDelay = row.delayMinutes != null ? row.delayMinutes : row.delay;
+      var delay = parseInt(rawDelay, 10);
+      var rawStatus = String(row.status || '').toLowerCase();
+      var cancelled = !!(row.cancelled || row.canceled || row.suppressed || row.soppressed || rawStatus === 'cancelled');
+      var statusLabel = 'In orario';
+      if (cancelled) statusLabel = 'Cancellato';
+      else if (!isNaN(delay) && delay > 0) statusLabel = '+' + delay + ' min';
+      else if (rawStatus === 'scheduled') statusLabel = 'Programmato';
+      return {
+        destination: row.to || row.destination || row.destinationName || row.arrivo || toName,
+        departure_display: departure || '—',
+        departure_at: null,
+        platform: platform || '',
+        status_label: statusLabel
+      };
+    }
+
+    async function fetchRealtimeTrainRows(fromName, toName) {
+      var lastError = null;
+      for (var i = 0; i < TRAIN_RT_ENDPOINTS.length; i += 1) {
+        var endpoint = TRAIN_RT_ENDPOINTS[i];
+        if (!endpoint) continue;
+        try {
+          var requestUrl = buildHomeRealtimeUrl(endpoint, fromName, toName);
+          var response = await fetch(requestUrl, { cache: 'no-store' });
+          if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + requestUrl);
+          var payload = await response.json();
+          var rows = Array.isArray(payload)
+            ? payload
+            : (payload.trains || payload.departures || payload.services || payload.data || []);
+          var normalized = rows
+            .map(function (row) { return normalizeRealtimeRow(row, fromName, toName); })
+            .filter(function (row) { return row && row.departure_display && row.departure_display !== '—'; })
+            .sort(function (a, b) { return toMinutes(a.departure_display) - toMinutes(b.departure_display); });
+          if (normalized.length) return normalized;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      if (lastError) throw lastError;
+      return [];
+    }
+
+    async function fetchFirstTrainForDirection(fromName, toName) {
+      try {
+        var realtimeRows = await fetchRealtimeTrainRows(fromName, toName);
+        if (realtimeRows.length) return realtimeRows[0];
+      } catch (_error) {}
+
+      var now = getItalianNow();
+      var fromStation = await resolveStationViaViaggiaTreno(fromName);
+      var toStation = await resolveStationViaViaggiaTreno(toName);
+      var base = fromStation.base;
+      var stamp = buildViaggiaTrenoDateTime(now.isoDate, now.time);
+      var departures = await fetchJsonStrict(base + '/partenze/' + encodeURIComponent(fromStation.code) + '/' + encodeURIComponent(stamp));
+
+      if (!Array.isArray(departures) || !departures.length) return null;
+
+      var limit = Math.min(departures.length, 8);
+      var candidates = [];
+      for (var i = 0; i < limit; i += 1) {
+        try {
+          var item = await enrichViaggiaTrenoDeparture(base, departures[i], fromStation, toStation);
+          if (item && item.departure_at) candidates.push(item);
+        } catch (_error) {}
+      }
+
+      candidates.sort(function (a, b) {
+        return new Date(a.departure_at).getTime() - new Date(b.departure_at).getTime();
+      });
+
+      return candidates[0] || null;
+    }
+
+    async function fetchHomeStationDepartures(village) {
+      var villageName = VILLAGE_LABELS[village] || 'Monterosso';
+      var fromName = villageName;
+      var results = await Promise.allSettled([
+        fetchFirstTrainForDirection(fromName, 'La Spezia Centrale'),
+        fetchFirstTrainForDirection(fromName, 'Levanto')
+      ]);
+
+      return results.map(function (result, index) {
+        if (result.status === 'fulfilled' && result.value) return result.value;
+        return {
+          destination: index === 0 ? 'La Spezia Centrale' : 'Levanto',
+          departure_at: null,
+          departure_display: '—',
+          platform: '',
+          status_label: '—',
+          duration: '—'
+        };
+      });
+    }
+
+    function getTrainDisplayTime(item) {
+      if (!item) return '—';
+      if (item.departure_display) return item.departure_display;
+      return formatTime(item.departure_at);
+    }
+
+    function buildLiveNowMarkup(place, data, meta) {
+      var villageName = VILLAGE_LABELS[place] || 'Monterosso';
+      var weather = data.weather || {};
+      var trains = Array.isArray(data.trains) ? data.trains.slice(0, 2) : [];
+      var crowd = data.crowd || { value: 'Media', sub: villageName };
+      var events = Array.isArray(data.events) ? data.events.slice(0, 2) : [];
+      var stationName = data.stationName || ('Stazione ' + villageName);
+
+      while (trains.length < 2) trains.push(null);
+      while (events.length < 2) events.push(null);
+
+      return `
+        <div class="small-card card-tl weather-card">
+          <div class="weather-header metric">
+            <span class="bubble">☁</span>
+            <strong>Meteo ${escapeHtml(villageName)}</strong>
+          </div>
+          <div class="weather-top">
+            <span class="bubble">${escapeHtml(weather.condition_emoji || '☀️')}</span>
+            <div class="weather-main">
+              <div class="weather-temp">${weather.temperature_c != null ? `${Math.round(Number(weather.temperature_c))}°` : '—'}</div>
+              <div class="weather-location">${escapeHtml(villageName)}</div>
+            </div>
+          </div>
+          <div class="weather-details">
+            <div class="weather-line">
+              <span class="label">UV</span>
+              <span class="value">${escapeHtml(weather.uv_label || '—')}</span>
+            </div>
+            <div class="weather-line is-crowd">
+              <span class="label">Affollamento</span>
+              <span class="value">${escapeHtml(weather.crowd_label || crowd.value || '—')}</span>
+            </div>
+          </div>
+          ${meta && meta.weatherFallback ? '<div class="loading-note">Meteo Open-Meteo non disponibile, uso fallback locale.</div>' : ''}
+        </div>
+        <div class="small-card card-tr train-dual">
+          <div class="metric">
+            <span class="bubble" style="background:var(--green-soft);color:var(--green);">🚆</span>
+            <strong>${escapeHtml(stationName)}</strong>
+          </div>
+          <div class="train-list">
+            <div class="train-row">
+              <div class="train-destination">Verso ${trains[0] ? escapeHtml(trains[0].destination || 'La Spezia Centrale') : 'La Spezia Centrale'}</div>
+              <div class="train-time">${trains[0] ? escapeHtml(getTrainDisplayTime(trains[0])) : '—'}</div>
+              <div class="train-meta">${trains[0] && getTrainDisplayTime(trains[0]) !== '—' ? escapeHtml((trains[0].status_label || 'Live') + (trains[0].platform ? ' · Binario ' + trains[0].platform : '')) : 'Sto cercando la prossima corsa'}</div>
+            </div>
+            <div class="train-divider"></div>
+            <div class="train-row">
+              <div class="train-destination">Verso ${trains[1] ? escapeHtml(trains[1].destination || 'Levanto') : 'Levanto'}</div>
+              <div class="train-time">${trains[1] ? escapeHtml(getTrainDisplayTime(trains[1])) : '—'}</div>
+              <div class="train-meta">${trains[1] && getTrainDisplayTime(trains[1]) !== '—' ? escapeHtml((trains[1].status_label || 'Live') + (trains[1].platform ? ' · Binario ' + trains[1].platform : '')) : 'Sto cercando la prossima corsa'}</div>
+            </div>
+          </div>
+        </div>
+        <div class="small-card events-card events-wide">
+          <div class="metric">
+            <span class="bubble" style="background:var(--orange-soft);color:var(--orange);">✦</span>
+            <strong>Oggi a ${escapeHtml(villageName)}</strong>
+          </div>
+          <div class="events-list">
+            <div class="event-row">
+              <div class="event-time">${events[0] ? escapeHtml(formatTime(events[0].starts_at)) : '—'}</div>
+              <div class="event-title">${events[0] ? escapeHtml(events[0].title || '—') : 'Nessun evento caricato'}</div>
+              <div class="event-place">${events[0] ? escapeHtml(events[0].venue || '—') : 'Aggiungi eventi in Supabase'}</div>
+            </div>
+            <div class="train-divider"></div>
+            <div class="event-row">
+              <div class="event-time">${events[1] ? escapeHtml(formatTime(events[1].starts_at)) : '—'}</div>
+              <div class="event-title">${events[1] ? escapeHtml(events[1].title || '—') : 'Nessun altro evento'}</div>
+              <div class="event-place">${events[1] ? escapeHtml(events[1].venue || '—') : 'Aggiungi eventi in Supabase'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadLiveNow(place) {
+      var grid = document.getElementById('liveNowGrid');
+      var village = place || 'monterosso';
+      var fallback = liveNowFallback[village] || liveNowFallback.monterosso;
+      var client = getSupabaseClient();
+      var today = new Date().toISOString().slice(0, 10);
+      if (!grid) return;
+
+      grid.innerHTML = buildLiveNowMarkup(village, fallback, { weatherFallback: true });
+
+      try {
+        var weatherPromise = fetchOpenMeteoWeather(village).then(function (data) {
+          return { data: data };
+        }).catch(function () {
+          return { data: null };
+        });
+        var eventsPromise = client
+          ? client.from('live_events').select('title, venue, starts_at, sort_order').eq('village', village).eq('event_date', today).order('sort_order', { ascending: true }).order('starts_at', { ascending: true }).limit(2)
+          : Promise.resolve({ data: [] });
+        var trainsPromise = fetchHomeStationDepartures(village).catch(function () { return fallback.trains; });
+
+        var results = await Promise.all([weatherPromise, eventsPromise, trainsPromise]);
+        var weatherRes = results[0] || {};
+        var eventsRes = results[1] || {};
+        var trainsRes = results[2] || [];
+
+        var merged = {
+          weather: Object.assign({}, fallback.weather, weatherRes.data || {}, { crowd_label: fallback.crowd && fallback.crowd.value ? fallback.crowd.value : (fallback.weather && fallback.weather.crowd_label) }),
+          trains: Array.isArray(trainsRes) ? trainsRes : fallback.trains,
+          crowd: fallback.crowd,
+          events: Array.isArray(eventsRes.data) ? eventsRes.data : fallback.events,
+          stationName: 'Stazione ' + (VILLAGE_LABELS[village] || 'Monterosso')
+        };
+
+        grid.innerHTML = buildLiveNowMarkup(village, merged, {
+          weatherFallback: !weatherRes.data
+        });
+      } catch (error) {
+        console.error('Live now load failed', error);
+      }
+    }
+
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('.live-tab');
+      if (!btn) return;
+      document.querySelectorAll('.live-tab').forEach(function (tab) {
+        tab.classList.remove('active');
+      });
+      btn.classList.add('active');
+      loadLiveNow(btn.getAttribute('data-place'));
+    });
+
+    loadLiveNow('monterosso');
+  </script>
   <script>
     (function () {
       var slides = Array.prototype.slice.call(document.querySelectorAll('.video-backdrop .bg-slide'));
+      var current = -1;
+      if (!slides.length) return;
+
+      function activateSlide(index) {
+        var nextSlide = slides[index];
+        var previousSlide = current >= 0 ? slides[current] : null;
+
+        if (previousSlide && previousSlide !== nextSlide) {
+          previousSlide.classList.remove('is-active');
+        }
+
+        current = index;
+        nextSlide.style.animation = 'none';
+        void nextSlide.offsetWidth;
+        nextSlide.classList.add('is-active');
+        nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
+      }
+
+      activateSlide(0);
+      setInterval(function () {
+        activateSlide((current + 1) % slides.length);
+      }, 5200);
+    }());
+  </script>
+  <script>
+    (function () {
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.discover-carousel .discover-slide'));
       var current = -1;
       if (!slides.length) return;
 
