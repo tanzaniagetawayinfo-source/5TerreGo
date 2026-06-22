@@ -345,12 +345,10 @@
     .feature-card.gold .ficon { background: var(--gold-soft); color: var(--gold); }
 
     .small-card {
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.96);
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.48);
-      box-shadow: 0 4px 14px rgba(15,23,42,.06);
-      backdrop-filter: blur(16px) saturate(1.08);
-      -webkit-backdrop-filter: blur(16px) saturate(1.08);
+      border: 1px solid #eef2f7;
+      box-shadow: 0 4px 14px rgba(15,23,42,.04);
       padding: 16px 14px;
       min-height: 108px;
       display: flex;
@@ -1062,6 +1060,7 @@
       var backdrop = document.querySelector('.video-backdrop');
       var hero = document.querySelector('.hero');
       var swipe = document.querySelector('.hero-swipe');
+      var actionbarRoot = document.getElementById('ftg-global-actionbar-root');
       var ticking = false;
       if (!stage || !backdrop || !hero) return;
 
@@ -1069,10 +1068,23 @@
         return Math.max(min, Math.min(max, value));
       }
 
+      function getVisibleActionbarHeight() {
+        var rect;
+        var visibleTop;
+        var visibleBottom;
+        if (!actionbarRoot) return 0;
+        rect = actionbarRoot.getBoundingClientRect();
+        if (!rect.height) return 0;
+        visibleTop = Math.max(rect.top, 0);
+        visibleBottom = Math.min(rect.bottom, window.innerHeight);
+        return Math.max(0, visibleBottom - visibleTop);
+      }
+
       function updateStage() {
         var stageRect = stage.getBoundingClientRect();
         var stageHeight = stage.offsetHeight;
-        var viewportHeight = window.innerHeight;
+        var actionbarVisible = getVisibleActionbarHeight();
+        var viewportHeight = Math.max(1, window.innerHeight - actionbarVisible);
         var maxFixed = Math.max(0, stageHeight - viewportHeight);
         var scrolledIntoStage = Math.max(0, -stageRect.top);
         var pinned = clamp(scrolledIntoStage, 0, maxFixed);
