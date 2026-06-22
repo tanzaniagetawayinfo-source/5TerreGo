@@ -89,18 +89,36 @@
       position: sticky;
       top: 8px;
       height: calc(var(--stage-height) - 8px);
-      border-radius: 0 0 32px 32px;
+      border-radius: 0;
       overflow: hidden;
       background: #0d1729;
       box-shadow: var(--shadow);
     }
 
-    .video-backdrop video {
+    .video-backdrop .bg-slide {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      opacity: 0;
+      transform: scale(1.02) translate3d(0, 0, 0);
+      transform-origin: center center;
+      transition: opacity 2s ease;
+      will-change: opacity, transform;
+    }
+
+    @keyframes ftgDroneZoom {
+      0% {
+        transform: scale(1.02) translate3d(0, 0, 0);
+      }
+      100% {
+        transform: scale(1.14) translate3d(0, -1.5%, 0);
+      }
+    }
+
+    .video-backdrop .bg-slide.is-active {
+      opacity: 1;
     }
 
     .video-backdrop::after {
@@ -128,73 +146,104 @@
     .hero {
       position: relative;
       min-height: calc(var(--stage-height) - 8px);
-      display: flex;
-      align-items: flex-end;
-      border-radius: 0 0 32px 32px;
+      border-radius: 0;
       overflow: hidden;
       background: transparent;
       box-shadow: none;
     }
 
     .hero-copy {
-      position: relative;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       z-index: 2;
-      width: 100%;
-      padding: 0 24px 24px;
+      width: calc(100% - 48px);
+      max-width: 680px;
+      padding: 0;
       color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-swipe {
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      z-index: 3;
+      width: calc(100% - 40px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      color: #fff;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+
+    .hero-swipe-label {
+      font-size: 18px;
+      line-height: 1.1;
+      font-weight: 950;
+      letter-spacing: -.04em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+
+    .hero-swipe-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: .7;
+      font-size: 18px;
+      font-weight: 900;
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 8px 18px rgba(0,0,0,.18);
+      animation: ftgSwipeUp 1.6s ease-in-out infinite;
+    }
+
+    .hero-swipe-icon span + span {
+      margin-top: -4px;
+    }
+
+    @keyframes ftgSwipeUp {
+      0%, 100% {
+        transform: translateY(0);
+        opacity: .72;
+      }
+      50% {
+        transform: translateY(-8px);
+        opacity: 1;
+      }
     }
 
     .hero h1 {
-      margin: 0;
-      max-width: 90%;
+      margin: 0 auto;
+      max-width: 640px;
       font-size: 58px;
       line-height: .92;
       letter-spacing: -.07em;
       font-weight: 950;
       text-shadow: 0 10px 24px rgba(0,0,0,.18);
+      text-align: center;
     }
 
     .hero p {
-      margin: 16px 0 0;
-      max-width: 82%;
+      margin: 16px auto 0;
+      max-width: 520px;
       font-size: 18px;
       line-height: 1.5;
       color: rgba(255,255,255,.94);
       text-shadow: 0 8px 18px rgba(0,0,0,.14);
+      text-align: center;
     }
 
-    .hero-actions {
-      display: grid;
-      gap: 12px;
-      margin-top: 22px;
-    }
-
-    .hero-btn {
-      min-height: 58px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border: 1px solid rgba(255,255,255,.36);
-      font-size: 16px;
-      font-weight: 850;
-      letter-spacing: -.02em;
-      box-shadow: 0 12px 28px rgba(8,15,24,.14);
-    }
-
-    .hero-btn.primary {
-      background: var(--orange);
-      border-color: var(--orange);
-      color: #fff;
-    }
-
-    .hero-btn.secondary {
-      background: rgba(8,15,24,.28);
-      color: #fff;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
+    
 
     .section-title,
     .eyebrow,
@@ -712,24 +761,36 @@
       .video-backdrop {
         top: 0;
         height: var(--stage-height);
-        border-radius: 0 0 28px 28px;
+        border-radius: 0;
       }
       .video-scroll {
         margin-top: calc(-1 * var(--stage-height));
       }
       .hero {
         min-height: var(--stage-height);
-        border-radius: 0 0 28px 28px;
+        border-radius: 0;
       }
       .hero-copy {
-        padding: 0 18px 20px;
+        width: calc(100% - 36px);
+        max-width: 640px;
+        padding: 0;
       }
       .video-panel {
         padding-left: 10px;
         padding-right: 10px;
       }
-      .hero h1 { font-size: 52px; }
-      .hero p { max-width: 90%; font-size: 17px; }
+      .hero h1 { font-size: 52px; max-width: 92%; }
+      .hero p { max-width: 92%; font-size: 17px; }
+      .hero-swipe {
+        width: calc(100% - 28px);
+        bottom: 22px;
+      }
+      .hero-swipe-label {
+        font-size: 16px;
+      }
+      .hero-swipe-icon {
+        font-size: 16px;
+      }
       .feature-card { min-height: 180px; }
       .feature-card h2 { font-size: 17px; }
       .feature-card p { font-size: 13px; }
@@ -742,24 +803,30 @@
 
   <main class="page">
     <section class="video-stage" aria-label="Hero con video fisso">
-      <div class="video-backdrop">
-        <video src="videohome.mp4" autoplay muted loop playsinline preload="auto"></video>
+      <div class="video-backdrop" aria-hidden="true">
+        <img class="bg-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
+        <img class="bg-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
+        <img class="bg-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
+        <img class="bg-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
+        <img class="bg-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
       </div>
 
       <div class="video-scroll">
         <section class="hero">
+          <div class="hero-swipe">
+            <div class="hero-swipe-label">Tutto quello che ti serve</div>
+            <div class="hero-swipe-icon" aria-hidden="true">
+              <span>⌃</span>
+              <span>⌃</span>
+            </div>
+          </div>
           <div class="hero-copy">
             <h1>Cinque Terre made simple</h1>
             <p>Mappe, treni, sentieri, meteo e tutto ciò che serve per vivere al meglio le Cinque Terre.</p>
-            <div class="hero-actions">
-              <a class="hero-btn primary" href="map.html">🗺 ESPLORA LA MAPPA</a>
-              <a class="hero-btn secondary" href="public-transport.html">🚆 TRASPORTI E TRENI</a>
             </div>
-          </div>
         </section>
 
         <section class="section video-panel">
-          <h2 class="section-title">Tutto quello che ti serve</h2>
           <div class="feature-grid">
             <a class="feature-card orange" href="public-transport.html">
               <div class="ficon">🚆</div>
@@ -852,11 +919,11 @@
     <section class="section">
       <h2 class="eyebrow">Esplora 5 Terre</h2>
       <div class="villages">
-        <a class="village-mini" href="map.html#monterosso"><img src="https://images.pexels.com/photos/1707963/pexels-photo-1707963.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Monterosso"><span>Monterosso</span></a>
-        <a class="village-mini" href="map.html#vernazza"><img src="https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vernazza"><span>Vernazza</span></a>
-        <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Corniglia"><span>Corniglia</span></a>
-        <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/1539700/pexels-photo-1539700.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Manarola"><span>Manarola</span></a>
-        <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Riomaggiore"><span>Riomaggiore</span></a>
+        <a class="village-mini" href="map.html#monterosso"><img src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="Monterosso"><span>Monterosso</span></a>
+        <a class="village-mini" href="map.html#vernazza"><img src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="Vernazza"><span>Vernazza</span></a>
+        <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="Corniglia"><span>Corniglia</span></a>
+        <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="Manarola"><span>Manarola</span></a>
+        <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="Riomaggiore"><span>Riomaggiore</span></a>
       </div>
     </section>
 
@@ -960,6 +1027,67 @@
   </main>
 
   <script src="site-analytics.js?v=3"></script>
+  <script>
+    (function () {
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.video-backdrop .bg-slide'));
+      var current = -1;
+      if (!slides.length) return;
+
+      function activateSlide(index) {
+        var nextSlide = slides[index];
+        var previousSlide = current >= 0 ? slides[current] : null;
+
+        if (previousSlide && previousSlide !== nextSlide) {
+          previousSlide.classList.remove('is-active');
+        }
+
+        current = index;
+        nextSlide.style.animation = 'none';
+        void nextSlide.offsetWidth;
+        nextSlide.classList.add('is-active');
+        nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
+      }
+
+      activateSlide(0);
+      setInterval(function () {
+        activateSlide((current + 1) % slides.length);
+      }, 5200);
+    }());
+  </script>
+  <script>
+    (function () {
+      var hero = document.querySelector('.hero');
+      var swipe = document.querySelector('.hero-swipe');
+      var ticking = false;
+      if (!hero || !swipe) return;
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function updateSwipe() {
+        var rect = hero.getBoundingClientRect();
+        var scrolled = Math.max(0, -rect.top);
+        var fadeStart = 10;
+        var fadeEnd = Math.min(window.innerHeight * 0.26, 220);
+        var progress = clamp((scrolled - fadeStart) / Math.max(1, fadeEnd - fadeStart), 0, 1);
+        var opacity = 1 - progress;
+        swipe.style.opacity = String(opacity);
+        swipe.style.transform = 'translateX(-50%) translateY(' + (progress * 18) + 'px)';
+        ticking = false;
+      }
+
+      function requestUpdate() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(updateSwipe);
+      }
+
+      window.addEventListener('scroll', requestUpdate, { passive: true });
+      window.addEventListener('resize', requestUpdate);
+      requestUpdate();
+    }());
+  </script>
   <script>
     (function () {
       'use strict';
