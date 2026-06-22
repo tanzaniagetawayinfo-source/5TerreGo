@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>5TerreGo.com | Home</title>
+  <meta name="description" content="Mappe, treni, sentieri, meteo, sconti locali e guide pratiche per vivere al meglio le Cinque Terre." />
+  <meta name="theme-color" content="#ffffff" />
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-2: #fbfcfe;
+      --text: #101828;
+      --muted: #667085;
+      --line: #e3e8f0;
+      --orange: #ff8a1f;
+      --orange-soft: #fff2e6;
+      --green: #5da34c;
+      --green-soft: #edf7df;
+      --blue: #3777ff;
+      --blue-soft: #eaf2ff;
+      --purple: #9a63f6;
+      --purple-soft: #f2eafe;
+      --red: #ff6c5b;
+      --red-soft: #ffe9e9;
+      --gold: #f6ab29;
+      --gold-soft: #fff4de;
+      --shadow: 0 18px 42px rgba(16,24,40,.08);
+      --shadow-soft: 0 8px 24px rgba(16,24,40,.05);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 20px;
+      --radius-sm: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(55,119,255,.05), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,138,31,.06), transparent 22%),
+        linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    button, input { font: inherit; }
+    body.ftg-actionbar-enabled { padding-top: 0 !important; }
+
+    #ftg-global-actionbar-root {
+      position: relative;
+      z-index: 80;
+    }
+
+    #ftg-global-actionbar-root .ftg-topbar {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      inset: auto !important;
+      width: 100% !important;
+    }
+
+    #ftg-global-actionbar-root .ftg-menu-panel {
+      position: fixed !important;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 10px 14px 40px;
+    }
+
+    .section {
+      margin-top: 16px;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 600px;
+      overflow: hidden;
+      border-radius: 32px;
+      background: #dbe3ed;
+      box-shadow: var(--shadow);
+    }
+
+    .hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15,23,42,.06) 0%, rgba(15,23,42,.22) 42%, rgba(15,23,42,.74) 100%);
+    }
+
+    .hero-copy {
+      position: absolute;
+      z-index: 2;
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      color: #fff;
+    }
+
+    .hero h1 {
+      margin: 0;
+      max-width: 90%;
+      font-size: 58px;
+      line-height: .92;
+      letter-spacing: -.07em;
+      font-weight: 950;
+    }
+
+    .hero p {
+      margin: 16px 0 0;
+      max-width: 82%;
+      font-size: 18px;
+      line-height: 1.5;
+      color: rgba(255,255,255,.94);
+    }
+
+    .hero-actions {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .hero-btn {
+      min-height: 58px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,.4);
+      font-size: 16px;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .hero-btn.primary {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+    }
+
+    .hero-btn.secondary {
+      background: rgba(8,15,24,.35);
+      color: #fff;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .section-title,
+    .eyebrow,
+    .footer-title {
+      margin: 0 0 12px;
+      font-size: 14px;
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .feature-grid,
+    .live-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .feature-card {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      width: 100%;
+      min-height: 186px;
+      padding: 18px 16px;
+      border-radius: 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 14px rgba(15,23,42,.04);
+      color: var(--text);
+      overflow: hidden;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .feature-card > div:last-child {
+      justify-self: end;
+      align-self: end;
+      margin-top: auto;
+      color: #64748b;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .feature-card h2 {
+      margin: 10px 0 8px;
+      font-size: 18px;
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .feature-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .ficon {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .feature-card.orange .ficon { background: var(--orange-soft); color: var(--orange); }
+    .feature-card.green .ficon { background: var(--green-soft); color: var(--green); }
+    .feature-card.blue .ficon { background: var(--blue-soft); color: var(--blue); }
+    .feature-card.purple .ficon { background: var(--purple-soft); color: var(--purple); }
+    .feature-card.red .ficon { background: var(--red-soft); color: var(--red); }
+    .feature-card.gold .ficon { background: var(--gold-soft); color: var(--gold); }
+
+    .small-card {
+      background: var(--surface);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 14px;
+      min-height: 108px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 850;
+      color: var(--text);
+    }
+
+    .metric .bubble {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      background: var(--orange-soft);
+      color: var(--orange);
+    }
+
+    .metric strong {
+      font-size: 20px;
+      letter-spacing: -.04em;
+    }
+
+    .small-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .train-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      border-radius: 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 18px;
+    }
+
+    .big-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 28px;
+    }
+
+    .route {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: #1f2937;
+    }
+
+    .train-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .time-strong {
+      display: block;
+      color: var(--text);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      margin-bottom: 4px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e7f4da;
+      color: #2b7d2f;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .villages {
+      display: grid;
+      grid-template-columns: repeat(5, 88px);
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .villages::-webkit-scrollbar { display: none; }
+
+    .village-mini {
+      position: relative;
+      min-height: 154px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #d1d5db;
+      flex: 0 0 auto;
+    }
+
+    .village-mini img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .village-mini::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.58));
+    }
+
+    .village-mini span {
+      position: absolute;
+      z-index: 2;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .discover-card,
+    .cta-card {
+      position: relative;
+      min-height: 228px;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-card { min-height: 286px; }
+
+    .discover-card img,
+    .cta-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .discover-card::after,
+    .cta-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,18,30,.04), rgba(10,18,30,.62));
+    }
+
+    .cta-card::after {
+      background: linear-gradient(180deg, rgba(12,25,44,.10), rgba(17,33,54,.58));
+    }
+
+    .discover-copy,
+    .cta-copy {
+      position: absolute;
+      z-index: 2;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      color: #fff;
+    }
+
+    .discover-copy h2,
+    .cta-copy h2,
+    .stories-title,
+    .panel-card h2,
+    .newsletter h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.03;
+      letter-spacing: -.04em;
+      font-weight: 900;
+    }
+
+    .discover-copy p,
+    .cta-copy p,
+    .panel-card p,
+    .newsletter p {
+      margin: 10px 0 0;
+      line-height: 1.45;
+    }
+
+    .discover-copy p,
+    .cta-copy p { color: rgba(255,255,255,.92); }
+
+    .mini-btn,
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 850;
+    }
+
+    .mini-btn {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .cta-btn {
+      margin-top: 18px;
+      min-width: 230px;
+      min-height: 54px;
+      border-radius: 16px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .stories-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .story-card {
+      display: grid;
+      grid-template-columns: 92px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 12px;
+    }
+
+    .story-card img {
+      width: 92px;
+      height: 92px;
+      border-radius: 14px;
+      object-fit: cover;
+    }
+
+    .story-card h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .story-card p {
+      margin: 8px 0 0;
+      font-size: 14px;
+      line-height: 1.42;
+      color: var(--muted);
+    }
+
+    .story-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .bookmark {
+      color: #64748b;
+      font-size: 22px;
+    }
+
+    .panel-card {
+      position: relative;
+      border-radius: 22px;
+      padding: 22px 20px;
+      overflow: hidden;
+    }
+
+    .panel-card.green {
+      background: #f2f7ec;
+      color: var(--text);
+    }
+
+    .panel-card.blue {
+      background: #153455;
+      color: #fff;
+    }
+
+    .panel-card.blue p { color: rgba(255,255,255,.92); }
+
+    .panel-stamp {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 54px;
+      height: 54px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      background: rgba(255,255,255,.55);
+    }
+
+    .newsletter {
+      background: #fcf2ea;
+      border-radius: 22px;
+      padding: 22px 20px;
+    }
+
+    .newsletter-form {
+      display: grid;
+      grid-template-columns: 1fr 52px;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .newsletter input {
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid #ead8c8;
+      background: #fff;
+      padding: 0 14px;
+      outline: none;
+      color: var(--text);
+    }
+
+    .newsletter button {
+      border: none;
+      border-radius: 10px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .social-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .footer-links {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 0 18px 10px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 48px;
+      border-bottom: 1px solid #efefef;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .footer-row:last-child { border-bottom: 0; }
+
+    .footer-meta {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      padding: 6px 8px 10px;
+    }
+
+    @media (max-width: 560px) {
+      .page { padding: 8px 10px 34px; }
+      .hero { min-height: 560px; }
+      .hero h1 { font-size: 52px; }
+      .hero p { max-width: 90%; font-size: 17px; }
+      .feature-card { min-height: 180px; }
+      .feature-card h2 { font-size: 17px; }
+      .feature-card p { font-size: 13px; }
+      .cta-btn { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="ftg-global-actionbar-root"></div>
+
+  <main class="page">
+    <section class="section hero">
+      <img src="https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Vista sulle Cinque Terre" />
+      <div class="hero-copy">
+        <h1>Cinque Terre made simple</h1>
+        <p>Mappe, treni, sentieri, meteo e tutto ciò che serve per vivere al meglio le Cinque Terre.</p>
+        <div class="hero-actions">
+          <a class="hero-btn primary" href="map.html">🗺 ESPLORA LA MAPPA</a>
+          <a class="hero-btn secondary" href="public-transport.html">🚆 TRASPORTI E TRENI</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Tutto quello che ti serve</h2>
+      <div class="feature-grid">
+        <a class="feature-card orange" href="public-transport.html">
+          <div class="ficon">🚆</div>
+          <div>
+            <h2>Treni e trasporti</h2>
+            <p>Orari, stazioni e collegamenti in tempo reale</p>
+          </div>
+          <div>›</div>
+        </a>
+        <a class="feature-card green" href="sentieri.html">
+          <div class="ficon">🥾</div>
+          <div>
+            <h2>Sentieri</h2>
+            <p>Stato sentieri, difficoltà e info utili</p>
+          </div>
+          <div>›</div>
+        </a>
+        <a class="feature-card blue" href="weather.html">
+          <div class="ficon">☁</div>
+          <div>
+            <h2>Meteo</h2>
+            <p>Previsioni e condizioni mare in tempo reale</p>
+          </div>
+          <div>›</div>
+        </a>
+        <a class="feature-card purple" href="discounts.html">
+          <div class="ficon">◈</div>
+          <div>
+            <h2>Sconti locali</h2>
+            <p>Offerte, card e vantaggi esclusivi</p>
+          </div>
+          <div>›</div>
+        </a>
+        <a class="feature-card red" href="index.html">
+          <div class="ficon">▤</div>
+          <div>
+            <h2>Aggiornamenti</h2>
+            <p>Info ufficiali da fonti locali e trasporti</p>
+          </div>
+          <div>›</div>
+        </a>
+        <a class="feature-card gold" href="index.html">
+          <div class="ficon">i</div>
+          <div>
+            <h2>Guida completa</h2>
+            <p>Consigli, itinerari e cosa vedere</p>
+          </div>
+          <div>›</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="eyebrow">Live now</h2>
+      <div class="live-grid">
+        <div class="small-card">
+          <div class="metric"><span class="bubble">☀</span><strong>22°</strong></div>
+          <p>Soleggiato<br>Monterosso</p>
+        </div>
+        <div class="small-card">
+          <div class="metric"><span class="bubble" style="background:var(--green-soft);color:var(--green);">🥾</span><strong>12 / 13</strong></div>
+          <p>Sentieri aperti<br>su 13</p>
+        </div>
+        <div class="small-card">
+          <div class="metric"><span class="bubble" style="background:var(--purple-soft);color:var(--purple);">👥</span><strong>Media</strong></div>
+          <p>Affollamento</p>
+        </div>
+        <div class="small-card">
+          <div class="metric"><span class="bubble" style="background:var(--blue-soft);color:var(--blue);">≋</span><strong>Mare calmo</strong></div>
+          <p>Condizioni ottime</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="eyebrow">Prossimo treno</h2>
+      <a class="train-card" href="public-transport.html">
+        <div class="big-icon">🚆</div>
+        <div>
+          <p class="route">Monterosso → Vernazza</p>
+          <span class="time-strong">16:13 → 16:16</span>
+          <p>⌁ Piattaforma 3</p>
+        </div>
+        <div><span class="badge">In orario</span></div>
+      </a>
+    </section>
+
+    <section class="section">
+      <h2 class="eyebrow">Esplora 5 Terre</h2>
+      <div class="villages">
+        <a class="village-mini" href="map.html#monterosso"><img src="https://images.pexels.com/photos/1707963/pexels-photo-1707963.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Monterosso"><span>Monterosso</span></a>
+        <a class="village-mini" href="map.html#vernazza"><img src="https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vernazza"><span>Vernazza</span></a>
+        <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Corniglia"><span>Corniglia</span></a>
+        <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/1539700/pexels-photo-1539700.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Manarola"><span>Manarola</span></a>
+        <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/1485894/pexels-photo-1485894.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Riomaggiore"><span>Riomaggiore</span></a>
+      </div>
+    </section>
+
+    <section class="section discover-card">
+      <a href="map.html" style="position:absolute;inset:0;z-index:3" aria-label="Scopri i borghi"></a>
+      <img src="https://images.pexels.com/photos/356844/pexels-photo-356844.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Scopri i borghi" />
+      <div class="discover-copy">
+        <h2>Scopri i borghi</h2>
+        <p>Cinque paesi, un’esperienza indimenticabile.</p>
+        <span class="mini-btn">SCOPRI DI PIÙ</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Storie in evidenza</h2>
+      <div class="stories-list">
+        <a class="story-card" href="index.html">
+          <img src="https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Vini delle Cinque Terre" />
+          <div>
+            <h3>I vini delle Cinque Terre sono costosi?</h3>
+            <p>Una delle domande più frequenti</p>
+            <div class="story-time">◷ <span>3 min</span></div>
+          </div>
+          <div class="bookmark">⌑</div>
+        </a>
+        <a class="story-card" href="index.html">
+          <img src="https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Valigia per le Cinque Terre" />
+          <div>
+            <h3>Cosa mettere in valigia per le Cinque Terre</h3>
+            <p>Guida pratica per il tuo viaggio</p>
+            <div class="story-time">◷ <span>4 min</span></div>
+          </div>
+          <div class="bookmark">⌑</div>
+        </a>
+        <a class="story-card" href="index.html">
+          <img src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Mangiare nelle Cinque Terre" />
+          <div>
+            <h3>Dove mangiare bene nelle Cinque Terre</h3>
+            <p>I nostri consigli locali</p>
+            <div class="story-time">◷ <span>5 min</span></div>
+          </div>
+          <div class="bookmark">⌑</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="section cta-card">
+      <a href="public-transport.html" style="position:absolute;inset:0;z-index:3" aria-label="Trova il tuo prossimo viaggio"></a>
+      <img src="https://images.pexels.com/photos/261949/pexels-photo-261949.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Trova il tuo prossimo viaggio" />
+      <div class="cta-copy">
+        <h2>Trova il tuo prossimo viaggio</h2>
+        <p>Confronta orari e prezzi e acquista online in sicurezza</p>
+        <span class="cta-btn">🚆 CERCA TRENI</span>
+      </div>
+    </section>
+
+    <section class="section panel-card green">
+      <h2>Amici del Parco</h2>
+      <p>Rispettiamo e proteggiamo questo territorio unico. Viaggia responsabile.</p>
+      <div class="panel-stamp">🌿</div>
+    </section>
+
+    <section class="section panel-card blue">
+      <h2>5TerreGo è indipendente</h2>
+      <p>Non siamo affiliati con il Parco Nazionale, i Comuni o le compagnie ferroviarie. Informazioni e collegamenti sono forniti per facilitare il tuo viaggio.</p>
+      <div class="panel-stamp">♡</div>
+    </section>
+
+    <section class="section newsletter">
+      <h2>Iscriviti alla newsletter</h2>
+      <p>Ricevi aggiornamenti, consigli e offerte esclusive direttamente nella tua email.</p>
+      <form class="newsletter-form" onsubmit="event.preventDefault()">
+        <input aria-label="La tua email" placeholder="La tua email" />
+        <button type="submit">→</button>
+      </form>
+    </section>
+
+    <section class="section socials" aria-label="Social links">
+      <a class="social-btn" href="#" aria-label="Instagram">◎</a>
+      <a class="social-btn" href="#" aria-label="Facebook">f</a>
+      <a class="social-btn" href="#" aria-label="TikTok">♪</a>
+      <a class="social-btn" href="#" aria-label="YouTube">▶</a>
+      <a class="social-btn" href="mailto:tanzaniagetaway.info@gmail.com" aria-label="Email">✉</a>
+    </section>
+
+    <section class="section footer-links">
+      <h2 class="footer-title" style="padding-top:18px;">Link utili</h2>
+      <a class="footer-row" href="#"><span>Chi siamo</span><span>›</span></a>
+      <a class="footer-row" href="mailto:tanzaniagetaway.info@gmail.com"><span>Contatti</span><span>›</span></a>
+      <a class="footer-row" href="#"><span>Privacy Policy</span><span>›</span></a>
+      <a class="footer-row" href="#"><span>Cookie Policy</span><span>›</span></a>
+      <a class="footer-row" href="#"><span>Termini e condizioni</span><span>›</span></a>
+      <a class="footer-row" href="#"><span>Dichiarazione affiliate</span><span>›</span></a>
+      <a class="footer-row" href="copyright.html"><span>Copyright</span><span>›</span></a>
+    </section>
+
+    <div class="section footer-meta">
+      © 2025 5TerreGo.com<br>
+      by Rosetta Ventures FZ-LLC
+    </div>
+  </main>
+
+  <script src="site-analytics.js?v=3"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var ACTIONBAR_PARTIAL_CANDIDATES = [
+        'global-actionbar.html',
+        './global-actionbar.html',
+        '/global-actionbar.html'
+      ];
+
+      var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v1';
+      var actionbarLoadPromise = null;
+      var rootActionbar = document.getElementById('ftg-global-actionbar-root');
+
+      function injectGlobalActionbarHTML(html, cacheKeyPrefix) {
+        return new Promise(function (resolve) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          var links = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+          var styles = Array.from(doc.querySelectorAll('style'));
+          var scripts = Array.from(doc.querySelectorAll('script'));
+          var index = 0;
+
+          links.forEach(function (link) {
+            var href = link.getAttribute('href') || '';
+            var el;
+            if (!href) return;
+            if (document.querySelector('link[data-ftg-actionbar-link="' + href.replace(/"/g, '&quot;') + '"]')) return;
+            el = document.createElement('link');
+            el.rel = 'stylesheet';
+            el.href = href;
+            el.setAttribute('data-ftg-actionbar-link', href);
+            document.head.appendChild(el);
+          });
+
+          styles.forEach(function (style, styleIndex) {
+            var key = 'ftg-actionbar-style-' + cacheKeyPrefix + '-' + styleIndex;
+            var el;
+            if (document.getElementById(key)) return;
+            el = document.createElement('style');
+            el.id = key;
+            el.textContent = style.textContent || '';
+            document.head.appendChild(el);
+          });
+
+          function next() {
+            var original, src, scriptEl, done;
+            if (index >= scripts.length) {
+              resolve(typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function');
+              return;
+            }
+            original = scripts[index++];
+            src = original.getAttribute('src');
+            scriptEl = document.createElement('script');
+            done = false;
+
+            function finish() {
+              if (done) return;
+              done = true;
+              next();
+            }
+
+            if (src) {
+              scriptEl.src = src;
+              scriptEl.onload = finish;
+              scriptEl.onerror = finish;
+            } else {
+              scriptEl.textContent = original.textContent || '';
+            }
+
+            document.head.appendChild(scriptEl);
+            if (!src) finish();
+          }
+
+          next();
+        });
+      }
+
+      function loadGlobalActionbarPartial() {
+        if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') return Promise.resolve(true);
+        if (actionbarLoadPromise) return actionbarLoadPromise;
+
+        actionbarLoadPromise = (async function () {
+          var cachedHtml = '';
+          var i;
+          var response;
+          var html;
+
+          try { cachedHtml = sessionStorage.getItem(ACTIONBAR_SESSION_HTML_KEY) || ''; } catch (_error) {}
+
+          if (cachedHtml) {
+            try {
+              if (await injectGlobalActionbarHTML(cachedHtml, 'session')) return true;
+            } catch (_error) {}
+          }
+
+          for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
+            try {
+              response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
+              if (!response.ok) continue;
+              html = await response.text();
+              if (!html) continue;
+              try { sessionStorage.setItem(ACTIONBAR_SESSION_HTML_KEY, html); } catch (_error) {}
+              if (await injectGlobalActionbarHTML(html, i)) return true;
+            } catch (_error) {}
+          }
+
+          return typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function';
+        }());
+
+        return actionbarLoadPromise;
+      }
+
+      function getInitialLanguage() {
+        var raw = '';
+        try { raw = localStorage.getItem('ftg_language') || ''; } catch (_error) {}
+        raw = String(raw || 'en').toLowerCase();
+        if (raw.indexOf('-') >= 0) raw = raw.split('-')[0];
+        return raw || 'en';
+      }
+
+      loadGlobalActionbarPartial().then(function () {
+        if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR !== 'function' || !rootActionbar) return;
+        window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, {
+          activePage: 'home',
+          language: getInitialLanguage(),
+          privacyHref: '#',
+          termsHref: '#',
+          androidAppHref: '#'
+        });
+      }).catch(function () {});
+    }());
+  </script>
+</body>
+</html>
