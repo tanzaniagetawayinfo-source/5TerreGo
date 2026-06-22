@@ -7,107 +7,156 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
-      --bg:#f4f7fb;
-      --surface:#ffffff;
-      --surface-soft:#f8fbff;
+      --bg:#f7f9fd;
       --text:#17336d;
       --muted:#7083aa;
       --line:#dbe4f2;
       --primary:#163f95;
       --accent:#ff7e57;
       --ok:#16a34a;
-      --shadow:0 18px 50px rgba(20,50,110,.08);
-      --radius-xl:26px;
-      --radius-lg:20px;
-      --radius-md:16px;
+      --danger:#cc3d3d;
     }
 
     *{box-sizing:border-box;}
+
     html,body{
       margin:0;
       padding:0;
-      min-height:100%;
       width:100%;
       max-width:100%;
+      min-height:100%;
       overflow-x:hidden;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
+      background:var(--bg);
       color:var(--text);
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
     }
 
     body{
-      padding:110px 10px 16px;
-      width:100%;
-      max-width:100vw;
-      overflow-x:hidden;
+      padding:92px 10px 18px;
     }
 
-    #ftg-global-actionbar-root{
+    #ftg-actionbar-mount{
       position:relative;
       z-index:9999;
+      width:100%;
     }
 
     .shell{
       width:100%;
-      max-width:1100px;
+      max-width:980px;
       margin:0 auto;
       display:grid;
       gap:14px;
       min-width:0;
     }
 
-    .panel,
-    .metric,
     .gate{
-      min-width:0;
-      background:rgba(255,255,255,.92);
-      border:1px solid rgba(255,255,255,.95);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      box-shadow:var(--shadow);
+      padding:14px 2px;
+      font-size:13px;
+      color:var(--muted);
+      border-bottom:1px solid var(--line);
     }
 
-    .toolbar-compact{
+    .dashboard{
+      display:grid;
+      gap:16px;
+      min-width:0;
+    }
+
+    .hidden{display:none !important;}
+
+    .stats-strip{
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+      min-width:0;
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding:0 0 12px;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+      border-bottom:1px solid var(--line);
+    }
+
+    .stats-strip::-webkit-scrollbar{
+      display:none;
+    }
+
+    .stat{
+      flex:0 0 auto;
+      min-width:110px;
+      max-width:140px;
+      padding-right:14px;
+      border-right:1px solid var(--line);
+    }
+
+    .stat:last-child{
+      border-right:none;
+      padding-right:0;
+    }
+
+    .stat-label{
+      font-size:10px;
+      line-height:1.15;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#8ea0c3;
+      margin-bottom:4px;
+    }
+
+    .stat-value{
+      font-size:24px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:-.05em;
+      color:var(--text);
+      word-break:break-word;
+    }
+
+    .toolbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
       flex-wrap:wrap;
-      padding:0 2px;
+      min-width:0;
     }
 
     .toolbar-actions{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:8px;
       flex-wrap:wrap;
     }
 
     .btn{
-      min-height:42px;
-      padding:0 14px;
-      border:none;
+      min-height:34px;
+      padding:0 12px;
       border-radius:999px;
+      border:1px solid var(--line);
       background:#fff;
       color:var(--text);
+      font-size:13px;
       font-weight:800;
-      cursor:pointer;
-      border:1px solid var(--line);
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
+      cursor:pointer;
       white-space:nowrap;
     }
 
     .btn.primary{
-      background:linear-gradient(180deg,#1949ab 0%,var(--primary) 100%);
+      background:var(--primary);
+      border-color:var(--primary);
       color:#fff;
-      border:none;
     }
 
     .status-inline{
-      font-size:13px;
+      font-size:12px;
       color:var(--muted);
       white-space:nowrap;
     }
@@ -117,111 +166,107 @@
       font-weight:800;
     }
 
-    .metrics{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-    }
-
-    .metric{
-      border-radius:var(--radius-lg);
-      padding:16px;
-      display:grid;
-      gap:8px;
-      min-width:0;
-    }
-
-    .metric .label{
-      font-size:12px;
+    .status-inline.error{
+      color:var(--danger);
       font-weight:800;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#8ea0c3;
-      line-height:1.2;
     }
 
-    .metric .value{
-      font-size:30px;
-      font-weight:900;
-      letter-spacing:-.05em;
-      line-height:1;
-      color:var(--text);
-      word-break:break-word;
-    }
-
-    .panel{
-      border-radius:var(--radius-lg);
-      padding:16px;
+    .section{
       display:grid;
-      gap:14px;
+      gap:10px;
+      min-width:0;
+      padding-top:2px;
     }
 
-    .panel-head{
+    .section-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       flex-wrap:wrap;
+      min-width:0;
+      border-bottom:1px solid var(--line);
+      padding-bottom:8px;
     }
 
-    .panel h2{
+    .section-title{
       margin:0;
-      font-size:22px;
+      font-size:17px;
       line-height:1;
-      letter-spacing:-.04em;
+      letter-spacing:-.03em;
+      font-weight:900;
+      color:var(--text);
+    }
+
+    .section-meta{
+      font-size:12px;
+      color:var(--muted);
     }
 
     .filters{
       display:flex;
-      gap:8px;
+      gap:6px;
       flex-wrap:wrap;
     }
 
     .chip{
-      min-height:36px;
-      padding:0 14px;
+      min-height:30px;
+      padding:0 10px;
       border-radius:999px;
-      background:#f2f6fc;
+      background:#fff;
       border:1px solid var(--line);
-      font-weight:700;
+      font-size:12px;
+      font-weight:800;
       color:var(--text);
       cursor:pointer;
     }
 
     .chip.active{
-      background:#fff1eb;
-      border-color:#ffd8ca;
-      color:#a24d2f;
+      border-color:var(--accent);
+      color:#b65534;
+      background:#fff8f4;
     }
 
     .split{
       display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:14px;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      min-width:0;
     }
 
-    .bars,.table{
+    .bars{
       display:grid;
       gap:10px;
+      min-width:0;
     }
 
     .bar-row{
       display:grid;
-      gap:6px;
+      gap:5px;
+      min-width:0;
     }
 
     .bar-top{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
-      font-size:14px;
+      gap:8px;
+      font-size:13px;
+      min-width:0;
+    }
+
+    .bar-top strong{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-weight:800;
     }
 
     .bar-track{
-      height:12px;
+      height:8px;
       border-radius:999px;
-      background:#eef3fb;
+      background:#eaf0fa;
       overflow:hidden;
     }
 
@@ -231,180 +276,169 @@
       background:linear-gradient(90deg,#1949ab 0%,#5f8ef0 100%);
     }
 
+    .empty{
+      font-size:13px;
+      color:var(--muted);
+      padding:4px 0;
+    }
+
+    .table-wrap{
+      width:100%;
+      min-width:0;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
     table{
       width:100%;
+      min-width:520px;
       border-collapse:collapse;
     }
 
     th,td{
       text-align:left;
-      padding:12px 10px;
+      padding:10px 6px;
       border-bottom:1px solid var(--line);
-      font-size:14px;
+      font-size:13px;
       vertical-align:top;
     }
 
     th{
-      font-size:12px;
+      font-size:10px;
       letter-spacing:.08em;
       text-transform:uppercase;
       color:#8ea0c3;
+      font-weight:900;
     }
 
     .muted{color:var(--muted);}
 
-    .empty,.gate{
-      padding:18px;
-      border-radius:var(--radius-lg);
-      background:var(--surface-soft);
-      border:1px dashed var(--line);
-      color:var(--muted);
-    }
-
-    .hidden{display:none !important;}
-
-    @media (max-width: 980px){
+    @media (max-width: 860px){
       .split{
         grid-template-columns:1fr;
+        gap:16px;
       }
     }
 
-    @media (max-width: 768px){
-      html,body{
-        overflow-x:hidden;
-      }
-
+    @media (max-width: 640px){
       body{
-        padding:96px 8px 14px;
-      }
-
-      .metrics{
-        display:flex;
-        overflow-x:auto;
-        overflow-y:hidden;
-        gap:8px;
-        padding:0 1px 2px;
-        width:100%;
-        max-width:100%;
-        -webkit-overflow-scrolling:touch;
-        scrollbar-width:none;
-        -ms-overflow-style:none;
-      }
-
-      .metrics::-webkit-scrollbar{
-        display:none;
-      }
-
-      .metric{
-        flex:0 0 auto;
-        min-width:138px;
-        max-width:138px;
-        padding:12px;
-      }
-
-      .metric .label{
-        font-size:10px;
-      }
-
-      .metric .value{
-        font-size:22px;
-      }
-
-      th:nth-child(3), td:nth-child(3){
-        display:none;
-      }
-
-      .toolbar-compact,
-      .panel,
-      .split,
-      .table{
-        min-width:0;
-        width:100%;
-      }
-
-      .table{
-        overflow-x:auto;
-      }
-
-      table{
-        min-width:0;
-      }
-    }
-
-    @media (max-width: 560px){
-      body{
-        padding:94px 6px 12px;
+        padding:86px 7px 14px;
       }
 
       .shell{
+        gap:12px;
+      }
+
+      .stats-strip{
         gap:10px;
+        padding-bottom:10px;
       }
 
-      .panel{
-        padding:12px;
+      .stat{
+        min-width:88px;
+        max-width:110px;
+        padding-right:10px;
       }
 
-      .metric{
-        min-width:132px;
-        max-width:132px;
-        padding:11px;
-      }
-
-      .metric .value{
-        font-size:20px;
-      }
-
-      .metric .label{
+      .stat-label{
         font-size:9px;
       }
 
-      .toolbar-compact{
-      .toolbar-compact{
+      .stat-value{
+        font-size:18px;
+      }
+
+      .btn{
+        min-height:30px;
+        padding:0 10px;
+        font-size:12px;
+      }
+
+      .status-inline{
+        font-size:11px;
+      }
+
+      .section-title{
+        font-size:15px;
+      }
+
+      .section-meta{
+        font-size:11px;
+      }
+
+      .chip{
+        min-height:28px;
+        padding:0 8px;
+        font-size:11px;
+      }
+
+      .bar-top{
+        font-size:12px;
+      }
+
+      th,td{
+        padding:8px 4px;
+        font-size:12px;
+      }
+
+      table{
+        min-width:440px;
+      }
+    }
+
+    @media (max-width: 420px){
+      body{
+        padding:82px 6px 12px;
+      }
+
+      .toolbar{
         align-items:flex-start;
       }
 
       .toolbar-actions{
         width:100%;
-        justify-content:flex-start;
       }
 
-      .btn{
-        min-height:40px;
-        padding:0 12px;
+      .stat{
+        min-width:82px;
+        max-width:96px;
+      }
+
+      .stat-value{
+        font-size:16px;
+      }
+
+      .stat-label{
+        font-size:8px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="ftg-global-actionbar-root"></div>
+  <div id="ftg-actionbar-mount"></div>
 
   <main class="shell">
     <section id="gate" class="gate">Controllo sessione…</section>
 
-    <section id="dashboard" class="hidden">
-      <div class="metrics">
-        <article class="metric">
-          <div class="label">Ricariche pagina</div>
-          <div id="totalVisits" class="value">—</div>
-        </article>
+    <section id="dashboard" class="dashboard hidden">
+      <div class="stats-strip">
+        <div class="stat">
+          <div class="stat-label">Visitatori</div>
+          <div id="uniqueVisitors" class="stat-value">—</div>
+        </div>
 
-        <article class="metric">
-          <div class="label">Visitatori</div>
-          <div id="uniqueVisitors" class="value">—</div>
-        </article>
+        <div class="stat">
+          <div class="stat-label">Ricariche pagina</div>
+          <div id="totalVisits" class="stat-value">—</div>
+        </div>
 
-        <article class="metric">
-          <div class="label">Visualizzazioni oggi</div>
-          <div id="todayVisits" class="value">—</div>
-        </article>
-
-        <article class="metric">
-          <div class="label">Pagina top</div>
-          <div id="topPage" class="value" style="font-size:20px;line-height:1.15;">—</div>
-        </article>
+        <div class="stat">
+          <div class="stat-label">Pagina top</div>
+          <div id="topPage" class="stat-value" style="font-size:13px; line-height:1.15; letter-spacing:-.02em;">—</div>
+        </div>
       </div>
 
-      <div class="toolbar-compact">
+      <div class="toolbar">
         <div class="toolbar-actions">
           <button id="refreshBtn" class="btn primary" type="button">Aggiorna</button>
           <a class="btn" href="map.html">Apri mappa</a>
@@ -412,42 +446,44 @@
         <span id="status" class="status-inline">Caricamento…</span>
       </div>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Intervallo</h2>
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title">Intervallo</h2>
           <div class="filters" id="filters">
             <button class="chip active" type="button" data-days="7">7 giorni</button>
             <button class="chip" type="button" data-days="30">30 giorni</button>
             <button class="chip" type="button" data-days="90">90 giorni</button>
           </div>
         </div>
+      </section>
 
+      <section class="section">
         <div class="split">
-          <div class="panel">
-            <div class="panel-head">
-              <h2>Pagine più viste</h2>
-              <div id="pageCount" class="muted">—</div>
+          <div class="section">
+            <div class="section-head">
+              <h2 class="section-title">Pagine più viste</h2>
+              <div id="pageCount" class="section-meta">—</div>
             </div>
             <div id="pageBars" class="bars"></div>
           </div>
 
-          <div class="panel">
-            <div class="panel-head">
-              <h2>Ultimi 14 giorni</h2>
-              <div id="dailyCount" class="muted">—</div>
+          <div class="section">
+            <div class="section-head">
+              <h2 class="section-title">Ultimi 14 giorni</h2>
+              <div id="dailyCount" class="section-meta">—</div>
             </div>
             <div id="dailyBars" class="bars"></div>
           </div>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Visite recenti</h2>
-          <div id="recentMeta" class="muted">—</div>
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title">Visite recenti</h2>
+          <div id="recentMeta" class="section-meta">—</div>
         </div>
 
-        <div class="table">
+        <div class="table-wrap">
           <table>
             <thead>
               <tr>
@@ -465,23 +501,38 @@
   </main>
 
   <script>
-    const ACTIONBAR_PARTIAL_CANDIDATES = [
-      '/global-actionbar.html',
-      'global-actionbar.html'
-    ];
+    async function injectHTMLWithScripts(target, html){
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = html;
+
+      const nodes = Array.from(wrapper.childNodes);
+      target.innerHTML = '';
+
+      for(const node of nodes){
+        if(node.nodeType === 1 && node.tagName.toLowerCase() === 'script'){
+          const script = document.createElement('script');
+          for(const attr of Array.from(node.attributes)){
+            script.setAttribute(attr.name, attr.value);
+          }
+          script.textContent = node.textContent || '';
+          target.appendChild(script);
+        } else {
+          target.appendChild(node.cloneNode(true));
+        }
+      }
+    }
 
     async function mountGlobalActionbar(){
-      const root = document.getElementById('ftg-global-actionbar-root');
-      if(!root) return;
+      const mount = document.getElementById('ftg-actionbar-mount');
+      if(!mount) return;
 
-      for(const candidate of ACTIONBAR_PARTIAL_CANDIDATES){
-        try{
-          const res = await fetch(candidate, { cache: 'no-store' });
-          if(!res.ok) continue;
-          const html = await res.text();
-          root.innerHTML = html;
-          return;
-        }catch(_err){}
+      try{
+        const res = await fetch('/global-actionbar.html?v=3', { cache: 'no-store' });
+        if(!res.ok) throw new Error('Impossibile caricare global-actionbar.html');
+        const html = await res.text();
+        await injectHTMLWithScripts(mount, html);
+      }catch(err){
+        console.error('Global actionbar non montata:', err);
       }
     }
 
@@ -509,7 +560,6 @@
 
       var totalVisits = document.getElementById('totalVisits');
       var uniqueVisitors = document.getElementById('uniqueVisitors');
-      var todayVisits = document.getElementById('todayVisits');
       var topPage = document.getElementById('topPage');
 
       var pageBars = document.getElementById('pageBars');
@@ -546,12 +596,6 @@
           hour:'2-digit',
           minute:'2-digit'
         });
-      }
-
-      function startOfToday() {
-        var now = new Date();
-        now.setHours(0,0,0,0);
-        return now;
       }
 
       function buildDailyBuckets(rows, bucketDays) {
@@ -598,6 +642,7 @@
 
       function renderBars(target, items, emptyText) {
         var max = items.length ? items[0].count : 0;
+
         if (!items.length) {
           target.innerHTML = '<div class="empty">' + escapeHTML(emptyText) + '</div>';
           return;
@@ -643,14 +688,14 @@
         if (!email) {
           gate.textContent = 'Non hai effettuato l’accesso.';
           status.textContent = 'Non autenticato';
-          status.className = 'status-inline';
+          status.className = 'status-inline error';
           return false;
         }
 
         if (email !== OWNER_EMAIL) {
           gate.textContent = 'Accesso negato. Questa dashboard è riservata all’owner.';
           status.textContent = 'Accesso negato';
-          status.className = 'status-inline';
+          status.className = 'status-inline error';
           return false;
         }
 
@@ -687,18 +732,14 @@
           var pageStats = aggregateBy(rows, function (row) { return formatPage(row.page_path); });
           var dailyStats = buildDailyBuckets(rows, 14);
           var unique = {};
-          var todayStart = startOfToday();
-          var visitsToday = 0;
 
           rows.forEach(function (row) {
             var key = row.session_id || row.ip_hash || '';
             if (key) unique[key] = true;
-            if (new Date(row.created_at) >= todayStart) visitsToday += 1;
           });
 
-          totalVisits.textContent = String(rows.length);
           uniqueVisitors.textContent = String(Object.keys(unique).length || 0);
-          todayVisits.textContent = String(visitsToday);
+          totalVisits.textContent = String(rows.length);
           topPage.textContent = pageStats.length ? pageStats[0].key : '—';
 
           pageCount.textContent = pageStats.length + ' pagine';
@@ -722,7 +763,7 @@
           dashboard.classList.add('hidden');
           gate.textContent = error && error.message ? error.message : 'Impossibile caricare i dati.';
           status.textContent = 'Errore caricamento';
-          status.className = 'status-inline';
+          status.className = 'status-inline error';
         }
       }
 
