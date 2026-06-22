@@ -244,6 +244,16 @@
       text-shadow: 0 8px 18px rgba(0,0,0,.16);
     }
 
+    .after-stage .video-panel {
+      margin-top: 0;
+    }
+
+    .after-stage .video-panel .section-title,
+    .after-stage .video-panel .eyebrow {
+      color: var(--text);
+      text-shadow: none;
+    }
+
     .feature-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -309,7 +319,7 @@
       width: 100%;
       min-height: 186px;
       padding: 18px 16px;
-      border-radius: 22px;
+      border-radius: 0;
       background: rgba(255,255,255,.96);
       border: 1px solid #eef2f7;
       box-shadow: 0 4px 14px rgba(15,23,42,.04);
@@ -318,6 +328,13 @@
       gap: 12px;
       align-items: start;
     }
+
+    .feature-grid .feature-card:nth-child(1) { border-radius: 22px 0 0 0; }
+    .feature-grid .feature-card:nth-child(2) { border-radius: 0 22px 0 0; }
+    .feature-grid .feature-card:nth-child(3) { border-radius: 0; }
+    .feature-grid .feature-card:nth-child(4) { border-radius: 0; }
+    .feature-grid .feature-card:nth-child(5) { border-radius: 0 0 0 22px; }
+    .feature-grid .feature-card:nth-child(6) { border-radius: 0 0 22px 0; }
 
     .feature-card > div:last-child {
       justify-self: end;
@@ -658,7 +675,7 @@
     .village-mini {
       position: relative;
       min-height: 154px;
-      border-radius: 14px;
+      border-radius: 0 0 14px 14px;
       overflow: hidden;
       background: #d1d5db;
       flex: 0 0 auto;
@@ -699,6 +716,10 @@
       border-radius: 26px;
       overflow: hidden;
       box-shadow: var(--shadow);
+    }
+
+    .discover-card {
+      border-radius: 26px 26px 0 0;
     }
 
     .cta-card { min-height: 286px; }
@@ -748,28 +769,10 @@
       background: linear-gradient(180deg, rgba(12,25,44,.10), rgba(17,33,54,.58));
     }
 
-    .discover-pill {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 4;
-      min-height: 36px;
-      padding: 0 14px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,.9);
-      color: #0b2345;
-      font-size: 12px;
-      font-weight: 850;
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
+    
 
     .villages-wrap {
-      margin-top: 10px;
+      margin-top: 6px;
     }
 
     .discover-copy,
@@ -1095,21 +1098,6 @@
             </div>
         </section>
 
-        <section class="section video-panel">
-          <div class="section-head">
-            <h2 class="eyebrow">Live now</h2>
-            <div class="live-switcher" id="liveNowTabs">
-              <button class="live-tab active" data-place="monterosso">Monterosso now</button>
-              <button class="live-tab" data-place="vernazza">Vernazza now</button>
-              <button class="live-tab" data-place="corniglia">Corniglia now</button>
-              <button class="live-tab" data-place="manarola">Manarola now</button>
-              <button class="live-tab" data-place="riomaggiore">Riomaggiore now</button>
-            </div>
-          </div>
-          <div class="live-grid" id="liveNowGrid"></div>
-        </section>
-
-
         <section class="section video-panel first-peek">
           <div class="feature-grid">
             <a class="feature-card orange" href="public-transport.html">
@@ -1166,8 +1154,20 @@
     </section>
 
     <div class="after-stage">
+    <section class="section video-panel">
+      <div class="section-head">
+        <div class="live-switcher" id="liveNowTabs">
+          <button class="live-tab active" data-place="monterosso">Monterosso now</button>
+          <button class="live-tab" data-place="vernazza">Vernazza now</button>
+          <button class="live-tab" data-place="corniglia">Corniglia now</button>
+          <button class="live-tab" data-place="manarola">Manarola now</button>
+          <button class="live-tab" data-place="riomaggiore">Riomaggiore now</button>
+        </div>
+      </div>
+      <div class="live-grid" id="liveNowGrid"></div>
+    </section>
+
     <section class="section">
-      <h2 class="eyebrow">Esplora 5 Terre</h2>
       <section class="discover-card">
         <a href="map.html" style="position:absolute;inset:0;z-index:3" aria-label="Vai alla mappa interattiva"></a>
         <div class="discover-carousel" aria-hidden="true">
@@ -1177,7 +1177,6 @@
           <img class="discover-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
           <img class="discover-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
         </div>
-        <span class="discover-pill">VAI ALLA MAPPA INTERATTIVA</span>
         <div class="discover-copy">
           <h2>Scopri i borghi</h2>
           <p>Seleziona un borgo per aprirlo nella mappa interattiva, poi solleva la tendina per aprire la panoramica villaggio.</p>
