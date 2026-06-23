@@ -703,14 +703,72 @@
       { code: "zh", label: "中文", flag: "🇨🇳" }
     ];
 
-    var menuItems = config.menuItems || [
+    function normalizeLanguageCode(value) {
+      var code = String(value || "en").trim().toLowerCase();
+      if (code.indexOf("-") >= 0) code = code.split("-")[0];
+      return languages.some(function (lang) {
+        return String(lang.code || "").toLowerCase() === code;
+      }) ? code : "en";
+    }
+
+    function normalizePageId(value) {
+      var id = String(value || "").trim().toLowerCase();
+      if (id === "stories" || id === "story" || id === "blog" || id === "posts") return "guide";
+      if (id === "publictransport") return "trains";
+      if (id === "official-updates" || id === "officialupdates" || id === "updates" || id === "update") return "";
+      return id;
+    }
+
+    var canonicalMenuItems = [
       { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
       { id: "home", labelKey: "nav_home", label: "Home", href: "index.html" },
       { id: "guide", labelKey: "nav_guide", label: "Guide", href: "guide.html" },
       { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "sentieri.html" },
       { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "discounts.html" },
       { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "public-transport.html" },
-      { id: "weather", labelKey: "nav_weather", label: "Weather", href: "weather.html" },    ];
+      { id: "weather", labelKey: "nav_weather", label: "Weather", href: "weather.html" }
+    ];
+
+    function getCanonicalMenuItems(inputItems) {
+      var mapById = {};
+      var seen = {};
+      var output = [];
+
+      canonicalMenuItems.forEach(function (item) {
+        mapById[item.id] = item;
+      });
+
+      if (Array.isArray(inputItems) && inputItems.length) {
+        inputItems.forEach(function (raw) {
+          var id = normalizePageId(raw && raw.id);
+          var canonical = mapById[id];
+          var href = resolveHref(raw && raw.href || (canonical && canonical.href) || "");
+          if (!id || !canonical || seen[id]) return;
+          seen[id] = true;
+          output.push({
+            id: canonical.id,
+            labelKey: canonical.labelKey,
+            label: canonical.label,
+            href: href || canonical.href
+          });
+        });
+      }
+
+      canonicalMenuItems.forEach(function (item) {
+        if (seen[item.id]) return;
+        output.push({
+          id: item.id,
+          labelKey: item.labelKey,
+          label: item.label,
+          href: item.href
+        });
+      });
+
+      return output;
+    }
+
+    currentLanguage = normalizeLanguageCode(currentLanguage);
+    var menuItems = getCanonicalMenuItems(config.menuItems);
 
     activePage = resolveActivePage(activePage);
 
@@ -727,8 +785,7 @@
         nav_sentieri: "Trails",
         nav_discounts: "Local Discounts",
         nav_trains: "Public Transport",
-        nav_weather: "Weather",
-        nav_updates: "Official Updates"
+        nav_weather: "Weather"
       },
       it: {
         download_android: "Scarica l'app per Android",
@@ -742,8 +799,7 @@
         nav_sentieri: "Sentieri",
         nav_discounts: "Sconti locali",
         nav_trains: "Trasporto pubblico",
-        nav_weather: "Meteo",
-        nav_updates: "Aggiornamenti ufficiali"
+        nav_weather: "Meteo"
       },
       fr: {
         download_android: "Télécharger l'app Android",
@@ -757,8 +813,7 @@
         nav_sentieri: "Sentiers",
         nav_discounts: "Réductions locales",
         nav_trains: "Transports publics",
-        nav_weather: "Météo",
-        nav_updates: "Mises à jour officielles"
+        nav_weather: "Météo"
       },
       de: {
         download_android: "Android-App herunterladen",
@@ -772,8 +827,7 @@
         nav_sentieri: "Wege",
         nav_discounts: "Lokale Rabatte",
         nav_trains: "Öffentliche Verkehrsmittel",
-        nav_weather: "Wetter",
-        nav_updates: "Offizielle Updates"
+        nav_weather: "Wetter"
       },
       zh: {
         download_android: "下载 Android 应用",
@@ -787,8 +841,7 @@
         nav_sentieri: "步道",
         nav_discounts: "本地优惠",
         nav_trains: "公共交通",
-        nav_weather: "天气",
-        nav_updates: "官方更新"
+        nav_weather: "天气"
       }
     };
 
@@ -808,18 +861,22 @@
     function resolveActivePage(preferredPage) {
       var pathname = String(window.location.pathname || "").toLowerCase();
       var fileName = pathname.split("/").pop() || "index.html";
+      var normalizedPreferred = normalizePageId(preferredPage);
       var mapByFile = {
         "index.html": "home",
+        "home.html": "home",
         "guide.html": "guide",
         "blog.html": "guide",
+        "stories.html": "guide",
         "map.html": "map",
         "sentieri.html": "sentieri",
         "discounts.html": "discounts",
         "public-transport.html": "trains",
+        "transport.html": "trains",
         "weather.html": "weather",
-        "updates.html": "updates"
+        "updates.html": "home"
       };
-      return mapByFile[fileName] || preferredPage || "home";
+      return normalizePageId(mapByFile[fileName]) || normalizedPreferred || "home";
     }
 
     function t(key, fallback) {
@@ -891,9 +948,9 @@
     var pillButtons = [];
 
     function syncActiveButtons(pageId) {
-      activePage = pageId;
+      activePage = normalizePageId(pageId) || "home";
       pillButtons.forEach(function (button) {
-        button.classList.toggle("active", button.getAttribute("data-page-target") === pageId);
+        button.classList.toggle("active", button.getAttribute("data-page-target") === activePage);
       });
     }
 
@@ -1122,13 +1179,14 @@
 
     var api = {
       navigateToPage: function (pageId) {
-        var match = menuItems.find(function (item) { return item.id === pageId; }) || {};
-        navigateTo(pageId, match.href || "");
+        var normalizedPageId = normalizePageId(pageId) || "home";
+        var match = menuItems.find(function (item) { return item.id === normalizedPageId; }) || {};
+        navigateTo(normalizedPageId, match.href || "");
       },
       toggleAI: toggleAI,
       getCurrentPage: function () { return activePage; },
       setActivePage: function (pageId) {
-        activePage = pageId;
+        activePage = normalizePageId(pageId) || "home";
         rebuildPills();
       },
       remount: function (nextRoot, nextConfig) { return mountGlobalActionbar(nextRoot || root, nextConfig || config); }
