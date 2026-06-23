@@ -978,42 +978,76 @@
     }
 
     .stories-list {
-      display: grid;
-      gap: 12px;
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      overflow-y: visible;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px calc(50% - 152px) 16px;
+      margin: 0 -14px;
+      perspective: 1200px;
+    }
+
+    .stories-list::-webkit-scrollbar {
+      display: none;
     }
 
     .story-card {
+      flex: 0 0 min(78vw, 304px);
       display: grid;
-      grid-template-columns: 92px 1fr auto;
-      gap: 14px;
-      align-items: center;
-      border-radius: 18px;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: flex-start;
+      scroll-snap-align: center;
+      border-radius: 24px;
       background: var(--surface);
       border: 1px solid var(--line);
       box-shadow: var(--shadow-soft);
       padding: 12px;
+      transform-origin: center center;
+      transition: transform .28s ease, opacity .28s ease, box-shadow .28s ease, filter .28s ease;
+      opacity: .58;
+      filter: saturate(.9);
+      will-change: transform;
+    }
+
+    .story-card.is-focus {
+      opacity: 1;
+      filter: none;
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 18px 42px rgba(16,24,40,.12);
+    }
+
+    .story-card.is-left {
+      transform: perspective(1000px) rotateY(16deg) scale(.93) translateY(10px);
+    }
+
+    .story-card.is-right {
+      transform: perspective(1000px) rotateY(-16deg) scale(.93) translateY(10px);
     }
 
     .story-card img {
-      width: 92px;
-      height: 92px;
-      border-radius: 14px;
+      width: 100%;
+      height: 192px;
+      border-radius: 18px;
       object-fit: cover;
     }
 
     .story-card h3 {
       margin: 0;
-      font-size: 18px;
-      line-height: 1.08;
-      letter-spacing: -.03em;
-      font-weight: 900;
+      font-size: 24px;
+      line-height: .98;
+      letter-spacing: -.05em;
+      font-weight: 950;
       color: var(--text);
     }
 
     .story-card p {
       margin: 8px 0 0;
       font-size: 14px;
-      line-height: 1.42;
+      line-height: 1.45;
       color: var(--muted);
     }
 
@@ -1021,15 +1055,26 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: 13px;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .bookmark {
       color: #64748b;
-      font-size: 22px;
+      font-size: 20px;
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255,255,255,.86);
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(15,23,42,.08);
     }
 
     .panel-card {
@@ -1356,7 +1401,7 @@
 
     <section class="section">
       <h2 class="section-title">Storie in evidenza</h2>
-      <div class="stories-list">
+      <div class="stories-list" id="storiesWheel">
         <a class="story-card" href="index.html">
           <img src="https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Vini delle Cinque Terre" />
           <div>
@@ -1822,7 +1867,11 @@
 
       if (nextDay) {
         statusLabel = 'Domani';
-      } else 
+      } else if (!row.statusLabel && !row.status_label) {
+        if (cancelled) statusLabel = 'Cancellato';
+        else if (!isNaN(delay) && delay > 0) statusLabel = '+' + delay + ' min';
+        else if (rawStatus === 'scheduled') statusLabel = 'Programmato';
+      }
 
       return {
         destination: row.to || row.destination || row.destinationName || row.arrivo || toName,
@@ -2184,6 +2233,51 @@
       setInterval(function () {
         activateSlide((current + 1) % slides.length);
       }, 5200);
+    }());
+  </script>
+  <script>
+    (function () {
+      var wheel = document.getElementById('storiesWheel');
+      if (!wheel) return;
+
+      var cards = Array.prototype.slice.call(wheel.querySelectorAll('.story-card'));
+      var ticking = false;
+
+      function updateWheel() {
+        ticking = false;
+        var rect = wheel.getBoundingClientRect();
+        var center = rect.left + rect.width / 2;
+        var activeIndex = 0;
+        var activeDistance = Infinity;
+
+        cards.forEach(function (card, index) {
+          var cardRect = card.getBoundingClientRect();
+          var cardCenter = cardRect.left + cardRect.width / 2;
+          var distance = Math.abs(center - cardCenter);
+          if (distance < activeDistance) {
+            activeDistance = distance;
+            activeIndex = index;
+          }
+        });
+
+        cards.forEach(function (card, index) {
+          card.classList.remove('is-focus', 'is-left', 'is-right');
+          if (index === activeIndex) card.classList.add('is-focus');
+          else if (index < activeIndex) card.classList.add('is-left');
+          else card.classList.add('is-right');
+        });
+      }
+
+      function requestWheelUpdate() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(updateWheel);
+      }
+
+      wheel.addEventListener('scroll', requestWheelUpdate, { passive: true });
+      window.addEventListener('resize', requestWheelUpdate);
+      setTimeout(updateWheel, 60);
+      requestAnimationFrame(updateWheel);
     }());
   </script>
   <script>
