@@ -729,35 +729,19 @@
       { id: "weather", labelKey: "nav_weather", label: "Weather", href: "weather.html" }
     ];
 
-    function getCanonicalMenuItems(inputItems) {
-      var overridesById = {};
-      var output = [];
-
-      if (Array.isArray(inputItems) && inputItems.length) {
-        inputItems.forEach(function (raw) {
-          var id = normalizePageId(raw && raw.id);
-          if (!id) return;
-          overridesById[id] = {
-            href: resolveHref(raw && raw.href || "")
-          };
-        });
-      }
-
-      canonicalMenuItems.forEach(function (item) {
-        var override = overridesById[item.id] || {};
-        output.push({
+    function getCanonicalMenuItems() {
+      return canonicalMenuItems.map(function (item) {
+        return {
           id: item.id,
           labelKey: item.labelKey,
           label: item.label,
-          href: override.href || item.href
-        });
+          href: item.href
+        };
       });
-
-      return output;
     }
 
     currentLanguage = normalizeLanguageCode(currentLanguage);
-    var menuItems = getCanonicalMenuItems(config.menuItems);
+    var menuItems = getCanonicalMenuItems();
 
     activePage = resolveActivePage(activePage);
 
