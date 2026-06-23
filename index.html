@@ -1365,7 +1365,7 @@
         contain-intrinsic-size: 780px;
       }
       .after-stage > .video-panel:first-child {
-        margin-top: 54px;
+        margin-top: 28px;
         padding-left: 0;
         padding-right: 0;
       }
@@ -1373,7 +1373,7 @@
         margin-top: 0;
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
-        min-height: calc(var(--stage-height) + 220px);
+        min-height: auto;
       }
       .video-backdrop {
         width: 100%;
@@ -1386,9 +1386,9 @@
         padding-top: 0;
       }
       .hero {
-        min-height: calc(var(--stage-height) - var(--actionbar-live-height));
+        min-height: auto;
         border-radius: 0;
-        padding: clamp(108px, 20svh, 156px) 0 14px;
+        padding: clamp(96px, 17svh, 132px) 0 78px;
       }
       .hero-copy {
         width: calc(100% - 20px);
@@ -1402,12 +1402,19 @@
         padding-right: 8px;
       }
       .video-panel.first-peek {
-        margin-top: 16px;
+        margin-top: 62px;
         padding-left: 12px;
         padding-right: 12px;
       }
+      .feature-grid {
+        gap: 6px;
+      }
+      .feature-card {
+        min-height: 150px;
+        padding: 12px 10px;
+      }
       .hero h1 { font-size: 48px; max-width: 92%; text-align: center; }
-      .hero p { max-width: 92%; font-size: 16px; text-align: center; }
+      .hero p { max-width: 92%; font-size: 16px; text-align: center; margin-top: 10px; }
       .hero-swipe {
         width: calc(100% - 28px);
         bottom: 22px;
@@ -1455,7 +1462,6 @@
       .train-time {
         font-size: 21px;
       }
-      .feature-card { min-height: 164px; padding: 13px 11px; }
       .feature-card h2 { font-size: 16px; }
       .feature-card p { font-size: 12px; }
       .villages-section {
