@@ -983,6 +983,7 @@ button.delete{
 <script>
 const SUPABASE_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY";
+const STORAGE_BUCKET = "poi-images";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, ANON_KEY, {
   auth: {
     persistSession: true,
@@ -1075,6 +1076,7 @@ let miniMapPressTimer = null;
 let miniMapStartPoint = null;
 let imageSuggestTimer = null;
 let lastImageSuggestionQuery = "";
+let pendingImageUploads = 0;
 const CINQUE_TERRE_CENTER = [44.1278, 9.7121];
 const MINI_MAP_START_ZOOM = 10;
 const VILLAGE_ZOOM = 15;
@@ -1367,7 +1369,37 @@ function normalizePoiImages(value){
   return [];
 }
 
-function resizeImageFile(file){
+function sanitizeFileName(value){
+  return String(value || "image")
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "image";
+}
+
+function getStorageSetupHint(value){
+  const lower = String(value || "").toLowerCase();
+  if(lower.includes("bucket") && lower.includes("not found")){
+    return " Crea in Supabase Storage un bucket pubblico chiamato '" + STORAGE_BUCKET + "'.";
+  }
+  if(lower.includes("row level security") || lower.includes("permission") || lower.includes("not allowed") || lower.includes("unauthorized")){
+    return " Controlla le policy Storage: l'utente autenticato deve poter fare upload e leggere nel bucket '" + STORAGE_BUCKET + "'.";
+  }
+  return "";
+}
+
+function setImageUploadState(){
+  const busy = pendingImageUploads > 0;
+  if(imageAddBtn){
+    imageAddBtn.disabled = busy;
+    imageAddBtn.innerText = busy ? (pendingImageUploads === 1 ? "Caricamento 1 immagine..." : "Caricamento " + pendingImageUploads + " immagini...") : "Carica immagini";
+    imageAddBtn.style.opacity = busy ? ".7" : "1";
+    imageAddBtn.style.cursor = busy ? "progress" : "pointer";
+  }
+}
+
+function resizeImageFileToBlob(file){
   return new Promise((resolve, reject)=>{
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Impossibile leggere l'immagine"));
@@ -1388,12 +1420,53 @@ function resizeImageFile(file){
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
+        canvas.toBlob((blob) => {
+          if(!blob){
+            reject(new Error("Compressione immagine fallita"));
+            return;
+          }
+          resolve(blob);
+        }, "image/jpeg", quality);
       };
       img.src = String(reader.result || "");
     };
     reader.readAsDataURL(file);
   });
+}
+
+async function uploadImageFileToStorage(file){
+  await requireActiveSession();
+
+  const blob = await resizeImageFileToBlob(file);
+  const userEmail = await getUserEmail();
+  const userFolder = String(userEmail || "poi-editor")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "poi-editor";
+  const safeName = sanitizeFileName(file && file.name);
+  const path = userFolder + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "-" + safeName + ".jpg";
+
+  const { error } = await supabaseClient.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, blob, {
+      contentType: "image/jpeg",
+      cacheControl: "31536000",
+      upsert: false
+    });
+
+  if(error){
+    throw new Error("Upload storage fallito: " + error.message + getStorageSetupHint(error.message));
+  }
+
+  const { data } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  const publicUrl = data && data.publicUrl ? data.publicUrl : "";
+
+  if(!publicUrl){
+    throw new Error("Upload completato ma URL pubblico non disponibile. Verifica che il bucket '" + STORAGE_BUCKET + "' sia pubblico.");
+  }
+
+  return publicUrl;
 }
 
 function buildImageSearchQuery(){
@@ -1595,12 +1668,27 @@ async function addImageFiles(files){
   const selected = Array.from(files || []).filter(file => file && file.type && file.type.startsWith("image/"));
   if(!selected.length) return;
 
+  const errors = [];
+  pendingImageUploads += selected.length;
+  setImageUploadState();
+
   for(const file of selected){
-    const compressed = await resizeImageFile(file);
-    poiImagesState.push(compressed);
+    try{
+      const uploadedUrl = await uploadImageFileToStorage(file);
+      poiImagesState.push(uploadedUrl);
+      renderImagePreviews();
+    }catch(err){
+      console.error("IMAGE UPLOAD ERROR", err);
+      errors.push((file && file.name ? file.name + ": " : "") + err.message);
+    }finally{
+      pendingImageUploads = Math.max(0, pendingImageUploads - 1);
+      setImageUploadState();
+    }
   }
 
-  renderImagePreviews();
+  if(errors.length){
+    throw new Error(errors.join("\n"));
+  }
 }
 
 function updateImportanceUI(value = importanceEl.value){
@@ -2117,6 +2205,11 @@ function buildPoiSaveRequest(poiId){
 }
 
 async function savePoi(){
+  if(pendingImageUploads > 0){
+    alert("Aspetta che finisca il caricamento delle immagini prima di salvare il POI.");
+    return;
+  }
+
   const poi = readPoiForm();
   const saveTargetId = editingPoiId;
   const request = buildPoiSaveRequest(saveTargetId);
@@ -2253,6 +2346,7 @@ document.addEventListener("visibilitychange", () => {
   if(document.visibilityState === "visible") warmSession();
 });
 
+setImageUploadState();
 startHeroQuoteRotation();
 warmSession();
 loadPois();
