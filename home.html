@@ -764,7 +764,7 @@
     }
 
     .villages-section {
-      padding-top: 10px;
+      padding-top: 22px;
     }
 
     .villages {
@@ -823,23 +823,31 @@
     .discover-card,
     .cta-card {
       position: relative;
-      min-height: 228px;
       border-radius: 26px;
       overflow: hidden;
       box-shadow: var(--shadow);
+      display: block;
+      width: 100%;
+      flex: 0 0 auto;
     }
 
     .discover-card {
       border-radius: 26px 26px 0 0;
+      height: clamp(220px, 34vw, 280px);
+      min-height: 220px;
+      max-height: 280px;
     }
 
-    .cta-card { min-height: 286px; }
+    .cta-card {
+      min-height: 286px;
+    }
 
     .discover-carousel {
       position: absolute;
       inset: 0;
       z-index: 0;
       overflow: hidden;
+      height: 100%;
     }
 
     .discover-carousel .discover-slide {
@@ -920,6 +928,10 @@
       margin-top: 6px;
     }
 
+    .villages-section .discover-card {
+      contain: layout paint;
+    }
+
     .discover-copy,
     .cta-copy {
       position: absolute;
@@ -928,6 +940,12 @@
       right: 18px;
       bottom: 18px;
       color: #fff;
+    }
+
+    .discover-card > a,
+    .discover-card > .discover-carousel,
+    .discover-card > .discover-copy {
+      position: absolute;
     }
 
     .discover-copy h2,
@@ -1380,6 +1398,14 @@
       .feature-card { min-height: 180px; }
       .feature-card h2 { font-size: 17px; }
       .feature-card p { font-size: 13px; }
+      .villages-section {
+        padding-top: 18px;
+      }
+      .discover-card {
+        height: 228px;
+        min-height: 228px;
+        max-height: 228px;
+      }
       .guide-section {
         margin-top: 22px;
         padding: 26px 0 24px;
@@ -1510,7 +1536,7 @@
     </section>
 
     <section class="section villages-section">
-      <section class="discover
+      <section class="discover-card">
         <a href="map.html" style="position:absolute;inset:0;z-index:3" aria-label="Vai alla mappa interattiva"></a>
         <div class="discover-carousel" aria-hidden="true">
           <img class="discover-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
