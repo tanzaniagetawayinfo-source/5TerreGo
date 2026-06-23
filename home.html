@@ -50,6 +50,7 @@
 
     a { color: inherit; text-decoration: none; }
     img, video { display: block; max-width: 100%; }
+    img[loading="lazy"] { content-visibility: auto; }
     button, input { font: inherit; }
     body.ftg-actionbar-enabled { padding-top: 0 !important; }
 
@@ -82,15 +83,16 @@
       margin-top: 16px;
     }
 
-    .after-stage {
-      position: relative;
-      z-index: 3;
-      background:
-        radial-gradient(circle at top left, rgba(55,119,255,.05), transparent 28%),
-        radial-gradient(circle at top right, rgba(255,138,31,.06), transparent 22%),
-        linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
-      margin-top: 0;
-      padding-top: 16px;
+    $1
+
+    .after-stage > .section {
+      content-visibility: auto;
+      contain-intrinsic-size: 680px;
+    }
+
+    .after-stage > .section:first-child {
+      content-visibility: visible;
+      contain-intrinsic-size: auto;
     }
 
     .video-stage {
@@ -248,6 +250,10 @@
 
     .after-stage .video-panel {
       margin-top: 0;
+    }
+
+    .after-stage > .video-panel:first-child {
+      margin-top: 42px;
     }
 
     .after-stage .video-panel .section-title,
@@ -1028,18 +1034,16 @@
       position: relative;
       margin-top: 24px;
       padding: 34px 0 30px;
-      border-radius: 28px;
-      overflow: hidden;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.28) 100%),
-        url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5Ojf/2wBDAQoKCg0LDRgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAHTArwDASIAAhEBAxEB/8QAHAAAAQUBAQEAAAAAAAAAAAAAAAECAwQFBgcI/8QATRAAAgEDAwIDBQQIBQMEAwAAAQIDAAQRBRIhMQYTQVEHImFxgZEykaGxFCNCUrHB0fAHM2Lh8RUkQ5KiYoPS8YPC/8QAGQEBAQEBAQEAAAAAAAAAAAAAAAECAwQF/8QAJxEBAQEAAgICAgICAgMAAAAAAAECERIhAzFBEhMiUWEUMnGRsfD/2gAMAwEAAhEDEQA/ANiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ6v2R1lqNZ1jaS2ut7m2uIri6mkjMjyRxySROzM7MzM7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7M7P/2Q==") center center / cover no-repeat;
-      box-shadow: var(--shadow);
+      border-radius: 0;
+      overflow: visible;
+      background: transparent;
+      box-shadow: none;
     }
 
     .guide-actions {
       display: flex;
       justify-content: center;
-      padding: 16px 18px 0;
+      padding: 16px 0 0;
       position: relative;
       z-index: 1;
     }
@@ -1067,38 +1071,12 @@
       transform: scale(.98);
     }
 
-    .guide-section + .cta-card {
-      min-height: auto;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.42);
-      box-shadow: none;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .guide-section + .cta-card img,
-    .guide-section + .cta-card::after {
-      display: none;
-    }
-
-    .guide-section + .cta-card .cta-copy {
-      position: relative;
-      left: auto;
-      right: auto;
-      bottom: auto;
-      color: var(--text);
-      padding: 24px 22px;
-      text-align: center;
-    }
-
-    .guide-section + .cta-card .cta-copy p {
-      color: var(--muted);
-    }
+    
 
     .guide-copy {
       position: relative;
       z-index: 1;
-      padding: 2px 18px 26px;
+      padding: 2px 0 26px;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -1343,7 +1321,16 @@
     }
 
     @media (max-width: 560px) {
-      .page { padding: 0 10px 34px; }
+      .page { padding: 0 10px 56px; }
+      .section {
+        margin-top: 28px;
+      }
+      .after-stage > .section {
+        contain-intrinsic-size: 780px;
+      }
+      .after-stage > .video-panel:first-child {
+        margin-top: 54px;
+      }
       .video-stage {
         margin-top: 0;
         margin-left: calc(50% - 50vw);
@@ -1393,6 +1380,8 @@
       .live-village-bar {
         min-height: 54px;
         grid-template-columns: 44px 1fr 44px;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
       }
       .live-village-name {
         font-size: 14px;
@@ -1426,7 +1415,7 @@
       .feature-card h2 { font-size: 16px; }
       .feature-card p { font-size: 12px; }
       .villages-section {
-        padding-top: 18px;
+        padding-top: 28px;
       }
       .discover-card {
         height: 228px;
@@ -1434,20 +1423,26 @@
         max-height: 228px;
       }
       .guide-section {
-        margin-top: 22px;
-        padding: 26px 0 24px;
-        border-radius: 24px;
+        margin-top: 34px;
+        padding: 34px 0 34px;
+        border-radius: 0;
       }
       .guide-actions {
-        padding: 14px 16px 0;
+        padding: 18px 0 0;
       }
       .guide-cta-btn {
         min-width: 188px;
         min-height: 48px;
         font-size: 14px;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+      .guide-section + .cta-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
       }
       .guide-copy {
-        padding: 0 16px 20px;
+        padding: 4px 0 28px;
       }
       .guide-title {
         font-size: 31px;
@@ -1458,16 +1453,45 @@
         max-width: 86%;
       }
       .stories-list {
-        padding: 8px calc(50% - 138px) 8px;
+        padding: 12px 14px 12px;
+        scroll-snap-type: x proximity;
+        perspective: none;
       }
       .story-card {
         flex-basis: min(80vw, 276px);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow: 0 8px 20px rgba(16,24,40,.08);
+      }
+      .story-card.is-focus,
+      .story-card.is-left,
+      .story-card.is-right {
+        transform: none;
+        opacity: 1;
+        filter: none;
       }
       .story-card img {
         height: 176px;
       }
       .story-card h3 {
         font-size: 22px;
+      }
+      .cta-card,
+      .discover-card,
+      .newsletter,
+      .panel-card,
+      .footer-links {
+        box-shadow: 0 8px 20px rgba(16,24,40,.08);
+      }
+      .panel-card,
+      .newsletter,
+      .footer-links {
+        padding-top: 26px;
+        padding-bottom: 26px;
+      }
+      .socials {
+        padding-top: 6px;
+        padding-bottom: 6px;
       }
       .cta-btn { min-width: 100%; }
     }
@@ -1479,11 +1503,11 @@
   <main class="page">
     <section class="video-stage" aria-label="Hero con video fisso">
       <div class="video-backdrop" aria-hidden="true">
-        <img class="bg-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
-        <img class="bg-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
-        <img class="bg-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
-        <img class="bg-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
-        <img class="bg-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
+        <img loading="eager" decoding="async" fetchpriority="high" class="bg-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
+        <img loading="lazy" decoding="async" class="bg-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
+        <img loading="lazy" decoding="async" class="bg-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
+        <img loading="lazy" decoding="async" class="bg-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
+        <img loading="lazy" decoding="async" class="bg-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
       </div>
 
       <div class="video-stage-flow">
@@ -1505,7 +1529,7 @@
               <div>›</div>
             </a>
             <a class="feature-card green" href="sentieri.html">
-              <div class="ficon"><img src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F45F.png" alt="" aria-hidden="true"></div>
+              <div class="ficon"><img loading="lazy" decoding="async" src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F45F.png" alt="" aria-hidden="true"></div>
               <div>
                 <h2>Sentieri</h2>
                 <p>Stato sentieri, difficoltà e info utili</p>
@@ -1566,11 +1590,11 @@
       <section class="discover-card">
         <a href="map.html" style="position:absolute;inset:0;z-index:3" aria-label="Vai alla mappa interattiva"></a>
         <div class="discover-carousel" aria-hidden="true">
-          <img class="discover-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
-          <img class="discover-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
-          <img class="discover-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
-          <img class="discover-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
-          <img class="discover-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="discover-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="discover-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="discover-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="discover-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="discover-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
         </div>
         <div class="discover-copy">
           <h2>Scopri i borghi</h2>
@@ -1579,20 +1603,20 @@
       </section>
       <div class="villages-wrap">
         <div class="villages">
-          <a class="village-mini" href="map.html#monterosso"><img src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="Monterosso"><span>Monterosso</span></a>
-          <a class="village-mini" href="map.html#vernazza"><img src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="Vernazza"><span>Vernazza</span></a>
-          <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="Corniglia"><span>Corniglia</span></a>
-          <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="Manarola"><span>Manarola</span></a>
-          <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="Riomaggiore"><span>Riomaggiore</span></a>
+          <a class="village-mini" href="map.html#monterosso"><img loading="lazy" decoding="async" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="Monterosso"><span>Monterosso</span></a>
+          <a class="village-mini" href="map.html#vernazza"><img loading="lazy" decoding="async" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="Vernazza"><span>Vernazza</span></a>
+          <a class="village-mini" href="map.html#corniglia"><img loading="lazy" decoding="async" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="Corniglia"><span>Corniglia</span></a>
+          <a class="village-mini" href="map.html#manarola"><img loading="lazy" decoding="async" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="Manarola"><span>Manarola</span></a>
+          <a class="village-mini" href="map.html#riomaggiore"><img loading="lazy" decoding="async" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="Riomaggiore"><span>Riomaggiore</span></a>
         </div>
       </div>
       <div class="villages-bridge" aria-hidden="true">
         <div class="villages-bridge-carousel">
-          <img class="villages-bridge-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
-          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
-          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
-          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
-          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="villages-bridge-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="villages-bridge-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="villages-bridge-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="villages-bridge-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
+          <img loading="lazy" decoding="async" class="villages-bridge-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
         </div>
       </div>
     </section>
@@ -1604,7 +1628,7 @@
       </div>
       <div class="stories-list" id="storiesWheel">
         <a class="story-card" href="index.html">
-          <img src="https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Vini delle Cinque Terre" />
+          <img loading="lazy" decoding="async" src="https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Vini delle Cinque Terre" />
           <div>
             <h3>I vini delle Cinque Terre sono costosi?</h3>
             <p>Una delle domande più frequenti</p>
@@ -1613,7 +1637,7 @@
           <div class="bookmark">⌑</div>
         </a>
         <a class="story-card" href="index.html">
-          <img src="https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Valigia per le Cinque Terre" />
+          <img loading="lazy" decoding="async" src="https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Valigia per le Cinque Terre" />
           <div>
             <h3>Cosa mettere in valigia per le Cinque Terre</h3>
             <p>Guida pratica per il tuo viaggio</p>
@@ -1622,7 +1646,7 @@
           <div class="bookmark">⌑</div>
         </a>
         <a class="story-card" href="index.html">
-          <img src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Mangiare nelle Cinque Terre" />
+          <img loading="lazy" decoding="async" src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Mangiare nelle Cinque Terre" />
           <div>
             <h3>Dove mangiare bene nelle Cinque Terre</h3>
             <p>I nostri consigli locali</p>
@@ -1633,16 +1657,6 @@
       </div>
       <div class="guide-actions">
         <a class="guide-cta-btn" href="index.html">Vai alla guida</a>
-      </div>
-    </section>
-
-    <section class="section cta-card">
-      <a href="public-transport.html" style="position:absolute;inset:0;z-index:3" aria-label="Trova il tuo prossimo viaggio"></a>
-      <img src="https://images.pexels.com/photos/261949/pexels-photo-261949.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Trova il tuo prossimo viaggio" />
-      <div class="cta-copy">
-        <h2>Trova il tuo prossimo viaggio</h2>
-        <p>Confronta orari e prezzi e acquista online in sicurezza</p>
-        <span class="cta-btn">🚆 CERCA TRENI</span>
       </div>
     </section>
 
@@ -1771,6 +1785,16 @@
 
     const LIVE_VILLAGES = ['monterosso', 'vernazza', 'corniglia', 'manarola', 'riomaggiore'];
     let liveVillageIndex = 0;
+    let liveNowActivated = false;
+    const liveNowCache = {};
+    const deviceHints = {
+      reduceMotion: !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
+      mobile: !!(window.matchMedia && window.matchMedia('(max-width: 560px)').matches),
+      saveData: !!(navigator.connection && navigator.connection.saveData),
+      lowCpu: (navigator.hardwareConcurrency || 8) <= 4,
+      lowMemory: (navigator.deviceMemory || 8) <= 4
+    };
+    const shouldReduceEffects = !!(deviceHints.mobile || deviceHints.reduceMotion || deviceHints.saveData || deviceHints.lowCpu || deviceHints.lowMemory);
 
     const TRAIN_RT_ENDPOINTS = [
       'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime'
@@ -2347,6 +2371,11 @@
       var today = new Date().toISOString().slice(0, 10);
       if (!grid) return;
 
+      if (liveNowCache[village]) {
+        grid.innerHTML = buildLiveNowMarkup(village, liveNowCache[village].data, liveNowCache[village].meta);
+        return;
+      }
+
       grid.innerHTML = buildLiveNowMarkup(village, fallback, { weatherFallback: true });
 
       try {
@@ -2373,25 +2402,71 @@
           stationName: 'Stazione ' + (VILLAGE_LABELS[village] || 'Monterosso')
         };
 
-        grid.innerHTML = buildLiveNowMarkup(village, merged, {
+        var meta = {
           weatherFallback: !weatherRes.data
-        });
+        };
+
+        liveNowCache[village] = {
+          data: merged,
+          meta: meta
+        };
+
+        grid.innerHTML = buildLiveNowMarkup(village, merged, meta);
       } catch (error) {
         console.error('Live now load failed', error);
       }
     }
 
-    function syncLiveVillageBar() {
+    function paintLiveNowFallback(place) {
+      var grid = document.getElementById('liveNowGrid');
+      var village = place || 'monterosso';
+      var fallback = liveNowFallback[village] || liveNowFallback.monterosso;
+      if (!grid) return;
+      grid.innerHTML = buildLiveNowMarkup(village, fallback, { weatherFallback: true });
+    }
+
+    function activateLiveNow() {
+      if (liveNowActivated) return;
+      liveNowActivated = true;
+      syncLiveVillageBar(true);
+    }
+
+    function setupLiveNowObserver() {
+      var section = document.querySelector('.after-stage .video-panel');
+      if (!section) {
+        activateLiveNow();
+        return;
+      }
+      if (!('IntersectionObserver' in window)) {
+        activateLiveNow();
+        return;
+      }
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+          activateLiveNow();
+        });
+      }, { rootMargin: '220px 0px' });
+      observer.observe(section);
+    }
+
+    function syncLiveVillageBar(forceLoad) {
       var place = LIVE_VILLAGES[liveVillageIndex] || 'monterosso';
       var label = VILLAGE_LABELS[place] || 'Monterosso';
       var titleEl = document.getElementById('liveVillageName');
       if (titleEl) titleEl.textContent = label + ' now';
-      loadLiveNow(place);
+      if (forceLoad || liveNowActivated) {
+        loadLiveNow(place);
+      } else {
+        paintLiveNowFallback(place);
+      }
     }
 
     function goLiveVillage(direction) {
       liveVillageIndex = (liveVillageIndex + direction + LIVE_VILLAGES.length) % LIVE_VILLAGES.length;
-      syncLiveVillageBar();
+      if (!liveNowActivated) liveNowActivated = true;
+      syncLiveVillageBar(true);
     }
 
     var prevBtn = document.getElementById('livePrevBtn');
@@ -2410,41 +2485,58 @@
     }
 
     liveVillageIndex = 0;
-    syncLiveVillageBar();
+    syncLiveVillageBar(false);
+    setupLiveNowObserver();
   </script>
   <script>
     (function () {
-      var slides = Array.prototype.slice.call(document.querySelectorAll('.video-backdrop .bg-slide'));
-      var current = -1;
-      if (!slides.length) return;
+      function setupCarousel(selector, options) {
+        var slides = Array.prototype.slice.call(document.querySelectorAll(selector));
+        var current = -1;
+        var intervalMs = options && options.intervalMs ? options.intervalMs : 5200;
+        var animate = !(options && options.animate === false);
+        if (!slides.length) return;
 
-      function activateSlide(index) {
-        var nextSlide = slides[index];
-        var previousSlide = current >= 0 ? slides[current] : null;
+        function activateSlide(index) {
+          var nextSlide = slides[index];
+          var previousSlide = current >= 0 ? slides[current] : null;
 
-        if (previousSlide && previousSlide !== nextSlide) {
-          previousSlide.classList.remove('is-active');
+          if (previousSlide && previousSlide !== nextSlide) {
+            previousSlide.classList.remove('is-active');
+          }
+
+          current = index;
+          nextSlide.style.animation = 'none';
+          void nextSlide.offsetWidth;
+          nextSlide.classList.add('is-active');
+          if (animate) {
+            nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
+          }
         }
 
-        current = index;
-        nextSlide.style.animation = 'none';
-        void nextSlide.offsetWidth;
-        nextSlide.classList.add('is-active');
-        nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
+        activateSlide(0);
+        if (!animate || slides.length < 2) return;
+        setInterval(function () {
+          activateSlide((current + 1) % slides.length);
+        }, intervalMs);
       }
 
-      activateSlide(0);
-      setInterval(function () {
-        activateSlide((current + 1) % slides.length);
-      }, 5200);
-    }());
-  </script>
-  <script>
-    (function () {
+      setupCarousel('.video-backdrop .bg-slide', { animate: !shouldReduceEffects });
+      if (!shouldReduceEffects) {
+        setupCarousel('.discover-carousel .discover-slide', { animate: true });
+        setupCarousel('.villages-bridge-carousel .villages-bridge-slide', { animate: true });
+      }
+
       var wheel = document.getElementById('storiesWheel');
       if (!wheel) return;
 
       var cards = Array.prototype.slice.call(wheel.querySelectorAll('.story-card'));
+      if (!cards.length) return;
+      if (shouldReduceEffects) {
+        cards[0].classList.add('is-focus');
+        return;
+      }
+
       var ticking = false;
 
       function updateWheel() {
@@ -2482,60 +2574,6 @@
       window.addEventListener('resize', requestWheelUpdate);
       setTimeout(updateWheel, 60);
       requestAnimationFrame(updateWheel);
-    }());
-  </script>
-  <script>
-    (function () {
-      var slides = Array.prototype.slice.call(document.querySelectorAll('.discover-carousel .discover-slide'));
-      var current = -1;
-      if (!slides.length) return;
-
-      function activateSlide(index) {
-        var nextSlide = slides[index];
-        var previousSlide = current >= 0 ? slides[current] : null;
-
-        if (previousSlide && previousSlide !== nextSlide) {
-          previousSlide.classList.remove('is-active');
-        }
-
-        current = index;
-        nextSlide.style.animation = 'none';
-        void nextSlide.offsetWidth;
-        nextSlide.classList.add('is-active');
-        nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
-      }
-
-      activateSlide(0);
-      setInterval(function () {
-        activateSlide((current + 1) % slides.length);
-      }, 5200);
-    }());
-  </script>
-  <script>
-    (function () {
-      var slides = Array.prototype.slice.call(document.querySelectorAll('.villages-bridge-carousel .villages-bridge-slide'));
-      var current = -1;
-      if (!slides.length) return;
-
-      function activateSlide(index) {
-        var nextSlide = slides[index];
-        var previousSlide = current >= 0 ? slides[current] : null;
-
-        if (previousSlide && previousSlide !== nextSlide) {
-          previousSlide.classList.remove('is-active');
-        }
-
-        current = index;
-        nextSlide.style.animation = 'none';
-        void nextSlide.offsetWidth;
-        nextSlide.classList.add('is-active');
-        nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
-      }
-
-      activateSlide(0);
-      setInterval(function () {
-        activateSlide((current + 1) % slides.length);
-      }, 5200);
     }());
   </script>
   
