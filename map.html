@@ -1338,12 +1338,44 @@
       -webkit-backdrop-filter: none;
     }
     .boot-loader {
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
+      position: relative;
+      width: 52px;
+      height: 52px;
+      min-width: 52px;
+      min-height: 52px;
+      max-width: 52px;
+      max-height: 52px;
+      flex: 0 0 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      aspect-ratio: 1 / 1;
+      box-sizing: border-box;
+    }
+    .boot-loader::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
       border: 2.5px solid rgba(17,17,17,0.10);
       border-top-color: #111;
       animation: bootSpin .8s linear infinite;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+    .boot-loader-value {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -.03em;
+      color: #111;
+      animation: none;
+      transform: translateZ(0);
+      font-variant-numeric: tabular-nums;
     }
     .boot-status-title {
       font-size: 15px;
@@ -1379,9 +1411,12 @@
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
     }
-    #boot-status.is-overlay .boot-loader {
+    #boot-status.is-overlay .boot-loader::before {
       border-color: rgba(255,255,255,.20);
       border-top-color: #fff;
+    }
+    #boot-status.is-overlay .boot-loader-value {
+      color: #fff;
     }
     #boot-status.is-overlay .boot-status-title,
     #boot-status.is-overlay .boot-status-text {
@@ -1394,7 +1429,7 @@
 <div id="ftg-global-actionbar-root"></div>
 <div id="boot-status" aria-live="polite" aria-busy="true">
   <div class="boot-status-card">
-    <div class="boot-loader" aria-hidden="true"></div>
+    <div class="boot-loader" aria-hidden="true"><div id="boot-loader-value" class="boot-loader-value">1%</div></div>
     <div class="boot-status-title">Loading map</div>
     <div id="boot-status-text" class="boot-status-text">Preparing experience…</div>
   </div>
@@ -1806,6 +1841,72 @@
     setBootOverlayMode(false);
     setBootMessage('Preparing map…');
   }
+}());
+</script>
+<script>
+(function(){
+  var bootStatus = document.getElementById('boot-status');
+  var bootLoaderValue = document.getElementById('boot-loader-value');
+  var progress = 1;
+  var timer = 0;
+  var originalHide = window.__ftgHideBootStatus;
+  var originalShowError = window.__ftgShowBootError;
+  var originalRevealOverlay = window.__ftgRevealBootOverlay;
+
+  function renderProgress() {
+    if (bootLoaderValue) bootLoaderValue.textContent = Math.max(1, Math.min(100, Math.round(progress))) + '%';
+  }
+
+  function setProgress(value) {
+    var next = Number(value);
+    if (!Number.isFinite(next)) return;
+    progress = Math.max(1, Math.min(100, next));
+    renderProgress();
+  }
+
+  function startProgressLoop() {
+    if (timer) return;
+    timer = window.setInterval(function() {
+      var cap = bootStatus && bootStatus.classList.contains('is-overlay') ? 96 : 76;
+      if (progress < cap) {
+        progress += progress < 18 ? 3 : (progress < 42 ? 2 : 1);
+        renderProgress();
+      }
+    }, 180);
+  }
+
+  function stopProgressLoop() {
+    if (!timer) return;
+    window.clearInterval(timer);
+    timer = 0;
+  }
+
+  window.__ftgSetBootProgress = setProgress;
+  window.__ftgStartBootProgressLoop = startProgressLoop;
+  window.__ftgStopBootProgressLoop = stopProgressLoop;
+
+  window.__ftgRevealBootOverlay = function(text) {
+    startProgressLoop();
+    if (progress < 28) setProgress(28);
+    if (typeof originalRevealOverlay === 'function') originalRevealOverlay(text);
+  };
+
+  window.__ftgHideBootStatus = function() {
+    stopProgressLoop();
+    setProgress(100);
+    window.setTimeout(function() {
+      if (typeof originalHide === 'function') originalHide();
+    }, 110);
+  };
+
+  window.__ftgShowBootError = function(text) {
+    stopProgressLoop();
+    setProgress(100);
+    if (typeof originalShowError === 'function') originalShowError(text);
+  };
+
+  renderProgress();
+  startProgressLoop();
 }());
 </script>
 <script>
