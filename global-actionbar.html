@@ -730,37 +730,26 @@
     ];
 
     function getCanonicalMenuItems(inputItems) {
-      var mapById = {};
-      var seen = {};
+      var overridesById = {};
       var output = [];
-
-      canonicalMenuItems.forEach(function (item) {
-        mapById[item.id] = item;
-      });
 
       if (Array.isArray(inputItems) && inputItems.length) {
         inputItems.forEach(function (raw) {
           var id = normalizePageId(raw && raw.id);
-          var canonical = mapById[id];
-          var href = resolveHref(raw && raw.href || (canonical && canonical.href) || "");
-          if (!id || !canonical || seen[id]) return;
-          seen[id] = true;
-          output.push({
-            id: canonical.id,
-            labelKey: canonical.labelKey,
-            label: canonical.label,
-            href: href || canonical.href
-          });
+          if (!id) return;
+          overridesById[id] = {
+            href: resolveHref(raw && raw.href || "")
+          };
         });
       }
 
       canonicalMenuItems.forEach(function (item) {
-        if (seen[item.id]) return;
+        var override = overridesById[item.id] || {};
         output.push({
           id: item.id,
           labelKey: item.labelKey,
           label: item.label,
-          href: item.href
+          href: override.href || item.href
         });
       });
 
