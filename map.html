@@ -1369,23 +1369,23 @@
       pointer-events: none;
     }
     #boot-status.is-overlay .boot-status-card {
-      padding: 14px 16px;
+      padding: 10px;
+      width: 42px;
+      height: 42px;
       border-radius: 999px;
-      background: rgba(8,12,16,.76);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 18px 42px rgba(0,0,0,.22);
-      backdrop-filter: blur(18px) saturate(1.04);
-      -webkit-backdrop-filter: blur(18px) saturate(1.04);
+      background: rgba(8,12,16,.58);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 12px 28px rgba(0,0,0,.16);
+      backdrop-filter: blur(16px) saturate(1.02);
+      -webkit-backdrop-filter: blur(16px) saturate(1.02);
     }
     #boot-status.is-overlay .boot-loader {
-      border-color: rgba(255,255,255,.22);
+      border-color: rgba(255,255,255,.20);
       border-top-color: #fff;
     }
-    #boot-status.is-overlay .boot-status-title {
-      color: #fff;
-    }
+    #boot-status.is-overlay .boot-status-title,
     #boot-status.is-overlay .boot-status-text {
-      color: rgba(255,255,255,.76);
+      display: none;
     }
 </style>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -1789,7 +1789,7 @@
   window.__ftgRevealBootOverlay = function(text) {
     bootStatus.classList.remove('hidden');
     setBootOverlayMode(true);
-    setBootMessage(text || 'Loading places…');
+    setBootMessage(text || '');
   };
 
   window.__ftgHideBootStatus = function() {
@@ -2576,11 +2576,11 @@
       return;
     }
     if (window.__ftgRevealBootOverlay) {
-      window.__ftgRevealBootOverlay(poiCoordsReady ? 'Loading remaining places…' : 'Loading places…');
+      window.__ftgRevealBootOverlay('');
       return;
     }
     if (window.__ftgSetBootMessage) {
-      window.__ftgSetBootMessage(poiCoordsReady ? 'Loading remaining places…' : 'Loading places…');
+      window.__ftgSetBootMessage('Loading map…');
     }
   }
   function centerCity(place) { var zoomLevel; if (!place) return; isProgrammaticMove = true; zoomLevel = place.name === 'Monterosso' ? 14 : 15; map.flyTo(place.coords, zoomLevel, { duration: 1.2 }); window.setTimeout(function () { isProgrammaticMove = false; updatePOIVisibility(); updateTrailWidths(); }, 1400); }
