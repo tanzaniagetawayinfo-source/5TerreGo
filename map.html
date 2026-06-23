@@ -793,8 +793,35 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .bottom-rail-village-header {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .bottom-rail-village-subtitle {
+      max-width: min(92vw, 430px);
+      font-size: 12px;
+      line-height: 1.34;
+      font-weight: 760;
+      letter-spacing: -.01em;
+      text-transform: none;
+      color: rgba(17,17,17,.56);
+      text-align: center;
+      white-space: normal;
+      text-wrap: balance;
+    }
     .bottom-rail-village-title.is-visible {
       display: block;
+    }
+    @media (max-width: 520px) {
+      .bottom-rail-village-subtitle {
+        max-width: min(92vw, 360px);
+        font-size: 11px;
+        line-height: 1.32;
+      }
     }
     .bottom-rail-track {
       display: flex;
@@ -2184,6 +2211,102 @@
     'Riomaggiore': createVillageCalendarSeed('Riomaggiore')
   };
 
+  function normalizeVillageEventVillageName(value) {
+    var normalized = normalizeText(value || '');
+    if (normalized === 'monterosso al mare') return 'Monterosso';
+    if (normalized === 'monterosso') return 'Monterosso';
+    if (normalized === 'vernazza') return 'Vernazza';
+    if (normalized === 'corniglia') return 'Corniglia';
+    if (normalized === 'manarola') return 'Manarola';
+    if (normalized === 'riomaggiore') return 'Riomaggiore';
+    return '';
+  }
+
+  function formatVillageEventTime(value, isAllDay) {
+    var date;
+    if (isAllDay) return 'All day';
+    if (!value) return '';
+    date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return '';
+    return new Intl.DateTimeFormat(getCurrentUILocale(), {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Europe/Rome'
+    }).format(date);
+  }
+
+  function mapVillageEventRow(row) {
+    var eventDate;
+    var villageName;
+    var dateParts;
+    if (!row) return null;
+    villageName = normalizeVillageEventVillageName(row.village);
+    if (!villageName) return null;
+    eventDate = row.event_date ? new Date(String(row.event_date) + 'T12:00:00') : null;
+    if (!eventDate || !Number.isFinite(eventDate.getTime())) return null;
+    dateParts = formatVillageEventDate(eventDate);
+    return {
+      id: String(row.id || ''),
+      village: villageName,
+      title: String(row.title || 'Event'),
+      note: String(row.venue || row.source_name || '').trim(),
+      time: formatVillageEventTime(row.starts_at, row.is_all_day),
+      day: Number(new Intl.DateTimeFormat('en-GB', { day: '2-digit' }).format(eventDate)),
+      monthIndex: eventDate.getMonth(),
+      year: eventDate.getFullYear(),
+      weekday: dateParts.weekday,
+      monthLabel: dateParts.month,
+      date: eventDate,
+      startsAt: row.starts_at || null,
+      isAllDay: Boolean(row.is_all_day)
+    };
+  }
+
+  async function loadVillageEvents() {
+    var response;
+    var rows;
+    var grouped = {};
+    Object.keys(villageCalendarData).forEach(function(name) {
+      grouped[name] = [];
+    });
+
+    if (!SUPABASE_READY || !supabaseClient) {
+      renderBottomRailCalendar();
+      return;
+    }
+
+    response = await supabaseClient
+      .from('village_events')
+      .select('id,village,title,venue,event_date,starts_at,is_all_day,status,source_name')
+      .eq('status', 'published')
+      .gte('event_date', getTodayDateString())
+      .order('event_date', { ascending: true })
+      .order('starts_at', { ascending: true, nullsFirst: false });
+
+    if (response.error) {
+      console.warn('Supabase village_events load failed:', response.error.message || response.error);
+      renderBottomRailCalendar();
+      return;
+    }
+
+    rows = Array.isArray(response.data) ? response.data : [];
+    rows.map(mapVillageEventRow).filter(Boolean).forEach(function(item) {
+      if (!grouped[item.village]) grouped[item.village] = [];
+      grouped[item.village].push(item);
+    });
+
+    Object.keys(villageCalendarData).forEach(function(name) {
+      villageCalendarData[name] = {
+        village: name,
+        events: (grouped[name] || []).slice(0, 8),
+        emptyText: 'No upcoming events scheduled yet for ' + name + '.'
+      };
+    });
+
+    renderBottomRailCalendar();
+  }
+
   var map, satelliteLayer, roadsLayer, detailedRoadsLayer, whiteLayer, labelsLayer, ferryRoutesLayer, ferryVehiclesLayer, trailsLayer;
   var card = null;
   var weatherEl = null;
@@ -3459,6 +3582,16 @@
     })[0];
     return closest && closest.place ? closest.place.name : (places[0] ? places[0].name : 'Riomaggiore');
   }
+  function getBottomRailVillageDescription(label) {
+    var place;
+    if (!label || label === getDiscoverLabel()) {
+      return 'A quick general view across the villages, places and upcoming moments around Cinque Terre.';
+    }
+    place = places.find(function(item) {
+      return item && item.name === label;
+    });
+    return place && place.description ? place.description : 'Explore what is around this village right now.';
+  }
   function isBottomRailVillageSheetEnabled() {
     return Boolean(bottomRail);
   }
@@ -3804,9 +3937,9 @@
     if (bottomRailVillageTitle) {
       if (villageLabel) {
         if (villageLabel === getDiscoverLabel()) {
-          bottomRailVillageTitle.textContent = villageLabel;
+          bottomRailVillageTitle.innerHTML = '<div class="bottom-rail-village-header"><div class="bottom-rail-village-nav-label">' + escapeHTML(villageLabel) + '</div><div class="bottom-rail-village-subtitle">' + escapeHTML(getBottomRailVillageDescription(villageLabel)) + '</div></div>';
         } else {
-          bottomRailVillageTitle.innerHTML = '<div class="bottom-rail-village-nav"><button class="bottom-rail-village-nav-btn" type="button" data-village-nav="prev" aria-label="Previous village">‹</button><span class="bottom-rail-village-nav-label">' + escapeHTML(villageLabel) + '</span><button class="bottom-rail-village-nav-btn" type="button" data-village-nav="next" aria-label="Next village">›</button></div>';
+          bottomRailVillageTitle.innerHTML = '<div class="bottom-rail-village-header"><div class="bottom-rail-village-nav"><button class="bottom-rail-village-nav-btn" type="button" data-village-nav="prev" aria-label="Previous village">‹</button><span class="bottom-rail-village-nav-label">' + escapeHTML(villageLabel) + '</span><button class="bottom-rail-village-nav-btn" type="button" data-village-nav="next" aria-label="Next village">›</button></div><div class="bottom-rail-village-subtitle">' + escapeHTML(getBottomRailVillageDescription(villageLabel)) + '</div></div>';
         }
         bottomRailVillageTitle.classList.add('is-visible');
       } else {
@@ -4975,6 +5108,7 @@
     createCityMarkers(!isMapPreviewMode);
     preloadImages();
     updateWeather(44.12, 9.71);
+    if (!isMapPreviewMode) loadVillageEvents();
     if (!isMapPreviewMode) {
       setupEvents();
       setUserLocationButtonState('idle');
