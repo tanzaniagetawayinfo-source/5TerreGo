@@ -218,8 +218,6 @@
       text-align: left;
     }
 
-    
-
     .section-title,
     .eyebrow,
     .footer-title {
@@ -269,34 +267,79 @@
       margin-bottom: 12px;
     }
 
-    .live-switcher {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-
-    .live-switcher::-webkit-scrollbar {
-      display: none;
-    }
-
-    .live-tab {
+    .live-village-bar {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+      min-height: 58px;
+      padding: 0 6px;
+      margin-bottom: 6px;
+      background: #153455;
       border: 0;
-      background: rgba(255,255,255,.82);
-      color: #0b2345;
-      padding: 10px 14px;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 12px 30px rgba(8,18,38,.16);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .live-village-name {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      color: #fff;
+    }
+
+    .live-status-dot {
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
-      font-size: 13px;
-      font-weight: 800;
-      white-space: nowrap;
-      box-shadow: 0 8px 22px rgba(7,20,43,.10);
+      background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34,197,94,.7);
+      animation: liveBlink 1.4s infinite ease-in-out;
+      flex: 0 0 auto;
+    }
+
+    @keyframes liveBlink {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(34,197,94,.7);
+      }
+      50% {
+        opacity: .65;
+        transform: scale(1.08);
+        box-shadow: 0 0 0 6px rgba(34,197,94,0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(34,197,94,0);
+      }
+    }
+
+    .live-arrow {
+      border: 0;
+      background: transparent;
+      height: 44px;
+      width: 44px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
       cursor: pointer;
     }
 
-    .live-tab.active {
-      background: #0b2345;
-      color: #fff;
+    .live-arrow:active {
+      transform: scale(.97);
     }
 
     .live-grid {
@@ -311,6 +354,18 @@
       grid-column: 1 / -1;
       border-radius: 0 0 28px 28px;
       min-height: 124px;
+    }
+
+    .after-stage .video-panel .small-card {
+      background: #153455;
+      color: #fff;
+      border: 0;
+      box-shadow: 0 12px 30px rgba(8,18,38,.16);
+    }
+
+    .after-stage .video-panel .small-card.card-tl,
+    .after-stage .video-panel .small-card.card-tr {
+      border-radius: 0;
     }
 
     .feature-card {
@@ -445,6 +500,21 @@
       gap: 10px;
     }
 
+    .weather-emoji {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      line-height: 1;
+      background: transparent !important;
+      color: inherit !important;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+
     .weather-main {
       display: flex;
       flex-direction: column;
@@ -495,7 +565,37 @@
     }
 
     .weather-line.is-crowd .value {
-      color: #6f42c1;
+      color: #fff;
+    }
+
+    .after-stage .video-panel .metric strong,
+    .after-stage .video-panel .weather-temp,
+    .after-stage .video-panel .weather-location,
+    .after-stage .video-panel .weather-line .value,
+    .after-stage .video-panel .train-time,
+    .after-stage .video-panel .event-title,
+    .after-stage .video-panel .live-village-name,
+    .after-stage .video-panel .live-arrow {
+      color: #fff;
+    }
+
+    .after-stage .video-panel .weather-line .label,
+    .after-stage .video-panel .train-destination,
+    .after-stage .video-panel .train-meta,
+    .after-stage .video-panel .event-time,
+    .after-stage .video-panel .event-place,
+    .after-stage .video-panel .loading-note,
+    .after-stage .video-panel p {
+      color: rgba(255,255,255,.78);
+    }
+
+    .after-stage .video-panel .bubble {
+      background: rgba(255,255,255,.14) !important;
+      color: #fff !important;
+    }
+
+    .after-stage .video-panel .train-divider {
+      background: rgba(255,255,255,.16);
     }
 
     .loading-note {
@@ -675,10 +775,15 @@
     .village-mini {
       position: relative;
       min-height: 154px;
-      border-radius: 0 0 14px 14px;
+      border-radius: 0;
       overflow: hidden;
       background: #d1d5db;
       flex: 0 0 auto;
+    }
+
+    .villages .village-mini:first-child,
+    .villages .village-mini:last-child {
+      border-radius: 0;
     }
 
     .village-mini img {
@@ -769,7 +874,39 @@
       background: linear-gradient(180deg, rgba(12,25,44,.10), rgba(17,33,54,.58));
     }
 
-    
+    .villages-bridge {
+      position: relative;
+      height: 28px;
+      margin-top: 6px;
+      overflow: hidden;
+      border-radius: 0 0 18px 18px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .villages-bridge-carousel {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .villages-bridge-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center bottom;
+      opacity: 0;
+      transform: scale(1.03);
+      transition: opacity 2s ease;
+      will-change: opacity, transform;
+      backface-visibility: hidden;
+    }
+
+    .villages-bridge-slide.is-active {
+      opacity: 1;
+    }
 
     .villages-wrap {
       margin-top: 6px;
@@ -1050,6 +1187,18 @@
       .hero-swipe-icon {
         font-size: 16px;
       }
+      .live-village-bar {
+        min-height: 54px;
+        grid-template-columns: 44px 1fr 44px;
+      }
+      .live-village-name {
+        font-size: 14px;
+      }
+      .live-arrow {
+        height: 40px;
+        width: 40px;
+        font-size: 22px;
+      }
       .live-grid {
         gap: 5px;
       }
@@ -1155,14 +1304,13 @@
 
     <div class="after-stage">
     <section class="section video-panel">
-      <div class="section-head">
-        <div class="live-switcher" id="liveNowTabs">
-          <button class="live-tab active" data-place="monterosso">Monterosso now</button>
-          <button class="live-tab" data-place="vernazza">Vernazza now</button>
-          <button class="live-tab" data-place="corniglia">Corniglia now</button>
-          <button class="live-tab" data-place="manarola">Manarola now</button>
-          <button class="live-tab" data-place="riomaggiore">Riomaggiore now</button>
+      <div class="live-village-bar">
+        <button class="live-arrow" id="livePrevBtn" aria-label="Villaggio precedente">‹</button>
+        <div class="live-village-name">
+          <span class="live-status-dot" aria-hidden="true"></span>
+          <span id="liveVillageName">Monterosso now</span>
         </div>
+        <button class="live-arrow" id="liveNextBtn" aria-label="Villaggio successivo">›</button>
       </div>
       <div class="live-grid" id="liveNowGrid"></div>
     </section>
@@ -1189,6 +1337,15 @@
           <a class="village-mini" href="map.html#corniglia"><img src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="Corniglia"><span>Corniglia</span></a>
           <a class="village-mini" href="map.html#manarola"><img src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="Manarola"><span>Manarola</span></a>
           <a class="village-mini" href="map.html#riomaggiore"><img src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="Riomaggiore"><span>Riomaggiore</span></a>
+        </div>
+      </div>
+      <div class="villages-bridge" aria-hidden="true">
+        <div class="villages-bridge-carousel">
+          <img class="villages-bridge-slide is-active" src="https://images.pexels.com/photos/13368984/pexels-photo-13368984.jpeg?_gl=1*xek8sk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzkzJGoxMSRsMCRoMA.." alt="">
+          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/37550983/pexels-photo-37550983.jpeg?_gl=1*10iae4l*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NzEwJGoyMSRsMCRoMA.." alt="">
+          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/14401368/pexels-photo-14401368.jpeg?_gl=1*2rnhl9*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NTQ0JGo0MSRsMCRoMA.." alt="">
+          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/10843755/pexels-photo-10843755.jpeg?_gl=1*1fe6qov*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5NjEzJGo0MiRsMCRoMA.." alt="">
+          <img class="villages-bridge-slide" src="https://images.pexels.com/photos/30861099/pexels-photo-30861099.jpeg?_gl=1*1m4fctk*_ga*MTU5NzY4NjgyOS4xNzcwMjQ3MTk3*_ga_8JE65Q40S6*czE3ODIxMzk0NTkkbzQyJGcxJHQxNzgyMTM5ODQyJGo0NiRsMCRoMA.." alt="">
         </div>
       </div>
     </section>
@@ -1359,14 +1516,12 @@
       }
     };
 
+    const LIVE_VILLAGES = ['monterosso', 'vernazza', 'corniglia', 'manarola', 'riomaggiore'];
+    let liveVillageIndex = 0;
+
     const TRAIN_RT_ENDPOINTS = [
-      'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime',
-      window.FTG_TRAIN_RT_ENDPOINT,
-      window.FTG_TRANSPORT_ENDPOINT,
-      window.FTG_PUBLIC_TRANSPORT_ENDPOINT,
-      window.__TRAIN_RT_ENDPOINT,
-      '/api/trains/realtime'
-    ].filter(Boolean);
+      'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime'
+    ];
 
     const VT_DIRECT_BASES = ['https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno'];
     const VT_STATION_ALIASES = {
@@ -1485,6 +1640,19 @@
       }).format(new Date(value));
     }
 
+    function getItalyIsoDateFromInstant(value) {
+      if (!value) return '';
+      var parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Rome',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(new Date(value));
+      var map = {};
+      parts.forEach(function (part) { map[part.type] = part.value; });
+      return map.year + '-' + map.month + '-' + map.day;
+    }
+
     function escapeHtml(value) {
       return String(value == null ? '' : value)
         .replace(/&/g, '&amp;')
@@ -1563,6 +1731,13 @@
       return weekdays[jsDate.getDay()] + ' ' + months[jsDate.getMonth()] + ' ' + jsDate.getDate() + ' ' + jsDate.getFullYear() + ' ' + time + ':00';
     }
 
+    function addDaysToIsoDate(dateStr, daysToAdd) {
+      var parts = String(dateStr || '').split('-');
+      var jsDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      jsDate.setDate(jsDate.getDate() + daysToAdd);
+      return jsDate.getFullYear() + '-' + pad(jsDate.getMonth() + 1) + '-' + pad(jsDate.getDate());
+    }
+
     function stopMatchesStation(stop, station) {
       if (!stop || !station) return false;
       if (String(stop.id || '') === String(station.code || '')) return true;
@@ -1617,53 +1792,84 @@
       };
     }
 
-    function buildHomeRealtimeUrl(endpoint, fromName, toName) {
+    function buildHomeRealtimeUrl(endpoint, fromName, toName, dateValue, timeValue) {
       var now = getItalianNow();
       var url = new URL(endpoint, window.location.origin);
       url.searchParams.set('from', fromName);
       url.searchParams.set('to', toName);
-      url.searchParams.set('date', now.isoDate);
-      url.searchParams.set('time', now.time);
+      url.searchParams.set('date', dateValue || now.isoDate);
+      url.searchParams.set('time', timeValue || now.time);
       return url.toString();
     }
 
-    function normalizeRealtimeRow(row, fromName, toName) {
-      var departure = normalizeTime(row.departure || row.departureTime || row.scheduledDeparture || row.orarioPartenza);
+    function normalizeRealtimeRow(row, fromName, toName, searchWindow) {
+      var departureAt = row.departureAt || row.departure_at || null;
+      var departure = normalizeTime(row.departure || row.departureTime || row.departure_display || row.scheduledDeparture || row.orarioPartenza);
       var platform = row.platform || row.binario || row.platformDeparture || row.platformCode || '';
       var rawDelay = row.delayMinutes != null ? row.delayMinutes : row.delay;
       var delay = parseInt(rawDelay, 10);
       var rawStatus = String(row.status || '').toLowerCase();
       var cancelled = !!(row.cancelled || row.canceled || row.suppressed || row.soppressed || rawStatus === 'cancelled');
-      var statusLabel = 'In orario';
-      if (cancelled) statusLabel = 'Cancellato';
-      else if (!isNaN(delay) && delay > 0) statusLabel = '+' + delay + ' min';
-      else if (rawStatus === 'scheduled') statusLabel = 'Programmato';
+      var departureMinutes = departure ? toMinutes(departure) : null;
+      var italyDate = departureAt ? getItalyIsoDateFromInstant(departureAt) : '';
+      var nextDay = !!(row.nextDay || row.next_day || (searchWindow && searchWindow.nextDay));
+      if (!nextDay && italyDate && searchWindow && italyDate > searchWindow.date) nextDay = true;
+      if (!departureAt && searchWindow && searchWindow.nextDay) nextDay = true;
+      var statusLabel = row.statusLabel || row.status_label || 'In orario';
+
+      if (!row.statusLabel && !row.status_label) {
+        if (cancelled) statusLabel = 'Cancellato';
+        else if (nextDay) statusLabel = 'Domani';
+        else if (!isNaN(delay) && delay > 0) statusLabel = '+' + delay + ' min';
+        else if (rawStatus === 'scheduled') statusLabel = 'Programmato';
+      }
+
       return {
         destination: row.to || row.destination || row.destinationName || row.arrivo || toName,
         departure_display: departure || '—',
-        departure_at: null,
+        departure_at: departureAt,
+        departure_date_italy: italyDate,
+        departure_minutes: departureMinutes,
         platform: platform || '',
-        status_label: statusLabel
+        status_label: statusLabel,
+        next_day: nextDay,
+        sort_timestamp: departureAt ? new Date(departureAt).getTime() : null,
+        sort_minutes: departureMinutes != null ? departureMinutes + (nextDay ? 1440 : 0) : 999999
       };
     }
 
-    async function fetchRealtimeTrainRows(fromName, toName) {
+    function realtimeRowMatchesWindow(row, searchWindow) {
+      if (!row || (!row.departure_at && !row.departure_display)) return false;
+      if (row.departure_at) {
+        var departureStamp = new Date(row.departure_at).getTime();
+        if (!isFinite(departureStamp)) return false;
+        if (searchWindow && searchWindow.nextDay) {
+          return row.departure_date_italy === searchWindow.date;
+        }
+        return row.departure_date_italy === searchWindow.date && departureStamp >= Date.now();
+      }
+
+      if (row.departure_minutes == null) return false;
+      if (searchWindow && searchWindow.nextDay) return true;
+      if (row.next_day) return false;
+      return row.departure_minutes >= toMinutes(searchWindow && searchWindow.time ? searchWindow.time : '00:00');
+    }
+
+    async function fetchRealtimeTrainRows(fromName, toName, searchWindow) {
       var lastError = null;
       for (var i = 0; i < TRAIN_RT_ENDPOINTS.length; i += 1) {
         var endpoint = TRAIN_RT_ENDPOINTS[i];
         if (!endpoint) continue;
         try {
-          var requestUrl = buildHomeRealtimeUrl(endpoint, fromName, toName);
+          var requestUrl = buildHomeRealtimeUrl(endpoint, fromName, toName, searchWindow && searchWindow.date, searchWindow && searchWindow.time);
           var response = await fetch(requestUrl, { cache: 'no-store' });
           if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + requestUrl);
           var payload = await response.json();
-          var rows = Array.isArray(payload)
-            ? payload
-            : (payload.trains || payload.departures || payload.services || payload.data || []);
+          var rows = Array.isArray(payload && payload.trains) ? payload.trains : [];
           var normalized = rows
-            .map(function (row) { return normalizeRealtimeRow(row, fromName, toName); })
-            .filter(function (row) { return row && row.departure_display && row.departure_display !== '—'; })
-            .sort(function (a, b) { return toMinutes(a.departure_display) - toMinutes(b.departure_display); });
+            .map(function (row) { return normalizeRealtimeRow(row, fromName, toName, searchWindow); })
+            .filter(function (row) { return realtimeRowMatchesWindow(row, searchWindow); })
+            .sort(function (a, b) { return getTrainSortKey(a) - getTrainSortKey(b); });
           if (normalized.length) return normalized;
         } catch (error) {
           lastError = error;
@@ -1673,33 +1879,81 @@
       return [];
     }
 
-    async function fetchFirstTrainForDirection(fromName, toName) {
-      try {
-        var realtimeRows = await fetchRealtimeTrainRows(fromName, toName);
-        if (realtimeRows.length) return realtimeRows[0];
-      } catch (_error) {}
+    function getTrainSortKey(item) {
+      if (!item) return Number.POSITIVE_INFINITY;
+      if (item.sort_timestamp != null && isFinite(item.sort_timestamp)) return item.sort_timestamp;
+      if (item.__sortKey != null && isFinite(item.__sortKey)) return item.__sortKey;
+      if (item.sort_minutes != null && isFinite(item.sort_minutes)) return item.sort_minutes;
+      if (item.departure_at) {
+        var parsedAt = new Date(item.departure_at).getTime();
+        return isFinite(parsedAt) ? parsedAt : Number.POSITIVE_INFINITY;
+      }
+      return Number.POSITIVE_INFINITY;
+    }
 
-      var now = getItalianNow();
-      var fromStation = await resolveStationViaViaggiaTreno(fromName);
-      var toStation = await resolveStationViaViaggiaTreno(toName);
-      var base = fromStation.base;
-      var stamp = buildViaggiaTrenoDateTime(now.isoDate, now.time);
+    async function fetchOfficialCandidatesForWindow(base, fromStation, toStation, windowSpec, nowIsoDate) {
+      var stamp = buildViaggiaTrenoDateTime(windowSpec.date, windowSpec.time);
       var departures = await fetchJsonStrict(base + '/partenze/' + encodeURIComponent(fromStation.code) + '/' + encodeURIComponent(stamp));
+      if (!Array.isArray(departures) || !departures.length) return [];
 
-      if (!Array.isArray(departures) || !departures.length) return null;
-
-      var limit = Math.min(departures.length, 8);
+      var limit = Math.min(departures.length, 60);
       var candidates = [];
       for (var i = 0; i < limit; i += 1) {
         try {
           var item = await enrichViaggiaTrenoDeparture(base, departures[i], fromStation, toStation);
-          if (item && item.departure_at) candidates.push(item);
+          if (!item || !item.departure_at) continue;
+
+          var departureItalyDate = getItalyIsoDateFromInstant(item.departure_at);
+          item.next_day = !!(departureItalyDate && departureItalyDate > nowIsoDate);
+          if (item.next_day && (!item.status_label || item.status_label === 'Live')) {
+            item.status_label = 'Domani';
+          }
+          item.__sortKey = new Date(item.departure_at).getTime();
+          candidates.push(item);
         } catch (_error) {}
       }
 
-      candidates.sort(function (a, b) {
-        return new Date(a.departure_at).getTime() - new Date(b.departure_at).getTime();
-      });
+      return candidates;
+    }
+
+    async function fetchFirstTrainForDirection(fromName, toName) {
+      var now = getItalianNow();
+      var currentWindow = { date: now.isoDate, time: now.time, nextDay: false };
+      var nextDayWindow = { date: addDaysToIsoDate(now.isoDate, 1), time: '00:00', nextDay: true };
+
+      try {
+        var realtimeToday = await fetchRealtimeTrainRows(fromName, toName, currentWindow);
+        if (realtimeToday.length) return realtimeToday[0];
+      } catch (_error) {}
+
+      try {
+        var realtimeTomorrow = await fetchRealtimeTrainRows(fromName, toName, nextDayWindow);
+        if (realtimeTomorrow.length) return realtimeTomorrow[0];
+      } catch (_error) {}
+
+      var fromStation = null;
+      var toStation = null;
+      var base = null;
+      try {
+        fromStation = await resolveStationViaViaggiaTreno(fromName);
+        toStation = await resolveStationViaViaggiaTreno(toName);
+        base = fromStation.base;
+      } catch (_error) {}
+
+      if (!base || !fromStation || !toStation) return null;
+
+      var nowTimestamp = Date.now();
+      var allCandidates = [];
+      try {
+        allCandidates = allCandidates.concat(await fetchOfficialCandidatesForWindow(base, fromStation, toStation, { date: now.isoDate, time: '00:00', nextDay: false }, now.isoDate));
+      } catch (_error) {}
+      try {
+        allCandidates = allCandidates.concat(await fetchOfficialCandidatesForWindow(base, fromStation, toStation, nextDayWindow, now.isoDate));
+      } catch (_error) {}
+
+      var candidates = allCandidates
+        .filter(function (item) { return item && item.departure_at && new Date(item.departure_at).getTime() >= nowTimestamp; })
+        .sort(function (a, b) { return getTrainSortKey(a) - getTrainSortKey(b); });
 
       return candidates[0] || null;
     }
@@ -1745,11 +1999,10 @@
       return `
         <div class="small-card card-tl weather-card">
           <div class="weather-header metric">
-            <span class="bubble">☁</span>
             <strong>Meteo ${escapeHtml(villageName)}</strong>
           </div>
           <div class="weather-top">
-            <span class="bubble">${escapeHtml(weather.condition_emoji || '☀️')}</span>
+            <span class="weather-emoji">${escapeHtml(weather.condition_emoji || '☀️')}</span>
             <div class="weather-main">
               <div class="weather-temp">${weather.temperature_c != null ? `${Math.round(Number(weather.temperature_c))}°` : '—'}</div>
               <div class="weather-location">${escapeHtml(villageName)}</div>
@@ -1769,7 +2022,6 @@
         </div>
         <div class="small-card card-tr train-dual">
           <div class="metric">
-            <span class="bubble" style="background:var(--green-soft);color:var(--green);">🚆</span>
             <strong>${escapeHtml(stationName)}</strong>
           </div>
           <div class="train-list">
@@ -1850,17 +2102,36 @@
       }
     }
 
-    document.addEventListener('click', function (event) {
-      var btn = event.target.closest('.live-tab');
-      if (!btn) return;
-      document.querySelectorAll('.live-tab').forEach(function (tab) {
-        tab.classList.remove('active');
-      });
-      btn.classList.add('active');
-      loadLiveNow(btn.getAttribute('data-place'));
-    });
+    function syncLiveVillageBar() {
+      var place = LIVE_VILLAGES[liveVillageIndex] || 'monterosso';
+      var label = VILLAGE_LABELS[place] || 'Monterosso';
+      var titleEl = document.getElementById('liveVillageName');
+      if (titleEl) titleEl.textContent = label + ' now';
+      loadLiveNow(place);
+    }
 
-    loadLiveNow('monterosso');
+    function goLiveVillage(direction) {
+      liveVillageIndex = (liveVillageIndex + direction + LIVE_VILLAGES.length) % LIVE_VILLAGES.length;
+      syncLiveVillageBar();
+    }
+
+    var prevBtn = document.getElementById('livePrevBtn');
+    var nextBtn = document.getElementById('liveNextBtn');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        goLiveVillage(-1);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        goLiveVillage(1);
+      });
+    }
+
+    liveVillageIndex = 0;
+    syncLiveVillageBar();
   </script>
   <script>
     (function () {
@@ -1916,6 +2187,33 @@
       }, 5200);
     }());
   </script>
+  <script>
+    (function () {
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.villages-bridge-carousel .villages-bridge-slide'));
+      var current = -1;
+      if (!slides.length) return;
+
+      function activateSlide(index) {
+        var nextSlide = slides[index];
+        var previousSlide = current >= 0 ? slides[current] : null;
+
+        if (previousSlide && previousSlide !== nextSlide) {
+          previousSlide.classList.remove('is-active');
+        }
+
+        current = index;
+        nextSlide.style.animation = 'none';
+        void nextSlide.offsetWidth;
+        nextSlide.classList.add('is-active');
+        nextSlide.style.animation = 'ftgDroneZoom 6.8s linear forwards';
+      }
+
+      activateSlide(0);
+      setInterval(function () {
+        activateSlide((current + 1) % slides.length);
+      }, 5200);
+    }());
+  </script>
   
   <script>
     (function () {
@@ -1930,8 +2228,6 @@
       var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v1';
       var actionbarLoadPromise = null;
       var rootActionbar = document.getElementById('ftg-global-actionbar-root');
-
-      
 
       function injectGlobalActionbarHTML(html, cacheKeyPrefix) {
         return new Promise(function (resolve) {
@@ -2039,8 +2335,6 @@
         if (raw.indexOf('-') >= 0) raw = raw.split('-')[0];
         return raw || 'en';
       }
-
-      
 
       function syncActionbarLiveHeight() {
         var height = Math.round(rootActionbar.getBoundingClientRect().height || 0);
