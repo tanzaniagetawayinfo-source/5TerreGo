@@ -994,6 +994,11 @@
       padding-top: 14px;
       border-top: 1px solid rgba(17,17,17,.08);
     }
+    .bottom-rail-calendar-events-wrap.is-standalone {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
     .bottom-rail-calendar-events-title {
       font-size: 11px;
       font-weight: 900;
@@ -1019,11 +1024,23 @@
       color: #111;
     }
     .bottom-rail-calendar-event-day {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 3px;
       font-size: 20px;
       line-height: 1;
       letter-spacing: -.04em;
       font-weight: 980;
       color: #ffcf7f;
+    }
+    .bottom-rail-calendar-event-day small {
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(17,17,17,.48);
     }
     .bottom-rail-calendar-event-body {
       min-width: 0;
@@ -1387,16 +1404,14 @@
   <div id="bottom-rail-sheet-content" class="bottom-rail-sheet-content">
     <div id="bottom-rail-village-title" class="bottom-rail-village-title"></div>
     <div id="bottom-rail-track" class="bottom-rail-track"></div>
-    <section id="bottom-rail-calendar" class="bottom-rail-calendar" aria-label="Village events calendar">
+    <section id="bottom-rail-calendar" class="bottom-rail-calendar" aria-label="Village upcoming events">
       <div class="bottom-rail-calendar-head">
-        <div class="bottom-rail-calendar-kicker">Village events</div>
-        <div id="bottom-rail-calendar-title" class="bottom-rail-calendar-title">Riomaggiore calendar</div>
-        <div id="bottom-rail-calendar-month" class="bottom-rail-calendar-month">June 2026</div>
+        <div class="bottom-rail-calendar-kicker">Upcoming events</div>
+        <div id="bottom-rail-calendar-title" class="bottom-rail-calendar-title">Riomaggiore upcoming events</div>
+        <div id="bottom-rail-calendar-month" class="bottom-rail-calendar-month">See what is happening next in the village</div>
       </div>
-      <div id="bottom-rail-calendar-weekdays" class="bottom-rail-calendar-weekdays"></div>
-      <div id="bottom-rail-calendar-grid" class="bottom-rail-calendar-grid"></div>
-      <div class="bottom-rail-calendar-events-wrap">
-        <div class="bottom-rail-calendar-events-title">Events</div>
+      <div class="bottom-rail-calendar-events-wrap is-standalone">
+        <div class="bottom-rail-calendar-events-title">Next events</div>
         <div id="bottom-rail-calendar-events" class="bottom-rail-calendar-events"></div>
       </div>
     </section>
@@ -1870,10 +1885,50 @@
     }, 120);
   }
 
+  function getRequestedVillageIndexFromURL() {
+    var params = new URLSearchParams(window.location.search || '');
+    var raw = params.get('village') || params.get('place') || params.get('borgo') || params.get('v') || '';
+    var normalized;
+    var index;
+    if (!raw && window.location.hash) raw = String(window.location.hash || '').replace(/^#/, '');
+    raw = String(raw || '').trim();
+    if (!raw) return -1;
+    try { raw = decodeURIComponent(raw); } catch (_error) {}
+    normalized = normalizeText(raw);
+    if (!normalized) return -1;
+    index = places.findIndex(function(place) {
+      var placeName = normalizeText(place && place.name || '');
+      return placeName === normalized || placeName.indexOf(normalized) !== -1 || normalized.indexOf(placeName) !== -1;
+    });
+    return index;
+  }
+
+  function focusRequestedVillageFromURL(animate) {
+    var requestedIndex = getRequestedVillageIndexFromURL();
+    if (requestedIndex < 0) return false;
+    if (animate) focusVillageByIndex(requestedIndex);
+    else {
+      currentDataset = 'places';
+      currentIndex = requestedIndex;
+    }
+    return true;
+  }
+
   function getInitialMapState() {
+    var requestedIndex = getRequestedVillageIndexFromURL();
     var sessionState = readSessionMapState();
     var index;
     var place;
+
+    if (requestedIndex >= 0) {
+      place = places[requestedIndex] || places[0];
+      return {
+        index: requestedIndex,
+        place: place,
+        center: place && place.coords ? place.coords : [44.12, 9.71],
+        zoom: isMapPreviewMode ? 13.9 : getVillageCenterZoom(place)
+      };
+    }
 
     if (sessionState) {
       index = Number.isFinite(sessionState.currentIndex) ? sessionState.currentIndex : 0;
@@ -1950,13 +2005,10 @@
   }
 
   function createVillageCalendarSeed(name) {
-    var now = new Date();
     return {
       village: name,
-      year: now.getFullYear(),
-      monthIndex: now.getMonth(),
       events: [],
-      emptyText: 'Add ' + name + ' events here.'
+      emptyText: 'No upcoming events scheduled yet for ' + name + '.'
     };
   }
 
@@ -3238,21 +3290,31 @@
     if (!villageCalendarData[name]) villageCalendarData[name] = createVillageCalendarSeed(name);
     return villageCalendarData[name];
   }
-  function getCalendarMonthLabel(year, monthIndex) {
-    var date = new Date(year, monthIndex, 1);
-    return new Intl.DateTimeFormat(getCurrentUILocale(), { month: 'long', year: 'numeric' }).format(date);
+  function getEventDisplayDate(eventItem) {
+    var today = new Date();
+    var year = Number(eventItem && eventItem.year || today.getFullYear());
+    var monthIndex = Number(eventItem && eventItem.monthIndex);
+    var day = Number(eventItem && eventItem.day);
+    var date;
+    if (!Number.isFinite(monthIndex)) monthIndex = today.getMonth();
+    if (!Number.isFinite(day) || day < 1) day = today.getDate();
+    date = new Date(year, monthIndex, day);
+    if (!Number.isFinite(date.getTime())) date = today;
+    return date;
   }
-  function getCalendarWeekdayLabels() {
-    var base = new Date(2026, 0, 5);
-    var labels = [];
-    var i;
-    for (i = 0; i < 7; i += 1) {
-      labels.push(new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short' }).format(new Date(base.getFullYear(), base.getMonth(), base.getDate() + i)));
-    }
-    return labels;
+
+  function formatVillageEventDate(date) {
+    return {
+      day: new Intl.DateTimeFormat(getCurrentUILocale(), { day: '2-digit' }).format(date),
+      month: new Intl.DateTimeFormat(getCurrentUILocale(), { month: 'short' }).format(date),
+      weekday: new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short' }).format(date)
+    };
   }
+
   function renderBottomRailCalendar() {
     var villageName;
+    var config;
+    var events;
     if (!isBottomRailVillageSheetEnabled()) {
       if (bottomRailCalendarTitle) bottomRailCalendarTitle.textContent = '';
       if (bottomRailCalendarMonth) bottomRailCalendarMonth.textContent = '';
@@ -3261,50 +3323,34 @@
       if (bottomRailCalendarEvents) bottomRailCalendarEvents.innerHTML = '';
       return;
     }
-    var config;
-    var firstDay;
-    var startOffset;
-    var daysInMonth;
-    var weekdays;
-    var cells = [];
-    var events;
-    var i;
-    var dayNumber;
-    if (!bottomRailCalendarTitle || !bottomRailCalendarMonth || !bottomRailCalendarGrid || !bottomRailCalendarEvents || !bottomRailCalendarWeekdays) return;
+    if (!bottomRailCalendarTitle || !bottomRailCalendarMonth || !bottomRailCalendarEvents) return;
+
     villageName = getBottomRailActiveVillageName();
     config = getVillageCalendarConfig(villageName);
     events = Array.isArray(config.events) ? config.events.slice() : [];
-    firstDay = new Date(config.year, config.monthIndex, 1);
-    startOffset = (firstDay.getDay() + 6) % 7;
-    daysInMonth = new Date(config.year, config.monthIndex + 1, 0).getDate();
-    weekdays = getCalendarWeekdayLabels();
 
-    bottomRailCalendarTitle.textContent = villageName === getDiscoverLabel() ? getDiscoverLabel() : (villageName + ' calendar');
-    bottomRailCalendarMonth.textContent = getCalendarMonthLabel(config.year, config.monthIndex);
-    bottomRailCalendarWeekdays.innerHTML = weekdays.map(function(label) {
-      return '<div class="bottom-rail-calendar-weekday">' + escapeHTML(label) + '</div>';
-    }).join('');
+    bottomRailCalendarTitle.textContent = villageName === getDiscoverLabel() ? getDiscoverLabel() : (villageName + ' upcoming events');
+    bottomRailCalendarMonth.textContent = villageName === getDiscoverLabel()
+      ? 'Explore the villages to see local events here'
+      : 'The next things happening soon in ' + villageName;
 
-    for (i = 0; i < 42; i += 1) {
-      dayNumber = i - startOffset + 1;
-      if (dayNumber < 1 || dayNumber > daysInMonth) {
-        cells.push('<div class="bottom-rail-calendar-day is-empty" aria-hidden="true"></div>');
-        continue;
-      }
-      cells.push('<div class="bottom-rail-calendar-day' + (events.some(function(eventItem) { return Number(eventItem && eventItem.day) === dayNumber; }) ? ' has-event' : '') + '"><span>' + dayNumber + '</span>' + (events.some(function(eventItem) { return Number(eventItem && eventItem.day) === dayNumber; }) ? '<span class="bottom-rail-calendar-day-dot"></span>' : '') + '</div>');
-    }
-    bottomRailCalendarGrid.innerHTML = cells.join('');
+    if (bottomRailCalendarWeekdays) bottomRailCalendarWeekdays.innerHTML = '';
+    if (bottomRailCalendarGrid) bottomRailCalendarGrid.innerHTML = '';
 
     if (!events.length) {
-      bottomRailCalendarEvents.innerHTML = '<div class="bottom-rail-calendar-empty">' + escapeHTML(villageName === getDiscoverLabel() ? 'Pull up to explore Cinque Terre cards here.' : (config.emptyText || ('Add ' + villageName + ' events here.'))) + '</div>';
+      bottomRailCalendarEvents.innerHTML = '<div class="bottom-rail-calendar-empty">' + escapeHTML(villageName === getDiscoverLabel() ? 'Choose a village to view its next events here.' : (config.emptyText || ('No upcoming events scheduled yet for ' + villageName + '.'))) + '</div>';
       return;
     }
 
     events.sort(function(a, b) {
-      return Number(a && a.day || 0) - Number(b && b.day || 0);
+      return getEventDisplayDate(a).getTime() - getEventDisplayDate(b).getTime();
     });
+
     bottomRailCalendarEvents.innerHTML = events.map(function(eventItem) {
-      return '<div class="bottom-rail-calendar-event"><div class="bottom-rail-calendar-event-day">' + escapeHTML(String(eventItem && eventItem.day || '')) + '</div><div class="bottom-rail-calendar-event-body"><div class="bottom-rail-calendar-event-title">' + escapeHTML(eventItem && eventItem.title || 'Event') + '</div>' + ((eventItem && (eventItem.time || eventItem.note)) ? '<div class="bottom-rail-calendar-event-meta">' + escapeHTML([eventItem.time || '', eventItem.note || ''].filter(Boolean).join(' • ')) + '</div>' : '') + '</div></div>';
+      var eventDate = getEventDisplayDate(eventItem);
+      var parts = formatVillageEventDate(eventDate);
+      var meta = [eventItem && eventItem.time || '', eventItem && eventItem.note || ''].filter(Boolean).join(' • ');
+      return '<div class="bottom-rail-calendar-event"><div class="bottom-rail-calendar-event-day"><small>' + escapeHTML(parts.weekday) + '</small><span>' + escapeHTML(parts.day) + '</span><small>' + escapeHTML(parts.month) + '</small></div><div class="bottom-rail-calendar-event-body"><div class="bottom-rail-calendar-event-title">' + escapeHTML(eventItem && eventItem.title || 'Event') + '</div>' + (meta ? '<div class="bottom-rail-calendar-event-meta">' + escapeHTML(meta) + '</div>' : '') + '</div></div>';
     }).join('');
   }
   function getBottomRailPeekHeight() {
@@ -4594,6 +4640,7 @@
     if (!isMapPreviewMode) {
       applyMapFilterUI(currentMapFilter);
       renderBottomRailCards();
+      focusRequestedVillageFromURL(false);
       scheduleSessionMapStateSave();
     }
     loadPOIs().then(function() {
@@ -4609,6 +4656,9 @@
     });
     if (!isMapPreviewMode) loadTrails();
     window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300);
+    window.addEventListener('hashchange', function() {
+      if (!isMapPreviewMode) focusRequestedVillageFromURL(true);
+    });
     if (!isMapPreviewMode) {
       window.setTimeout(function () { checkUser(); startUserPolling(); }, 250);
       if (supabaseClient) supabaseClient.auth.onAuthStateChange(function () { checkUser(); startUserPolling(); });
