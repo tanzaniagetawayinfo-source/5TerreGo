@@ -255,6 +255,8 @@
 
     .after-stage > .video-panel:first-child {
       margin-top: 42px;
+      padding-left: 0;
+      padding-right: 0;
     }
 
     .after-stage .video-panel .section-title,
@@ -365,6 +367,14 @@
       grid-column: 1 / -1;
       border-radius: 0 0 28px 28px;
       min-height: 124px;
+    }
+
+    .events-wide.events-empty {
+      min-height: 16px;
+      padding: 0;
+      background: #153455;
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 12px 30px rgba(8,18,38,.16);
     }
 
     .after-stage .video-panel .small-card {
@@ -501,6 +511,15 @@
       font-size: 15px;
       background: var(--orange-soft);
       color: var(--orange);
+      overflow: hidden;
+    }
+
+    .metric .bubble img {
+      width: 16px;
+      height: 16px;
+      display: block;
+      object-fit: contain;
+      filter: brightness(0) saturate(100%) invert(55%) sepia(80%) saturate(1824%) hue-rotate(347deg) brightness(101%) contrast(102%);
     }
 
     .metric strong {
@@ -650,6 +669,13 @@
       margin-top: 4px;
     }
 
+    .events-wide.events-empty .events-list,
+    .events-wide.events-empty .metric,
+    .events-wide.events-empty .train-divider,
+    .events-wide.events-empty .event-row {
+      display: none !important;
+    }
+
     .events-wide .train-divider {
       display: none;
     }
@@ -664,7 +690,7 @@
     .event-row {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .event-time {
@@ -1044,9 +1070,9 @@
     .guide-actions {
       display: flex;
       justify-content: center;
-      padding: 16px 0 0;
+      padding: 8px 0 0;
       position: relative;
-      z-index: 1;
+      z-index: 3;
     }
 
     .guide-cta-btn {
@@ -1057,15 +1083,15 @@
       min-height: 52px;
       padding: 0 22px;
       border-radius: 999px;
-      background: rgba(255,255,255,.86);
+      background: #ffffff;
       color: #0f172a;
-      border: 1px solid rgba(255,255,255,.95);
-      box-shadow: 0 12px 30px rgba(16,24,40,.10);
+      border: 1px solid rgba(227,232,240,.95);
+      box-shadow: none;
       font-size: 15px;
       font-weight: 900;
       letter-spacing: -.02em;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     .guide-cta-btn:active {
@@ -1113,9 +1139,9 @@
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
-      padding: 8px calc(50% - 152px) 10px;
-      margin: 0;
-      perspective: 1200px;
+      padding: 12px calc(50% - 152px) 30px;
+      margin: 0 0 8px;
+      perspective: none;
       scroll-behavior: smooth;
     }
 
@@ -1132,34 +1158,32 @@
       align-items: flex-start;
       scroll-snap-align: center;
       border-radius: 24px;
-      background: rgba(255,255,255,.94);
-      border: 1px solid rgba(255,255,255,.9);
-      box-shadow: 0 12px 30px rgba(16,24,40,.10);
+      background: #ffffff;
+      border: 1px solid rgba(227,232,240,.95);
+      box-shadow: 0 8px 18px rgba(16,24,40,.07);
       padding: 12px;
       transform-origin: center center;
-      transition: transform .28s ease, opacity .28s ease, box-shadow .28s ease, filter .28s ease;
-      opacity: .78;
-      filter: saturate(.96);
+      transition: transform .22s ease, box-shadow .22s ease;
+      opacity: 1;
+      filter: none;
       will-change: transform;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
     }
 
     .story-card.is-focus {
       opacity: 1;
       filter: none;
-      transform: translateY(-10px) scale(1.03);
-      box-shadow: 0 18px 42px rgba(16,24,40,.14);
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 10px 22px rgba(16,24,40,.08);
     }
 
     .story-card.is-left {
-      transform: perspective(1000px) rotateY(16deg) scale(.93) translateY(10px);
-      opacity: .72;
+      transform: scale(.985);
+      opacity: 1;
     }
 
     .story-card.is-right {
-      transform: perspective(1000px) rotateY(-16deg) scale(.93) translateY(10px);
-      opacity: .72;
+      transform: scale(.985);
+      opacity: 1;
     }
 
     .story-card.is-reduced {
@@ -1207,14 +1231,15 @@
       position: absolute;
       top: 18px;
       right: 18px;
-      background: rgba(255,255,255,.88);
+      background: rgba(255,255,255,.92);
       width: 34px;
       height: 34px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 16px rgba(15,23,42,.08);
+      box-shadow: none;
+      border: 1px solid rgba(227,232,240,.95);
     }
 
     .panel-card {
@@ -1341,6 +1366,8 @@
       }
       .after-stage > .video-panel:first-child {
         margin-top: 54px;
+        padding-left: 0;
+        padding-right: 0;
       }
       .video-stage {
         margin-top: 0;
@@ -1415,6 +1442,9 @@
       .events-wide {
         min-height: 112px;
       }
+      .events-wide.events-empty {
+        min-height: 12px;
+      }
       .events-wide .events-list {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -1442,7 +1472,7 @@
         border-radius: 0;
       }
       .guide-actions {
-        padding: 18px 0 0;
+        padding: 8px 0 0;
       }
       .guide-cta-btn {
         min-width: 188px;
@@ -1467,7 +1497,8 @@
         max-width: 86%;
       }
       .stories-list {
-        padding: 12px 14px 12px;
+        padding: 12px 14px 26px;
+        margin: 0 0 8px;
         scroll-snap-type: x mandatory;
         perspective: none;
       }
@@ -1648,50 +1679,16 @@
         <h2 class="guide-title">Guida gratuita</h2>
         <p class="guide-description">Consigli pratici, mini guide e risposte veloci alle domande più frequenti prima di partire.</p>
       </div>
-      <div class="stories-list" id="storiesWheel">
-        <a class="story-card" href="index.html">
-          <img loading="lazy" decoding="async" src="https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Vini delle Cinque Terre" />
-          <div>
-            <h3>I vini delle Cinque Terre sono costosi?</h3>
-            <p>Una delle domande più frequenti</p>
-            <div class="story-time">◷ <span>3 min</span></div>
-          </div>
-          <div class="bookmark">⌑</div>
-        </a>
-        <a class="story-card" href="index.html">
-          <img loading="lazy" decoding="async" src="https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Valigia per le Cinque Terre" />
-          <div>
-            <h3>Cosa mettere in valigia per le Cinque Terre</h3>
-            <p>Guida pratica per il tuo viaggio</p>
-            <div class="story-time">◷ <span>4 min</span></div>
-          </div>
-          <div class="bookmark">⌑</div>
-        </a>
-        <a class="story-card" href="index.html">
-          <img loading="lazy" decoding="async" src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Mangiare nelle Cinque Terre" />
-          <div>
-            <h3>Dove mangiare bene nelle Cinque Terre</h3>
-            <p>I nostri consigli locali</p>
-            <div class="story-time">◷ <span>5 min</span></div>
-          </div>
-          <div class="bookmark">⌑</div>
-        </a>
-      </div>
+      <div class="stories-list" id="storiesWheel"></div>
       <div class="guide-actions">
         <a class="guide-cta-btn" href="index.html">Vai alla guida</a>
       </div>
     </section>
 
-    <section class="section panel-card green">
-      <h2>Amici del Parco</h2>
-      <p>Rispettiamo e proteggiamo questo territorio unico. Viaggia responsabile.</p>
-      <div class="panel-stamp">🌿</div>
-    </section>
-
     <section class="section panel-card blue">
       <h2>5TerreGo è indipendente</h2>
       <p>Non siamo affiliati con il Parco Nazionale, i Comuni o le compagnie ferroviarie. Informazioni e collegamenti sono forniti per facilitare il tuo viaggio.</p>
-      <div class="panel-stamp">♡</div>
+      
     </section>
 
     <section class="section newsletter">
@@ -1701,14 +1698,6 @@
         <input aria-label="La tua email" placeholder="La tua email" />
         <button type="submit">→</button>
       </form>
-    </section>
-
-    <section class="section socials" aria-label="Social links">
-      <a class="social-btn" href="#" aria-label="Instagram">◎</a>
-      <a class="social-btn" href="#" aria-label="Facebook">f</a>
-      <a class="social-btn" href="#" aria-label="TikTok">♪</a>
-      <a class="social-btn" href="#" aria-label="YouTube">▶</a>
-      <a class="social-btn" href="mailto:tanzaniagetaway.info@gmail.com" aria-label="Email">✉</a>
     </section>
 
     <section class="section footer-links">
@@ -1732,6 +1721,12 @@
   <script src="site-analytics.js?v=3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    window.FTG_SUPABASE_URL = window.FTG_SUPABASE_URL || 'https://baggohsrpxkcubhbzcpu.supabase.co';
+    window.FTG_SUPABASE_ANON_KEY = window.FTG_SUPABASE_ANON_KEY || 'sb_publishable_e1G4u6PMDY39tyQW2U8xJQ_eQYetzIb';
+    const GUIDE_SUPABASE_URL = window.FTG_GUIDE_SUPABASE_URL || window.APP_SUPABASE_URL || 'https://jpflcbktcnhmlvaibzcw.supabase.co';
+    const GUIDE_SUPABASE_ANON_KEY = window.FTG_GUIDE_SUPABASE_ANON_KEY || window.APP_SUPABASE_ANON_KEY || 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
+    const GUIDE_POSTS_ENDPOINT = GUIDE_SUPABASE_URL + '/rest/v1/blog_posts?select=id,title,slug,excerpt,content,cover_image,category,status,published_at,created_at&status=eq.published&order=created_at.desc';
+
     const VILLAGE_LABELS = {
       monterosso: 'Monterosso',
       vernazza: 'Vernazza',
@@ -1774,31 +1769,31 @@
 
     const liveNowFallback = {
       monterosso: {
-        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Media' },
+        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Media', wave_height_m: null, wave_period_s: null, wave_direction_deg: null },
         trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
         crowd: { value: 'Media', sub: 'spiaggia e centro' },
         events: []
       },
       vernazza: {
-        weather: { temperature_c: 21, condition_emoji: '⛅', uv_label: 'UV 5', crowd_label: 'Alta' },
+        weather: { temperature_c: 21, condition_emoji: '⛅', uv_label: 'UV 5', crowd_label: 'Alta', wave_height_m: null, wave_period_s: null, wave_direction_deg: null },
         trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
         crowd: { value: 'Alta', sub: 'piazzetta' },
         events: []
       },
       corniglia: {
-        weather: { temperature_c: 21, condition_emoji: '☀️', uv_label: 'UV 5', crowd_label: 'Bassa' },
+        weather: { temperature_c: 21, condition_emoji: '☀️', uv_label: 'UV 5', crowd_label: 'Bassa', wave_height_m: null, wave_period_s: null, wave_direction_deg: null },
         trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
         crowd: { value: 'Bassa', sub: 'borgo' },
         events: []
       },
       manarola: {
-        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Alta' },
+        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Alta', wave_height_m: null, wave_period_s: null, wave_direction_deg: null },
         trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
         crowd: { value: 'Alta', sub: 'belvedere' },
         events: []
       },
       riomaggiore: {
-        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Media' },
+        weather: { temperature_c: 22, condition_emoji: '☀️', uv_label: 'UV 6', crowd_label: 'Media', wave_height_m: null, wave_period_s: null, wave_direction_deg: null },
         trains: [{ destination: 'La Spezia Centrale', departure_display: '—', platform: '', status_label: 'Live' }, { destination: 'Levanto', departure_display: '—', platform: '', status_label: 'Live' }],
         crowd: { value: 'Media', sub: 'porto' },
         events: []
@@ -1823,6 +1818,8 @@
       'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime'
     ];
 
+    const CROWD_LIVE_ENDPOINT = 'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/crowd-live';
+
     const VT_DIRECT_BASES = ['https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno'];
     const VT_STATION_ALIASES = {
       monterosso: ['Monterosso'],
@@ -1839,6 +1836,24 @@
     function getWeatherEmoji(weatherCode, isDay) {
       var entry = WEATHER_CODE_LABELS[weatherCode] || { day: '🌤️', night: '☁️' };
       return isDay ? entry.day : entry.night;
+    }
+
+    function degreesToCompass(deg) {
+      var value = Number(deg);
+      var dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      if (!isFinite(value)) return '';
+      return dirs[Math.round((((value % 360) + 360) % 360) / 45) % 8];
+    }
+
+    function formatWaveLabel(height, period, direction) {
+      var parts = [];
+      var h = Number(height);
+      var p = Number(period);
+      var d = Number(direction);
+      if (isFinite(h)) parts.push(h.toFixed(h >= 10 ? 0 : 1) + ' m');
+      if (isFinite(p)) parts.push(Math.round(p) + ' s');
+      if (isFinite(d)) parts.push(degreesToCompass(d));
+      return parts.join(' · ') || '—';
     }
 
     async function fetchOpenMeteoWeather(village) {
@@ -1863,6 +1878,45 @@
       };
     }
 
+    async function fetchOpenMeteoMarine(village) {
+      var coords = VILLAGE_COORDS[village] || VILLAGE_COORDS.monterosso;
+      var url = new URL('https://marine-api.open-meteo.com/v1/marine');
+      url.searchParams.set('latitude', coords.latitude);
+      url.searchParams.set('longitude', coords.longitude);
+      url.searchParams.set('current', 'wave_height,wave_direction,wave_period');
+      url.searchParams.set('timezone', 'auto');
+      url.searchParams.set('cell_selection', 'sea');
+      var response = await fetch(url.toString(), { cache: 'no-store' });
+      if (!response.ok) throw new Error('Open-Meteo Marine HTTP ' + response.status);
+      var payload = await response.json();
+      var current = payload.current || {};
+      return {
+        wave_height_m: current.wave_height,
+        wave_direction_deg: current.wave_direction,
+        wave_period_s: current.wave_period
+      };
+    }
+
+    async function fetchCrowdLive(village) {
+      var url = new URL(CROWD_LIVE_ENDPOINT);
+      url.searchParams.set('village', village);
+      var response = await fetch(url.toString(), { cache: 'no-store' });
+      if (!response.ok) throw new Error('Crowd Live HTTP ' + response.status);
+      var payload = await response.json();
+      var item = Array.isArray(payload && payload.villages) ? payload.villages[0] : null;
+      if (!item) throw new Error('Crowd Live missing village payload');
+      var liveLabel = String(item.crowd_label || '—');
+      if (liveLabel.toLowerCase() === 'molto alto') liveLabel = 'Estremo';
+      return {
+        value: liveLabel,
+        sub: item.confidence && String(item.confidence).toLowerCase() !== 'alta' ? ('Confidenza ' + item.confidence.toLowerCase()) : '',
+        score: item.crowd_score != null ? Math.round(Number(item.crowd_score)) : null,
+        confidence: item.confidence || '',
+        methodology: item.methodology || '',
+        signals: item.signals || null
+      };
+    }
+
     function getSupabaseClient() {
       if (window.__ftgSupabaseClient) return window.__ftgSupabaseClient;
       if (window.ftgSupabase) return window.ftgSupabase;
@@ -1871,10 +1925,151 @@
 
       var url = window.FTG_SUPABASE_URL || window.SUPABASE_URL || '';
       var anonKey = window.FTG_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || '';
-      if (!url || !anonKey) return null;
+      if (!url || !anonKey) {
+        console.warn('5TerreGo calendar: missing Supabase browser credentials');
+        return null;
+      }
 
-      window.__ftgSupabaseClient = window.supabase.createClient(url, anonKey);
+      window.__ftgSupabaseClient = window.supabase.createClient(url, anonKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
+        }
+      });
       return window.__ftgSupabaseClient;
+    }
+
+    function collapseGuideSpaces(text) {
+      var out = String(text || '');
+      out = out.split(String.fromCharCode(10)).join(' ');
+      out = out.split(String.fromCharCode(13)).join(' ');
+      out = out.split(String.fromCharCode(9)).join(' ');
+      while (out.indexOf('  ') !== -1) out = out.split('  ').join(' ');
+      return out.trim();
+    }
+
+    function stripGuideHtml(value) {
+      var div = document.createElement('div');
+      div.innerHTML = String(value || '');
+      return collapseGuideSpaces(div.textContent || div.innerText || '');
+    }
+
+    function normalizeGuideCategory(value) {
+      return String(value || '').trim().toLowerCase().split('_').join('-').split(' ').join('-');
+    }
+
+    function getGuidePreview(post) {
+      var excerpt = stripGuideHtml(post.excerpt);
+      var content = stripGuideHtml(post.content);
+      if (excerpt) return excerpt;
+      if (content) return content.slice(0, 120) + (content.length > 120 ? '…' : '');
+      return 'Apri l’articolo per leggere la guida completa.';
+    }
+
+    function getGuideReadingMinutes(post) {
+      var source = collapseGuideSpaces([post.title, post.excerpt, post.content].map(stripGuideHtml).join(' '));
+      var words = source ? source.split(' ').filter(Boolean).length : 0;
+      return Math.max(3, Math.ceil(words / 180));
+    }
+
+    function resolveGuideStoryHref(slug) {
+      var base = '';
+      if (typeof window.FTG_BUILD_STORY_URL === 'function') return window.FTG_BUILD_STORY_URL(slug);
+      if (window.FTG_STORY_BASE_PATH) {
+        base = String(window.FTG_STORY_BASE_PATH);
+        if (base.charAt(base.length - 1) === '/') base = base.slice(0, -1);
+        return base + '/' + slug + '.html';
+      }
+      return '/stories/' + slug + '.html';
+    }
+
+    function buildGuideHeaders() {
+      var headers = { 'Content-Type': 'application/json' };
+      var anonKey = GUIDE_SUPABASE_ANON_KEY || '';
+      if (anonKey) {
+        headers.apikey = anonKey;
+        headers.Authorization = 'Bearer ' + anonKey;
+      }
+      return headers;
+    }
+
+    function normalizeGuidePost(row) {
+      return {
+        id: row.id,
+        title: String(row.title || 'Guida').trim(),
+        slug: String(row.slug || '').trim(),
+        excerpt: row.excerpt || '',
+        content: row.content || '',
+        cover_image: row.cover_image || '',
+        category: normalizeGuideCategory(row.category || 'guide'),
+        readingMinutes: getGuideReadingMinutes(row)
+      };
+    }
+
+    function buildGuideStoryMarkup(post) {
+      return '<article class="story-card" data-story-slug="' + escapeHtml(post.slug) + '" tabindex="0" role="link" aria-label="Apri ' + escapeHtml(post.title) + '">' +
+        '<img loading="lazy" decoding="async" src="' + escapeHtml(post.cover_image || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80') + '" alt="' + escapeHtml(post.title) + '">' +
+        '<h3>' + escapeHtml(post.title) + '</h3>' +
+        '<p>' + escapeHtml(getGuidePreview(post)) + '</p>' +
+        '<div class="story-time">' + escapeHtml(post.readingMinutes + ' min') + '</div>' +
+      '</article>';
+    }
+
+    function attachGuideStoryEvents(wheel) {
+      Array.prototype.slice.call(wheel.querySelectorAll('.story-card[data-story-slug]')).forEach(function (card) {
+        function openStory() {
+          var slug = card.getAttribute('data-story-slug') || '';
+          if (!slug) return;
+          window.location.href = resolveGuideStoryHref(slug);
+        }
+        card.addEventListener('click', openStory);
+        card.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openStory();
+          }
+        });
+      });
+    }
+
+    async function loadGuideStories() {
+      var wheel = document.getElementById('storiesWheel');
+      var section = document.querySelector('.guide-section');
+      var response = null;
+      var rows = [];
+      var posts = [];
+      if (!wheel) return [];
+      wheel.innerHTML = '';
+      if (section) section.hidden = false;
+      try {
+        response = await fetch(GUIDE_POSTS_ENDPOINT, { headers: buildGuideHeaders() });
+        if (!response.ok) {
+          console.warn('Guide posts HTTP error', response.status);
+          if (section) section.hidden = true;
+          return [];
+        }
+        rows = await response.json();
+        posts = Array.isArray(rows) ? rows.map(normalizeGuidePost).filter(function (post) {
+          return post.slug && post.title && post.category !== 'official-updates' && post.category !== 'official-update';
+        }) : [];
+        posts = posts.slice(0, 8);
+        if (!posts.length) {
+          if (section) section.hidden = true;
+          return [];
+        }
+        wheel.innerHTML = posts.map(buildGuideStoryMarkup).join('');
+        attachGuideStoryEvents(wheel);
+        if (typeof window.FTG_INIT_GUIDE_WHEEL === 'function') {
+          window.FTG_INIT_GUIDE_WHEEL();
+        }
+        return posts;
+      } catch (_error) {
+        console.warn('Guide posts load failed', _error);
+        if (section) section.hidden = true;
+        wheel.innerHTML = '';
+        return [];
+      }
     }
 
     function getItalianNow() {
@@ -1928,6 +2123,61 @@
       var date = new Date(value);
       if (Number.isNaN(date.getTime())) return '—';
       return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatShortDate(value) {
+      if (!value) return '';
+      var date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).replace('.', '');
+    }
+
+    function italyDateFromEventRow(row) {
+      if (!row) return '';
+      if (row.event_date) return String(row.event_date);
+      if (row.starts_at) return getItalyIsoDateFromInstant(row.starts_at);
+      return '';
+    }
+
+    function italyEndDateFromEventRow(row) {
+      if (!row) return '';
+      if (row.ends_at) return getItalyIsoDateFromInstant(row.ends_at);
+      return italyDateFromEventRow(row);
+    }
+
+    function getEventSortScore(row, today) {
+      var startDate = italyDateFromEventRow(row);
+      var endDate = italyEndDateFromEventRow(row);
+      var isOngoing = !!(startDate && startDate <= today && endDate && endDate >= today);
+      var startsToday = startDate === today;
+      var isFuture = !!(startDate && startDate > today);
+      if (isOngoing && startsToday) return 0;
+      if (isOngoing) return 1;
+      if (startsToday) return 2;
+      if (isFuture) return 3;
+      return 9;
+    }
+
+    function getEventDisplayLabel(row, today) {
+      var startDate = italyDateFromEventRow(row);
+      var endDate = italyEndDateFromEventRow(row);
+      var ongoing = !!(startDate && startDate <= today && endDate && endDate >= today);
+      var multiDay = !!(startDate && endDate && endDate > startDate);
+      if (row && row.is_all_day) {
+        if (ongoing && multiDay) return 'In corso';
+        if (startDate === today) return 'Oggi';
+        if (row.starts_at) return formatShortDate(row.starts_at);
+        if (startDate) return formatShortDate(startDate + 'T12:00:00');
+        return 'Tutto il giorno';
+      }
+      if (row && row.starts_at) {
+        if (startDate === today) return formatTime(row.starts_at);
+        return formatShortDate(row.starts_at) + ' · ' + formatTime(row.starts_at);
+      }
+      if (ongoing && multiDay) return 'In corso';
+      if (startDate === today) return 'Oggi';
+      if (startDate) return formatShortDate(startDate + 'T12:00:00');
+      return '—';
     }
 
     function formatMillisToTime(value) {
@@ -2313,14 +2563,21 @@
 
     function buildLiveNowMarkup(place, data, meta) {
       var villageName = VILLAGE_LABELS[place] || 'Monterosso';
+      var todayItaly = getItalianNow().isoDate;
       var weather = data.weather || {};
       var trains = Array.isArray(data.trains) ? data.trains.slice(0, 2) : [];
       var crowd = data.crowd || { value: 'Media', sub: villageName };
       var events = Array.isArray(data.events) ? data.events.slice(0, 2) : [];
       var stationName = data.stationName || ('Stazione ' + villageName);
+      var hasTodayCalendar = events.length > 0;
+      var eventOneLabel = events[0] ? getEventDisplayLabel(events[0], todayItaly) : '';
+      var eventOneTitle = events[0] ? (events[0].title || '—') : '';
+      var eventOnePlace = events[0] ? (events[0].venue || events[0].source_name || '—') : '';
+      var eventTwoLabel = events[1] ? getEventDisplayLabel(events[1], todayItaly) : '';
+      var eventTwoTitle = events[1] ? (events[1].title || '—') : '';
+      var eventTwoPlace = events[1] ? (events[1].venue || events[1].source_name || '—') : '';
 
       while (trains.length < 2) trains.push(null);
-      while (events.length < 2) events.push(null);
 
       return `
         <div class="small-card card-tl weather-card">
@@ -2339,12 +2596,19 @@
               <span class="label">UV</span>
               <span class="value">${escapeHtml(weather.uv_label || '—')}</span>
             </div>
+            <div class="weather-line">
+              <span class="label">Onde</span>
+              <span class="value">${escapeHtml(formatWaveLabel(weather.wave_height_m, weather.wave_period_s, weather.wave_direction_deg))}</span>
+            </div>
             <div class="weather-line is-crowd">
               <span class="label">Affollamento</span>
               <span class="value">${escapeHtml(weather.crowd_label || crowd.value || '—')}</span>
             </div>
           </div>
+          ${crowd && crowd.sub ? '<div class="loading-note">' + escapeHtml(crowd.sub) + '</div>' : ''}
           ${meta && meta.weatherFallback ? '<div class="loading-note">Meteo Open-Meteo non disponibile, uso fallback locale.</div>' : ''}
+          ${meta && !meta.weatherFallback && meta.marineFallback ? '<div class="loading-note">Dati onde non disponibili, mostro solo meteo base.</div>' : ''}
+          ${meta && meta.crowdFallback ? '<div class="loading-note">Affollamento live non disponibile, uso fallback locale.</div>' : ''}
         </div>
         <div class="small-card card-tr train-dual">
           <div class="metric">
@@ -2364,26 +2628,58 @@
             </div>
           </div>
         </div>
+        ${hasTodayCalendar ? `
         <div class="small-card events-card events-wide">
           <div class="metric">
-            <span class="bubble" style="background:var(--orange-soft);color:var(--orange);">✦</span>
-            <strong>Oggi a ${escapeHtml(villageName)}</strong>
+            <span class="bubble" style="background:var(--orange-soft);color:var(--orange);"><img loading="lazy" decoding="async" src="https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/618x618/1F4C5.png" alt="" aria-hidden="true"></span>
+            <strong>Prossimi eventi</strong>
           </div>
           <div class="events-list">
             <div class="event-row">
-              <div class="event-time">${events[0] ? escapeHtml(formatTime(events[0].starts_at)) : '—'}</div>
-              <div class="event-title">${events[0] ? escapeHtml(events[0].title || '—') : 'Nessun evento caricato'}</div>
-              <div class="event-place">${events[0] ? escapeHtml(events[0].venue || '—') : 'Aggiungi eventi in Supabase'}</div>
+              <div class="event-time">${escapeHtml(eventOneLabel)}</div>
+              <div class="event-title">${escapeHtml(eventOneTitle)}</div>
             </div>
-            <div class="train-divider"></div>
-            <div class="event-row">
-              <div class="event-time">${events[1] ? escapeHtml(formatTime(events[1].starts_at)) : '—'}</div>
-              <div class="event-title">${events[1] ? escapeHtml(events[1].title || '—') : 'Nessun altro evento'}</div>
-              <div class="event-place">${events[1] ? escapeHtml(events[1].venue || '—') : 'Aggiungi eventi in Supabase'}</div>
-            </div>
+            ${events[1] ? '<div class="train-divider"></div><div class="event-row"><div class="event-time">' + escapeHtml(eventTwoLabel) + '</div><div class="event-title">' + escapeHtml(eventTwoTitle) + '</div></div>' : ''}
           </div>
         </div>
+      ` : '<div class="small-card events-card events-wide events-empty" aria-hidden="true"></div>'}
       `;
+    }
+
+    async function fetchVillageCalendar(client, village) {
+      var today = getItalianNow().isoDate;
+      var endWindow = addDaysToIsoDate(today, 14);
+      if (!client) return [];
+      var response = await client
+        .from('village_events')
+        .select('title, venue, starts_at, ends_at, event_date, is_all_day, source_name, status')
+        .eq('village', village)
+        .eq('status', 'published')
+        .lte('event_date', endWindow)
+        .order('event_date', { ascending: true })
+        .order('starts_at', { ascending: true, nullsFirst: false })
+        .limit(12);
+      if (response && response.error) {
+        console.warn('Village calendar query failed for', village, response.error);
+        return [];
+      }
+      var rows = Array.isArray(response && response.data) ? response.data : [];
+      return rows
+        .filter(function (row) {
+          var startDate = italyDateFromEventRow(row);
+          var endDate = italyEndDateFromEventRow(row);
+          if (!startDate) return false;
+          if (endDate && endDate >= today && startDate <= endWindow) return true;
+          return startDate >= today && startDate <= endWindow;
+        })
+        .sort(function (a, b) {
+          var groupDiff = getEventSortScore(a, today) - getEventSortScore(b, today);
+          if (groupDiff) return groupDiff;
+          var aTime = a.starts_at ? new Date(a.starts_at).getTime() : Number.POSITIVE_INFINITY;
+          var bTime = b.starts_at ? new Date(b.starts_at).getTime() : Number.POSITIVE_INFINITY;
+          return aTime - bTime;
+        })
+        .slice(0, 2);
     }
 
     async function loadLiveNow(place) {
@@ -2402,31 +2698,41 @@
       grid.innerHTML = buildLiveNowMarkup(village, fallback, { weatherFallback: true });
 
       try {
-        var weatherPromise = fetchOpenMeteoWeather(village).then(function (data) {
-          return { data: data };
+        var weatherPromise = Promise.all([
+          fetchOpenMeteoWeather(village).catch(function () { return null; }),
+          fetchOpenMeteoMarine(village).catch(function () { return null; })
+        ]).then(function (parts) {
+          return {
+            data: Object.assign({}, parts[0] || {}, parts[1] || {})
+          };
         }).catch(function () {
           return { data: null };
         });
-        var eventsPromise = client
-          ? client.from('live_events').select('title, venue, starts_at, sort_order').eq('village', village).eq('event_date', today).order('sort_order', { ascending: true }).order('starts_at', { ascending: true }).limit(2)
-          : Promise.resolve({ data: [] });
+        var eventsPromise = fetchVillageCalendar(client, village).catch(function () { return fallback.events; });
         var trainsPromise = fetchHomeStationDepartures(village).catch(function () { return fallback.trains; });
+        var crowdPromise = fetchCrowdLive(village).catch(function () { return null; });
 
-        var results = await Promise.all([weatherPromise, eventsPromise, trainsPromise]);
+        var results = await Promise.all([weatherPromise, eventsPromise, trainsPromise, crowdPromise]);
         var weatherRes = results[0] || {};
-        var eventsRes = results[1] || {};
+        var eventsRes = results[1] || [];
         var trainsRes = results[2] || [];
+        var crowdRes = results[3] || null;
 
+        var liveCrowd = crowdRes || fallback.crowd;
         var merged = {
-          weather: Object.assign({}, fallback.weather, weatherRes.data || {}, { crowd_label: fallback.crowd && fallback.crowd.value ? fallback.crowd.value : (fallback.weather && fallback.weather.crowd_label) }),
+          weather: Object.assign({}, fallback.weather, weatherRes.data || {}, {
+            crowd_label: liveCrowd && liveCrowd.value ? (String(liveCrowd.value).toLowerCase() === 'molto alto' ? 'Estremo' : liveCrowd.value) : (fallback.weather && fallback.weather.crowd_label)
+          }),
           trains: Array.isArray(trainsRes) ? trainsRes : fallback.trains,
-          crowd: fallback.crowd,
-          events: Array.isArray(eventsRes.data) ? eventsRes.data : fallback.events,
+          crowd: liveCrowd,
+          events: Array.isArray(eventsRes) ? eventsRes : fallback.events,
           stationName: 'Stazione ' + (VILLAGE_LABELS[village] || 'Monterosso')
         };
 
         var meta = {
-          weatherFallback: !weatherRes.data
+          weatherFallback: !weatherRes.data,
+          marineFallback: !(weatherRes.data && (weatherRes.data.wave_height_m != null || weatherRes.data.wave_period_s != null || weatherRes.data.wave_direction_deg != null)),
+          crowdFallback: !crowdRes
         };
 
         liveNowCache[village] = {
@@ -2510,6 +2816,7 @@
     liveVillageIndex = 0;
     syncLiveVillageBar(false);
     setupLiveNowObserver();
+    loadGuideStories();
   </script>
   <script>
     (function () {
@@ -2550,42 +2857,44 @@
         setupCarousel('.villages-bridge-carousel .villages-bridge-slide', { animate: true });
       }
 
+      window.FTG_INIT_GUIDE_WHEEL = function () {
       var wheel = document.getElementById('storiesWheel');
-      if (!wheel) return;
-
-      var cards = Array.prototype.slice.call(wheel.querySelectorAll('.story-card'));
-      if (!cards.length) return;
-      if (shouldReduceStoryWheel) {
-        cards.forEach(function (card) {
-          card.classList.remove('is-focus', 'is-left', 'is-right');
-          card.classList.add('is-reduced');
-        });
-        return;
-      }
-      cards.forEach(function (card) {
-        card.classList.remove('is-reduced');
-      });
-
+      var cards = wheel ? Array.prototype.slice.call(wheel.querySelectorAll('.story-card')) : [];
       var ticking = false;
+      if (!wheel || !cards.length) return;
 
       function updateWheel() {
-        ticking = false;
-        var rect = wheel.getBoundingClientRect();
-        var center = rect.left + rect.width / 2;
+        var localCards = Array.prototype.slice.call(wheel.querySelectorAll('.story-card'));
+        var rect;
+        var center;
         var activeIndex = 0;
         var activeDistance = Infinity;
+        ticking = false;
+        if (!localCards.length) return;
 
-        cards.forEach(function (card, index) {
+        if (shouldReduceStoryWheel) {
+          localCards.forEach(function (card) {
+            card.classList.remove('is-focus', 'is-left', 'is-right');
+            card.classList.add('is-reduced');
+          });
+          return;
+        }
+
+        rect = wheel.getBoundingClientRect();
+        center = rect.left + rect.width / 2;
+
+        localCards.forEach(function (card, index) {
           var cardRect = card.getBoundingClientRect();
           var cardCenter = cardRect.left + cardRect.width / 2;
           var distance = Math.abs(center - cardCenter);
+          card.classList.remove('is-reduced');
           if (distance < activeDistance) {
             activeDistance = distance;
             activeIndex = index;
           }
         });
 
-        cards.forEach(function (card, index) {
+        localCards.forEach(function (card, index) {
           card.classList.remove('is-focus', 'is-left', 'is-right');
           if (index === activeIndex) card.classList.add('is-focus');
           else if (index < activeIndex) card.classList.add('is-left');
@@ -2599,10 +2908,17 @@
         requestAnimationFrame(updateWheel);
       }
 
-      wheel.addEventListener('scroll', requestWheelUpdate, { passive: true });
-      window.addEventListener('resize', requestWheelUpdate);
+      if (!wheel.__ftgWheelBound) {
+        wheel.addEventListener('scroll', requestWheelUpdate, { passive: true });
+        window.addEventListener('resize', requestWheelUpdate);
+        wheel.__ftgWheelBound = true;
+      }
+
       setTimeout(updateWheel, 60);
       requestAnimationFrame(updateWheel);
+    };
+
+    window.FTG_INIT_GUIDE_WHEEL();
     }());
   </script>
   
