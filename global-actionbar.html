@@ -706,7 +706,7 @@
     var menuItems = config.menuItems || [
       { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
       { id: "home", labelKey: "nav_home", label: "Home", href: "index.html" },
-      { id: "stories", labelKey: "nav_stories", label: "Blog", href: "blog.html" },
+      { id: "guide", labelKey: "nav_guide", label: "Guide", href: "guide.html" },
       { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "sentieri.html" },
       { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "discounts.html" },
       { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "public-transport.html" },
@@ -723,8 +723,7 @@
         choose_language: "Choose language",
         nav_map: "Map",
         nav_home: "Home",
-        nav_stories: "Blog",
-        nav_sentieri: "Trails",
+        nav_guide: "指南",     nav_sentieri: "Trails",
         nav_discounts: "Local Discounts",
         nav_trains: "Public Transport",
         nav_weather: "Weather",
@@ -810,7 +809,8 @@
       var fileName = pathname.split("/").pop() || "index.html";
       var mapByFile = {
         "index.html": "home",
-        "blog.html": "stories",
+        "guide.html": "guide",
+        "blog.html": "guide",
         "map.html": "map",
         "sentieri.html": "sentieri",
         "discounts.html": "discounts",
@@ -818,7 +818,7 @@
         "weather.html": "weather",
         "updates.html": "updates"
       };
-      return mapByFile[fileName] || preferredPage || "stories";
+      return mapByFile[fileName] || preferredPage || "home";
     }
 
     function t(key, fallback) {
@@ -841,7 +841,7 @@
       var icons = {
         map: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4.5 15 2l6 2.5v15L15 22l-6-2.5L3 22V7z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 4.5v15" stroke-width="1.8"></path><path d="M15 2v20" stroke-width="1.8"></path></svg>',
         home: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 10.5 12 4l7.5 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-4v6H5.5a1 1 0 0 1-1-1v-9.5Z" stroke-width="1.8" stroke-linejoin="round"></path></svg>',
-        stories: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
+        guide: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
         discounts: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5V6a2 2 0 0 1 2-2h8.8a2 2 0 0 1 1.4.6l3.2 3.2A2 2 0 0 1 20 9.2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="8" cy="8" r="1.25" stroke-width="1.8"></circle><path d="m9.5 14.5 5-5" stroke-width="1.8" stroke-linecap="round"></path></svg>',
         trains: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
         weather: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="1.8"></circle><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.5 1.5M6.8 17.2l-1.5 1.5M18.7 18.7l-1.5-1.5M6.8 6.8 5.3 5.3" stroke-width="1.8" stroke-linecap="round"></path></svg>',
