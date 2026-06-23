@@ -1502,11 +1502,14 @@
   window.__ftgActionbarMountStarted = false;
 
   var ACTIONBAR_PARTIAL_CANDIDATES = [
+    'global-actionbar.html?v=20260623-3',
+    './global-actionbar.html?v=20260623-3',
+    '/global-actionbar.html?v=20260623-3',
     'global-actionbar.html',
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v1';
+  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v3';
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -1619,12 +1622,6 @@
         cachedHtml = '';
       }
 
-      if (cachedHtml) {
-        try {
-          if (await injectGlobalActionbarPartialHTML(cachedHtml, 'session')) return true;
-        } catch (_error) {}
-      }
-
       for (i = 0; i < ACTIONBAR_PARTIAL_CANDIDATES.length; i += 1) {
         try {
           response = await fetch(ACTIONBAR_PARTIAL_CANDIDATES[i], { cache: 'no-store' });
@@ -1634,7 +1631,13 @@
           if (!html) continue;
 
           cacheGlobalActionbarHTML(html);
-          if (await injectGlobalActionbarPartialHTML(html, i)) return true;
+          if (await injectGlobalActionbarPartialHTML(html, 'net-' + i)) return true;
+        } catch (_error) {}
+      }
+
+      if (cachedHtml) {
+        try {
+          if (await injectGlobalActionbarPartialHTML(cachedHtml, 'session')) return true;
         } catch (_error) {}
       }
 
@@ -1756,7 +1759,7 @@
   }
   function showBootError(text) {
     if (bootStatus) bootStatus.classList.remove('hidden');
-    setBootMessage(text || 'The map could not load its required local resources.');
+    setBootMessage(text || 'The map libraries did not start correctly. Reload the page once.');
   }
   window.__ftgHideBootStatus = hideBootStatus;
   window.__ftgShowBootError = showBootError;
@@ -1765,7 +1768,7 @@
   if (window.__ftgLibrariesReady) {
     setBootMessage('Preparing map…');
   } else {
-    showBootError('A local map file did not load. Reload the page once.');
+    showBootError('The map libraries did not start correctly. Reload the page once.');
   }
 }());
 </script>
@@ -3455,6 +3458,7 @@
     bottomRail.style.transform = 'translateY(' + Math.round(clamped) + 'px)';
     bottomRail.classList.toggle('sheet-expanded', clamped <= Math.max(16, bottomRailSheetPeekY * 0.42));
     bottomRail.classList.toggle('sheet-title-only', clamped >= Math.max(0, bottomRailSheetTitleOnlyY - 10));
+    if (bottomRail.classList.contains('sheet-expanded')) scheduleBottomRailImageHydration(true);
     if (animated === false) {
       window.requestAnimationFrame(function() {
         if (bottomRail) bottomRail.style.transition = '';
@@ -3473,6 +3477,7 @@
     else if (bottomRailSheetMode === 'expanded') bottomRailSheetMode = 'peek';
     bottomRailSheetExpanded = bottomRailSheetMode === 'expanded';
     applyBottomRailTranslate(bottomRailSheetMode === 'expanded' ? 0 : (bottomRailSheetMode === 'title' ? bottomRailSheetTitleOnlyY : bottomRailSheetPeekY), animated !== false);
+    if (bottomRailSheetExpanded) scheduleBottomRailImageHydration(true);
   }
   function syncBottomRailSheetLayout(forceMode) {
     var targetTranslate;
@@ -3653,6 +3658,29 @@
       return '<div class="bottom-rail-card is-ghost" aria-hidden="true" data-ghost-index="' + index + '"><div class="bottom-rail-ghost-image"></div><div class="bottom-rail-ghost-body"><div class="bottom-rail-ghost-line line-1"></div><div class="bottom-rail-ghost-line line-2"></div><div class="bottom-rail-ghost-line line-3"></div></div></div>';
     }).join('');
   }
+  var bottomRailImageHydrateTimer = 0;
+  function hydrateBottomRailImages(forceAll) {
+    var images;
+    var limit;
+    if (!bottomRailTrack) return;
+    images = Array.prototype.slice.call(bottomRailTrack.querySelectorAll('.bottom-rail-image[data-src]'));
+    if (!images.length) return;
+    limit = forceAll ? images.length : Math.min(images.length, 4);
+    images.slice(0, limit).forEach(function(img) {
+      var src = img.getAttribute('data-src') || '';
+      if (!src) return;
+      img.setAttribute('src', src);
+      img.removeAttribute('data-src');
+      img.setAttribute('loading', 'lazy');
+    });
+  }
+  function scheduleBottomRailImageHydration(forceAll) {
+    if (bottomRailImageHydrateTimer) window.clearTimeout(bottomRailImageHydrateTimer);
+    bottomRailImageHydrateTimer = window.setTimeout(function() {
+      bottomRailImageHydrateTimer = 0;
+      hydrateBottomRailImages(Boolean(forceAll));
+    }, forceAll ? 60 : 520);
+  }
   function renderBottomRailCards() {
     var items;
     var villageLabel;
@@ -3695,9 +3723,10 @@
       return;
     }
     bottomRailTrack.innerHTML = items.map(function(item) {
-      var image = item.image ? '<img class="bottom-rail-image" src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
+      var image = item.image ? '<img class="bottom-rail-image" data-src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '">' : '';
       return '<button class="bottom-rail-card" type="button" data-rail-kind="' + escapeHTML(item.kind) + '" data-rail-id="' + escapeHTML(item.id) + '">' + image + '<div class="bottom-rail-body"><div class="bottom-rail-title">' + escapeHTML(item.title || '') + '</div><div class="bottom-rail-kicker">' + escapeHTML(item.kicker || '') + '</div></div></button>';
     }).join('');
+    if (bottomRailSheetMode === 'expanded') scheduleBottomRailImageHydration(true);
   }
   function handleBottomRailClick(event) {
     var button = event.target.closest('[data-rail-kind]');
@@ -3911,6 +3940,39 @@
       east: bounds.getEast() + 0.01
     };
   }
+  function getBootPriorityVillageName() {
+    var requestedIndex = getRequestedVillageIndexFromURL();
+    if (requestedIndex >= 0 && places[requestedIndex]) return places[requestedIndex].name;
+    if (Number.isFinite(currentIndex) && places[currentIndex]) return places[currentIndex].name;
+    if (map) {
+      var closestIndex = getClosestVillageIndexForCenter();
+      if (closestIndex >= 0 && places[closestIndex]) return places[closestIndex].name;
+    }
+    return places[0] ? places[0].name : '';
+  }
+  function getPOIRowBootScore(row, priorityVillageName, bounds) {
+    var parsed = parseCoords(row || {});
+    var coords;
+    var score;
+    var nearestVillage;
+    var importance;
+    var zoomScore;
+    if (!Number.isFinite(parsed.lat) || !Number.isFinite(parsed.lng)) return -Infinity;
+    coords = [parsed.lat, parsed.lng];
+    importance = Number(row && (row.importance || row.relevance || row.score || 0)) || 0;
+    zoomScore = getPOIZoomScoreFromRaw(row || {});
+    nearestVillage = getClosestPlaceNameForCoords(coords);
+    score = importance;
+    if (priorityVillageName && nearestVillage === priorityVillageName) score += 5000;
+    if (bounds && parsed.lat >= bounds.south && parsed.lat <= bounds.north && parsed.lng >= bounds.west && parsed.lng <= bounds.east) score += 2400;
+    if (Number.isFinite(zoomScore)) score += (101 - zoomScore) * 7;
+    return score;
+  }
+  function sortPOIRowsForBoot(rows, priorityVillageName, bounds) {
+    return (Array.isArray(rows) ? rows.slice() : []).sort(function(a, b) {
+      return getPOIRowBootScore(b, priorityVillageName, bounds) - getPOIRowBootScore(a, priorityVillageName, bounds);
+    });
+  }
   var blogPostsCache = [];
   async function loadBlogPosts() {
     var response;
@@ -4022,140 +4084,8 @@
   async function loadPOIs() {
     var generation = ++poiLoadGeneration;
     var remotePageSize = 250;
-    var from = 0;
-    var response;
-    var rows;
-    var localRows;
-    var idbRows;
-    var mergedCacheRows = [];
-    var localAssetRows = [];
-    var seenIds = Object.create(null);
-
-    function refreshPOIViews(renderRail) {
-      updateExclusiveDiscountFilterVisibility();
-      updatePOIVisibility();
-      if (renderRail) renderBottomRailCards();
-    }
-
-    function mergeCachedRows(list) {
-      (Array.isArray(list) ? list : []).forEach(function(row) {
-        var id = String(row && (row.id || row._id || '') || '').trim() || ('coords:' + String(row && row.coords || ''));
-        if (seenIds[id]) return;
-        seenIds[id] = true;
-        mergedCacheRows.push(row);
-      });
-    }
-
-    poiDataLoaded = false;
-    refreshMapLoadingState();
-
-    poiMarkers.forEach(function(entry) {
-      if (entry && entry.marker && map && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
-    });
-    poiMarkers = [];
-
-    try {
-      localRows = readLocalPOIs();
-      mergeCachedRows(localRows);
-
-      idbRows = await readFullPOICacheFromIDB();
-      if (generation !== poiLoadGeneration) return;
-      mergeCachedRows(idbRows);
-
-      if (!mergedCacheRows.length) {
-        localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
-        if (generation !== poiLoadGeneration) return;
-        mergeCachedRows(localAssetRows);
-      }
-
-      if (mergedCacheRows.length) {
-        appendPOIRows(sortCachedPOIRows(mergedCacheRows).slice(0, 900), {
-          replaceExisting: true,
-          refresh: false,
-          keepRichData: true,
-          incremental: false
-        });
-        poiCoordsReady = true;
-        refreshPOIViews(true);
-      }
-
-      if (!SUPABASE_READY || !supabaseClient) {
-        poiCoordsReady = poiMarkers.length > 0;
-        renderBottomRailCards();
-        await loadFerryTimetable();
-        await loadBlogPosts();
-        return;
-      }
-
-      while (generation === poiLoadGeneration) {
-        response = await supabaseClient
-          .from('pois')
-          .select('*')
-          .order('id', { ascending: true })
-          .range(from, from + remotePageSize - 1);
-
-        if (response.error) {
-          console.warn('Supabase POI load failed:', response.error.message);
-          break;
-        }
-
-        rows = Array.isArray(response.data) ? response.data : [];
-        if (!rows.length) break;
-
-        appendPOIRows(rows, {
-          replaceExisting: false,
-          refresh: false,
-          keepRichData: true,
-          incremental: false
-        });
-
-        from += rows.length;
-        poiCoordsReady = poiMarkers.length > 0;
-
-        if (rows.length < remotePageSize || from % (remotePageSize * 2) === 0) {
-          refreshPOIViews(rows.length < remotePageSize);
-        }
-
-        if (rows.length < remotePageSize) break;
-        await new Promise(function(resolve) { window.requestAnimationFrame(resolve); });
-      }
-
-      if (generation !== poiLoadGeneration) return;
-
-      if (!poiMarkers.length) {
-        localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
-        if (generation !== poiLoadGeneration) return;
-        if (localAssetRows.length) {
-          appendPOIRows(localAssetRows, {
-            replaceExisting: true,
-            refresh: false,
-            keepRichData: true,
-            incremental: false
-          });
-        }
-      }
-
-      poiCoordsReady = poiMarkers.length > 0;
-      writeLocalPOIs(poiMarkers.map(function(entry) {
-        return entry && entry.poi ? entry.poi : null;
-      }).filter(Boolean));
-
-      refreshPOIViews(true);
-      addFerryRoutes();
-      await loadFerryTimetable();
-      await loadBlogPosts();
-      if (searchInput) renderSearchSuggestions(searchInput.value);
-    } finally {
-      if (generation === poiLoadGeneration) {
-        poiDataLoaded = true;
-        if (!poiCoordsReady) poiCoordsReady = poiMarkers.length > 0;
-        refreshMapLoadingState();
-      }
-    }
-  }
-  async function loadPOIs() {
-    var generation = ++poiLoadGeneration;
-    var remotePageSize = 250;
+    var initialRenderLimit = 90;
+    var progressiveChunkSize = 120;
     var from = 0;
     var response;
     var rows;
@@ -4170,6 +4100,9 @@
     var firstRemotePromise;
     var firstAvailable;
     var secondAvailable;
+    var priorityVillageName = getBootPriorityVillageName();
+    var initialBounds = getInitialViewportPOIBounds();
+    var deferredAppendGeneration = generation;
 
     function refreshPOIViews(renderRail) {
       updateExclusiveDiscountFilterVisibility();
@@ -4187,20 +4120,54 @@
       });
     }
 
-    function applyImmediateRows(list, source) {
+    function scheduleDeferredAppend(list) {
+      var queue = sortPOIRowsForBoot(list, priorityVillageName, initialBounds).slice();
+      var chunkIndex = 0;
+      if (!queue.length) return;
+      function pump() {
+        var chunk;
+        if (generation !== poiLoadGeneration || deferredAppendGeneration !== generation) return;
+        if (!queue.length) {
+          refreshPOIViews(true);
+          return;
+        }
+        chunk = queue.splice(0, progressiveChunkSize);
+        appendPOIRows(chunk, {
+          replaceExisting: false,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
+        poiCoordsReady = poiMarkers.length > 0;
+        chunkIndex += 1;
+        if (chunkIndex % 2 === 0 || !queue.length) refreshPOIViews(!queue.length);
+        window.requestAnimationFrame(pump);
+      }
+      window.requestAnimationFrame(pump);
+    }
+
+    function applyPriorityRows(list, source, replaceExisting) {
+      var sorted;
+      var firstChunk;
+      var remainder;
       if (generation !== poiLoadGeneration) return false;
       if (!Array.isArray(list) || !list.length) return false;
-      appendPOIRows(list, {
-        replaceExisting: !poiMarkers.length,
+      sorted = sortPOIRowsForBoot(list, priorityVillageName, initialBounds);
+      firstChunk = sorted.slice(0, initialRenderLimit);
+      remainder = sorted.slice(initialRenderLimit);
+      if (!firstChunk.length) return false;
+      appendPOIRows(firstChunk, {
+        replaceExisting: replaceExisting !== false,
         refresh: false,
         keepRichData: true,
         incremental: false
       });
       poiCoordsReady = poiMarkers.length > 0;
       if (window.__ftgRevealBootOverlay) {
-        window.__ftgRevealBootOverlay(source === 'remote' ? 'Loading live places…' : 'Loading places…');
+        window.__ftgRevealBootOverlay(source === 'remote' ? 'Loading village places…' : 'Loading nearby places…');
       }
       refreshPOIViews(true);
+      if (remainder.length) scheduleDeferredAppend(remainder);
       return true;
     }
 
@@ -4230,29 +4197,14 @@
       mergeCachedRows(idbRows);
 
       if (mergedCacheRows.length) {
-        appendPOIRows(sortCachedPOIRows(mergedCacheRows).slice(0, 900), {
-          replaceExisting: true,
-          refresh: false,
-          keepRichData: true,
-          incremental: false
-        });
-        poiCoordsReady = poiMarkers.length > 0;
-        if (window.__ftgRevealBootOverlay) window.__ftgRevealBootOverlay('Loading live places…');
-        refreshPOIViews(true);
+        applyPriorityRows(mergedCacheRows, 'cache', true);
       }
 
       if (!SUPABASE_READY || !supabaseClient) {
         if (!poiMarkers.length) {
           localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
           if (generation !== poiLoadGeneration) return;
-          if (localAssetRows.length) {
-            appendPOIRows(localAssetRows, {
-              replaceExisting: true,
-              refresh: false,
-              keepRichData: true,
-              incremental: false
-            });
-          }
+          applyPriorityRows(localAssetRows, 'local', true);
         }
         poiCoordsReady = poiMarkers.length > 0;
         refreshPOIViews(true);
@@ -4275,12 +4227,12 @@
         ]);
         if (generation !== poiLoadGeneration) return;
 
-        if (!applyImmediateRows(firstAvailable.rows, firstAvailable.source)) {
+        if (!applyPriorityRows(firstAvailable.rows, firstAvailable.source, true)) {
           secondAvailable = await (firstAvailable.source === 'local'
             ? firstRemotePromise.then(function(result) { return { source: 'remote', rows: Array.isArray(result && result.data) ? result.data : [], response: result }; })
             : localAssetPromise.then(function(list) { return { source: 'local', rows: list }; }));
           if (generation !== poiLoadGeneration) return;
-          applyImmediateRows(secondAvailable.rows, secondAvailable.source);
+          applyPriorityRows(secondAvailable.rows, secondAvailable.source, true);
         }
       }
 
@@ -4297,7 +4249,7 @@
       firstRemoteRows = Array.isArray(firstRemoteResponse && firstRemoteResponse.data) ? firstRemoteResponse.data : [];
 
       if (firstRemoteRows.length) {
-        appendPOIRows(firstRemoteRows, {
+        appendPOIRows(sortPOIRowsForBoot(firstRemoteRows, priorityVillageName, initialBounds), {
           replaceExisting: false,
           refresh: false,
           keepRichData: true,
@@ -4307,17 +4259,10 @@
         poiCoordsReady = poiMarkers.length > 0;
         refreshPOIViews(true);
       } else if (!poiMarkers.length && localAssetRows.length) {
-        appendPOIRows(localAssetRows, {
-          replaceExisting: true,
-          refresh: false,
-          keepRichData: true,
-          incremental: false
-        });
-        poiCoordsReady = poiMarkers.length > 0;
-        refreshPOIViews(true);
+        applyPriorityRows(localAssetRows, 'local', true);
       }
 
-      while (generation === poiLoadGeneration && firstRemoteRows.length) {
+      while (generation === poiLoadGeneration) {
         response = await fetchRemotePOIPage(from, remotePageSize);
 
         if (response.error) {
@@ -4328,7 +4273,7 @@
         rows = Array.isArray(response.data) ? response.data : [];
         if (!rows.length) break;
 
-        appendPOIRows(rows, {
+        appendPOIRows(sortPOIRowsForBoot(rows, priorityVillageName, initialBounds), {
           replaceExisting: false,
           refresh: false,
           keepRichData: true,
@@ -4953,7 +4898,7 @@
         window.__ftgShowBootError('The map opened, but some live data is temporarily unavailable. Local map content remains available.');
       }
     });
-    if (!isMapPreviewMode) loadTrails();
+    if (!isMapPreviewMode) window.setTimeout(function() { loadTrails(); }, 900);
     window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300);
     window.addEventListener('hashchange', function() {
       if (!isMapPreviewMode) focusRequestedVillageFromURL(true);
@@ -4967,7 +4912,7 @@
   if (!window.__ftgActionbarReadyDone) return;
   if (window.__ftgBootStarted) return;
   if (!window.__ftgLibrariesReady || typeof window.L === 'undefined') {
-    if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The local map libraries are not available. Reload the page once.');
+    if (typeof window.__ftgShowBootError === 'function') window.__ftgShowBootError('The map libraries are not available right now. Reload the page once.');
     return;
   }
   window.__ftgBootStarted = true;
