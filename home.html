@@ -83,8 +83,7 @@
       margin-top: 16px;
     }
 
-    $1
-
+    
     .after-stage > .section {
       content-visibility: auto;
       contain-intrinsic-size: 680px;
@@ -99,14 +98,14 @@
       position: relative;
       margin-top: 16px;
       isolation: isolate;
-      overflow: hidden;
+      min-height: calc(var(--stage-height) + 260px);
     }
 
     .video-backdrop {
-      position: absolute;
-      inset: 0;
+      position: sticky;
+      top: var(--actionbar-live-height);
       width: 100%;
-      height: 100%;
+      height: calc(var(--stage-height) - var(--actionbar-live-height));
       overflow: hidden;
       background: #0d1729;
       z-index: 0;
@@ -154,7 +153,7 @@
     .video-stage-flow {
       position: relative;
       z-index: 2;
-      margin-top: 0;
+      margin-top: calc(-1 * (var(--stage-height) - var(--actionbar-live-height)));
       padding-top: 0;
       padding-bottom: 24px;
     }
@@ -166,15 +165,15 @@
 
     .hero {
       position: relative;
-      min-height: clamp(260px, 50svh, calc(var(--stage-height) - var(--actionbar-live-height)));
+      min-height: calc(var(--stage-height) - var(--actionbar-live-height));
       border-radius: 0;
       overflow: hidden;
       background: transparent;
       box-shadow: none;
       display: flex;
       align-items: flex-start;
-      justify-content: flex-start;
-      padding: 26px 0 18px;
+      justify-content: center;
+      padding: clamp(84px, 16svh, 140px) 0 18px;
     }
 
     .hero-copy {
@@ -189,8 +188,8 @@
       color: #fff;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
+      align-items: center;
+      text-align: center;
     }
 
     .video-panel.first-peek {
@@ -209,17 +208,17 @@
       letter-spacing: -.07em;
       font-weight: 950;
       text-shadow: 0 10px 24px rgba(0,0,0,.18);
-      text-align: left;
+      text-align: center;
     }
 
     .hero p {
       margin: 14px 0 0;
-      max-width: 520px;
+      max-width: 560px;
       font-size: 18px;
       line-height: 1.5;
       color: rgba(255,255,255,.94);
       text-shadow: 0 8px 18px rgba(0,0,0,.14);
-      text-align: left;
+      text-align: center;
     }
 
     
@@ -1115,6 +1114,7 @@
       padding: 8px calc(50% - 152px) 10px;
       margin: 0;
       perspective: 1200px;
+      scroll-behavior: smooth;
     }
 
     .stories-list::-webkit-scrollbar {
@@ -1136,8 +1136,8 @@
       padding: 12px;
       transform-origin: center center;
       transition: transform .28s ease, opacity .28s ease, box-shadow .28s ease, filter .28s ease;
-      opacity: .58;
-      filter: saturate(.9);
+      opacity: .78;
+      filter: saturate(.96);
       will-change: transform;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
@@ -1152,10 +1152,18 @@
 
     .story-card.is-left {
       transform: perspective(1000px) rotateY(16deg) scale(.93) translateY(10px);
+      opacity: .72;
     }
 
     .story-card.is-right {
       transform: perspective(1000px) rotateY(-16deg) scale(.93) translateY(10px);
+      opacity: .72;
+    }
+
+    .story-card.is-reduced {
+      opacity: 1;
+      filter: none;
+      transform: none;
     }
 
     .story-card img {
@@ -1292,32 +1300,33 @@
     }
 
     .footer-links {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 0 18px 10px;
-      box-shadow: var(--shadow-soft);
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
     }
 
     .footer-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      min-height: 48px;
-      border-bottom: 1px solid #efefef;
-      font-size: 14px;
-      font-weight: 600;
+      min-height: 54px;
+      border-bottom: 1px solid #e8edf5;
+      font-size: 15px;
+      font-weight: 700;
       color: var(--text);
+      background: transparent;
     }
 
-    .footer-row:last-child { border-bottom: 0; }
+    .footer-row:last-child { border-bottom: 1px solid #e8edf5; }
 
     .footer-meta {
       text-align: center;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
-      padding: 6px 8px 10px;
+      padding: 14px 8px 10px;
     }
 
     @media (max-width: 560px) {
@@ -1335,26 +1344,29 @@
         margin-top: 0;
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
+        min-height: calc(var(--stage-height) + 220px);
       }
       .video-backdrop {
         width: 100%;
-        height: 100%;
+        height: calc(var(--stage-height) - var(--actionbar-live-height));
         border-radius: 0;
         box-shadow: none;
       }
       .video-stage-flow {
-        margin-top: 0;
+        margin-top: calc(-1 * (var(--stage-height) - var(--actionbar-live-height)));
         padding-top: 0;
       }
       .hero {
-        min-height: 44svh;
+        min-height: calc(var(--stage-height) - var(--actionbar-live-height));
         border-radius: 0;
-        padding: 20px 0 14px;
+        padding: clamp(108px, 20svh, 156px) 0 14px;
       }
       .hero-copy {
         width: calc(100% - 20px);
         max-width: 640px;
         padding: 0 10px;
+        align-items: center;
+        text-align: center;
       }
       .video-panel {
         padding-left: 8px;
@@ -1365,8 +1377,8 @@
         padding-left: 12px;
         padding-right: 12px;
       }
-      .hero h1 { font-size: 48px; max-width: 92%; }
-      .hero p { max-width: 92%; font-size: 16px; }
+      .hero h1 { font-size: 48px; max-width: 92%; text-align: center; }
+      .hero p { max-width: 92%; font-size: 16px; text-align: center; }
       .hero-swipe {
         width: calc(100% - 28px);
         bottom: 22px;
@@ -1454,7 +1466,7 @@
       }
       .stories-list {
         padding: 12px 14px 12px;
-        scroll-snap-type: x proximity;
+        scroll-snap-type: x mandatory;
         perspective: none;
       }
       .story-card {
@@ -1462,13 +1474,22 @@
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         box-shadow: 0 8px 20px rgba(16,24,40,.08);
+        opacity: .84;
+        filter: none;
       }
-      .story-card.is-focus,
+      .story-card.is-focus {
+        transform: translateY(-6px) scale(1.02);
+        opacity: 1;
+        filter: none;
+      }
       .story-card.is-left,
       .story-card.is-right {
         transform: none;
-        opacity: 1;
+        opacity: .84;
         filter: none;
+      }
+      .story-card.is-reduced {
+        opacity: 1;
       }
       .story-card img {
         height: 176px;
@@ -1479,8 +1500,7 @@
       .cta-card,
       .discover-card,
       .newsletter,
-      .panel-card,
-      .footer-links {
+      .panel-card {
         box-shadow: 0 8px 20px rgba(16,24,40,.08);
       }
       .panel-card,
@@ -1691,17 +1711,17 @@
 
     <section class="section footer-links">
       <h2 class="footer-title" style="padding-top:18px;">Link utili</h2>
-      <a class="footer-row" href="#"><span>Chi siamo</span><span>›</span></a>
-      <a class="footer-row" href="mailto:tanzaniagetaway.info@gmail.com"><span>Contatti</span><span>›</span></a>
-      <a class="footer-row" href="#"><span>Privacy Policy</span><span>›</span></a>
-      <a class="footer-row" href="#"><span>Cookie Policy</span><span>›</span></a>
-      <a class="footer-row" href="#"><span>Termini e condizioni</span><span>›</span></a>
-      <a class="footer-row" href="#"><span>Dichiarazione affiliate</span><span>›</span></a>
+      <a class="footer-row" href="chi-siamo.html"><span>Chi siamo</span><span>›</span></a>
+      <a class="footer-row" href="contatti.html"><span>Contatti</span><span>›</span></a>
+      <a class="footer-row" href="privacy-policy.html"><span>Privacy Policy</span><span>›</span></a>
+      <a class="footer-row" href="cookie-policy.html"><span>Cookie Policy</span><span>›</span></a>
+      <a class="footer-row" href="termini-e-condizioni.html"><span>Termini e condizioni</span><span>›</span></a>
+      <a class="footer-row" href="dichiarazione-affiliate.html"><span>Dichiarazione affiliate</span><span>›</span></a>
       <a class="footer-row" href="copyright.html"><span>Copyright</span><span>›</span></a>
     </section>
 
     <div class="section footer-meta">
-      © 2025 5TerreGo.com<br>
+      © 2026 5TerreGo.com<br>
       by Rosetta Ventures FZ-LLC
     </div>
     </div>
@@ -1795,6 +1815,7 @@
       lowMemory: (navigator.deviceMemory || 8) <= 4
     };
     const shouldReduceEffects = !!(deviceHints.mobile || deviceHints.reduceMotion || deviceHints.saveData || deviceHints.lowCpu || deviceHints.lowMemory);
+    const shouldReduceStoryWheel = !!(deviceHints.reduceMotion || deviceHints.saveData);
 
     const TRAIN_RT_ENDPOINTS = [
       'https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime'
@@ -2532,10 +2553,16 @@
 
       var cards = Array.prototype.slice.call(wheel.querySelectorAll('.story-card'));
       if (!cards.length) return;
-      if (shouldReduceEffects) {
-        cards[0].classList.add('is-focus');
+      if (shouldReduceStoryWheel) {
+        cards.forEach(function (card) {
+          card.classList.remove('is-focus', 'is-left', 'is-right');
+          card.classList.add('is-reduced');
+        });
         return;
       }
+      cards.forEach(function (card) {
+        card.classList.remove('is-reduced');
+      });
 
       var ticking = false;
 
@@ -2712,9 +2739,9 @@
         window.FTG_MOUNT_GLOBAL_ACTIONBAR(rootActionbar, {
           activePage: 'home',
           language: getInitialLanguage(),
-          privacyHref: '#',
-          termsHref: '#',
-          androidAppHref: '#'
+          privacyHref: 'privacy-policy.html',
+          termsHref: 'termini-e-condizioni.html',
+          androidAppHref: 'https://5terrego.com'
         });
         syncActionbarLiveHeight();
         requestAnimationFrame(syncActionbarLiveHeight);
