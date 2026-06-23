@@ -705,7 +705,8 @@
 
     var menuItems = config.menuItems || [
       { id: "map", labelKey: "nav_map", label: "Map", href: "map.html" },
-      { id: "stories", labelKey: "nav_stories", label: "Stories", href: "index.html" },
+      { id: "home", labelKey: "nav_home", label: "Home", href: "index.html" },
+      { id: "stories", labelKey: "nav_stories", label: "Blog", href: "blog.html" },
       { id: "sentieri", labelKey: "nav_sentieri", label: "Sentieri", href: "sentieri.html" },
       { id: "discounts", labelKey: "nav_discounts", label: "Local Discounts", href: "discounts.html" },
       { id: "trains", labelKey: "nav_trains", label: "Public Transport", href: "public-transport.html" },
@@ -721,7 +722,8 @@
         terms: "Terms & Conditions",
         choose_language: "Choose language",
         nav_map: "Map",
-        nav_stories: "Stories",
+        nav_home: "Home",
+        nav_stories: "Blog",
         nav_sentieri: "Trails",
         nav_discounts: "Local Discounts",
         nav_trains: "Public Transport",
@@ -735,7 +737,8 @@
         terms: "Termini e condizioni",
         choose_language: "Scegli la lingua",
         nav_map: "Mappa",
-        nav_stories: "Stories",
+        nav_home: "Home",
+        nav_stories: "Blog",
         nav_sentieri: "Sentieri",
         nav_discounts: "Sconti locali",
         nav_trains: "Trasporto pubblico",
@@ -749,7 +752,8 @@
         terms: "Conditions générales",
         choose_language: "Choisir la langue",
         nav_map: "Carte",
-        nav_stories: "Stories",
+        nav_home: "Home",
+        nav_stories: "Blog",
         nav_sentieri: "Sentiers",
         nav_discounts: "Réductions locales",
         nav_trains: "Transports publics",
@@ -763,7 +767,8 @@
         terms: "AGB",
         choose_language: "Sprache wählen",
         nav_map: "Karte",
-        nav_stories: "Stories",
+        nav_home: "Home",
+        nav_stories: "Blog",
         nav_sentieri: "Wege",
         nav_discounts: "Lokale Rabatte",
         nav_trains: "Öffentliche Verkehrsmittel",
@@ -777,7 +782,8 @@
         terms: "条款与条件",
         choose_language: "选择语言",
         nav_map: "地图",
-        nav_stories: "故事",
+        nav_home: "Home",
+        nav_stories: "Blog",
         nav_sentieri: "步道",
         nav_discounts: "本地优惠",
         nav_trains: "公共交通",
@@ -803,7 +809,8 @@
       var pathname = String(window.location.pathname || "").toLowerCase();
       var fileName = pathname.split("/").pop() || "index.html";
       var mapByFile = {
-        "index.html": "stories",
+        "index.html": "home",
+        "blog.html": "stories",
         "map.html": "map",
         "sentieri.html": "sentieri",
         "discounts.html": "discounts",
@@ -833,6 +840,7 @@
 
       var icons = {
         map: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4.5 15 2l6 2.5v15L15 22l-6-2.5L3 22V7z" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 4.5v15" stroke-width="1.8"></path><path d="M15 2v20" stroke-width="1.8"></path></svg>',
+        home: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 10.5 12 4l7.5 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-4v6H5.5a1 1 0 0 1-1-1v-9.5Z" stroke-width="1.8" stroke-linejoin="round"></path></svg>',
         stories: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3" stroke-width="1.8"></rect><path d="M9 8h6M9 12h6M9 16h4" stroke-width="1.8" stroke-linecap="round"></path></svg>',
         discounts: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5V6a2 2 0 0 1 2-2h8.8a2 2 0 0 1 1.4.6l3.2 3.2A2 2 0 0 1 20 9.2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="8" cy="8" r="1.25" stroke-width="1.8"></circle><path d="m9.5 14.5 5-5" stroke-width="1.8" stroke-linecap="round"></path></svg>',
         trains: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3.5" width="12" height="12" rx="3" stroke-width="1.8"></rect><path d="M8.5 18.5 7 21M15.5 18.5 17 21M8 10h8" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"></circle></svg>',
