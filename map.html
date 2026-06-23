@@ -1363,7 +1363,31 @@
     @keyframes bootSpin {
       to { transform: rotate(360deg); }
     }
-  </style>
+  
+    #boot-status.is-overlay {
+      background: transparent;
+      pointer-events: none;
+    }
+    #boot-status.is-overlay .boot-status-card {
+      padding: 14px 16px;
+      border-radius: 999px;
+      background: rgba(8,12,16,.76);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 42px rgba(0,0,0,.22);
+      backdrop-filter: blur(18px) saturate(1.04);
+      -webkit-backdrop-filter: blur(18px) saturate(1.04);
+    }
+    #boot-status.is-overlay .boot-loader {
+      border-color: rgba(255,255,255,.22);
+      border-top-color: #fff;
+    }
+    #boot-status.is-overlay .boot-status-title {
+      color: #fff;
+    }
+    #boot-status.is-overlay .boot-status-text {
+      color: rgba(255,255,255,.76);
+    }
+</style>
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body class="park-presentation-mode">
@@ -1742,6 +1766,42 @@
     setBootMessage('Preparing map…');
   } else {
     showBootError('A local map file did not load. Reload the page once.');
+  }
+}());
+</script>
+<script>
+(function(){
+  var bootStatus = document.getElementById('boot-status');
+  var bootStatusText = document.getElementById('boot-status-text');
+  if (!bootStatus) return;
+
+  function setBootMessage(text) {
+    if (bootStatusText) bootStatusText.textContent = text;
+  }
+
+  function setBootOverlayMode(isOverlay) {
+    bootStatus.classList.toggle('is-overlay', Boolean(isOverlay));
+  }
+
+  window.__ftgRevealBootOverlay = function(text) {
+    bootStatus.classList.remove('hidden');
+    setBootOverlayMode(true);
+    setBootMessage(text || 'Loading places…');
+  };
+
+  window.__ftgHideBootStatus = function() {
+    bootStatus.classList.add('hidden');
+  };
+
+  window.__ftgShowBootError = function(text) {
+    bootStatus.classList.remove('hidden');
+    setBootOverlayMode(true);
+    setBootMessage(text || 'The map opened, but some live data is temporarily unavailable.');
+  };
+
+  if (window.__ftgLibrariesReady) {
+    setBootOverlayMode(false);
+    setBootMessage('Preparing map…');
   }
 }());
 </script>
@@ -2507,7 +2567,19 @@
   function showCityCard(item) {}
   function hideCard(manual) {}
   function renderTourLocationRequestPanel() {}
-  function refreshMapLoadingState() {}
+  function refreshMapLoadingState() {
+    if (poiDataLoaded) {
+      if (window.__ftgHideBootStatus) window.__ftgHideBootStatus();
+      return;
+    }
+    if (window.__ftgRevealBootOverlay) {
+      window.__ftgRevealBootOverlay(poiCoordsReady ? 'Loading remaining places…' : 'Loading places…');
+      return;
+    }
+    if (window.__ftgSetBootMessage) {
+      window.__ftgSetBootMessage(poiCoordsReady ? 'Loading remaining places…' : 'Loading places…');
+    }
+  }
   function centerCity(place) { var zoomLevel; if (!place) return; isProgrammaticMove = true; zoomLevel = place.name === 'Monterosso' ? 14 : 15; map.flyTo(place.coords, zoomLevel, { duration: 1.2 }); window.setTimeout(function () { isProgrammaticMove = false; updatePOIVisibility(); updateTrailWidths(); }, 1400); }
   function showCityByIndex(index, shouldCenter) { var place; if (shouldCenter === undefined) shouldCenter = true; if (index < 0 || index >= places.length) return; currentDataset = 'places'; currentIndex = index; currentPOI = null; place = places[index]; if (shouldCenter) centerCity(place); }
   function getClosestPlaceNameForCoords(coords) { var bestName = ''; var bestDistance = Infinity; if (!isValidCoords(coords)) return ''; places.forEach(function(place) { var distance = distanceMeters(coords, place.coords); if (distance < bestDistance) { bestDistance = distance; bestName = place.name; } }); return bestName; }
@@ -4081,6 +4153,220 @@
       }
     }
   }
+  async function loadPOIs() {
+    var generation = ++poiLoadGeneration;
+    var remotePageSize = 250;
+    var from = 0;
+    var response;
+    var rows;
+    var localRows;
+    var idbRows;
+    var localAssetRows = [];
+    var mergedCacheRows = [];
+    var seenIds = Object.create(null);
+    var firstRemoteResponse = null;
+    var firstRemoteRows = [];
+    var localAssetPromise;
+    var firstRemotePromise;
+    var firstAvailable;
+    var secondAvailable;
+
+    function refreshPOIViews(renderRail) {
+      updateExclusiveDiscountFilterVisibility();
+      updatePOIVisibility();
+      if (renderRail) renderBottomRailCards();
+      refreshMapLoadingState();
+    }
+
+    function mergeCachedRows(list) {
+      (Array.isArray(list) ? list : []).forEach(function(row) {
+        var id = String(row && (row.id || row._id || '') || '').trim() || ('coords:' + String(row && row.coords || ''));
+        if (seenIds[id]) return;
+        seenIds[id] = true;
+        mergedCacheRows.push(row);
+      });
+    }
+
+    function applyImmediateRows(list, source) {
+      if (generation !== poiLoadGeneration) return false;
+      if (!Array.isArray(list) || !list.length) return false;
+      appendPOIRows(list, {
+        replaceExisting: !poiMarkers.length,
+        refresh: false,
+        keepRichData: true,
+        incremental: false
+      });
+      poiCoordsReady = poiMarkers.length > 0;
+      if (window.__ftgRevealBootOverlay) {
+        window.__ftgRevealBootOverlay(source === 'remote' ? 'Loading live places…' : 'Loading places…');
+      }
+      refreshPOIViews(true);
+      return true;
+    }
+
+    async function fetchRemotePOIPage(start, size) {
+      return supabaseClient
+        .from('pois')
+        .select('*')
+        .order('id', { ascending: true })
+        .range(start, start + size - 1);
+    }
+
+    poiDataLoaded = false;
+    poiCoordsReady = false;
+    refreshMapLoadingState();
+
+    poiMarkers.forEach(function(entry) {
+      if (entry && entry.marker && map && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
+    });
+    poiMarkers = [];
+
+    try {
+      localRows = readLocalPOIs();
+      mergeCachedRows(localRows);
+
+      idbRows = await readFullPOICacheFromIDB();
+      if (generation !== poiLoadGeneration) return;
+      mergeCachedRows(idbRows);
+
+      if (mergedCacheRows.length) {
+        appendPOIRows(sortCachedPOIRows(mergedCacheRows).slice(0, 900), {
+          replaceExisting: true,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
+        poiCoordsReady = poiMarkers.length > 0;
+        if (window.__ftgRevealBootOverlay) window.__ftgRevealBootOverlay('Loading live places…');
+        refreshPOIViews(true);
+      }
+
+      if (!SUPABASE_READY || !supabaseClient) {
+        if (!poiMarkers.length) {
+          localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
+          if (generation !== poiLoadGeneration) return;
+          if (localAssetRows.length) {
+            appendPOIRows(localAssetRows, {
+              replaceExisting: true,
+              refresh: false,
+              keepRichData: true,
+              incremental: false
+            });
+          }
+        }
+        poiCoordsReady = poiMarkers.length > 0;
+        refreshPOIViews(true);
+        await loadFerryTimetable();
+        await loadBlogPosts();
+        return;
+      }
+
+      localAssetPromise = fetchLocalPOIsAsset().then(filterUsableCachedPOIRows).catch(function() { return []; });
+      firstRemotePromise = fetchRemotePOIPage(0, remotePageSize).catch(function(error) {
+        return { data: [], error: error };
+      });
+
+      if (!poiMarkers.length) {
+        firstAvailable = await Promise.race([
+          localAssetPromise.then(function(list) { return { source: 'local', rows: list }; }),
+          firstRemotePromise.then(function(result) {
+            return { source: 'remote', rows: Array.isArray(result && result.data) ? result.data : [], response: result };
+          })
+        ]);
+        if (generation !== poiLoadGeneration) return;
+
+        if (!applyImmediateRows(firstAvailable.rows, firstAvailable.source)) {
+          secondAvailable = await (firstAvailable.source === 'local'
+            ? firstRemotePromise.then(function(result) { return { source: 'remote', rows: Array.isArray(result && result.data) ? result.data : [], response: result }; })
+            : localAssetPromise.then(function(list) { return { source: 'local', rows: list }; }));
+          if (generation !== poiLoadGeneration) return;
+          applyImmediateRows(secondAvailable.rows, secondAvailable.source);
+        }
+      }
+
+      localAssetRows = await localAssetPromise;
+      if (generation !== poiLoadGeneration) return;
+
+      firstRemoteResponse = await firstRemotePromise;
+      if (generation !== poiLoadGeneration) return;
+
+      if (firstRemoteResponse && firstRemoteResponse.error) {
+        console.warn('Supabase POI load failed:', firstRemoteResponse.error.message || firstRemoteResponse.error);
+      }
+
+      firstRemoteRows = Array.isArray(firstRemoteResponse && firstRemoteResponse.data) ? firstRemoteResponse.data : [];
+
+      if (firstRemoteRows.length) {
+        appendPOIRows(firstRemoteRows, {
+          replaceExisting: false,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
+        from = firstRemoteRows.length;
+        poiCoordsReady = poiMarkers.length > 0;
+        refreshPOIViews(true);
+      } else if (!poiMarkers.length && localAssetRows.length) {
+        appendPOIRows(localAssetRows, {
+          replaceExisting: true,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
+        poiCoordsReady = poiMarkers.length > 0;
+        refreshPOIViews(true);
+      }
+
+      while (generation === poiLoadGeneration && firstRemoteRows.length) {
+        response = await fetchRemotePOIPage(from, remotePageSize);
+
+        if (response.error) {
+          console.warn('Supabase POI load failed:', response.error.message);
+          break;
+        }
+
+        rows = Array.isArray(response.data) ? response.data : [];
+        if (!rows.length) break;
+
+        appendPOIRows(rows, {
+          replaceExisting: false,
+          refresh: false,
+          keepRichData: true,
+          incremental: false
+        });
+
+        from += rows.length;
+        poiCoordsReady = poiMarkers.length > 0;
+
+        if (rows.length < remotePageSize || from % (remotePageSize * 2) === 0) {
+          refreshPOIViews(rows.length < remotePageSize);
+        }
+
+        if (rows.length < remotePageSize) break;
+        await new Promise(function(resolve) { window.requestAnimationFrame(resolve); });
+      }
+
+      if (generation !== poiLoadGeneration) return;
+
+      poiCoordsReady = poiMarkers.length > 0;
+      writeLocalPOIs(poiMarkers.map(function(entry) {
+        return entry && entry.poi ? entry.poi : null;
+      }).filter(Boolean));
+
+      refreshPOIViews(true);
+      addFerryRoutes();
+      await loadFerryTimetable();
+      await loadBlogPosts();
+      if (searchInput) renderSearchSuggestions(searchInput.value);
+    } finally {
+      if (generation === poiLoadGeneration) {
+        poiDataLoaded = true;
+        if (!poiCoordsReady) poiCoordsReady = poiMarkers.length > 0;
+        refreshMapLoadingState();
+      }
+    }
+  }
+
   function normalizeSearchText(value) { return normalizeText(value); }
   function searchMatches(item, q) { var haystack = normalizeSearchText([item.name, item.label, item.description, item.keywords].filter(Boolean).join(' ')); if (!q) return false; return haystack.indexOf(q) !== -1 || q.split(' ').filter(function(word) { return word.length > 2; }).some(function(word) { return haystack.indexOf(word) !== -1; }); }
   function hasActiveSearchQuery() { return Boolean(normalizeSearchText(getRailSearchQuery())); }
@@ -4294,6 +4580,12 @@
   }
   function initMap() {
     var initialState;
+    var baseMapReadyHandled = false;
+    function markBaseMapReady() {
+      if (baseMapReadyHandled) return;
+      baseMapReadyHandled = true;
+      refreshMapLoadingState();
+    }
 
     if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
 
@@ -4335,6 +4627,13 @@
     trailsLayer = L.layerGroup().addTo(map);
     poiOverlapLayer = L.layerGroup().addTo(map);
     map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
+
+    [satelliteLayer, whiteLayer, roadsLayer].forEach(function(layer) {
+      if (!layer) return;
+      layer.once('load', markBaseMapReady);
+      layer.once('tileload', markBaseMapReady);
+    });
+    window.setTimeout(markBaseMapReady, 900);
   }
   function updateMapVisualByZoom() {
     var z, raw, t;
