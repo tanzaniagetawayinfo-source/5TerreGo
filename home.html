@@ -218,6 +218,8 @@
       text-align: left;
     }
 
+    
+
     .section-title,
     .eyebrow,
     .footer-title {
@@ -873,6 +875,8 @@
     .cta-card::after {
       background: linear-gradient(180deg, rgba(12,25,44,.10), rgba(17,33,54,.58));
     }
+
+    
 
     .villages-bridge {
       position: relative;
@@ -1814,15 +1818,11 @@
       var italyDate = departureAt ? getItalyIsoDateFromInstant(departureAt) : '';
       var nextDay = !!(row.nextDay || row.next_day || (searchWindow && searchWindow.nextDay));
       if (!nextDay && italyDate && searchWindow && italyDate > searchWindow.date) nextDay = true;
-      if (!departureAt && searchWindow && searchWindow.nextDay) nextDay = true;
       var statusLabel = row.statusLabel || row.status_label || 'In orario';
 
-      if (!row.statusLabel && !row.status_label) {
-        if (cancelled) statusLabel = 'Cancellato';
-        else if (nextDay) statusLabel = 'Domani';
-        else if (!isNaN(delay) && delay > 0) statusLabel = '+' + delay + ' min';
-        else if (rawStatus === 'scheduled') statusLabel = 'Programmato';
-      }
+      if (nextDay) {
+        statusLabel = 'Domani';
+      } else 
 
       return {
         destination: row.to || row.destination || row.destinationName || row.arrivo || toName,
@@ -1840,6 +1840,7 @@
 
     function realtimeRowMatchesWindow(row, searchWindow) {
       if (!row || (!row.departure_at && !row.departure_display)) return false;
+
       if (row.departure_at) {
         var departureStamp = new Date(row.departure_at).getTime();
         if (!isFinite(departureStamp)) return false;
@@ -1850,7 +1851,7 @@
       }
 
       if (row.departure_minutes == null) return false;
-      if (searchWindow && searchWindow.nextDay) return true;
+      if (searchWindow && searchWindow.nextDay) return row.next_day || row.departure_minutes < toMinutes(searchWindow.time || '00:00');
       if (row.next_day) return false;
       return row.departure_minutes >= toMinutes(searchWindow && searchWindow.time ? searchWindow.time : '00:00');
     }
@@ -1865,7 +1866,9 @@
           var response = await fetch(requestUrl, { cache: 'no-store' });
           if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + requestUrl);
           var payload = await response.json();
-          var rows = Array.isArray(payload && payload.trains) ? payload.trains : [];
+          var rows = Array.isArray(payload && payload.trains)
+            ? payload.trains
+            : (Array.isArray(payload) ? payload : (payload.departures || payload.services || payload.data || []));
           var normalized = rows
             .map(function (row) { return normalizeRealtimeRow(row, fromName, toName, searchWindow); })
             .filter(function (row) { return realtimeRowMatchesWindow(row, searchWindow); })
@@ -1881,13 +1884,27 @@
 
     function getTrainSortKey(item) {
       if (!item) return Number.POSITIVE_INFINITY;
-      if (item.sort_timestamp != null && isFinite(item.sort_timestamp)) return item.sort_timestamp;
-      if (item.__sortKey != null && isFinite(item.__sortKey)) return item.__sortKey;
-      if (item.sort_minutes != null && isFinite(item.sort_minutes)) return item.sort_minutes;
+
+      if (item.sort_timestamp != null && isFinite(item.sort_timestamp)) {
+        return item.sort_timestamp;
+      }
+
       if (item.departure_at) {
         var parsedAt = new Date(item.departure_at).getTime();
         return isFinite(parsedAt) ? parsedAt : Number.POSITIVE_INFINITY;
       }
+
+      if (item.sort_minutes != null && isFinite(item.sort_minutes)) {
+        return item.sort_minutes;
+      }
+
+      if (item.departure_display) {
+        var now = getItalianNow();
+        var baseDate = item.next_day ? addDaysToIsoDate(now.isoDate, 1) : now.isoDate;
+        var parsed = new Date(baseDate + 'T' + item.departure_display + ':00').getTime();
+        return isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+      }
+
       return Number.POSITIVE_INFINITY;
     }
 
@@ -1926,11 +1943,6 @@
         if (realtimeToday.length) return realtimeToday[0];
       } catch (_error) {}
 
-      try {
-        var realtimeTomorrow = await fetchRealtimeTrainRows(fromName, toName, nextDayWindow);
-        if (realtimeTomorrow.length) return realtimeTomorrow[0];
-      } catch (_error) {}
-
       var fromStation = null;
       var toStation = null;
       var base = null;
@@ -1940,22 +1952,36 @@
         base = fromStation.base;
       } catch (_error) {}
 
+      var todayOfficial = [];
+      if (base && fromStation && toStation) {
+        try {
+          todayOfficial = await fetchOfficialCandidatesForWindow(base, fromStation, toStation, { date: now.isoDate, time: '00:00', nextDay: false }, now.isoDate);
+        } catch (_error) {}
+
+        todayOfficial = todayOfficial
+          .filter(function (item) { return item && item.departure_at && new Date(item.departure_at).getTime() >= Date.now(); })
+          .sort(function (a, b) { return getTrainSortKey(a) - getTrainSortKey(b); });
+
+        if (todayOfficial.length) return todayOfficial[0];
+      }
+
+      try {
+        var realtimeTomorrow = await fetchRealtimeTrainRows(fromName, toName, nextDayWindow);
+        if (realtimeTomorrow.length) return realtimeTomorrow[0];
+      } catch (_error) {}
+
       if (!base || !fromStation || !toStation) return null;
 
-      var nowTimestamp = Date.now();
-      var allCandidates = [];
+      var tomorrowOfficial = [];
       try {
-        allCandidates = allCandidates.concat(await fetchOfficialCandidatesForWindow(base, fromStation, toStation, { date: now.isoDate, time: '00:00', nextDay: false }, now.isoDate));
-      } catch (_error) {}
-      try {
-        allCandidates = allCandidates.concat(await fetchOfficialCandidatesForWindow(base, fromStation, toStation, nextDayWindow, now.isoDate));
+        tomorrowOfficial = await fetchOfficialCandidatesForWindow(base, fromStation, toStation, nextDayWindow, now.isoDate);
       } catch (_error) {}
 
-      var candidates = allCandidates
-        .filter(function (item) { return item && item.departure_at && new Date(item.departure_at).getTime() >= nowTimestamp; })
+      tomorrowOfficial = tomorrowOfficial
+        .filter(function (item) { return item && item.departure_at; })
         .sort(function (a, b) { return getTrainSortKey(a) - getTrainSortKey(b); });
 
-      return candidates[0] || null;
+      return tomorrowOfficial[0] || null;
     }
 
     async function fetchHomeStationDepartures(village) {
@@ -2229,6 +2255,8 @@
       var actionbarLoadPromise = null;
       var rootActionbar = document.getElementById('ftg-global-actionbar-root');
 
+      
+
       function injectGlobalActionbarHTML(html, cacheKeyPrefix) {
         return new Promise(function (resolve) {
           var parser = new DOMParser();
@@ -2335,6 +2363,8 @@
         if (raw.indexOf('-') >= 0) raw = raw.split('-')[0];
         return raw || 'en';
       }
+
+      
 
       function syncActionbarLiveHeight() {
         var height = Math.round(rootActionbar.getBoundingClientRect().height || 0);
