@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>5TerreGo · Gestione sconti</title>
+  <style>
+    :root{--ink:#171717;--muted:#6f6f73;--line:#e7e7ea;--panel:#fff;--accent:#7c3aed;--danger:#b42318;--ok:#067647}
+    *{box-sizing:border-box} body{margin:0;background:#f6f6f8;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+    button,input,textarea,select{font:inherit} button{cursor:pointer}
+    .shell{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:28px 0 64px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+    .back{color:var(--ink);text-decoration:none;font-weight:750}.eyebrow{color:var(--accent);font-size:13px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+    h1{font-size:clamp(30px,5vw,52px);line-height:1;margin:8px 0 10px;letter-spacing:-.045em}.intro{max-width:720px;color:var(--muted);font-size:17px;line-height:1.55;margin:0}
+    .toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;margin:26px 0 18px}.search,.filter{border:1px solid var(--line);border-radius:14px;background:#fff;padding:13px 15px;outline:none}.search:focus,.filter:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #ede9fe}
+    .status{padding:13px 15px;border-radius:14px;background:#fff;border:1px solid var(--line);color:var(--muted);margin-bottom:16px}.status.error{color:var(--danger);border-color:#fecdca;background:#fffbfa}.status.ok{color:var(--ok);border-color:#abefc6;background:#f6fef9}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 28px rgba(0,0,0,.035)}
+    .card-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.card h2{font-size:20px;letter-spacing:-.02em;margin:0 0 5px}.meta{font-size:13px;color:var(--muted)}
+    .badge{flex:none;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:850;background:#f2f4f7;color:#475467}.badge.active{background:#ecfdf3;color:#067647}
+    .offer{min-height:45px;margin:18px 0;color:#343438;line-height:1.45}.edit{width:100%;border:0;border-radius:12px;background:#171717;color:#fff;font-weight:800;padding:12px 14px}
+    .empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted);background:#fff;border:1px dashed #d0d0d5;border-radius:20px}
+    dialog{width:min(620px,calc(100% - 24px));border:0;border-radius:24px;padding:0;box-shadow:0 30px 90px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(5px)}
+    .modal{padding:24px}.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.modal h2{margin:0;font-size:25px}.close{border:0;background:#f2f2f4;width:38px;height:38px;border-radius:50%;font-size:22px}
+    .field{display:block;margin-top:17px}.field span{display:block;font-weight:800;font-size:13px;margin-bottom:7px}.field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 13px;outline:none}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field textarea:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #ede9fe}
+    .row{display:grid;grid-template-columns:130px 1fr;gap:12px}.hint{font-size:12px;line-height:1.45;color:var(--muted);margin:7px 0 0}.actions{display:flex;gap:10px;margin-top:22px}.save,.cancel{border:0;border-radius:13px;padding:13px 17px;font-weight:850}.save{background:var(--accent);color:#fff;flex:1}.cancel{background:#f2f2f4;color:var(--ink)}
+    @media(max-width:720px){.shell{width:min(100% - 20px,1120px);padding-top:18px}.grid{grid-template-columns:1fr}.toolbar,.row{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar .back:last-child{display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topbar"><a class="back" href="/login.html">← Account</a><a class="back" href="/discounts.html">Vedi pagina pubblica ↗</a></div>
+    <div class="eyebrow">Dashboard owner</div>
+    <h1>Gestione sconti</h1>
+    <p class="intro">Gli sconti sono gestiti qui, separatamente dai dati dei POI. Attiva un’offerta, scrivi il testo pubblico e assegna gli operatori autorizzati a validare i QR.</p>
+    <div class="toolbar">
+      <input id="search" class="search" type="search" placeholder="Cerca attività…" />
+      <select id="filter" class="filter" aria-label="Filtra sconti"><option value="all">Tutte le attività</option><option value="active">Solo sconti attivi</option><option value="inactive">Senza sconto</option></select>
+    </div>
+    <div id="status" class="status">Verifica accesso…</div>
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <dialog id="editor">
+    <form id="form" class="modal" method="dialog">
+      <div class="modal-head"><div><div class="eyebrow">Modifica offerta</div><h2 id="modalTitle">Attività</h2></div><button id="closeBtn" class="close" type="button" aria-label="Chiudi">×</button></div>
+      <div class="row">
+        <label class="field"><span>Sconto %</span><input id="discount" type="number" min="0" max="100" required /></label>
+        <label class="field"><span>Titolo offerta</span><input id="offerTitle" maxlength="80" placeholder="Es. Limoncino in omaggio" /></label>
+      </div>
+      <label class="field"><span>Descrizione e condizioni</span><textarea id="offerDescription" placeholder="Descrivi cosa riceve l’utente e le condizioni dell’offerta"></textarea></label>
+      <label class="field"><span>Email operatori autorizzati</span><input id="emails" type="text" placeholder="email1@attivita.it, email2@attivita.it" /></label>
+      <p class="hint">Gli operatori indicati qui possono accedere alla dashboard partner e validare i QR di questa attività.</p>
+      <div id="modalStatus" class="status" style="display:none"></div>
+      <div class="actions"><button id="cancelBtn" class="cancel" type="button">Annulla</button><button id="saveBtn" class="save" type="submit">Salva sconto</button></div>
+    </form>
+  </dialog>
+
+  <script src="vendor/supabase.js"></script>
+  <script>
+    (function(){
+      'use strict';
+      var SUPABASE_URL='https://jpflcbktcnhmlvaibzcw.supabase.co';
+      var SUPABASE_KEY='sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
+      var OWNER_EMAIL='5terrego.info@gmail.com';
+      var client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      var rows=[],editing=null;
+      var grid=document.getElementById('grid'),statusEl=document.getElementById('status'),searchEl=document.getElementById('search'),filterEl=document.getElementById('filter');
+      var dialog=document.getElementById('editor'),form=document.getElementById('form'),modalTitle=document.getElementById('modalTitle'),discountEl=document.getElementById('discount'),titleEl=document.getElementById('offerTitle'),descriptionEl=document.getElementById('offerDescription'),emailsEl=document.getElementById('emails'),modalStatus=document.getElementById('modalStatus'),saveBtn=document.getElementById('saveBtn');
+
+      function escapeHtml(value){return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+      function setStatus(message,type){statusEl.textContent=message;statusEl.className='status'+(type?' '+type:'')}
+      function decodeOffer(value){var raw=String(value||'').trim();if(!raw)return{title:'',description:''};try{var data=JSON.parse(raw);if(data&&typeof data==='object')return{title:String(data.title||data.offer_title||''),description:String(data.description||data.text||'')}}catch(_err){}return{title:'',description:raw}}
+      function encodeOffer(title,description){title=String(title||'').trim();description=String(description||'').trim();return title||description?JSON.stringify({title:title,description:description}):''}
+      function active(row){return Number(row.discount||0)>0}
+      function render(){
+        var query=searchEl.value.trim().toLowerCase(),filter=filterEl.value;
+        var filtered=rows.filter(function(row){var matches=!query||String(row.name||'').toLowerCase().indexOf(query)!==-1;return matches&&(filter==='all'||(filter==='active'&&active(row))||(filter==='inactive'&&!active(row)))});
+        if(!filtered.length){grid.innerHTML='<div class="empty">Nessuna attività corrisponde al filtro.</div>';return}
+        grid.innerHTML=filtered.map(function(row){var offer=decodeOffer(row.discount_info);var text=offer.title||offer.description||'Nessuna descrizione pubblica impostata.';return '<article class="card"><div class="card-head"><div><h2>'+escapeHtml(row.name||'Attività senza nome')+'</h2><div class="meta">'+escapeHtml(row.type||'POI')+'</div></div><span class="badge'+(active(row)?' active':'')+'">'+(active(row)?escapeHtml(row.discount)+'% attivo':'Non attivo')+'</span></div><div class="offer">'+escapeHtml(text)+'</div><button class="edit" type="button" data-id="'+escapeHtml(row.id)+'">Gestisci sconto</button></article>'}).join('')
+      }
+      function openEditor(id){editing=rows.find(function(row){return String(row.id)===String(id)});if(!editing)return;var offer=decodeOffer(editing.discount_info);modalTitle.textContent=editing.name||'Attività';discountEl.value=Number(editing.discount||0);titleEl.value=offer.title;descriptionEl.value=offer.description;emailsEl.value=editing.emails||'';modalStatus.style.display='none';dialog.showModal()}
+      function closeEditor(){editing=null;dialog.close()}
+      async function getVerifiedOwner(){var result=await client.auth.getUser();if(result.error||!result.data||!result.data.user)return null;return String(result.data.user.email||'').trim().toLowerCase()===OWNER_EMAIL?result.data.user:null}
+      async function load(){
+        try{
+          var owner=await getVerifiedOwner();
+          if(!owner){setStatus('Accesso riservato a '+OWNER_EMAIL+'. Accedi con questo account.','error');grid.innerHTML='<div class="empty"><a href="/login.html">Vai al login</a></div>';return}
+          setStatus('Caricamento attività…');
+          var result=await client.from('pois').select('id,name,type,discount,discount_info,emails').order('name',{ascending:true});
+          if(result.error)throw result.error;rows=Array.isArray(result.data)?result.data:[];setStatus(rows.length+' attività caricate. Gli sconti sono ora gestiti separatamente dai POI.','ok');render()
+        }catch(error){setStatus(error.message||'Impossibile caricare gli sconti.','error')}
+      }
+      async function save(event){
+        event.preventDefault();if(!editing)return;
+        var value=Math.max(0,Math.min(100,Number(discountEl.value||0)));saveBtn.disabled=true;modalStatus.style.display='block';modalStatus.className='status';modalStatus.textContent='Salvataggio…';
+        try{
+          var owner=await getVerifiedOwner();if(!owner)throw new Error('Sessione scaduta. Accedi nuovamente con '+OWNER_EMAIL+'.');
+          var patch={discount:value,discount_info:encodeOffer(titleEl.value,descriptionEl.value),emails:emailsEl.value.trim()};
+          var result=await client.from('pois').update(patch).eq('id',editing.id).select('id,name,type,discount,discount_info,emails').single();
+          if(result.error)throw result.error;
+          rows=rows.map(function(row){return String(row.id)===String(editing.id)?result.data:row});
+          modalStatus.className='status ok';modalStatus.textContent='Sconto salvato.';render();setTimeout(closeEditor,450)
+        }catch(error){modalStatus.className='status error';modalStatus.textContent=error.message||'Salvataggio non riuscito.'}finally{saveBtn.disabled=false}
+      }
+      grid.addEventListener('click',function(event){var button=event.target.closest('[data-id]');if(button)openEditor(button.getAttribute('data-id'))});
+      searchEl.addEventListener('input',render);filterEl.addEventListener('change',render);form.addEventListener('submit',save);document.getElementById('closeBtn').addEventListener('click',closeEditor);document.getElementById('cancelBtn').addEventListener('click',closeEditor);dialog.addEventListener('click',function(event){if(event.target===dialog)closeEditor()});
+      load();
+    })();
+  </script>
+</body>
+</html>

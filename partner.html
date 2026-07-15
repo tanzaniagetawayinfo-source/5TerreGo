@@ -986,6 +986,30 @@
         return date && !isNaN(date.getTime()) ? date : null;
       }
 
+      function getItalyDayFromDate(date) {
+        return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(date || new Date());
+      }
+
+      function getNextRequestLabel(code) {
+        var day = String(code && code.valid_day || getItalyDayFromDate(getValidatedAt(code) || new Date()));
+        var parts = day.split("-").map(Number);
+        var next = new Date(Date.UTC(parts[0] || new Date().getUTCFullYear(), (parts[1] || 1) - 1, (parts[2] || 1) + 1));
+        var label = new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" }).format(next);
+        return "dal " + label + " alle 00:00 (ora italiana)";
+      }
+
+      function findValidatedCode(codeValue) {
+        if (!activePoi) return null;
+        var normalized = normalizeCode(codeValue);
+        return parseActiveCodes(activePoi.active_codes).find(function (code) {
+          return codeWasValidated(code) && normalizeCode(code && code.code) === normalized;
+        }) || null;
+      }
+
+      function showAlreadyValidated(code) {
+        setScannerFeedback("Hai già validato questo QR.<br>Un nuovo QR potrà essere richiesto <strong>" + escapeHtml(getNextRequestLabel(code)) + "</strong>.", "ok");
+      }
+
       function countValidatedCodes(days) {
         if (!activePoi) return 0;
         var codes = parseActiveCodes(activePoi.active_codes);
@@ -1291,8 +1315,15 @@
 
       async function validateCurrentCode() {
         var code = normalizeCode(codeInput.value);
+        var knownCode;
         if (!code) {
           setScannerFeedback("Insert or scan a QR code.", "error");
+          return;
+        }
+
+        knownCode = findValidatedCode(code);
+        if (knownCode) {
+          showAlreadyValidated(knownCode);
           return;
         }
 
@@ -1303,12 +1334,21 @@
           var result = await partnerClient.rpc("validate_partner_discount_code", { target_code: code });
           if (result.error) throw new Error(result.error.message || "Could not validate code.");
           var data = result.data || {};
+          if (data.already_validated || data.already_used || String(data.status || "").toLowerCase() === "used") {
+            showAlreadyValidated(data);
+            return;
+          }
           var poiName = data.poi_name || "Activity";
           codeInput.value = "";
           setScannerFeedback("Validated<br><strong>" + escapeHtml(poiName) + "</strong>" + buildOfferFeedbackHtml(data), "ok");
           addValidatedCodeToLocalStats(code);
         } catch (error) {
-          setScannerFeedback(escapeHtml(error.message), "error");
+          knownCode = findValidatedCode(code);
+          if (knownCode || /already|used|validat/i.test(String(error && error.message || ""))) {
+            showAlreadyValidated(knownCode || { valid_day: getItalyDayFromDate(new Date()) });
+          } else {
+            setScannerFeedback(escapeHtml(error.message), "error");
+          }
         } finally {
           validateBtn.disabled = false;
         }

@@ -809,6 +809,9 @@ select{appearance:none;-webkit-appearance:none;}
   }
 
   async function maybeAddPartnerDiscountButton(menuList){
+    const session = await getReliableSession();
+    const email = String(session && session.user && session.user.email ? session.user.email : '').trim().toLowerCase();
+    if(email === '5terrego.info@gmail.com') return;
     const hasPartnerPois = await fetchPartnerDiscountStatus();
     if(!hasPartnerPois || document.getElementById('partner-discounts')) return;
 
@@ -847,6 +850,18 @@ select{appearance:none;-webkit-appearance:none;}
         onClick:function(){ window.location.href = '/trakeditor.html'; }
       });
       menuList.insertBefore(trailsBtn, document.getElementById('logout'));
+    }
+
+    if(!document.getElementById('discounts-dashboard')){
+      const session = await getReliableSession();
+      const ownerEmail = String(session && session.user && session.user.email ? session.user.email : '').trim().toLowerCase();
+      if(ownerEmail === '5terrego.info@gmail.com'){
+        const discountsBtn = createMenuButton({
+          id:'discounts-dashboard', label:'Manage discounts', icon:'discounts',
+          onClick:function(){ window.location.href = '/discounteditor.html'; }
+        });
+        menuList.insertBefore(discountsBtn, document.getElementById('logout'));
+      }
     }
 
     if(!document.getElementById('visitors-dashboard')){

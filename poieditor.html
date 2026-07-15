@@ -964,11 +964,8 @@ button.delete{
     </div>
 
     <div class="modal-section-card">
-      <div class="modal-section-label">Contatti e sconto</div>
-      <input id="emails" placeholder="Email autorizzate" />
-    <input id="phone" placeholder="Telefono" />
-    <input id="discount" type="number" min="0" max="100" placeholder="Sconto %" />
-
+      <div class="modal-section-label">Contatti</div>
+      <input id="phone" placeholder="Telefono" />
     </div>
 
     <div class="modal-actions">
@@ -1049,9 +1046,7 @@ const descriptionEl = document.getElementById("description");
 const importanceEl = document.getElementById("importance");
 const importanceValueEl = document.getElementById("importanceValue");
 const typeEl = document.getElementById("type");
-const emailsEl = document.getElementById("emails");
 const phoneEl = document.getElementById("phone");
-const discountEl = document.getElementById("discount");
 const poiImagesEl = document.getElementById("poiImages");
 const imageAddBtn = document.getElementById("imageAddBtn");
 const imageSuggestionsEl = document.getElementById("imageSuggestions");
@@ -1734,7 +1729,7 @@ async function loadPois(){
 
   try{
     const res = await authFetch(
-      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type,discount",
+      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type",
       {
         method: "GET",
         useUserToken: true,
@@ -1814,7 +1809,6 @@ function toListPoi(row){
     coords: source.coords || "",
     importance: source.importance ?? null,
     type: source.type || "",
-    discount: source.discount ?? 0,
     ...(hasDescriptionField ? { description: source.description || "" } : {}),
     _listOnly: !Object.prototype.hasOwnProperty.call(source, "emails")
       && !Object.prototype.hasOwnProperty.call(source, "phone")
@@ -1940,7 +1934,7 @@ function createPoiCard(p){
 
   const meta = document.createElement("div");
   meta.className = "poi-meta";
-  meta.innerText = String(p.type || "-") + " • importanza " + String(p.importance ?? "-") + " • sconto " + String(p.discount ?? 0) + "%";
+  meta.innerText = String(p.type || "-") + " • importanza " + String(p.importance ?? "-");
 
   div.appendChild(title);
   div.appendChild(meta);
@@ -2007,9 +2001,7 @@ function patchPoiForm(poi){
   descriptionEl.value = poi.description || "";
   updateImportanceUI(poi.importance ?? 50);
   typeEl.value = poi.type || "chiesa";
-  emailsEl.value = poi.emails || "";
   phoneEl.value = poi.phone || "";
-  discountEl.value = poi.discount ?? "";
   setPoiImages(poi.images);
 }
 
@@ -2018,7 +2010,7 @@ async function fetchPoiDetail(poiId){
   if(poiDetailCache.has(poiId)) return poiDetailCache.get(poiId);
 
   const res = await authFetch(
-    SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) + "&select=id,name,coords,description,importance,type,emails,phone,discount,images",
+    SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) + "&select=id,name,coords,description,importance,type,phone,images",
     {
       method: "GET",
       useUserToken: true,
@@ -2056,9 +2048,7 @@ async function openModal(poi = null){
       description: poi.description || "",
       importance: poi.importance ?? 50,
       type: poi.type || "chiesa",
-      emails: "",
       phone: "",
-      discount: poi.discount ?? "",
       images: []
     });
   }else{
@@ -2107,9 +2097,7 @@ function clearForm(resetEditing = true){
   descriptionEl.value = "";
   updateImportanceUI(50);
   typeEl.value = "chiesa";
-  emailsEl.value = "";
   phoneEl.value = "";
-  discountEl.value = "";
   setPoiImages([]);
 }
 
@@ -2120,9 +2108,7 @@ function readPoiForm(){
     description: descriptionEl.value.trim(),
     importance: clampNumber(importanceEl.value, 1, 100, 1),
     type: typeEl.value,
-    emails: emailsEl.value.trim(),
     phone: phoneEl.value.trim(),
-    discount: clampNumber(discountEl.value, 0, 100, 0),
     images: poiImagesState.slice()
   };
 }
