@@ -965,10 +965,10 @@ async function loadTrails(){
     listStatusEl.innerText = "Tabella " + TRAILS_TABLE + " non disponibile o permessi Supabase mancanti. Puoi comunque provare l'editor.";
   }
 }
-function formatTrailPrice(amount){
+function formatTrailPrice(amount, isFree){
   const value = Number(amount || 0);
-  if(!value) return "Free";
-  return value.toFixed(value % 1 === 0 ? 0 : 2) + " EUR";
+  if(value) return value.toFixed(value % 1 === 0 ? 0 : 2) + " EUR";
+  return isFree === false ? "Cinque Terre Card / check access" : "Free";
 }
 
 const OFFICIAL_TRAIL_COLUMNS = [
@@ -1057,7 +1057,7 @@ function renderTrailList(filter){
     meta.appendChild(makeMetaPill(trail.difficulty || "difficulty -"));
     meta.appendChild(makeMetaPill("importance: " + clampTrailImportance(trail.importance)));
     if(trail.shoe_type) meta.appendChild(makeMetaPill("shoes: " + trail.shoe_type));
-    meta.appendChild(makeMetaPill(formatTrailPrice(trail.price_amount)));
+    meta.appendChild(makeMetaPill(formatTrailPrice(trail.price_amount, trail.is_free)));
     meta.appendChild(makeMetaPill((trail.distance_km || 0) + " km"));
     meta.appendChild(makeMetaPill(trail.estimated_duration || "durata -"));
     if(trail.start_name || trail.end_name) meta.appendChild(makeMetaPill((trail.start_name || "?") + " -> " + (trail.end_name || "?")));
