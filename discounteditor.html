@@ -5,53 +5,38 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>5TerreGo · Gestione sconti</title>
   <style>
-    :root{--ink:#171717;--muted:#6f6f73;--line:#e7e7ea;--panel:#fff;--accent:#7c3aed;--danger:#b42318;--ok:#067647}
-    *{box-sizing:border-box} body{margin:0;background:#f6f6f8;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-    button,input,textarea,select{font:inherit} button{cursor:pointer}
-    .shell{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:28px 0 64px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
-    .back{color:var(--ink);text-decoration:none;font-weight:750}.eyebrow{color:var(--accent);font-size:13px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
-    h1{font-size:clamp(30px,5vw,52px);line-height:1;margin:8px 0 10px;letter-spacing:-.045em}.intro{max-width:720px;color:var(--muted);font-size:17px;line-height:1.55;margin:0}
-    .toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;margin:26px 0 18px}.search,.filter{border:1px solid var(--line);border-radius:14px;background:#fff;padding:13px 15px;outline:none}.search:focus,.filter:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #ede9fe}
-    .status{padding:13px 15px;border-radius:14px;background:#fff;border:1px solid var(--line);color:var(--muted);margin-bottom:16px}.status.error{color:var(--danger);border-color:#fecdca;background:#fffbfa}.status.ok{color:var(--ok);border-color:#abefc6;background:#f6fef9}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 28px rgba(0,0,0,.035)}
-    .card-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.card h2{font-size:20px;letter-spacing:-.02em;margin:0 0 5px}.meta{font-size:13px;color:var(--muted)}
-    .badge{flex:none;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:850;background:#f2f4f7;color:#475467}.badge.active{background:#ecfdf3;color:#067647}
-    .offer{min-height:45px;margin:18px 0;color:#343438;line-height:1.45}.edit{width:100%;border:0;border-radius:12px;background:#171717;color:#fff;font-weight:800;padding:12px 14px}
-    .empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted);background:#fff;border:1px dashed #d0d0d5;border-radius:20px}
-    dialog{width:min(620px,calc(100% - 24px));border:0;border-radius:24px;padding:0;box-shadow:0 30px 90px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(5px)}
-    .modal{padding:24px}.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.modal h2{margin:0;font-size:25px}.close{border:0;background:#f2f2f4;width:38px;height:38px;border-radius:50%;font-size:22px}
-    .field{display:block;margin-top:17px}.field span{display:block;font-weight:800;font-size:13px;margin-bottom:7px}.field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 13px;outline:none}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field textarea:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #ede9fe}
-    .row{display:grid;grid-template-columns:130px 1fr;gap:12px}.hint{font-size:12px;line-height:1.45;color:var(--muted);margin:7px 0 0}.actions{display:flex;gap:10px;margin-top:22px}.save,.cancel{border:0;border-radius:13px;padding:13px 17px;font-weight:850}.save{background:var(--accent);color:#fff;flex:1}.cancel{background:#f2f2f4;color:var(--ink)}
-    @media(max-width:720px){.shell{width:min(100% - 20px,1120px);padding-top:18px}.grid{grid-template-columns:1fr}.toolbar,.row{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar .back:last-child{display:none}}
+    :root{--ink:#171717;--muted:#6f6f73;--line:#e5e5e9;--purple:#7c3aed;--green:#067647;--red:#b42318}
+    *{box-sizing:border-box}body{margin:0;background:#f6f6f8;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
+    .shell{width:min(1040px,calc(100% - 28px));margin:auto;padding:24px 0 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px}.link{color:var(--ink);font-weight:800;text-decoration:none}.eyebrow{margin-top:28px;color:var(--purple);font-size:12px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+    h1{font-size:clamp(34px,6vw,56px);line-height:1;margin:8px 0 12px;letter-spacing:-.05em}.intro{max-width:760px;margin:0 0 24px;color:var(--muted);font-size:17px;line-height:1.55}.status{padding:13px 15px;border-radius:14px;background:#fff;border:1px solid var(--line);color:var(--muted);margin:14px 0}.status.ok{background:#f6fef9;border-color:#abefc6;color:var(--green)}.status.error{background:#fffbfa;border-color:#fecdca;color:var(--red)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:21px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.035)}.head{display:flex;justify-content:space-between;gap:14px}.card h2{margin:0;font-size:21px}.meta{color:var(--muted);font-size:13px;margin-top:5px}.badge{white-space:nowrap;padding:7px 10px;border-radius:999px;background:#f2f4f7;color:#475467;font-size:12px;font-weight:900}.badge.on{background:#ecfdf3;color:var(--green)}.offer{margin:18px 0;min-height:48px;line-height:1.5}.actions{display:flex;gap:9px}.primary,.secondary{border:0;border-radius:12px;padding:12px 14px;font-weight:850}.primary{flex:1;background:#171717;color:#fff}.secondary{background:#f0eafe;color:#5b21b6}.empty{grid-column:1/-1;padding:50px 20px;text-align:center;background:#fff;border:1px dashed #ccc;border-radius:20px;color:var(--muted)}
+    dialog{width:min(650px,calc(100% - 20px));border:0;border-radius:24px;padding:0;box-shadow:0 30px 100px rgba(0,0,0,.27)}dialog::backdrop{background:rgba(0,0,0,.52);backdrop-filter:blur(5px)}.modal{padding:23px}.modal-head{display:flex;justify-content:space-between;gap:14px}.modal h2{margin:3px 0 0;font-size:25px}.close{width:38px;height:38px;border:0;border-radius:50%;background:#f1f1f3;font-size:22px}.field{display:block;margin-top:17px}.field>span{display:block;margin-bottom:7px;font-size:13px;font-weight:850}.field input,.field textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;outline:none}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field textarea:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #ede9fe}
+    .switch-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:20px 0 4px;padding:15px;background:#fafafa;border:1px solid var(--line);border-radius:14px}.switch-row strong{display:block}.switch-row small{display:block;color:var(--muted);margin-top:3px}.switch{width:52px;height:30px;accent-color:var(--green)}.save-row{display:flex;gap:9px;margin-top:20px}.save-row .primary{background:var(--purple)}
+    .operators{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}.chip{padding:8px 10px;border-radius:999px;background:#f2f4f7;font-size:12px;font-weight:800}.chip.manager{background:#ecfdf3;color:var(--green)}.operator-add{display:grid;grid-template-columns:1fr auto;gap:8px}.operator-add button{border:0;border-radius:12px;background:#171717;color:#fff;padding:0 17px;font-weight:850}.divider{height:1px;background:var(--line);margin:22px 0}.hint{color:var(--muted);font-size:12px;line-height:1.5}.hidden{display:none!important}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}.shell{width:min(100% - 18px,1040px);padding-top:16px}.top .link:last-child{display:none}.operator-add{grid-template-columns:1fr}.operator-add button{padding:12px}}
   </style>
 </head>
 <body>
   <main class="shell">
-    <div class="topbar"><a class="back" href="/login.html">← Account</a><a class="back" href="/discounts.html">Vedi pagina pubblica ↗</a></div>
-    <div class="eyebrow">Dashboard owner</div>
-    <h1>Gestione sconti</h1>
-    <p class="intro">Gli sconti sono gestiti qui, separatamente dai dati dei POI. Attiva un’offerta, scrivi il testo pubblico e assegna gli operatori autorizzati a validare i QR.</p>
-    <div class="toolbar">
-      <input id="search" class="search" type="search" placeholder="Cerca attività…" />
-      <select id="filter" class="filter" aria-label="Filtra sconti"><option value="all">Tutte le attività</option><option value="active">Solo sconti attivi</option><option value="inactive">Senza sconto</option></select>
-    </div>
+    <div class="top"><a class="link" href="/login.html">← Account</a><a class="link" href="/partner.html">Apri Scanner QR →</a></div>
+    <div class="eyebrow">Area attività</div><h1>Gestione sconti</h1>
+    <p class="intro">Crea un’offerta testuale di qualsiasi tipo, attivala quando vuoi e autorizza gli operatori che possono validare i QR. L’email responsabile resta sempre inclusa nello scanner.</p>
     <div id="status" class="status">Verifica accesso…</div>
     <section id="grid" class="grid" aria-live="polite"></section>
   </main>
 
   <dialog id="editor">
-    <form id="form" class="modal" method="dialog">
-      <div class="modal-head"><div><div class="eyebrow">Modifica offerta</div><h2 id="modalTitle">Attività</h2></div><button id="closeBtn" class="close" type="button" aria-label="Chiudi">×</button></div>
-      <div class="row">
-        <label class="field"><span>Sconto %</span><input id="discount" type="number" min="0" max="100" required /></label>
-        <label class="field"><span>Titolo offerta</span><input id="offerTitle" maxlength="80" placeholder="Es. Limoncino in omaggio" /></label>
-      </div>
-      <label class="field"><span>Descrizione e condizioni</span><textarea id="offerDescription" placeholder="Descrivi cosa riceve l’utente e le condizioni dell’offerta"></textarea></label>
-      <label class="field"><span>Email operatori autorizzati</span><input id="emails" type="text" placeholder="email1@attivita.it, email2@attivita.it" /></label>
-      <p class="hint">Gli operatori indicati qui possono accedere alla dashboard partner e validare i QR di questa attività.</p>
-      <div id="modalStatus" class="status" style="display:none"></div>
-      <div class="actions"><button id="cancelBtn" class="cancel" type="button">Annulla</button><button id="saveBtn" class="save" type="submit">Salva sconto</button></div>
+    <form id="form" class="modal">
+      <div class="modal-head"><div><div class="eyebrow" style="margin-top:0">Offerta</div><h2 id="modalTitle">Attività</h2></div><button id="closeBtn" class="close" type="button" aria-label="Chiudi">×</button></div>
+      <label class="switch-row"><span><strong>Offerta attiva</strong><small>Se disattivata non sarà possibile generare nuovi QR.</small></span><input id="active" class="switch" type="checkbox" /></label>
+      <label class="field"><span>Titolo dell’offerta</span><input id="offerTitle" maxlength="100" placeholder="Es. Limoncino in omaggio, 2×1, degustazione gratuita…" /></label>
+      <label class="field"><span>Descrizione e condizioni</span><textarea id="offerDescription" placeholder="Scrivi liberamente cosa comprende l’offerta e quando è valida"></textarea></label>
+      <div id="offerStatus" class="status hidden"></div>
+      <div class="save-row"><button id="cancelBtn" class="secondary" type="button">Annulla</button><button id="saveBtn" class="primary" type="submit">Salva offerta</button></div>
+      <div class="divider"></div>
+      <div><strong>Operatori scanner</strong><p class="hint">Il responsabile è sempre incluso. Le altre email vedranno nel menu soltanto la pagina Scanner QR.</p><div id="operators" class="operators"></div></div>
+      <label class="field"><span>Aggiungi email operatore</span><div class="operator-add"><input id="operatorEmail" type="email" autocomplete="email" placeholder="operatore@attivita.it" /><button id="addOperatorBtn" type="button">Aggiungi</button></div></label>
+      <div id="operatorStatus" class="status hidden"></div>
     </form>
   </dialog>
 
@@ -61,50 +46,28 @@
       'use strict';
       var SUPABASE_URL='https://jpflcbktcnhmlvaibzcw.supabase.co';
       var SUPABASE_KEY='sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
-      var OWNER_EMAIL='5terrego.info@gmail.com';
+      var FUNCTION_NAME='partner-backend';
       var client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-      var rows=[],editing=null;
-      var grid=document.getElementById('grid'),statusEl=document.getElementById('status'),searchEl=document.getElementById('search'),filterEl=document.getElementById('filter');
-      var dialog=document.getElementById('editor'),form=document.getElementById('form'),modalTitle=document.getElementById('modalTitle'),discountEl=document.getElementById('discount'),titleEl=document.getElementById('offerTitle'),descriptionEl=document.getElementById('offerDescription'),emailsEl=document.getElementById('emails'),modalStatus=document.getElementById('modalStatus'),saveBtn=document.getElementById('saveBtn');
-
-      function escapeHtml(value){return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-      function setStatus(message,type){statusEl.textContent=message;statusEl.className='status'+(type?' '+type:'')}
-      function decodeOffer(value){var raw=String(value||'').trim();if(!raw)return{title:'',description:''};try{var data=JSON.parse(raw);if(data&&typeof data==='object')return{title:String(data.title||data.offer_title||''),description:String(data.description||data.text||'')}}catch(_err){}return{title:'',description:raw}}
-      function encodeOffer(title,description){title=String(title||'').trim();description=String(description||'').trim();return title||description?JSON.stringify({title:title,description:description}):''}
-      function active(row){return Number(row.discount||0)>0}
-      function render(){
-        var query=searchEl.value.trim().toLowerCase(),filter=filterEl.value;
-        var filtered=rows.filter(function(row){var matches=!query||String(row.name||'').toLowerCase().indexOf(query)!==-1;return matches&&(filter==='all'||(filter==='active'&&active(row))||(filter==='inactive'&&!active(row)))});
-        if(!filtered.length){grid.innerHTML='<div class="empty">Nessuna attività corrisponde al filtro.</div>';return}
-        grid.innerHTML=filtered.map(function(row){var offer=decodeOffer(row.discount_info);var text=offer.title||offer.description||'Nessuna descrizione pubblica impostata.';return '<article class="card"><div class="card-head"><div><h2>'+escapeHtml(row.name||'Attività senza nome')+'</h2><div class="meta">'+escapeHtml(row.type||'POI')+'</div></div><span class="badge'+(active(row)?' active':'')+'">'+(active(row)?escapeHtml(row.discount)+'% attivo':'Non attivo')+'</span></div><div class="offer">'+escapeHtml(text)+'</div><button class="edit" type="button" data-id="'+escapeHtml(row.id)+'">Gestisci sconto</button></article>'}).join('')
-      }
-      function openEditor(id){editing=rows.find(function(row){return String(row.id)===String(id)});if(!editing)return;var offer=decodeOffer(editing.discount_info);modalTitle.textContent=editing.name||'Attività';discountEl.value=Number(editing.discount||0);titleEl.value=offer.title;descriptionEl.value=offer.description;emailsEl.value=editing.emails||'';modalStatus.style.display='none';dialog.showModal()}
-      function closeEditor(){editing=null;dialog.close()}
-      async function getVerifiedOwner(){var result=await client.auth.getUser();if(result.error||!result.data||!result.data.user)return null;return String(result.data.user.email||'').trim().toLowerCase()===OWNER_EMAIL?result.data.user:null}
-      async function load(){
-        try{
-          var owner=await getVerifiedOwner();
-          if(!owner){setStatus('Accesso riservato a '+OWNER_EMAIL+'. Accedi con questo account.','error');grid.innerHTML='<div class="empty"><a href="/login.html">Vai al login</a></div>';return}
-          setStatus('Caricamento attività…');
-          var result=await client.from('pois').select('id,name,type,discount,discount_info,emails').order('name',{ascending:true});
-          if(result.error)throw result.error;rows=Array.isArray(result.data)?result.data:[];setStatus(rows.length+' attività caricate. Gli sconti sono ora gestiti separatamente dai POI.','ok');render()
-        }catch(error){setStatus(error.message||'Impossibile caricare gli sconti.','error')}
-      }
-      async function save(event){
-        event.preventDefault();if(!editing)return;
-        var value=Math.max(0,Math.min(100,Number(discountEl.value||0)));saveBtn.disabled=true;modalStatus.style.display='block';modalStatus.className='status';modalStatus.textContent='Salvataggio…';
-        try{
-          var owner=await getVerifiedOwner();if(!owner)throw new Error('Sessione scaduta. Accedi nuovamente con '+OWNER_EMAIL+'.');
-          var patch={discount:value,discount_info:encodeOffer(titleEl.value,descriptionEl.value),emails:emailsEl.value.trim()};
-          var result=await client.from('pois').update(patch).eq('id',editing.id).select('id,name,type,discount,discount_info,emails').single();
-          if(result.error)throw result.error;
-          rows=rows.map(function(row){return String(row.id)===String(editing.id)?result.data:row});
-          modalStatus.className='status ok';modalStatus.textContent='Sconto salvato.';render();setTimeout(closeEditor,450)
-        }catch(error){modalStatus.className='status error';modalStatus.textContent=error.message||'Salvataggio non riuscito.'}finally{saveBtn.disabled=false}
-      }
-      grid.addEventListener('click',function(event){var button=event.target.closest('[data-id]');if(button)openEditor(button.getAttribute('data-id'))});
-      searchEl.addEventListener('input',render);filterEl.addEventListener('change',render);form.addEventListener('submit',save);document.getElementById('closeBtn').addEventListener('click',closeEditor);document.getElementById('cancelBtn').addEventListener('click',closeEditor);dialog.addEventListener('click',function(event){if(event.target===dialog)closeEditor()});
-      load();
+      var userEmail='',activities=[],activePoi=null;
+      var grid=document.getElementById('grid'),statusEl=document.getElementById('status'),dialog=document.getElementById('editor'),form=document.getElementById('form'),titleEl=document.getElementById('offerTitle'),descriptionEl=document.getElementById('offerDescription'),activeEl=document.getElementById('active'),modalTitle=document.getElementById('modalTitle'),operatorsEl=document.getElementById('operators'),operatorEmailEl=document.getElementById('operatorEmail'),saveBtn=document.getElementById('saveBtn'),addOperatorBtn=document.getElementById('addOperatorBtn');
+      var offerStatus=document.getElementById('offerStatus'),operatorStatus=document.getElementById('operatorStatus');
+      function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+      function emails(value){return String(value||'').split(',').map(function(v){return v.trim().toLowerCase()}).filter(Boolean)}
+      function manager(poi){return emails(poi&&poi.emails)[0]||''}
+      function decode(value){var raw=String(value||'').trim();if(!raw)return{title:'',description:''};try{var data=JSON.parse(raw);if(data&&typeof data==='object')return{title:String(data.title||data.offer_title||''),description:String(data.description||data.text||'')}}catch(_e){}return{title:raw,description:''}}
+      function encode(title,description){return JSON.stringify({title:String(title||'').trim(),description:String(description||'').trim()})}
+      function setStatus(el,message,type){el.textContent=message;el.className='status'+(type?' '+type:'')}
+      function showInline(el,message,type){setStatus(el,message,type);el.classList.remove('hidden')}
+      async function token(){var result=await client.auth.getSession();return result&&result.data&&result.data.session?result.data.session.access_token:''}
+      async function callBackend(body){var accessToken=await token();if(!accessToken)throw new Error('Accedi prima con la mail responsabile.');var response=await fetch(SUPABASE_URL+'/functions/v1/'+FUNCTION_NAME,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+accessToken},body:JSON.stringify(body)});var payload=null;try{payload=await response.json()}catch(_e){}if(!response.ok||!payload||payload.ok===false)throw new Error(payload&&payload.error?payload.error:'Errore backend '+response.status);return payload}
+      function render(){if(!activities.length){grid.innerHTML='<div class="empty">Nessuna attività gestibile con questa email.</div>';return}grid.innerHTML=activities.map(function(poi){var offer=decode(poi.discount_info),on=Number(poi.discount||0)>0;return '<article class="card"><div class="head"><div><h2>'+esc(poi.name||'Attività')+'</h2><div class="meta">Responsabile: '+esc(manager(poi))+'</div></div><span class="badge'+(on?' on':'')+'">'+(on?'Offerta attiva':'Disattivata')+'</span></div><div class="offer"><strong>'+esc(offer.title||'Offerta senza titolo')+'</strong>'+(offer.description?'<br>'+esc(offer.description):'')+'</div><div class="actions"><button class="primary" type="button" data-edit="'+esc(poi.id)+'">Gestisci offerta</button><a class="secondary" href="/partner.html" style="text-decoration:none">Scanner QR</a></div></article>'}).join('')}
+      function renderOperators(){var list=emails(activePoi&&activePoi.emails),owner=list[0]||userEmail;operatorsEl.innerHTML='<span class="chip manager">'+esc(owner)+' · responsabile</span>'+list.slice(1).map(function(email){return '<span class="chip">'+esc(email)+'</span>'}).join('')}
+      function openEditor(id){activePoi=activities.find(function(poi){return String(poi.id)===String(id)});if(!activePoi)return;var offer=decode(activePoi.discount_info);modalTitle.textContent=activePoi.name||'Attività';activeEl.checked=Number(activePoi.discount||0)>0;titleEl.value=offer.title;descriptionEl.value=offer.description;operatorEmailEl.value='';offerStatus.classList.add('hidden');operatorStatus.classList.add('hidden');renderOperators();dialog.showModal()}
+      function closeEditor(){dialog.close();activePoi=null}
+      async function load(){try{var userResult=await client.auth.getUser();var user=userResult&&userResult.data?userResult.data.user:null;if(!user||!user.email){setStatus(statusEl,'Devi effettuare l’accesso prima di gestire gli sconti.','error');grid.innerHTML='<div class="empty"><a href="/login.html">Vai al login</a></div>';return}userEmail=String(user.email).trim().toLowerCase();var payload=await callBackend({action:'get_partner_pois'});var all=Array.isArray(payload.pois)?payload.pois:[];activities=all.filter(function(poi){return manager(poi)===userEmail});if(!activities.length){setStatus(statusEl,'Questa email è autorizzata soltanto allo scanner oppure non è responsabile di alcuna attività.','error')}else{setStatus(statusEl,activities.length+' attività disponibili.','ok')}render()}catch(error){setStatus(statusEl,error.message||'Impossibile caricare le attività.','error')}}
+      async function saveOffer(event){event.preventDefault();if(!activePoi)return;var title=titleEl.value.trim(),description=descriptionEl.value.trim();if(activeEl.checked&&!title&&!description){showInline(offerStatus,'Inserisci almeno un titolo o una descrizione per attivare l’offerta.','error');return}saveBtn.disabled=true;showInline(offerStatus,'Salvataggio…','');try{var info=encode(title,description);var result=await client.rpc('update_partner_discount',{target_poi_id:Number(activePoi.id),new_discount:activeEl.checked?1:0,new_discount_info:info});if(result.error)throw result.error;activePoi.discount=activeEl.checked?1:0;activePoi.discount_info=info;activities=activities.map(function(poi){return String(poi.id)===String(activePoi.id)?activePoi:poi});render();showInline(offerStatus,'Offerta salvata.','ok')}catch(error){showInline(offerStatus,error.message||'Salvataggio non riuscito.','error')}finally{saveBtn.disabled=false}}
+      async function addOperator(){if(!activePoi)return;var email=operatorEmailEl.value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showInline(operatorStatus,'Inserisci una email valida.','error');return}var list=emails(activePoi.emails);if(list.indexOf(email)!==-1){showInline(operatorStatus,'Questa email è già autorizzata.','ok');return}addOperatorBtn.disabled=true;showInline(operatorStatus,'Aggiunta operatore…','');try{await callBackend({action:'update_emails',poi_id:activePoi.id,add_emails:[email]});list.push(email);activePoi.emails=list.join(', ');activities=activities.map(function(poi){return String(poi.id)===String(activePoi.id)?activePoi:poi});operatorEmailEl.value='';renderOperators();showInline(operatorStatus,'Operatore aggiunto. Il responsabile resta incluso.','ok')}catch(error){showInline(operatorStatus,error.message||'Impossibile aggiungere l’operatore.','error')}finally{addOperatorBtn.disabled=false}}
+      grid.addEventListener('click',function(event){var button=event.target.closest('[data-edit]');if(button)openEditor(button.getAttribute('data-edit'))});form.addEventListener('submit',saveOffer);document.getElementById('closeBtn').addEventListener('click',closeEditor);document.getElementById('cancelBtn').addEventListener('click',closeEditor);addOperatorBtn.addEventListener('click',addOperator);operatorEmailEl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();addOperator()}});dialog.addEventListener('click',function(event){if(event.target===dialog)closeEditor()});load();
     })();
   </script>
 </body>

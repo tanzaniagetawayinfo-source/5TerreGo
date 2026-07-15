@@ -655,15 +655,15 @@
         <div id="restaurantName" class="restaurant-name">Partner scanner</div>
       </div>
       <div class="top-actions">
-        <button id="settingsBtn" class="icon-btn hidden" type="button" aria-label="Settings">⚙️</button>
+        <button id="settingsBtn" class="icon-btn hidden" type="button" aria-label="Settings" style="display:none!important">⚙️</button>
         <button id="logoutBtn" class="icon-btn hidden" type="button" aria-label="Logout">↪</button>
       </div>
     </header>
 
     <section id="authScreen" class="screen">
       <div class="auth-card">
-        <h1 class="auth-title">Partner access</h1>
-        <p class="auth-text">Use the email authorized in the restaurant POI. If you already logged in, the dashboard opens automatically.</p>
+        <h1 class="auth-title">Scanner QR</h1>
+        <p class="auth-text">Accedi nel browser del telefono con una delle email operatore autorizzate. Dopo l’accesso puoi validare i QR con la fotocamera.</p>
         <div class="field">
           <label for="emailInput">Email</label>
           <input id="emailInput" type="email" autocomplete="email" placeholder="restaurant@email.com" />
@@ -686,7 +686,7 @@
           <div id="scannerPlaceholder" class="scanner-placeholder">
             <div>
               <strong>QR scanner</strong><br />
-              <span>Allow camera access or insert the code below.</span>
+              <span>Consenti l’accesso alla fotocamera oppure inserisci il codice.</span>
             </div>
           </div>
           <div class="scan-frame"></div>
@@ -696,8 +696,8 @@
 
         <div class="manual-area">
           <input id="codeInput" class="manual-input" type="text" autocomplete="one-time-code" placeholder="5TG-XXXXXXXX" />
-          <button id="validateBtn" class="primary-btn" type="button">Validate QR</button>
-          <button id="startCameraBtn" class="secondary-btn" type="button">Start camera</button>
+          <button id="validateBtn" class="primary-btn" type="button">Valida QR</button>
+          <button id="startCameraBtn" class="secondary-btn" type="button">Apri fotocamera</button>
         </div>
       </div>
 
@@ -1060,7 +1060,7 @@
         authScreen.classList.add("hidden");
         dashboardScreen.classList.remove("hidden");
         logoutBtn.classList.remove("hidden");
-        settingsBtn.classList.remove("hidden");
+        settingsBtn.classList.add("hidden");
       }
 
       async function getFreshAccessToken() {
@@ -1165,7 +1165,7 @@
           partnerPois = await loadAuthorizedPartnerPois();
 
           if (!partnerPois.length) {
-            setStatus(dashboardStatus, "This account is not authorized to manage discounts.", "error");
+            setStatus(dashboardStatus, "Questa email non è autorizzata a usare lo scanner QR.", "error");
             settingsBtn.classList.add("hidden");
             return;
           }
@@ -1428,7 +1428,6 @@
 
       bindEvent(loginBtn, "click", login);
       bindEvent(logoutBtn, "click", logout);
-      bindEvent(settingsBtn, "click", openSettings);
       bindEvent(closeSettingsBtn, "click", closeSettings);
       bindEvent(saveSettingsBtn, "click", saveSettings);
       bindEvent(addOperatorBtn, "click", addOperatorEmail);

@@ -725,6 +725,7 @@ select{appearance:none;-webkit-appearance:none;}
       bookings:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>',
       profile:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>',
       discounts:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4L13.4 20.6a2 2 0 0 1-2.8 0L3.4 13.4a2 2 0 0 1 0-2.8l7.2-7.2a2 2 0 0 1 1.4-.6H19a2 2 0 0 1 2 2v7a2 2 0 0 1-.4 1.2z"></path><circle cx="16" cy="8" r="1"></circle></svg>',
+      qr:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 20h2"></path></svg>',
       pois:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-4.35-6-10a6 6 0 1 1 12 0c0 5.65-6 10-6 10z"></path><circle cx="12" cy="11" r="2.5"></circle></svg>',
       blog:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V4.5a2 2 0 0 1 2-2h12v17"></path><path d="M8 7h6M8 11h8M8 15h5"></path><path d="M4 19.5a2.5 2.5 0 0 0 2.5 2.5H20"></path></svg>',
       trails:'<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6.5-11L13 15l3.5-6L21 20"></path><path d="M3 20h18"></path></svg>',
@@ -783,11 +784,15 @@ select{appearance:none;-webkit-appearance:none;}
     return list;
   }
 
-  async function fetchPartnerDiscountStatus(){
+  function parsePartnerEmails(value){
+    return String(value || '').split(',').map(function(email){ return email.trim().toLowerCase(); }).filter(Boolean);
+  }
+
+  async function fetchPartnerAccess(){
     const session = await getReliableSession();
     const token = session && session.access_token ? session.access_token : '';
     const userEmail = session && session.user && session.user.email ? session.user.email.trim().toLowerCase() : '';
-    if(!userEmail || !token) return false;
+    if(!userEmail || !token) return { hasAccess:false, isManager:false };
 
     try{
       const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
@@ -801,27 +806,36 @@ select{appearance:none;-webkit-appearance:none;}
       });
       if(res.ok){
         const payload = await res.json();
-        return Boolean(payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0);
+        const pois = payload && payload.ok === true && Array.isArray(payload.pois) ? payload.pois : [];
+        return {
+          hasAccess: pois.length > 0,
+          isManager: pois.some(function(poi){ return parsePartnerEmails(poi && poi.emails)[0] === userEmail; })
+        };
       }
     } catch(_err){}
 
-    return false;
+    return { hasAccess:false, isManager:false };
   }
 
   async function maybeAddPartnerDiscountButton(menuList){
     const session = await getReliableSession();
     const email = String(session && session.user && session.user.email ? session.user.email : '').trim().toLowerCase();
     if(email === '5terrego.info@gmail.com') return;
-    const hasPartnerPois = await fetchPartnerDiscountStatus();
-    if(!hasPartnerPois || document.getElementById('partner-discounts')) return;
-
-    const discountBtn = createMenuButton({
-      id:'partner-discounts', label:'Manage discounts', icon:'discounts',
-      onClick:function(){ window.location.href = '/partner.html'; }
-    });
-
+    const access = await fetchPartnerAccess();
+    if(!access.hasAccess) return;
     const logoutButton = document.getElementById('logout');
-    menuList.insertBefore(discountBtn, logoutButton);
+    if(access.isManager && !document.getElementById('partner-discounts')){
+      menuList.insertBefore(createMenuButton({
+        id:'partner-discounts', label:'Gestione sconti', icon:'discounts',
+        onClick:function(){ window.location.href = '/discounteditor.html'; }
+      }), logoutButton);
+    }
+    if(!document.getElementById('partner-qr')){
+      menuList.insertBefore(createMenuButton({
+        id:'partner-qr', label:'Scanner QR', icon:'qr',
+        onClick:function(){ window.location.href = '/partner.html'; }
+      }), logoutButton);
+    }
   }
 
   async function maybeAddOwnerButton(menuList){
@@ -850,18 +864,6 @@ select{appearance:none;-webkit-appearance:none;}
         onClick:function(){ window.location.href = '/trakeditor.html'; }
       });
       menuList.insertBefore(trailsBtn, document.getElementById('logout'));
-    }
-
-    if(!document.getElementById('discounts-dashboard')){
-      const session = await getReliableSession();
-      const ownerEmail = String(session && session.user && session.user.email ? session.user.email : '').trim().toLowerCase();
-      if(ownerEmail === '5terrego.info@gmail.com'){
-        const discountsBtn = createMenuButton({
-          id:'discounts-dashboard', label:'Manage discounts', icon:'discounts',
-          onClick:function(){ window.location.href = '/discounteditor.html'; }
-        });
-        menuList.insertBefore(discountsBtn, document.getElementById('logout'));
-      }
     }
 
     if(!document.getElementById('visitors-dashboard')){

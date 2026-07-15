@@ -964,8 +964,10 @@ button.delete{
     </div>
 
     <div class="modal-section-card">
-      <div class="modal-section-label">Contatti</div>
+      <div class="modal-section-label">Attività e accesso sconti</div>
       <input id="phone" placeholder="Telefono" />
+      <input id="emails" type="email" placeholder="Email responsabile sconti" />
+      <div class="image-suggestion-credit">Questa email vedrà Gestione sconti e Scanner QR nel proprio menu. Potrà aggiungere altri operatori scanner dalla sua dashboard.</div>
     </div>
 
     <div class="modal-actions">
@@ -1026,6 +1028,7 @@ const REQUIRED_POIS = [
 
 let pois = [];
 let editingPoiId = null;
+let existingAuthorizedEmails = [];
 let poiImagesState = [];
 
 const statusEl = document.getElementById("status");
@@ -1047,6 +1050,7 @@ const importanceEl = document.getElementById("importance");
 const importanceValueEl = document.getElementById("importanceValue");
 const typeEl = document.getElementById("type");
 const phoneEl = document.getElementById("phone");
+const emailsEl = document.getElementById("emails");
 const poiImagesEl = document.getElementById("poiImages");
 const imageAddBtn = document.getElementById("imageAddBtn");
 const imageSuggestionsEl = document.getElementById("imageSuggestions");
@@ -1729,7 +1733,7 @@ async function loadPois(){
 
   try{
     const res = await authFetch(
-      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type",
+      SUPABASE_URL + "/rest/v1/pois?select=id,name,coords,description,importance,type,emails",
       {
         method: "GET",
         useUserToken: true,
@@ -1810,9 +1814,12 @@ function toListPoi(row){
     importance: source.importance ?? null,
     type: source.type || "",
     ...(hasDescriptionField ? { description: source.description || "" } : {}),
+    ...(Object.prototype.hasOwnProperty.call(source, "emails") ? { emails: source.emails || "" } : {}),
+    ...(Object.prototype.hasOwnProperty.call(source, "phone") ? { phone: source.phone || "" } : {}),
+    ...(Object.prototype.hasOwnProperty.call(source, "images") ? { images: source.images || [] } : {}),
     _listOnly: !Object.prototype.hasOwnProperty.call(source, "emails")
-      && !Object.prototype.hasOwnProperty.call(source, "phone")
-      && !Object.prototype.hasOwnProperty.call(source, "images"),
+      || !Object.prototype.hasOwnProperty.call(source, "phone")
+      || !Object.prototype.hasOwnProperty.call(source, "images"),
     _searchText: buildPoiSearchText(source)
   };
 }
@@ -2002,6 +2009,8 @@ function patchPoiForm(poi){
   updateImportanceUI(poi.importance ?? 50);
   typeEl.value = poi.type || "chiesa";
   phoneEl.value = poi.phone || "";
+  existingAuthorizedEmails = String(poi.emails || "").split(",").map((email) => email.trim().toLowerCase()).filter(Boolean);
+  emailsEl.value = existingAuthorizedEmails[0] || "";
   setPoiImages(poi.images);
 }
 
@@ -2010,7 +2019,7 @@ async function fetchPoiDetail(poiId){
   if(poiDetailCache.has(poiId)) return poiDetailCache.get(poiId);
 
   const res = await authFetch(
-    SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) + "&select=id,name,coords,description,importance,type,phone,images",
+    SUPABASE_URL + "/rest/v1/pois?id=eq." + encodeURIComponent(poiId) + "&select=id,name,coords,description,importance,type,phone,emails,images",
     {
       method: "GET",
       useUserToken: true,
@@ -2049,6 +2058,7 @@ async function openModal(poi = null){
       importance: poi.importance ?? 50,
       type: poi.type || "chiesa",
       phone: "",
+      emails: poi.emails || "",
       images: []
     });
   }else{
@@ -2098,10 +2108,16 @@ function clearForm(resetEditing = true){
   updateImportanceUI(50);
   typeEl.value = "chiesa";
   phoneEl.value = "";
+  emailsEl.value = "";
+  existingAuthorizedEmails = [];
   setPoiImages([]);
 }
 
 function readPoiForm(){
+  const managerEmail = emailsEl.value.trim().toLowerCase();
+  const authorizedEmails = managerEmail
+    ? [managerEmail, ...existingAuthorizedEmails.slice(1).filter((email) => email !== managerEmail)]
+    : [];
   return {
     name: nameEl.value.trim(),
     coords: coordsEl.value.trim(),
@@ -2109,6 +2125,7 @@ function readPoiForm(){
     importance: clampNumber(importanceEl.value, 1, 100, 1),
     type: typeEl.value,
     phone: phoneEl.value.trim(),
+    emails: authorizedEmails.join(", "),
     images: poiImagesState.slice()
   };
 }
