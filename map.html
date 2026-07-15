@@ -1245,7 +1245,10 @@
       }
     }
 
-    .user-location-marker { width: 18px; height: 18px; border-radius: 50%; background: #1e9bff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(30,155,255,0.18), 0 8px 24px rgba(0,0,0,0.22); }
+    .user-location-icon { position: relative; }
+    .user-location-marker { position: relative; z-index: 2; width: 18px; height: 18px; border-radius: 50%; background: #1e9bff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(30,155,255,0.18), 0 8px 24px rgba(0,0,0,0.22); }
+    .user-location-heading { display: none; position: absolute; z-index: 1; left: 12px; top: -27px; width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-bottom: 30px solid rgba(30,155,255,.86); filter: drop-shadow(0 4px 5px rgba(0,0,0,.22)); transform: translateX(-50%) rotate(0deg); transform-origin: 50% 39px; transition: transform .16s linear; }
+    body.navigation-active .user-location-heading { display: block; }
     .user-location-marker::after { content: ""; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(30,155,255,0.45); transform: translate(-50%, -50%); animation: userLocationPulse 1.8s ease-out infinite; }
     @keyframes userLocationPulse { 0% { transform: translate(-50%, -50%) scale(.72); opacity: .85; } 100% { transform: translate(-50%, -50%) scale(1.55); opacity: 0; } }
 
@@ -1312,6 +1315,36 @@
     #poi-card.open .poi-content { opacity: 1; transform: translateY(0); }
     #poi-title { position: sticky; top: 0; z-index: 11; min-height: 66px; display: flex; align-items: flex-end; margin: 0 -16px 0; padding: 30px 58px 10px 20px; background: #fff; font-size: 25px; font-weight: 950; line-height: 1.02; letter-spacing: -0.06em; text-align: left; box-shadow: 0 1px 0 rgba(0,0,0,0.045), 0 12px 18px rgba(255,255,255,0.96); }
     .poi-action-row { display: flex; align-items: center; gap: 9px; margin: 12px 0 18px; overflow-x: auto; }
+    #poi-directions { border: 0; border-radius: 999px; padding: 12px 22px; background: #ff7200; color: #fff; font: inherit; font-size: 14px; font-weight: 950; cursor: pointer; box-shadow: 0 10px 24px rgba(255,114,0,.24); }
+    #navigation-planner { display: none; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 4100; max-width: 610px; margin: 0 auto; border-radius: 30px; background: rgba(255,255,255,.98); color: #111827; box-shadow: 0 24px 70px rgba(4,15,30,.32); border: 1px solid rgba(17,24,39,.08); overflow: hidden; opacity: 0; transform: translateY(24px); transition: opacity .22s ease, transform .28s cubic-bezier(.2,.9,.2,1); }
+    #navigation-planner.open { opacity: 1; transform: translateY(0); }
+    .navigation-head { display: grid; grid-template-columns: 46px minmax(0,1fr) 42px; gap: 10px; align-items: center; padding: 16px 16px 12px; }
+    .navigation-pin { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 16px; background: #fff1e8; color: #ff7200; font-size: 23px; }
+    .navigation-kicker { color: #ff7200; font-size: 10px; line-height: 1; font-weight: 950; letter-spacing: .13em; text-transform: uppercase; }
+    #navigation-title { margin-top: 5px; font-size: 20px; line-height: 1.08; font-weight: 950; letter-spacing: -.045em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #navigation-close { width: 42px; height: 42px; border: 0; border-radius: 999px; background: #f3f5f8; color: #111827; font-size: 25px; cursor: pointer; }
+    .navigation-origin { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; padding: 0 16px 12px; }
+    #navigation-origin-select { min-width: 0; height: 48px; border: 1px solid rgba(17,24,39,.1); border-radius: 16px; background: #f5f6f8; padding: 0 13px; color: #111827; font: inherit; font-size: 14px; font-weight: 850; }
+    #navigation-locate { border: 0; border-radius: 16px; padding: 0 16px; background: #0f172a; color: #fff; font: inherit; font-size: 13px; font-weight: 900; cursor: pointer; }
+    #navigation-context { margin: 0 16px 11px; padding: 11px 13px; border-radius: 16px; background: #eef7f3; color: #08795b; font-size: 13px; font-weight: 800; line-height: 1.35; }
+    #navigation-options { display: flex; gap: 10px; padding: 0 16px 16px; overflow-x: auto; scroll-snap-type: x proximity; }
+    .navigation-option { flex: 0 0 178px; min-height: 128px; scroll-snap-align: start; border: 1px solid rgba(17,24,39,.09); border-radius: 21px; padding: 14px; background: #fff; color: #111827; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 8px 24px rgba(15,23,42,.06); }
+    .navigation-option.active { border-color: #ff7200; box-shadow: 0 0 0 2px rgba(255,114,0,.12), 0 10px 28px rgba(15,23,42,.08); }
+    .navigation-option.loading { opacity: .62; pointer-events: none; }
+    .navigation-option-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 13px; margin-bottom: 10px; background: #f2f4f7; font-size: 19px; }
+    .navigation-option-title { font-size: 15px; font-weight: 950; line-height: 1.08; }
+    .navigation-option-time { margin-top: 5px; color: #08795b; font-size: 13px; font-weight: 900; }
+    .navigation-option-meta { margin-top: 5px; color: #6b7486; font-size: 11px; font-weight: 750; line-height: 1.32; }
+    .navigation-empty { flex: 1 0 100%; padding: 14px; border-radius: 18px; background: #f5f6f8; color: #667085; font-size: 13px; line-height: 1.42; }
+    .navigation-actions { display: flex; gap: 9px; padding: 0 16px 16px; }
+    #navigation-start, #navigation-stop { flex: 1; min-height: 48px; border: 0; border-radius: 16px; font: inherit; font-size: 14px; font-weight: 950; cursor: pointer; }
+    #navigation-start { background: #ff7200; color: #fff; }
+    #navigation-start:disabled { background: #d7dae0; color: #8b93a1; cursor: default; }
+    #navigation-stop { display: none; background: #111827; color: #fff; }
+    body.navigation-mode .search-floating, body.navigation-mode #bottom-rail, body.navigation-mode #map-style-btn { display: none !important; }
+    body.navigation-active #navigation-origin-select, body.navigation-active #navigation-locate, body.navigation-active #navigation-options, body.navigation-active #navigation-start { display: none; }
+    body.navigation-active #navigation-stop { display: block; }
+    body.navigation-active #navigation-context { background: #111827; color: #fff; }
     #poi-images-preview { display: none; gap: 8px; margin: 0 0 14px; overflow-x: auto; }
     #poi-card.has-images #poi-images-preview { display: flex; }
     .poi-preview-img { flex: 0 0 152px; width: 152px; height: 152px; border-radius: 22px; object-fit: cover; display: block; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06); }
@@ -1349,6 +1382,7 @@
     body.map-preview-mode #tour-nav,
     body.map-preview-mode #poi-card,
     body.map-preview-mode #trail-card,
+    body.map-preview-mode #navigation-planner,
     body.map-preview-mode #discount-modal {
       display: none !important;
     }
@@ -1558,9 +1592,27 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><a id="poi-directions" target="_blank" rel="noopener noreferrer">Directions</a></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
+  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button">Vai</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
   <div id="poi-close">×</div>
 </div>
+
+<section id="navigation-planner" aria-hidden="true" aria-label="Navigazione verso il POI">
+  <div class="navigation-head">
+    <div class="navigation-pin" aria-hidden="true">⌖</div>
+    <div><div class="navigation-kicker">Modalità Vai</div><div id="navigation-title">Destinazione</div></div>
+    <button id="navigation-close" type="button" aria-label="Chiudi navigazione">×</button>
+  </div>
+  <div class="navigation-origin">
+    <select id="navigation-origin-select" aria-label="Villaggio di partenza"></select>
+    <button id="navigation-locate" type="button">⌖ Usa GPS</button>
+  </div>
+  <div id="navigation-context">Calcolo delle opzioni disponibili…</div>
+  <div id="navigation-options" aria-live="polite"></div>
+  <div class="navigation-actions">
+    <button id="navigation-start" type="button" disabled>Avvia percorso</button>
+    <button id="navigation-stop" type="button">Termina navigazione</button>
+  </div>
+</section>
 
 <div id="discount-modal" aria-hidden="true">
   <div class="discount-sheet">
@@ -2361,6 +2413,15 @@
   var poiRelatedArticlesList = document.getElementById('poi-related-articles-list');
 
   var poiDirections = document.getElementById('poi-directions');
+  var navigationPlanner = document.getElementById('navigation-planner');
+  var navigationTitle = document.getElementById('navigation-title');
+  var navigationClose = document.getElementById('navigation-close');
+  var navigationOriginSelect = document.getElementById('navigation-origin-select');
+  var navigationLocate = document.getElementById('navigation-locate');
+  var navigationContext = document.getElementById('navigation-context');
+  var navigationOptions = document.getElementById('navigation-options');
+  var navigationStart = document.getElementById('navigation-start');
+  var navigationStop = document.getElementById('navigation-stop');
 
   var poiDiscountBtn = document.getElementById('poi-discount-btn');
   var poiDiscountNote = document.getElementById('poi-discount-note');
@@ -2466,6 +2527,22 @@
   var userLocationAccuracyCircle = null;
   var userLocationWatchId = null;
   var userLocationLatLng = null;
+  var navigationDestinationPOI = null;
+  var navigationOriginCoords = null;
+  var navigationOriginVillage = null;
+  var navigationDestinationVillage = null;
+  var navigationSelectedOption = null;
+  var navigationChoices = [];
+  var navigationRouteLine = null;
+  var navigationModeActive = false;
+  var navigationFollowing = false;
+  var pendingNavigationLocation = false;
+  var navigationTrainRequestId = 0;
+  var navigationRouteRequestId = 0;
+  var navigationLastPedestrianRouteAt = 0;
+  var navigationLastPedestrianOrigin = null;
+  var navigationOrientationListening = false;
+  var navigationOrientationEventName = '';
   var currentUserHeading = null;
   var tourSmoothedHeading = null;
   var lastTourHeadingUpdateAt = 0;
@@ -2532,7 +2609,7 @@
   function showUserLocationToast(message) { if (!userLocationToast || !message) return; userLocationToast.innerText = message; userLocationToast.classList.add('is-visible'); window.clearTimeout(showUserLocationToast.timer); showUserLocationToast.timer = window.setTimeout(function () { userLocationToast.classList.remove('is-visible'); }, 3600); }
   function getUserLocationButtonIcon(state) { if (state === 'pending') return '<span style="font-size:28px;font-weight:900;line-height:1;">…</span>'; return '🧭'; }
   function setUserLocationButtonState(state) { if (!userLocationBtn) return; if (state === 'pending') { userLocationBtn.innerHTML = getUserLocationButtonIcon('pending'); userLocationBtn.title = 'Looking for your location'; return; } if (state === 'active') { userLocationBtn.innerHTML = getUserLocationButtonIcon('active'); userLocationBtn.title = 'Center on my location'; return; } userLocationBtn.innerHTML = getUserLocationButtonIcon('idle'); userLocationBtn.title = 'Show my location'; }
-  function createUserLocationIcon() { return L.divIcon({ className: 'user-location-icon', html: '<div class="user-location-marker"></div>', iconSize: [24, 24], iconAnchor: [12, 12] }); }
+  function createUserLocationIcon() { return L.divIcon({ className: 'user-location-icon', html: '<div class="user-location-heading" aria-hidden="true"></div><div class="user-location-marker"></div>', iconSize: [24, 24], iconAnchor: [12, 12] }); }
   function normalizeText(value){ var text = String(value || '').toLowerCase().normalize('NFD'), output = '', lastWasSpace = false, i, code, ch; for (i = 0; i < text.length; i += 1) { ch = text.charAt(i); code = text.charCodeAt(i); if (code >= 768 && code <= 879) continue; if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) { output += ch; lastWasSpace = false; } else if (!lastWasSpace) { output += ' '; lastWasSpace = true; } } return output.trim(); }
   function normalizeLatLngPair(first, second) { var a = Number(first), b = Number(second); if (!Number.isFinite(a) || !Number.isFinite(b)) return { lat: NaN, lng: NaN }; if (Math.abs(a) > 20 && Math.abs(b) < 20) return { lat: a, lng: b }; if (Math.abs(b) > 20 && Math.abs(a) < 20) return { lat: b, lng: a }; return { lat: a, lng: b }; }
   function parseCoords(raw) { var lat, lng, str, cleaned, parts; raw = raw || {}; if (Array.isArray(raw.coords) && raw.coords.length >= 2) return normalizeLatLngPair(raw.coords[0], raw.coords[1]); if (raw.coords && typeof raw.coords === 'object' && !Array.isArray(raw.coords)) { lat = readValue(raw.coords.lat, raw.coords.latitude); lng = readValue(raw.coords.lng, raw.coords.longitude); if (lat !== undefined && lng !== undefined) return normalizeLatLngPair(lat, lng); if (Array.isArray(raw.coords.coordinates) && raw.coords.coordinates.length >= 2) return normalizeLatLngPair(raw.coords.coordinates[1], raw.coords.coordinates[0]); if (raw.coords.x !== undefined && raw.coords.y !== undefined) return normalizeLatLngPair(raw.coords.y, raw.coords.x); }
@@ -2889,7 +2966,39 @@
   function getBearingDegrees(fromPoint, toPoint) { var lat1; var lat2; var dLon; var y; var x; if (!isValidCoords(fromPoint) || !isValidCoords(toPoint)) return 0; lat1 = fromPoint[0] * Math.PI / 180; lat2 = toPoint[0] * Math.PI / 180; dLon = (toPoint[1] - fromPoint[1]) * Math.PI / 180; y = Math.sin(dLon) * Math.cos(lat2); x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
   function getCompassTargetOnRoute(userCoords, routeLatLngs) { var i; if (!isValidCoords(userCoords) || !routeLatLngs || routeLatLngs.length < 2 || !map) return null; for (i = 1; i < routeLatLngs.length; i += 1) { if (distanceMeters(userCoords, routeLatLngs[i]) > 12) return routeLatLngs[i]; } return routeLatLngs[routeLatLngs.length - 1]; }
   function getRouteInstructionBearing() { var target; if (!activeTour || !isValidCoords(userLocationLatLng)) return null; target = getCompassTargetOnRoute(userLocationLatLng, activeTour.currentLegPath || []); if (!target && getActiveTourStop()) target = getActiveTourStop().coords; if (!target) return null; return getBearingDegrees(userLocationLatLng, target); }
-  function setTourHeading(rawHeading, source) { var heading = normalizeDegrees(rawHeading); var now = Date.now(); var delta; var smoothing; if (!Number.isFinite(heading)) return; if (source === 'device' && now - lastTourHeadingUpdateAt < 90) return; if (tourSmoothedHeading === null) { tourSmoothedHeading = heading; } else { delta = getShortestAngleDelta(tourSmoothedHeading, heading); if (Math.abs(delta) < 2.5) return; smoothing = source === 'gps' ? 0.22 : 0.14; tourSmoothedHeading = normalizeDegrees(tourSmoothedHeading + delta * smoothing); } lastTourHeadingUpdateAt = now; currentUserHeading = tourSmoothedHeading; tourHeadingSource = source || ''; updateTourCompass(); }
+  function setTourHeading(rawHeading, source) { var heading = normalizeDegrees(rawHeading); var now = Date.now(); var delta; var smoothing; if (!Number.isFinite(heading)) return; if (source === 'device' && now - lastTourHeadingUpdateAt < 90) return; if (tourSmoothedHeading === null) { tourSmoothedHeading = heading; } else { delta = getShortestAngleDelta(tourSmoothedHeading, heading); if (Math.abs(delta) < 2.5) return; smoothing = source === 'gps' ? 0.22 : 0.14; tourSmoothedHeading = normalizeDegrees(tourSmoothedHeading + delta * smoothing); } lastTourHeadingUpdateAt = now; currentUserHeading = tourSmoothedHeading; tourHeadingSource = source || ''; updateTourCompass(); updateNavigationHeadingVisual(); }
+  function updateNavigationHeadingVisual() {
+    var headingEl = userLocationMarker && userLocationMarker._icon ? userLocationMarker._icon.querySelector('.user-location-heading') : null;
+    if (!headingEl || currentUserHeading === null) return;
+    headingEl.style.transform = 'translateX(-50%) rotate(' + normalizeDegrees(currentUserHeading) + 'deg)';
+  }
+  function handleNavigationOrientation(event) {
+    var heading = Number(event && event.webkitCompassHeading);
+    if (!Number.isFinite(heading) && event && Number.isFinite(Number(event.alpha))) heading = 360 - Number(event.alpha);
+    if (!Number.isFinite(heading)) return;
+    setTourHeading(heading, 'device');
+  }
+  async function enableNavigationOrientation() {
+    var permission;
+    if (navigationOrientationListening || typeof window.DeviceOrientationEvent === 'undefined') return false;
+    try {
+      if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+        permission = await window.DeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') return false;
+      }
+      navigationOrientationEventName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+      window.addEventListener(navigationOrientationEventName, handleNavigationOrientation, true);
+      navigationOrientationListening = true;
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  function disableNavigationOrientation() {
+    if (navigationOrientationListening && navigationOrientationEventName) window.removeEventListener(navigationOrientationEventName, handleNavigationOrientation, true);
+    navigationOrientationListening = false;
+    navigationOrientationEventName = '';
+  }
   function updateTourCompass() { var routeBearing; var relativeBearing; var delta; if (!activeTour || !tourNavCompassArrow || !isValidCoords(userLocationLatLng)) return; routeBearing = getRouteInstructionBearing(); if (routeBearing === null) return; relativeBearing = currentUserHeading === null ? routeBearing : normalizeDegrees(routeBearing - currentUserHeading); if (lastCompassArrowRotation === null) lastCompassArrowRotation = relativeBearing; else { delta = getShortestAngleDelta(lastCompassArrowRotation, relativeBearing); if (Math.abs(delta) < 1.8) return; lastCompassArrowRotation = normalizeDegrees(lastCompassArrowRotation + delta * 0.24); } tourNavCompassArrow.style.transform = 'rotate(' + lastCompassArrowRotation + 'deg)'; }
   function renderActiveTourNav() { var stop = getActiveTourStop(); var distance; var hasArrived; if (!tourNav || !activeTour || !stop) return; distance = getActiveTourStopDistance(); hasArrived = Number.isFinite(distance) && distance <= activeTourArrivalRadius; tourNavKicker.innerText = hasArrived ? ('Stop ' + (activeTour.index + 1) + ' of ' + activeTour.stops.length) : 'On the way'; tourNavTitle.innerText = stop.name || 'Next stop'; if (Number.isFinite(distance)) tourNavDistance.innerText = hasArrived ? 'You are here. Listen to the description, then continue.' : Math.round(distance) + ' m to the next stop'; else tourNavDistance.innerText = 'Move toward the next stop.'; if (tourNavDescription) tourNavDescription.innerText = getTourStopDescription(stop); if (tourNavNextBtn) { tourNavNextBtn.classList.toggle('is-visible', hasArrived); tourNavNextBtn.innerText = activeTour.index >= activeTour.stops.length - 1 ? 'Finish tour' : 'Next stop'; } tourNav.classList.toggle('is-walking', !hasArrived); tourNav.classList.toggle('is-arrived', hasArrived); tourNav.classList.add('is-active'); tourNav.setAttribute('aria-hidden', 'false'); updateTourCompass(); }
   function centerMapOnTourUser() { if (!map || !isValidCoords(userLocationLatLng)) return; isProgrammaticMove = true; map.setView(userLocationLatLng, Math.max(map.getZoom(), 18.5), { animate: true }); window.setTimeout(function () { isProgrammaticMove = false; }, 500); }
@@ -3334,7 +3443,9 @@
       var shouldShow;
       var minZoom;
       if (!item || !item.poi || !isValidCoords(item.poi.coords)) return;
-      shouldShow = !activeTour && isPOIMatchFilter(item.poi, currentMapFilter) && railTypeMatchesSearchType(item.poi && item.poi.type) && (!searchMode || poiMatchesActiveSearch(item.poi, searchQuery));
+      shouldShow = navigationModeActive
+        ? Boolean(navigationDestinationPOI && String(item.poi.id || item.poi.name || '') === String(navigationDestinationPOI.id || navigationDestinationPOI.name || ''))
+        : (!activeTour && isPOIMatchFilter(item.poi, currentMapFilter) && railTypeMatchesSearchType(item.poi && item.poi.type) && (!searchMode || poiMatchesActiveSearch(item.poi, searchQuery)));
       minZoom = (searchMode || forcedTypeVisibility) ? -999 : getPOIIconMinZoom(item.poi, item.importance);
 
       if (item.marker) item.marker.setLatLng(item.poi.coords);
@@ -3352,7 +3463,7 @@
     });
 
     if (trailsLayer) trailsLayer.clearLayers();
-    visibleTrailSymbols = getVisibleTrailMapItems(zoom);
+    visibleTrailSymbols = navigationModeActive ? [] : getVisibleTrailMapItems(zoom);
     separateMapSymbols(visibleTrailSymbols, zoom).forEach(addSeparatedMapSymbolToLayer);
 
     
@@ -3417,7 +3528,7 @@
       updateSelectedPOIEmphasis();
     });
   }
-  function updateFerryVisibilityForFilter() { var showFerries = currentMapFilter === 'all' || currentMapFilter === 'ferry'; if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
+  function updateFerryVisibilityForFilter() { var showFerries = !navigationModeActive && (currentMapFilter === 'all' || currentMapFilter === 'ferry'); if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
   function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); renderBottomRailCards(); scheduleSessionMapStateSave(); }
   function getSelectedLanguageCode() {
     var htmlLang = document.documentElement && document.documentElement.lang ? String(document.documentElement.lang).trim().toLowerCase() : '';
@@ -3460,12 +3571,21 @@
     userLocationLatLng = [lat, lng];
     if (!userLocationMarker) userLocationMarker = L.marker(userLocationLatLng, { icon: createUserLocationIcon(), interactive: false, zIndexOffset: 2000 }).addTo(map);
     else userLocationMarker.setLatLng(userLocationLatLng);
+    updateNavigationHeadingVisual();
     if (!userLocationAccuracyCircle) userLocationAccuracyCircle = L.circle(userLocationLatLng, { radius: accuracy, color: '#1e9bff', weight: 1, opacity: 0.35, fillColor: '#1e9bff', fillOpacity: 0.08, interactive: false }).addTo(map);
     else {
       userLocationAccuracyCircle.setLatLng(userLocationLatLng);
       userLocationAccuracyCircle.setRadius(accuracy);
     }
     setUserLocationButtonState('active');
+    if (navigationModeActive && pendingNavigationLocation) {
+      pendingNavigationLocation = false;
+      navigationOriginCoords = userLocationLatLng.slice();
+      navigationOriginVillage = getPlaceForCoords(navigationOriginCoords);
+      if (navigationOriginSelect && navigationOriginVillage) navigationOriginSelect.value = navigationOriginVillage.name;
+      renderNavigationChoices();
+    }
+    if (navigationFollowing) updateFollowingNavigation();
     tourPlace = userLocationRequestMode === 'tour' && pendingTourLocationRequest ? pendingTourPlace : null;
     if (tourPlace && !activeTour) {
       if (isUserInsideVillage(tourPlace)) {
@@ -4120,6 +4240,405 @@
   function startMovingFerries() { var activeLegs; stopMovingFerries(); if (!ferryVehiclesLayer) return; activeLegs = getActiveFerryLegs(); if (!activeLegs.length && ferryPorts && ferryPorts.length) { activeLegs = ferryPorts.map(function(port) { return { tripId: 'port-' + String(port.id || port.name), status: 'port-waiting', port: port, from: port, to: port, arc: [port.coords, port.coords], departMin: getCurrentMinutesOfDay(), arriveMin: getCurrentMinutesOfDay(), progress: 0, direction: '', upcomingStops: [] }; }); } activeLegs.forEach(function(leg) { var startPoint = leg.status === 'port-before' || leg.status === 'port-after' || leg.status === 'port-waiting' ? leg.port.coords : (getPointAlongLatLngs(leg.arc, leg.progress) || leg.arc[0]); var reverseIcon = shouldReverseFerryIcon(leg.from, leg.to); var marker = L.marker(startPoint, { icon: createMovingFerryIcon(reverseIcon), interactive: true, zIndexOffset: -250 }).addTo(ferryVehiclesLayer); ferryVehicleMarkers.push({ marker: marker, status: leg.status || 'sailing', port: leg.port || null, arc: leg.arc, departMin: leg.departMin, arriveMin: leg.arriveMin, tripId: leg.tripId, from: leg.from, to: leg.to, direction: leg.direction, reverseIcon: reverseIcon, upcomingStops: leg.upcomingStops || [] }); bindMovingFerryPopup(marker, ferryVehicleMarkers[ferryVehicleMarkers.length - 1]); updateSelectedPOIEmphasis(); }); if (ferryVehicleMarkers.length) ferryAnimationFrameId = requestAnimationFrame(animateMovingFerries); if (ferryTimetableRefreshTimer) window.clearTimeout(ferryTimetableRefreshTimer); ferryTimetableRefreshTimer = window.setTimeout(refreshMovingFerriesFromTimetable, 60000); }
   function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; stopMovingFerryRefresh(); stopMovingFerries(); ferryRoutesLayer.clearLayers(); ferryRouteArcs = []; ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 48); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: false }); L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.62, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } startMovingFerries(); }
   async function loadFerryTimetable() { var response; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('ferry_timetable').select('*').order('trip_id', { ascending: true }).order('stop_sequence', { ascending: true }); if (response.error) { console.warn('Supabase ferry timetable load failed:', response.error.message); ferryTimetableRows = []; startMovingFerries(); return; } ferryTimetableRows = response.data || []; startMovingFerries(); }
+  function getPlaceForCoords(coords) {
+    var closest = null;
+    var bestDistance = Infinity;
+    if (!isValidCoords(coords)) return null;
+    places.forEach(function(place) {
+      var distance = distanceMeters(coords, place.coords);
+      if (distance < bestDistance) { bestDistance = distance; closest = place; }
+    });
+    return closest;
+  }
+  function formatNavigationDistance(meters) {
+    meters = Number(meters || 0);
+    if (meters < 1000) return Math.max(1, Math.round(meters)) + ' m';
+    return (meters / 1000).toFixed(meters < 10000 ? 1 : 0) + ' km';
+  }
+  function formatNavigationMinutes(minutes) {
+    minutes = Math.max(1, Math.round(Number(minutes || 0)));
+    if (minutes < 60) return minutes + ' min';
+    return Math.floor(minutes / 60) + ' h ' + (minutes % 60 ? (minutes % 60) + ' min' : '');
+  }
+  function formatClockMinutes(minutes) {
+    minutes = Math.round(Number(minutes || 0)) % 1440;
+    if (minutes < 0) minutes += 1440;
+    return String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0');
+  }
+  function getNavigationTrail(fromVillage, toVillage) {
+    var fromKey = normalizeFerryPortName(fromVillage && fromVillage.name);
+    var toKey = normalizeFerryPortName(toVillage && toVillage.name);
+    var match = trailItems.find(function(entry) {
+      var start = normalizeFerryPortName(entry && entry.trail && entry.trail.start_name);
+      var end = normalizeFerryPortName(entry && entry.trail && entry.trail.end_name);
+      return (start === fromKey && end === toKey) || (start === toKey && end === fromKey);
+    });
+    if (!match) return null;
+    return { entry: match, reverse: normalizeFerryPortName(match.trail.start_name) !== fromKey };
+  }
+  function getNextNavigationFerries(fromVillage, toVillage) {
+    var grouped = {};
+    var now = getCurrentMinutesOfDay();
+    var fromKey = normalizeFerryPortName(fromVillage && fromVillage.name);
+    var toKey = normalizeFerryPortName(toVillage && toVillage.name);
+    var results = [];
+    var allResults = [];
+    ferryTimetableRows.forEach(function(row) {
+      var tripId;
+      if (!row || row.no_stop === true || row.no_stop === 'true' || !row.scheduled_time || !isFerryRowActiveForDate(row)) return;
+      tripId = String(row.trip_id || row.direction || 'trip');
+      if (!grouped[tripId]) grouped[tripId] = [];
+      grouped[tripId].push(row);
+    });
+    Object.keys(grouped).forEach(function(tripId) {
+      var stops = grouped[tripId].slice().sort(function(a, b) { return Number(a.stop_sequence || 0) - Number(b.stop_sequence || 0); });
+      var fromIndex = stops.findIndex(function(row) { return normalizeFerryPortName(row.port_name) === fromKey; });
+      var toIndex = stops.findIndex(function(row, index) { return index > fromIndex && normalizeFerryPortName(row.port_name) === toKey; });
+      var depart;
+      var arrive;
+      if (fromIndex < 0 || toIndex <= fromIndex) return;
+      depart = getMinutesFromTime(stops[fromIndex].scheduled_time);
+      arrive = getMinutesFromTime(stops[toIndex].scheduled_time);
+      if (depart === null || arrive === null) return;
+      if (arrive <= depart) arrive += 1440;
+      allResults.push({ tripId: tripId, departMin: depart, arriveMin: arrive, durationMin: arrive - depart, nextDay: false });
+      if (depart + 2 >= now) results.push({ tripId: tripId, departMin: depart, arriveMin: arrive, durationMin: arrive - depart, nextDay: false });
+    });
+    if (!results.length && allResults.length) {
+      results = allResults.map(function(item) { return Object.assign({}, item, { departMin: item.departMin + 1440, arriveMin: item.arriveMin + 1440, nextDay: true }); });
+    }
+    return results.sort(function(a, b) { return a.departMin - b.departMin; }).slice(0, 3);
+  }
+  function getItalyNavigationDateTime() {
+    var p = getItalyDateParts();
+    return { date: p.year + '-' + p.month + '-' + p.day, time: p.hour + ':' + p.minute };
+  }
+  function decodeValhallaPolyline6(encoded) {
+    var coordinates = [];
+    var index = 0;
+    var lat = 0;
+    var lng = 0;
+    var shift;
+    var result;
+    var byte;
+    var delta;
+    encoded = String(encoded || '');
+    while (index < encoded.length) {
+      shift = 0; result = 0;
+      do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 31) << shift; shift += 5; } while (byte >= 32 && index < encoded.length);
+      delta = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lat += delta;
+      shift = 0; result = 0;
+      do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 31) << shift; shift += 5; } while (byte >= 32 && index < encoded.length);
+      delta = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lng += delta;
+      coordinates.push([lat / 1000000, lng / 1000000]);
+    }
+    return coordinates;
+  }
+  async function fetchPedestrianNavigationRoute(fromCoords, toCoords) {
+    var request = {
+      locations: [{ lat: Number(fromCoords[0]), lon: Number(fromCoords[1]) }, { lat: Number(toCoords[0]), lon: Number(toCoords[1]) }],
+      costing: 'pedestrian',
+      units: 'kilometers',
+      directions_options: { units: 'kilometers' }
+    };
+    var url = 'https://valhalla1.openstreetmap.de/route?json=' + encodeURIComponent(JSON.stringify(request));
+    var response = await fetch(url, { cache: 'no-store' });
+    var payload;
+    var leg;
+    var summary;
+    var points;
+    if (!response.ok) throw new Error('Pedestrian routing HTTP ' + response.status);
+    payload = await response.json();
+    leg = payload && payload.trip && payload.trip.legs && payload.trip.legs[0];
+    summary = payload && payload.trip && payload.trip.summary;
+    points = leg && leg.shape ? decodeValhallaPolyline6(leg.shape) : [];
+    if (points.length < 2) throw new Error('Pedestrian route unavailable');
+    return { points: points, distanceMeters: Number(summary && summary.length || 0) * 1000, durationMinutes: Number(summary && summary.time || 0) / 60 };
+  }
+  async function resolvePedestrianNavigationRoute(option, fromCoords, force) {
+    var requestId;
+    var result;
+    var moved;
+    if (!option || option.mode !== 'walk' || !isValidCoords(fromCoords) || !navigationDestinationPOI) return;
+    moved = navigationLastPedestrianOrigin ? distanceMeters(navigationLastPedestrianOrigin, fromCoords) : Infinity;
+    if (!force && moved < 20 && Date.now() - navigationLastPedestrianRouteAt < 12000) return;
+    navigationLastPedestrianOrigin = fromCoords.slice();
+    navigationLastPedestrianRouteAt = Date.now();
+    requestId = ++navigationRouteRequestId;
+    try {
+      result = await fetchPedestrianNavigationRoute(fromCoords, navigationDestinationPOI.coords);
+      if (requestId !== navigationRouteRequestId || !navigationModeActive || navigationChoices.indexOf(option) === -1) return;
+      option.routePoints = result.points;
+      option.distanceMeters = result.distanceMeters;
+      option.time = formatNavigationMinutes(result.durationMinutes);
+      option.meta = formatNavigationDistance(result.distanceMeters) + ' · percorso pedonale OSM';
+      renderNavigationOptions();
+      if (navigationFollowing) centerNavigationOnUser();
+    } catch (error) {
+      if (requestId !== navigationRouteRequestId || !navigationModeActive) return;
+      option.routePoints = getLocalTourPath(fromCoords, navigationDestinationPOI.coords);
+      option.meta = formatNavigationDistance(option.distanceMeters || distanceMeters(fromCoords, navigationDestinationPOI.coords)) + ' · percorso indicativo (routing non disponibile)';
+      renderNavigationOptions();
+    }
+  }
+  function normalizeNavigationTrain(row) {
+    var departure = row && (row.departure || row.departureTime || row.scheduledDeparture || row.orarioPartenza || row.partenza);
+    var arrival = row && (row.arrival || row.arrivalTime || row.scheduledArrival || row.orarioArrivo || row.arrivo);
+    if (!departure) return null;
+    return {
+      departure: String(departure).slice(0, 5),
+      arrival: arrival ? String(arrival).slice(0, 5) : '',
+      route: row.route || row.service || row.name || (row.trainNumber ? 'Treno ' + row.trainNumber : 'Treno regionale'),
+      platform: row.platform || row.binario || row.departurePlatform || '',
+      delay: Number(row.delayMinutes != null ? row.delayMinutes : row.delay || 0),
+      cancelled: Boolean(row.cancelled || row.canceled || row.suppressed || row.soppressed)
+    };
+  }
+  async function fetchNavigationTrainChoice(requestId, fromVillage, toVillage) {
+    var dateTime = getItalyNavigationDateTime();
+    var url = new URL('https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/trains-realtime');
+    var payload;
+    var rows;
+    var trains;
+    url.searchParams.set('from', fromVillage.name);
+    url.searchParams.set('to', toVillage.name);
+    url.searchParams.set('date', dateTime.date);
+    url.searchParams.set('time', dateTime.time);
+    try {
+      payload = await fetch(url.toString(), { cache: 'no-store' }).then(function(response) { if (!response.ok) throw new Error('HTTP ' + response.status); return response.json(); });
+      if (requestId !== navigationTrainRequestId || !navigationModeActive) return;
+      rows = Array.isArray(payload) ? payload : (payload.trains || payload.departures || payload.services || payload.data || []);
+      trains = rows.map(normalizeNavigationTrain).filter(Boolean).filter(function(train) { return !train.cancelled; }).slice(0, 3);
+      navigationChoices = navigationChoices.filter(function(option) { return option.mode !== 'train' && option.mode !== 'train-loading'; });
+      navigationChoices.unshift({
+        mode: 'train',
+        icon: '🚆',
+        title: 'Treno',
+        time: trains.length ? ('Parte ' + trains[0].departure) : 'Orari live',
+        meta: trains.length
+          ? ((trains[0].arrival ? 'Arrivo ' + trains[0].arrival + ' · ' : '') + (trains[0].delay > 0 ? ('+' + trains[0].delay + ' min') : 'in orario') + (trains.length > 1 ? ' · poi ' + trains.slice(1).map(function(t) { return t.departure; }).join(', ') : ''))
+          : 'Nessuna partenza trovata ora. Apri comunque gli orari aggiornati.',
+        trains: trains,
+        origin: fromVillage,
+        destination: toVillage
+      });
+      renderNavigationOptions();
+    } catch (error) {
+      if (requestId !== navigationTrainRequestId || !navigationModeActive) return;
+      navigationChoices = navigationChoices.filter(function(option) { return option.mode !== 'train' && option.mode !== 'train-loading'; });
+      navigationChoices.unshift({ mode: 'train', icon: '🚆', title: 'Treno', time: 'Verifica orari', meta: 'Feed live momentaneamente non raggiungibile.', trains: [], origin: fromVillage, destination: toVillage });
+      renderNavigationOptions();
+    }
+  }
+  function renderNavigationOptions() {
+    if (!navigationOptions) return;
+    if (!navigationChoices.length) {
+      navigationOptions.innerHTML = '<div class="navigation-empty">Nessuna opzione disponibile con i dati attuali. Prova a cambiare il villaggio di partenza.</div>';
+      navigationSelectedOption = null;
+      if (navigationStart) navigationStart.disabled = true;
+      return;
+    }
+    if (!navigationSelectedOption || navigationChoices.indexOf(navigationSelectedOption) === -1) navigationSelectedOption = navigationChoices[0];
+    navigationOptions.innerHTML = navigationChoices.map(function(option, index) {
+      return '<button class="navigation-option' + (option === navigationSelectedOption ? ' active' : '') + '" type="button" data-navigation-option="' + index + '">' +
+        '<span class="navigation-option-icon">' + option.icon + '</span>' +
+        '<div class="navigation-option-title">' + escapeHTML(option.title) + '</div>' +
+        '<div class="navigation-option-time">' + escapeHTML(option.time) + '</div>' +
+        '<div class="navigation-option-meta">' + escapeHTML(option.meta) + '</div>' +
+      '</button>';
+    }).join('');
+    if (navigationStart) {
+      navigationStart.disabled = false;
+      navigationStart.textContent = 'Avvia percorso';
+    }
+    previewNavigationRoute(navigationSelectedOption);
+  }
+  function renderNavigationChoices() {
+    var origin = navigationOriginVillage || getPlaceForCoords(navigationOriginCoords);
+    var destination = navigationDestinationVillage;
+    var sameVillage;
+    var directDistance;
+    var walkingMinutes;
+    var walkOption;
+    var trailMatch;
+    var ferries;
+    var requestId;
+    if (!navigationModeActive || !navigationDestinationPOI || !origin || !destination) return;
+    navigationOriginVillage = origin;
+    sameVillage = origin.name === destination.name;
+    navigationChoices = [];
+    navigationSelectedOption = null;
+    if (sameVillage) {
+      directDistance = distanceMeters(navigationOriginCoords || origin.coords, navigationDestinationPOI.coords);
+      walkingMinutes = directDistance / 75;
+      walkOption = { mode: 'walk', icon: '🚶', title: 'A piedi', time: formatNavigationMinutes(walkingMinutes), meta: formatNavigationDistance(directDistance) + ' · calcolo percorso pedonale…', distanceMeters: directDistance, routePoints: getLocalTourPath(navigationOriginCoords || origin.coords, navigationDestinationPOI.coords) };
+      navigationChoices.push(walkOption);
+      if (navigationContext) navigationContext.textContent = 'Sei a ' + origin.name + ': puoi raggiungere il luogo a piedi.';
+      renderNavigationOptions();
+      resolvePedestrianNavigationRoute(walkOption, navigationOriginCoords || origin.coords, true);
+      return;
+    }
+    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello o sentiero.';
+    navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
+    trailMatch = getNavigationTrail(origin, destination);
+    if (trailMatch) navigationChoices.push({ mode: 'trail', icon: '🥾', title: trailMatch.entry.trail.name, time: formatTrailDuration(trailMatch.entry.trail.estimated_duration), meta: Number(trailMatch.entry.trail.distance_km || 0).toFixed(1) + ' km · ' + getDisplayDifficulty(trailMatch.entry.trail), trailMatch: trailMatch });
+    ferries = getNextNavigationFerries(origin, destination);
+    if (ferries.length) navigationChoices.push({ mode: 'ferry', icon: '⛴', title: 'Battello', time: (ferries[0].nextDay ? 'Domani ' : 'Parte ') + formatClockMinutes(ferries[0].departMin), meta: 'Arrivo ' + formatClockMinutes(ferries[0].arriveMin) + ' · ' + formatNavigationMinutes(ferries[0].durationMin) + (ferries.length > 1 ? ' · poi ' + ferries.slice(1).map(function(f) { return formatClockMinutes(f.departMin); }).join(', ') : ''), ferries: ferries, origin: origin, destination: destination });
+    renderNavigationOptions();
+    requestId = ++navigationTrainRequestId;
+    fetchNavigationTrainChoice(requestId, origin, destination);
+  }
+  function clearNavigationRoute() {
+    if (!navigationRouteLine || !map) return;
+    try { map.removeLayer(navigationRouteLine); } catch (error) {}
+    navigationRouteLine = null;
+  }
+  function getNavigationRoutePoints(option) {
+    var originCoords = navigationOriginCoords || (navigationOriginVillage && navigationOriginVillage.coords);
+    var destinationCoords = navigationDestinationPOI && navigationDestinationPOI.coords;
+    var match;
+    var trailPoints;
+    var fromPort;
+    var toPort;
+    var route;
+    if (!option || !isValidCoords(originCoords) || !isValidCoords(destinationCoords)) return [];
+    if (option.mode === 'walk') return option.routePoints && option.routePoints.length >= 2 ? option.routePoints.slice() : getLocalTourPath(originCoords, destinationCoords);
+    if (option.mode === 'trail') {
+      match = option.trailMatch;
+      trailPoints = match && match.entry ? match.entry.latLngs.slice() : [];
+      if (match && match.reverse) trailPoints.reverse();
+      if (!trailPoints.length) return [];
+      return getLocalTourPath(originCoords, trailPoints[0]).slice(0, -1).concat(trailPoints).concat(getLocalTourPath(trailPoints[trailPoints.length - 1], destinationCoords).slice(1));
+    }
+    if (option.mode === 'ferry') {
+      fromPort = getFerryPortByName(navigationOriginVillage.name) || { coords: navigationOriginVillage.coords };
+      toPort = getFerryPortByName(navigationDestinationVillage.name) || { coords: navigationDestinationVillage.coords };
+      route = getFerryRouteArc(fromPort, toPort);
+      return getLocalTourPath(originCoords, fromPort.coords).slice(0, -1).concat(route).concat(getLocalTourPath(toPort.coords, destinationCoords).slice(1));
+    }
+    if (option.mode === 'train') return getLocalTourPath(originCoords, navigationOriginVillage.coords).slice(0, -1).concat(getLocalTourPath(navigationOriginVillage.coords, navigationDestinationVillage.coords)).concat(getLocalTourPath(navigationDestinationVillage.coords, destinationCoords).slice(1));
+    return [];
+  }
+  function offsetNavigationPoint(coords, bearingDegrees, meters) {
+    var earthRadius = 6378137;
+    var angularDistance = Number(meters || 0) / earthRadius;
+    var bearing = Number(bearingDegrees || 0) * Math.PI / 180;
+    var lat1 = Number(coords[0]) * Math.PI / 180;
+    var lon1 = Number(coords[1]) * Math.PI / 180;
+    var lat2 = Math.asin(Math.sin(lat1) * Math.cos(angularDistance) + Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearing));
+    var lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat1), Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2));
+    return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
+  }
+  function getNavigationForwardBearing() {
+    var points = navigationSelectedOption ? getNavigationRoutePoints(navigationSelectedOption) : [];
+    var target = getCompassTargetOnRoute(userLocationLatLng, points);
+    if (target) return getBearingDegrees(userLocationLatLng, target);
+    if (currentUserHeading !== null) return currentUserHeading;
+    if (navigationDestinationPOI) return getBearingDegrees(userLocationLatLng, navigationDestinationPOI.coords);
+    return 0;
+  }
+  function centerNavigationOnUser() {
+    var forwardCenter;
+    if (!map || !navigationFollowing || !isValidCoords(userLocationLatLng)) return;
+    forwardCenter = offsetNavigationPoint(userLocationLatLng, getNavigationForwardBearing(), 42);
+    isProgrammaticMove = true;
+    map.setView(forwardCenter, 18.5, { animate: true });
+    window.setTimeout(function() { isProgrammaticMove = false; }, 420);
+  }
+  function previewNavigationRoute(option) {
+    var points = getNavigationRoutePoints(option);
+    var color = option && option.mode === 'ferry' ? '#00a8d6' : (option && option.mode === 'trail' && option.trailMatch ? getDisplayTrailColor(option.trailMatch.entry.trail) : '#ff7200');
+    var bounds;
+    clearNavigationRoute();
+    if (!map || !points || points.length < 2) return;
+    navigationRouteLine = L.polyline(points, { color: color, weight: 7, opacity: .96, dashArray: option && option.mode === 'train' ? '12, 10' : null, lineCap: 'round', lineJoin: 'round' }).addTo(map);
+    navigationRouteLine.bringToFront();
+    bounds = navigationRouteLine.getBounds();
+    if (navigationFollowing && isValidCoords(userLocationLatLng)) {
+      centerNavigationOnUser();
+      return;
+    }
+    if (bounds && bounds.isValid()) map.fitBounds(bounds, { paddingTopLeft: [28, 115], paddingBottomRight: [28, 340], maxZoom: 17, animate: true, duration: .7 });
+  }
+  function beginNavigationMode(poi, event) {
+    var fallbackOrigin;
+    if (!poi || !isValidPOI(poi)) return;
+    if (event) markExplicitPermissionGesture(event);
+    navigationDestinationPOI = poi;
+    navigationDestinationVillage = getPlaceForCoords(poi.coords);
+    navigationModeActive = true;
+    navigationFollowing = false;
+    pendingNavigationLocation = !isValidCoords(userLocationLatLng);
+    fallbackOrigin = getPlaceForCoords(isValidCoords(userLocationLatLng) ? userLocationLatLng : [map.getCenter().lat, map.getCenter().lng]) || places[0];
+    navigationOriginCoords = isValidCoords(userLocationLatLng) ? userLocationLatLng.slice() : fallbackOrigin.coords.slice();
+    navigationOriginVillage = getPlaceForCoords(navigationOriginCoords) || fallbackOrigin;
+    document.body.classList.add('navigation-mode');
+    document.body.classList.remove('navigation-active');
+    closePOICard(true);
+    if (navigationTitle) navigationTitle.textContent = poi.name || 'Destinazione';
+    if (navigationOriginSelect) {
+      navigationOriginSelect.innerHTML = places.map(function(place) { return '<option value="' + escapeHTML(place.name) + '">Partenza: ' + escapeHTML(place.name) + '</option>'; }).join('');
+      navigationOriginSelect.value = navigationOriginVillage.name;
+    }
+    if (navigationPlanner) {
+      navigationPlanner.style.display = 'block';
+      navigationPlanner.setAttribute('aria-hidden', 'false');
+      window.requestAnimationFrame(function() { navigationPlanner.classList.add('open'); });
+    }
+    updateFerryVisibilityForFilter();
+    updatePOIVisibility();
+    renderNavigationChoices();
+    if (pendingNavigationLocation) requestPlainUserLocation();
+  }
+  function selectNavigationOption(index) {
+    var option = navigationChoices[Number(index)];
+    if (!option || option.mode === 'train-loading') return;
+    navigationSelectedOption = option;
+    renderNavigationOptions();
+  }
+  function startSelectedNavigation() {
+    var option = navigationSelectedOption;
+    if (!option) return;
+    enableNavigationOrientation();
+    navigationFollowing = true;
+    document.body.classList.add('navigation-active');
+    if (navigationContext) navigationContext.textContent = option.title + ' verso ' + (navigationDestinationPOI.name || 'la destinazione') + '. Segui il percorso evidenziato.';
+    previewNavigationRoute(option);
+    if (!isValidCoords(userLocationLatLng)) { pendingNavigationLocation = true; requestPlainUserLocation(); }
+  }
+  function updateFollowingNavigation() {
+    var remaining;
+    if (!navigationFollowing || !navigationDestinationPOI || !isValidCoords(userLocationLatLng)) return;
+    remaining = distanceMeters(userLocationLatLng, navigationDestinationPOI.coords);
+    navigationOriginCoords = userLocationLatLng.slice();
+    if (navigationContext) navigationContext.textContent = remaining <= 35 ? 'Sei arrivato a ' + navigationDestinationPOI.name + '.' : navigationSelectedOption.title + ' · ' + formatNavigationDistance(remaining) + ' dalla destinazione';
+    centerNavigationOnUser();
+    if (navigationSelectedOption && navigationSelectedOption.mode === 'walk') resolvePedestrianNavigationRoute(navigationSelectedOption, userLocationLatLng, false);
+  }
+  function closeNavigationMode() {
+    navigationTrainRequestId += 1;
+    navigationRouteRequestId += 1;
+    navigationModeActive = false;
+    navigationFollowing = false;
+    pendingNavigationLocation = false;
+    navigationDestinationPOI = null;
+    navigationSelectedOption = null;
+    navigationChoices = [];
+    navigationLastPedestrianOrigin = null;
+    navigationLastPedestrianRouteAt = 0;
+    disableNavigationOrientation();
+    clearNavigationRoute();
+    document.body.classList.remove('navigation-mode', 'navigation-active');
+    if (navigationPlanner) {
+      navigationPlanner.classList.remove('open');
+      navigationPlanner.setAttribute('aria-hidden', 'true');
+      window.setTimeout(function() { if (!navigationModeActive) navigationPlanner.style.display = 'none'; }, 260);
+    }
+    updateFerryVisibilityForFilter();
+    updatePOIVisibility();
+  }
   function safeParseJSON(value, fallback) {
     try {
       return JSON.parse(value);
@@ -5060,6 +5579,43 @@
         }
       });
     }
+
+    if (poiDirections) {
+      poiDirections.addEventListener('click', function(event) {
+        beginNavigationMode(currentPOI, event);
+      });
+    }
+
+    if (navigationOriginSelect) {
+      navigationOriginSelect.addEventListener('change', function() {
+        var place = places.find(function(item) { return item.name === navigationOriginSelect.value; });
+        if (!place) return;
+        pendingNavigationLocation = false;
+        navigationOriginVillage = place;
+        navigationOriginCoords = place.coords.slice();
+        renderNavigationChoices();
+      });
+    }
+
+    if (navigationLocate) {
+      navigationLocate.addEventListener('click', function(event) {
+        markExplicitPermissionGesture(event);
+        pendingNavigationLocation = true;
+        if (navigationContext) navigationContext.textContent = 'Ricerca della tua posizione…';
+        requestPlainUserLocation();
+      });
+    }
+
+    if (navigationOptions) {
+      navigationOptions.addEventListener('click', function(event) {
+        var button = event.target.closest('[data-navigation-option]');
+        if (button) selectNavigationOption(button.getAttribute('data-navigation-option'));
+      });
+    }
+
+    if (navigationStart) navigationStart.addEventListener('click', startSelectedNavigation);
+    if (navigationClose) navigationClose.addEventListener('click', closeNavigationMode);
+    if (navigationStop) navigationStop.addEventListener('click', closeNavigationMode);
 
     if (poiClose) {
       poiClose.addEventListener('click', function () {
