@@ -1765,6 +1765,7 @@
     };
 
     observeActionbarRoot();
+    window.setTimeout(notifyActionbarReady, 180);
     await loadGlobalActionbarPartial();
 
     if (typeof window.FTG_MOUNT_GLOBAL_ACTIONBAR === 'function') {
@@ -2795,7 +2796,7 @@
   function hideCard(manual) {}
   function renderTourLocationRequestPanel() {}
   function refreshMapLoadingState() {
-    if (poiDataLoaded) {
+    if (mapFirstFrameReady || poiDataLoaded) {
       if (window.__ftgHideBootStatus) window.__ftgHideBootStatus();
       return;
     }
@@ -4059,7 +4060,7 @@
     }
   }
   async function fetchLocalPOIsAsset() {
-    var candidates = ['data/pois.json', './data/pois.json', '/data/pois.json'];
+    var candidates = ['data/pois-lite.json', './data/pois-lite.json', '/data/pois-lite.json'];
     var i;
     var response;
     var data;
@@ -4426,6 +4427,13 @@
       localRows = readLocalPOIs();
       mergeCachedRows(localRows);
 
+      if (SUPABASE_READY && supabaseClient) {
+        localAssetPromise = fetchLocalPOIsAsset().then(filterUsableCachedPOIRows).catch(function() { return []; });
+        firstRemotePromise = fetchRemotePOIPage(0, remotePageSize).catch(function(error) {
+          return { data: [], error: error };
+        });
+      }
+
       idbRows = await readFullPOICacheFromIDB();
       if (generation !== poiLoadGeneration) return;
       mergeCachedRows(idbRows);
@@ -4446,11 +4454,6 @@
         await loadBlogPosts();
         return;
       }
-
-      localAssetPromise = fetchLocalPOIsAsset().then(filterUsableCachedPOIRows).catch(function() { return []; });
-      firstRemotePromise = fetchRemotePOIPage(0, remotePageSize).catch(function(error) {
-        return { data: [], error: error };
-      });
 
       if (!poiMarkers.length) {
         firstAvailable = await Promise.race([
@@ -4706,6 +4709,7 @@
   var poiDataLoaded = false;
   var poiCoordsReady = false;
   var poiLoadGeneration = 0;
+  var mapFirstFrameReady = false;
   function renderSearchSuggestions(value) {
     var query = String(value || '').trim();
     if (!searchResults) return;
@@ -4763,6 +4767,7 @@
     function markBaseMapReady() {
       if (baseMapReadyHandled) return;
       baseMapReadyHandled = true;
+      mapFirstFrameReady = true;
       refreshMapLoadingState();
     }
 
@@ -5106,9 +5111,12 @@
     initMap();
     applyBaseMapMode(getStoredMapMode(), true);
     createCityMarkers(!isMapPreviewMode);
-    preloadImages();
-    updateWeather(44.12, 9.71);
-    if (!isMapPreviewMode) loadVillageEvents();
+    window.setTimeout(function() { updateWeather(44.12, 9.71); }, 700);
+    if (!isMapPreviewMode) window.setTimeout(loadVillageEvents, 1400);
+    window.setTimeout(function() {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(preloadImages, { timeout: 2400 });
+      else preloadImages();
+    }, 1600);
     if (!isMapPreviewMode) {
       setupEvents();
       setUserLocationButtonState('idle');
