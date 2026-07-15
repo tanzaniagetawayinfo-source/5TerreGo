@@ -261,7 +261,9 @@ const ANON_KEY = "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa";
 const CINQUE_TERRE_CENTER = [44.1265, 9.7092];
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const OSRM_FOOT_URL = "https://router.project-osrm.org/route/v1/foot";
-const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAxMzViYzBhMWYzZTQ0NTNiOTAzM2M3NGRhOWFkZjNjIiwiaCI6Im11cm11cjY0In0=";
+// Keep third-party routing secrets out of the public editor. The editor uses
+// the OpenStreetMap/OSRM fallbacks unless routing is proxied server-side.
+const ORS_API_KEY = "";
 const ORS_HIKING_URL = "https://api.openrouteservice.org/v2/directions/foot-hiking/geojson";
 const TRAILS_TABLE = "trails";
 const FIXED_CURRENCY = "EUR";

@@ -4005,7 +4005,42 @@
     window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); } }, 80); }
   function flyToWithTopOffset(coords, zoom, duration) { var targetZoom, point, offsetY, targetPoint; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); offsetY = Math.round(Math.min(window.innerHeight * 0.18, 150)); point = map.project(coords, targetZoom); targetPoint = L.point(point.x, point.y + offsetY); isProgrammaticMove = true; if (isIOSDevice()) map.setView(map.unproject(targetPoint, targetZoom), targetZoom, { animate: true }); else map.flyTo(map.unproject(targetPoint, targetZoom), targetZoom, { duration: Number(duration || 0.9) }); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
-  async function loadTrails() { var response, rows; if (!trailsLayer) return; trailsLayer.clearLayers(); trailItems = []; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('trails').select('*').order('created_at', { ascending: false }); if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; } rows = response.data || []; rows.map(normalizeTrail).forEach(function (trail) { var latLngs = getTrailLatLngs(trail), startPoint, marker; if (!latLngs || latLngs.length < 2) return; startPoint = latLngs[0]; marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, pane: 'trailPane', icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) }); marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); }); marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 }); trailItems.push({ trail: trail, latLngs: latLngs, marker: marker }); }); updateTrailWidths(); renderBottomRailCards(); }
+  async function loadTrails() {
+    var response, rows;
+    if (!trailsLayer) return;
+    trailsLayer.clearLayers();
+    trailItems = [];
+    if (!SUPABASE_READY || !supabaseClient) return;
+    response = await supabaseClient.from('trails')
+      .select('id,name,description,difficulty,estimated_duration,shoe_type,importance,price_amount,start_name,end_name,distance_km,elevation_gain_m,elevation_loss_m,elevation_profile,points,route_geojson,created_at')
+      .order('created_at', { ascending: false });
+    if (response.error) { console.warn('Supabase trails load failed:', response.error.message); return; }
+    rows = response.data || [];
+    rows.map(normalizeTrail).forEach(function (trail) {
+      var latLngs = getTrailLatLngs(trail), startPoint, marker;
+      if (!latLngs || latLngs.length < 2) return;
+      startPoint = latLngs[0];
+      marker = L.marker(startPoint, { title: trail.name, zIndexOffset: 2500, pane: 'trailPane', icon: L.divIcon({ className: 'custom-trail-start', html: '<div class="trail-start-label"><img src="' + getGithubAssetUrl('sentiero.png') + '" alt="Trail"></div>', iconSize: [40, 40], iconAnchor: [20, 20] }) });
+      marker.on('click', function (event) { if (event && event.originalEvent) { L.DomEvent.stopPropagation(event.originalEvent); L.DomEvent.preventDefault(event.originalEvent); } showTrailCard(trail); });
+      marker.bindTooltip(trail.name, { sticky: true, direction: 'top', opacity: 0.9 });
+      trailItems.push({ trail: trail, latLngs: latLngs, marker: marker });
+    });
+    updateTrailWidths();
+    renderBottomRailCards();
+    focusRequestedTrailFromURL();
+  }
+  function focusRequestedTrailFromURL() {
+    var requested, item;
+    try { requested = new URLSearchParams(window.location.search).get('trail'); } catch (error) { requested = ''; }
+    if (!requested) return;
+    item = trailItems.find(function (entry) { return String(entry.trail && entry.trail.id || '') === String(requested); });
+    if (!item || !item.trail) return;
+    currentMapFilter = 'trails';
+    applyMapFilterUI(currentMapFilter);
+    renderBottomRailCards();
+    if (item.latLngs && item.latLngs.length) flyToWithTopOffset(item.latLngs[0], 15, 0.8);
+    showTrailCard(item.trail);
+  }
   function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
   function createSeaArc(p1, p2, segments) { var lat1 = p1[0], lng1 = p1[1], lat2 = p2[0], lng2 = p2[1], midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2, distance = Math.abs(lng2 - lng1), offset = 0.018 + distance * 0.45, control = [midLat - 0.003, midLng - offset], points = [], i, t, lat, lng; for (i = 0; i <= segments; i += 1) { t = i / segments; lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2; lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2; points.push([lat, lng]); } return points; }
   function normalizeFerryPortName(value) { var text = String(value || '').toLowerCase(); try { text = text.normalize('NFD'); } catch (error) {} text = text.replace(/[̀-ͯ]/g, ''); text = text.replace(/[^a-z0-9]+/g, ' ').trim(); return text; }

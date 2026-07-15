@@ -34,6 +34,10 @@ for (const file of await htmlFiles()) {
       errors.push(`${relative}: public frontend queries private POI emails`);
     }
   }
+
+  if (/const\s+ORS_API_KEY\s*=\s*["'][^"']{20,}["']/i.test(source)) {
+    errors.push(`${relative}: exposes a third-party routing key in public HTML`);
+  }
 }
 
 const forbiddenSnapshot = path.join(root, 'data', 'pois.json');
