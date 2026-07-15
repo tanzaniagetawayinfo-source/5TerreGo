@@ -21,6 +21,8 @@ button,input,select,textarea{font-family:inherit}
 .title{font-size:18px;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .subtitle{font-size:12px;color:rgba(255,255,255,.62);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .add-top{height:42px;border-radius:14px;border:none;background:#fff;color:#000;font-weight:900;padding:0 16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);white-space:nowrap}
+.import-top{height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-weight:900;padding:0 13px;cursor:pointer;white-space:nowrap}
+.import-top:disabled{opacity:.55;cursor:wait}
 .auth-warning{display:none;margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(255,59,48,.14);border:1px solid rgba(255,59,48,.32);color:#ffb4ae;font-size:12px;line-height:1.35}
 .auth-warning.is-visible{display:block}
 .dashboard{position:absolute;inset:0;overflow:auto;padding:0 14px calc(18px + env(safe-area-inset-bottom));background:#05070a}
@@ -95,6 +97,7 @@ select option{color:#111}
         <div class="title">Sentieri</div>
         <div id="userLine" class="subtitle">Controllo autorizzazione...</div>
       </div>
+      <button id="importOfficialBtn" class="import-top" type="button">Importa ufficiali</button>
       <button id="addTrailTopBtn" class="add-top" type="button">Aggiungi sentiero</button>
     </div>
     <div id="authWarning" class="auth-warning">Questa pagina è riservata agli utenti autorizzati.</div>
@@ -967,6 +970,54 @@ function formatTrailPrice(amount){
   if(!value) return "Free";
   return value.toFixed(value % 1 === 0 ? 0 : 2) + " EUR";
 }
+
+const OFFICIAL_TRAIL_COLUMNS = [
+  "name", "description", "difficulty", "estimated_duration", "shoe_type", "importance",
+  "price_amount", "price_currency", "is_free", "start_name", "end_name", "distance_km",
+  "elevation_gain_m", "elevation_loss_m", "elevation_profile", "points", "route_geojson"
+];
+
+function officialTrailPayload(trail){
+  const payload = {};
+  OFFICIAL_TRAIL_COLUMNS.forEach(function(key){ if(Object.prototype.hasOwnProperty.call(trail, key)) payload[key] = trail[key]; });
+  payload.owner_email = "5terrego.info@gmail.com";
+  return payload;
+}
+
+async function importOfficialTrails(){
+  const button = document.getElementById("importOfficialBtn");
+  if(!checkAuthorization()){ alert("You must be logged in as an authorized user to import trails."); return; }
+  try{
+    button.disabled = true;
+    button.innerText = "Importazione...";
+    listStatusEl.innerText = "Caricamento dataset ufficiale...";
+    const datasetResponse = await fetch("data/official-trails.json", { cache:"no-store" });
+    if(!datasetResponse.ok) throw new Error("Dataset non disponibile: HTTP " + datasetResponse.status);
+    const dataset = await datasetResponse.json();
+    const officialTrails = Array.isArray(dataset.trails) ? dataset.trails : [];
+    if(!officialTrails.length) throw new Error("Il dataset non contiene sentieri.");
+    for(const trail of officialTrails){
+      const existing = trails.find(function(item){ return String(item.name || "").trim().toLowerCase() === String(trail.name || "").trim().toLowerCase(); });
+      const url = existing
+        ? SUPABASE_URL + "/rest/v1/" + TRAILS_TABLE + "?id=eq." + encodeURIComponent(existing.id)
+        : SUPABASE_URL + "/rest/v1/" + TRAILS_TABLE;
+      const response = await fetch(url, {
+        method:existing ? "PATCH" : "POST",
+        headers:buildHeaders({ useUserToken:true, extra:{ Prefer:"return=minimal" } }),
+        body:JSON.stringify(officialTrailPayload(trail))
+      });
+      await parseResponse(response);
+    }
+    await loadTrails();
+    listStatusEl.innerText = officialTrails.length + " sentieri ufficiali importati o aggiornati.";
+  }catch(err){
+    console.error("IMPORT OFFICIAL TRAILS ERROR", err);
+    listStatusEl.innerText = "Errore importazione: " + err.message;
+  }finally{
+    button.disabled = false;
+    button.innerText = "Importa ufficiali";
+  }
+}
 function makeMetaPill(text){
   const pill = document.createElement("div");
   pill.className = "meta-pill";
@@ -1073,6 +1124,7 @@ window.addEventListener("load", async function(){
 });
 
 document.getElementById("addTrailTopBtn").addEventListener("click", function(){ openEditor("new"); });
+document.getElementById("importOfficialBtn").addEventListener("click", importOfficialTrails);
 document.getElementById("closeEditorBtn").addEventListener("click", closeEditor);
 document.getElementById("saveBtn").addEventListener("click", saveTrail);
 document.getElementById("saveTopBtn").addEventListener("click", saveTrail);

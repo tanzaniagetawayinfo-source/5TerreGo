@@ -51,8 +51,27 @@ for (const [index, row] of lite.entries()) {
   if (unknown.length) errors.push(`data/pois-lite.json row ${index}: forbidden fields ${unknown.join(', ')}`);
 }
 
+const officialTrailsPath = path.join(root, 'data', 'official-trails.json');
+const officialDataset = JSON.parse(await readFile(officialTrailsPath, 'utf8'));
+const officialTrails = Array.isArray(officialDataset.trails) ? officialDataset.trails : [];
+if (officialTrails.length < 3) errors.push('data/official-trails.json must contain at least 3 official trails');
+for (const [index, trail] of officialTrails.entries()) {
+  const points = Array.isArray(trail.points) ? trail.points : [];
+  const geometry = trail.route_geojson?.geometry;
+  if (!/^\d{3}(?:-\d)?\b/.test(String(trail.name || ''))) errors.push(`official trail ${index}: missing official route number`);
+  if (!String(trail.official_url || '').startsWith('https://www.parconazionale5terre.it/')) errors.push(`official trail ${index}: invalid official source`);
+  if (points.length < 50 || geometry?.type !== 'LineString' || geometry.coordinates?.length !== points.length) errors.push(`official trail ${index}: incomplete route geometry`);
+  if (Object.prototype.hasOwnProperty.call(trail, 'owner_email')) errors.push(`official trail ${index}: owner email must not be published in the dataset`);
+  for (const point of points) {
+    if (!(point.lat >= 44.05 && point.lat <= 44.2 && point.lng >= 9.55 && point.lng <= 9.85)) {
+      errors.push(`official trail ${index}: coordinate outside Cinque Terre bounds`);
+      break;
+    }
+  }
+}
+
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log(`Site checks passed: ${lite.length} safe POIs and no broken local links.`);
+console.log(`Site checks passed: ${lite.length} safe POIs, ${officialTrails.length} official trails and no broken local links.`);
