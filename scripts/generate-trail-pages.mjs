@@ -1,0 +1,66 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+
+const root = path.resolve(import.meta.dirname, '..');
+const source = await readFile(path.join(root, 'sentieri.html'), 'utf8');
+const url = process.env.SUPABASE_URL || source.match(/var SUPABASE_URL='([^']+)'/)?.[1];
+const key = process.env.SUPABASE_ANON_KEY || source.match(/var SUPABASE_KEY='([^']+)'/)?.[1];
+if (!url || !key) throw new Error('Supabase public configuration not found');
+
+const columns = 'id,created_at,name,description,difficulty,estimated_duration,shoe_type,importance,price_amount,is_free,start_name,end_name,distance_km,elevation_gain_m,elevation_loss_m,elevation_profile';
+const response = await fetch(`${url}/rest/v1/trails?select=${columns}&order=importance.desc`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+if (!response.ok) throw new Error(`Trails request failed: HTTP ${response.status}`);
+const trails = await response.json();
+
+const labels = { easy: 'Facile', medium: 'Media', hard: 'Difficile', expert: 'Esperti' };
+const colors = { easy: '#138a64', medium: '#f2c94c', hard: '#f97316', expert: '#d92d20' };
+const shoes = { sneakers: 'scarpe comode con buona aderenza', trail: 'scarpe da trail running', hiking: 'scarpe da trekking', boots: 'scarponi da trekking' };
+
+function escapeHTML(value = '') { return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function slugify(value = '') { return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+function level(trail) {
+  const saved = String(trail.difficulty || '').toLowerCase();
+  if (labels[saved]) return saved;
+  const km = Number(trail.distance_km || 0), gain = Number(trail.elevation_gain_m || 0), ratio = km ? gain / km : 0;
+  if (km >= 13 || gain >= 850) return 'expert';
+  if (km >= 8 || gain >= 450 || ratio >= 120) return 'hard';
+  if (km >= 4 || gain >= 180 || ratio >= 65) return 'medium';
+  return 'easy';
+}
+function code(trail) { return String(trail.name || '').match(/^([0-9]{3}(?:-[0-9])?)/)?.[1] || 'Sentiero'; }
+function access(trail) { const amount = Number(trail.price_amount || 0); return amount ? `${amount.toFixed(amount % 1 ? 2 : 0)} EUR` : trail.is_free === false ? 'Cinque Terre Card / verifica accesso' : 'Libero'; }
+function elevationSVG(trail) {
+  const profile = Array.isArray(trail.elevation_profile) ? trail.elevation_profile : [];
+  if (profile.length < 2) return '';
+  const width = 760, height = 210, pad = 22;
+  const distances = profile.map((p) => Number(p.distanceKm || 0));
+  const elevations = profile.map((p) => Number(p.elevation || 0));
+  const maxD = Math.max(...distances, 0.001), minE = Math.min(...elevations), maxE = Math.max(...elevations), range = Math.max(1, maxE - minE);
+  const points = profile.map((p, i) => `${(pad + distances[i] / maxD * (width - pad * 2)).toFixed(1)},${(height - pad - (elevations[i] - minE) / range * (height - pad * 2)).toFixed(1)}`).join(' ');
+  return `<section class="profile"><div class="section-label">Profilo altimetrico</div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Profilo altimetrico da ${Math.round(minE)} a ${Math.round(maxE)} metri"><polyline points="${points}" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><text x="${pad}" y="${height - 3}">${Math.round(minE)} m</text><text x="${width - pad}" y="${height - 3}" text-anchor="end">${Math.round(maxE)} m</text></svg></section>`;
+}
+function relatedMarkup(trail) {
+  const related = trails.filter((candidate) => candidate.id !== trail.id).sort((a, b) => (a.start_name === trail.start_name ? -1 : 0) - (b.start_name === trail.start_name ? -1 : 0)).slice(0, 4);
+  return `<section class="related"><div class="section-label">Altri sentieri</div><div class="related-track">${related.map((item) => { const itemLevel = level(item); return `<a class="related-card" style="--accent:${colors[itemLevel]}" href="/trails/${slugify(item.name)}.html"><small>${escapeHTML(code(item))} · ${escapeHTML(labels[itemLevel])}</small><strong>${escapeHTML(item.name)}</strong><span>${Number(item.distance_km || 0).toFixed(1)} km · ${escapeHTML(item.estimated_duration || '—')}</span></a>`; }).join('')}</div></section>`;
+}
+function page(trail) {
+  const trailLevel = level(trail), accent = colors[trailLevel], title = escapeHTML(trail.name), description = escapeHTML(trail.description || `Sentiero da ${trail.start_name} a ${trail.end_name} nelle Cinque Terre.`), slug = slugify(trail.name);
+  const canonical = `https://www.5terrego.com/trails/${slug}.html`;
+  const structured = JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: trail.name, description: trail.description || '', url: canonical, isPartOf: { '@type': 'WebSite', name: '5TerreGo', url: 'https://www.5terrego.com/' }, about: { '@type': 'Thing', name: trail.name } }).replace(/</g, '\\u003c');
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${title} | Sentieri Cinque Terre | 5TerreGo</title><meta name="description" content="${description.slice(0, 158)}"><link rel="canonical" href="${canonical}"><meta property="og:type" content="article"><meta property="og:title" content="${title}"><meta property="og:description" content="${description.slice(0, 180)}"><meta property="og:url" content="${canonical}"><meta name="theme-color" content="${accent}"><link rel="icon" href="/app.png"><script type="application/ld+json">${structured}</script><style>
+:root{--ink:#101828;--muted:#667085;--paper:#f7f4ed;--line:#e5e7eb;--accent:${accent}}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.top{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 max(18px,calc((100vw - 1080px)/2));border-bottom:1px solid var(--line);background:rgba(247,244,237,.94);position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}.logo{font-size:24px;font-weight:950;letter-spacing:-.06em;text-decoration:none}.logo b{color:#ff6b00}.back{font-weight:850;text-decoration:none}.hero{max-width:1080px;margin:42px auto 0;padding:0 22px}.tag{display:inline-flex;padding:9px 13px;border-radius:999px;background:var(--accent);color:${trailLevel === 'medium' ? '#382d00' : '#fff'};font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.hero h1{max-width:880px;margin:18px 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,7vw,78px);line-height:.94;letter-spacing:-.055em}.route{color:var(--accent);font-size:20px;font-weight:900}.dek{max-width:790px;margin:24px 0 0;color:#475467;font-size:19px;line-height:1.65}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:1080px;margin:34px auto 0;padding:0 22px}.metric{padding:17px;border-radius:18px;background:#fff;border:1px solid var(--line)}.metric small{display:block;color:#98a2b3;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.metric strong{display:block;margin-top:6px;font-size:18px}.content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:22px;max-width:1080px;margin:24px auto 55px;padding:0 22px}.main,.side{padding:clamp(22px,4vw,36px);border-radius:28px;background:#fff;border:1px solid var(--line)}.section-label{margin-bottom:12px;color:var(--accent);font-size:11px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}.main p{margin:0;color:#475467;font-family:Georgia,"Times New Roman",serif;font-size:20px;line-height:1.75}.profile{margin-top:30px;color:var(--accent)}.profile svg{display:block;width:100%;height:auto;padding:12px;border-radius:18px;background:#f7f8fa}.profile text{fill:#667085;font:700 13px Inter,sans-serif}.side h2{margin:0 0 14px;font-size:25px}.side ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}.side li{padding:13px;border-radius:14px;background:#f7f8fa;color:#475467;line-height:1.45}.cta{display:flex;justify-content:center;align-items:center;min-height:52px;margin-top:14px;border-radius:15px;background:var(--accent);color:${trailLevel === 'medium' ? '#382d00' : '#fff'};font-weight:900;text-decoration:none}.cta.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.related{max-width:1080px;margin:0 auto 80px;padding:32px 22px 0;border-top:1px solid var(--line)}.related-track{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(245px,31%);gap:14px;overflow-x:auto;padding-bottom:16px;scroll-snap-type:x mandatory}.related-card{display:flex;flex-direction:column;min-height:185px;padding:20px;border-top:7px solid var(--accent);border-radius:20px;background:#fff;color:var(--ink);text-decoration:none;scroll-snap-align:start}.related-card small{color:var(--accent);font-weight:950;text-transform:uppercase}.related-card strong{margin:16px 0 10px;font-family:Georgia,"Times New Roman",serif;font-size:23px;line-height:1.05}.related-card span{margin-top:auto;color:var(--muted);font-size:13px;font-weight:750}@media(max-width:760px){.top{height:64px}.hero{margin-top:24px;padding:0 16px}.hero h1{font-size:clamp(40px,12vw,58px)}.route{font-size:17px}.dek{font-size:17px}.metrics{grid-template-columns:repeat(2,1fr);padding:0 16px}.content{grid-template-columns:1fr;padding:0 16px}.main,.side{border-radius:23px}.related{padding:26px 16px 0}.related-track{grid-auto-columns:minmax(235px,82%)}}
+</style></head><body><header class="top"><a class="logo" href="/">5Terre<b>Go</b>.com</a><a class="back" href="/sentieri.html">← Tutti i sentieri</a></header><main><section class="hero"><span class="tag">${escapeHTML(code(trail))} · ${escapeHTML(labels[trailLevel])}</span><h1>${title}</h1><p class="dek">${description}</p></section><section class="metrics"><div class="metric"><small>Distanza</small><strong>${Number(trail.distance_km || 0).toFixed(2)} km</strong></div><div class="metric"><small>Durata</small><strong>${escapeHTML(trail.estimated_duration || '—')}</strong></div><div class="metric"><small>Dislivello</small><strong>+${Math.round(Number(trail.elevation_gain_m || 0))} / −${Math.round(Number(trail.elevation_loss_m || 0))} m</strong></div><div class="metric"><small>Scarpe</small><strong>${escapeHTML(shoes[String(trail.shoe_type || '').toLowerCase()] || 'scarpe da trekking')}</strong></div></section><section class="content"><article class="main"><div class="section-label">Il percorso</div><p>${description}</p>${elevationSVG(trail)}</article><aside class="side"><h2>Prima di partire</h2><ul><li><strong>Accesso:</strong> ${escapeHTML(access(trail))}</li><li>Controlla sempre aperture, ordinanze e condizioni meteo.</li><li>Indossa ${escapeHTML(shoes[String(trail.shoe_type || '').toLowerCase()] || 'scarpe da trekking')}.</li></ul><a class="cta" href="/map.html?trail=${encodeURIComponent(trail.id)}">Apri il percorso sulla mappa</a><a class="cta secondary" href="https://www.parconazionale5terre.it/sentieri-outdoor.php" target="_blank" rel="noopener noreferrer">Stato ufficiale dei sentieri ↗</a></aside></section>${relatedMarkup(trail)}</main></body></html>`;
+}
+
+const output = path.join(root, 'trails');
+await mkdir(output, { recursive: true });
+await Promise.all(trails.map((trail) => writeFile(path.join(output, `${slugify(trail.name)}.html`), page(trail), 'utf8')));
+await writeFile(path.join(output, 'index.html'), '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/sentieri.html"><link rel="canonical" href="https://www.5terrego.com/sentieri.html"><title>5TerreGo Trails</title>', 'utf8');
+
+const sitemapPath = path.join(root, 'sitemap.xml');
+let sitemap = await readFile(sitemapPath, 'utf8');
+sitemap = sitemap.replace(/^\s*<url><loc>https:\/\/www\.5terrego\.com\/trails\/.*?<\/url>\s*$/gm, '');
+const entries = trails.map((trail) => `  <url><loc>https://www.5terrego.com/trails/${slugify(trail.name)}.html</loc></url>`).join('\n');
+sitemap = sitemap.replace('</urlset>', `${entries}\n</urlset>`).replace(/\n{3,}/g, '\n\n');
+await writeFile(sitemapPath, sitemap, 'utf8');
+console.log(`Generated ${trails.length} SEO trail pages.`);
