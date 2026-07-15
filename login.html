@@ -377,7 +377,7 @@ select{appearance:none;-webkit-appearance:none;}
           <label for="password">Password</label>
           <div class="input-shell">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
-            <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password">
+            <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" minlength="12">
             <button id="password-toggle" class="ghost-icon-btn" type="button" aria-label="Mostra o nascondi password">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
@@ -388,7 +388,7 @@ select{appearance:none;-webkit-appearance:none;}
           <label for="repeat">Repeat password</label>
           <div class="input-shell">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
-            <input id="repeat" type="password" placeholder="Repeat your password" autocomplete="new-password">
+            <input id="repeat" type="password" placeholder="Repeat your password" autocomplete="new-password" minlength="12">
           </div>
         </div>
 
@@ -680,8 +680,8 @@ select{appearance:none;-webkit-appearance:none;}
       setStatus('Inserisci nome utente.');
       return;
     }
-    if(p.length < 6){
-      setStatus('La password deve avere almeno 6 caratteri.');
+    if(p.length < 12){
+      setStatus('La password deve avere almeno 12 caratteri.');
       return;
     }
     if(p !== r){
@@ -787,46 +787,21 @@ select{appearance:none;-webkit-appearance:none;}
     const session = await getReliableSession();
     const token = session && session.access_token ? session.access_token : '';
     const userEmail = session && session.user && session.user.email ? session.user.email.trim().toLowerCase() : '';
-    if(!userEmail) return false;
-
-    if(token){
-      try{
-        const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'apikey':SUPABASE_ANON_KEY,
-            'Authorization':'Bearer ' + token
-          },
-          body:JSON.stringify({ action:'get_partner_pois' })
-        });
-
-        if(res.ok){
-          const payload = await res.json();
-          if(payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0) return true;
-        }
-      } catch(_err){}
-    }
+    if(!userEmail || !token) return false;
 
     try{
-      const result = await client.from('pois').select('id,emails').not('emails','is',null);
-      if(!result.error && Array.isArray(result.data)){
-        const found = result.data.some(function(poi){ return parseEmailsList(poi.emails).includes(userEmail); });
-        if(found) return true;
-      }
-    } catch(_err){}
-
-    try{
-      const restRes = await fetch(SUPABASE_URL + '/rest/v1/pois?select=id,emails&emails=not.is.null', {
-        method:'GET',
-        headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + SUPABASE_ANON_KEY }
+      const res = await fetch(PARTNER_BACKEND_ENDPOINT, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'apikey':SUPABASE_ANON_KEY,
+          'Authorization':'Bearer ' + token
+        },
+        body:JSON.stringify({ action:'get_partner_pois' })
       });
-
-      if(restRes.ok){
-        const rows = await restRes.json();
-        if(Array.isArray(rows)){
-          return rows.some(function(poi){ return parseEmailsList(poi.emails).includes(userEmail); });
-        }
+      if(res.ok){
+        const payload = await res.json();
+        return Boolean(payload && payload.ok === true && Array.isArray(payload.pois) && payload.pois.length > 0);
       }
     } catch(_err){}
 

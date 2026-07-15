@@ -63,7 +63,7 @@
       <p>Alcune funzioni del sito possono memorizzare preferenze locali nel browser, ad esempio lingua selezionata, contenuti salvati o stati di navigazione. Questi dati possono essere conservati direttamente nel tuo browser e non necessariamente come cookie tradizionali.</p>
 
       <h2>4. Analytics e misurazione</h2>
-      <p>5TerreGo.com può usare strumenti di analisi e misurazione per capire come viene utilizzato il sito, quali pagine funzionano meglio, quali errori vanno corretti e come migliorare performance e usabilità. Questi strumenti possono utilizzare cookie o tecnologie equivalenti, direttamente o tramite fornitori tecnici.</p>
+      <p>Solo dopo il tuo consenso, 5TerreGo invia al proprio servizio analytics ospitato su Supabase il percorso della pagina, il titolo e l'orario della visita. Il servizio può inoltre registrare provenienza, paese indicativo e un identificatore derivato dall'indirizzo IP mediante hashing. Non utilizziamo questa misurazione per mostrare pubblicità personalizzata. Puoi rifiutare senza perdere le funzioni essenziali del sito.</p>
 
       <h2>5. Servizi di terze parti</h2>
       <p>Alcune pagine o funzioni possono collegarsi a servizi esterni, per esempio fornitori di database, mappe, meteo, trasporti, email, analytics, immagini o altre risorse tecniche. Tali servizi possono impostare propri cookie o usare propri identificatori secondo le rispettive policy.</p>
@@ -75,6 +75,7 @@
         <li>cancellare cookie, localStorage o sessionStorage già presenti;</li>
         <li>impostare preferenze diverse per siti o browser differenti.</li>
       </ul>
+      <p style="margin-top:14px"><button type="button" onclick="window.FTGPrivacy && window.FTGPrivacy.openAnalyticsSettings()" style="min-height:44px;padding:11px 16px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:#fff;color:#071424;font:inherit;font-weight:850;cursor:pointer">Riapri le preferenze analytics</button></p>
 
       <h2>7. Effetti della disattivazione</h2>
       <p>Se blocchi completamente cookie o storage locale, alcune parti del sito potrebbero non funzionare correttamente, perdere preferenze salvate o offrire un’esperienza meno fluida.</p>
@@ -89,5 +90,6 @@
       © 2026 5TerreGo.com · Rosetta Ventures FZ-LLC
     </footer>
   </main>
+<script src="site-analytics.js?v=4" defer></script>
 </body>
 </html>

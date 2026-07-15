@@ -1,0 +1,26 @@
+name: Site quality and privacy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate links and public POI data
+        run: node scripts/check-site.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check sw.js
+          node --check site-analytics.js
+          node --check scripts/generate-pois-lite.mjs
+          node --check scripts/generate-story-pages.mjs

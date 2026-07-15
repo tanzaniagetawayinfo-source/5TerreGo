@@ -1070,12 +1070,9 @@
         return payload;
       }
 
-      async function loadPartnerPoisFallback() {
-        var email = currentSession && currentSession.user && currentSession.user.email ? currentSession.user.email.trim().toLowerCase() : "";
-        if (!email) return [];
-        var result = await partnerClient.from("pois").select("*").not("emails", "is", null);
-        if (result.error) throw new Error(result.error.message || "Could not read POIs from Supabase.");
-        return Array.isArray(result.data) ? result.data.filter(function (poi) { return emailIsAuthorized(poi, email); }) : [];
+      async function loadAuthorizedPartnerPois() {
+        var payload = await callBackend({ action: "get_partner_pois" });
+        return payload && Array.isArray(payload.pois) ? payload.pois : [];
       }
 
       async function updatePoiSettingsFallback(poiId, patch) {
@@ -1141,7 +1138,7 @@
         setStatus(dashboardStatus, "Loading authorized activity...", "");
 
         try {
-          partnerPois = await loadPartnerPoisFallback();
+          partnerPois = await loadAuthorizedPartnerPois();
 
           if (!partnerPois.length) {
             setStatus(dashboardStatus, "This account is not authorized to manage discounts.", "error");
@@ -1373,7 +1370,8 @@
         console.assert(parseAuthorizedEmails(' A@B.COM, c@d.com ,, ').join('|') === 'a@b.com|c@d.com', 'parseAuthorizedEmails should trim lowercase and remove empty values');
         console.assert(emailIsAuthorized({ emails: 'one@test.com, two@test.com' }, 'TWO@test.com') === true, 'emailIsAuthorized should match case-insensitively');
         console.assert(normalizeCode('https://5terrego.com/partner.html?code=5tg-test') === '5TG-TEST', 'normalizeCode should extract code from URL');
-        console.assert(typeof updatePoiSettingsFallback === 'function', 'Settings use update_partner_discount RPC instead of the old backend');
+        console.assert(typeof loadAuthorizedPartnerPois === 'function', 'Partner POIs are loaded through the authenticated backend');
+        console.assert(typeof updatePoiSettingsFallback === 'function', 'Settings use the restricted update_partner_discount RPC');
         console.assert(typeof validateCurrentCode === 'function', 'Validation uses validate_partner_discount_code RPC instead of the old backend');
         console.assert(isValidEmail('operator@test.com') === true, 'isValidEmail should accept valid emails');
         console.assert(isValidEmail('bad-email') === false, 'isValidEmail should reject invalid emails');

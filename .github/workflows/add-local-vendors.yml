@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/add-local-vendors.yml'
+  schedule:
+    - cron: '17 3 * * *'
   workflow_dispatch:
 
 permissions:
@@ -57,40 +59,50 @@ jobs:
             git push
           fi
 
-      - name: Generate POI snapshot
+      - name: Generate privacy-safe POI fallback
         shell: bash
         env:
           SUPABASE_URL: https://jpflcbktcnhmlvaibzcw.supabase.co
-          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZmxjYmt0Y25obWx2YWliemN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMDg1MTUsImV4cCI6MjA5Mjg4NDUxNX0.fen_Y3nw47dBNg3IjAVdKnBH8ecQ9WNN6cbjxH9ccnY
+          SUPABASE_ANON_KEY: sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa
         run: |
           set -euo pipefail
           if ! curl --fail --location --retry 4 --retry-delay 2 \
-            "$SUPABASE_URL/rest/v1/pois?select=id,created_at,name,coords,description,importance,type,emails,phone,discount,discount_info,active_codes,images&order=id.asc" \
+            "$SUPABASE_URL/rest/v1/pois?select=id,name,coords,description,importance,type,discount,discount_info&order=id.asc" \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H 'Accept: application/json' \
-            --output data/pois.json; then
-            echo 'Supabase snapshot request failed; preserving the current snapshot.'
-            git checkout -- data/pois.json 2>/dev/null || printf '[]\n' > data/pois.json
+            --output data/pois-lite.json; then
+            echo 'Supabase fallback request failed; preserving the current safe fallback.'
+            git checkout -- data/pois-lite.json 2>/dev/null || printf '[]\n' > data/pois-lite.json
           fi
 
           python - <<'PY'
           import json
           from pathlib import Path
-          path = Path('data/pois.json')
+          path = Path('data/pois-lite.json')
           data = json.loads(path.read_text(encoding='utf-8'))
           if not isinstance(data, list):
               raise SystemExit('POI response is not a JSON array')
+          allowed = {'id', 'name', 'coords', 'description', 'importance', 'type', 'discount', 'discount_info'}
+          forbidden = {'emails', 'email', 'phone', 'active_codes', 'images'}
+          for row in data:
+              if not isinstance(row, dict):
+                  raise SystemExit('POI response contains a non-object row')
+              if forbidden.intersection(row):
+                  raise SystemExit('Private POI fields detected in public fallback')
+              unknown = set(row) - allowed
+              if unknown:
+                  raise SystemExit(f'Unexpected POI fields: {sorted(unknown)}')
           path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          print(f'Generated {len(data)} POIs')
+          print(f'Generated {len(data)} privacy-safe POIs')
           PY
 
-      - name: Commit POI snapshot
+      - name: Commit POI fallback
         shell: bash
         run: |
           set -euo pipefail
-          git add data/pois.json
+          git add data/pois-lite.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Refresh local POI snapshot'
+            git commit -m 'Refresh privacy-safe POI fallback'
             git push
           fi

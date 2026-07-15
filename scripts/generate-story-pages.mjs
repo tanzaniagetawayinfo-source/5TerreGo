@@ -106,6 +106,7 @@ ${published ? `<meta property="article:published_time" content="${escapeHTML(pub
 <header class="top"><a class="logo" href="/">5Terre<b>Go</b>.com</a><a class="back" href="/guide.html">← All stories</a></header>
 <main><section class="hero"><div><img class="cover" src="${image}" alt="${title}"></div><div class="hero-copy"><p class="kicker">${escapeHTML(label(post.category || 'Guide'))}</p><h1>${title}</h1><p class="dek">${desc}</p><div class="meta"><span>${readingMinutes(post)} min read</span>${dateLabel ? `<span>· ${escapeHTML(dateLabel)}</span>` : ''}<span>· ${escapeHTML(post.author || '5TerreGo Editorial')}</span></div></div></section>
 <article class="article">${renderContent(post.content || post.excerpt, post.title)}<div class="end"><a href="/guide.html">Explore all Cinque Terre stories</a></div></article>${relatedMarkup(post)}</main>
+<script src="/site-analytics.js?v=4" defer></script>
 </body></html>`;
 }
 
@@ -113,7 +114,7 @@ const storiesDir = path.join(root, 'stories');
 await mkdir(storiesDir, { recursive: true });
 await Promise.all(posts.map((post) => writeFile(path.join(storiesDir, `${post.slug}.html`), storyPage(post), 'utf8')));
 await writeFile(path.join(storiesDir, 'index.html'), '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/guide.html"><link rel="canonical" href="https://www.5terrego.com/guide.html"><title>5TerreGo Stories</title>', 'utf8');
-const staticUrls = ['', 'guide.html', 'map.html', 'sentieri.html', 'public-transport.html', 'weather.html'];
+const staticUrls = ['', 'guide.html', 'map.html', 'sentieri.html', 'public-transport.html', 'weather.html', 'updates.html', 'discounts.html', 'advertise.html'];
 const sitemapEntries = staticUrls.map((url) => `  <url><loc>https://www.5terrego.com/${url}</loc></url>`)
   .concat(posts.map((post) => {
     const lastModified = String(post.published_at || post.created_at || '').slice(0, 10);
