@@ -15,11 +15,10 @@
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{padding:92px 18px 44px}
+    body{padding:28px 18px 44px}
     button,select{font:inherit}
     button:focus-visible,select:focus-visible{outline:3px solid rgba(40,100,220,.28);outline-offset:2px}
     .hidden{display:none!important}
-    #ftg-actionbar-mount{position:relative;z-index:9999}
     .shell{width:min(1180px,100%);margin:auto}
     .gate{min-height:260px;display:grid;place-items:center;text-align:center;color:var(--muted);font-weight:700}
     .gate-card{padding:28px;border-radius:24px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}
@@ -82,11 +81,10 @@
     .pill{display:inline-flex;width:max-content;max-width:100%;padding:5px 8px;border-radius:999px;background:#f1f4f8;color:#526176;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .mobile-label{display:none}
     @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.lower-grid{grid-template-columns:1fr 1fr}.lower-grid .card:last-child{grid-column:1/-1}}
-    @media(max-width:620px){body{padding:80px 10px 28px}.dashboard{gap:14px}.topline{align-items:flex-start;flex-direction:column}.controls{width:100%;justify-content:space-between}.status{order:3;width:100%;text-align:left}.range{flex:1}.range button{flex:1;padding:0 8px}.kpis{gap:8px}.kpi{padding:14px;border-radius:18px}.kpi-value{font-size:28px}.kpi-label{font-size:9px}.grid,.lower-grid{gap:10px}.lower-grid{grid-template-columns:1fr}.lower-grid .card:last-child{grid-column:auto}.card{padding:16px;border-radius:20px}.chart-wrap{height:210px}.recent-row.head{display:none}.recent-row{grid-template-columns:1fr auto;gap:7px 10px;padding:13px 2px}.recent-row>div:nth-child(2){grid-column:1/-1;grid-row:1}.recent-row>div:nth-child(1){grid-column:1}.recent-row>div:nth-child(3){grid-column:1}.recent-row>div:nth-child(4){grid-column:2;grid-row:2/4}.mobile-label{display:inline;color:#9aa5b5;margin-right:4px}}
+    @media(max-width:620px){body{padding:18px 10px 28px}.dashboard{gap:14px}.topline{align-items:flex-start;flex-direction:column}.controls{width:100%;justify-content:space-between}.status{order:3;width:100%;text-align:left}.range{flex:1}.range button{flex:1;padding:0 8px}.kpis{gap:8px}.kpi{padding:14px;border-radius:18px}.kpi-value{font-size:28px}.kpi-label{font-size:9px}.grid,.lower-grid{gap:10px}.lower-grid{grid-template-columns:1fr}.lower-grid .card:last-child{grid-column:auto}.card{padding:16px;border-radius:20px}.chart-wrap{height:210px}.recent-row.head{display:none}.recent-row{grid-template-columns:1fr auto;gap:7px 10px;padding:13px 2px}.recent-row>div:nth-child(2){grid-column:1/-1;grid-row:1}.recent-row>div:nth-child(1){grid-column:1}.recent-row>div:nth-child(3){grid-column:1}.recent-row>div:nth-child(4){grid-column:2;grid-row:2/4}.mobile-label{display:inline;color:#9aa5b5;margin-right:4px}}
   </style>
 </head>
 <body>
-  <div id="ftg-actionbar-mount"></div>
   <main class="shell">
     <section id="gate" class="gate"><div class="gate-card">Controllo dell’accesso in corso…</div></section>
     <section id="dashboard" class="dashboard hidden" aria-live="polite">
@@ -132,28 +130,14 @@
   </main>
 
   <script>
-    async function injectHTMLWithScripts(target, html){
-      var wrapper=document.createElement('div');wrapper.innerHTML=html;target.innerHTML='';
-      for(var node of Array.from(wrapper.childNodes)){
-        if(node.nodeType===1&&node.tagName.toLowerCase()==='script'){
-          var script=document.createElement('script');for(var attr of Array.from(node.attributes))script.setAttribute(attr.name,attr.value);script.textContent=node.textContent||'';target.appendChild(script);
-        }else target.appendChild(node.cloneNode(true));
-      }
-    }
-    async function mountGlobalActionbar(){
-      var mount=document.getElementById('ftg-actionbar-mount');if(!mount)return;
-      try{var response=await fetch('/global-actionbar.html?v=3',{cache:'no-store'});if(!response.ok)throw new Error('Actionbar non disponibile');await injectHTMLWithScripts(mount,await response.text());}catch(error){console.error(error);}
-    }
-    mountGlobalActionbar();
-  </script>
-
-  <script>
   (function(){
     'use strict';
     var SUPABASE_URL='https://jpflcbktcnhmlvaibzcw.supabase.co';
     var SUPABASE_ANON_KEY='sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
     var OWNER_EMAIL='5terrego.info@gmail.com';
     var DAYS=7;
+    var VPN_FIELD='';
+    var IDENTITY_FIELD='';
     var PREVIEW_MODE=/^(localhost|127\.)/.test(location.hostname)&&new URLSearchParams(location.search).has('preview');
     var client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     var el=function(id){return document.getElementById(id);};
@@ -162,6 +146,9 @@
     function escapeHTML(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char];});}
     function number(value){return new Intl.NumberFormat('it-IT').format(Number(value||0));}
     function uniqueKey(row){return row.session_id||row.ip_hash||'';}
+    function isOwnerVisit(row){return String(row.user_email||row.email||'').trim().toLowerCase()===OWNER_EMAIL;}
+    function isVPNVisit(row){var value=row.vpn_detected!==undefined?row.vpn_detected:(row.is_vpn!==undefined?row.is_vpn:row.is_proxy);return value===true||value===1||String(value||'').toLowerCase()==='true';}
+    function countryName(row){return isVPNVisit(row)?'VPN rilevata':(row.country||'Non disponibile');}
     function uniqueCount(rows){var keys={};rows.forEach(function(row){var key=uniqueKey(row);if(key)keys[key]=true;});return Object.keys(keys).length;}
     function pageName(value){var path=String(value||'/').split('?')[0],known={'/':'Home','/index.html':'Home','/map.html':'Mappa','/guide.html':'Guide','/sentieri.html':'Sentieri','/public-transport.html':'Trasporti','/weather.html':'Meteo','/discounts.html':'Sconti locali'};if(known[path])return known[path];var name=path.split('/').filter(Boolean).pop()||'Home';name=name.replace(/\.html$/,'').replace(/[-_]+/g,' ');return name.replace(/\b\w/g,function(c){return c.toUpperCase();});}
     function sourceName(value){if(!value)return 'Diretto';try{var host=new URL(value).hostname.replace(/^www\./,'');if(host==='5terrego.com')return 'Navigazione interna';if(/google\./.test(host))return 'Google';if(/instagram/.test(host))return 'Instagram';if(/facebook|fb\./.test(host))return 'Facebook';return host;}catch(error){return String(value).slice(0,40);}}
@@ -195,11 +182,12 @@
       el('insights').innerHTML=items.slice(0,4).map(function(item){return'<div class="insight"><div class="insight-icon">'+item.icon+'</div><div><strong>'+escapeHTML(item.title)+'</strong><p>'+escapeHTML(item.text)+'</p></div></div>';}).join('');
     }
 
-    function renderRecent(rows){var target=el('recentRows'),recent=rows.slice(0,15);el('recentMeta').textContent=recent.length+' eventi';if(!recent.length){target.innerHTML='<div class="empty">Nessuna attività nel periodo.</div>';return;}target.innerHTML=recent.map(function(row){return'<div class="recent-row"><div><span class="mobile-label">Quando:</span>'+escapeHTML(dateTime(row.created_at))+'</div><div class="recent-page" title="'+escapeHTML(row.page_path||'/')+'">'+escapeHTML(pageName(row.page_path))+'</div><div><span class="pill">'+escapeHTML(sourceName(row.referrer))+'</span></div><div><span class="mobile-label">Paese:</span>'+escapeHTML(row.country||'—')+'</div></div>';}).join('');}
+    function renderRecent(rows){var target=el('recentRows'),recent=rows.slice(0,15);el('recentMeta').textContent=recent.length+' eventi';if(!recent.length){target.innerHTML='<div class="empty">Nessuna attività nel periodo.</div>';return;}target.innerHTML=recent.map(function(row){return'<div class="recent-row"><div><span class="mobile-label">Quando:</span>'+escapeHTML(dateTime(row.created_at))+'</div><div class="recent-page" title="'+escapeHTML(row.page_path||'/')+'">'+escapeHTML(pageName(row.page_path))+'</div><div><span class="pill">'+escapeHTML(sourceName(row.referrer))+'</span></div><div><span class="mobile-label">Paese:</span>'+escapeHTML(countryName(row))+'</div></div>';}).join('');}
 
-    function previewRows(){var pages=['/map.html','/','/guide.html','/sentieri.html','/public-transport.html'],sources=['https://google.it/','','https://instagram.com/','https://www.5terrego.com/guide.html'],countries=['IT','DE','US','FR','GB'],rows=[];for(var day=0;day<180;day++){var count=8+((day*7)%19);for(var i=0;i<count;i++){var date=new Date();date.setDate(date.getDate()-(day%Math.max(14,DAYS*2)));date.setHours(8+(i%13),(i*11)%60,0,0);rows.push({created_at:date.toISOString(),page_path:pages[(i+day)%pages.length],referrer:sources[(i*2+day)%sources.length],country:countries[(i+day*3)%countries.length],session_id:'demo-'+day+'-'+(i%Math.max(4,Math.round(count*.58))),ip_hash:''});}}return rows.sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);});}
+    function previewRows(){var pages=['/map.html','/','/guide.html','/sentieri.html','/public-transport.html'],sources=['https://google.it/','','https://instagram.com/','https://www.5terrego.com/guide.html'],countries=['IT','DE','US','FR','GB'],rows=[];for(var day=0;day<180;day++){var count=8+((day*7)%19);for(var i=0;i<count;i++){var date=new Date();date.setDate(date.getDate()-(day%Math.max(14,DAYS*2)));date.setHours(8+(i%13),(i*11)%60,0,0);rows.push({created_at:date.toISOString(),page_path:pages[(i+day)%pages.length],referrer:sources[(i*2+day)%sources.length],country:countries[(i+day*3)%countries.length],vpn_detected:(i+day)%11===0,session_id:'demo-'+day+'-'+(i%Math.max(4,Math.round(count*.58))),ip_hash:''});}}return rows.sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);});}
     async function ensureOwner(){if(PREVIEW_MODE){gate.classList.add('hidden');dashboard.classList.remove('hidden');return true;}var result=await client.auth.getSession(),session=result&&result.data?result.data.session:null,email=session&&session.user&&session.user.email?String(session.user.email).toLowerCase():'';if(!email){gate.innerHTML='<div class="gate-card"><strong>Accesso richiesto</strong><p>Accedi con l’account proprietario per vedere le statistiche.</p><a href="/login.html">Vai al login</a></div>';return false;}if(email!==OWNER_EMAIL){gate.innerHTML='<div class="gate-card"><strong>Accesso non autorizzato</strong><p>Questa dashboard è riservata al proprietario.</p></div>';return false;}gate.classList.add('hidden');dashboard.classList.remove('hidden');return true;}
-    async function loadRows(){if(PREVIEW_MODE)return previewRows();var cutoff=startOfDay(new Date()),rows=[],pageSize=1000,from=0,result;cutoff.setDate(cutoff.getDate()-(DAYS*2));do{result=await client.from('site_visits').select('created_at,page_path,referrer,country,session_id,ip_hash').gte('created_at',cutoff.toISOString()).order('created_at',{ascending:false}).range(from,from+pageSize-1);if(result.error)throw result.error;if(Array.isArray(result.data))rows=rows.concat(result.data);from+=pageSize;}while(result.data&&result.data.length===pageSize&&rows.length<50000);return rows;}
+    async function detectOptionalField(cutoff,candidates){var result;for(var i=0;i<candidates.length;i++){result=await client.from('site_visits').select(candidates[i]).gte('created_at',cutoff.toISOString()).limit(1);if(!result.error)return candidates[i];}return'';}
+    async function loadRows(){if(PREVIEW_MODE)return previewRows();var cutoff=startOfDay(new Date()),rows=[],pageSize=1000,from=0,result,fields;cutoff.setDate(cutoff.getDate()-(DAYS*2));if(VPN_FIELD==='')VPN_FIELD=await detectOptionalField(cutoff,['vpn_detected','is_vpn','is_proxy']);if(IDENTITY_FIELD==='')IDENTITY_FIELD=await detectOptionalField(cutoff,['user_email','email']);fields='created_at,page_path,referrer,country,session_id,ip_hash'+(VPN_FIELD?','+VPN_FIELD:'')+(IDENTITY_FIELD?','+IDENTITY_FIELD:'');do{result=await client.from('site_visits').select(fields).gte('created_at',cutoff.toISOString()).order('created_at',{ascending:false}).range(from,from+pageSize-1);if(result.error)throw result.error;if(Array.isArray(result.data))rows=rows.concat(result.data);from+=pageSize;}while(result.data&&result.data.length===pageSize&&rows.length<50000);return rows.filter(function(row){return!isOwnerVisit(row);});}
 
     async function refresh(){
       try{
@@ -207,7 +195,7 @@
         var rows=await loadRows(),now=new Date(),currentStart=startOfDay(now);currentStart.setDate(currentStart.getDate()-(DAYS-1));var previousStart=new Date(currentStart);previousStart.setDate(previousStart.getDate()-DAYS);var current=periodRows(rows,currentStart,new Date(now.getTime()+1000)),previous=periodRows(rows,previousStart,currentStart);
         var visitors=uniqueCount(current),previousVisitors=uniqueCount(previous),views=current.length,previousViews=previous.length,depth=visitors?views/visitors:0;
         var todayStart=startOfDay(now),today=periodRows(rows,todayStart,new Date(now.getTime()+1000)),todayVisitors=uniqueCount(today);
-        var pages=aggregate(current,function(row){return pageName(row.page_path);}),sources=aggregate(current,function(row){return sourceName(row.referrer);}),countries=aggregate(current,function(row){return row.country||'Non disponibile';}),daily=dailyBuckets(current,DAYS);
+        var pages=aggregate(current,function(row){return pageName(row.page_path);}),sources=aggregate(current,function(row){return sourceName(row.referrer);}),countries=aggregate(current,countryName),daily=dailyBuckets(current,DAYS);
         el('visitorsKpi').textContent=number(visitors);el('viewsKpi').textContent=number(views);el('depthKpi').textContent=depth.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1});el('todayKpi').textContent=number(todayVisitors);
         el('visitorsChange').innerHTML=changeMarkup(visitors,previousVisitors,'vs periodo precedente');el('viewsChange').innerHTML=changeMarkup(views,previousViews,'vs periodo precedente');el('todayFoot').textContent=number(today.length)+' visualizzazioni oggi';
         el('periodLabel').textContent='Panoramica degli ultimi '+DAYS+' giorni';el('trendTotal').textContent=number(views)+' visualizzazioni';el('pageMeta').textContent=pages.length+' pagine';

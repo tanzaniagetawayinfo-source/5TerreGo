@@ -4,6 +4,7 @@
   window.__FTG_SITE_RUNTIME__ = true;
 
   var CONSENT_KEY = 'ftg_analytics_consent_v1';
+  var TEST_OWNER_EMAIL = '5terrego.info@gmail.com';
   var ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/site-visit';
   var localHost = /^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname);
 
@@ -22,8 +23,24 @@
     try { localStorage.setItem(CONSENT_KEY, value); } catch (error) {}
   }
 
+  function getSignedInEmail() {
+    var index, key, value, parsed, user;
+    try {
+      for (index = 0; index < localStorage.length; index += 1) {
+        key = localStorage.key(index) || '';
+        if (!/^sb-.*-auth-token$/.test(key)) continue;
+        value = localStorage.getItem(key);
+        if (!value) continue;
+        parsed = JSON.parse(value);
+        user = parsed && parsed.user ? parsed.user : (parsed && parsed.currentSession && parsed.currentSession.user ? parsed.currentSession.user : null);
+        if (user && user.email) return String(user.email).trim().toLowerCase();
+      }
+    } catch (error) {}
+    return '';
+  }
+
   function sendPageView() {
-    if (localHost || getConsent() !== 'accepted') return;
+    if (localHost || getConsent() !== 'accepted' || getSignedInEmail() === TEST_OWNER_EMAIL) return;
     try {
       var query = '?page_path=' + encodeURIComponent(location.pathname || '/') +
         '&page_title=' + encodeURIComponent(document.title || '') +
