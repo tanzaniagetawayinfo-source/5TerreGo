@@ -860,6 +860,7 @@
         category: 'guide'
       }
     ];
+    var LOCAL_GUIDES_URL = '/data/local-guides.json';
 
     var PAGE_TEXT = {
       en: { search: 'Search stories...', all: 'All', guide: 'Guides', food: 'Food', transport: 'Public Transport', tips: 'Tips', trails: 'Trails', villages: 'Villages', official_updates: 'Official Updates', loading_title: 'Loading stories', loading_text: 'Reading real articles from Supabase.', empty_title: 'No stories found', empty_text: 'Try another keyword or switch category to see more guides and local tips.', saved: 'Saved for offline', see_all: 'See all', saved_state: 'Saved', open_guide: 'Open this article to read the full guide.' },
@@ -1228,21 +1229,45 @@
       render();
     }
 
+    async function loadLocalGuides() {
+      try {
+        var response = await fetch(LOCAL_GUIDES_URL, { cache: 'no-cache' });
+        var rows = response.ok ? await response.json() : [];
+        return Array.isArray(rows) ? rows.map(normalizePost).filter(function (post) { return post.slug && post.title; }) : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function mergePosts(primary, local) {
+      var seen = {};
+      return (local || []).concat(primary || []).filter(function (post) {
+        if (!post || !post.slug || seen[post.slug]) return false;
+        seen[post.slug] = true;
+        return true;
+      });
+    }
+
     async function loadPosts() {
       var response = null;
       var rows = null;
+      var localGuides = await loadLocalGuides();
       if (!SUPABASE_ANON_KEY) {
-        useFallbackData();
+        posts = mergePosts(FALLBACK_POSTS.map(normalizePost), localGuides);
+        featuredPost = getFeaturedHeroPost(posts);
+        render();
         return;
       }
       try {
         response = await fetch(SUPABASE_URL + '/rest/v1/blog_posts?select=id,title,slug,excerpt,content,cover_image,category,status,published_at,created_at&status=eq.published&order=created_at.desc', { headers: createHeaders() });
         if (!response.ok) {
-          useFallbackData();
+          posts = mergePosts(FALLBACK_POSTS.map(normalizePost), localGuides);
+          featuredPost = getFeaturedHeroPost(posts);
+          render();
           return;
         }
         rows = await response.json();
-        posts = Array.isArray(rows) ? rows.map(normalizePost).filter(function (post) { return post.slug && post.title; }) : [];
+        posts = mergePosts(Array.isArray(rows) ? rows.map(normalizePost).filter(function (post) { return post.slug && post.title; }) : [], localGuides);
         featuredPost = getFeaturedHeroPost(posts);
         if (!posts.length) {
           useFallbackData();
@@ -1250,7 +1275,9 @@
         }
         render();
       } catch (_error) {
-        useFallbackData();
+        posts = mergePosts(FALLBACK_POSTS.map(normalizePost), localGuides);
+        featuredPost = getFeaturedHeroPost(posts);
+        render();
       }
     }
 
