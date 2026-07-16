@@ -2634,12 +2634,11 @@
   var NORMAL_MAP_ZOOM = 9.5;
   var NORMAL_MAP_PITCH = 38;
   var NORMAL_MAP_LIMITS = [[9.28, 43.75], [10.28, 44.48]];
-  var OPENING_FLIGHT_DURATION_MS = 6800;
-  var OPENING_FLIGHT_START = { center:[9.6575,44.1485], zoom:13.55, pitch:54, bearing:-34 };
+  var OPENING_FLIGHT_DURATION_MS = 10400;
+  var OPENING_FLIGHT_START = { center:[9.6548,44.1461], zoom:15.15, pitch:55, bearing:-24 };
   var openingFlightActive = false;
   var openingFlightStarted = false;
   var openingFlightFrame = 0;
-  var openingFlightLastMarkerSync = 0;
   var openingFlightStartAttempts = 0;
   var placesOverviewBounds = null;
   var placesOverviewMinZoom = 10;
@@ -5008,26 +5007,38 @@
   function shouldPlayOpeningFlight() {
     return !isMapPreviewMode && !navigationModeActive && getRequestedVillageIndexFromURL() < 0;
   }
-  function interpolateOpeningFlightValue(from, to, amount) {
-    return Number(from) + ((Number(to) - Number(from)) * amount);
-  }
-  function getOpeningFlightBezierPoint(progress, start, controlA, controlB, end) {
-    var inverse = 1 - progress;
-    return (inverse * inverse * inverse * start) +
-      (3 * inverse * inverse * progress * controlA) +
-      (3 * inverse * progress * progress * controlB) +
-      (progress * progress * progress * end);
+  function getOpeningFlightSplineValue(previous, start, end, next, amount) {
+    var amount2 = amount * amount;
+    var amount3 = amount2 * amount;
+    return .5 * ((2 * start) + ((end - previous) * amount) + ((2 * previous - 5 * start + 4 * end - next) * amount2) + ((-previous + 3 * start - 3 * end + next) * amount3));
   }
   function getOpeningFlightCamera(progress) {
+    var frames = [
+      { center:[9.6548,44.1461], zoom:15.15, pitch:55, bearing:-24 },
+      { center:[9.6847,44.1350], zoom:14.95, pitch:55, bearing:-21 },
+      { center:[9.7089,44.1197], zoom:14.75, pitch:54, bearing:-18 },
+      { center:[9.7290,44.1076], zoom:14.90, pitch:54, bearing:-15 },
+      { center:[9.7378,44.0990], zoom:14.65, pitch:53, bearing:-12 },
+      { center:[9.7480,44.1110], zoom:12.35, pitch:49, bearing:-8 },
+      { center:[9.7650,44.1200], zoom:10.75, pitch:44, bearing:-4 },
+      { center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 }
+    ];
     var linear = Math.max(0, Math.min(1, progress));
+    var scaled = linear * (frames.length - 1);
+    var index = Math.min(frames.length - 2, Math.floor(scaled));
+    var amount = scaled - index;
+    var previous = frames[Math.max(0, index - 1)];
+    var start = frames[index];
+    var end = frames[index + 1];
+    var next = frames[Math.min(frames.length - 1, index + 2)];
     return {
       center:[
-        getOpeningFlightBezierPoint(linear, OPENING_FLIGHT_START.center[0], 9.6650, 9.7350, NORMAL_MAP_CENTER[0]),
-        getOpeningFlightBezierPoint(linear, OPENING_FLIGHT_START.center[1], 44.1660, 44.1390, NORMAL_MAP_CENTER[1])
+        getOpeningFlightSplineValue(previous.center[0], start.center[0], end.center[0], next.center[0], amount),
+        getOpeningFlightSplineValue(previous.center[1], start.center[1], end.center[1], next.center[1], amount)
       ],
-      zoom:interpolateOpeningFlightValue(OPENING_FLIGHT_START.zoom, NORMAL_MAP_ZOOM, linear),
-      pitch:interpolateOpeningFlightValue(OPENING_FLIGHT_START.pitch, NORMAL_MAP_PITCH, linear),
-      bearing:interpolateOpeningFlightValue(OPENING_FLIGHT_START.bearing, 0, linear)
+      zoom:getOpeningFlightSplineValue(previous.zoom, start.zoom, end.zoom, next.zoom, amount),
+      pitch:getOpeningFlightSplineValue(previous.pitch, start.pitch, end.pitch, next.pitch, amount),
+      bearing:getOpeningFlightSplineValue(previous.bearing, start.bearing, end.bearing, next.bearing, amount)
     };
   }
   function finishOpeningFlight(keepCurrentCamera) {
@@ -5066,7 +5077,6 @@
     if (reducedMotion) { finishOpeningFlight(false); return; }
     openingFlightActive = true;
     isProgrammaticMove = true;
-    openingFlightLastMarkerSync = 0;
     turnNavigationMap.jumpTo(OPENING_FLIGHT_START);
     syncMapLibreMarkers();
     startedAt = performance.now();
@@ -5077,10 +5087,6 @@
       progress = Math.max(0, Math.min(1, (now - startedAt) / OPENING_FLIGHT_DURATION_MS));
       camera = getOpeningFlightCamera(progress);
       turnNavigationMap.jumpTo(camera);
-      if (!openingFlightLastMarkerSync || now - openingFlightLastMarkerSync > 480) {
-        openingFlightLastMarkerSync = now;
-        syncMapLibreMarkers();
-      }
       if (progress < 1) openingFlightFrame = window.requestAnimationFrame(animateOpeningFlight);
       else finishOpeningFlight(false);
     }
@@ -6702,7 +6708,7 @@
         updatePOIVisibility();
       }
       if (window.__ftgHideBootStatus) window.__ftgHideBootStatus();
-      window.setTimeout(startOpeningFlight, 120);
+      startOpeningFlight();
     }).catch(function(error) {
       console.error('POI load failed:', error);
       if (window.__ftgShowBootError) {
