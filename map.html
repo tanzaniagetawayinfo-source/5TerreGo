@@ -3766,16 +3766,21 @@
   }
   function requestTourLocationAgain(place) { userLocationRequestMode = 'tour'; if (place) pendingTourPlace = place; pendingTourLocationRequest = true; resetUserLocationWatch(); startUserLocationWatch(); }
   function requestPlainUserLocation() { userLocationRequestMode = 'plain'; pendingTourPlace = null; pendingTourLocationRequest = false; resetUserLocationWatch(); startUserLocationWatch(); }
-  async function activateUserCompass(event) {
+  function activateUserCompass(event) {
+    var orientationPromise;
     markExplicitPermissionGesture(event);
     stopAmbientOrbit();
     normalGyroSuspendedByGesture = false;
-    await enableNavigationOrientation();
-    normalGyroTracking = navigationOrientationListening;
     userOrbitPlayed = true;
     compassRecenterPending = true;
+    orientationPromise = enableNavigationOrientation();
     requestPlainUserLocation();
     if (isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
+    orientationPromise.then(function(enabled) {
+      normalGyroTracking = enabled;
+      normalGyroSuspendedByGesture = false;
+      if (isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
+    });
   }
   function tryPreviouslyGrantedLocation() {
     if (!navigator.permissions || !navigator.permissions.query || !navigator.geolocation) { window.setTimeout(startFallbackOrbit, 650); return; }
@@ -5105,7 +5110,11 @@
   }
   function settleUserCameraFromCompass() {
     var targetBearing;
-    if (!turnNavigationMap || !turnNavigationMapLoaded || !isValidCoords(userLocationLatLng)) return;
+    if (!isValidCoords(userLocationLatLng)) return;
+    if (!turnNavigationMap || !turnNavigationMapLoaded) {
+      window.setTimeout(settleUserCameraFromCompass, 160);
+      return;
+    }
     compassRecenterPending = false;
     stopAmbientOrbit();
     normalGyroSuspendedByGesture = false;
