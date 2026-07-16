@@ -685,6 +685,13 @@
   .chips{padding-top:2px}.chip{background:transparent;border-color:#d9d3c7;box-shadow:none}.chip.active{background:#142033;color:#fff;border-color:#142033}
   .section{margin-top:36px}.section-intro{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #d9d3c7}.section-intro h2{font-family:Georgia,"Times New Roman",serif;font-size:38px;line-height:1;margin:0;letter-spacing:-.045em}.section-intro p{margin:0;color:#66758a;font-size:14px}
   .stories-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .pagination{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:30px 0 0}
+  .pagination[hidden]{display:none}
+  .page-button{min-width:42px;height:42px;padding:0 13px;border:1px solid #d9d3c7;border-radius:999px;background:rgba(255,255,255,.78);color:#142033;font:inherit;font-size:14px;font-weight:850;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease}
+  .page-button:hover{transform:translateY(-1px);border-color:#142033}
+  .page-button.active{background:#142033;color:#fff;border-color:#142033}
+  .page-button:disabled{opacity:.42;cursor:not-allowed;transform:none}
+  .page-gap{padding:0 2px;color:#66758a;font-weight:800}
   .story-card{position:relative;display:block;padding:0;border-radius:24px;background:#fff;border:1px solid #e2dccf;box-shadow:none;overflow:hidden}
   .story-card:hover{transform:translateY(-4px);box-shadow:0 20px 45px rgba(20,32,51,.1)}
   .story-link{display:block;color:inherit;text-decoration:none;height:100%}
@@ -746,6 +753,7 @@
     <section class="section">
       <div class="section-intro"><h2>Latest field notes</h2><p id="storyCount">Updated from the 5TerreGo editorial desk.</p></div>
       <div id="storiesList" class="stories-list"></div>
+      <nav id="pagination" class="pagination" aria-label="Article pages" hidden></nav>
 
       <div id="emptyState" class="empty-state is-visible">
         <h3 id="emptyTitle">Loading stories</h3>
@@ -807,6 +815,7 @@
     var AUTH_STORAGE_KEY = 'sb-jpflcbktcnhmlvaibzcw-auth-token';
     var STORY_SAVE_KEY = 'ftg_saved_story_slugs';
     var LANGUAGE_STORAGE_KEY = 'ftg_language';
+    var GUIDE_RETURN_KEY = 'ftg_guide_return_state';
     var ACTIONBAR_PARTIAL_CANDIDATES = [
       'global-actionbar.html',
       './global-actionbar.html',
@@ -879,6 +888,7 @@
     var featuredTime = document.getElementById('featuredTime');
     var featuredSaveButton = document.getElementById('featuredSaveButton');
     var storiesList = document.getElementById('storiesList');
+    var pagination = document.getElementById('pagination');
     var emptyState = document.getElementById('emptyState');
     var emptyTitle = document.getElementById('emptyTitle');
     var emptyText = document.getElementById('emptyText');
@@ -898,6 +908,9 @@
     var posts = [];
     var featuredPost = null;
     var activeFilter = 'all';
+    var pendingReturnState = getReturnState();
+    var currentPage = getInitialPage();
+    var lastPageSize = getPageSize();
     var currentLanguage = getInitialLanguage();
     var actionbarLoadPromise = null;
     var actionbarObserver = null;
@@ -912,6 +925,89 @@
       if (lang.indexOf('-') >= 0) lang = lang.split('-')[0];
       if (!PAGE_TEXT[lang]) lang = 'en';
       return lang;
+    }
+
+    function getPageFromURL() {
+      var parsed = Number(new URL(window.location.href).searchParams.get('page') || 1);
+      return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1;
+    }
+
+    function getPageSize() {
+      return window.matchMedia('(max-width: 560px)').matches ? 8 : 12;
+    }
+
+    function getReturnState() {
+      var state = null;
+      if (String(document.referrer || '').indexOf('/stories/') < 0) return null;
+      try { state = JSON.parse(sessionStorage.getItem(GUIDE_RETURN_KEY) || 'null'); } catch (_error) {}
+      return state && Number(state.page) > 0 ? state : null;
+    }
+
+    function getInitialPage() {
+      var pageInURL = getPageFromURL();
+      if (pageInURL > 1) return pageInURL;
+      return pendingReturnState ? Math.max(1, Number(pendingReturnState.page) || 1) : 1;
+    }
+
+    function updatePageURL(mode) {
+      var url = new URL(window.location.href);
+      if (currentPage > 1) url.searchParams.set('page', String(currentPage));
+      else url.searchParams.delete('page');
+      window.history[mode === 'push' ? 'pushState' : 'replaceState']({ page: currentPage }, '', url.pathname + url.search + url.hash);
+    }
+
+    function rememberGuidePosition() {
+      try {
+        sessionStorage.setItem(GUIDE_RETURN_KEY, JSON.stringify({ page: currentPage, scrollY: Math.max(0, window.scrollY || 0) }));
+      } catch (_error) {}
+    }
+
+    function restoreGuidePosition() {
+      var state = pendingReturnState;
+      if (!state || !posts.length) return;
+      pendingReturnState = null;
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          window.scrollTo(0, Math.max(0, Number(state.scrollY) || 0));
+        });
+      });
+    }
+
+    function paginationItems(totalPages) {
+      var selected = [1, totalPages, currentPage - 1, currentPage, currentPage + 1].filter(function (page) {
+        return page >= 1 && page <= totalPages;
+      }).sort(function (a, b) { return a - b; });
+      return selected.filter(function (page, index) { return index === 0 || page !== selected[index - 1]; });
+    }
+
+    function renderPagination(totalPages) {
+      var pages;
+      var markup = '';
+      var previous = 0;
+      if (totalPages <= 1) {
+        pagination.hidden = true;
+        pagination.innerHTML = '';
+        return;
+      }
+      pages = paginationItems(totalPages);
+      markup += '<button class="page-button" type="button" data-page="' + (currentPage - 1) + '" aria-label="Previous page"' + (currentPage === 1 ? ' disabled' : '') + '>Prev</button>';
+      pages.forEach(function (page) {
+        if (previous && page - previous > 1) markup += '<span class="page-gap" aria-hidden="true">&hellip;</span>';
+        markup += '<button class="page-button' + (page === currentPage ? ' active' : '') + '" type="button" data-page="' + page + '"' + (page === currentPage ? ' aria-current="page"' : '') + ' aria-label="Page ' + page + '">' + page + '</button>';
+        previous = page;
+      });
+      markup += '<button class="page-button" type="button" data-page="' + (currentPage + 1) + '" aria-label="Next page"' + (currentPage === totalPages ? ' disabled' : '') + '>Next</button>';
+      pagination.innerHTML = markup;
+      pagination.hidden = false;
+    }
+
+    function goToPage(page, shouldScroll) {
+      currentPage = Math.max(1, Number(page) || 1);
+      updatePageURL('push');
+      render();
+      if (shouldScroll) {
+        document.querySelector('.section-intro').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function t(key) {
@@ -1123,6 +1219,8 @@
       Array.from(chipsNav.querySelectorAll('.chip')).forEach(function (chip) {
         chip.addEventListener('click', function () {
           activeFilter = chip.dataset.filter || 'all';
+          currentPage = 1;
+          updatePageURL('replace');
           render();
         });
       });
@@ -1186,6 +1284,12 @@
 
     function render() {
       var query = String(searchInput.value || '').trim().toLowerCase();
+      var pageSize = getPageSize();
+      var totalItems;
+      var totalPages;
+      var pageItems;
+      var firstItem;
+      var lastItem;
       var filtered = posts.filter(function (post) {
         var category = normalizeCategory(post.category);
         var official = isOfficialUpdate(post);
@@ -1206,12 +1310,20 @@
       var savedSlugs = getSavedSlugs();
       var savedPosts = posts.filter(function (post) { return savedSlugs.indexOf(post.slug) >= 0; });
       filtered = filtered.filter(function (post) { return !featuredPost || post.slug !== featuredPost.slug; });
+      totalItems = filtered.length;
+      totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      currentPage = Math.min(Math.max(1, currentPage), totalPages);
+      updatePageURL('replace');
+      pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+      firstItem = totalItems ? ((currentPage - 1) * pageSize) + 1 : 0;
+      lastItem = Math.min(currentPage * pageSize, totalItems);
       applyStaticTranslations();
       buildChips();
-      renderFeatured(featuredPost);
-      storiesList.innerHTML = filtered.map(storyCardMarkup).join('');
-      document.getElementById('storyCount').textContent = filtered.length + (filtered.length === 1 ? ' story' : ' stories');
-      if (filtered.length === 0) {
+      renderFeatured(currentPage === 1 ? featuredPost : null);
+      storiesList.innerHTML = pageItems.map(storyCardMarkup).join('');
+      document.getElementById('storyCount').textContent = totalItems ? ('Showing ' + firstItem + '\u2013' + lastItem + ' of ' + totalItems + ' stories') : '0 stories';
+      renderPagination(totalPages);
+      if (totalItems === 0) {
         emptyTitle.textContent = t('empty_title');
         emptyText.textContent = t('empty_text');
         emptyState.classList.add('is-visible');
@@ -1221,6 +1333,7 @@
       savedSection.hidden = savedPosts.length === 0;
       savedList.innerHTML = savedPosts.map(savedCardMarkup).join('');
       savedSeeAll.style.display = savedPosts.length > 2 ? 'inline' : 'none';
+      restoreGuidePosition();
     }
 
     function useFallbackData() {
@@ -1587,12 +1700,17 @@
 
     document.addEventListener('click', function (event) {
       var saveButton = event.target.closest('[data-save-slug]');
+      var storyLink = event.target.closest('.story-link, #featuredLink');
       var storyCard = null;
       var post = null;
       if (saveButton) {
         event.preventDefault();
         event.stopPropagation();
         toggleSavedSlug(saveButton.getAttribute('data-save-slug'));
+        return;
+      }
+      if (storyLink) {
+        rememberGuidePosition();
         return;
       }
       storyCard = event.target.closest('.saved-card');
@@ -1614,7 +1732,30 @@
       if (event.key === 'Escape') closeReader();
     });
 
-    searchInput.addEventListener('input', render);
+    searchInput.addEventListener('input', function () {
+      currentPage = 1;
+      updatePageURL('replace');
+      render();
+    });
+    pagination.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-page]');
+      if (!button || button.disabled) return;
+      goToPage(button.getAttribute('data-page'), true);
+    });
+    window.addEventListener('popstate', function () {
+      currentPage = getPageFromURL();
+      render();
+    });
+    window.addEventListener('resize', function () {
+      var nextPageSize = getPageSize();
+      var firstVisibleIndex;
+      if (nextPageSize === lastPageSize) return;
+      firstVisibleIndex = (currentPage - 1) * lastPageSize;
+      lastPageSize = nextPageSize;
+      currentPage = Math.floor(firstVisibleIndex / nextPageSize) + 1;
+      updatePageURL('replace');
+      render();
+    });
     savedSeeAll.addEventListener('click', function (event) {
       event.preventDefault();
       window.scrollTo({ top: savedSection.offsetTop - 16, behavior: 'smooth' });
