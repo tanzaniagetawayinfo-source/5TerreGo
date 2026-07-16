@@ -4710,13 +4710,9 @@
       if (!event.touches || event.touches.length !== 2) return;
       manualRotationGesture = {
         angle: getTouchAngle(event.touches[0], event.touches[1]),
-        bearing: navigationMapBearing,
-        touchZoomEnabled: Boolean(map && map.touchZoom && map.touchZoom.enabled && map.touchZoom.enabled())
+        bearing: navigationMapBearing
       };
-      if (manualRotationGesture.touchZoomEnabled) map.touchZoom.disable();
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false, capture: true });
+    }, { passive: true });
     mapElement.addEventListener('touchmove', function(event) {
       var angle;
       var delta;
@@ -4727,16 +4723,13 @@
       navigationMapHeadingEnabled = true;
       applyNavigationMapRotation(normalizeDegrees(manualRotationGesture.bearing - delta), true);
       if (navigationNorth) navigationNorth.classList.add('is-active');
-      event.preventDefault();
-      event.stopPropagation();
-    }, { passive: false, capture: true });
+    }, { passive: true });
     function finishManualRotation(event) {
       if (!manualRotationGesture || (event.touches && event.touches.length >= 2)) return;
-      if (manualRotationGesture.touchZoomEnabled && map && map.touchZoom) map.touchZoom.enable();
       manualRotationGesture = null;
     }
-    mapElement.addEventListener('touchend', finishManualRotation, { passive: true, capture: true });
-    mapElement.addEventListener('touchcancel', finishManualRotation, { passive: true, capture: true });
+    mapElement.addEventListener('touchend', finishManualRotation, { passive: true });
+    mapElement.addEventListener('touchcancel', finishManualRotation, { passive: true });
   }
   function applyNavigationMapRotation(bearing, immediate) {
     var centerPoint;
@@ -4825,7 +4818,6 @@
     normalMapOrientationActive = true;
     navigationMapHeadingEnabled = true;
     navigationMapBearing = currentUserHeading === null ? 0 : currentUserHeading;
-    setNavigationInteractions(false);
     startUserLocationWatch();
     await enableNavigationOrientation();
     if (currentUserHeading !== null) applyNavigationMapRotation(currentUserHeading, true);
