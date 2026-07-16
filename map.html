@@ -4340,11 +4340,18 @@
     'manarola>riomaggiore': [[44.1050,9.7232],[44.1020,9.7240],[44.0990,9.7290],[44.0970,9.7345]],
     'riomaggiore>portovenere': [[44.0960,9.7330],[44.0910,9.7270],[44.0820,9.7300],[44.0710,9.7420],[44.0590,9.7630],[44.0500,9.7920],[44.0455,9.8170],[44.0465,9.8270],[44.0490,9.8335],[44.0505,9.8368]],
     'portovenere>la-spezia': [[44.0505,9.8368],[44.0510,9.8425],[44.0560,9.8500],[44.0670,9.8580],[44.0810,9.8520],[44.0900,9.8440],[44.0960,9.8380],[44.1005,9.8330],[44.1020,9.8290]],
-    'portovenere>lerici': [[44.0505,9.8368],[44.0520,9.8425],[44.0545,9.8490],[44.0575,9.8570],[44.0600,9.8680],[44.0615,9.8800],[44.0640,9.8910],[44.0660,9.8980],[44.0685,9.9020],[44.0710,9.9035],[44.0725,9.9042],[44.0735,9.9048],[44.07436,9.90519]],
-    'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0830,9.8530],[44.0750,9.8700],[44.0670,9.8900],[44.0640,9.8990],[44.0660,9.8980],[44.0685,9.9020],[44.0710,9.9035],[44.0725,9.9042],[44.0735,9.9048],[44.07436,9.90519]]
+    'portovenere>lerici': [[44.0505,9.8368],[44.0520,9.8425],[44.0545,9.8490],[44.0575,9.8570],[44.0600,9.8680],[44.0615,9.8800],[44.0640,9.8910],[44.0660,9.8980],[44.0685,9.9020],[44.0710,9.9035],[44.0725,9.9042],[44.0735,9.9048],[44.0743,9.9050],[44.0748,9.9058],[44.0749,9.9070],[44.0746,9.9082],[44.07436,9.90519]],
+    'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0830,9.8530],[44.0750,9.8700],[44.0670,9.8900],[44.0640,9.8990],[44.0660,9.8980],[44.0685,9.9020],[44.0710,9.9035],[44.0725,9.9042],[44.0735,9.9048],[44.0743,9.9050],[44.0748,9.9058],[44.0749,9.9070],[44.0746,9.9082],[44.07436,9.90519]]
   };
   function getFerryPortKey(port) { var name = normalizeFerryPortName(port && port.name); if (name.indexOf('monterosso') !== -1) return 'monterosso'; if (name.indexOf('vernazza') !== -1) return 'vernazza'; if (name.indexOf('manarola') !== -1) return 'manarola'; if (name.indexOf('riomaggiore') !== -1) return 'riomaggiore'; if (name.indexOf('portovenere') !== -1 || name.indexOf('porto venere') !== -1) return 'portovenere'; if (name.indexOf('la spezia') !== -1) return 'la-spezia'; if (name.indexOf('lerici') !== -1) return 'lerici'; return ''; }
-  function getFerryPOIs() { var seen = {}; return poiMarkers.map(function (m) { var p = m.poi; if (getFerryPortKey(p) === 'lerici') p.coords = [44.07436,9.90519]; return p; }).filter(function (p) { var key = getFerryPortKey(p); if (!p || !isValidPOI(p) || String(p.type || '').toLowerCase() !== 'ferry' || !key || seen[key]) return false; seen[key] = true; return true; }).sort(function (a, b) { return FERRY_PORT_ORDER.indexOf(getFerryPortKey(a)) - FERRY_PORT_ORDER.indexOf(getFerryPortKey(b)); }); }
+  function getFerryPOIs() { var seen = {}; return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { var key = getFerryPortKey(p); if (!p || !isValidPOI(p) || String(p.type || '').toLowerCase() !== 'ferry' || !key || seen[key]) return false; seen[key] = true; return true; }).sort(function (a, b) { return FERRY_PORT_ORDER.indexOf(getFerryPortKey(a)) - FERRY_PORT_ORDER.indexOf(getFerryPortKey(b)); }); }
+  function anchorFerrySeaLeg(leg, fromCoords, toCoords) {
+    var anchored = (leg || []).map(function(point) { return point.slice(); });
+    if (!anchored.length) return [fromCoords.slice(), toCoords.slice()];
+    anchored[0] = fromCoords.slice();
+    anchored[anchored.length - 1] = toCoords.slice();
+    return anchored;
+  }
   function createSeaArc(p1, p2, segments, fromPort, toPort) {
     var fromKey = getFerryPortKey(fromPort);
     var toKey = getFerryPortKey(toPort);
@@ -4358,8 +4365,8 @@
     var leg;
     var exactKey = fromKey + '>' + toKey;
     var reverseExactKey = toKey + '>' + fromKey;
-    if (FERRY_SEA_LEGS[exactKey]) return FERRY_SEA_LEGS[exactKey].map(function(point) { return point.slice(); });
-    if (FERRY_SEA_LEGS[reverseExactKey]) return FERRY_SEA_LEGS[reverseExactKey].map(function(point) { return point.slice(); }).reverse();
+    if (FERRY_SEA_LEGS[exactKey]) return anchorFerrySeaLeg(FERRY_SEA_LEGS[exactKey], p1, p2);
+    if (FERRY_SEA_LEGS[reverseExactKey]) return anchorFerrySeaLeg(FERRY_SEA_LEGS[reverseExactKey].slice().reverse(), p1, p2);
     if (start >= 0 && end > start) {
       for (i = start; i < end; i += 1) {
         leg = FERRY_SEA_LEGS[FERRY_PORT_ORDER[i] + '>' + FERRY_PORT_ORDER[i + 1]] || [];
