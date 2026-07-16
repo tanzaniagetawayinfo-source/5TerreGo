@@ -2316,6 +2316,12 @@
     return index >= 0 ? index : getClosestVillageIndexForCenter();
   }
 
+  function flyMapLibre3D(coords, zoom, duration) {
+    if (!turnNavigationMap || !turnNavigationMapLoaded || !isValidCoords(coords)) return;
+    turnNavigationFollowingUser = false;
+    turnNavigationMap.flyTo({ center:[coords[1],coords[0]], zoom:Number(zoom || 16), pitch:55, bearing:0, duration:Math.round(Number(duration || 1) * 1000), essential:true, offset:[0, window.innerWidth <= 700 ? -72 : 0] });
+  }
+
   function focusVillageByIndex(index) {
     var total = places.length;
     var safeIndex;
@@ -2331,7 +2337,10 @@
     closePOICard(true);
     closeTrailCard(true);
     isProgrammaticMove = true;
-    map.flyTo(place.coords, getVillageCenterZoom(place), { duration: 0.92 });
+    syncingMapCameras = true;
+    map.setView(place.coords, getVillageCenterZoom(place), { animate:false });
+    syncingMapCameras = false;
+    flyMapLibre3D(place.coords, getVillageCenterZoom(place), 1.15);
     window.setTimeout(function() {
       isProgrammaticMove = false;
       scheduleMapRefresh({ rail: true, auto: true });
@@ -4284,7 +4293,7 @@
     renderDiscountCTA(poi);
     updateSelectedPOIEmphasis();
     window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); } }, 80); }
-  function flyToWithTopOffset(coords, zoom, duration) { var targetZoom, point, offsetY, targetPoint; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); offsetY = Math.round(Math.min(window.innerHeight * 0.18, 150)); point = map.project(coords, targetZoom); targetPoint = L.point(point.x, point.y + offsetY); isProgrammaticMove = true; if (isIOSDevice()) map.setView(map.unproject(targetPoint, targetZoom), targetZoom, { animate: true }); else map.flyTo(map.unproject(targetPoint, targetZoom), targetZoom, { duration: Number(duration || 0.9) }); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
+  function flyToWithTopOffset(coords, zoom, duration) { var targetZoom; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); isProgrammaticMove = true; syncingMapCameras = true; map.setView(coords, targetZoom, { animate:false }); syncingMapCameras = false; flyMapLibre3D(coords, targetZoom, duration); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
   async function loadTrails() {
     var response, rows;
@@ -4331,8 +4340,8 @@
     'manarola>riomaggiore': [[44.1050,9.7232],[44.1020,9.7240],[44.0990,9.7290],[44.0970,9.7345]],
     'riomaggiore>portovenere': [[44.0960,9.7330],[44.0910,9.7270],[44.0820,9.7300],[44.0710,9.7420],[44.0590,9.7630],[44.0500,9.7920],[44.0455,9.8170],[44.0465,9.8270],[44.0490,9.8335],[44.0505,9.8368]],
     'portovenere>la-spezia': [[44.0505,9.8368],[44.0510,9.8425],[44.0560,9.8500],[44.0670,9.8580],[44.0810,9.8520],[44.0900,9.8440],[44.0960,9.8380],[44.1005,9.8330],[44.1020,9.8290]],
-    'portovenere>lerici': [[44.0505,9.8368],[44.0490,9.8430],[44.0490,9.8560],[44.0520,9.8710],[44.0570,9.8860],[44.0630,9.8980],[44.0670,9.9030],[44.0705,9.9060],[44.0725,9.9080],[44.0742,9.9091]],
-    'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0830,9.8530],[44.0750,9.8700],[44.0670,9.8900],[44.0640,9.8990],[44.0670,9.9030],[44.0705,9.9060],[44.0725,9.9080],[44.0742,9.9091]]
+    'portovenere>lerici': [[44.0505,9.8368],[44.0490,9.8430],[44.0490,9.8560],[44.0520,9.8710],[44.0570,9.8860],[44.0630,9.8980],[44.0670,9.9030],[44.0705,9.9050],[44.0728,9.9058]],
+    'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0830,9.8530],[44.0750,9.8700],[44.0670,9.8900],[44.0640,9.8990],[44.0670,9.9030],[44.0705,9.9050],[44.0728,9.9058]]
   };
   function getFerryPortKey(port) { var name = normalizeFerryPortName(port && port.name); if (name.indexOf('monterosso') !== -1) return 'monterosso'; if (name.indexOf('vernazza') !== -1) return 'vernazza'; if (name.indexOf('manarola') !== -1) return 'manarola'; if (name.indexOf('riomaggiore') !== -1) return 'riomaggiore'; if (name.indexOf('portovenere') !== -1 || name.indexOf('porto venere') !== -1) return 'portovenere'; if (name.indexOf('la spezia') !== -1) return 'la-spezia'; if (name.indexOf('lerici') !== -1) return 'lerici'; return ''; }
   function getFerryPOIs() { var seen = {}; return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { var key = getFerryPortKey(p); if (!p || !isValidPOI(p) || String(p.type || '').toLowerCase() !== 'ferry' || !key || seen[key]) return false; seen[key] = true; return true; }).sort(function (a, b) { return FERRY_PORT_ORDER.indexOf(getFerryPortKey(a)) - FERRY_PORT_ORDER.indexOf(getFerryPortKey(b)); }); }
@@ -4349,8 +4358,8 @@
     var leg;
     var exactKey = fromKey + '>' + toKey;
     var reverseExactKey = toKey + '>' + fromKey;
-    if (FERRY_SEA_LEGS[exactKey]) return [p1.slice()].concat(FERRY_SEA_LEGS[exactKey].map(function(point) { return point.slice(); }), [p2.slice()]);
-    if (FERRY_SEA_LEGS[reverseExactKey]) return [p2.slice()].concat(FERRY_SEA_LEGS[reverseExactKey].map(function(point) { return point.slice(); }), [p1.slice()]).reverse();
+    if (FERRY_SEA_LEGS[exactKey]) return FERRY_SEA_LEGS[exactKey].map(function(point) { return point.slice(); });
+    if (FERRY_SEA_LEGS[reverseExactKey]) return FERRY_SEA_LEGS[reverseExactKey].map(function(point) { return point.slice(); }).reverse();
     if (start >= 0 && end > start) {
       for (i = start; i < end; i += 1) {
         leg = FERRY_SEA_LEGS[FERRY_PORT_ORDER[i] + '>' + FERRY_PORT_ORDER[i + 1]] || [];
@@ -4405,6 +4414,7 @@
   function getCurrentMinutesOfDay() { var p = getItalyDateParts(); return Number(p.hour || 0) * 60 + Number(p.minute || 0) + Number(p.second || 0) / 60; }
   function isFerryRowActiveForDate(row) { var today = getTodayDateString(); var from = row && row.valid_from ? String(row.valid_from) : ''; var to = row && row.valid_to ? String(row.valid_to) : ''; if (from && today < from) return false; if (to && today > to) return false; return isFerryValidityRuleActive(row); }
   function addFerryPortLeg(legs, tripId, status, port, fromPort, toPort, depart, arrive, direction) { if (!port || !isValidCoords(port.coords)) return; legs.push({ tripId: tripId, status: status, port: port, from: fromPort || port, to: toPort || port, arc: [port.coords, port.coords], departMin: depart, arriveMin: arrive, progress: status === 'port-after' ? 1 : 0, direction: direction || '', upcomingStops: [] }); }
+  function dedupeActiveFerryLegs(legs) { var seen = {}; return legs.filter(function(leg) { var key = [getFerryPortKey(leg.from),getFerryPortKey(leg.to)].join('>'); if (seen[key]) return false; seen[key] = true; return true; }); }
   function getOfficialLericiPortovenereLegs(nowMin) {
     var today = getTodayDateString();
     var lerici = getFerryPortByName('Lerici');
@@ -4438,7 +4448,7 @@
     });
     return legs;
   }
-  function getActiveFerryLegs() { var grouped = {}; var nowMin = getCurrentMinutesOfDay(); var legs = getOfficialLericiPortovenereLegs(nowMin); ferryTimetableRows.forEach(function(row) { var tripId; if (!row || row.no_stop === true || row.no_stop === 'true') return; if (!row.scheduled_time) return; if (!isFerryRowActiveForDate(row)) return; tripId = String(row.trip_id || row.direction || 'trip'); if (!grouped[tripId]) grouped[tripId] = []; grouped[tripId].push(row); }); Object.keys(grouped).forEach(function(tripId) { var stops = grouped[tripId].slice().sort(function(a, b) { return Number(a.stop_sequence || 0) - Number(b.stop_sequence || 0); }); var i; var fromRow; var toRow; var depart; var arrive; var fromPort; var toPort; var arc; for (i = 1; i < stops.length; i += 1) { fromRow = stops[i - 1]; toRow = stops[i]; depart = getMinutesFromTime(fromRow.scheduled_time); arrive = getMinutesFromTime(toRow.scheduled_time); if (depart === null || arrive === null || arrive <= depart) continue; fromPort = getFerryPortByName(fromRow.port_name); toPort = getFerryPortByName(toRow.port_name); if (!fromPort || !toPort) continue; if (nowMin >= depart - 18 && nowMin < depart) { addFerryPortLeg(legs, tripId, 'port-before', fromPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); continue; } if (nowMin >= depart && nowMin <= arrive) { arc = getFerryRouteArc(fromPort, toPort); if (!arc || arc.length < 2) continue; legs.push({ tripId: tripId, status: 'sailing', from: fromPort, to: toPort, arc: arc, departMin: depart, arriveMin: arrive, progress: (nowMin - depart) / Math.max(1, arrive - depart), direction: fromRow.direction || toRow.direction || '', upcomingStops: [] }); continue; } if (nowMin > arrive && nowMin <= arrive + 12) addFerryPortLeg(legs, tripId, 'port-after', toPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); } }); return legs; }
+  function getActiveFerryLegs() { var grouped = {}; var nowMin = getCurrentMinutesOfDay(); var legs = getOfficialLericiPortovenereLegs(nowMin); ferryTimetableRows.forEach(function(row) { var tripId; if (!row || row.no_stop === true || row.no_stop === 'true') return; if (!row.scheduled_time) return; if (!isFerryRowActiveForDate(row)) return; tripId = String(row.trip_id || row.direction || 'trip'); if (!grouped[tripId]) grouped[tripId] = []; grouped[tripId].push(row); }); Object.keys(grouped).forEach(function(tripId) { var stops = grouped[tripId].slice().sort(function(a, b) { return Number(a.stop_sequence || 0) - Number(b.stop_sequence || 0); }); var i; var fromRow; var toRow; var depart; var arrive; var fromPort; var toPort; var arc; for (i = 1; i < stops.length; i += 1) { fromRow = stops[i - 1]; toRow = stops[i]; depart = getMinutesFromTime(fromRow.scheduled_time); arrive = getMinutesFromTime(toRow.scheduled_time); if (depart === null || arrive === null || arrive <= depart) continue; fromPort = getFerryPortByName(fromRow.port_name); toPort = getFerryPortByName(toRow.port_name); if (!fromPort || !toPort) continue; if (nowMin >= depart - 18 && nowMin < depart) { addFerryPortLeg(legs, tripId, 'port-before', fromPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); continue; } if (nowMin >= depart && nowMin <= arrive) { arc = getFerryRouteArc(fromPort, toPort); if (!arc || arc.length < 2) continue; legs.push({ tripId: tripId, status: 'sailing', from: fromPort, to: toPort, arc: arc, departMin: depart, arriveMin: arrive, progress: (nowMin - depart) / Math.max(1, arrive - depart), direction: fromRow.direction || toRow.direction || '', upcomingStops: [] }); continue; } if (nowMin > arrive && nowMin <= arrive + 12) addFerryPortLeg(legs, tripId, 'port-after', toPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); } }); return dedupeActiveFerryLegs(legs); }
   function bindMovingFerryPopup(marker, item) { if (!marker || !item) return; marker.bindPopup('<div style="min-width:190px"><div style="font-size:14px;font-weight:950;color:#111;margin-bottom:4px">⛴️ Ferry · posizione stimata</div><div style="font-size:12px;font-weight:750;color:rgba(0,0,0,0.68);line-height:1.32">' + escapeHTML(item.from && item.from.name ? item.from.name : 'Port') + ' → ' + escapeHTML(item.to && item.to.name ? item.to.name : 'Port') + '</div><div style="font-size:10px;margin-top:7px;color:#667085">Orari ufficiali NGDP 2026 · servizio soggetto a condizioni meteo-marine</div></div>', { closeButton: true, autoPan: true, className: 'ferry-live-popup' }); }
   function syncMapLibreFerryVehicles() {
     if (!turnNavigationMap || !turnNavigationMapLoaded) return;
@@ -4943,7 +4953,7 @@
         el.setAttribute('aria-label', trail.name || 'Trail');
         el.style.cssText = 'width:40px;height:40px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))';
         el.innerHTML = '<img src="' + getGithubAssetUrl('sentiero.png') + '" alt="" style="width:35px;height:35px;object-fit:contain">';
-        el.addEventListener('click', function(event) { event.stopPropagation(); showTrailCard(trail); });
+        el.addEventListener('click', function(event) { event.stopPropagation(); flyToWithTopOffset(point, 15.5, 1); window.setTimeout(function(){ showTrailCard(trail); }, 260); });
         glTrailMarkers.push(new window.maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([point[1],point[0]]).addTo(turnNavigationMap));
       });
     }
@@ -4962,7 +4972,7 @@
       el.innerHTML = getPOIIconHTML(poi);
       el.style.cssText = 'width:38px;height:38px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;font-size:24px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))';
       Array.from(el.querySelectorAll('img')).forEach(function(img){img.style.cssText='width:34px;height:34px;object-fit:contain'});
-      el.addEventListener('click', function(event) { event.stopPropagation(); showPOICard(poi); });
+      el.addEventListener('click', function(event) { event.stopPropagation(); openPOIWithMapMove(poi, null); });
       glPOIMarkers.push(new window.maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([poi.coords[1], poi.coords[0]]).addTo(turnNavigationMap));
     });
     updateNormalMapLibreLines();
