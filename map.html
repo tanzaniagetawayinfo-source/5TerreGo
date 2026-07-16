@@ -1346,10 +1346,10 @@
     #navigation-start { background: #ff7200; color: #fff; }
     #navigation-start:disabled { background: #d7dae0; color: #8b93a1; cursor: default; }
     #navigation-stop { display: none; background: #111827; color: #fff; }
-    #navigation-north { display: block; position: fixed; right: 18px; bottom: calc(206px + env(safe-area-inset-bottom)); z-index: 2200; width: 44px; height: 44px; border: 1px solid rgba(17,24,39,.12); border-radius: 999px; background: rgba(255,255,255,.96); color: #111827; box-shadow: 0 10px 28px rgba(4,15,30,.2); font: inherit; font-size: 12px; font-weight: 950; cursor:pointer; }
+    #navigation-north { display: none !important; position: fixed; right: 18px; bottom: calc(206px + env(safe-area-inset-bottom)); z-index: 2200; width: 44px; height: 44px; border: 1px solid rgba(17,24,39,.12); border-radius: 999px; background: rgba(255,255,255,.96); color: #111827; box-shadow: 0 10px 28px rgba(4,15,30,.2); font: inherit; font-size: 12px; font-weight: 950; cursor:pointer; }
     #navigation-north::before { content: '▲'; display: block; color: #ff7200; font-size: 17px; line-height: 14px; }
     #navigation-north.is-active { background: #111827; color: #fff; }
-    body.navigation-active #navigation-north { display: block; right: 14px; top: calc(var(--ftg-header-height, 98px) + 14px); bottom: auto; }
+    body.navigation-active #navigation-north { right: 14px; top: calc(var(--ftg-header-height, 98px) + 14px); bottom: auto; }
     body.map-preview-mode #navigation-north { display:none !important; }
     body.navigation-mode .search-floating, body.navigation-mode #bottom-rail, body.navigation-mode #map-style-btn { display: none !important; }
     body.navigation-active #navigation-origin-select, body.navigation-active #navigation-locate, body.navigation-active #navigation-options, body.navigation-active #navigation-start { display: none; }
@@ -2103,10 +2103,20 @@
     { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: 'YfKWbnMCNZ8', description: 'Vernazza is one of the most iconic villages, with a tiny harbor, colorful houses and dramatic cliffs.' },
     { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: 'BhPxgJ3w8Ag', description: 'Corniglia sits above the sea and feels quieter, with terraces, viewpoints and narrow historic streets.' },
     { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU', description: 'Manarola is famous for sunset views, colorful houses and the cliffside postcard panorama.' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' }
+    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' },
+    { name: 'Levanto', coords: [44.1703, 9.6137], image: 'https://images.pexels.com/photos/26309839/pexels-photo-26309839.jpeg', description: 'Levanto is a relaxed seaside gateway north of the Cinque Terre, with a long beach and a walkable historic centre.' },
+    { name: 'La Spezia', coords: [44.1025, 9.8241], image: 'https://images.pexels.com/photos/4254555/pexels-photo-4254555.jpeg', description: 'La Spezia is the main transport hub for the eastern Ligurian coast, with museums, markets and a broad waterfront.' },
+    { name: 'Fezzano', coords: [44.0802, 9.8246], image: 'https://images.pexels.com/photos/7611304/pexels-photo-7611304.jpeg', description: 'Fezzano is a small harbour village on the western shore of the Gulf of Poets, between La Spezia and Portovenere.' },
+    { name: 'Le Grazie', coords: [44.0669, 9.8339], image: 'https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg', description: 'Le Grazie is a sheltered maritime village with a working harbour and easy access toward Portovenere.' },
+    { name: 'Portovenere', coords: [44.0519, 9.8352], image: 'https://images.pexels.com/photos/15570449/pexels-photo-15570449.jpeg', description: 'Portovenere stands at the western entrance of the Gulf of Poets, facing Palmaria with a historic waterfront and dramatic headland.' },
+    { name: 'San Terenzo', coords: [44.0846, 9.8963], image: 'https://images.pexels.com/photos/14534753/pexels-photo-14534753.jpeg', description: 'San Terenzo is a compact seaside village with a sandy bay, castle and promenade linking it to Lerici.' },
+    { name: 'Lerici', coords: [44.0741, 9.9117], image: 'https://images.pexels.com/photos/13706810/pexels-photo-13706810.jpeg', description: 'Lerici curves around the eastern Gulf of Poets, known for its castle, waterfront and connections to nearby coves.' },
+    { name: 'Tellaro', coords: [44.0591, 9.9304], image: 'https://images.pexels.com/photos/5060295/pexels-photo-5060295.jpeg', description: 'Tellaro is a small cliffside village south of Lerici, with narrow lanes descending toward the rocky sea.' },
+    { name: 'Bocca di Magra', coords: [44.0488, 9.9892], image: 'https://images.pexels.com/photos/26309839/pexels-photo-26309839.jpeg', description: 'Bocca di Magra sits where the Magra river reaches the Ligurian Sea, with marinas and views toward the gulf.' },
+    { name: 'Sarzana', coords: [44.1114, 9.9586], image: 'https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg', description: 'Sarzana is a historic inland town near the Gulf of Poets, with fortresses, piazzas and useful regional connections.' }
   ];
 
-  var randomInitialVillageIndex = isMapPreviewMode ? -1 : Math.floor(Math.random() * places.length);
+  var randomInitialVillageIndex = isMapPreviewMode ? -1 : Math.floor(Math.random() * 5);
 
   function getVillageCenterZoom(place) {
     return place && place.name === 'Monterosso' ? 14.4 : 15.2;
@@ -2572,6 +2582,7 @@
   var navigationInteractionState = null;
   var normalMapOrientationActive = false;
   var manualRotationGesture = null;
+  var ENABLE_MAP_ROTATION = false;
   var currentUserHeading = null;
   var tourSmoothedHeading = null;
   var lastTourHeadingUpdateAt = 0;
@@ -3572,7 +3583,7 @@
     return stored || htmlLang || String(navigator.language || 'en').trim().toLowerCase();
   }
   function getDiscoverLabel() {
-    return 'Explore Cinque Terre';
+    return 'Explore Cinque Terre & Gulf of Poets';
   }
   function getCurrentUILocale() { return getSelectedLanguageCode() || 'en-GB'; }
   function formatWeatherDate(value) { var date = new Date(String(value || '') + 'T12:00:00'); if (!Number.isFinite(date.getTime())) return String(value || ''); return new Intl.DateTimeFormat(getCurrentUILocale(), { weekday: 'short', day: '2-digit', month: 'short' }).format(date); }
@@ -3790,7 +3801,7 @@
   function getBottomRailVillageDescription(label) {
     var place;
     if (!label || label === getDiscoverLabel()) {
-      return 'A quick general view across the villages, places and upcoming moments around Cinque Terre.';
+      return 'A wider view across the Cinque Terre, La Spezia and the villages of the Gulf of Poets.';
     }
     place = places.find(function(item) {
       return item && item.name === label;
@@ -4705,7 +4716,7 @@
   }
   function setupManualMapRotation() {
     var mapElement = document.getElementById('map');
-    if (!mapElement) return;
+    if (!ENABLE_MAP_ROTATION || !mapElement) return;
     mapElement.addEventListener('touchstart', function(event) {
       if (!event.touches || event.touches.length !== 2) return;
       manualRotationGesture = {
@@ -4735,7 +4746,7 @@
     var centerPoint;
     var delta;
     var target = navigationMapHeadingEnabled ? normalizeDegrees(bearing) : 0;
-    if (!map || (!navigationFollowing && !normalMapOrientationActive)) return;
+    if (!ENABLE_MAP_ROTATION || !map || (!navigationFollowing && !normalMapOrientationActive)) return;
     if (immediate) navigationMapBearing = target;
     else {
       delta = getShortestAngleDelta(navigationMapBearing, target);
@@ -4756,7 +4767,7 @@
     }
   }
   function updateNavigationMapRotation(immediate) {
-    if ((!navigationFollowing && !normalMapOrientationActive) || !navigationMapHeadingEnabled) return;
+    if (!ENABLE_MAP_ROTATION || (!navigationFollowing && !normalMapOrientationActive) || !navigationMapHeadingEnabled) return;
     applyNavigationMapRotation(navigationFollowing ? getNavigationForwardBearing() : currentUserHeading, Boolean(immediate));
   }
   function resetNavigationMapRotation() {
@@ -4800,6 +4811,7 @@
     navigationInteractionState = null;
   }
   async function toggleNavigationMapOrientation(event) {
+    if (!ENABLE_MAP_ROTATION) return;
     if (event) markExplicitPermissionGesture(event);
     if (navigationFollowing) {
       navigationMapHeadingEnabled = !navigationMapHeadingEnabled;
@@ -5733,7 +5745,7 @@
     ferryVehiclesLayer = L.layerGroup().addTo(map);
     trailsLayer = L.layerGroup().addTo(map);
     poiOverlapLayer = L.layerGroup().addTo(map);
-    map.setMaxBounds(L.latLngBounds([44.07, 9.58], [44.17, 9.80]));
+    map.setMaxBounds(L.latLngBounds([43.99, 9.54], [44.22, 10.05]));
 
     [satelliteLayer, whiteLayer, roadsLayer].forEach(function(layer) {
       if (!layer) return;
