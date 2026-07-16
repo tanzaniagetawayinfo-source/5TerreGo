@@ -2571,6 +2571,7 @@
   var navigationMapBearing = 0;
   var navigationInteractionState = null;
   var normalMapOrientationActive = false;
+  var manualRotationGesture = null;
   var currentUserHeading = null;
   var tourSmoothedHeading = null;
   var lastTourHeadingUpdateAt = 0;
@@ -4699,6 +4700,44 @@
     if (!panes) return [];
     return ['tilePane', 'overlayPane', 'shadowPane', 'markerPane', 'tooltipPane', 'popupPane', 'trailPane', 'poiPane', 'poiGroupPane'].map(function(name) { return panes[name]; }).filter(Boolean);
   }
+  function getTouchAngle(first, second) {
+    return Math.atan2(second.clientY - first.clientY, second.clientX - first.clientX) * 180 / Math.PI;
+  }
+  function setupManualMapRotation() {
+    var mapElement = document.getElementById('map');
+    if (!mapElement) return;
+    mapElement.addEventListener('touchstart', function(event) {
+      if (!event.touches || event.touches.length !== 2) return;
+      manualRotationGesture = {
+        angle: getTouchAngle(event.touches[0], event.touches[1]),
+        bearing: navigationMapBearing,
+        touchZoomEnabled: Boolean(map && map.touchZoom && map.touchZoom.enabled && map.touchZoom.enabled())
+      };
+      if (manualRotationGesture.touchZoomEnabled) map.touchZoom.disable();
+      event.preventDefault();
+      event.stopPropagation();
+    }, { passive: false, capture: true });
+    mapElement.addEventListener('touchmove', function(event) {
+      var angle;
+      var delta;
+      if (!manualRotationGesture || !event.touches || event.touches.length !== 2) return;
+      angle = getTouchAngle(event.touches[0], event.touches[1]);
+      delta = angle - manualRotationGesture.angle;
+      normalMapOrientationActive = !navigationFollowing;
+      navigationMapHeadingEnabled = true;
+      applyNavigationMapRotation(normalizeDegrees(manualRotationGesture.bearing - delta), true);
+      if (navigationNorth) navigationNorth.classList.add('is-active');
+      event.preventDefault();
+      event.stopPropagation();
+    }, { passive: false, capture: true });
+    function finishManualRotation(event) {
+      if (!manualRotationGesture || (event.touches && event.touches.length >= 2)) return;
+      if (manualRotationGesture.touchZoomEnabled && map && map.touchZoom) map.touchZoom.enable();
+      manualRotationGesture = null;
+    }
+    mapElement.addEventListener('touchend', finishManualRotation, { passive: true, capture: true });
+    mapElement.addEventListener('touchcancel', finishManualRotation, { passive: true, capture: true });
+  }
   function applyNavigationMapRotation(bearing, immediate) {
     var centerPoint;
     var delta;
@@ -5684,6 +5723,7 @@
       keyboard: !isMapPreviewMode,
       touchZoom: !isMapPreviewMode
     }).setView(initialState.center, initialState.zoom);
+    setupManualMapRotation();
 
     map.createPane('trailPane');
     map.getPane('trailPane').style.zIndex = 640;
