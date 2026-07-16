@@ -379,8 +379,6 @@
 
     .custom-label { z-index: 1 !important; overflow: visible !important; }
     .custom-label .label { display: inline-block; transform: translateX(-50%); color: white; font-weight: 900; font-size: 14px; line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 6px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.9); white-space: nowrap; cursor: pointer; user-select: none; }
-    .area-label { background:transparent!important;border:0!important;overflow:visible!important; }
-    .area-label span { display:inline-flex;align-items:center;justify-content:center;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(8,18,29,.78);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.28);backdrop-filter:blur(8px); }
     .poi-label { position: relative; min-width: 34px; min-height: 34px; display: grid; place-items: center; background: transparent; color: white; font-size: 26px; border: 0; box-shadow: none; overflow: visible; }
     .poi-label img { width: 32px; height: 32px; display: block; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
     .custom-poi {
@@ -2102,19 +2100,19 @@
   window.fiveTerreSupabaseClient = supabaseClient;
 
   var places = [
-    { name: 'Monterosso', coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', liveVideoId: 'Mjrd1nmlW5s', description: 'Monterosso is the largest village of the Cinque Terre, known for beaches, old town lanes and sea views.' },
-    { name: 'Vernazza', coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: 'YfKWbnMCNZ8', description: 'Vernazza is one of the most iconic villages, with a tiny harbor, colorful houses and dramatic cliffs.' },
-    { name: 'Corniglia', coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: 'BhPxgJ3w8Ag', description: 'Corniglia sits above the sea and feels quieter, with terraces, viewpoints and narrow historic streets.' },
-    { name: 'Manarola', coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU', description: 'Manarola is famous for sunset views, colorful houses and the cliffside postcard panorama.' },
-    { name: 'Riomaggiore', coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' },
-    { name: 'Levanto', coords: [44.1703, 9.6137], image: 'https://images.pexels.com/photos/26309839/pexels-photo-26309839.jpeg', description: 'Levanto is a relaxed seaside gateway north of the Cinque Terre, with a long beach and a walkable historic centre.' },
-    { name: 'La Spezia', coords: [44.1025, 9.8241], image: 'https://images.pexels.com/photos/4254555/pexels-photo-4254555.jpeg', description: 'La Spezia is the main transport hub for the eastern Ligurian coast, with museums, markets and a broad waterfront.' },
-    { name: 'Fezzano', coords: [44.0802, 9.8246], image: 'https://images.pexels.com/photos/7611304/pexels-photo-7611304.jpeg', description: 'Fezzano is a small harbour village on the western shore of the Gulf of Poets, between La Spezia and Portovenere.' },
-    { name: 'Le Grazie', coords: [44.0669, 9.8339], image: 'https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg', description: 'Le Grazie is a sheltered maritime village with a working harbour and easy access toward Portovenere.' },
-    { name: 'Portovenere', coords: [44.0519, 9.8352], image: 'https://images.pexels.com/photos/15570449/pexels-photo-15570449.jpeg', description: 'Portovenere stands at the western entrance of the Gulf of Poets, facing Palmaria with a historic waterfront and dramatic headland.' },
-    { name: 'San Terenzo', coords: [44.0846, 9.8963], image: 'https://images.pexels.com/photos/14534753/pexels-photo-14534753.jpeg', description: 'San Terenzo is a compact seaside village with a sandy bay, castle and promenade linking it to Lerici.' },
-    { name: 'Lerici', coords: [44.0741, 9.9117], image: 'https://images.pexels.com/photos/13706810/pexels-photo-13706810.jpeg', description: 'Lerici curves around the eastern Gulf of Poets, known for its castle, waterfront and connections to nearby coves.' },
-    { name: 'Tellaro', coords: [44.0591, 9.9304], image: 'https://images.pexels.com/photos/5060295/pexels-photo-5060295.jpeg', description: 'Tellaro is a small cliffside village south of Lerici, with narrow lanes descending toward the rocky sea.' }
+    { name: 'Monterosso', importance: 94, coords: [44.1461, 9.6548], image: 'https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg', liveVideoId: 'Mjrd1nmlW5s', description: 'Monterosso is the largest village of the Cinque Terre, known for beaches, old town lanes and sea views.' },
+    { name: 'Vernazza', importance: 93, coords: [44.1350, 9.6847], image: 'https://images.pexels.com/photos/31386736/pexels-photo-31386736.jpeg', liveVideoId: 'YfKWbnMCNZ8', description: 'Vernazza is one of the most iconic villages, with a tiny harbor, colorful houses and dramatic cliffs.' },
+    { name: 'Corniglia', importance: 88, coords: [44.1197, 9.7089], image: 'https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg', liveVideoId: 'BhPxgJ3w8Ag', description: 'Corniglia sits above the sea and feels quieter, with terraces, viewpoints and narrow historic streets.' },
+    { name: 'Manarola', importance: 92, coords: [44.1076, 9.7290], image: 'https://images.pexels.com/photos/632522/pexels-photo-632522.jpeg', liveVideoId: 'Xmv0LbyZPVU', description: 'Manarola is famous for sunset views, colorful houses and the cliffside postcard panorama.' },
+    { name: 'Riomaggiore', importance: 91, coords: [44.0990, 9.7378], image: RIOMAGGIORE_IMAGE, liveVideoId: 'A7oGJdUmVkg', description: 'Riomaggiore is the southern gateway of the Cinque Terre, with steep streets and a small romantic harbor.' },
+    { name: 'Levanto', importance: 87, coords: [44.1703, 9.6137], image: 'https://images.pexels.com/photos/26309839/pexels-photo-26309839.jpeg', description: 'Levanto is a relaxed seaside gateway north of the Cinque Terre, with a long beach and a walkable historic centre.' },
+    { name: 'La Spezia', importance: 100, coords: [44.1025, 9.8241], image: 'https://images.pexels.com/photos/4254555/pexels-photo-4254555.jpeg', description: 'La Spezia is the main transport hub for the eastern Ligurian coast, with museums, markets and a broad waterfront.' },
+    { name: 'Fezzano', importance: 55, coords: [44.0802, 9.8246], image: 'https://images.pexels.com/photos/7611304/pexels-photo-7611304.jpeg', description: 'Fezzano is a small harbour village on the western shore of the Gulf of Poets, between La Spezia and Portovenere.' },
+    { name: 'Le Grazie', importance: 65, coords: [44.0669, 9.8339], image: 'https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg', description: 'Le Grazie is a sheltered maritime village with a working harbour and easy access toward Portovenere.' },
+    { name: 'Portovenere', importance: 96, coords: [44.0519, 9.8352], image: 'https://images.pexels.com/photos/15570449/pexels-photo-15570449.jpeg', description: 'Portovenere stands at the western entrance of the Gulf of Poets, facing Palmaria with a historic waterfront and dramatic headland.' },
+    { name: 'San Terenzo', importance: 75, coords: [44.0846, 9.8963], image: 'https://images.pexels.com/photos/14534753/pexels-photo-14534753.jpeg', description: 'San Terenzo is a compact seaside village with a sandy bay, castle and promenade linking it to Lerici.' },
+    { name: 'Lerici', importance: 90, coords: [44.0741, 9.9117], image: 'https://images.pexels.com/photos/13706810/pexels-photo-13706810.jpeg', description: 'Lerici curves around the eastern Gulf of Poets, known for its castle, waterfront and connections to nearby coves.' },
+    { name: 'Tellaro', importance: 78, coords: [44.0591, 9.9304], image: 'https://images.pexels.com/photos/5060295/pexels-photo-5060295.jpeg', description: 'Tellaro is a small cliffside village south of Lerici, with narrow lanes descending toward the rocky sea.' }
   ];
 
   var randomInitialVillageIndex = isMapPreviewMode ? -1 : Math.floor(Math.random() * 5);
@@ -2512,7 +2510,6 @@
 
   var poiMarkers = [];
   var cityMarkers = [];
-  var areaMarkers = [];
   var trailItems = [];
   var poiOverlapLayer = null;
   var poiOverlapGroups = [];
@@ -4264,8 +4261,37 @@
     if (item.latLngs && item.latLngs.length) flyToWithTopOffset(item.latLngs[0], 15, 0.8);
     showTrailCard(item.trail);
   }
-  function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { if (a.lng === b.lng) return b.lat - a.lat; return a.lng - b.lng; }); }
-  function createSeaArc(p1, p2, segments) { var lat1 = p1[0], lng1 = p1[1], lat2 = p2[0], lng2 = p2[1], midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2, distance = Math.abs(lng2 - lng1), offset = 0.018 + distance * 0.45, control = [midLat - 0.003, midLng - offset], points = [], i, t, lat, lng; for (i = 0; i <= segments; i += 1) { t = i / segments; lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * control[0] + t * t * lat2; lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * control[1] + t * t * lng2; points.push([lat, lng]); } return points; }
+  var FERRY_PORT_ORDER = ['monterosso', 'vernazza', 'manarola', 'riomaggiore', 'portovenere', 'la-spezia'];
+  var FERRY_SEA_LEGS = {
+    'monterosso>vernazza': [[44.1435,9.6512],[44.1395,9.6580],[44.1362,9.6738]],
+    'vernazza>manarola': [[44.1342,9.6785],[44.1280,9.6840],[44.1180,9.6990],[44.1090,9.7198]],
+    'manarola>riomaggiore': [[44.1047,9.7243],[44.1015,9.7295],[44.0985,9.7350]],
+    'riomaggiore>portovenere': [[44.0950,9.7400],[44.0870,9.7470],[44.0760,9.7580],[44.0630,9.7720],[44.0510,9.7920],[44.0465,9.8150],[44.0485,9.8295]],
+    'portovenere>la-spezia': [[44.0500,9.8400],[44.0560,9.8500],[44.0670,9.8580],[44.0810,9.8520],[44.0930,9.8380],[44.1000,9.8290]]
+  };
+  function getFerryPortKey(port) { var name = normalizeFerryPortName(port && port.name); if (name.indexOf('monterosso') !== -1) return 'monterosso'; if (name.indexOf('vernazza') !== -1) return 'vernazza'; if (name.indexOf('manarola') !== -1) return 'manarola'; if (name.indexOf('riomaggiore') !== -1) return 'riomaggiore'; if (name.indexOf('portovenere') !== -1 || name.indexOf('porto venere') !== -1) return 'portovenere'; if (name.indexOf('la spezia') !== -1) return 'la-spezia'; return ''; }
+  function getFerryPOIs() { return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { return p && isValidPOI(p) && String(p.type || '').toLowerCase() === 'ferry'; }).sort(function (a, b) { return FERRY_PORT_ORDER.indexOf(getFerryPortKey(a)) - FERRY_PORT_ORDER.indexOf(getFerryPortKey(b)); }); }
+  function createSeaArc(p1, p2, segments, fromPort, toPort) {
+    var fromKey = getFerryPortKey(fromPort);
+    var toKey = getFerryPortKey(toPort);
+    var fromIndex = FERRY_PORT_ORDER.indexOf(fromKey);
+    var toIndex = FERRY_PORT_ORDER.indexOf(toKey);
+    var reverse = fromIndex > toIndex;
+    var start = reverse ? toIndex : fromIndex;
+    var end = reverse ? fromIndex : toIndex;
+    var points = [reverse ? p2.slice() : p1.slice()];
+    var i;
+    var leg;
+    if (start >= 0 && end > start) {
+      for (i = start; i < end; i += 1) {
+        leg = FERRY_SEA_LEGS[FERRY_PORT_ORDER[i] + '>' + FERRY_PORT_ORDER[i + 1]] || [];
+        points = points.concat(leg.map(function(point) { return point.slice(); }));
+      }
+      points.push(reverse ? p1.slice() : p2.slice());
+      return reverse ? points.reverse() : points;
+    }
+    return [p1.slice(), p2.slice()];
+  }
   function normalizeFerryPortName(value) { var text = String(value || '').toLowerCase(); try { text = text.normalize('NFD'); } catch (error) {} text = text.replace(/[̀-ͯ]/g, ''); text = text.replace(/[^a-z0-9]+/g, ' ').trim(); return text; }
   function getFerryPortByName(name) { var target = normalizeFerryPortName(name); var exact; var partial; if (!target) return null; exact = ferryPorts.find(function(port) { return normalizeFerryPortName(port.name) === target; }); if (exact) return exact; partial = ferryPorts.find(function(port) { var n = normalizeFerryPortName(port.name); return n.indexOf(target) !== -1 || target.indexOf(n) !== -1; }); return partial || null; }
   function getTrainStationForVillage(village) {
@@ -4289,7 +4315,7 @@
     }).map(function(poi) { return { poi: poi, distance: distanceMeters(poi.coords, (villagePlace || { coords: poi.coords }).coords) }; }).sort(function(a, b) { return a.distance - b.distance; });
     return candidates.length ? candidates[0].poi : null;
   }
-  function getFerryRouteArc(fromPort, toPort) { var fromKey; var toKey; var existing; var arc; if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return []; fromKey = String(fromPort.id || fromPort.name); toKey = String(toPort.id || toPort.name); existing = ferryRouteArcs.find(function(route) { return String(route.from.id || route.from.name) === fromKey && String(route.to.id || route.to.name) === toKey; }); if (existing) return existing.arc; existing = ferryRouteArcs.find(function(route) { return String(route.from.id || route.from.name) === toKey && String(route.to.id || route.to.name) === fromKey; }); if (existing) return existing.arc.slice().reverse(); arc = createSeaArc(fromPort.coords, toPort.coords, 64); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: true }); if (ferryRoutesLayer) L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.58, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); return arc; }
+  function getFerryRouteArc(fromPort, toPort) { var fromKey; var toKey; var existing; var arc; if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return []; fromKey = String(fromPort.id || fromPort.name); toKey = String(toPort.id || toPort.name); existing = ferryRouteArcs.find(function(route) { return String(route.from.id || route.from.name) === fromKey && String(route.to.id || route.to.name) === toKey; }); if (existing) return existing.arc; existing = ferryRouteArcs.find(function(route) { return String(route.from.id || route.from.name) === toKey && String(route.to.id || route.to.name) === fromKey; }); if (existing) return existing.arc.slice().reverse(); arc = createSeaArc(fromPort.coords, toPort.coords, 64, fromPort, toPort); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: true }); if (ferryRoutesLayer) L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.58, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); return arc; }
   function getPointAlongLatLngs(latLngs, progress) { var total = 0; var distances = []; var i; var target; var travelled = 0; var segmentDistance; var localT; var a; var b; if (!latLngs || latLngs.length < 2) return null; progress = Math.max(0, Math.min(1, Number(progress) || 0)); for (i = 1; i < latLngs.length; i += 1) { segmentDistance = distanceMeters(latLngs[i - 1], latLngs[i]); distances.push(segmentDistance); total += segmentDistance; } if (!total) return latLngs[0]; target = total * progress; for (i = 1; i < latLngs.length; i += 1) { segmentDistance = distances[i - 1]; if (travelled + segmentDistance >= target) { a = latLngs[i - 1]; b = latLngs[i]; localT = segmentDistance ? (target - travelled) / segmentDistance : 0; return [a[0] + (b[0] - a[0]) * localT, a[1] + (b[1] - a[1]) * localT]; } travelled += segmentDistance; } return latLngs[latLngs.length - 1]; }
   function shouldReverseFerryIcon(fromPort, toPort) { if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return false; return Number(toPort.coords[1]) > Number(fromPort.coords[1]); }
   function getMovingFerryIconSize() { var zoom = map ? map.getZoom() : 12; var width; if (zoom >= 18) width = 82; else if (zoom >= 17) width = 76; else if (zoom >= 16) width = 68; else if (zoom >= 15) width = 58; else if (zoom >= 14) width = 48; else if (zoom >= 13) width = 42; else width = 36; return { width: width, height: Math.round(width * 0.56) }; }
@@ -4309,7 +4335,7 @@
   function animateMovingFerries() { var nowMin = getCurrentMinutesOfDay(); ferryVehicleMarkers.forEach(function(item) { var progress; var point; if (!item || !item.marker) return; if (item.status === 'port-before' || item.status === 'port-after' || item.status === 'port-waiting') { if (item.port && isValidCoords(item.port.coords)) item.marker.setLatLng(item.port.coords); return; } if (!item.arc || item.arc.length < 2) return; progress = (nowMin - item.departMin) / Math.max(1, item.arriveMin - item.departMin); progress = Math.max(0, Math.min(1, progress)); point = getPointAlongLatLngs(item.arc, progress); if (point) item.marker.setLatLng(point); }); ferryAnimationFrameId = requestAnimationFrame(animateMovingFerries); }
   function refreshMovingFerriesFromTimetable() { startMovingFerries(); }
   function startMovingFerries() { var activeLegs; stopMovingFerries(); if (!ferryVehiclesLayer) return; activeLegs = getActiveFerryLegs(); if (!activeLegs.length && ferryPorts && ferryPorts.length) { activeLegs = ferryPorts.map(function(port) { return { tripId: 'port-' + String(port.id || port.name), status: 'port-waiting', port: port, from: port, to: port, arc: [port.coords, port.coords], departMin: getCurrentMinutesOfDay(), arriveMin: getCurrentMinutesOfDay(), progress: 0, direction: '', upcomingStops: [] }; }); } activeLegs.forEach(function(leg) { var startPoint = leg.status === 'port-before' || leg.status === 'port-after' || leg.status === 'port-waiting' ? leg.port.coords : (getPointAlongLatLngs(leg.arc, leg.progress) || leg.arc[0]); var reverseIcon = shouldReverseFerryIcon(leg.from, leg.to); var marker = L.marker(startPoint, { icon: createMovingFerryIcon(reverseIcon), interactive: true, zIndexOffset: -250 }).addTo(ferryVehiclesLayer); ferryVehicleMarkers.push({ marker: marker, status: leg.status || 'sailing', port: leg.port || null, arc: leg.arc, departMin: leg.departMin, arriveMin: leg.arriveMin, tripId: leg.tripId, from: leg.from, to: leg.to, direction: leg.direction, reverseIcon: reverseIcon, upcomingStops: leg.upcomingStops || [] }); bindMovingFerryPopup(marker, ferryVehicleMarkers[ferryVehicleMarkers.length - 1]); updateSelectedPOIEmphasis(); }); if (ferryVehicleMarkers.length) ferryAnimationFrameId = requestAnimationFrame(animateMovingFerries); if (ferryTimetableRefreshTimer) window.clearTimeout(ferryTimetableRefreshTimer); ferryTimetableRefreshTimer = window.setTimeout(refreshMovingFerriesFromTimetable, 60000); }
-  function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; stopMovingFerryRefresh(); stopMovingFerries(); ferryRoutesLayer.clearLayers(); ferryRouteArcs = []; ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 48); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: false }); L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.62, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } startMovingFerries(); }
+  function addFerryRoutes() { var i, fromPort, toPort, arc; if (!ferryRoutesLayer) return; stopMovingFerryRefresh(); stopMovingFerries(); ferryRoutesLayer.clearLayers(); ferryRouteArcs = []; ferryPorts = getFerryPOIs(); if (ferryPorts.length < 2) return; for (i = 0; i < ferryPorts.length - 1; i += 1) { fromPort = ferryPorts[i]; toPort = ferryPorts[i + 1]; arc = createSeaArc(fromPort.coords, toPort.coords, 48, fromPort, toPort); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: false }); L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.62, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); } startMovingFerries(); }
   async function loadFerryTimetable() { var response; if (!SUPABASE_READY || !supabaseClient) return; response = await supabaseClient.from('ferry_timetable').select('*').order('trip_id', { ascending: true }).order('stop_sequence', { ascending: true }); if (response.error) { console.warn('Supabase ferry timetable load failed:', response.error.message); ferryTimetableRows = []; startMovingFerries(); return; } ferryTimetableRows = response.data || []; startMovingFerries(); }
   function getPlaceForCoords(coords) {
     var closest = null;
@@ -5807,36 +5833,32 @@
   }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function updatePlaceLabelVisibility() {
-    var overview = map && map.getZoom() < 12.15;
-    cityMarkers.forEach(function(entry) {
-      if (!entry.marker) return;
-      if (overview && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
-      if (!overview && !map.hasLayer(entry.marker)) entry.marker.addTo(map);
-    });
-    areaMarkers.forEach(function(marker) {
-      if (overview && !map.hasLayer(marker)) marker.addTo(map);
-      if (!overview && map.hasLayer(marker)) map.removeLayer(marker);
-    });
-  }
-  function createAreaMarkers(interactive) {
-    var areas = [
-      { name: 'Cinque Terre', coords: [44.1215, 9.6995], place: 'Corniglia' },
-      { name: 'La Spezia', coords: [44.1025, 9.8241], place: 'La Spezia' },
-      { name: 'Golfo dei Poeti', coords: [44.0685, 9.8825], place: 'Lerici' }
-    ];
-    areaMarkers = areas.map(function(area) {
-      var marker = L.marker(area.coords, {
-        interactive: interactive,
-        zIndexOffset: 2500,
-        icon: L.divIcon({ className: 'area-label', html: '<span>' + escapeHTML(area.name) + '</span>', iconSize: [1, 1], iconAnchor: [0, 0] })
-      });
-      if (interactive) marker.on('click', function() { var index = getVillageIndexByName(area.place); if (index >= 0) focusVillageByIndex(index); });
-      return marker;
+    var zoom = map ? map.getZoom() : 20;
+    var minimumImportance = zoom < 10.75 ? 90 : (zoom < 11.5 ? 80 : (zoom < 12.25 ? 65 : 0));
+    var placed = [];
+    cityMarkers.slice().sort(function(a, b) { return Number(b.place.importance || 0) - Number(a.place.importance || 0); }).forEach(function(entry) {
+      var point;
+      var width;
+      var box;
+      var collides;
+      if (!entry.marker || Number(entry.place.importance || 0) < minimumImportance) {
+        if (entry.marker && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
+        return;
+      }
+      point = map.latLngToContainerPoint(entry.place.coords);
+      width = Math.max(48, String(entry.place.name || '').length * 8.3 + 10);
+      box = { left: point.x - width / 2 - 7, right: point.x + width / 2 + 7, top: point.y - 15, bottom: point.y + 15 };
+      collides = placed.some(function(other) { return box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top; });
+      if (collides) {
+        if (map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
+      } else {
+        if (!map.hasLayer(entry.marker)) entry.marker.addTo(map);
+        placed.push(box);
+      }
     });
   }
   function createCityMarkers(interactive) {
     interactive = interactive !== false;
-    createAreaMarkers(interactive);
     places.forEach(function (place, index) {
       var marker = L.marker(place.coords, {
         title: place.name,
