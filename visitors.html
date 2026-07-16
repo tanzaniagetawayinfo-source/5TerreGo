@@ -23,6 +23,9 @@
     .gate{min-height:260px;display:grid;place-items:center;text-align:center;color:var(--muted);font-weight:700}
     .gate-card{padding:28px;border-radius:24px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}
     .dashboard{display:grid;gap:20px}
+    .account-back{display:inline-flex;align-items:center;gap:8px;width:max-content;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font-size:12px;font-weight:850;text-decoration:none;box-shadow:0 6px 18px rgba(25,48,83,.05);cursor:pointer}
+    .account-back svg{width:17px;height:17px}
+    .account-back:active{transform:scale(.98)}
     .topline{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
     .eyebrow{margin:0 0 6px;color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
     h1{margin:0;font-size:clamp(30px,4vw,48px);line-height:.95;letter-spacing:-.055em}
@@ -88,6 +91,10 @@
   <main class="shell">
     <section id="gate" class="gate"><div class="gate-card">Controllo dell’accesso in corso…</div></section>
     <section id="dashboard" class="dashboard hidden" aria-live="polite">
+      <a id="accountBack" class="account-back" href="/login.html" aria-label="Torna all’account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+        <span>Torna all’account</span>
+      </a>
       <header class="topline">
         <div><p class="eyebrow">Analisi del sito</p><h1>Come sta andando?</h1><p id="periodLabel" class="subtitle">Panoramica degli ultimi 7 giorni</p></div>
         <div class="controls">
@@ -142,6 +149,7 @@
     var client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     var el=function(id){return document.getElementById(id);};
     var gate=el('gate'),dashboard=el('dashboard'),statusEl=el('status'),refreshBtn=el('refreshBtn'),filters=el('filters');
+    el('accountBack').addEventListener('click',function(event){event.preventDefault();window.location.replace('/login.html');});
 
     function escapeHTML(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char];});}
     function number(value){return new Intl.NumberFormat('it-IT').format(Number(value||0));}
