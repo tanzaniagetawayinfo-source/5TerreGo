@@ -564,9 +564,9 @@
     #turn-navigation-map { display:none;position:fixed;inset:0;z-index:1900;background:#dce8ed; }
     #turn-navigation-close { display:none;position:fixed;right:14px;top:calc(14px + env(safe-area-inset-top));z-index:5200;width:52px;height:52px;border:0;border-radius:999px;background:#e3262e;color:#fff;font:inherit;font-size:28px;font-weight:900;line-height:1;box-shadow:0 12px 30px rgba(130,0,0,.34);cursor:pointer; }
     #turn-navigation-recenter{display:none;position:fixed;right:16px;bottom:112px;z-index:5000;width:50px;height:50px;border:0;border-radius:999px;background:#fff;color:#1677ff;font-size:25px;font-weight:900;box-shadow:0 10px 26px rgba(0,0,0,.28);cursor:pointer}
-    body.navigation-active #turn-navigation-map,body.navigation-active #turn-navigation-close{display:block}
+    body.navigation-mode #turn-navigation-map,body.navigation-mode #turn-navigation-close{display:block}
     body.navigation-active #turn-navigation-recenter{display:block}
-    body.navigation-active #ftg-global-actionbar-root,body.navigation-active #map,body.navigation-active .search-floating,body.navigation-active #bottom-rail,body.navigation-active #map-style-btn,body.navigation-active #user-location-btn,body.navigation-active #user-location-toast,body.navigation-active #tour-nav,body.navigation-active #poi-card,body.navigation-active #trail-card{display:none!important}
+    body.navigation-mode #ftg-global-actionbar-root,body.navigation-mode #map,body.navigation-mode .search-floating,body.navigation-mode #bottom-rail,body.navigation-mode #map-style-btn,body.navigation-mode #user-location-btn,body.navigation-mode #user-location-toast,body.navigation-mode #tour-nav,body.navigation-mode #poi-card,body.navigation-mode #trail-card{display:none!important}
     .leaflet-div-icon { background: transparent !important; border: none !important; }
 
     #trail-card { position:fixed; inset:0 0 0 auto; z-index:4100; width:min(470px,100vw); height:100dvh; display:none; overflow:hidden; background:rgba(255,255,255,.98); color:#101828; box-shadow:-26px 0 70px rgba(0,0,0,.22); transform:translateX(104%); transition:transform .34s cubic-bezier(.2,.9,.2,1),height .32s cubic-bezier(.2,.9,.2,1); }
@@ -1360,6 +1360,9 @@
     body.navigation-active #navigation-north { right: 14px; top: calc(var(--ftg-header-height, 98px) + 14px); bottom: auto; }
     body.map-preview-mode #navigation-north { display:none !important; }
     body.navigation-mode .search-floating, body.navigation-mode #bottom-rail, body.navigation-mode #map-style-btn { display: none !important; }
+    body.navigation-mode:not(.navigation-active) #navigation-planner{left:0;right:0;bottom:0;width:100%;max-width:none;margin:0;border:0;border-radius:28px 28px 0 0;box-shadow:0 -16px 46px rgba(4,15,30,.3);max-height:46vh;overflow-y:auto}
+    body.navigation-mode:not(.navigation-active) #navigation-steps{display:none!important}
+    body.navigation-mode:not(.navigation-active) .navigation-head{padding-top:12px}
     body.navigation-active #navigation-origin-select, body.navigation-active #navigation-locate, body.navigation-active #navigation-options, body.navigation-active #navigation-start { display: none; }
     body.navigation-active #navigation-stop { display: block; }
     body.navigation-active #navigation-context { background: #111827; color: #fff; }
@@ -4764,11 +4767,17 @@
     return output;
   }
   function getTurnNavigationGeoJSON() {
+    var colors = ['#ff7200', '#7c3aed', '#00b8e6'];
+    var alternatives = navigationChoices.filter(function(choice) { return choice && choice.mode !== 'train-loading'; }).slice(0, 3);
+    var features = [];
+    alternatives.forEach(function(choice, routeIndex) {
+      getNavigationRouteSegments(choice).filter(function(segment) { return segment.points && segment.points.length >= 2; }).forEach(function(segment) {
+        features.push({ type: 'Feature', properties: { mode: segment.mode, routeIndex: routeIndex, routeColor: colors[routeIndex], selected: choice === navigationSelectedOption ? 1 : 0 }, geometry: { type: 'LineString', coordinates: segment.points.map(function(point) { return [point[1], point[0]]; }) } });
+      });
+    });
     return {
       type: 'FeatureCollection',
-      features: getNavigationRouteSegments(navigationSelectedOption).filter(function(segment) { return segment.points && segment.points.length >= 2; }).map(function(segment) {
-        return { type: 'Feature', properties: { mode: segment.mode }, geometry: { type: 'LineString', coordinates: segment.points.map(function(point) { return [point[1], point[0]]; }) } };
-      })
+      features: features
     };
   }
   function updateTurnNavigationRoute() {
@@ -4795,8 +4804,9 @@
     }
   }
   function fitTurnNavigationRoute() {
-    var points = getNavigationRoutePoints(navigationSelectedOption);
+    var points = [];
     var bounds;
+    navigationChoices.filter(function(choice) { return choice && choice.mode !== 'train-loading'; }).slice(0, 3).forEach(function(choice) { points = points.concat(getNavigationRoutePoints(choice)); });
     if (!turnNavigationMap || !turnNavigationMapLoaded || points.length < 2) return;
     bounds = new window.maplibregl.LngLatBounds();
     points.forEach(function(point) { bounds.extend([point[1], point[0]]); });
@@ -4824,8 +4834,8 @@
       },
       center: [initial[1], initial[0]],
       zoom: 16.5,
-      pitch: 55,
-      bearing: getNavigationForwardBearing(),
+      pitch: 0,
+      bearing: 0,
       attributionControl: false,
       dragRotate: true,
       touchPitch: true
@@ -4833,8 +4843,8 @@
     turnNavigationMap.on('load', function() {
       turnNavigationMapLoaded = true;
       turnNavigationMap.addSource('navigation-route', { type: 'geojson', data: getTurnNavigationGeoJSON() });
-      turnNavigationMap.addLayer({ id: 'navigation-route-casing', type: 'line', source: 'navigation-route', paint: { 'line-color': '#ffffff', 'line-width': 10, 'line-opacity': .92 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
-      turnNavigationMap.addLayer({ id: 'navigation-route-line', type: 'line', source: 'navigation-route', paint: { 'line-color': ['match', ['get', 'mode'], 'ferry', '#00b8e6', 'train', '#7c3aed', 'trail', '#17a673', '#ff7200'], 'line-width': 6 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
+      turnNavigationMap.addLayer({ id: 'navigation-route-casing', type: 'line', source: 'navigation-route', paint: { 'line-color': '#ffffff', 'line-width': ['case', ['==', ['get', 'selected'], 1], 10, 8], 'line-opacity': .9 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
+      turnNavigationMap.addLayer({ id: 'navigation-route-line', type: 'line', source: 'navigation-route', paint: { 'line-color': ['get', 'routeColor'], 'line-width': ['case', ['==', ['get', 'selected'], 1], 6, 4], 'line-opacity': ['case', ['==', ['get', 'selected'], 1], 1, .78] }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
       fitTurnNavigationRoute();
     });
     turnNavigationMap.on('dragstart', function() { turnNavigationFollowingUser = false; });
@@ -5010,6 +5020,7 @@
     clearNavigationRoute();
     if (!map || !alternatives.length) return;
     updateTurnNavigationRoute();
+    if (turnNavigationMapLoaded && !navigationFollowing) fitTurnNavigationRoute();
     alternatives.forEach(function(choice, index) {
       var points = getNavigationRoutePoints(choice);
       if (points.length < 2) return;
@@ -5053,6 +5064,7 @@
     updateFerryVisibilityForFilter();
     updatePOIVisibility();
     renderNavigationChoices();
+    window.setTimeout(function() { if (navigationModeActive) startTurnNavigationMap(); }, 100);
     if (pendingNavigationLocation) requestPlainUserLocation();
   }
   function selectNavigationOption(index) {
