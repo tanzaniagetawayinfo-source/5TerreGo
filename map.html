@@ -2634,12 +2634,12 @@
   var NORMAL_MAP_ZOOM = 9.5;
   var NORMAL_MAP_PITCH = 38;
   var NORMAL_MAP_LIMITS = [[9.28, 43.75], [10.28, 44.48]];
-  var OPENING_FLIGHT_DURATION_MS = 10400;
-  var OPENING_FLIGHT_START = { center:[9.6548,44.1461], zoom:15.15, pitch:55, bearing:-24 };
-  var openingFlightActive = false;
-  var openingFlightStarted = false;
-  var openingFlightFrame = 0;
-  var openingFlightStartAttempts = 0;
+  var ambientOrbitFrame = 0;
+  var ambientOrbitActive = false;
+  var fallbackOrbitStarted = false;
+  var userOrbitPlayed = false;
+  var normalGyroTracking = false;
+  var normalGyroSuspendedByGesture = false;
   var placesOverviewBounds = null;
   var placesOverviewMinZoom = 10;
   var fittingPlacesOverview = false;
@@ -3070,7 +3070,7 @@
   function getBearingDegrees(fromPoint, toPoint) { var lat1; var lat2; var dLon; var y; var x; if (!isValidCoords(fromPoint) || !isValidCoords(toPoint)) return 0; lat1 = fromPoint[0] * Math.PI / 180; lat2 = toPoint[0] * Math.PI / 180; dLon = (toPoint[1] - fromPoint[1]) * Math.PI / 180; y = Math.sin(dLon) * Math.cos(lat2); x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
   function getCompassTargetOnRoute(userCoords, routeLatLngs) { var i; if (!isValidCoords(userCoords) || !routeLatLngs || routeLatLngs.length < 2 || !map) return null; for (i = 1; i < routeLatLngs.length; i += 1) { if (distanceMeters(userCoords, routeLatLngs[i]) > 12) return routeLatLngs[i]; } return routeLatLngs[routeLatLngs.length - 1]; }
   function getRouteInstructionBearing() { var target; if (!activeTour || !isValidCoords(userLocationLatLng)) return null; target = getCompassTargetOnRoute(userLocationLatLng, activeTour.currentLegPath || []); if (!target && getActiveTourStop()) target = getActiveTourStop().coords; if (!target) return null; return getBearingDegrees(userLocationLatLng, target); }
-  function setTourHeading(rawHeading, source) { var heading = normalizeDegrees(rawHeading); var now = Date.now(); var delta; var smoothing; if (!Number.isFinite(heading)) return; if (source === 'device' && now - lastTourHeadingUpdateAt < 90) return; if (tourSmoothedHeading === null) { tourSmoothedHeading = heading; } else { delta = getShortestAngleDelta(tourSmoothedHeading, heading); if (Math.abs(delta) < 2.5) return; smoothing = source === 'gps' ? 0.22 : 0.14; tourSmoothedHeading = normalizeDegrees(tourSmoothedHeading + delta * smoothing); } lastTourHeadingUpdateAt = now; currentUserHeading = tourSmoothedHeading; tourHeadingSource = source || ''; updateTourCompass(); updateNavigationHeadingVisual(); updateNavigationMapRotation(); if (navigationFollowing) updateTurnNavigationCamera(false); }
+  function setTourHeading(rawHeading, source) { var heading = normalizeDegrees(rawHeading); var now = Date.now(); var delta; var smoothing; if (!Number.isFinite(heading)) return; if (source === 'device' && now - lastTourHeadingUpdateAt < 90) return; if (tourSmoothedHeading === null) { tourSmoothedHeading = heading; } else { delta = getShortestAngleDelta(tourSmoothedHeading, heading); if (Math.abs(delta) < 2.5) return; smoothing = source === 'gps' ? 0.22 : 0.14; tourSmoothedHeading = normalizeDegrees(tourSmoothedHeading + delta * smoothing); } lastTourHeadingUpdateAt = now; currentUserHeading = tourSmoothedHeading; tourHeadingSource = source || ''; updateTourCompass(); updateNavigationHeadingVisual(); updateNavigationMapRotation(); updateNormalMapLibreHeading(); if (navigationFollowing) updateTurnNavigationCamera(false); }
   function updateNavigationHeadingVisual() {
     var headingEl = userLocationMarker && userLocationMarker._icon ? userLocationMarker._icon.querySelector('.user-location-heading') : null;
     if (!headingEl || currentUserHeading === null) return;
@@ -3692,6 +3692,7 @@
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     userLocationLatLng = [lat, lng];
     syncMapLibreUserMarker();
+    updateNormalMapLibreHeading();
     if (!userLocationMarker) userLocationMarker = L.marker(userLocationLatLng, { icon: createUserLocationIcon(), interactive: false, zIndexOffset: 2000 }).addTo(map);
     else userLocationMarker.setLatLng(userLocationLatLng);
     updateNavigationHeadingVisual();
@@ -3727,9 +3728,8 @@
     }
     if (userLocationFirstFix) {
       userLocationFirstFix = false;
-      isProgrammaticMove = true;
-      map.flyTo(userLocationLatLng, Math.max(map.getZoom(), 16), { duration: 0.9 });
-      window.setTimeout(function () { isProgrammaticMove = false; }, 1000);
+      stopAmbientOrbit();
+      startUserLocationOrbit(false);
     }
   }
   function resetUserLocationWatch() { if (userLocationWatchId !== null && navigator.geolocation) { try { navigator.geolocation.clearWatch(userLocationWatchId); } catch (error) {} } userLocationWatchId = null; userLocationFirstFix = true; }
@@ -3761,6 +3761,31 @@
   }
   function requestTourLocationAgain(place) { userLocationRequestMode = 'tour'; if (place) pendingTourPlace = place; pendingTourLocationRequest = true; resetUserLocationWatch(); startUserLocationWatch(); }
   function requestPlainUserLocation() { userLocationRequestMode = 'plain'; pendingTourPlace = null; pendingTourLocationRequest = false; resetUserLocationWatch(); startUserLocationWatch(); }
+  async function activateUserCompass(event) {
+    markExplicitPermissionGesture(event);
+    stopAmbientOrbit();
+    normalGyroSuspendedByGesture = false;
+    await enableNavigationOrientation();
+    normalGyroTracking = navigationOrientationListening;
+    userOrbitPlayed = false;
+    requestPlainUserLocation();
+    if (isValidCoords(userLocationLatLng)) window.setTimeout(function() { startUserLocationOrbit(true); }, 260);
+  }
+  function tryPreviouslyGrantedLocation() {
+    if (!navigator.permissions || !navigator.permissions.query || !navigator.geolocation) { window.setTimeout(startFallbackOrbit, 650); return; }
+    navigator.permissions.query({ name:'geolocation' }).then(function(status) {
+      if (!status || status.state !== 'granted') { startFallbackOrbit(); return; }
+      if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof window.DeviceOrientationEvent.requestPermission !== 'function') {
+        enableNavigationOrientation().then(function(enabled) { normalGyroTracking = enabled; });
+      }
+      userLocationRequestMode = 'plain';
+      setUserLocationButtonState('pending');
+      navigator.geolocation.getCurrentPosition(function(position) {
+        updateUserLocationOnMap(position);
+        if (userLocationWatchId === null) userLocationWatchId = navigator.geolocation.watchPosition(updateUserLocationOnMap, handleUserLocationError, { enableHighAccuracy:true, maximumAge:3000, timeout:15000 });
+      }, function() { startFallbackOrbit(); }, { enableHighAccuracy:true, maximumAge:3000, timeout:5000 });
+    }).catch(startFallbackOrbit);
+  }
   function getClosestCity() { var center = map.getCenter(), minDist = Infinity, closestIndex = -1; places.forEach(function (place, index) { var distance = center.distanceTo(L.latLng(place.coords)); if (distance < minDist) { minDist = distance; closestIndex = index; } }); return { index: closestIndex, distance: minDist }; }
   function evaluateAutoCard() {
     return;
@@ -5004,93 +5029,76 @@
     turnNavigationMap[immediate ? 'jumpTo' : 'easeTo']({ center: center, zoom: 17.2, pitch: 55, bearing: bearing, duration: immediate ? 0 : 520 });
     syncMapLibreUserMarker();
   }
-  function shouldPlayOpeningFlight() {
-    return !isMapPreviewMode && !navigationModeActive && getRequestedVillageIndexFromURL() < 0;
+  function stopAmbientOrbit() {
+    if (ambientOrbitFrame) window.cancelAnimationFrame(ambientOrbitFrame);
+    ambientOrbitFrame = 0;
+    ambientOrbitActive = false;
   }
-  function getOpeningFlightSplineValue(previous, start, end, next, amount) {
-    var amount2 = amount * amount;
-    var amount3 = amount2 * amount;
-    return .5 * ((2 * start) + ((end - previous) * amount) + ((2 * previous - 5 * start + 4 * end - next) * amount2) + ((-previous + 3 * start - 3 * end + next) * amount3));
+  function syncLeafletToNormalCamera() {
+    var center;
+    if (!map || !turnNavigationMap) return;
+    center = turnNavigationMap.getCenter();
+    syncingMapCameras = true;
+    map.setView([center.lat, center.lng], turnNavigationMap.getZoom(), { animate:false });
+    syncingMapCameras = false;
   }
-  function getOpeningFlightCamera(progress) {
-    var frames = [
-      { center:[9.6548,44.1461], zoom:15.15, pitch:55, bearing:-24 },
-      { center:[9.6847,44.1350], zoom:14.95, pitch:55, bearing:-21 },
-      { center:[9.7089,44.1197], zoom:14.75, pitch:54, bearing:-18 },
-      { center:[9.7290,44.1076], zoom:14.90, pitch:54, bearing:-15 },
-      { center:[9.7378,44.0990], zoom:14.65, pitch:53, bearing:-12 },
-      { center:[9.7480,44.1110], zoom:12.35, pitch:49, bearing:-8 },
-      { center:[9.7650,44.1200], zoom:10.75, pitch:44, bearing:-4 },
-      { center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 }
-    ];
-    var linear = Math.max(0, Math.min(1, progress));
-    var scaled = linear * (frames.length - 1);
-    var index = Math.min(frames.length - 2, Math.floor(scaled));
-    var amount = scaled - index;
-    var previous = frames[Math.max(0, index - 1)];
-    var start = frames[index];
-    var end = frames[index + 1];
-    var next = frames[Math.min(frames.length - 1, index + 2)];
-    return {
-      center:[
-        getOpeningFlightSplineValue(previous.center[0], start.center[0], end.center[0], next.center[0], amount),
-        getOpeningFlightSplineValue(previous.center[1], start.center[1], end.center[1], next.center[1], amount)
-      ],
-      zoom:getOpeningFlightSplineValue(previous.zoom, start.zoom, end.zoom, next.zoom, amount),
-      pitch:getOpeningFlightSplineValue(previous.pitch, start.pitch, end.pitch, next.pitch, amount),
-      bearing:getOpeningFlightSplineValue(previous.bearing, start.bearing, end.bearing, next.bearing, amount)
-    };
-  }
-  function finishOpeningFlight(keepCurrentCamera) {
-    var currentCenter;
-    if (openingFlightFrame) window.cancelAnimationFrame(openingFlightFrame);
-    openingFlightFrame = 0;
-    openingFlightActive = false;
-    isProgrammaticMove = false;
-    if (!turnNavigationMap || !turnNavigationMapLoaded) return;
-    if (!keepCurrentCamera) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
-    if (map) {
-      currentCenter = turnNavigationMap.getCenter();
-      syncingMapCameras = true;
-      map.setView([currentCenter.lat, currentCenter.lng], turnNavigationMap.getZoom(), { animate:false });
-      syncingMapCameras = false;
-    }
-    syncMapLibreMarkers();
-    renderBottomRailCards();
-    scheduleSessionMapStateSave();
-  }
-  function cancelOpeningFlight() {
-    if (!openingFlightActive) return;
-    finishOpeningFlight(true);
-  }
-  function startOpeningFlight() {
+  function runAmbientOrbit(options) {
     var startedAt;
-    var reducedMotion = false;
-    if (openingFlightStarted || !shouldPlayOpeningFlight()) return;
-    if (!turnNavigationMap || !turnNavigationMapLoaded) {
-      openingFlightStartAttempts += 1;
-      if (openingFlightStartAttempts < 40) window.setTimeout(startOpeningFlight, 150);
-      return;
-    }
-    openingFlightStarted = true;
-    try { reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_error) {}
-    if (reducedMotion) { finishOpeningFlight(false); return; }
-    openingFlightActive = true;
-    isProgrammaticMove = true;
-    turnNavigationMap.jumpTo(OPENING_FLIGHT_START);
-    syncMapLibreMarkers();
+    var duration;
+    var startBearing;
+    var endBearing;
+    var center;
+    var zoom;
+    var pitch;
+    if (!turnNavigationMap || !turnNavigationMapLoaded || !options) return;
+    stopAmbientOrbit();
+    center = options.center;
+    zoom = Number(options.zoom);
+    pitch = Number(options.pitch);
+    duration = Math.max(1200, Number(options.duration || 9000));
+    startBearing = Number(options.startBearing || 0);
+    endBearing = startBearing + Number(options.rotation || 360);
+    ambientOrbitActive = true;
+    turnNavigationMap.jumpTo({ center:center, zoom:zoom, pitch:pitch, bearing:startBearing });
     startedAt = performance.now();
-    function animateOpeningFlight(now) {
+    function animateOrbit(now) {
       var progress;
-      var camera;
-      if (!openingFlightActive || !turnNavigationMap) return;
-      progress = Math.max(0, Math.min(1, (now - startedAt) / OPENING_FLIGHT_DURATION_MS));
-      camera = getOpeningFlightCamera(progress);
-      turnNavigationMap.jumpTo(camera);
-      if (progress < 1) openingFlightFrame = window.requestAnimationFrame(animateOpeningFlight);
-      else finishOpeningFlight(false);
+      if (!ambientOrbitActive || !turnNavigationMap) return;
+      progress = Math.max(0, Math.min(1, (now - startedAt) / duration));
+      turnNavigationMap.jumpTo({ center:center, zoom:zoom, pitch:pitch, bearing:startBearing + ((endBearing - startBearing) * progress) });
+      if (progress < 1) { ambientOrbitFrame = window.requestAnimationFrame(animateOrbit); return; }
+      stopAmbientOrbit();
+      if (typeof options.onComplete === 'function') options.onComplete();
+      syncLeafletToNormalCamera();
+      syncMapLibreMarkers();
     }
-    openingFlightFrame = window.requestAnimationFrame(animateOpeningFlight);
+    ambientOrbitFrame = window.requestAnimationFrame(animateOrbit);
+  }
+  function startFallbackOrbit() {
+    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || getRequestedVillageIndexFromURL() >= 0 || isValidCoords(userLocationLatLng)) return;
+    fallbackOrbitStarted = true;
+    normalGyroTracking = false;
+    runAmbientOrbit({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:48, startBearing:0, rotation:360, duration:12000, onComplete:function() {
+      if (turnNavigationMap) turnNavigationMap.easeTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0, duration:500 });
+    } });
+  }
+  function startUserLocationOrbit(force) {
+    var targetBearing;
+    if (!isValidCoords(userLocationLatLng) || (userOrbitPlayed && !force)) return;
+    if (!turnNavigationMap || !turnNavigationMapLoaded) { window.setTimeout(function() { startUserLocationOrbit(force); }, 160); return; }
+    userOrbitPlayed = true;
+    targetBearing = currentUserHeading === null ? 0 : currentUserHeading;
+    normalGyroTracking = false;
+    runAmbientOrbit({ center:[userLocationLatLng[1],userLocationLatLng[0]], zoom:16.2, pitch:58, startBearing:targetBearing - 180, rotation:360, duration:5200, onComplete:function() {
+      var settledBearing = currentUserHeading === null ? 0 : currentUserHeading;
+      normalGyroSuspendedByGesture = false;
+      normalGyroTracking = navigationOrientationListening;
+      if (turnNavigationMap) turnNavigationMap.easeTo({ center:[userLocationLatLng[1],userLocationLatLng[0]], zoom:17.2, pitch:55, bearing:settledBearing, duration:650 });
+    } });
+  }
+  function updateNormalMapLibreHeading() {
+    if (!turnNavigationMap || !turnNavigationMapLoaded || !normalGyroTracking || normalGyroSuspendedByGesture || currentUserHeading === null || !isValidCoords(userLocationLatLng)) return;
+    turnNavigationMap.easeTo({ center:[userLocationLatLng[1],userLocationLatLng[0]], bearing:currentUserHeading, pitch:55, duration:120 });
   }
   function fitTurnNavigationRoute() {
     var points = [];
@@ -5128,10 +5136,10 @@
           { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} }
         ]
       },
-      center: shouldPlayOpeningFlight() ? OPENING_FLIGHT_START.center : (!navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]]),
-      zoom: shouldPlayOpeningFlight() ? OPENING_FLIGHT_START.zoom : (!navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11)),
-      pitch: shouldPlayOpeningFlight() ? OPENING_FLIGHT_START.pitch : (navigationModeActive ? 25 : 38),
-      bearing: shouldPlayOpeningFlight() ? OPENING_FLIGHT_START.bearing : 0,
+      center: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
+      zoom: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11),
+      pitch: navigationModeActive ? 25 : NORMAL_MAP_PITCH,
+      bearing: 0,
       minZoom: 9.5,
       maxBounds: NORMAL_MAP_LIMITS,
       attributionControl: false,
@@ -5154,17 +5162,25 @@
       });
       if (navigationModeActive) fitTurnNavigationRoute();
       else {
-        if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo(shouldPlayOpeningFlight() ? OPENING_FLIGHT_START : { center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
+        if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
         syncMapLibreMarkers();
+        window.setTimeout(startFallbackOrbit, 650);
       }
     });
-    turnNavigationMap.on('dragstart', function() { turnNavigationFollowingUser = false; cancelOpeningFlight(); });
-    turnNavigationMap.getCanvasContainer().addEventListener('pointerdown', cancelOpeningFlight, { passive:true });
-    turnNavigationMap.getCanvasContainer().addEventListener('touchstart', cancelOpeningFlight, { passive:true });
-    turnNavigationMap.getCanvasContainer().addEventListener('wheel', cancelOpeningFlight, { passive:true });
+    turnNavigationMap.on('dragstart', function() { turnNavigationFollowingUser = false; stopAmbientOrbit(); });
+    turnNavigationMap.on('rotatestart', function(event) {
+      if (!event || !event.originalEvent) return;
+      stopAmbientOrbit();
+      normalGyroSuspendedByGesture = true;
+      normalGyroTracking = false;
+      showUserLocationToast('Orientamento manuale. Tocca la bussola per seguire di nuovo il giroscopio.');
+    });
+    turnNavigationMap.getCanvasContainer().addEventListener('pointerdown', stopAmbientOrbit, { passive:true });
+    turnNavigationMap.getCanvasContainer().addEventListener('touchstart', stopAmbientOrbit, { passive:true });
+    turnNavigationMap.getCanvasContainer().addEventListener('wheel', stopAmbientOrbit, { passive:true });
     turnNavigationMap.on('moveend', function() {
       var center;
-      if (openingFlightActive) return;
+      if (ambientOrbitActive) return;
       if (syncingMapCameras || navigationModeActive || !map) { syncMapLibreMarkers(); return; }
       center = turnNavigationMap.getCenter();
       syncingMapCameras = true;
@@ -6562,8 +6578,7 @@
 
     if (userLocationBtn) {
       userLocationBtn.addEventListener('click', function (event) {
-        markExplicitPermissionGesture(event);
-        requestPlainUserLocation();
+        activateUserCompass(event);
       });
     }
 
@@ -6708,7 +6723,6 @@
         updatePOIVisibility();
       }
       if (window.__ftgHideBootStatus) window.__ftgHideBootStatus();
-      startOpeningFlight();
     }).catch(function(error) {
       console.error('POI load failed:', error);
       if (window.__ftgShowBootError) {
@@ -6716,6 +6730,7 @@
       }
     });
     if (!isMapPreviewMode) window.setTimeout(function() { loadTrails(); }, 900);
+    if (!isMapPreviewMode) window.setTimeout(tryPreviouslyGrantedLocation, 180);
     window.setTimeout(function () { if (map) map.invalidateSize(false); }, 300);
     window.addEventListener('hashchange', function() {
       if (!isMapPreviewMode) focusRequestedVillageFromURL(true);
