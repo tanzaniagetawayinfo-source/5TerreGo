@@ -2621,6 +2621,10 @@
   var glTrailMarkers = [];
   var glFerryVehicleMarkers = [];
   var syncingMapCameras = false;
+  var NORMAL_MAP_CENTER = [9.785, 44.105];
+  var NORMAL_MAP_ZOOM = 9.8;
+  var NORMAL_MAP_PITCH = 38;
+  var NORMAL_MAP_LIMITS = [[9.28, 43.75], [10.28, 44.48]];
   var placesOverviewBounds = null;
   var placesOverviewMinZoom = 10;
   var fittingPlacesOverview = false;
@@ -4324,11 +4328,11 @@
   var FERRY_SEA_LEGS = {
     'monterosso>vernazza': [[44.1435,9.6512],[44.1395,9.6580],[44.1362,9.6738]],
     'vernazza>manarola': [[44.1342,9.6785],[44.1280,9.6840],[44.1180,9.6990],[44.1090,9.7198]],
-    'manarola>riomaggiore': [[44.1047,9.7243],[44.1015,9.7295],[44.0985,9.7350]],
-    'riomaggiore>portovenere': [[44.0950,9.7400],[44.0870,9.7470],[44.0760,9.7580],[44.0630,9.7720],[44.0510,9.7920],[44.0465,9.8150],[44.0485,9.8295]],
-    'portovenere>la-spezia': [[44.0500,9.8400],[44.0560,9.8500],[44.0670,9.8580],[44.0810,9.8520],[44.0900,9.8440],[44.0960,9.8380],[44.1005,9.8330],[44.1020,9.8290]],
-    'portovenere>lerici': [[44.0510,9.8400],[44.0515,9.8480],[44.0545,9.8610],[44.0585,9.8750],[44.0640,9.8890],[44.0700,9.9000],[44.0752,9.9048],[44.0760,9.9070],[44.0748,9.9085]],
-    'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0860,9.8550],[44.0830,9.8750],[44.0780,9.8950]]
+    'manarola>riomaggiore': [[44.1050,9.7232],[44.1020,9.7240],[44.0990,9.7290],[44.0970,9.7345]],
+    'riomaggiore>portovenere': [[44.0960,9.7330],[44.0910,9.7270],[44.0820,9.7300],[44.0710,9.7420],[44.0590,9.7630],[44.0500,9.7920],[44.0455,9.8170],[44.0465,9.8270],[44.0490,9.8335],[44.0505,9.8368]],
+    'portovenere>la-spezia': [[44.0505,9.8368],[44.0510,9.8425],[44.0560,9.8500],[44.0670,9.8580],[44.0810,9.8520],[44.0900,9.8440],[44.0960,9.8380],[44.1005,9.8330],[44.1020,9.8290]],
+    'portovenere>lerici': [[44.0505,9.8368],[44.0490,9.8430],[44.0490,9.8560],[44.0520,9.8710],[44.0570,9.8860],[44.0630,9.8980],[44.0670,9.9030],[44.0705,9.9060],[44.0725,9.9080],[44.0742,9.9091]],
+    'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0830,9.8530],[44.0750,9.8700],[44.0670,9.8900],[44.0640,9.8990],[44.0670,9.9030],[44.0705,9.9060],[44.0725,9.9080],[44.0742,9.9091]]
   };
   function getFerryPortKey(port) { var name = normalizeFerryPortName(port && port.name); if (name.indexOf('monterosso') !== -1) return 'monterosso'; if (name.indexOf('vernazza') !== -1) return 'vernazza'; if (name.indexOf('manarola') !== -1) return 'manarola'; if (name.indexOf('riomaggiore') !== -1) return 'riomaggiore'; if (name.indexOf('portovenere') !== -1 || name.indexOf('porto venere') !== -1) return 'portovenere'; if (name.indexOf('la spezia') !== -1) return 'la-spezia'; if (name.indexOf('lerici') !== -1) return 'lerici'; return ''; }
   function getFerryPOIs() { var seen = {}; return poiMarkers.map(function (m) { return m.poi; }).filter(function (p) { var key = getFerryPortKey(p); if (!p || !isValidPOI(p) || String(p.type || '').toLowerCase() !== 'ferry' || !key || seen[key]) return false; seen[key] = true; return true; }).sort(function (a, b) { return FERRY_PORT_ORDER.indexOf(getFerryPortKey(a)) - FERRY_PORT_ORDER.indexOf(getFerryPortKey(b)); }); }
@@ -4933,7 +4937,7 @@
         var point = entry && entry.latLngs && entry.latLngs[0];
         var trail = entry && entry.trail;
         var el;
-        if (!trail || !point) return;
+        if (!trail || !point || zoom < Math.max(14.25, getMinZoomForTrailImportance(trail.importance))) return;
         el = document.createElement('button');
         el.type = 'button';
         el.setAttribute('aria-label', trail.name || 'Trail');
@@ -5013,10 +5017,12 @@
           { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} }
         ]
       },
-      center: [initial[1], initial[0]],
-      zoom: map ? map.getZoom() : 11,
+      center: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
+      zoom: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11),
       pitch: navigationModeActive ? 25 : 38,
       bearing: 0,
+      minZoom: 9.5,
+      maxBounds: NORMAL_MAP_LIMITS,
       attributionControl: false,
       dragRotate: true,
       touchPitch: true
@@ -5036,7 +5042,10 @@
         if (entry) showTrailCard(entry.trail);
       });
       if (navigationModeActive) fitTurnNavigationRoute();
-      else syncMapLibreMarkers();
+      else {
+        if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
+        syncMapLibreMarkers();
+      }
     });
     turnNavigationMap.on('dragstart', function() { turnNavigationFollowingUser = false; });
     turnNavigationMap.on('moveend', function() {
@@ -6086,23 +6095,16 @@
     return mobile ? L.point(120, 250) : L.point(210, 150);
   }
   function configurePlacesOverviewZoom() {
-    var calculated;
     if (!map || !places.length) return;
     placesOverviewBounds = L.latLngBounds(places.map(function(place) { return place.coords; })).pad(.32);
-    calculated = map.getBoundsZoom(placesOverviewBounds, false, getPlacesOverviewPadding());
-    placesOverviewMinZoom = Math.max(9, Math.min(11, Math.floor(calculated * 4) / 4));
+    placesOverviewMinZoom = NORMAL_MAP_ZOOM;
     map.setMinZoom(placesOverviewMinZoom);
     if (map.getZoom() < placesOverviewMinZoom) map.setZoom(placesOverviewMinZoom, { animate: false });
   }
   function fitPlacesAtMinimumZoom() {
     if (!map || !placesOverviewBounds || fittingPlacesOverview || map.getZoom() > placesOverviewMinZoom + .02) return;
     fittingPlacesOverview = true;
-    map.fitBounds(placesOverviewBounds, {
-      paddingTopLeft: window.innerWidth <= 700 ? [42, 105] : [90, 80],
-      paddingBottomRight: window.innerWidth <= 700 ? [72, 155] : [90, 70],
-      maxZoom: placesOverviewMinZoom,
-      animate: false
-    });
+    map.setView([NORMAL_MAP_CENTER[1], NORMAL_MAP_CENTER[0]], placesOverviewMinZoom, { animate:false });
     window.setTimeout(function() { fittingPlacesOverview = false; }, 80);
   }
   function initMap() {
@@ -6118,6 +6120,10 @@
     if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
 
     initialState = getInitialMapState();
+    if (getRequestedVillageIndexFromURL() < 0 && !navigationModeActive) {
+      initialState.center = [NORMAL_MAP_CENTER[1], NORMAL_MAP_CENTER[0]];
+      initialState.zoom = NORMAL_MAP_ZOOM;
+    }
     currentDataset = 'places';
     currentIndex = initialState.index;
 
