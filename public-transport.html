@@ -82,6 +82,10 @@
     min-width:0;
   }
 
+  .search-heading{padding:2px 2px 0}
+  .search-heading h2{margin:0;font-size:24px;line-height:1.1;letter-spacing:-.04em}
+  .search-heading p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+
   .actionbar{
     width:100%;
     min-width:0;
@@ -378,6 +382,12 @@
     border-color:#111111;
     color:#fff;
   }
+
+  .mode-pill[disabled]{cursor:default;opacity:.55}
+  .soon-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+
+  .service-note{margin:-4px 2px 0;color:var(--muted);font-size:12px;line-height:1.45}
+  .service-note a{color:#175cd3;font-weight:700;text-underline-offset:2px}
 
   .live-strip{
     width:100%;
@@ -893,6 +903,11 @@
   <main class="page">
     <div class="transport-shell">
 
+      <header class="search-heading">
+        <h2>Find your best way</h2>
+        <p>One search for trains and ferries. Bus connections will appear here too.</p>
+      </header>
+
       <section class="selectors" aria-label="Route selectors">
         <label class="location-card location-select-card" for="fromSelect">
           <span class="location-label">From</span>
@@ -905,6 +920,8 @@
               <option>Riomaggiore</option>
               <option>La Spezia</option>
               <option>Levanto</option>
+              <option>Porto Venere</option>
+              <option>Lerici</option>
             </select>
             <svg class="select-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
@@ -925,6 +942,8 @@
               <option>Riomaggiore</option>
               <option>La Spezia</option>
               <option>Levanto</option>
+              <option>Porto Venere</option>
+              <option>Lerici</option>
             </select>
             <svg class="select-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
@@ -942,10 +961,19 @@
         </span>
       </button>
 
+      <nav class="mode-filters" aria-label="Filter transport results">
+        <button class="mode-pill active" type="button" data-mode="all">All transport</button>
+        <button class="mode-pill" type="button" data-mode="train">Train</button>
+        <button class="mode-pill" type="button" data-mode="ferry">Ferry</button>
+        <button class="mode-pill" type="button" data-mode="bus" disabled>Bus <span class="soon-label">soon</span></button>
+      </nav>
+
+      <p class="service-note">Ferries follow the <a href="https://navigazionegolfodeipoeti.it/pdf/orari/linea-02/b-linea-02-aprile-settembre.pdf" target="_blank" rel="noopener">official seasonal timetable</a> and depend on sea conditions. <a href="https://navigazionegolfodeipoeti.it/en/service-updates" target="_blank" rel="noopener">Check today’s service</a></p>
+
       <section class="loading-block" id="loadingBlock" aria-live="polite">
         <div class="loading-row">
           <span class="loading-spinner" aria-hidden="true"></span>
-          <span class="loading-copy">Loading live train departures…</span>
+          <span class="loading-copy">Finding trains and ferries…</span>
         </div>
       </section>
 
@@ -976,7 +1004,7 @@
 
       
 
-      <section class="list" id="departuresList" aria-label="Live train departures list"></section>
+      <section class="list" id="departuresList" aria-label="Transport departures list"></section>
 
       
     </div>
@@ -1188,6 +1216,37 @@
     var ACTIVE_TRAIN_RT_ENDPOINT = '';
     var LAST_RT_ERROR = '';
     var REALTIME_REFRESH_MS = 30000;
+    var TRAIN_LOCATIONS = ['Monterosso','Vernazza','Corniglia','Manarola','Riomaggiore','La Spezia','Levanto'];
+    var FERRY_RUNS_2026 = [
+      { id:'n0900', stops:{'Porto Venere':'09:00','Riomaggiore':'09:35','Manarola':'09:45','Vernazza':'10:10','Monterosso':'10:30'} },
+      { id:'n1000', stops:{'La Spezia':'09:15','Porto Venere':'10:00','Riomaggiore':'10:35','Manarola':'10:45','Vernazza':'11:10','Monterosso':'11:30'} },
+      { id:'n1100', stops:{'Lerici':'09:30','La Spezia':'10:15','Porto Venere':'11:00','Riomaggiore':'11:35','Manarola':'11:45','Vernazza':'12:10','Monterosso':'12:30'} },
+      { id:'n1200', stops:{'Lerici':'10:30','La Spezia':'11:15','Porto Venere':'12:00','Riomaggiore':'12:35','Manarola':'12:45','Vernazza':'13:10','Monterosso':'13:30'} },
+      { id:'n1300', rule:'mid', stops:{'La Spezia':'12:15','Porto Venere':'13:00','Riomaggiore':'13:35','Manarola':'13:45','Vernazza':'14:10','Monterosso':'14:30'} },
+      { id:'n1400', stops:{'Porto Venere':'14:00','Riomaggiore':'14:35','Manarola':'14:45','Vernazza':'15:10','Monterosso':'15:30'} },
+      { id:'n1500a', stops:{'La Spezia':'14:05','Porto Venere':'15:00','Riomaggiore':'15:35','Manarola':'15:45','Vernazza':'16:10','Monterosso':'16:30'} },
+      { id:'n1500b', stops:{'Lerici':'14:30','Porto Venere':'15:00','Riomaggiore':'15:35','Manarola':'15:45','Vernazza':'16:10','Monterosso':'16:30'} },
+      { id:'n1600', rule:'mid', stops:{'La Spezia':'15:20','Porto Venere':'16:00','Riomaggiore':'16:35','Manarola':'16:45','Vernazza':'17:10','Monterosso':'17:30','Levanto':'17:50'} },
+      { id:'n1700', rule:'summer', stops:{'Lerici':'16:25','Porto Venere':'17:00','Riomaggiore':'17:35','Manarola':'17:45','Vernazza':'18:05','Monterosso':'18:15','Levanto':'18:50'} },
+      { id:'s0900', stops:{'Levanto':'09:00','Monterosso':'09:30','Vernazza':'09:40','Manarola':'10:00','Riomaggiore':'10:15','Porto Venere':'10:50'} },
+      { id:'s1000', stops:{'Levanto':'10:00','Monterosso':'10:30','Vernazza':'10:40','Manarola':'11:00','Riomaggiore':'11:15','Porto Venere':'11:50'} },
+      { id:'s1125', stops:{'Monterosso':'11:25','Vernazza':'11:40','Manarola':'12:00','Riomaggiore':'12:15','Porto Venere':'12:50','Lerici':'13:20'} },
+      { id:'s1225', stops:{'Monterosso':'12:25','Vernazza':'12:40','Manarola':'13:00','Riomaggiore':'13:15','Porto Venere':'13:50'} },
+      { id:'s1350', rule:'mid', stops:{'Levanto':'13:50','Monterosso':'14:25','Vernazza':'14:40','Manarola':'15:00','Riomaggiore':'15:15','Porto Venere':'15:50'} },
+      { id:'s1525', stops:{'Monterosso':'15:25','Vernazza':'15:40','Manarola':'16:00','Riomaggiore':'16:15','Porto Venere':'16:50'} },
+      { id:'s1625', stops:{'Monterosso':'16:25','Vernazza':'16:40','Manarola':'17:00','Riomaggiore':'17:15','Porto Venere':'17:50'} },
+      { id:'s1725', stops:{'Monterosso':'17:25','Vernazza':'17:40','Manarola':'18:00','Riomaggiore':'18:15','Porto Venere':'18:50'} },
+      { id:'p1000', rule:'summer', stops:{'Porto Venere':'10:00','Lerici':'10:30'} },
+      { id:'p1145', rule:'mid', stops:{'Porto Venere':'11:45','La Spezia':'12:15'} },
+      { id:'p1445', stops:{'Porto Venere':'14:45','La Spezia':'15:15'} },
+      { id:'p1600', stops:{'Porto Venere':'16:00','Lerici':'16:30'} },
+      { id:'p1700l', stops:{'Porto Venere':'17:00','La Spezia':'17:30'} },
+      { id:'p1700r', stops:{'Porto Venere':'17:00','Lerici':'17:30'} },
+      { id:'p1800l', stops:{'Porto Venere':'18:00','La Spezia':'18:30'} },
+      { id:'p1800r', stops:{'Porto Venere':'18:00','Lerici':'18:30'} },
+      { id:'p1900l', rule:'summer', stops:{'Porto Venere':'19:00','La Spezia':'19:30'} },
+      { id:'p1900r', rule:'summer', stops:{'Porto Venere':'19:00','Lerici':'19:30'} }
+    ];
 
     var fromSelect = document.getElementById('fromSelect');
     var toSelect = document.getElementById('toSelect');
@@ -1225,7 +1284,7 @@
     var liveTitle = document.getElementById('liveTitle');
     var liveMeta = document.getElementById('liveMeta');
 
-    var activeMode = 'train';
+    var activeMode = 'all';
     var italianNow = getItalianNow();
     var currentSelection = { date: italianNow.isoDate, time: italianNow.time, now: true };
     var draftSelection = { date: italianNow.isoDate, time: italianNow.time, now: true };
@@ -1302,6 +1361,46 @@
       if (diff <= 0) return '—';
       return diff + ' min';
     }
+    function dateIsBetween(value, start, end){ return value >= start && value <= end; }
+    function ferryRuleApplies(rule, isoDate){
+      if (!dateIsBetween(isoDate, '2026-04-20', '2026-09-27')) return false;
+      if (rule === 'summer') return dateIsBetween(isoDate, '2026-06-29', '2026-08-30');
+      if (rule === 'mid') {
+        return dateIsBetween(isoDate, '2026-05-18', '2026-09-27') ||
+          ['2026-04-25','2026-04-26','2026-05-01','2026-05-02','2026-05-03'].indexOf(isoDate) > -1;
+      }
+      return true;
+    }
+    function buildFerryDepartures(){
+      var from = fromSelect.value.trim();
+      var to = toSelect.value.trim();
+      var seen = {};
+      return FERRY_RUNS_2026.filter(function(run){
+        return ferryRuleApplies(run.rule, currentSelection.date) && run.stops[from] && run.stops[to] && toMinutes(run.stops[to]) > toMinutes(run.stops[from]);
+      }).map(function(run){
+        var departure = run.stops[from];
+        var arrival = run.stops[to];
+        return {
+          id:'ferry-' + run.id,
+          mode:'ferry',
+          route:'Line 02 ferry',
+          from:from,
+          to:to,
+          departure:departure,
+          arrival:arrival,
+          duration:inferDuration(departure, arrival),
+          status:'neutral',
+          statusLabel:'Scheduled',
+          meta:'Official 2026 timetable · weather dependent',
+          direct:'Direct'
+        };
+      }).filter(function(item){
+        var key = item.from + '|' + item.to + '|' + item.departure + '|' + item.arrival;
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+    }
     function syncLiveNowSelection(){
       if (currentSelection.now) {
         italianNow = getItalianNow();
@@ -1369,10 +1468,6 @@
     }
     function openSheet(){
       syncLiveNowSelection();
-      if (!silent) {
-        isLoadingDepartures = true;
-        render();
-      }
       italianNow = getItalianNow();
       draftSelection = { date: currentSelection.date, time: currentSelection.time, now: currentSelection.now };
       viewYear = parseInt(draftSelection.date.split('-')[0], 10);
@@ -1610,34 +1705,38 @@
     }
 
     function getMergedDepartures(){
-      return realtimeDepartures.slice();
+      return realtimeDepartures.concat(buildFerryDepartures());
     }
     function normalizeFiltered(){
       var from = fromSelect.value.trim();
       var to = toSelect.value.trim();
-      var selectedMinutes = isTodayISO(currentSelection.date) ? toMinutes(currentSelection.time) : 0;
+      var selectedMinutes = toMinutes(currentSelection.time);
       return getMergedDepartures().filter(function(item){
         var routeMatch = item.from === from && item.to === to;
         var timeMatch = toMinutes(item.departure) >= selectedMinutes;
-        return routeMatch && timeMatch;
+        var modeMatch = activeMode === 'all' || item.mode === activeMode;
+        return routeMatch && timeMatch && modeMatch;
       }).sort(function(a, b){ return toMinutes(a.departure) - toMinutes(b.departure); });
     }
     function updateBestCard(items){
       var best = items[0];
-      bestIconWrap.className = 'transport-badge train';
-      bestIconWrap.innerHTML = modeIcons.train;
-      bestMode.textContent = 'Train';
       if (!best) {
-        bestIn.textContent = 'Waiting for live data';
+        bestIconWrap.className = 'transport-badge ' + (activeMode === 'ferry' ? 'ferry' : 'train');
+        bestIconWrap.innerHTML = modeIcons[activeMode === 'ferry' ? 'ferry' : 'train'];
+        bestMode.textContent = activeMode === 'ferry' ? 'Ferry' : 'Transport';
+        bestIn.textContent = 'No matching departure';
         bestDeparture.textContent = '--:--';
         bestArrival.textContent = '--:--';
-        bestMeta.textContent = 'No fallback timetable';
+        bestMeta.textContent = 'Try another time or route';
         bestStatus.className = 'status-badge status-neutral';
         bestStatus.textContent = 'No data';
         bestDuration.textContent = '—';
-        bestDirect.textContent = 'Live only';
+        bestDirect.textContent = 'No service';
         return;
       }
+      bestIconWrap.className = 'transport-badge ' + modeClasses[best.mode];
+      bestIconWrap.innerHTML = modeIcons[best.mode];
+      bestMode.textContent = best.mode === 'ferry' ? 'Ferry' : (best.mode === 'bus' ? 'Bus' : 'Train');
       bestIn.textContent = leadTextFor(best);
       bestDeparture.textContent = best.departure;
       bestArrival.textContent = best.arrival;
@@ -1710,6 +1809,14 @@
       var attemptedUrls = [];
       var i = 0;
       syncLiveNowSelection();
+
+      if (TRAIN_LOCATIONS.indexOf(fromSelect.value.trim()) === -1 || TRAIN_LOCATIONS.indexOf(toSelect.value.trim()) === -1) {
+        realtimeDepartures = [];
+        isLoadingDepartures = false;
+        refreshLiveState('empty', '', 'This route is served by ferry, not train');
+        render();
+        return;
+      }
 
       endpoints = ACTIVE_TRAIN_RT_ENDPOINT
         ? [ACTIVE_TRAIN_RT_ENDPOINT].concat(TRAIN_RT_ENDPOINTS.filter(function(item){ return item !== ACTIVE_TRAIN_RT_ENDPOINT; }))
@@ -1787,7 +1894,7 @@
       updateBestCard(items);
       departuresList.innerHTML = items.map(cardTemplate).join('');
       if (!items.length) {
-        departuresList.innerHTML = '<article class="departure-card"><div class="time-col">—</div><div style="grid-column:span 3"><div class="route-title">No real departures found</div><div class="route-line">Only live data is shown. Try another time or check again shortly.</div></div><div></div></article>';
+        departuresList.innerHTML = '<article class="departure-card"><div class="time-col">—</div><div style="grid-column:span 3"><div class="route-title">No departures found</div><div class="route-line">Try another time or route. Ferries do not stop in Corniglia and may be suspended in bad sea conditions.</div></div><div></div></article>';
       }
     }
 
