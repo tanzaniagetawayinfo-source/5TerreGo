@@ -38,6 +38,7 @@
     body:not(.ftg-global-actionbar-ready) .search-floating,
     body:not(.ftg-global-actionbar-ready) #map-style-btn,
     body:not(.ftg-global-actionbar-ready) #user-location-btn,
+    body:not(.ftg-global-actionbar-ready) #navigation-north,
     body:not(.ftg-global-actionbar-ready) #user-location-toast,
     body:not(.ftg-global-actionbar-ready) #bottom-rail,
     body:not(.ftg-global-actionbar-ready) #tour-nav,
@@ -1345,6 +1346,11 @@
     #navigation-start { background: #ff7200; color: #fff; }
     #navigation-start:disabled { background: #d7dae0; color: #8b93a1; cursor: default; }
     #navigation-stop { display: none; background: #111827; color: #fff; }
+    #navigation-north { display: block; position: fixed; right: 18px; bottom: calc(206px + env(safe-area-inset-bottom)); z-index: 2200; width: 44px; height: 44px; border: 1px solid rgba(17,24,39,.12); border-radius: 999px; background: rgba(255,255,255,.96); color: #111827; box-shadow: 0 10px 28px rgba(4,15,30,.2); font: inherit; font-size: 12px; font-weight: 950; cursor:pointer; }
+    #navigation-north::before { content: '▲'; display: block; color: #ff7200; font-size: 17px; line-height: 14px; }
+    #navigation-north.is-active { background: #111827; color: #fff; }
+    body.navigation-active #navigation-north { display: block; right: 14px; top: calc(var(--ftg-header-height, 98px) + 14px); bottom: auto; }
+    body.map-preview-mode #navigation-north { display:none !important; }
     body.navigation-mode .search-floating, body.navigation-mode #bottom-rail, body.navigation-mode #map-style-btn { display: none !important; }
     body.navigation-active #navigation-origin-select, body.navigation-active #navigation-locate, body.navigation-active #navigation-options, body.navigation-active #navigation-start { display: none; }
     body.navigation-active #navigation-stop { display: block; }
@@ -1628,6 +1634,7 @@
     <button id="navigation-stop" type="button">Termina navigazione</button>
   </div>
 </section>
+<button id="navigation-north" type="button" aria-label="Mantieni il nord in alto" aria-pressed="false">N</button>
 
 <div id="discount-modal" aria-hidden="true">
   <div class="discount-sheet">
@@ -2438,6 +2445,7 @@
   var navigationSteps = document.getElementById('navigation-steps');
   var navigationStart = document.getElementById('navigation-start');
   var navigationStop = document.getElementById('navigation-stop');
+  var navigationNorth = document.getElementById('navigation-north');
 
   var poiDiscountBtn = document.getElementById('poi-discount-btn');
   var poiDiscountNote = document.getElementById('poi-discount-note');
@@ -2559,6 +2567,10 @@
   var navigationLastPedestrianOrigin = null;
   var navigationOrientationListening = false;
   var navigationOrientationEventName = '';
+  var navigationMapHeadingEnabled = true;
+  var navigationMapBearing = 0;
+  var navigationInteractionState = null;
+  var normalMapOrientationActive = false;
   var currentUserHeading = null;
   var tourSmoothedHeading = null;
   var lastTourHeadingUpdateAt = 0;
@@ -2986,7 +2998,7 @@
   function getBearingDegrees(fromPoint, toPoint) { var lat1; var lat2; var dLon; var y; var x; if (!isValidCoords(fromPoint) || !isValidCoords(toPoint)) return 0; lat1 = fromPoint[0] * Math.PI / 180; lat2 = toPoint[0] * Math.PI / 180; dLon = (toPoint[1] - fromPoint[1]) * Math.PI / 180; y = Math.sin(dLon) * Math.cos(lat2); x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
   function getCompassTargetOnRoute(userCoords, routeLatLngs) { var i; if (!isValidCoords(userCoords) || !routeLatLngs || routeLatLngs.length < 2 || !map) return null; for (i = 1; i < routeLatLngs.length; i += 1) { if (distanceMeters(userCoords, routeLatLngs[i]) > 12) return routeLatLngs[i]; } return routeLatLngs[routeLatLngs.length - 1]; }
   function getRouteInstructionBearing() { var target; if (!activeTour || !isValidCoords(userLocationLatLng)) return null; target = getCompassTargetOnRoute(userLocationLatLng, activeTour.currentLegPath || []); if (!target && getActiveTourStop()) target = getActiveTourStop().coords; if (!target) return null; return getBearingDegrees(userLocationLatLng, target); }
-  function setTourHeading(rawHeading, source) { var heading = normalizeDegrees(rawHeading); var now = Date.now(); var delta; var smoothing; if (!Number.isFinite(heading)) return; if (source === 'device' && now - lastTourHeadingUpdateAt < 90) return; if (tourSmoothedHeading === null) { tourSmoothedHeading = heading; } else { delta = getShortestAngleDelta(tourSmoothedHeading, heading); if (Math.abs(delta) < 2.5) return; smoothing = source === 'gps' ? 0.22 : 0.14; tourSmoothedHeading = normalizeDegrees(tourSmoothedHeading + delta * smoothing); } lastTourHeadingUpdateAt = now; currentUserHeading = tourSmoothedHeading; tourHeadingSource = source || ''; updateTourCompass(); updateNavigationHeadingVisual(); }
+  function setTourHeading(rawHeading, source) { var heading = normalizeDegrees(rawHeading); var now = Date.now(); var delta; var smoothing; if (!Number.isFinite(heading)) return; if (source === 'device' && now - lastTourHeadingUpdateAt < 90) return; if (tourSmoothedHeading === null) { tourSmoothedHeading = heading; } else { delta = getShortestAngleDelta(tourSmoothedHeading, heading); if (Math.abs(delta) < 2.5) return; smoothing = source === 'gps' ? 0.22 : 0.14; tourSmoothedHeading = normalizeDegrees(tourSmoothedHeading + delta * smoothing); } lastTourHeadingUpdateAt = now; currentUserHeading = tourSmoothedHeading; tourHeadingSource = source || ''; updateTourCompass(); updateNavigationHeadingVisual(); updateNavigationMapRotation(); }
   function updateNavigationHeadingVisual() {
     var headingEl = userLocationMarker && userLocationMarker._icon ? userLocationMarker._icon.querySelector('.user-location-heading') : null;
     if (!headingEl || currentUserHeading === null) return;
@@ -4682,13 +4694,112 @@
     if (navigationDestinationPOI) return getBearingDegrees(userLocationLatLng, navigationDestinationPOI.coords);
     return 0;
   }
+  function getNavigationRotationPanes() {
+    var panes = map && map.getPanes ? map.getPanes() : null;
+    if (!panes) return [];
+    return ['tilePane', 'overlayPane', 'shadowPane', 'markerPane', 'tooltipPane', 'popupPane', 'trailPane', 'poiPane', 'poiGroupPane'].map(function(name) { return panes[name]; }).filter(Boolean);
+  }
+  function applyNavigationMapRotation(bearing, immediate) {
+    var centerPoint;
+    var delta;
+    var target = navigationMapHeadingEnabled ? normalizeDegrees(bearing) : 0;
+    if (!map || (!navigationFollowing && !normalMapOrientationActive)) return;
+    if (immediate) navigationMapBearing = target;
+    else {
+      delta = getShortestAngleDelta(navigationMapBearing, target);
+      if (Math.abs(delta) < .7) return;
+      navigationMapBearing = normalizeDegrees(navigationMapBearing + delta * .24);
+    }
+    centerPoint = map.latLngToLayerPoint(map.getCenter());
+    getNavigationRotationPanes().forEach(function(pane) {
+      pane.style.transformOrigin = centerPoint.x + 'px ' + centerPoint.y + 'px';
+      pane.style.transition = immediate ? 'none' : 'transform .22s linear';
+      pane.style.transform = 'rotate(' + (-navigationMapBearing) + 'deg)';
+    });
+    if (navigationNorth) {
+      navigationNorth.style.transform = 'rotate(' + (-navigationMapBearing) + 'deg)';
+      navigationNorth.classList.toggle('is-active', navigationMapHeadingEnabled);
+      navigationNorth.setAttribute('aria-pressed', navigationMapHeadingEnabled ? 'false' : 'true');
+      navigationNorth.setAttribute('aria-label', navigationMapHeadingEnabled ? 'Mantieni il nord in alto' : 'Segui la direzione di marcia');
+    }
+  }
+  function updateNavigationMapRotation(immediate) {
+    if ((!navigationFollowing && !normalMapOrientationActive) || !navigationMapHeadingEnabled) return;
+    applyNavigationMapRotation(navigationFollowing ? getNavigationForwardBearing() : currentUserHeading, Boolean(immediate));
+  }
+  function resetNavigationMapRotation() {
+    getNavigationRotationPanes().forEach(function(pane) {
+      pane.style.transition = 'transform .2s ease-out';
+      pane.style.transform = 'rotate(0deg)';
+      window.setTimeout(function() {
+        pane.style.removeProperty('transform');
+        pane.style.removeProperty('transform-origin');
+        pane.style.removeProperty('transition');
+      }, 220);
+    });
+    navigationMapBearing = 0;
+    navigationMapHeadingEnabled = true;
+    normalMapOrientationActive = false;
+    if (navigationNorth) {
+      navigationNorth.style.removeProperty('transform');
+      navigationNorth.classList.remove('is-active');
+      navigationNorth.setAttribute('aria-pressed', 'false');
+      navigationNorth.setAttribute('aria-label', 'Mantieni il nord in alto');
+    }
+  }
+  function setNavigationInteractions(enabled) {
+    var handlers;
+    if (!map) return;
+    handlers = ['dragging', 'touchZoom', 'doubleClickZoom', 'scrollWheelZoom', 'boxZoom', 'keyboard'];
+    if (!enabled) {
+      navigationInteractionState = {};
+      handlers.forEach(function(name) {
+        var handler = map[name];
+        navigationInteractionState[name] = Boolean(handler && handler.enabled && handler.enabled());
+        if (handler && handler.disable) handler.disable();
+      });
+      return;
+    }
+    if (!navigationInteractionState) return;
+    handlers.forEach(function(name) {
+      var handler = map[name];
+      if (navigationInteractionState[name] && handler && handler.enable) handler.enable();
+    });
+    navigationInteractionState = null;
+  }
+  async function toggleNavigationMapOrientation(event) {
+    if (event) markExplicitPermissionGesture(event);
+    if (navigationFollowing) {
+      navigationMapHeadingEnabled = !navigationMapHeadingEnabled;
+      if (navigationMapHeadingEnabled) applyNavigationMapRotation(getNavigationForwardBearing(), true);
+      else applyNavigationMapRotation(0, true);
+      updateNavigationHeadingVisual();
+      return;
+    }
+    if (normalMapOrientationActive) {
+      resetNavigationMapRotation();
+      setNavigationInteractions(true);
+      if (!activeTour) disableNavigationOrientation();
+      showUserLocationToast('Mappa con nord in alto.');
+      return;
+    }
+    normalMapOrientationActive = true;
+    navigationMapHeadingEnabled = true;
+    navigationMapBearing = currentUserHeading === null ? 0 : currentUserHeading;
+    setNavigationInteractions(false);
+    startUserLocationWatch();
+    await enableNavigationOrientation();
+    if (currentUserHeading !== null) applyNavigationMapRotation(currentUserHeading, true);
+    if (navigationNorth) navigationNorth.classList.add('is-active');
+    showUserLocationToast('Bussola attiva. Ruota il telefono per orientare la mappa.');
+  }
   function centerNavigationOnUser() {
     var forwardCenter;
     if (!map || !navigationFollowing || !isValidCoords(userLocationLatLng)) return;
     forwardCenter = offsetNavigationPoint(userLocationLatLng, getNavigationForwardBearing(), 42);
     isProgrammaticMove = true;
     map.setView(forwardCenter, 18.5, { animate: true });
-    window.setTimeout(function() { isProgrammaticMove = false; }, 420);
+    window.setTimeout(function() { isProgrammaticMove = false; updateNavigationMapRotation(false); }, 420);
   }
   function previewNavigationRoute(option) {
     var segments = getNavigationRouteSegments(option);
@@ -4755,12 +4866,16 @@
     if (!option) return;
     enableNavigationOrientation();
     navigationFollowing = true;
+    navigationMapHeadingEnabled = true;
+    navigationMapBearing = getNavigationForwardBearing();
+    if (!navigationInteractionState) setNavigationInteractions(false);
     document.body.classList.add('navigation-active');
     if (navigationContext) {
       if (option.mode === 'train' || option.mode === 'ferry') navigationContext.textContent = 'Prima vai a piedi fino a ' + ((option.originStop && option.originStop.name) || (option.mode === 'train' ? 'la stazione' : 'il punto di imbarco')) + '.';
       else navigationContext.textContent = option.title + ' verso ' + (navigationDestinationPOI.name || 'la destinazione') + '. Segui il percorso evidenziato.';
     }
     previewNavigationRoute(option);
+    window.setTimeout(function() { updateNavigationMapRotation(true); }, 460);
     if (!isValidCoords(userLocationLatLng)) { pendingNavigationLocation = true; requestPlainUserLocation(); }
   }
   function updateFollowingNavigation() {
@@ -4782,6 +4897,7 @@
       } else navigationContext.textContent = navigationSelectedOption.title + ' · ' + formatNavigationDistance(remaining) + ' dalla destinazione';
     }
     centerNavigationOnUser();
+    updateNavigationMapRotation(false);
     if (navigationSelectedOption && navigationSelectedOption.mode === 'walk') resolvePedestrianNavigationRoute(navigationSelectedOption, userLocationLatLng, false);
   }
   function closeNavigationMode() {
@@ -4796,6 +4912,8 @@
     if (navigationSteps) { navigationSteps.innerHTML = ''; navigationSteps.classList.remove('is-visible'); }
     navigationLastPedestrianOrigin = null;
     navigationLastPedestrianRouteAt = 0;
+    resetNavigationMapRotation();
+    setNavigationInteractions(true);
     disableNavigationOrientation();
     clearNavigationRoute();
     document.body.classList.remove('navigation-mode', 'navigation-active');
@@ -5784,6 +5902,7 @@
     if (navigationStart) navigationStart.addEventListener('click', startSelectedNavigation);
     if (navigationClose) navigationClose.addEventListener('click', closeNavigationMode);
     if (navigationStop) navigationStop.addEventListener('click', closeNavigationMode);
+    if (navigationNorth) navigationNorth.addEventListener('click', toggleNavigationMapOrientation);
 
     if (poiClose) {
       poiClose.addEventListener('click', function () {
