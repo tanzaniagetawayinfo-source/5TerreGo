@@ -895,6 +895,7 @@ button.delete{
         <option value="sentiero">sentiero</option>
         <option value="spiaggia">spiaggia</option>
         <option value="stazione">stazione</option>
+        <option value="ferry">ferry station</option>
         <option value="ristorante">ristorante</option>
         <option value="bar">bar</option>
         <option value="punto panoramico">punto panoramico</option>
@@ -928,6 +929,14 @@ button.delete{
         <button class="village-pill" type="button" data-village="corniglia">Corniglia</button>
         <button class="village-pill" type="button" data-village="manarola">Manarola</button>
         <button class="village-pill" type="button" data-village="riomaggiore">Riomaggiore</button>
+        <button class="village-pill" type="button" data-village="levanto">Levanto</button>
+        <button class="village-pill" type="button" data-village="la-spezia">La Spezia</button>
+        <button class="village-pill" type="button" data-village="fezzano">Fezzano</button>
+        <button class="village-pill" type="button" data-village="le-grazie">Le Grazie</button>
+        <button class="village-pill" type="button" data-village="portovenere">Portovenere</button>
+        <button class="village-pill" type="button" data-village="san-terenzo">San Terenzo</button>
+        <button class="village-pill" type="button" data-village="lerici">Lerici</button>
+        <button class="village-pill" type="button" data-village="tellaro">Tellaro</button>
       </div>
       <div id="miniMap" class="mini-map">
         <button id="mapStyleFloatingBtn" class="map-floating-style" type="button">Mappa</button>
@@ -1074,7 +1083,7 @@ let miniMapPressTimer = null;
 let miniMapStartPoint = null;
 let imageSuggestTimer = null;
 let lastImageSuggestionQuery = "";
-const CINQUE_TERRE_CENTER = [44.1278, 9.7121];
+const EDITOR_AREA_CENTER = [44.105, 9.80];
 const MINI_MAP_START_ZOOM = 10;
 const VILLAGE_ZOOM = 15;
 const VILLAGE_CENTERS = {
@@ -1082,7 +1091,15 @@ const VILLAGE_CENTERS = {
   vernazza: [44.1350, 9.6846],
   corniglia: [44.1197, 9.7089],
   manarola: [44.1076, 9.7297],
-  riomaggiore: [44.0998, 9.7387]
+  riomaggiore: [44.0998, 9.7387],
+  levanto: [44.1703, 9.6137],
+  "la-spezia": [44.1025, 9.8241],
+  fezzano: [44.0802, 9.8246],
+  "le-grazie": [44.0669, 9.8339],
+  portovenere: [44.0519, 9.8352],
+  "san-terenzo": [44.0846, 9.8963],
+  lerici: [44.0741, 9.9117],
+  tellaro: [44.0591, 9.9304]
 };
 
 const HERO_QUOTES = [
@@ -1208,7 +1225,7 @@ function setMiniMapStyle(style){
 function initMiniMap(){
   if(miniMap || !miniMapEl || typeof L === "undefined") return;
   miniMap = L.map("miniMap", {
-    center: CINQUE_TERRE_CENTER,
+    center: EDITOR_AREA_CENTER,
     zoom: MINI_MAP_START_ZOOM,
     zoomControl: false,
     attributionControl: true
@@ -1273,7 +1290,7 @@ function syncMiniMapFromCoords(){
       if(parsed){
         setMiniMapMarker(parsed.lat, parsed.lng, true);
       }else{
-        miniMap.setView(CINQUE_TERRE_CENTER, MINI_MAP_START_ZOOM, { animate: false });
+        miniMap.setView(EDITOR_AREA_CENTER, MINI_MAP_START_ZOOM, { animate: false });
       }
       setTimeout(() => miniMap.invalidateSize(true), 180);
     });
@@ -1407,8 +1424,8 @@ function resizeImageFile(file){
 function buildImageSearchQuery(){
   const name = String(nameEl.value || "").trim();
   const type = String(typeEl.value || "").trim();
-  const base = name || "Cinque Terre";
-  const extra = base.toLowerCase().includes("cinque terre") ? "" : " Cinque Terre";
+  const base = name || "Golfo dei Poeti";
+  const extra = /cinque terre|la spezia|portovenere|lerici|golfo dei poeti/i.test(base) ? "" : " Liguria";
   return String(base + " " + type + extra).split(/ +/).join(" ").trim();
 }
 
@@ -1484,17 +1501,17 @@ async function searchFreePoiImages(force = false){
     const shortName = nameWords.slice(0, 3).join(" ");
 
     const searches = [
-      poiName + " " + poiType + " Cinque Terre Liguria Italy",
-      poiName + " Cinque Terre Liguria",
-      poiName + " Cinque Terre",
+      poiName + " " + poiType + " Liguria Italy",
+      poiName + " Gulf of Poets Liguria",
+      poiName + " La Spezia province",
       poiName + " Liguria Italy",
       poiName + " Italy",
       poiName,
-      shortName + " Cinque Terre",
+      shortName + " Gulf of Poets",
       shortName + " Liguria",
-      "Cinque Terre " + poiType,
-      "Cinque Terre villages",
-      "Cinque Terre Liguria Italy",
+      "La Spezia " + poiType,
+      "Gulf of Poets villages",
+      "Cinque Terre Gulf of Poets Liguria",
       "Liguria coast Italy"
     ].map(v => String(v || "").split(" ").filter(Boolean).join(" ").trim()).filter(Boolean);
 

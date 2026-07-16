@@ -379,6 +379,8 @@
 
     .custom-label { z-index: 1 !important; overflow: visible !important; }
     .custom-label .label { display: inline-block; transform: translateX(-50%); color: white; font-weight: 900; font-size: 14px; line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 6px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.9); white-space: nowrap; cursor: pointer; user-select: none; }
+    .area-label { background:transparent!important;border:0!important;overflow:visible!important; }
+    .area-label span { display:inline-flex;align-items:center;justify-content:center;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(8,18,29,.78);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.28);backdrop-filter:blur(8px); }
     .poi-label { position: relative; min-width: 34px; min-height: 34px; display: grid; place-items: center; background: transparent; color: white; font-size: 26px; border: 0; box-shadow: none; overflow: visible; }
     .poi-label img { width: 32px; height: 32px; display: block; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
     .custom-poi {
@@ -2509,6 +2511,8 @@
   var bottomRailCalendarEvents = document.getElementById('bottom-rail-calendar-events');
 
   var poiMarkers = [];
+  var cityMarkers = [];
+  var areaMarkers = [];
   var trailItems = [];
   var poiOverlapLayer = null;
   var poiOverlapGroups = [];
@@ -5802,15 +5806,45 @@
     labelsLayer.setOpacity(0);
   }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
+  function updatePlaceLabelVisibility() {
+    var overview = map && map.getZoom() < 12.15;
+    cityMarkers.forEach(function(entry) {
+      if (!entry.marker) return;
+      if (overview && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
+      if (!overview && !map.hasLayer(entry.marker)) entry.marker.addTo(map);
+    });
+    areaMarkers.forEach(function(marker) {
+      if (overview && !map.hasLayer(marker)) marker.addTo(map);
+      if (!overview && map.hasLayer(marker)) map.removeLayer(marker);
+    });
+  }
+  function createAreaMarkers(interactive) {
+    var areas = [
+      { name: 'Cinque Terre', coords: [44.1215, 9.6995], place: 'Corniglia' },
+      { name: 'La Spezia', coords: [44.1025, 9.8241], place: 'La Spezia' },
+      { name: 'Golfo dei Poeti', coords: [44.0685, 9.8825], place: 'Lerici' }
+    ];
+    areaMarkers = areas.map(function(area) {
+      var marker = L.marker(area.coords, {
+        interactive: interactive,
+        zIndexOffset: 2500,
+        icon: L.divIcon({ className: 'area-label', html: '<span>' + escapeHTML(area.name) + '</span>', iconSize: [1, 1], iconAnchor: [0, 0] })
+      });
+      if (interactive) marker.on('click', function() { var index = getVillageIndexByName(area.place); if (index >= 0) focusVillageByIndex(index); });
+      return marker;
+    });
+  }
   function createCityMarkers(interactive) {
     interactive = interactive !== false;
+    createAreaMarkers(interactive);
     places.forEach(function (place, index) {
       var marker = L.marker(place.coords, {
         title: place.name,
         zIndexOffset: interactive ? 2600 : 1800,
         interactive: interactive,
         icon: L.divIcon({ className: 'custom-label', html: '<div class="label">' + escapeHTML(place.name) + '</div>' })
-      }).addTo(map);
+      });
+      cityMarkers.push({ marker: marker, place: place });
       if (interactive) {
         marker.on('click', function (event) {
           if (event && event.originalEvent) {
@@ -5822,6 +5856,7 @@
         });
       }
     });
+    updatePlaceLabelVisibility();
   }
   function getHeroPreviewStates() {
     return [
@@ -6092,6 +6127,7 @@
 
     map.on('zoomend moveend', function () {
       fitPlacesAtMinimumZoom();
+      updatePlaceLabelVisibility();
       scheduleMapRefresh({ rail: true, auto: true });
       scheduleSessionMapStateSave();
     });
