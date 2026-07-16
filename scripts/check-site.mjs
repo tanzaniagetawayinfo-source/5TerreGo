@@ -1,4 +1,5 @@
 import { access, readFile, readdir } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -72,6 +73,11 @@ for (const [index, trail] of officialTrails.entries()) {
 
 if (errors.length) {
   console.error(errors.join('\n'));
+  process.exit(1);
+}
+try {
+  execFileSync(process.execPath, [path.join(root, 'scripts', 'seo-audit.mjs')], { stdio: 'inherit' });
+} catch {
   process.exit(1);
 }
 console.log(`Site checks passed: ${lite.length} safe POIs, ${officialTrails.length} official trails and no broken local links.`);

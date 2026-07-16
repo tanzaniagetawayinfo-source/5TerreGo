@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /global-actionbar.html
 
 Sitemap: https://www.5terrego.com/sitemap.xml
