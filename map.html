@@ -2639,8 +2639,11 @@
   var fallbackOrbitStarted = false;
   var userOrbitPlayed = false;
   var compassRecenterPending = false;
+  var compassCameraSettling = false;
+  var compassCameraSettleTimer = 0;
   var normalGyroTracking = false;
   var normalGyroSuspendedByGesture = false;
+  var normalGyroPanActive = false;
   var placesOverviewBounds = null;
   var placesOverviewMinZoom = 10;
   var fittingPlacesOverview = false;
@@ -5120,11 +5123,17 @@
     normalGyroSuspendedByGesture = false;
     normalGyroTracking = navigationOrientationListening;
     targetBearing = currentUserHeading === null ? 0 : currentUserHeading;
+    compassCameraSettling = true;
+    window.clearTimeout(compassCameraSettleTimer);
     turnNavigationMap.easeTo({ center:[userLocationLatLng[1],userLocationLatLng[0]], zoom:15.5, pitch:52, bearing:targetBearing, duration:700 });
+    compassCameraSettleTimer = window.setTimeout(function() {
+      compassCameraSettling = false;
+      updateNormalMapLibreHeading();
+    }, 760);
   }
   function updateNormalMapLibreHeading() {
-    if (!turnNavigationMap || !turnNavigationMapLoaded || !normalGyroTracking || normalGyroSuspendedByGesture || currentUserHeading === null || !isValidCoords(userLocationLatLng)) return;
-    turnNavigationMap.easeTo({ center:[userLocationLatLng[1],userLocationLatLng[0]], bearing:currentUserHeading, pitch:55, duration:120 });
+    if (!turnNavigationMap || !turnNavigationMapLoaded || !normalGyroTracking || normalGyroSuspendedByGesture || normalGyroPanActive || compassCameraSettling || currentUserHeading === null) return;
+    turnNavigationMap.easeTo({ bearing:currentUserHeading, duration:120 });
   }
   function fitTurnNavigationRoute() {
     var points = [];
@@ -5188,12 +5197,21 @@
       });
       if (navigationModeActive) fitTurnNavigationRoute();
       else {
-        if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
+        if (compassRecenterPending && isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
+        else if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
         syncMapLibreMarkers();
-        window.setTimeout(startFallbackOrbit, 650);
+        if (!compassRecenterPending && !isValidCoords(userLocationLatLng)) window.setTimeout(startFallbackOrbit, 650);
       }
     });
-    turnNavigationMap.on('dragstart', function() { turnNavigationFollowingUser = false; stopAmbientOrbit(); });
+    turnNavigationMap.on('dragstart', function() {
+      turnNavigationFollowingUser = false;
+      normalGyroPanActive = true;
+      stopAmbientOrbit();
+    });
+    turnNavigationMap.on('dragend', function() {
+      normalGyroPanActive = false;
+      updateNormalMapLibreHeading();
+    });
     turnNavigationMap.on('rotatestart', function(event) {
       if (!event || !event.originalEvent) return;
       stopAmbientOrbit();
