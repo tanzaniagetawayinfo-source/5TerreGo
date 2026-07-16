@@ -2706,6 +2706,9 @@
     return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
   }
   function isValidCoords(coords) { return Array.isArray(coords) && Number.isFinite(coords[0]) && Number.isFinite(coords[1]); }
+  function isCoordsInsideNormalMap(coords) {
+    return isValidCoords(coords) && coords[1] >= NORMAL_MAP_LIMITS[0][0] && coords[1] <= NORMAL_MAP_LIMITS[1][0] && coords[0] >= NORMAL_MAP_LIMITS[0][1] && coords[0] <= NORMAL_MAP_LIMITS[1][1];
+  }
   function escapeHTML(value) { return String(value || '').replace(/[&<>\"]/g, function (char) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]; }); }
   function readValue(value, fallback) { return value === undefined || value === null ? fallback : value; }
   function isIOSDevice() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
@@ -3686,7 +3689,7 @@
     } else turnNavigationUserMarker.setLngLat([userLocationLatLng[1], userLocationLatLng[0]]);
   }
   function updateUserLocationOnMap(position) {
-    var lat, lng, accuracy, tourPlace, gpsHeading;
+    var lat, lng, accuracy, tourPlace, gpsHeading, locationInsideMap;
     if (!map || !position || !position.coords) return;
     lat = Number(position.coords.latitude);
     lng = Number(position.coords.longitude);
@@ -3695,11 +3698,17 @@
     if (Number.isFinite(gpsHeading) && gpsHeading >= 0 && Number(position.coords.speed || 0) >= 0.7) setTourHeading(gpsHeading, 'gps');
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     userLocationLatLng = [lat, lng];
-    syncMapLibreUserMarker();
+    locationInsideMap = isCoordsInsideNormalMap(userLocationLatLng);
+    if (locationInsideMap) syncMapLibreUserMarker();
+    else if (turnNavigationUserMarker) {
+      turnNavigationUserMarker.remove();
+      turnNavigationUserMarker = null;
+    }
     updateNormalMapLibreHeading();
     if (compassRecenterPending) {
       userLocationFirstFix = false;
-      settleUserCameraFromCompass();
+      if (locationInsideMap) settleUserCameraFromCompass();
+      else showOutsideMapFallback();
     }
     if (!userLocationMarker) userLocationMarker = L.marker(userLocationLatLng, { icon: createUserLocationIcon(), interactive: false, zIndexOffset: 2000 }).addTo(map);
     else userLocationMarker.setLatLng(userLocationLatLng);
@@ -3737,7 +3746,8 @@
     if (userLocationFirstFix) {
       userLocationFirstFix = false;
       stopAmbientOrbit();
-      startUserLocationOrbit(false);
+      if (locationInsideMap) startUserLocationOrbit(false);
+      else showOutsideMapFallback();
     }
   }
   function resetUserLocationWatch() { if (userLocationWatchId !== null && navigator.geolocation) { try { navigator.geolocation.clearWatch(userLocationWatchId); } catch (error) {} } userLocationWatchId = null; userLocationFirstFix = true; }
@@ -3778,11 +3788,13 @@
     compassRecenterPending = true;
     orientationPromise = enableNavigationOrientation();
     requestPlainUserLocation();
-    if (isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
+    if (isCoordsInsideNormalMap(userLocationLatLng)) settleUserCameraFromCompass();
+    else if (isValidCoords(userLocationLatLng)) showOutsideMapFallback();
     orientationPromise.then(function(enabled) {
       normalGyroTracking = enabled;
       normalGyroSuspendedByGesture = false;
-      if (isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
+      if (isCoordsInsideNormalMap(userLocationLatLng)) settleUserCameraFromCompass();
+      else if (isValidCoords(userLocationLatLng)) showOutsideMapFallback();
     });
   }
   function tryPreviouslyGrantedLocation() {
@@ -5062,6 +5074,9 @@
     var startBearing;
     var endBearing;
     var center;
+    var startCenter;
+    var cameraProgress;
+    var bearingProgress;
     var zoom;
     var endZoom;
     var pitch;
@@ -5069,6 +5084,7 @@
     if (!turnNavigationMap || !turnNavigationMapLoaded || !options) return;
     stopAmbientOrbit();
     center = options.center;
+    startCenter = options.startCenter || center;
     zoom = Number(options.zoom);
     endZoom = Number.isFinite(Number(options.endZoom)) ? Number(options.endZoom) : zoom;
     pitch = Number(options.pitch);
@@ -5077,13 +5093,20 @@
     startBearing = Number(options.startBearing || 0);
     endBearing = startBearing + Number(options.rotation || 360);
     ambientOrbitActive = true;
-    turnNavigationMap.jumpTo({ center:center, zoom:zoom, pitch:pitch, bearing:startBearing });
+    turnNavigationMap.jumpTo({ center:startCenter, zoom:zoom, pitch:pitch, bearing:startBearing });
     startedAt = performance.now();
     function animateOrbit(now) {
       var progress;
       if (!ambientOrbitActive || !turnNavigationMap) return;
       progress = Math.max(0, Math.min(1, (now - startedAt) / duration));
-      turnNavigationMap.jumpTo({ center:center, zoom:zoom + ((endZoom - zoom) * progress), pitch:pitch + ((endPitch - pitch) * progress), bearing:startBearing + ((endBearing - startBearing) * progress) });
+      cameraProgress = options.spiral ? 1 - Math.pow(1 - progress, 3) : progress;
+      bearingProgress = options.spiral ? 1 - Math.pow(1 - progress, 4) : progress;
+      turnNavigationMap.jumpTo({
+        center:[startCenter[0] + ((center[0] - startCenter[0]) * cameraProgress), startCenter[1] + ((center[1] - startCenter[1]) * cameraProgress)],
+        zoom:zoom + ((endZoom - zoom) * cameraProgress),
+        pitch:pitch + ((endPitch - pitch) * cameraProgress),
+        bearing:startBearing + ((endBearing - startBearing) * bearingProgress)
+      });
       if (progress < 1) { ambientOrbitFrame = window.requestAnimationFrame(animateOrbit); return; }
       stopAmbientOrbit();
       if (typeof options.onComplete === 'function') options.onComplete();
@@ -5093,19 +5116,36 @@
     ambientOrbitFrame = window.requestAnimationFrame(animateOrbit);
   }
   function startFallbackOrbit() {
-    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || getRequestedVillageIndexFromURL() >= 0 || isValidCoords(userLocationLatLng)) return;
+    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
     fallbackOrbitStarted = true;
     normalGyroTracking = false;
     runAmbientOrbit({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, endZoom:NORMAL_MAP_ZOOM, pitch:48, endPitch:NORMAL_MAP_PITCH, startBearing:0, rotation:360, duration:12000 });
   }
+  function showOutsideMapFallback() {
+    compassRecenterPending = false;
+    compassCameraSettling = false;
+    window.clearTimeout(compassCameraSettleTimer);
+    normalGyroTracking = false;
+    stopAmbientOrbit();
+    showUserLocationToast('La tua posizione è fuori dall’area della mappa. Mostro Cinque Terre e Golfo dei Poeti.');
+    if (!turnNavigationMap || !turnNavigationMapLoaded) {
+      window.setTimeout(showOutsideMapFallback, 160);
+      return;
+    }
+    turnNavigationMap.easeTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0, duration:700 });
+  }
   function startUserLocationOrbit(force) {
     var targetBearing;
-    if (!isValidCoords(userLocationLatLng) || (userOrbitPlayed && !force)) return;
+    var currentCenter;
+    var startZoom;
+    if (!isCoordsInsideNormalMap(userLocationLatLng) || (userOrbitPlayed && !force)) return;
     if (!turnNavigationMap || !turnNavigationMapLoaded) { window.setTimeout(function() { startUserLocationOrbit(force); }, 160); return; }
     userOrbitPlayed = true;
     targetBearing = currentUserHeading === null ? 0 : currentUserHeading;
+    currentCenter = turnNavigationMap.getCenter();
+    startZoom = Math.min(11.2, turnNavigationMap.getZoom());
     normalGyroTracking = false;
-    runAmbientOrbit({ center:[userLocationLatLng[1],userLocationLatLng[0]], zoom:14.9, endZoom:15.5, pitch:55, endPitch:52, startBearing:targetBearing - 360, rotation:360, duration:8200, onComplete:function() {
+    runAmbientOrbit({ startCenter:[currentCenter.lng,currentCenter.lat], center:[userLocationLatLng[1],userLocationLatLng[0]], zoom:startZoom, endZoom:15.5, pitch:NORMAL_MAP_PITCH, endPitch:52, startBearing:targetBearing - 170, rotation:170, duration:7200, spiral:true, onComplete:function() {
       normalGyroSuspendedByGesture = false;
       normalGyroTracking = navigationOrientationListening;
       updateNormalMapLibreHeading();
@@ -5114,6 +5154,7 @@
   function settleUserCameraFromCompass() {
     var targetBearing;
     if (!isValidCoords(userLocationLatLng)) return;
+    if (!isCoordsInsideNormalMap(userLocationLatLng)) { showOutsideMapFallback(); return; }
     if (!turnNavigationMap || !turnNavigationMapLoaded) {
       window.setTimeout(settleUserCameraFromCompass, 160);
       return;
@@ -5132,7 +5173,7 @@
     }, 760);
   }
   function updateNormalMapLibreHeading() {
-    if (!turnNavigationMap || !turnNavigationMapLoaded || !normalGyroTracking || normalGyroSuspendedByGesture || normalGyroPanActive || compassCameraSettling || currentUserHeading === null) return;
+    if (!turnNavigationMap || !turnNavigationMapLoaded || !normalGyroTracking || normalGyroSuspendedByGesture || normalGyroPanActive || compassCameraSettling || currentUserHeading === null || !isCoordsInsideNormalMap(userLocationLatLng)) return;
     turnNavigationMap.easeTo({ bearing:currentUserHeading, duration:120 });
   }
   function fitTurnNavigationRoute() {
