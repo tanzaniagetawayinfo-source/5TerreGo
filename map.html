@@ -377,7 +377,8 @@
     .mode-btn.active { background: rgba(255,255,255,0.96); color: #111; border-color: rgba(255,255,255,0.62); }
     .exclusive-discounts-filter { background: rgba(255,138,29,0.30); border-color: rgba(255,138,29,0.32); color: #fff; }
 
-    .label { color: white; font-weight: 800; font-size: 14px; text-shadow: 0 2px 6px rgba(0,0,0,0.9); white-space: nowrap; cursor: pointer; user-select: none; }
+    .custom-label { z-index: 1 !important; overflow: visible !important; }
+    .custom-label .label { display: inline-block; transform: translateX(-50%); color: white; font-weight: 900; font-size: 14px; line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 6px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.9); white-space: nowrap; cursor: pointer; user-select: none; }
     .poi-label { position: relative; min-width: 34px; min-height: 34px; display: grid; place-items: center; background: transparent; color: white; font-size: 26px; border: 0; box-shadow: none; overflow: visible; }
     .poi-label img { width: 32px; height: 32px; display: block; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
     .custom-poi {
@@ -2123,7 +2124,7 @@
   function clampSessionMapZoom(value) {
     var zoom = Number(value);
     if (!Number.isFinite(zoom)) return null;
-    return Math.max(11, Math.min(20, zoom));
+    return Math.max(9, Math.min(20, zoom));
   }
 
   function readSessionMapState() {
@@ -2581,6 +2582,9 @@
   var normalMapOrientationActive = false;
   var manualRotationGesture = null;
   var ENABLE_MAP_ROTATION = false;
+  var placesOverviewBounds = null;
+  var placesOverviewMinZoom = 10;
+  var fittingPlacesOverview = false;
   var currentUserHeading = null;
   var tourSmoothedHeading = null;
   var lastTourHeadingUpdateAt = 0;
@@ -5693,6 +5697,30 @@
   function toggleBaseMapMode() {
     applyBaseMapMode(currentBaseMapMode === 'satellite' ? 'map' : 'satellite');
   }
+  function getPlacesOverviewPadding() {
+    var mobile = window.innerWidth <= 700;
+    return mobile ? L.point(120, 250) : L.point(210, 150);
+  }
+  function configurePlacesOverviewZoom() {
+    var calculated;
+    if (!map || !places.length) return;
+    placesOverviewBounds = L.latLngBounds(places.map(function(place) { return place.coords; })).pad(.32);
+    calculated = map.getBoundsZoom(placesOverviewBounds, false, getPlacesOverviewPadding());
+    placesOverviewMinZoom = Math.max(9, Math.min(11, Math.floor(calculated * 4) / 4));
+    map.setMinZoom(placesOverviewMinZoom);
+    if (map.getZoom() < placesOverviewMinZoom) map.setZoom(placesOverviewMinZoom, { animate: false });
+  }
+  function fitPlacesAtMinimumZoom() {
+    if (!map || !placesOverviewBounds || fittingPlacesOverview || map.getZoom() > placesOverviewMinZoom + .02) return;
+    fittingPlacesOverview = true;
+    map.fitBounds(placesOverviewBounds, {
+      paddingTopLeft: window.innerWidth <= 700 ? [42, 105] : [90, 80],
+      paddingBottomRight: window.innerWidth <= 700 ? [72, 155] : [90, 70],
+      maxZoom: placesOverviewMinZoom,
+      animate: false
+    });
+    window.setTimeout(function() { fittingPlacesOverview = false; }, 80);
+  }
   function initMap() {
     var initialState;
     var baseMapReadyHandled = false;
@@ -5710,7 +5738,7 @@
     currentIndex = initialState.index;
 
     map = L.map('map', {
-      minZoom: 11,
+      minZoom: 9,
       maxZoom: 20,
       zoomControl: false,
       preferCanvas: true,
@@ -5744,6 +5772,7 @@
     trailsLayer = L.layerGroup().addTo(map);
     poiOverlapLayer = L.layerGroup().addTo(map);
     map.setMaxBounds(L.latLngBounds([43.99, 9.54], [44.22, 9.97]));
+    configurePlacesOverviewZoom();
 
     [satelliteLayer, whiteLayer, roadsLayer].forEach(function(layer) {
       if (!layer) return;
@@ -6062,8 +6091,14 @@
     });
 
     map.on('zoomend moveend', function () {
+      fitPlacesAtMinimumZoom();
       scheduleMapRefresh({ rail: true, auto: true });
       scheduleSessionMapStateSave();
+    });
+
+    window.addEventListener('resize', function() {
+      configurePlacesOverviewZoom();
+      fitPlacesAtMinimumZoom();
     });
 
     map.on('dragstart zoomstart', function () {
