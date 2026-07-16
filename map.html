@@ -4327,7 +4327,7 @@
     'manarola>riomaggiore': [[44.1047,9.7243],[44.1015,9.7295],[44.0985,9.7350]],
     'riomaggiore>portovenere': [[44.0950,9.7400],[44.0870,9.7470],[44.0760,9.7580],[44.0630,9.7720],[44.0510,9.7920],[44.0465,9.8150],[44.0485,9.8295]],
     'portovenere>la-spezia': [[44.0500,9.8400],[44.0560,9.8500],[44.0670,9.8580],[44.0810,9.8520],[44.0900,9.8440],[44.0960,9.8380],[44.1005,9.8330],[44.1020,9.8290]],
-    'portovenere>lerici': [[44.0480,9.8420],[44.0440,9.8620],[44.0500,9.8850],[44.0610,9.9020],[44.0720,9.9080]],
+    'portovenere>lerici': [[44.0510,9.8400],[44.0515,9.8480],[44.0545,9.8610],[44.0585,9.8750],[44.0640,9.8890],[44.0700,9.9000],[44.0752,9.9048],[44.0760,9.9070],[44.0748,9.9085]],
     'la-spezia>lerici': [[44.1020,9.8290],[44.1005,9.8330],[44.0960,9.8380],[44.0900,9.8440],[44.0860,9.8550],[44.0830,9.8750],[44.0780,9.8950]]
   };
   function getFerryPortKey(port) { var name = normalizeFerryPortName(port && port.name); if (name.indexOf('monterosso') !== -1) return 'monterosso'; if (name.indexOf('vernazza') !== -1) return 'vernazza'; if (name.indexOf('manarola') !== -1) return 'manarola'; if (name.indexOf('riomaggiore') !== -1) return 'riomaggiore'; if (name.indexOf('portovenere') !== -1 || name.indexOf('porto venere') !== -1) return 'portovenere'; if (name.indexOf('la spezia') !== -1) return 'la-spezia'; if (name.indexOf('lerici') !== -1) return 'lerici'; return ''; }
@@ -4401,7 +4401,40 @@
   function getCurrentMinutesOfDay() { var p = getItalyDateParts(); return Number(p.hour || 0) * 60 + Number(p.minute || 0) + Number(p.second || 0) / 60; }
   function isFerryRowActiveForDate(row) { var today = getTodayDateString(); var from = row && row.valid_from ? String(row.valid_from) : ''; var to = row && row.valid_to ? String(row.valid_to) : ''; if (from && today < from) return false; if (to && today > to) return false; return isFerryValidityRuleActive(row); }
   function addFerryPortLeg(legs, tripId, status, port, fromPort, toPort, depart, arrive, direction) { if (!port || !isValidCoords(port.coords)) return; legs.push({ tripId: tripId, status: status, port: port, from: fromPort || port, to: toPort || port, arc: [port.coords, port.coords], departMin: depart, arriveMin: arrive, progress: status === 'port-after' ? 1 : 0, direction: direction || '', upcomingStops: [] }); }
-  function getActiveFerryLegs() { var grouped = {}; var nowMin = getCurrentMinutesOfDay(); var legs = []; ferryTimetableRows.forEach(function(row) { var tripId; if (!row || row.no_stop === true || row.no_stop === 'true') return; if (!row.scheduled_time) return; if (!isFerryRowActiveForDate(row)) return; tripId = String(row.trip_id || row.direction || 'trip'); if (!grouped[tripId]) grouped[tripId] = []; grouped[tripId].push(row); }); Object.keys(grouped).forEach(function(tripId) { var stops = grouped[tripId].slice().sort(function(a, b) { return Number(a.stop_sequence || 0) - Number(b.stop_sequence || 0); }); var i; var fromRow; var toRow; var depart; var arrive; var fromPort; var toPort; var arc; for (i = 1; i < stops.length; i += 1) { fromRow = stops[i - 1]; toRow = stops[i]; depart = getMinutesFromTime(fromRow.scheduled_time); arrive = getMinutesFromTime(toRow.scheduled_time); if (depart === null || arrive === null || arrive <= depart) continue; fromPort = getFerryPortByName(fromRow.port_name); toPort = getFerryPortByName(toRow.port_name); if (!fromPort || !toPort) continue; if (nowMin >= depart - 18 && nowMin < depart) { addFerryPortLeg(legs, tripId, 'port-before', fromPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); continue; } if (nowMin >= depart && nowMin <= arrive) { arc = getFerryRouteArc(fromPort, toPort); if (!arc || arc.length < 2) continue; legs.push({ tripId: tripId, status: 'sailing', from: fromPort, to: toPort, arc: arc, departMin: depart, arriveMin: arrive, progress: (nowMin - depart) / Math.max(1, arrive - depart), direction: fromRow.direction || toRow.direction || '', upcomingStops: [] }); continue; } if (nowMin > arrive && nowMin <= arrive + 12) addFerryPortLeg(legs, tripId, 'port-after', toPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); } }); return legs; }
+  function getOfficialLericiPortovenereLegs(nowMin) {
+    var today = getTodayDateString();
+    var lerici = getFerryPortByName('Lerici');
+    var portovenere = getFerryPortByName('Portovenere');
+    var sailings = [
+      { from:lerici, to:portovenere, depart:570, arrive:600 },
+      { from:lerici, to:portovenere, depart:600, arrive:630 },
+      { from:lerici, to:portovenere, depart:690, arrive:720 },
+      { from:lerici, to:portovenere, depart:720, arrive:750 },
+      { from:lerici, to:portovenere, depart:870, arrive:900 },
+      { from:lerici, to:portovenere, depart:900, arrive:930 },
+      { from:portovenere, to:lerici, depart:750, arrive:780 },
+      { from:portovenere, to:lerici, depart:770, arrive:800 },
+      { from:portovenere, to:lerici, depart:930, arrive:960 },
+      { from:portovenere, to:lerici, depart:960, arrive:990 },
+      { from:portovenere, to:lerici, depart:1020, arrive:1035 },
+      { from:portovenere, to:lerici, depart:1080, arrive:1110 }
+    ];
+    var legs = [];
+    if (today < '2026-06-29' || today > '2026-08-30' || !lerici || !portovenere) return legs;
+    sailings.forEach(function(sailing, index) {
+      var id = 'official-lerici-portovenere-' + index;
+      var arc;
+      if (nowMin >= sailing.depart - 18 && nowMin < sailing.depart) { addFerryPortLeg(legs, id, 'port-before', sailing.from, sailing.from, sailing.to, sailing.depart, sailing.arrive, 'official-ngdp-2026'); return; }
+      if (nowMin >= sailing.depart && nowMin <= sailing.arrive) {
+        arc = createSeaArc(sailing.from.coords, sailing.to.coords, 64, sailing.from, sailing.to);
+        legs.push({ tripId:id, status:'sailing', from:sailing.from, to:sailing.to, arc:arc, departMin:sailing.depart, arriveMin:sailing.arrive, progress:(nowMin-sailing.depart)/Math.max(1,sailing.arrive-sailing.depart), direction:'official-ngdp-2026', upcomingStops:[] });
+        return;
+      }
+      if (nowMin > sailing.arrive && nowMin <= sailing.arrive + 12) addFerryPortLeg(legs, id, 'port-after', sailing.to, sailing.from, sailing.to, sailing.depart, sailing.arrive, 'official-ngdp-2026');
+    });
+    return legs;
+  }
+  function getActiveFerryLegs() { var grouped = {}; var nowMin = getCurrentMinutesOfDay(); var legs = getOfficialLericiPortovenereLegs(nowMin); ferryTimetableRows.forEach(function(row) { var tripId; if (!row || row.no_stop === true || row.no_stop === 'true') return; if (!row.scheduled_time) return; if (!isFerryRowActiveForDate(row)) return; tripId = String(row.trip_id || row.direction || 'trip'); if (!grouped[tripId]) grouped[tripId] = []; grouped[tripId].push(row); }); Object.keys(grouped).forEach(function(tripId) { var stops = grouped[tripId].slice().sort(function(a, b) { return Number(a.stop_sequence || 0) - Number(b.stop_sequence || 0); }); var i; var fromRow; var toRow; var depart; var arrive; var fromPort; var toPort; var arc; for (i = 1; i < stops.length; i += 1) { fromRow = stops[i - 1]; toRow = stops[i]; depart = getMinutesFromTime(fromRow.scheduled_time); arrive = getMinutesFromTime(toRow.scheduled_time); if (depart === null || arrive === null || arrive <= depart) continue; fromPort = getFerryPortByName(fromRow.port_name); toPort = getFerryPortByName(toRow.port_name); if (!fromPort || !toPort) continue; if (nowMin >= depart - 18 && nowMin < depart) { addFerryPortLeg(legs, tripId, 'port-before', fromPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); continue; } if (nowMin >= depart && nowMin <= arrive) { arc = getFerryRouteArc(fromPort, toPort); if (!arc || arc.length < 2) continue; legs.push({ tripId: tripId, status: 'sailing', from: fromPort, to: toPort, arc: arc, departMin: depart, arriveMin: arrive, progress: (nowMin - depart) / Math.max(1, arrive - depart), direction: fromRow.direction || toRow.direction || '', upcomingStops: [] }); continue; } if (nowMin > arrive && nowMin <= arrive + 12) addFerryPortLeg(legs, tripId, 'port-after', toPort, fromPort, toPort, depart, arrive, fromRow.direction || toRow.direction || ''); } }); return legs; }
   function bindMovingFerryPopup(marker, item) { if (!marker || !item) return; marker.bindPopup('<div style="min-width:190px"><div style="font-size:14px;font-weight:950;color:#111;margin-bottom:4px">⛴️ Ferry · posizione stimata</div><div style="font-size:12px;font-weight:750;color:rgba(0,0,0,0.68);line-height:1.32">' + escapeHTML(item.from && item.from.name ? item.from.name : 'Port') + ' → ' + escapeHTML(item.to && item.to.name ? item.to.name : 'Port') + '</div><div style="font-size:10px;margin-top:7px;color:#667085">Orari ufficiali NGDP 2026 · servizio soggetto a condizioni meteo-marine</div></div>', { closeButton: true, autoPan: true, className: 'ferry-live-popup' }); }
   function syncMapLibreFerryVehicles() {
     if (!turnNavigationMap || !turnNavigationMapLoaded) return;
