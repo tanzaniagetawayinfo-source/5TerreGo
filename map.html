@@ -2111,9 +2111,7 @@
     { name: 'Portovenere', coords: [44.0519, 9.8352], image: 'https://images.pexels.com/photos/15570449/pexels-photo-15570449.jpeg', description: 'Portovenere stands at the western entrance of the Gulf of Poets, facing Palmaria with a historic waterfront and dramatic headland.' },
     { name: 'San Terenzo', coords: [44.0846, 9.8963], image: 'https://images.pexels.com/photos/14534753/pexels-photo-14534753.jpeg', description: 'San Terenzo is a compact seaside village with a sandy bay, castle and promenade linking it to Lerici.' },
     { name: 'Lerici', coords: [44.0741, 9.9117], image: 'https://images.pexels.com/photos/13706810/pexels-photo-13706810.jpeg', description: 'Lerici curves around the eastern Gulf of Poets, known for its castle, waterfront and connections to nearby coves.' },
-    { name: 'Tellaro', coords: [44.0591, 9.9304], image: 'https://images.pexels.com/photos/5060295/pexels-photo-5060295.jpeg', description: 'Tellaro is a small cliffside village south of Lerici, with narrow lanes descending toward the rocky sea.' },
-    { name: 'Bocca di Magra', coords: [44.0488, 9.9892], image: 'https://images.pexels.com/photos/26309839/pexels-photo-26309839.jpeg', description: 'Bocca di Magra sits where the Magra river reaches the Ligurian Sea, with marinas and views toward the gulf.' },
-    { name: 'Sarzana', coords: [44.1114, 9.9586], image: 'https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg', description: 'Sarzana is a historic inland town near the Gulf of Poets, with fortresses, piazzas and useful regional connections.' }
+    { name: 'Tellaro', coords: [44.0591, 9.9304], image: 'https://images.pexels.com/photos/5060295/pexels-photo-5060295.jpeg', description: 'Tellaro is a small cliffside village south of Lerici, with narrow lanes descending toward the rocky sea.' }
   ];
 
   var randomInitialVillageIndex = isMapPreviewMode ? -1 : Math.floor(Math.random() * 5);
@@ -5745,7 +5743,7 @@
     ferryVehiclesLayer = L.layerGroup().addTo(map);
     trailsLayer = L.layerGroup().addTo(map);
     poiOverlapLayer = L.layerGroup().addTo(map);
-    map.setMaxBounds(L.latLngBounds([43.99, 9.54], [44.22, 10.05]));
+    map.setMaxBounds(L.latLngBounds([43.99, 9.54], [44.22, 9.97]));
 
     [satelliteLayer, whiteLayer, roadsLayer].forEach(function(layer) {
       if (!layer) return;
