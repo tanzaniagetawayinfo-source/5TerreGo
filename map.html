@@ -2651,6 +2651,7 @@
   var godModeAuthorizationPending = null;
   var godModePendingLatLng = null;
   var godModePendingMarker = null;
+  var godModePendingGlMarker = null;
   var godModePendingImageData = '';
   var godModePhotoPending = false;
   var godModePhotoReadToken = 0;
@@ -3788,7 +3789,9 @@
     godModePendingLatLng = null;
     if (godModeAddPrompt) godModeAddPrompt.classList.remove('is-visible');
     if (godModePendingMarker && map) map.removeLayer(godModePendingMarker);
+    if (godModePendingGlMarker) godModePendingGlMarker.remove();
     godModePendingMarker = null;
+    godModePendingGlMarker = null;
     if (!godModeSavePending) resetGodModeAddForm();
   }
   function getGodModePendingMarkerIcon(type) {
@@ -3796,9 +3799,15 @@
     var html = normalizedType === 'unknown spot' ? '📍' : getPOIIconHTML({ type:normalizedType, symbol:getPOIEmoji(normalizedType, '📍') });
     return L.divIcon({ className:'', html:'<div class="god-mode-map-pin"><span>' + html + '</span></div>', iconSize:[34,34], iconAnchor:[8,32] });
   }
+  function getGodModePendingMarkerHTML(type) {
+    var normalizedType = normalizePOIType(type || 'unknown spot');
+    var html = normalizedType === 'unknown spot' ? '📍' : getPOIIconHTML({ type:normalizedType, symbol:getPOIEmoji(normalizedType, '📍') });
+    return '<div class="god-mode-map-pin"><span>' + html + '</span></div>';
+  }
   function syncGodModePendingMarkerType() {
-    if (!godModePendingMarker) return;
-    godModePendingMarker.setIcon(getGodModePendingMarkerIcon(godModeAddType ? godModeAddType.value : 'unknown spot'));
+    var type = godModeAddType ? godModeAddType.value : 'unknown spot';
+    if (godModePendingMarker) godModePendingMarker.setIcon(getGodModePendingMarkerIcon(type));
+    if (godModePendingGlMarker) godModePendingGlMarker.getElement().innerHTML = getGodModePendingMarkerHTML(type);
   }
   function resizeGodModePhoto(file) {
     return new Promise(function(resolve, reject) {
@@ -3935,58 +3944,62 @@
   }
   function openPOIEditor(poi) { if (!godModeAuthorized || !godModeEnabled) return; window.location.href = getPOIEditorURL(poi); }
   function showGodModeAddPrompt(latlng) {
+    var markerElement;
     if (!godModeAuthorized || !godModeEnabled || !map || !latlng) return;
     clearGodModePendingPoint();
     godModePendingLatLng = L.latLng(latlng.lat, latlng.lng);
     if (godModeAddMeta) godModeAddMeta.textContent = godModePendingLatLng.lat.toFixed(6) + ', ' + godModePendingLatLng.lng.toFixed(6);
     if (godModeAddPrompt) godModeAddPrompt.classList.add('is-visible');
-    godModePendingMarker = L.marker(godModePendingLatLng, { icon:getGodModePendingMarkerIcon('unknown spot'), interactive:false, pane:'poiGroupPane' }).addTo(map);
+    if (turnNavigationMap && window.maplibregl) {
+      markerElement = document.createElement('div');
+      markerElement.innerHTML = getGodModePendingMarkerHTML('unknown spot');
+      markerElement.style.pointerEvents = 'none';
+      godModePendingGlMarker = new window.maplibregl.Marker({ element:markerElement, anchor:'bottom' }).setLngLat([godModePendingLatLng.lng, godModePendingLatLng.lat]).addTo(turnNavigationMap);
+    } else {
+      godModePendingMarker = L.marker(godModePendingLatLng, { icon:getGodModePendingMarkerIcon('unknown spot'), interactive:false, pane:'poiGroupPane' }).addTo(map);
+    }
   }
   function setupGodModeLongPress() {
-    var container;
-    if (!map || map._godModeLongPressReady) return;
-    map._godModeLongPressReady = true;
-    container = map.getContainer();
-    function isBlockedTarget(target) { return Boolean(target && target.closest && target.closest('.leaflet-control,.leaflet-marker-icon,.leaflet-popup,#god-mode-add-prompt')); }
-    function beginLongPress(clientX, clientY, sourceEvent) {
-      var point;
-      if (!godModeEnabled || !godModeAuthorized || isBlockedTarget(sourceEvent && sourceEvent.target)) return;
-      clearGodModeLongPress();
-      point = map.mouseEventToContainerPoint({ clientX:clientX, clientY:clientY });
-      godModeLongPressStart = { x:clientX, y:clientY, point:point };
-      godModeLongPressTimer = window.setTimeout(function() {
-        var pending = godModeLongPressStart;
-        godModeLongPressTimer = 0;
-        godModeLongPressStart = null;
-        if (!pending) return;
-        if (navigator.vibrate) navigator.vibrate(35);
-        showGodModeAddPrompt(map.containerPointToLatLng(pending.point));
-      }, 620);
+    function attachLongPress(container, toLatLng) {
+      function isBlockedTarget(target) { return Boolean(target && target.closest && target.closest('.leaflet-control,.leaflet-marker-icon,.leaflet-popup,.maplibregl-ctrl,#god-mode-add-prompt')); }
+      function beginLongPress(clientX, clientY, sourceEvent) {
+        if (!godModeEnabled || !godModeAuthorized || isBlockedTarget(sourceEvent && sourceEvent.target)) return;
+        clearGodModeLongPress();
+        godModeLongPressStart = { x:clientX, y:clientY, latlng:toLatLng(clientX, clientY) };
+        godModeLongPressTimer = window.setTimeout(function() {
+          var pending = godModeLongPressStart;
+          godModeLongPressTimer = 0;
+          godModeLongPressStart = null;
+          if (!pending || !pending.latlng) return;
+          if (navigator.vibrate) navigator.vibrate(35);
+          showGodModeAddPrompt(pending.latlng);
+        }, 620);
+      }
+      function moveLongPress(clientX, clientY) { if (godModeLongPressStart && Math.hypot(clientX - godModeLongPressStart.x, clientY - godModeLongPressStart.y) > 28) clearGodModeLongPress(); }
+      container.addEventListener('pointerdown', function(event) { if (event.pointerType === 'touch' || event.button > 0) return; beginLongPress(event.clientX, event.clientY, event); }, { passive:true });
+      container.addEventListener('pointermove', function(event) { if (event.pointerType !== 'touch') moveLongPress(event.clientX, event.clientY); }, { passive:true });
+      ['pointerup','pointercancel'].forEach(function(name) { container.addEventListener(name, function(event) { if (event.pointerType !== 'touch') clearGodModeLongPress(); }, { passive:true }); });
+      container.addEventListener('touchstart', function(event) { var touch; if (!event.touches || event.touches.length !== 1) { clearGodModeLongPress(); return; } touch = event.touches[0]; beginLongPress(touch.clientX, touch.clientY, event); }, { passive:true });
+      container.addEventListener('touchmove', function(event) { var touch; if (!event.touches || event.touches.length !== 1) { clearGodModeLongPress(); return; } touch = event.touches[0]; moveLongPress(touch.clientX, touch.clientY); }, { passive:true });
+      container.addEventListener('touchend', clearGodModeLongPress, { passive:true });
+      container.addEventListener('touchcancel', clearGodModeLongPress, { passive:true });
     }
-    function moveLongPress(clientX, clientY) {
-      if (godModeLongPressStart && Math.hypot(clientX - godModeLongPressStart.x, clientY - godModeLongPressStart.y) > 28) clearGodModeLongPress();
+    if (map && !map._godModeLongPressReady) {
+      map._godModeLongPressReady = true;
+      attachLongPress(map.getContainer(), function(clientX, clientY) { return map.containerPointToLatLng(map.mouseEventToContainerPoint({ clientX:clientX, clientY:clientY })); });
     }
-    container.addEventListener('pointerdown', function(event) {
-      if (event.pointerType === 'touch' || event.button > 0) return;
-      beginLongPress(event.clientX, event.clientY, event);
-    }, { passive:true });
-    container.addEventListener('pointermove', function(event) { if (event.pointerType !== 'touch') moveLongPress(event.clientX, event.clientY); }, { passive:true });
-    ['pointerup','pointercancel'].forEach(function(name) { container.addEventListener(name, function(event) { if (event.pointerType !== 'touch') clearGodModeLongPress(); }, { passive:true }); });
-    container.addEventListener('touchstart', function(event) {
-      var touch;
-      if (!event.touches || event.touches.length !== 1) { clearGodModeLongPress(); return; }
-      touch = event.touches[0];
-      beginLongPress(touch.clientX, touch.clientY, event);
-    }, { passive:true });
-    container.addEventListener('touchmove', function(event) {
-      var touch;
-      if (!event.touches || event.touches.length !== 1) { clearGodModeLongPress(); return; }
-      touch = event.touches[0];
-      moveLongPress(touch.clientX, touch.clientY);
-    }, { passive:true });
-    container.addEventListener('touchend', clearGodModeLongPress, { passive:true });
-    container.addEventListener('touchcancel', clearGodModeLongPress, { passive:true });
-    map.on('contextmenu', function(event) { if (godModeEnabled && godModeAuthorized) showGodModeAddPrompt(event.latlng); });
+    if (turnNavigationMap && !turnNavigationMap._godModeLongPressReady) {
+      turnNavigationMap._godModeLongPressReady = true;
+      attachLongPress(turnNavigationMap.getCanvasContainer(), function(clientX, clientY) {
+        var rect = turnNavigationMap.getCanvasContainer().getBoundingClientRect();
+        var point = turnNavigationMap.unproject([clientX - rect.left, clientY - rect.top]);
+        return { lat:point.lat, lng:point.lng };
+      });
+    }
+    if (map && !map._godModeContextMenuReady) {
+      map._godModeContextMenuReady = true;
+      map.on('contextmenu', function(event) { if (godModeEnabled && godModeAuthorized) showGodModeAddPrompt(event.latlng); });
+    }
   }
   async function checkUser() { var user = await readCurrentUser(); var menuName = document.getElementById('app-menu-username'); currentUser = user; window.FTG_CURRENT_USER = user || null; document.body.classList.toggle('user-logged-in', Boolean(user)); if (!user) { godModeAuthorized = false; setGodModeEnabled(false, true); if (menuName) menuName.innerText = 'Ospite'; return false; } if (menuName) menuName.innerText = getUserDisplayName(user); checkGodModeAuthorization(); return true; }
   function startUserPolling() { var tries = 0; if (userCheckTimer) { clearInterval(userCheckTimer); userCheckTimer = null; } userCheckTimer = setInterval(async function () { tries += 1; await checkUser(); if (currentUser || tries >= 12) { clearInterval(userCheckTimer); userCheckTimer = null; } }, 250); }
@@ -5533,6 +5546,7 @@
       dragRotate: true,
       touchPitch: true
     });
+    setupGodModeLongPress();
     turnNavigationMap.on('load', function() {
       turnNavigationMapLoaded = true;
       turnNavigationMap.addSource('navigation-route', { type: 'geojson', data: getTurnNavigationGeoJSON() });
