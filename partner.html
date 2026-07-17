@@ -958,8 +958,7 @@
         var decoded = decodeOfferText(data.discount_text || data.discount_info || data.offer_text || data.offer || "");
         var title = String(data.discount_title || data.offer_title || decoded.title || "").trim();
         var description = String(data.discount_description || data.offer_description || decoded.description || "").trim();
-        var discount = data.discount || "";
-        if (!title && discount) title = String(discount) + "% discount";
+        if (!title && !description) title = "Offerta dell’attività";
         return (title ? "<br><strong>" + escapeHtml(title) + "</strong>" : "") + (description ? "<br>" + escapeHtml(description) : "");
       }
 
@@ -1172,6 +1171,7 @@
           setStatus(dashboardStatus, "Ready to validate QR codes.", "ok");
           hideScannerFeedback();
           await applyPendingIncomingCode(true);
+          await startScanner();
         } catch (error) {
           setStatus(dashboardStatus, escapeHtml(error.message), "error");
         }

@@ -1,3 +1,106 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Campagna attività · 5TerreGo</title><link rel="stylesheet" href="/business-dashboard.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><main class="shell"><div class="top"><a class="back" data-page="discounteditor.html">← Dashboard</a><a class="scanner" href="/partner.html">Scanner QR →</a></div><section class="hero"><div class="eyebrow">Campagna</div><h1 data-business-name>Attività</h1><p>Crea o modifica lo sconto, stabilisci i limiti e decidi quando deve comparire sulla mappa.</p><div id="switcher" class="switcher hidden"><label for="activitySelect">Attività</label><select id="activitySelect"></select></div></section><div id="status" class="status">Caricamento…</div><section id="content" class="panel hidden"><label class="offer-toggle"><span><strong>Offerta attiva e visibile sulla mappa</strong><br><small>Se disattivata la campagna resta salvata ma non genera QR.</small></span><input id="active" type="checkbox"></label><label class="field"><span>Sconto percentuale</span><input id="discount" type="number" min="0" max="100"></label><label class="field"><span>Titolo</span><input id="title" maxlength="120"></label><label class="field"><span>Descrizione e condizioni</span><textarea id="description" maxlength="1000"></textarea></label><div class="grid2"><label class="field"><span>Validità QR in ore</span><input id="hours" type="number" min="1" max="24"></label><label class="field"><span>Convalide massime al giorno</span><input id="maxDaily" type="number" min="0" max="10000"><small>0 = nessun limite</small></label></div><div class="grid2"><label class="field"><span>Valida dalle</span><input id="start" type="time"></label><label class="field"><span>Valida fino alle</span><input id="end" type="time"></label></div><div class="actions"><button id="save" class="btn primary" type="button">Salva campagna</button><button id="close" class="btn soft" type="button">Chiudi offerta</button><button id="delete" class="btn danger" type="button">Elimina campagna</button></div></section></main><script src="/business-dashboard-common.js"></script><script>
-(async function(){var api=window.FTGBusiness,ctx,poi;try{ctx=await api.init();if(!ctx)return;poi=ctx.poi;var offer=api.decodeOffer(poi.discount_info),rules=offer.rules||{};document.getElementById('active').checked=Number(poi.discount||0)>0;document.getElementById('discount').value=Number(poi.discount||0);document.getElementById('title').value=offer.title;document.getElementById('description').value=offer.description;document.getElementById('hours').value=Math.max(1,Math.min(24,Number(rules.validity_hours||24)));document.getElementById('maxDaily').value=Math.max(0,Number(rules.max_daily_redemptions||0));document.getElementById('start').value=rules.daily_start||'00:00';document.getElementById('end').value=rules.daily_end||'23:59';document.getElementById('content').classList.remove('hidden');document.getElementById('save').onclick=async function(){var enabled=document.getElementById('active').checked,discount=Math.max(0,Math.min(100,Number(document.getElementById('discount').value||0))),title=document.getElementById('title').value.trim(),description=document.getElementById('description').value.trim();if(enabled&&discount<=0){api.setStatus('Inserisci uno sconto maggiore di zero.','error');return}var info=JSON.stringify({title:title,description:description,rules:{validity_hours:Math.max(1,Math.min(24,Number(document.getElementById('hours').value||24))),max_daily_redemptions:Math.max(0,Math.min(10000,Number(document.getElementById('maxDaily').value||0))),daily_start:document.getElementById('start').value||'00:00',daily_end:document.getElementById('end').value||'23:59'}});this.disabled=true;try{await api.updateDiscount(poi,enabled?discount:0,info);api.setStatus(enabled?'Campagna attiva e visibile sulla mappa.':'Campagna salvata ma chiusa.','ok')}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}};document.getElementById('close').onclick=async function(){this.disabled=true;try{await api.updateDiscount(poi,0,poi.discount_info);document.getElementById('active').checked=false;api.setStatus('Offerta chiusa. La campagna resta modificabile.','ok')}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}};document.getElementById('delete').onclick=async function(){this.disabled=true;try{await api.updateDiscount(poi,0,'');document.getElementById('active').checked=false;document.getElementById('discount').value=0;document.getElementById('title').value='';document.getElementById('description').value='';api.setStatus('Campagna eliminata.','ok')}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}}}catch(e){api.setStatus(e.message,'error')}})();
-</script></body></html>
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Campagna attività · 5TerreGo</title>
+  <link rel="stylesheet" href="/business-dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<main class="shell">
+  <div class="top"><a class="back" data-page="discounteditor.html">← Dashboard</a><a class="scanner" href="/partner.html">Scanner QR →</a></div>
+  <section class="hero">
+    <div class="eyebrow">Campagna</div>
+    <h1 data-business-name>Attività</h1>
+    <p>Crea l’offerta, scegli quando mostrarla e stabilisci le regole di riscatto.</p>
+    <div id="switcher" class="switcher hidden"><label for="activitySelect">Attività</label><select id="activitySelect"></select></div>
+  </section>
+  <div id="status" class="status">Caricamento…</div>
+  <section id="content" class="panel hidden">
+    <label class="offer-toggle"><span><strong>Offerta attiva e visibile sulla mappa</strong><br><small>Se disattivata, la campagna resta salvata ma non genera codici.</small></span><input id="active" type="checkbox"></label>
+
+    <label class="field"><span>Titolo dell’offerta</span><input id="title" maxlength="120" placeholder="Es. Aperitivo con assaggio incluso"></label>
+    <label class="field"><span>Descrizione e condizioni</span><textarea id="description" maxlength="1000" placeholder="Spiega liberamente cosa comprende l’offerta e come utilizzarla."></textarea></label>
+
+    <div class="section-box">
+      <h2>Durata della campagna</h2>
+      <p>La campagna comparirà sulla mappa solo nel periodo indicato.</p>
+      <div class="grid2">
+        <label class="field"><span>Da</span><select id="startMode"><option value="now">Adesso</option><option value="custom">Data e ora personalizzate</option></select></label>
+        <label id="startAtWrap" class="field hidden"><span>Data e ora di inizio</span><input id="startAt" type="datetime-local"></label>
+        <label class="field"><span>Fino a</span><input id="endAt" type="datetime-local" required></label>
+      </div>
+    </div>
+
+    <div class="section-box">
+      <h2>Regole di riscatto</h2>
+      <p>Predefinito: un nuovo codice ogni 24 ore per ciascun utente.</p>
+      <label class="field"><span>Frequenza</span><select id="redemptionMode"><option value="interval">Uno ogni intervallo</option><option value="campaign">Uno per l’intera campagna</option></select></label>
+      <div id="intervalWrap" class="interval-row">
+        <label class="field"><span>Ogni</span><input id="intervalValue" type="number" min="1" max="999" value="24"></label>
+        <label class="field"><span>Unità</span><select id="intervalUnit"><option value="hours">Ore</option><option value="days">Giorni</option><option value="months">Mesi</option></select></label>
+      </div>
+    </div>
+
+    <div class="section-box">
+      <div class="switch-row"><span><strong>Validabile solo in orari specifici</strong><br><small class="helper">Predefinito: no, il codice è validabile durante tutta la campagna.</small></span><input id="validationEnabled" type="checkbox"></div>
+      <div id="validationWrap" class="conditional hidden">
+        <div class="grid2">
+          <label class="field"><span>Dalle</span><input id="validationStart" type="time" value="09:00"></label>
+          <label class="field"><span>Alle</span><input id="validationEnd" type="time" value="18:00"></label>
+        </div>
+        <span class="mini-label">Giorni validi</span>
+        <div id="weekdays" class="weekday-picker" aria-label="Giorni della settimana">
+          <button type="button" class="weekday selected" data-day="1" aria-pressed="true">Lun</button><button type="button" class="weekday selected" data-day="2" aria-pressed="true">Mar</button><button type="button" class="weekday selected" data-day="3" aria-pressed="true">Mer</button><button type="button" class="weekday selected" data-day="4" aria-pressed="true">Gio</button><button type="button" class="weekday selected" data-day="5" aria-pressed="true">Ven</button><button type="button" class="weekday selected" data-day="6" aria-pressed="true">Sab</button><button type="button" class="weekday selected" data-day="7" aria-pressed="true">Dom</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions"><button id="save" class="btn primary" type="button">Salva campagna</button><button id="close" class="btn soft" type="button">Chiudi offerta</button><button id="delete" class="btn danger" type="button">Elimina campagna</button></div>
+  </section>
+</main>
+<script src="/business-dashboard-common.js"></script>
+<script>
+(async function(){
+  var api=window.FTGBusiness,ctx,poi,campaignId='';
+  var byId=function(id){return document.getElementById(id)};
+  function localValue(date){var pad=function(n){return String(n).padStart(2,'0')};return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes())}
+  function futureDefault(){var d=new Date();d.setDate(d.getDate()+30);d.setMinutes(0,0,0);return localValue(d)}
+  function setConditional(){byId('startAtWrap').classList.toggle('hidden',byId('startMode').value!=='custom');byId('intervalWrap').classList.toggle('hidden',byId('redemptionMode').value!=='interval');byId('validationWrap').classList.toggle('hidden',!byId('validationEnabled').checked)}
+  function selectedDays(){return Array.from(document.querySelectorAll('.weekday.selected')).map(function(b){return Number(b.dataset.day)})}
+  function setDays(days){var chosen=Array.isArray(days)&&days.length?days:[1,2,3,4,5,6,7];document.querySelectorAll('.weekday').forEach(function(b){var on=chosen.indexOf(Number(b.dataset.day))>=0;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on?'true':'false')})}
+  try{
+    ctx=await api.init();if(!ctx)return;poi=ctx.poi;
+    var offer=api.decodeOffer(poi.discount_info),schedule=offer.schedule||{},redemption=offer.redemption||{},windowRule=offer.validation_window||{};
+    campaignId=offer.campaign_id||((crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(16).slice(2));
+    byId('active').checked=Number(poi.discount||0)>0;byId('title').value=offer.title;byId('description').value=offer.description;
+    byId('startMode').value=schedule.start_mode==='custom'?'custom':'now';
+    if(schedule.start_at)byId('startAt').value=localValue(new Date(schedule.start_at));
+    byId('endAt').value=schedule.end_at?localValue(new Date(schedule.end_at)):futureDefault();
+    byId('redemptionMode').value=redemption.mode==='campaign'?'campaign':'interval';
+    byId('intervalValue').value=Math.max(1,Number(redemption.every||24));
+    byId('intervalUnit').value=['hours','days','months'].indexOf(redemption.unit)>=0?redemption.unit:'hours';
+    byId('validationEnabled').checked=windowRule.enabled===true;byId('validationStart').value=windowRule.start||'09:00';byId('validationEnd').value=windowRule.end||'18:00';setDays(windowRule.weekdays);setConditional();
+    byId('content').classList.remove('hidden');
+    byId('startMode').onchange=setConditional;byId('redemptionMode').onchange=setConditional;byId('validationEnabled').onchange=setConditional;
+    document.querySelectorAll('.weekday').forEach(function(button){button.onclick=function(){this.classList.toggle('selected');this.setAttribute('aria-pressed',this.classList.contains('selected')?'true':'false')}});
+    byId('save').onclick=async function(){
+      var enabled=byId('active').checked,title=byId('title').value.trim(),description=byId('description').value.trim(),startMode=byId('startMode').value;
+      if(enabled&&!title&&!description){api.setStatus('Inserisci almeno il titolo o la descrizione dell’offerta.','error');return}
+      var startDate=startMode==='custom'?new Date(byId('startAt').value):new Date();var endDate=new Date(byId('endAt').value);
+      if(startMode==='custom'&&!byId('startAt').value){api.setStatus('Scegli data e ora di inizio.','error');return}
+      if(!byId('endAt').value||isNaN(endDate.getTime())){api.setStatus('Scegli data e ora di fine.','error');return}
+      if(endDate<=startDate){api.setStatus('La fine deve essere successiva all’inizio.','error');return}
+      var validationOn=byId('validationEnabled').checked,days=selectedDays();
+      if(validationOn&&(!byId('validationStart').value||!byId('validationEnd').value||!days.length)){api.setStatus('Seleziona orari e almeno un giorno valido.','error');return}
+      var info=JSON.stringify({campaign_id:campaignId,title:title,description:description,schedule:{start_mode:startMode,start_at:startDate.toISOString(),end_at:endDate.toISOString()},redemption:{mode:byId('redemptionMode').value,every:Math.max(1,Math.min(999,Number(byId('intervalValue').value||24))),unit:byId('intervalUnit').value},validation_window:{enabled:validationOn,start:byId('validationStart').value||'09:00',end:byId('validationEnd').value||'18:00',weekdays:days}});
+      this.disabled=true;try{await api.updateDiscount(poi,enabled?1:0,info);api.setStatus(enabled?'Campagna attiva: comparirà sulla mappa nel periodo scelto.':'Campagna salvata ma chiusa.','ok')}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}
+    };
+    byId('close').onclick=async function(){this.disabled=true;try{await api.updateDiscount(poi,0,poi.discount_info);byId('active').checked=false;api.setStatus('Offerta chiusa. La campagna resta modificabile.','ok')}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}};
+    byId('delete').onclick=async function(){this.disabled=true;try{await api.updateDiscount(poi,0,'');byId('active').checked=false;byId('title').value='';byId('description').value='';api.setStatus('Campagna eliminata.','ok')}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}};
+  }catch(e){api.setStatus(e.message,'error')}
+})();
+</script>
+</body>
+</html>

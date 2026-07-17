@@ -1,10 +1,187 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>5TerreGo · Business dashboard</title><link rel="stylesheet" href="/business-dashboard.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
-<main class="shell"><div class="top"><a class="back" href="/login.html">← Account</a><a class="scanner" href="/partner.html">Scanner QR →</a></div>
-<section class="hero"><div class="eyebrow">5TerreGo Partner</div><h1 data-business-name>Business dashboard</h1><p>Il centro di controllo del locale: campagna, profilo pubblico, menu, personale e risultati.</p><div id="switcher" class="switcher hidden"><label for="activitySelect">Attività</label><select id="activitySelect"></select></div></section>
-<div id="status" class="status">Caricamento dashboard…</div><div id="content" class="hidden">
-<section id="campaignCard" class="campaign"><div class="campaign-head"><div><div class="eyebrow" style="color:#65742a">Campagna in evidenza</div><h2 id="campaignTitle">Nessuna campagna</h2><p id="campaignDescription">Crea uno sconto per apparire sulla mappa con un’offerta attiva.</p></div><span id="campaignBadge" class="badge">Non attiva</span></div><div class="actions"><a id="campaignPrimary" class="btn lime" data-page="business-campaign.html">Aggiungi sconto e appari sulla mappa</a><button id="closeCampaign" class="btn soft hidden" type="button">Chiudi offerta</button><button id="deleteCampaign" class="btn danger hidden" type="button">Elimina</button></div></section>
-<section class="stats"><div class="stat"><b id="viewsTotal">—</b><span>Visualizzazioni</span></div><div class="stat"><b id="views30">—</b><span>Visualizzazioni · 30 giorni</span></div><div class="stat"><b id="whatsappTotal">—</b><span>Click WhatsApp</span></div><div class="stat"><b id="whatsapp30">—</b><span>Click WhatsApp · 30 giorni</span></div></section>
-<section class="grid"><a class="nav-card" data-page="business-campaign.html"><div class="icon">🏷️</div><strong>Campagna e sconto</strong><span>Crea, modifica, chiudi o elimina l’offerta e i limiti QR.</span></a><a class="nav-card" data-page="business-profile.html"><div class="icon">🏪</div><strong>Profilo del locale</strong><span>Descrizione, WhatsApp e fotografie pubbliche.</span></a><a class="nav-card" data-page="business-menu.html"><div class="icon">🍽️</div><strong>Menu</strong><span>Carica un PDF/foto oppure inserisci i prodotti singolarmente.</span></a><a class="nav-card" data-page="business-staff.html"><div class="icon">👥</div><strong>Personale</strong><span>Autorizza gli operatori che possono usare lo scanner QR.</span></a><a class="nav-card" data-page="business-analytics.html"><div class="icon">📈</div><strong>Statistiche</strong><span>Visualizzazioni del profilo e click WhatsApp.</span></a><a class="nav-card" href="/map.html"><div class="icon">🗺️</div><strong>Visualizza sulla mappa</strong><span>Controlla la scheda pubblica come la vedono i visitatori.</span></a></section>
-</div></main><script src="/business-dashboard-common.js"></script><script>
-(async function(){try{var api=window.FTGBusiness,ctx=await api.init();if(!ctx)return;var poi=ctx.poi,offer=api.decodeOffer(poi.discount_info),active=Number(poi.discount||0)>0,saved=Boolean(offer.title||offer.description);document.getElementById('campaignTitle').textContent=saved?(offer.title||'Campagna senza titolo'):'Nessuna campagna';document.getElementById('campaignDescription').textContent=saved?(offer.description||('Sconto '+poi.discount+'%')):'Crea uno sconto per apparire sulla mappa con un’offerta attiva.';document.getElementById('campaignBadge').textContent=active?'Offerta attiva':(saved?'Campagna chiusa':'Non attiva');document.getElementById('campaignBadge').classList.toggle('active',active);document.getElementById('campaignPrimary').textContent=saved?'Modifica campagna':'Aggiungi sconto e appari sulla mappa';document.getElementById('closeCampaign').classList.toggle('hidden',!active);document.getElementById('deleteCampaign').classList.toggle('hidden',!saved);document.getElementById('content').classList.remove('hidden');var s=await api.stats(poi);document.getElementById('viewsTotal').textContent=s.views_total||0;document.getElementById('views30').textContent=s.views_30d||0;document.getElementById('whatsappTotal').textContent=s.whatsapp_total||0;document.getElementById('whatsapp30').textContent=s.whatsapp_30d||0;document.getElementById('closeCampaign').onclick=async function(){this.disabled=true;try{await api.updateDiscount(poi,0,poi.discount_info);location.reload()}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}};document.getElementById('deleteCampaign').onclick=async function(){this.disabled=true;try{await api.updateDiscount(poi,0,'');location.reload()}catch(e){api.setStatus(e.message,'error')}finally{this.disabled=false}}}catch(e){window.FTGBusiness.setStatus(e.message,'error')}})();
-</script></body></html>
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>5TerreGo · Business dashboard</title>
+    <link rel="stylesheet" href="/business-dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="top">
+        <a class="back" href="/login.html">← Account</a
+        ><a class="scanner" href="/partner.html">Scanner QR →</a>
+      </div>
+      <section class="hero">
+        <div class="eyebrow">5TerreGo Partner</div>
+        <h1 data-business-name>Business dashboard</h1>
+        <p>
+          Il centro di controllo del locale: campagna, profilo pubblico, menu,
+          personale e risultati.
+        </p>
+        <div id="switcher" class="switcher hidden">
+          <label for="activitySelect">Attività</label
+          ><select id="activitySelect"></select>
+        </div>
+      </section>
+      <div id="status" class="status">Caricamento dashboard…</div>
+      <div id="content" class="hidden">
+        <section id="campaignCard" class="campaign">
+          <div class="campaign-head">
+            <div>
+              <div class="eyebrow" style="color: #65742a">
+                Campagna in evidenza
+              </div>
+              <h2 id="campaignTitle">Nessuna campagna</h2>
+              <p id="campaignDescription">
+                Crea uno sconto per apparire sulla mappa con un’offerta attiva.
+              </p>
+            </div>
+            <span id="campaignBadge" class="badge">Non attiva</span>
+          </div>
+          <div class="actions">
+            <a
+              id="campaignPrimary"
+              class="btn lime"
+              data-page="business-campaign.html"
+              >Aggiungi sconto e appari sulla mappa</a
+            ><button id="closeCampaign" class="btn soft hidden" type="button">
+              Chiudi offerta</button
+            ><button
+              id="deleteCampaign"
+              class="btn danger hidden"
+              type="button"
+            >
+              Elimina
+            </button>
+          </div>
+        </section>
+        <section class="stats">
+          <div class="stat">
+            <b id="viewsTotal">—</b><span>Visualizzazioni</span>
+          </div>
+          <div class="stat">
+            <b id="views30">—</b><span>Visualizzazioni · 30 giorni</span>
+          </div>
+          <div class="stat">
+            <b id="whatsappTotal">—</b><span>Click WhatsApp</span>
+          </div>
+          <div class="stat">
+            <b id="whatsapp30">—</b><span>Click WhatsApp · 30 giorni</span>
+          </div>
+        </section>
+        <section class="grid">
+          <a class="nav-card" data-page="business-campaign.html"
+            ><div class="icon">🏷️</div>
+            <strong>Campagna e sconto</strong
+            ><span
+              >Crea, modifica, chiudi o elimina l’offerta e i limiti QR.</span
+            ></a
+          ><a class="nav-card" data-page="business-profile.html"
+            ><div class="icon">🏪</div>
+            <strong>Profilo del locale</strong
+            ><span>Descrizione, WhatsApp e fotografie pubbliche.</span></a
+          ><a class="nav-card" data-page="business-menu.html"
+            ><div class="icon">🍽️</div>
+            <strong>Menu</strong
+            ><span
+              >Carica un PDF/foto oppure inserisci i prodotti
+              singolarmente.</span
+            ></a
+          ><a class="nav-card" data-page="business-staff.html"
+            ><div class="icon">👥</div>
+            <strong>Personale</strong
+            ><span
+              >Autorizza gli operatori che possono usare lo scanner QR.</span
+            ></a
+          ><a class="nav-card" data-page="business-analytics.html"
+            ><div class="icon">📈</div>
+            <strong>Statistiche</strong
+            ><span>Visualizzazioni del profilo e click WhatsApp.</span></a
+          ><a class="nav-card" href="/map.html"
+            ><div class="icon">🗺️</div>
+            <strong>Visualizza sulla mappa</strong
+            ><span
+              >Controlla la scheda pubblica come la vedono i visitatori.</span
+            ></a
+          >
+        </section>
+      </div>
+    </main>
+    <script src="/business-dashboard-common.js"></script>
+    <script>
+      (async function () {
+        try {
+          var api = window.FTGBusiness,
+            ctx = await api.init();
+          if (!ctx) return;
+          var poi = ctx.poi,
+            offer = api.decodeOffer(poi.discount_info),
+            active = Number(poi.discount || 0) > 0,
+            saved = Boolean(offer.title || offer.description);
+          document.getElementById("campaignTitle").textContent = saved
+            ? offer.title || "Campagna senza titolo"
+            : "Nessuna campagna";
+          document.getElementById("campaignDescription").textContent = saved
+            ? offer.description || "Offerta personalizzata dell’attività."
+            : "Crea un’offerta per apparire sulla mappa.";
+          document.getElementById("campaignBadge").textContent = active
+            ? "Offerta attiva"
+            : saved
+              ? "Campagna chiusa"
+              : "Non attiva";
+          document
+            .getElementById("campaignBadge")
+            .classList.toggle("active", active);
+          document.getElementById("campaignPrimary").textContent = saved
+            ? "Modifica campagna"
+            : "Aggiungi sconto e appari sulla mappa";
+          document
+            .getElementById("closeCampaign")
+            .classList.toggle("hidden", !active);
+          document
+            .getElementById("deleteCampaign")
+            .classList.toggle("hidden", !saved);
+          document.getElementById("content").classList.remove("hidden");
+          var s = await api.stats(poi);
+          document.getElementById("viewsTotal").textContent =
+            s.views_total || 0;
+          document.getElementById("views30").textContent = s.views_30d || 0;
+          document.getElementById("whatsappTotal").textContent =
+            s.whatsapp_total || 0;
+          document.getElementById("whatsapp30").textContent =
+            s.whatsapp_30d || 0;
+          document.getElementById("closeCampaign").onclick = async function () {
+            this.disabled = true;
+            try {
+              await api.updateDiscount(poi, 0, poi.discount_info);
+              location.reload();
+            } catch (e) {
+              api.setStatus(e.message, "error");
+            } finally {
+              this.disabled = false;
+            }
+          };
+          document.getElementById("deleteCampaign").onclick =
+            async function () {
+              this.disabled = true;
+              try {
+                await api.updateDiscount(poi, 0, "");
+                location.reload();
+              } catch (e) {
+                api.setStatus(e.message, "error");
+              } finally {
+                this.disabled = false;
+              }
+            };
+        } catch (e) {
+          window.FTGBusiness.setStatus(e.message, "error");
+        }
+      })();
+    </script>
+  </body>
+</html>
