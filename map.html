@@ -1451,8 +1451,8 @@
     .atc-departure-line { min-width:0; font-size:12px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .atc-departure-wait { color:#64748b; font-size:10px; font-weight:850; white-space:nowrap; }
     .atc-selected-route-title { margin-top:14px; padding-top:12px; border-top:1px solid rgba(16,35,60,.10); color:#10233c; font-size:13px; font-weight:950; }
-    .atc-scheduled-bus { width:32px; height:52px; display:grid; place-items:center; padding:0; border:0; background:transparent; line-height:1; cursor:pointer; filter:drop-shadow(0 5px 5px rgba(0,0,0,.42)); }
-    .atc-scheduled-bus img { width:29px; height:50px; display:block; object-fit:contain; pointer-events:none; }
+    .atc-scheduled-bus { width:var(--atc-bus-width,22px); height:var(--atc-bus-height,38px); display:grid; place-items:center; padding:0; border:0; background:transparent; line-height:1; cursor:pointer; filter:drop-shadow(0 3px 4px rgba(0,0,0,.38)); contain:layout style paint; will-change:transform; }
+    .atc-scheduled-bus img { width:100%; height:100%; display:block; object-fit:contain; pointer-events:none; }
     @media (max-width:420px) { .atc-transit-query { grid-template-columns:1fr 1fr; } .atc-transit-query button { grid-column:1/-1; } }
     #poi-related-articles { display: none; margin-top: 16px; }
     #poi-related-articles.is-visible { display: block; }
@@ -2789,7 +2789,9 @@
   var atcScheduledBusTimer = null;
   var atcScheduledBusAnimationFrame = null;
   var selectedATCScheduledTrip = null;
-  var ATC_SCHEDULED_BUS_MIN_ZOOM = 14.25;
+  var ATC_SCHEDULED_BUS_MIN_ZOOM = 14.6;
+  var ATC_SCHEDULED_BUS_MAX_VISIBLE = 36;
+  var atcScheduledBusLastFrame = 0;
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
   var NORMAL_MAP_ZOOM = 9.5;
@@ -5179,12 +5181,19 @@
   }
 
   function animateATCScheduledBusMarkers(now) {
+    var keepAnimating = false;
+    if (now - atcScheduledBusLastFrame < 32) {
+      atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
+      return;
+    }
+    atcScheduledBusLastFrame = now;
     glScheduledBusMarkers.forEach(function(entry) {
       var progress;
       var point;
       var bearing;
       if (!entry || !entry.marker || !entry.fromPoint || !entry.targetPoint) return;
       progress = Math.max(0, Math.min(1, (now - entry.transitionStartedAt) / Math.max(1, entry.transitionDuration)));
+      if (progress < 1) keepAnimating = true;
       point = [entry.fromPoint[0] + (entry.targetPoint[0] - entry.fromPoint[0]) * progress, entry.fromPoint[1] + (entry.targetPoint[1] - entry.fromPoint[1]) * progress];
       bearing = interpolateATCBearing(entry.fromBearing, entry.targetBearing, progress);
       entry.currentPoint = point;
@@ -5192,18 +5201,39 @@
       entry.marker.setLngLat([point[1], point[0]]);
       if (typeof entry.marker.setRotation === 'function') entry.marker.setRotation(bearing);
     });
-    if (glScheduledBusMarkers.size) atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
+    if (keepAnimating) atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
     else atcScheduledBusAnimationFrame = null;
+  }
+
+  function updateATCScheduledBusSize() {
+    var zoom = turnNavigationMap ? Number(turnNavigationMap.getZoom()) : ATC_SCHEDULED_BUS_MIN_ZOOM;
+    var progress = Math.max(0, Math.min(1, (zoom - ATC_SCHEDULED_BUS_MIN_ZOOM) / 3.8));
+    var width = Math.round(19 + progress * 9);
+    glScheduledBusMarkers.forEach(function(entry) {
+      var element = entry && entry.marker && entry.marker.getElement ? entry.marker.getElement() : null;
+      if (!element) return;
+      element.style.setProperty('--atc-bus-width', width + 'px');
+      element.style.setProperty('--atc-bus-height', Math.round(width * 1.72) + 'px');
+    });
   }
 
   function renderATCScheduledBusMarkers() {
     var active;
     var activeKeys = new Set();
+    var needsAnimation = false;
     if (!turnNavigationMap || !turnNavigationMapLoaded || navigationModeActive || turnNavigationMap.getZoom() < ATC_SCHEDULED_BUS_MIN_ZOOM || (searchTypeFilter !== 'all' && searchTypeFilter !== 'bus')) {
       clearATCScheduledBusMarkers();
       return;
     }
-    active = getActiveATCScheduledBuses();
+    var bounds = turnNavigationMap.getBounds();
+    var center = turnNavigationMap.getCenter();
+    active = getActiveATCScheduledBuses().filter(function(estimate) {
+      return bounds.contains([estimate.point[1], estimate.point[0]]);
+    }).sort(function(a, b) {
+      var adx = a.point[1] - center.lng, ady = a.point[0] - center.lat;
+      var bdx = b.point[1] - center.lng, bdy = b.point[0] - center.lat;
+      return (adx * adx + ady * ady) - (bdx * bdx + bdy * bdy);
+    }).slice(0, ATC_SCHEDULED_BUS_MAX_VISIBLE);
     active.forEach(function(estimate) {
       var entry = glScheduledBusMarkers.get(estimate.key);
       var element;
@@ -5215,26 +5245,30 @@
         element.className = 'atc-scheduled-bus';
         element.innerHTML = '<img src="' + getGithubAssetUrl('atc-bus-top-yellow.png') + '" alt="">';
         element.setAttribute('aria-label', 'Bus ' + getATCRouteLabel(estimate.trip) + ' verso ' + (estimate.trip[4] || 'capolinea') + ', posizione stimata');
-        entry = { marker:null, estimate:estimate, currentPoint:estimate.point.slice(), fromPoint:estimate.point.slice(), targetPoint:estimate.point.slice(), currentBearing:estimate.bearing, fromBearing:estimate.bearing, targetBearing:estimate.bearing, transitionStartedAt:performance.now(), transitionDuration:2100 };
+        entry = { marker:null, estimate:estimate, currentPoint:estimate.point.slice(), fromPoint:estimate.point.slice(), targetPoint:estimate.point.slice(), currentBearing:estimate.bearing, fromBearing:estimate.bearing, targetBearing:estimate.bearing, transitionStartedAt:performance.now(), transitionDuration:3100 };
         element.addEventListener('click', function(event) { event.stopPropagation(); openATCScheduledBus(entry.estimate); });
         marker = new window.maplibregl.Marker({ element:element, anchor:'center', rotationAlignment:'map' }).setLngLat([estimate.point[1], estimate.point[0]]).addTo(turnNavigationMap);
         entry.marker = marker;
         glScheduledBusMarkers.set(estimate.key, entry);
       }
       entry.estimate = estimate;
-      entry.fromPoint = (entry.currentPoint || estimate.point).slice();
-      entry.targetPoint = estimate.point.slice();
-      entry.fromBearing = Number.isFinite(entry.currentBearing) ? entry.currentBearing : estimate.bearing;
-      entry.targetBearing = estimate.bearing;
-      entry.transitionStartedAt = performance.now();
-      entry.transitionDuration = 2100;
+      if (Math.abs(entry.targetPoint[0] - estimate.point[0]) > 0.0000002 || Math.abs(entry.targetPoint[1] - estimate.point[1]) > 0.0000002 || Math.abs(((entry.targetBearing - estimate.bearing + 540) % 360) - 180) > 0.2) {
+        entry.fromPoint = (entry.currentPoint || estimate.point).slice();
+        entry.targetPoint = estimate.point.slice();
+        entry.fromBearing = Number.isFinite(entry.currentBearing) ? entry.currentBearing : estimate.bearing;
+        entry.targetBearing = estimate.bearing;
+        entry.transitionStartedAt = performance.now();
+        entry.transitionDuration = 3100;
+        needsAnimation = true;
+      }
     });
     glScheduledBusMarkers.forEach(function(entry, key) {
       if (activeKeys.has(key)) return;
       try { entry.marker.remove(); } catch (_error) {}
       glScheduledBusMarkers.delete(key);
     });
-    if (glScheduledBusMarkers.size && !atcScheduledBusAnimationFrame) atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
+    updateATCScheduledBusSize();
+    if (needsAnimation && !atcScheduledBusAnimationFrame) atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
   }
 
   function syncATCScheduledBuses() {
@@ -5247,7 +5281,7 @@
       return;
     }
     renderATCScheduledBusMarkers();
-    if (!atcScheduledBusTimer) atcScheduledBusTimer = window.setInterval(renderATCScheduledBusMarkers, 2000);
+    if (!atcScheduledBusTimer) atcScheduledBusTimer = window.setInterval(renderATCScheduledBusMarkers, 3000);
   }
 
   function ensureATCScheduledRouteLayer() {
@@ -7798,7 +7832,7 @@
       });
     }
 
-    map.on('zoom move resize', function () {
+    map.on('zoom resize', function () {
       scheduleMapRefresh({ rail: false, auto: false });
     });
 
@@ -7814,6 +7848,7 @@
       }
       scheduleMapRefresh({ rail: true, auto: true });
       scheduleSessionMapStateSave();
+      if (turnNavigationMap && turnNavigationMapLoaded) renderATCScheduledBusMarkers();
     });
 
     window.addEventListener('resize', function() {
