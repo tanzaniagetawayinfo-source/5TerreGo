@@ -52,6 +52,10 @@ type PoiRow = {
   discount?: number | string | null;
   discount_info?: string | null;
   active_codes?: ActiveCode[] | string | null;
+  description?: string | null;
+  phone?: string | null;
+  images?: string[] | string | null;
+  partner_profile?: JsonRecord | null;
   [key: string]: unknown;
 };
 
@@ -149,8 +153,10 @@ function parseOfferInfo(value: unknown): { title: string; description: string; r
 }
 
 function createCode(): string {
-  const random = crypto.randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase();
-  return `5TG-${random}`;
+  const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const bytes = crypto.getRandomValues(new Uint8Array(4));
+  const random = Array.from(bytes).map((value) => alphabet[value % alphabet.length]).join("");
+  return `5T-${random}`;
 }
 
 function cleanCodes(codes: ActiveCode[], now: Date): ActiveCode[] {
@@ -375,11 +381,100 @@ serve(async (req) => {
     if (action === "get_partner_pois") {
       const { data: pois, error } = await supabaseAdmin
         .from("pois")
-        .select("id,name,type,coords,emails,discount,discount_info")
+        .select("id,name,type,coords,description,phone,images,emails,discount,discount_info,partner_profile")
         .not("emails", "is", null);
       if (error) throw new Error(error.message);
       const partnerPois = ((pois || []) as PoiRow[]).filter((poi) => isAuthorized(poi, userEmail));
       return jsonResponse({ ok: true, user_email: userEmail, pois: partnerPois });
+    }
+
+    if (action === "get_partner_stats") {
+      const poi = await findPoiByBody(supabaseAdmin, body);
+      if (!poi) return jsonResponse({ ok: false, error: "POI not found" }, 404);
+      const managers = parseAuthorizedEmails(poi.emails);
+      if (!managers.length || managers[0] !== userEmail) {
+        return jsonResponse({ ok: false, error: "Only the business manager can view analytics" }, 403);
+      }
+
+      const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const eventCount = async (type: string, since?: string) => {
+        let query = supabaseAdmin.from("poi_partner_events").select("id", { count: "exact", head: true })
+          .eq("poi_id", poi.id).eq("event_type", type);
+        if (since) query = query.gte("created_at", since);
+        const result = await query;
+        if (result.error) throw new Error(result.error.message);
+        return result.count || 0;
+      };
+      const [viewsTotal, views30, views7, whatsappTotal, whatsapp30, whatsapp7] = await Promise.all([
+        eventCount("profile_view"), eventCount("profile_view", since30), eventCount("profile_view", since7),
+        eventCount("whatsapp_click"), eventCount("whatsapp_click", since30), eventCount("whatsapp_click", since7),
+      ]);
+      return jsonResponse({
+        ok: true,
+        stats: {
+          views_total: viewsTotal,
+          views_7d: views7,
+          views_30d: views30,
+          whatsapp_total: whatsappTotal,
+          whatsapp_7d: whatsapp7,
+          whatsapp_30d: whatsapp30,
+        },
+      });
+    }
+
+    if (action === "upload_business_asset") {
+      const poi = await findPoiByBody(supabaseAdmin, body);
+      if (!poi) return jsonResponse({ ok: false, error: "POI not found" }, 404);
+      const managers = parseAuthorizedEmails(poi.emails);
+      if (!managers.length || managers[0] !== userEmail) {
+        return jsonResponse({ ok: false, error: "Only the business manager can upload files" }, 403);
+      }
+
+      const mimeType = String(body.mime_type || "").toLowerCase();
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+      if (!allowedTypes.includes(mimeType)) return jsonResponse({ ok: false, error: "Unsupported file type" }, 400);
+      const rawBase64 = String(body.base64 || "").replace(/^data:[^;]+;base64,/, "");
+      if (!rawBase64) return jsonResponse({ ok: false, error: "Missing file data" }, 400);
+      const binary = Uint8Array.from(atob(rawBase64), (char) => char.charCodeAt(0));
+      if (binary.byteLength > 6 * 1024 * 1024) return jsonResponse({ ok: false, error: "File exceeds 6 MB" }, 400);
+      const extension = mimeType === "application/pdf" ? "pdf" : mimeType.split("/")[1].replace("jpeg", "jpg");
+      const path = `poi-${poi.id}/${crypto.randomUUID()}.${extension}`;
+      const upload = await supabaseAdmin.storage.from("business-assets").upload(path, binary, {
+        contentType: mimeType,
+        cacheControl: "31536000",
+        upsert: false,
+      });
+      if (upload.error) throw new Error(upload.error.message);
+      const publicUrl = supabaseAdmin.storage.from("business-assets").getPublicUrl(path).data.publicUrl;
+      return jsonResponse({ ok: true, url: publicUrl, path, mime_type: mimeType });
+    }
+
+    if (action === "update_business_profile") {
+      const poi = await findPoiByBody(supabaseAdmin, body);
+      if (!poi) return jsonResponse({ ok: false, error: "POI not found" }, 404);
+      const managers = parseAuthorizedEmails(poi.emails);
+      if (!managers.length || managers[0] !== userEmail) {
+        return jsonResponse({ ok: false, error: "Only the business manager can edit the profile" }, 403);
+      }
+
+      const description = String(body.description || "").trim().slice(0, 5000);
+      const phone = String(body.phone || "").trim().slice(0, 80);
+      const images = Array.isArray(body.images)
+        ? body.images.map((value) => String(value || "").trim()).filter((value) => /^https:\/\//i.test(value)).slice(0, 10)
+        : [];
+      const profile = body.partner_profile && typeof body.partner_profile === "object"
+        ? body.partner_profile as JsonRecord
+        : {};
+      if (JSON.stringify(profile).length > 100000) return jsonResponse({ ok: false, error: "Menu data is too large" }, 400);
+      const { error } = await supabaseAdmin.from("pois").update({
+        description,
+        phone,
+        images,
+        partner_profile: profile,
+      }).eq("id", poi.id);
+      if (error) throw new Error(error.message);
+      return jsonResponse({ ok: true, poi_id: poi.id, description, phone, images, partner_profile: profile });
     }
 
     if (action === "generate_code") {
