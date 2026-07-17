@@ -7059,6 +7059,7 @@
       if (searchTypeFilter === 'church') return type === 'chiesa';
       if (searchTypeFilter === 'monument') return type === 'monumento';
       if (searchTypeFilter === 'station') return type === 'stazione';
+      if (searchTypeFilter === 'bus') return type === 'fermata bus' || type === 'bus stop' || type === 'busstop';
       if (searchTypeFilter === 'ferry') return type === 'ferry';
       if (searchTypeFilter === 'curiosity') return type === 'curiosity';
       return false;
@@ -7111,6 +7112,7 @@
       if (searchTypeFilter === 'church') return type === 'chiesa';
       if (searchTypeFilter === 'monument') return type === 'monumento';
       if (searchTypeFilter === 'station') return type === 'stazione';
+      if (searchTypeFilter === 'bus') return type === 'fermata bus' || type === 'bus stop' || type === 'busstop';
       if (searchTypeFilter === 'ferry') return type === 'ferry';
       if (searchTypeFilter === 'curiosity') return type === 'curiosity';
       return false;
