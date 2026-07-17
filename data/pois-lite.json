@@ -52,7 +52,7 @@
   {
     "id": 12,
     "name": "Marina (harbour)",
-    "coords": "44.0986627, 9.7376760",
+    "coords": "44.098784, 9.737609",
     "description": "Dive into the magical atmosphere of Riomaggiore by discovering its hidden gem: a small, sheltered cove tucked away right next to the ferry boarding point. This enchanting pebble beach is a peaceful corner where time seems to stand still, letting you be lulled by the sound of the sea and warmed by the Riviera sun.",
     "importance": 60,
     "type": "punto panoramico",
@@ -122,10 +122,10 @@
   {
     "id": 27,
     "name": "Ferry riomaggiore",
-    "coords": "44.097639, 9.737889",
+    "coords": "44.097753, 9.737288",
     "description": "The ferry terminal is located at the harbor of Riomaggiore, accessible by following the pathway all way down from the centre and taking the stairs on the left .",
     "importance": 36,
-    "type": "chiesa",
+    "type": "ferry",
     "discount": 0,
     "discount_info": null
   },
@@ -142,10 +142,10 @@
   {
     "id": 29,
     "name": "Ferry Vernazza",
-    "coords": "44.1350564, 9.6814445",
+    "coords": "44.135627, 9.681182",
     "description": "The ferry point is at the end of vernazza harbour.",
     "importance": 50,
-    "type": "",
+    "type": "ferry",
     "discount": 0,
     "discount_info": null
   },
@@ -1187,6 +1187,416 @@
     "importance": 50,
     "type": "chiesa",
     "discount": 0,
+    "discount_info": null
+  },
+  {
+    "id": 185,
+    "name": "Ferry Station La Spezia",
+    "coords": "44.102587, 9.825107",
+    "description": "",
+    "importance": 50,
+    "type": "ferry",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 186,
+    "name": "Ferry Station Portovenere",
+    "coords": "44.051425, 9.836212",
+    "description": "",
+    "importance": 50,
+    "type": "ferry",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 187,
+    "name": "Ferry Station Lerici",
+    "coords": "44.074162, 9.909098",
+    "description": "",
+    "importance": 50,
+    "type": "ferry",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 188,
+    "name": "San Giorgio Castle",
+    "coords": "44.106380, 9.821517",
+    "description": "",
+    "importance": 88,
+    "type": "castello",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 189,
+    "name": "Garibaldi Statue",
+    "coords": "44,1023787, 9,8228848",
+    "description": "",
+    "importance": 75,
+    "type": "monumento",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 190,
+    "name": "La Spezia Centrale",
+    "coords": "44,1110510, 9,8142755",
+    "description": "",
+    "importance": 90,
+    "type": "stazione",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 191,
+    "name": "La Spezia Migliarina",
+    "coords": "44,1231999, 9,8401377",
+    "description": "",
+    "importance": 85,
+    "type": "stazione",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 192,
+    "name": "Thaon Bridge",
+    "coords": "44,1009862, 9,8262620",
+    "description": "",
+    "importance": 71,
+    "type": "punto panoramico",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 193,
+    "name": "Church of San Giovanni Battista",
+    "coords": "44,1230327, 9,8469787",
+    "description": "",
+    "importance": 84,
+    "type": "chiesa",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 194,
+    "name": "Church of San Giovanni Battista",
+    "coords": "44,1230327, 9,8469787",
+    "description": "",
+    "importance": 93,
+    "type": "chiesa",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 195,
+    "name": "Cristo Re Cathedral",
+    "coords": "44,1082891, 9,8276363",
+    "description": "",
+    "importance": 91,
+    "type": "chiesa",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 196,
+    "name": "Piazza Beverini Parking",
+    "coords": "44,1047995, 9,8196514",
+    "description": "",
+    "importance": 50,
+    "type": "parcheggio",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 197,
+    "name": "Credem Banca",
+    "coords": "44,1034807, 9,8209569",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 198,
+    "name": "Credem Banca",
+    "coords": "44,1034807, 9,8209569",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 199,
+    "name": "BPER",
+    "coords": "44,1039644, 9,8217643",
+    "description": "",
+    "importance": 50,
+    "type": "chiesa",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 200,
+    "name": "Intesa San Paolo",
+    "coords": "44,1045867, 9,8237518",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 201,
+    "name": "Monterosso Dei Paschi Di Siena",
+    "coords": "44,1047683, 9,8239731",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 202,
+    "name": "Banca Toscana",
+    "coords": "",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 203,
+    "name": "Crédit Agricole",
+    "coords": "44,1054344, 9,8253407",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 204,
+    "name": "Crédit Agricole",
+    "coords": "44,1046431, 9,8192862",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 205,
+    "name": "Banco BPM",
+    "coords": "44,1050225, 9,8181232",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 206,
+    "name": "Crédit Agricole",
+    "coords": "44,1087391, 9,8165950",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 207,
+    "name": "Cassa Di Risparmio La Spezia",
+    "coords": "44,1144281, 9,8089856",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 208,
+    "name": "Crédit Agricole",
+    "coords": "44,1119940, 9,8023823",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 209,
+    "name": "BNL",
+    "coords": "44,1086120, 9,8286807",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 210,
+    "name": "Crèdit Agricole",
+    "coords": "44,1112783, 9,8328022",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 211,
+    "name": "Intesa Sanpaolo Spa",
+    "coords": "44,1146012, 9,8394169",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 212,
+    "name": "BPER",
+    "coords": "44,1179965, 9,8428354",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 213,
+    "name": "Crédit Agricole",
+    "coords": "44,1232745, 9,8442613",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 214,
+    "name": "Crédit Agricole",
+    "coords": "",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 215,
+    "name": "Crédit Agricole",
+    "coords": "44,1113893, 9,8415184",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 216,
+    "name": "Banco BPM",
+    "coords": "44,1113751, 9,8430325",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 217,
+    "name": "Crédit Agricole",
+    "coords": "44,1111473, 9,8456336",
+    "description": "",
+    "importance": 50,
+    "type": "atm",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 218,
+    "name": "Wagner Heard the Rhine Here",
+    "coords": "44,1044083, 9,8212318",
+    "description": "In 1853, composer Richard Wagner stayed in this building. According to his own account, a dreamlike sound inspired the opening of Das Rheingold, the first opera of his famous Ring Cycle. A plaque on the building still remembers the moment.",
+    "importance": 50,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 219,
+    "name": "The City Napoleon Wanted to Build",
+    "coords": "44,1021089, 9,8209130",
+    "description": "Napoleon understood the strategic importance of the Gulf of La Spezia and planned to build a major naval arsenal here. His empire collapsed before the project could begin, but decades later Cavour revived the idea.",
+    "importance": 85,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 220,
+    "name": "La Spezia Is Also Known as the “Gate of Zion”",
+    "coords": "44,1049854, 9,8598754",
+    "description": "In 1946, more than one thousand Holocaust survivors left this area aboard the ships Fede and Fenice, heading toward Palestine. Because local residents helped them, La Spezia became known as Sha’ar Zion — the Gate of Zion.",
+    "importance": 93,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 221,
+    "name": "The Poet’s Cave",
+    "coords": "44.049297, 9.832774",
+    "description": "This dramatic sea cave was once called Cala dell’Arpaia but later became associated with Lord Byron. Local tradition claims that the poet swam across the Gulf to visit the Shelleys, although the story has never been proven.",
+    "importance": 90,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 222,
+    "name": "Garibaldi Was Imprisoned Here",
+    "coords": "44,0686058, 9,8450780",
+    "description": "After being wounded during the Battle of Aspromonte in 1862, Giuseppe Garibaldi was taken to Varignano. He remained here for around forty days under military and medical supervision.",
+    "importance": 90,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 223,
+    "name": "Shelley’s Last Home Before the Shipwreck",
+    "coords": "44,0833438, 9,8997636",
+    "description": "Poets Percy Bysshe Shelley and Mary Shelley, the author of Frankenstein, lived here in 1822. Shortly afterwards, Percy drowned when his sailing boat sank while returning from Livorno.",
+    "importance": 81,
+    "type": "chiesa",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 224,
+    "name": "The Village Saved by a Giant Octopus",
+    "coords": "44,0578272, 9,9289004",
+    "description": "According to local legend, a giant octopus climbed out of the sea during a nighttime pirate attack and rang the church bells with its tentacles. The sound woke the villagers and saved Tellaro.",
+    "importance": 87,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 225,
+    "name": "A Bay Used as a Climate Change Laboratory",
+    "coords": "44,0818607, 9,8810887",
+    "description": "This small bay is home to Smart Bay Santa Teresa, a natural marine laboratory where researchers study the sea, aquaculture, new technologies and the effects of climate change on coastal ecosystems.",
+    "importance": 83,
+    "type": "curiosity",
+    "discount": null,
     "discount_info": null
   }
 ]
