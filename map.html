@@ -1332,16 +1332,29 @@
     body.god-mode-active #poi-edit { display:inline-flex; align-items:center; justify-content:center; }
     #god-mode-badge { display:none; position:fixed; z-index:2210; right:14px; top:calc(var(--ftg-header-height, 98px) + 14px); border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:9px 13px; background:rgba(17,24,39,.92); color:#fff; box-shadow:0 12px 34px rgba(0,0,0,.24); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font:inherit; font-size:11px; font-weight:950; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; }
     body.god-mode-active #god-mode-badge { display:block; }
-    #god-mode-add-prompt { display:none; position:fixed; z-index:4300; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); width:min(390px,calc(100vw - 28px)); transform:translateX(-50%); padding:15px; border-radius:22px; background:rgba(17,24,39,.97); color:#fff; box-shadow:0 24px 70px rgba(0,0,0,.34); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
-    #god-mode-add-prompt.is-visible { display:block; }
+    #god-mode-add-prompt { display:none; position:fixed; z-index:4300; left:50%; bottom:calc(12px + env(safe-area-inset-bottom)); width:min(430px,calc(100vw - 20px)); max-height:min(78vh,720px); transform:translateX(-50%); padding:17px; border-radius:26px; background:rgba(17,24,39,.98); color:#fff; box-shadow:0 24px 70px rgba(0,0,0,.38); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); overflow:auto; overscroll-behavior:contain; }
+    #god-mode-add-prompt.is-visible { display:block; animation:god-mode-sheet-in .2s ease-out; }
+    @keyframes god-mode-sheet-in { from { opacity:0; transform:translate(-50%,18px); } to { opacity:1; transform:translate(-50%,0); } }
     .god-mode-add-title { font-size:17px; font-weight:950; letter-spacing:-.025em; }
     .god-mode-add-meta { margin-top:4px; color:rgba(255,255,255,.62); font-size:12px; font-weight:750; }
+    .god-mode-form { display:grid; gap:10px; margin-top:14px; }
+    .god-mode-field { display:grid; gap:6px; color:rgba(255,255,255,.72); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+    .god-mode-field input,.god-mode-field select,.god-mode-field textarea { width:100%; box-sizing:border-box; margin:0; border:1px solid rgba(255,255,255,.15); border-radius:14px; padding:12px 13px; background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:14px; font-weight:700; letter-spacing:0; text-transform:none; outline:none; }
+    .god-mode-field select option { color:#111827; }
+    .god-mode-field textarea { min-height:92px; resize:vertical; }
+    .god-mode-field input:focus,.god-mode-field select:focus,.god-mode-field textarea:focus { border-color:#ff7200; box-shadow:0 0 0 3px rgba(255,114,0,.16); }
+    .god-mode-photo-row { display:grid; grid-template-columns:1fr 62px; gap:10px; align-items:center; }
+    #god-mode-photo-preview { width:62px; height:62px; border-radius:14px; object-fit:cover; background:rgba(255,255,255,.08); display:none; }
+    #god-mode-add-status { min-height:16px; color:rgba(255,255,255,.68); font-size:12px; font-weight:750; }
+    #god-mode-add-status.is-error { color:#ff9a92; }
     .god-mode-add-actions { display:flex; gap:9px; margin-top:13px; }
     .god-mode-add-actions button { flex:1; min-height:44px; border:0; border-radius:14px; font:inherit; font-size:14px; font-weight:950; cursor:pointer; }
     #god-mode-add-confirm { background:#ff7200; color:#fff; }
+    #god-mode-add-confirm:disabled { opacity:.55; cursor:wait; }
     #god-mode-add-cancel { background:rgba(255,255,255,.12); color:#fff; }
     .god-mode-map-pin { width:34px; height:34px; display:grid; place-items:center; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:#ff7200; color:#fff; border:3px solid #fff; box-shadow:0 10px 26px rgba(0,0,0,.3); }
-    .god-mode-map-pin span { transform:rotate(45deg); font-size:16px; font-weight:950; }
+    .god-mode-map-pin span { width:22px; height:22px; display:grid; place-items:center; transform:rotate(45deg); font-size:16px; font-weight:950; overflow:hidden; }
+    .god-mode-map-pin img { width:21px; height:21px; object-fit:contain; }
     #navigation-planner { display: none; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 4100; max-width: 610px; margin: 0 auto; border-radius: 30px; background: rgba(255,255,255,.98); color: #111827; box-shadow: 0 24px 70px rgba(4,15,30,.32); border: 1px solid rgba(17,24,39,.08); overflow: hidden; opacity: 0; transform: translateY(24px); transition: opacity .22s ease, transform .28s cubic-bezier(.2,.9,.2,1); }
     #navigation-planner.open { opacity: 1; transform: translateY(0); }
     .navigation-head { display: grid; grid-template-columns: 46px minmax(0,1fr) 42px; gap: 10px; align-items: center; padding: 16px 16px 12px; }
@@ -1669,9 +1682,24 @@
 </div>
 <div id="god-mode-badge" aria-hidden="true">⚡ GOD MODE</div>
 <div id="god-mode-add-prompt" role="dialog" aria-modal="true" aria-labelledby="god-mode-add-title">
-  <div id="god-mode-add-title" class="god-mode-add-title">Aggiungere un POI qui?</div>
+  <div id="god-mode-add-title" class="god-mode-add-title">Nuovo punto sulla mappa</div>
   <div id="god-mode-add-meta" class="god-mode-add-meta"></div>
-  <div class="god-mode-add-actions"><button id="god-mode-add-cancel" type="button">Annulla</button><button id="god-mode-add-confirm" type="button">Aggiungi</button></div>
+  <form id="god-mode-add-form" class="god-mode-form">
+    <label class="god-mode-field">Tipologia
+      <select id="god-mode-add-type">
+        <option value="unknown spot">POI classico</option><option value="chiesa">Chiesa</option><option value="monumento">Monumento</option><option value="sentiero">Sentiero</option><option value="spiaggia">Spiaggia</option><option value="stazione">Stazione</option><option value="ferry">Fermata traghetto</option><option value="ristorante">Ristorante</option><option value="bar">Bar</option><option value="punto panoramico">Punto panoramico</option><option value="curiosity">Curiosità</option><option value="castello">Castello</option><option value="fontana">Fontana</option><option value="bagno pubblico">Bagno pubblico</option><option value="parcheggio">Parcheggio</option><option value="farmacia">Farmacia</option><option value="ascensore pubblico">Ascensore pubblico</option><option value="fermata bus">Fermata bus</option><option value="atm">ATM</option><option value="piazza">Piazza</option>
+      </select>
+    </label>
+    <label class="god-mode-field">Titolo<input id="god-mode-add-name" type="text" maxlength="140" placeholder="Inserisci titolo" required></label>
+    <label class="god-mode-field">Testo<textarea id="god-mode-add-description" maxlength="3000" placeholder="Inserisci testo"></textarea></label>
+    <label class="god-mode-field">Foto
+      <span class="god-mode-photo-row"><input id="god-mode-add-photo" type="file" accept="image/*"><img id="god-mode-photo-preview" alt="Anteprima foto"></span>
+    </label>
+    <label class="god-mode-field">Numero di telefono<input id="god-mode-add-phone" type="tel" maxlength="80" placeholder="Inserisci numero di telefono" autocomplete="tel"></label>
+    <label class="god-mode-field">Email<input id="god-mode-add-email" type="email" maxlength="180" placeholder="Inserisci email" autocomplete="email"></label>
+    <div id="god-mode-add-status" role="status" aria-live="polite"></div>
+    <div class="god-mode-add-actions"><button id="god-mode-add-cancel" type="button">Annulla</button><button id="god-mode-add-confirm" type="submit">Salva</button></div>
+  </form>
 </div>
 
 <section id="navigation-planner" aria-hidden="true" aria-label="Navigazione verso il POI">
@@ -2521,6 +2549,15 @@
   var poiEdit = document.getElementById('poi-edit');
   var godModeAddPrompt = document.getElementById('god-mode-add-prompt');
   var godModeAddMeta = document.getElementById('god-mode-add-meta');
+  var godModeAddForm = document.getElementById('god-mode-add-form');
+  var godModeAddType = document.getElementById('god-mode-add-type');
+  var godModeAddName = document.getElementById('god-mode-add-name');
+  var godModeAddDescription = document.getElementById('god-mode-add-description');
+  var godModeAddPhoto = document.getElementById('god-mode-add-photo');
+  var godModePhotoPreview = document.getElementById('god-mode-photo-preview');
+  var godModeAddPhone = document.getElementById('god-mode-add-phone');
+  var godModeAddEmail = document.getElementById('god-mode-add-email');
+  var godModeAddStatus = document.getElementById('god-mode-add-status');
   var godModeAddConfirm = document.getElementById('god-mode-add-confirm');
   var godModeAddCancel = document.getElementById('god-mode-add-cancel');
   var navigationPlanner = document.getElementById('navigation-planner');
@@ -2613,6 +2650,10 @@
   var godModeAuthorizationPending = null;
   var godModePendingLatLng = null;
   var godModePendingMarker = null;
+  var godModePendingImageData = '';
+  var godModePhotoPending = false;
+  var godModePhotoReadToken = 0;
+  var godModeSavePending = false;
   var godModeLongPressTimer = 0;
   var godModeLongPressStart = null;
   var ferryTimetableRefreshTimer = null;
@@ -3732,7 +3773,97 @@
   async function readCurrentSession() { var response; if (!supabaseClient) return null; response = await supabaseClient.auth.getSession(); return response && response.data ? response.data.session : null; }
   async function readCurrentUser() { var session, userResponse; if (!supabaseClient) return null; session = await readCurrentSession(); if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
   function clearGodModeLongPress() { if (godModeLongPressTimer) window.clearTimeout(godModeLongPressTimer); godModeLongPressTimer = 0; godModeLongPressStart = null; }
-  function clearGodModePendingPoint() { godModePendingLatLng = null; if (godModeAddPrompt) godModeAddPrompt.classList.remove('is-visible'); if (godModePendingMarker && map) map.removeLayer(godModePendingMarker); godModePendingMarker = null; }
+  function setGodModeAddStatus(message, isError) { if (!godModeAddStatus) return; godModeAddStatus.textContent = String(message || ''); godModeAddStatus.classList.toggle('is-error', Boolean(isError)); }
+  function resetGodModeAddForm() {
+    godModePhotoReadToken += 1;
+    godModePhotoPending = false;
+    if (godModeAddForm) godModeAddForm.reset();
+    if (godModeAddType) godModeAddType.value = 'unknown spot';
+    godModePendingImageData = '';
+    if (godModePhotoPreview) { godModePhotoPreview.removeAttribute('src'); godModePhotoPreview.style.display = 'none'; }
+    setGodModeAddStatus('', false);
+  }
+  function clearGodModePendingPoint() {
+    godModePendingLatLng = null;
+    if (godModeAddPrompt) godModeAddPrompt.classList.remove('is-visible');
+    if (godModePendingMarker && map) map.removeLayer(godModePendingMarker);
+    godModePendingMarker = null;
+    if (!godModeSavePending) resetGodModeAddForm();
+  }
+  function getGodModePendingMarkerIcon(type) {
+    var normalizedType = normalizePOIType(type || 'unknown spot');
+    var html = normalizedType === 'unknown spot' ? '📍' : getPOIIconHTML({ type:normalizedType, symbol:getPOIEmoji(normalizedType, '📍') });
+    return L.divIcon({ className:'', html:'<div class="god-mode-map-pin"><span>' + html + '</span></div>', iconSize:[34,34], iconAnchor:[8,32] });
+  }
+  function syncGodModePendingMarkerType() {
+    if (!godModePendingMarker) return;
+    godModePendingMarker.setIcon(getGodModePendingMarkerIcon(godModeAddType ? godModeAddType.value : 'unknown spot'));
+  }
+  function resizeGodModePhoto(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onerror = function() { reject(new Error('Impossibile leggere la foto.')); };
+      reader.onload = function() {
+        var image = new Image();
+        image.onerror = function() { reject(new Error('Formato foto non valido.')); };
+        image.onload = function() {
+          var maxSide = 1200;
+          var scale = Math.min(maxSide / image.width, maxSide / image.height, 1);
+          var canvas = document.createElement('canvas');
+          var context;
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', .72));
+        };
+        image.src = String(reader.result || '');
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  async function saveGodModePOI() {
+    var authorized, userResponse, verifiedUser, point, email, payload, response, savedPoi;
+    if (godModeSavePending || !godModeAuthorized || !godModeEnabled || !godModePendingLatLng) return;
+    if (godModePhotoPending) { setGodModeAddStatus('Attendi che la foto sia pronta.', true); return; }
+    if (!godModeAddName || !godModeAddName.value.trim()) { setGodModeAddStatus('Inserisci il titolo.', true); godModeAddName.focus(); return; }
+    if (godModeAddEmail && godModeAddEmail.value && !godModeAddEmail.checkValidity()) { setGodModeAddStatus('Inserisci un indirizzo email valido.', true); godModeAddEmail.focus(); return; }
+    godModeSavePending = true;
+    if (godModeAddConfirm) godModeAddConfirm.disabled = true;
+    setGodModeAddStatus('Salvataggio in corso…', false);
+    try {
+      authorized = await checkGodModeAuthorization();
+      if (!authorized || !supabaseClient) throw new Error('Account non autorizzato.');
+      userResponse = await supabaseClient.auth.getUser();
+      verifiedUser = userResponse && userResponse.data ? userResponse.data.user : null;
+      if (!verifiedUser) throw new Error('Sessione scaduta. Accedi di nuovo.');
+      point = godModePendingLatLng;
+      email = godModeAddEmail ? godModeAddEmail.value.trim().toLowerCase() : '';
+      payload = {
+        name: godModeAddName.value.trim(),
+        coords: point.lat.toFixed(6) + ', ' + point.lng.toFixed(6),
+        description: godModeAddDescription ? godModeAddDescription.value.trim() : '',
+        importance: 50,
+        type: godModeAddType ? godModeAddType.value : 'unknown spot',
+        phone: godModeAddPhone ? godModeAddPhone.value.trim() : '',
+        emails: email,
+        images: godModePendingImageData ? [godModePendingImageData] : []
+      };
+      response = await supabaseClient.from('pois').insert(payload).select();
+      if (response.error) throw response.error;
+      savedPoi = Array.isArray(response.data) ? response.data[0] : null;
+      if (!savedPoi) throw new Error('Il POI non è stato restituito dal server.');
+      clearGodModePendingPoint();
+      appendPOIRows([savedPoi], { replaceExisting:false, refresh:true, keepRichData:true });
+      showUserLocationToast('POI salvato sulla mappa.');
+    } catch (error) {
+      setGodModeAddStatus(error && error.message ? error.message : 'Errore durante il salvataggio.', true);
+    } finally {
+      godModeSavePending = false;
+      if (godModeAddConfirm) godModeAddConfirm.disabled = false;
+      if (!godModePendingLatLng) resetGodModeAddForm();
+    }
+  }
   function syncGodModeMenuItem() {
     var menuList = document.querySelector('#ftg-global-actionbar-root .ftg-menu-list');
     var item = document.getElementById('ftg-god-mode-item');
@@ -3766,7 +3897,7 @@
     if (!silent) showUserLocationToast(godModeEnabled ? 'GOD MODE attivo · tieni premuto sulla mappa per aggiungere un POI.' : 'GOD MODE disattivato.');
   }
   async function checkGodModeAuthorization() {
-    var session, userResponse, verifiedUser, verifiedEmail = '', response, payload, wanted = false;
+    var session, userResponse, verifiedUser, verifiedEmail = '', response, payload, savedPreference = null, wanted = true;
     if (godModeAuthorizationPending) return godModeAuthorizationPending;
     godModeAuthorizationPending = (async function() {
       try {
@@ -3783,7 +3914,8 @@
           godModeAuthorized = Boolean(payload && payload.isOwner === true);
         }
       } catch (_error) { godModeAuthorized = false; }
-      try { wanted = sessionStorage.getItem('ftg-god-mode') === '1'; } catch (_error) {}
+      try { savedPreference = sessionStorage.getItem('ftg-god-mode'); } catch (_error) {}
+      wanted = savedPreference !== '0';
       godModeEnabled = Boolean(godModeAuthorized && wanted);
       document.body.classList.toggle('god-mode-active', godModeEnabled);
       if (!godModeAuthorized) clearGodModePendingPoint();
@@ -3802,14 +3934,12 @@
   }
   function openPOIEditor(poi) { if (!godModeAuthorized || !godModeEnabled) return; window.location.href = getPOIEditorURL(poi); }
   function showGodModeAddPrompt(latlng) {
-    var icon;
     if (!godModeAuthorized || !godModeEnabled || !map || !latlng) return;
     clearGodModePendingPoint();
     godModePendingLatLng = L.latLng(latlng.lat, latlng.lng);
     if (godModeAddMeta) godModeAddMeta.textContent = godModePendingLatLng.lat.toFixed(6) + ', ' + godModePendingLatLng.lng.toFixed(6);
     if (godModeAddPrompt) godModeAddPrompt.classList.add('is-visible');
-    icon = L.divIcon({ className:'', html:'<div class="god-mode-map-pin"><span>+</span></div>', iconSize:[34,34], iconAnchor:[8,32] });
-    godModePendingMarker = L.marker(godModePendingLatLng, { icon:icon, interactive:false, pane:'poiGroupPane' }).addTo(map);
+    godModePendingMarker = L.marker(godModePendingLatLng, { icon:getGodModePendingMarkerIcon('unknown spot'), interactive:false, pane:'poiGroupPane' }).addTo(map);
   }
   function setupGodModeLongPress() {
     var container;
@@ -6735,13 +6865,35 @@
     }
     if (poiEdit) poiEdit.addEventListener('click', function() { openPOIEditor(currentPOI); });
     if (godModeAddCancel) godModeAddCancel.addEventListener('click', clearGodModePendingPoint);
-    if (godModeAddConfirm) godModeAddConfirm.addEventListener('click', function() {
-      var point = godModePendingLatLng;
-      var params;
-      if (!point || !godModeAuthorized || !godModeEnabled) return;
-      params = new URLSearchParams({ new:'1', lat:String(point.lat), lng:String(point.lng), source:'map' });
-      window.location.href = 'poieditor.html?' + params.toString();
+    if (godModeAddType) godModeAddType.addEventListener('change', syncGodModePendingMarkerType);
+    if (godModeAddPhoto) godModeAddPhoto.addEventListener('change', async function() {
+      var file = godModeAddPhoto.files && godModeAddPhoto.files[0];
+      var readToken;
+      if (!file) { godModePendingImageData = ''; if (godModePhotoPreview) godModePhotoPreview.style.display = 'none'; return; }
+      readToken = ++godModePhotoReadToken;
+      godModePhotoPending = true;
+      if (godModeAddConfirm) godModeAddConfirm.disabled = true;
+      setGodModeAddStatus('Preparo la foto…', false);
+      try {
+        var imageData = await resizeGodModePhoto(file);
+        if (readToken !== godModePhotoReadToken) return;
+        godModePendingImageData = imageData;
+        if (godModePhotoPreview) { godModePhotoPreview.src = godModePendingImageData; godModePhotoPreview.style.display = 'block'; }
+        setGodModeAddStatus('Foto pronta.', false);
+      } catch (error) {
+        if (readToken !== godModePhotoReadToken) return;
+        godModePendingImageData = '';
+        godModeAddPhoto.value = '';
+        if (godModePhotoPreview) godModePhotoPreview.style.display = 'none';
+        setGodModeAddStatus(error && error.message ? error.message : 'Impossibile preparare la foto.', true);
+      } finally {
+        if (readToken === godModePhotoReadToken) {
+          godModePhotoPending = false;
+          if (godModeAddConfirm && !godModeSavePending) godModeAddConfirm.disabled = false;
+        }
+      }
     });
+    if (godModeAddForm) godModeAddForm.addEventListener('submit', function(event) { event.preventDefault(); saveGodModePOI(); });
 
     if (navigationOriginSelect) {
       navigationOriginSelect.addEventListener('change', function() {
