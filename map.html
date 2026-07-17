@@ -2132,6 +2132,7 @@
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
   var OWNER_CHECK_ENDPOINT = SUPABASE_URL + '/functions/v1/backend?action=me';
+  var GOD_MODE_EMAILS = ['5terrego.info@gmail.com', 'verofili96@icloud.com'];
   var LOCAL_POI_KEY = '5terrego_pois_backup';
   var FTG_POI_HOT_CACHE_KEYS = ['ftg-pois-hot-v1', '5terrego-pois-hot-v1', 'ftg-map-pois-hot-v1'];
   var FTG_POI_HOT_CACHE_TS_KEY = 'ftg-pois-hot-ts-v1';
@@ -3765,16 +3766,22 @@
     if (!silent) showUserLocationToast(godModeEnabled ? 'GOD MODE attivo · tieni premuto sulla mappa per aggiungere un POI.' : 'GOD MODE disattivato.');
   }
   async function checkGodModeAuthorization() {
-    var session, response, payload, wanted = false;
+    var session, userResponse, verifiedUser, verifiedEmail = '', response, payload, wanted = false;
     if (godModeAuthorizationPending) return godModeAuthorizationPending;
     godModeAuthorizationPending = (async function() {
       try {
         session = await readCurrentSession();
         if (!session || !session.access_token) throw new Error('No session');
-        response = await fetch(OWNER_CHECK_ENDPOINT, { headers: { Authorization: 'Bearer ' + session.access_token } });
-        if (!response.ok) throw new Error('Access denied');
-        payload = await response.json();
-        godModeAuthorized = Boolean(payload && payload.isOwner === true);
+        userResponse = await supabaseClient.auth.getUser(session.access_token);
+        verifiedUser = userResponse && userResponse.data ? userResponse.data.user : null;
+        verifiedEmail = String(verifiedUser && verifiedUser.email || '').trim().toLowerCase();
+        godModeAuthorized = GOD_MODE_EMAILS.indexOf(verifiedEmail) !== -1;
+        if (!godModeAuthorized) {
+          response = await fetch(OWNER_CHECK_ENDPOINT, { headers: { Authorization: 'Bearer ' + session.access_token } });
+          if (!response.ok) throw new Error('Access denied');
+          payload = await response.json();
+          godModeAuthorized = Boolean(payload && payload.isOwner === true);
+        }
       } catch (_error) { godModeAuthorized = false; }
       try { wanted = sessionStorage.getItem('ftg-god-mode') === '1'; } catch (_error) {}
       godModeEnabled = Boolean(godModeAuthorized && wanted);
