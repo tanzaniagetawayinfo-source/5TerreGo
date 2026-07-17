@@ -1440,7 +1440,20 @@
     .atc-transit-stop-number { width:28px; height:28px; font-size:11px; }
     .atc-transit-stop-time { color:#52657c; font-variant-numeric:tabular-nums; }
     .atc-scheduled-stop-marker { width:30px; height:30px; border:2px solid #fff; font-size:11px; pointer-events:none; }
-    .atc-scheduled-bus { width:34px; height:34px; display:grid; place-items:center; padding:0; border:0; background:transparent; font-size:27px; line-height:1; cursor:pointer; filter:drop-shadow(0 4px 5px rgba(0,0,0,.48)); }
+    .atc-transit-query { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.8fr) auto; gap:7px; align-items:end; margin-top:12px; }
+    .atc-transit-query label { display:grid; gap:4px; color:#52657c; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+    .atc-transit-query input { min-width:0; height:38px; box-sizing:border-box; border:1px solid rgba(16,35,60,.14); border-radius:11px; padding:0 9px; background:#fff; color:#10233c; font:inherit; font-size:12px; font-weight:850; }
+    .atc-transit-query button { height:38px; border:0; border-radius:11px; padding:0 12px; background:#075ea8; color:#fff; font:inherit; font-size:12px; font-weight:950; cursor:pointer; }
+    .atc-departure-list { display:grid; gap:7px; max-height:190px; margin-top:11px; overflow-y:auto; }
+    .atc-departure { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:9px; align-items:center; width:100%; border:1px solid rgba(16,35,60,.10); border-radius:13px; padding:9px 10px; background:#fff; color:#10233c; text-align:left; font:inherit; cursor:pointer; }
+    .atc-departure.is-selected { border-color:#ff7200; box-shadow:0 0 0 2px rgba(255,114,0,.12); }
+    .atc-departure-time { color:#075ea8; font-size:14px; font-weight:950; font-variant-numeric:tabular-nums; }
+    .atc-departure-line { min-width:0; font-size:12px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .atc-departure-wait { color:#64748b; font-size:10px; font-weight:850; white-space:nowrap; }
+    .atc-selected-route-title { margin-top:14px; padding-top:12px; border-top:1px solid rgba(16,35,60,.10); color:#10233c; font-size:13px; font-weight:950; }
+    .atc-scheduled-bus { width:32px; height:52px; display:grid; place-items:center; padding:0; border:0; background:transparent; line-height:1; cursor:pointer; filter:drop-shadow(0 5px 5px rgba(0,0,0,.42)); }
+    .atc-scheduled-bus img { width:29px; height:50px; display:block; object-fit:contain; pointer-events:none; }
+    @media (max-width:420px) { .atc-transit-query { grid-template-columns:1fr 1fr; } .atc-transit-query button { grid-column:1/-1; } }
     #poi-related-articles { display: none; margin-top: 16px; }
     #poi-related-articles.is-visible { display: block; }
     .poi-related-title { font-size: 12px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,.42); margin: 0 0 10px; }
@@ -2774,6 +2787,7 @@
   var glScheduledBusMarkers = new Map();
   var glScheduledStopMarkers = [];
   var atcScheduledBusTimer = null;
+  var atcScheduledBusAnimationFrame = null;
   var selectedATCScheduledTrip = null;
   var ATC_SCHEDULED_BUS_MIN_ZOOM = 14.25;
   var syncingMapCameras = false;
@@ -5086,20 +5100,30 @@
     var progress;
     var sourceDistance;
     var shapePosition;
+    var holdStart;
+    var holdEnd;
+    var moveStart;
+    var moveEnd;
     if (stops.length < 2) return null;
     first = stops[0];
     last = stops[stops.length - 1];
     if (timelineSeconds < first[2] || timelineSeconds > last[1]) return null;
     for (i = 0; i < stops.length; i += 1) {
-      if (timelineSeconds >= stops[i][1] && timelineSeconds <= stops[i][2]) {
+      holdStart = Number(stops[i][1]);
+      holdEnd = Number(stops[i][2]);
+      if (holdStart === holdEnd) { holdStart -= 4; holdEnd += 4; }
+      if (timelineSeconds >= holdStart && timelineSeconds <= holdEnd) {
         shapePosition = getATCShapePosition(trip[3], stops[i][3]);
         return shapePosition ? { trip:trip, point:shapePosition.point, bearing:shapePosition.bearing, sourceDistance:stops[i][3], nextStopIndex:Math.min(stops.length - 1, i + 1) } : null;
       }
       if (i >= stops.length - 1) continue;
       from = stops[i];
       to = stops[i + 1];
-      if (timelineSeconds >= from[2] && timelineSeconds <= to[1]) {
-        progress = (timelineSeconds - from[2]) / Math.max(1, to[1] - from[2]);
+      moveStart = Number(from[2]) + (Number(from[1]) === Number(from[2]) ? 4 : 0);
+      moveEnd = Number(to[1]) - (Number(to[1]) === Number(to[2]) ? 4 : 0);
+      if (moveEnd < moveStart) { moveStart = Number(from[2]); moveEnd = Number(to[1]); }
+      if (timelineSeconds >= moveStart && timelineSeconds <= moveEnd) {
+        progress = (timelineSeconds - moveStart) / Math.max(1, moveEnd - moveStart);
         sourceDistance = Number(from[3]) + (Number(to[3]) - Number(from[3])) * progress;
         shapePosition = getATCShapePosition(trip[3], sourceDistance);
         return shapePosition ? { trip:trip, point:shapePosition.point, bearing:shapePosition.bearing, sourceDistance:sourceDistance, nextStopIndex:i + 1 } : null;
@@ -5132,6 +5156,8 @@
     glScheduledBusMarkers.clear();
     if (atcScheduledBusTimer) window.clearInterval(atcScheduledBusTimer);
     atcScheduledBusTimer = null;
+    if (atcScheduledBusAnimationFrame) window.cancelAnimationFrame(atcScheduledBusAnimationFrame);
+    atcScheduledBusAnimationFrame = null;
   }
 
   function getATCRouteLabel(trip) {
@@ -5142,9 +5168,32 @@
   function openATCScheduledBus(estimate) {
     var trip = estimate.trip;
     var label = getATCRouteLabel(trip);
-    var poi = { id:'atc-scheduled-bus:' + trip[0], name:'Bus ' + label + ' → ' + (trip[4] || 'capolinea'), coords:estimate.point.slice(), lat:Number(estimate.point[0]), lng:Number(estimate.point[1]), type:'scheduled bus', importance:100, description:'Posizione approssimata in base agli orari GTFS ufficiali. Non è una posizione GPS in tempo reale.' };
+    var poi = { id:'atc-scheduled-bus:' + trip[0], name:'Bus ' + label + ' → ' + (trip[4] || 'capolinea'), coords:estimate.point.slice(), lat:Number(estimate.point[0]), lng:Number(estimate.point[1]), type:'scheduled bus', importance:100, description:'Posizione indicativa calcolata dall’orario ufficiale.' };
     showPOICard(poi);
-    showATCTripSelection(trip, estimate.nextStopIndex, { startDistance:estimate.sourceDistance, context:'Bus in movimento stimato' });
+    showATCTripSelection(trip, estimate.nextStopIndex, { startDistance:estimate.sourceDistance, context:'Bus in viaggio' });
+  }
+
+  function interpolateATCBearing(from, to, progress) {
+    var delta = ((Number(to) - Number(from) + 540) % 360) - 180;
+    return (Number(from) + delta * progress + 360) % 360;
+  }
+
+  function animateATCScheduledBusMarkers(now) {
+    glScheduledBusMarkers.forEach(function(entry) {
+      var progress;
+      var point;
+      var bearing;
+      if (!entry || !entry.marker || !entry.fromPoint || !entry.targetPoint) return;
+      progress = Math.max(0, Math.min(1, (now - entry.transitionStartedAt) / Math.max(1, entry.transitionDuration)));
+      point = [entry.fromPoint[0] + (entry.targetPoint[0] - entry.fromPoint[0]) * progress, entry.fromPoint[1] + (entry.targetPoint[1] - entry.fromPoint[1]) * progress];
+      bearing = interpolateATCBearing(entry.fromBearing, entry.targetBearing, progress);
+      entry.currentPoint = point;
+      entry.currentBearing = bearing;
+      entry.marker.setLngLat([point[1], point[0]]);
+      if (typeof entry.marker.setRotation === 'function') entry.marker.setRotation(bearing);
+    });
+    if (glScheduledBusMarkers.size) atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
+    else atcScheduledBusAnimationFrame = null;
   }
 
   function renderATCScheduledBusMarkers() {
@@ -5164,23 +5213,28 @@
         element = document.createElement('button');
         element.type = 'button';
         element.className = 'atc-scheduled-bus';
-        element.textContent = '🚌';
+        element.innerHTML = '<img src="' + getGithubAssetUrl('atc-bus-top-yellow.png') + '" alt="">';
         element.setAttribute('aria-label', 'Bus ' + getATCRouteLabel(estimate.trip) + ' verso ' + (estimate.trip[4] || 'capolinea') + ', posizione stimata');
-        entry = { marker:null, estimate:estimate };
+        entry = { marker:null, estimate:estimate, currentPoint:estimate.point.slice(), fromPoint:estimate.point.slice(), targetPoint:estimate.point.slice(), currentBearing:estimate.bearing, fromBearing:estimate.bearing, targetBearing:estimate.bearing, transitionStartedAt:performance.now(), transitionDuration:2100 };
         element.addEventListener('click', function(event) { event.stopPropagation(); openATCScheduledBus(entry.estimate); });
         marker = new window.maplibregl.Marker({ element:element, anchor:'center', rotationAlignment:'map' }).setLngLat([estimate.point[1], estimate.point[0]]).addTo(turnNavigationMap);
         entry.marker = marker;
         glScheduledBusMarkers.set(estimate.key, entry);
       }
       entry.estimate = estimate;
-      entry.marker.setLngLat([estimate.point[1], estimate.point[0]]);
-      if (typeof entry.marker.setRotation === 'function') entry.marker.setRotation(estimate.bearing - 90);
+      entry.fromPoint = (entry.currentPoint || estimate.point).slice();
+      entry.targetPoint = estimate.point.slice();
+      entry.fromBearing = Number.isFinite(entry.currentBearing) ? entry.currentBearing : estimate.bearing;
+      entry.targetBearing = estimate.bearing;
+      entry.transitionStartedAt = performance.now();
+      entry.transitionDuration = 2100;
     });
     glScheduledBusMarkers.forEach(function(entry, key) {
       if (activeKeys.has(key)) return;
       try { entry.marker.remove(); } catch (_error) {}
       glScheduledBusMarkers.delete(key);
     });
+    if (glScheduledBusMarkers.size && !atcScheduledBusAnimationFrame) atcScheduledBusAnimationFrame = window.requestAnimationFrame(animateATCScheduledBusMarkers);
   }
 
   function syncATCScheduledBuses() {
@@ -5193,7 +5247,7 @@
       return;
     }
     renderATCScheduledBusMarkers();
-    if (!atcScheduledBusTimer) atcScheduledBusTimer = window.setInterval(renderATCScheduledBusMarkers, 1000);
+    if (!atcScheduledBusTimer) atcScheduledBusTimer = window.setInterval(renderATCScheduledBusMarkers, 2000);
   }
 
   function ensureATCScheduledRouteLayer() {
@@ -5221,17 +5275,17 @@
   function renderATCTransitLoading() {
     if (!atcTransitPanel) return;
     atcTransitPanel.classList.add('is-visible');
-    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">ATC · orario programmato</div><div class="atc-transit-title">Cerco la prossima corsa…</div>';
+    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">Orari autobus</div><div class="atc-transit-title">Cerco le prossime partenze…</div>';
   }
 
   function renderATCTransitDetails(trip, startIndex, options) {
     var route = atcScheduleData.routes[trip[1]] || [];
     var label = route[0] || route[1] || trip[1];
     var stops = (trip[6] || []).slice(startIndex);
-    var title = options && options.departureDelta !== undefined ? ('Prossimo bus alle ' + formatATCTime(trip[6][startIndex][2]) + ' · ' + formatATCWait(options.departureDelta)) : (options && options.context || 'Bus programmato');
+    var title = options && options.departureDelta !== undefined ? ('Partenza alle ' + formatATCTime(trip[6][startIndex][2]) + ' · ' + formatATCWait(options.departureDelta)) : (options && options.context || 'Bus in viaggio');
     if (!atcTransitPanel) return;
     atcTransitPanel.classList.add('is-visible');
-    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">ATC · stima da orario</div><div class="atc-transit-title">' + escapeHTML(title) + '</div><div class="atc-transit-meta">Linea ' + escapeHTML(label) + ' → ' + escapeHTML(trip[4] || route[1] || 'capolinea') + '</div><div class="atc-transit-note">Posizioni e avanzamento sono approssimati usando stop_times.txt e shapes.txt; non sono dati GPS.</div><div class="atc-transit-stops">' + stops.map(function(stopTime, index) { var stop = atcScheduleData.stops[stopTime[0]] || [stopTime[0]]; return '<div class="atc-transit-stop"><span class="atc-transit-stop-number">' + (index + 1) + '</span><span>' + escapeHTML(stop[0]) + '</span><span class="atc-transit-stop-time">' + formatATCTime(stopTime[1]) + '</span></div>'; }).join('') + '</div>';
+    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">Percorso autobus</div><div class="atc-transit-title">' + escapeHTML(title) + '</div><div class="atc-transit-meta">Linea ' + escapeHTML(label) + ' → ' + escapeHTML(trip[4] || route[1] || 'capolinea') + '</div><div class="atc-transit-note">La posizione sulla mappa è indicativa.</div><div class="atc-transit-stops">' + stops.map(function(stopTime, index) { var stop = atcScheduleData.stops[stopTime[0]] || [stopTime[0]]; return '<div class="atc-transit-stop"><span class="atc-transit-stop-number">' + (index + 1) + '</span><span>' + escapeHTML(stop[0]) + '</span><span class="atc-transit-stop-time">' + formatATCTime(stopTime[1]) + '</span></div>'; }).join('') + '</div>';
   }
 
   function showATCTripSelection(trip, startIndex, options) {
@@ -5268,49 +5322,92 @@
       glScheduledStopMarkers.push(marker);
     });
     selectedATCScheduledTrip = trip;
-    renderATCTransitDetails(trip, startIndex, options);
+    if (options.renderPanel !== false) renderATCTransitDetails(trip, startIndex, options);
     if (routePoints.length) {
       bounds = routePoints.reduce(function(result, point) { return result.extend([point[1], point[0]]); }, new window.maplibregl.LngLatBounds([routePoints[0][1], routePoints[0][0]], [routePoints[0][1], routePoints[0][0]]));
       turnNavigationMap.fitBounds(bounds, { padding:{ top:90, right:42, bottom:Math.min(390, Math.round(window.innerHeight * .48)), left:42 }, maxZoom:15.8, pitch:20, bearing:0, duration:800 });
     }
   }
 
-  function findNextATCTripAtStop(stopId) {
+  function findATCDeparturesAtStop(stopId, dateKey, startSeconds) {
     var clock = getATCItalyClock(new Date());
-    var best = null;
+    var previousKey = shiftATCDateKey(dateKey, -1);
+    var departures = [];
+    var seen = new Set();
     (atcTripsByStop.get(stopId) || []).forEach(function(reference) {
       var trip = reference[0];
       var stopIndex = reference[1];
-      var departure = Number(trip[6][stopIndex][2]);
-      var dates = atcScheduleData.services[trip[2]] || [];
-      dates.forEach(function(dateKey) {
-        var offset = getATCDayOffset(dateKey, clock.key);
-        var delta;
-        if (offset < -1 || offset > 2) return;
-        delta = offset * 86400 + departure - clock.seconds;
-        if (delta < -30 || delta > 172800) return;
-        if (!best || delta < best.delta) best = { trip:trip, stopIndex:stopIndex, delta:delta };
+      var rawDeparture = Number(trip[6][stopIndex][2]);
+      var effectiveDeparture = null;
+      var serviceKey = '';
+      var key;
+      if (isATCTripActiveOn(trip, dateKey) && rawDeparture >= 0 && rawDeparture < 86400) {
+        effectiveDeparture = rawDeparture;
+        serviceKey = dateKey;
+      } else if (isATCTripActiveOn(trip, previousKey) && rawDeparture >= 86400 && rawDeparture < 172800) {
+        effectiveDeparture = rawDeparture - 86400;
+        serviceKey = previousKey;
+      }
+      if (effectiveDeparture === null || effectiveDeparture < Number(startSeconds || 0)) return;
+      key = trip[0] + ':' + stopIndex + ':' + serviceKey;
+      if (seen.has(key)) return;
+      seen.add(key);
+      departures.push({ trip:trip, stopIndex:stopIndex, departureSeconds:effectiveDeparture, delta:getATCDayOffset(dateKey, clock.key) * 86400 + effectiveDeparture - clock.seconds });
+    });
+    return departures.sort(function(a, b) { return a.departureSeconds - b.departureSeconds; });
+  }
+
+  function renderATCStopSchedule(poi, dateKey, startSeconds, departures, selectedIndex) {
+    var stopName = String(poi && poi.name || 'questa fermata');
+    var dateValue = dateKey.slice(0,4) + '-' + dateKey.slice(4,6) + '-' + dateKey.slice(6,8);
+    var timeValue = formatATCTime(startSeconds);
+    var selected = departures[selectedIndex] || null;
+    var selectedStops = selected ? selected.trip[6].slice(selected.stopIndex) : [];
+    var allServiceDates = Object.keys(atcScheduleData.services || {}).flatMap(function(serviceId) { return atcScheduleData.services[serviceId] || []; }).sort();
+    var minDateKey = allServiceDates[0] || dateKey;
+    var maxDateKey = atcScheduleData.feed_end_date ? atcScheduleData.feed_end_date.replaceAll('-', '') : (allServiceDates[allServiceDates.length - 1] || dateKey);
+    var minDate = minDateKey.slice(0,4) + '-' + minDateKey.slice(4,6) + '-' + minDateKey.slice(6,8);
+    var maxDate = maxDateKey.slice(0,4) + '-' + maxDateKey.slice(4,6) + '-' + maxDateKey.slice(6,8);
+    if (!atcTransitPanel) return;
+    atcTransitPanel.classList.add('is-visible');
+    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">Orari autobus</div><div class="atc-transit-title">Prossime partenze da ' + escapeHTML(stopName) + '</div><div class="atc-transit-query"><label>Giorno<input id="atc-query-date" type="date" min="' + minDate + '" max="' + maxDate + '" value="' + dateValue + '"></label><label>Ora<input id="atc-query-time" type="time" value="' + timeValue + '"></label><button id="atc-query-submit" type="button">Cerca</button></div>' + (departures.length ? '<div class="atc-departure-list">' + departures.map(function(departure, index) { var route = atcScheduleData.routes[departure.trip[1]] || []; var label = route[0] || route[1] || departure.trip[1]; return '<button class="atc-departure' + (index === selectedIndex ? ' is-selected' : '') + '" type="button" data-atc-departure-index="' + index + '"><span class="atc-departure-time">' + formatATCTime(departure.departureSeconds) + '</span><span class="atc-departure-line">Linea ' + escapeHTML(label) + ' → ' + escapeHTML(departure.trip[4] || route[1] || 'capolinea') + '</span><span class="atc-departure-wait">' + (departure.delta >= 0 && departure.delta < 21600 ? escapeHTML(formatATCWait(departure.delta)) : '') + '</span></button>'; }).join('') + '</div>' : '<div class="atc-transit-meta">Nessuna partenza dopo l’orario selezionato.</div>') + (selected ? '<div class="atc-selected-route-title">Fermate successive</div><div class="atc-transit-stops">' + selectedStops.map(function(stopTime, index) { var stop = atcScheduleData.stops[stopTime[0]] || [stopTime[0]]; return '<div class="atc-transit-stop"><span class="atc-transit-stop-number">' + (index + 1) + '</span><span>' + escapeHTML(stop[0]) + '</span><span class="atc-transit-stop-time">' + formatATCTime(stopTime[1]) + '</span></div>'; }).join('') + '</div>' : '') + '<div class="atc-transit-note">Orari programmati. La posizione dei mezzi è indicativa.</div>';
+    atcTransitPanel.querySelectorAll('[data-atc-departure-index]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var index = Number(button.getAttribute('data-atc-departure-index'));
+        var departure = departures[index];
+        if (!departure) return;
+        showATCTripSelection(departure.trip, departure.stopIndex, { departureDelta:departure.delta, renderPanel:false });
+        renderATCStopSchedule(poi, dateKey, startSeconds, departures, index);
       });
     });
-    return best;
+    var submit = document.getElementById('atc-query-submit');
+    if (submit) submit.addEventListener('click', function() {
+      var dateInput = document.getElementById('atc-query-date');
+      var timeInput = document.getElementById('atc-query-time');
+      var nextDateKey = String(dateInput && dateInput.value || dateValue).replaceAll('-', '');
+      var timeParts = String(timeInput && timeInput.value || '00:00').split(':');
+      var nextSeconds = Number(timeParts[0] || 0) * 3600 + Number(timeParts[1] || 0) * 60;
+      var nextDepartures = findATCDeparturesAtStop(String(poi.id || '').replace(/^atc-stop:/, ''), nextDateKey, nextSeconds);
+      clearATCScheduledSelection(false);
+      if (nextDepartures.length) showATCTripSelection(nextDepartures[0].trip, nextDepartures[0].stopIndex, { departureDelta:nextDepartures[0].delta, renderPanel:false });
+      renderATCStopSchedule(poi, nextDateKey, nextSeconds, nextDepartures, nextDepartures.length ? 0 : -1);
+    });
   }
 
   async function showNextATCBusFromStop(poi) {
     var stopId = String(poi && poi.id || '').replace(/^atc-stop:/, '');
-    var next;
+    var clock;
+    var departures;
     if (!stopId) return;
     clearATCScheduledSelection(false);
     renderATCTransitLoading();
     try {
       await loadATCTransitSchedule();
       if (!currentPOI || String(currentPOI.id || '') !== String(poi.id || '')) return;
-      next = findNextATCTripAtStop(stopId);
-      if (!next) {
-        atcTransitPanel.classList.add('is-visible');
-        atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">ATC · orario programmato</div><div class="atc-transit-title">Nessuna corsa successiva trovata</div><div class="atc-transit-note">Controlla eventuali variazioni sul sito ufficiale ATC.</div>';
-        return;
-      }
-      showATCTripSelection(next.trip, next.stopIndex, { departureDelta:next.delta });
+      clock = getATCItalyClock(new Date());
+      departures = findATCDeparturesAtStop(stopId, clock.key, clock.seconds);
+      if (departures.length) showATCTripSelection(departures[0].trip, departures[0].stopIndex, { departureDelta:departures[0].delta, renderPanel:false });
+      renderATCStopSchedule(poi, clock.key, clock.seconds, departures, departures.length ? 0 : -1);
     } catch (error) {
       if (atcTransitPanel) atcTransitPanel.innerHTML = '<div class="atc-transit-title">Orari temporaneamente non disponibili</div>';
       console.warn('ATC next bus load failed:', error.message);
