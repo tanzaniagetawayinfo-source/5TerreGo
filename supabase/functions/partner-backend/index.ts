@@ -382,7 +382,7 @@ serve(async (req) => {
       const { data: pois, error } = await supabaseAdmin
         .from("pois")
         .select("id,name,type,coords,description,phone,images,emails,discount,discount_info,partner_profile")
-        .not("emails", "is", null);
+        .ilike("emails", `%${userEmail}%`);
       if (error) throw new Error(error.message);
       const partnerPois = ((pois || []) as PoiRow[]).filter((poi) => isAuthorized(poi, userEmail));
       return jsonResponse({ ok: true, user_email: userEmail, pois: partnerPois });
