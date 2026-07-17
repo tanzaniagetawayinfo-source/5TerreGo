@@ -1332,6 +1332,7 @@
     body.god-mode-active #poi-edit { display:inline-flex; align-items:center; justify-content:center; }
     #god-mode-badge { display:none; position:fixed; z-index:2210; right:14px; top:calc(var(--ftg-header-height, 98px) + 14px); border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:9px 13px; background:rgba(17,24,39,.92); color:#fff; box-shadow:0 12px 34px rgba(0,0,0,.24); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font:inherit; font-size:11px; font-weight:950; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; }
     body.god-mode-active #god-mode-badge { display:block; }
+    body.god-mode-active #map { -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
     #god-mode-add-prompt { display:none; position:fixed; z-index:4300; left:50%; bottom:calc(12px + env(safe-area-inset-bottom)); width:min(430px,calc(100vw - 20px)); max-height:min(78vh,720px); transform:translateX(-50%); padding:17px; border-radius:26px; background:rgba(17,24,39,.98); color:#fff; box-shadow:0 24px 70px rgba(0,0,0,.38); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); overflow:auto; overscroll-behavior:contain; }
     #god-mode-add-prompt.is-visible { display:block; animation:god-mode-sheet-in .2s ease-out; }
     @keyframes god-mode-sheet-in { from { opacity:0; transform:translate(-50%,18px); } to { opacity:1; transform:translate(-50%,0); } }
@@ -3946,22 +3947,45 @@
     if (!map || map._godModeLongPressReady) return;
     map._godModeLongPressReady = true;
     container = map.getContainer();
-    container.addEventListener('pointerdown', function(event) {
+    function isBlockedTarget(target) { return Boolean(target && target.closest && target.closest('.leaflet-control,.leaflet-marker-icon,.leaflet-popup,#god-mode-add-prompt')); }
+    function beginLongPress(clientX, clientY, sourceEvent) {
       var point;
-      if (!godModeEnabled || !godModeAuthorized || event.button > 0 || (event.target.closest && event.target.closest('.leaflet-control,.leaflet-marker-icon,.leaflet-popup'))) return;
-      point = map.mouseEventToContainerPoint(event);
-      godModeLongPressStart = { x:event.clientX, y:event.clientY, point:point };
+      if (!godModeEnabled || !godModeAuthorized || isBlockedTarget(sourceEvent && sourceEvent.target)) return;
       clearGodModeLongPress();
-      godModeLongPressStart = { x:event.clientX, y:event.clientY, point:point };
+      point = map.mouseEventToContainerPoint({ clientX:clientX, clientY:clientY });
+      godModeLongPressStart = { x:clientX, y:clientY, point:point };
       godModeLongPressTimer = window.setTimeout(function() {
         var pending = godModeLongPressStart;
         godModeLongPressTimer = 0;
         godModeLongPressStart = null;
-        if (pending) showGodModeAddPrompt(map.containerPointToLatLng(pending.point));
-      }, 720);
+        if (!pending) return;
+        if (navigator.vibrate) navigator.vibrate(35);
+        showGodModeAddPrompt(map.containerPointToLatLng(pending.point));
+      }, 620);
+    }
+    function moveLongPress(clientX, clientY) {
+      if (godModeLongPressStart && Math.hypot(clientX - godModeLongPressStart.x, clientY - godModeLongPressStart.y) > 28) clearGodModeLongPress();
+    }
+    container.addEventListener('pointerdown', function(event) {
+      if (event.pointerType === 'touch' || event.button > 0) return;
+      beginLongPress(event.clientX, event.clientY, event);
     }, { passive:true });
-    container.addEventListener('pointermove', function(event) { if (godModeLongPressStart && Math.hypot(event.clientX - godModeLongPressStart.x, event.clientY - godModeLongPressStart.y) > 12) clearGodModeLongPress(); }, { passive:true });
-    ['pointerup','pointercancel','pointerleave'].forEach(function(name) { container.addEventListener(name, clearGodModeLongPress, { passive:true }); });
+    container.addEventListener('pointermove', function(event) { if (event.pointerType !== 'touch') moveLongPress(event.clientX, event.clientY); }, { passive:true });
+    ['pointerup','pointercancel'].forEach(function(name) { container.addEventListener(name, function(event) { if (event.pointerType !== 'touch') clearGodModeLongPress(); }, { passive:true }); });
+    container.addEventListener('touchstart', function(event) {
+      var touch;
+      if (!event.touches || event.touches.length !== 1) { clearGodModeLongPress(); return; }
+      touch = event.touches[0];
+      beginLongPress(touch.clientX, touch.clientY, event);
+    }, { passive:true });
+    container.addEventListener('touchmove', function(event) {
+      var touch;
+      if (!event.touches || event.touches.length !== 1) { clearGodModeLongPress(); return; }
+      touch = event.touches[0];
+      moveLongPress(touch.clientX, touch.clientY);
+    }, { passive:true });
+    container.addEventListener('touchend', clearGodModeLongPress, { passive:true });
+    container.addEventListener('touchcancel', clearGodModeLongPress, { passive:true });
     map.on('contextmenu', function(event) { if (godModeEnabled && godModeAuthorized) showGodModeAddPrompt(event.latlng); });
   }
   async function checkUser() { var user = await readCurrentUser(); var menuName = document.getElementById('app-menu-username'); currentUser = user; window.FTG_CURRENT_USER = user || null; document.body.classList.toggle('user-logged-in', Boolean(user)); if (!user) { godModeAuthorized = false; setGodModeEnabled(false, true); if (menuName) menuName.innerText = 'Ospite'; return false; } if (menuName) menuName.innerText = getUserDisplayName(user); checkGodModeAuthorization(); return true; }
