@@ -5142,7 +5142,7 @@
   function openATCScheduledBus(estimate) {
     var trip = estimate.trip;
     var label = getATCRouteLabel(trip);
-    var poi = { id:'atc-scheduled-bus:' + trip[0], name:'Bus ' + label + ' → ' + (trip[4] || 'capolinea'), coords:estimate.point.slice(), type:'scheduled bus', importance:100, description:'Posizione approssimata in base agli orari GTFS ufficiali. Non è una posizione GPS in tempo reale.' };
+    var poi = { id:'atc-scheduled-bus:' + trip[0], name:'Bus ' + label + ' → ' + (trip[4] || 'capolinea'), coords:estimate.point.slice(), lat:Number(estimate.point[0]), lng:Number(estimate.point[1]), type:'scheduled bus', importance:100, description:'Posizione approssimata in base agli orari GTFS ufficiali. Non è una posizione GPS in tempo reale.' };
     showPOICard(poi);
     showATCTripSelection(trip, estimate.nextStopIndex, { startDistance:estimate.sourceDistance, context:'Bus in movimento stimato' });
   }
