@@ -567,45 +567,19 @@ select{appearance:none;-webkit-appearance:none;}
     return at > 0 && dot > at + 1 && dot < value.length - 1;
   }
 
-  function getFastSession(){
-    const keys = [];
-    for(let i = 0; i < localStorage.length; i += 1){
-      const key = localStorage.key(i);
-      if(key && key.indexOf('auth-token') > -1){
-        keys.push(key);
-      }
-    }
-    keys.push('supabase.auth.token');
-
-    for(const key of keys){
-      try{
-        const raw = localStorage.getItem(key);
-        if(!raw) continue;
-        const parsed = JSON.parse(raw);
-        if(parsed && parsed.currentSession && parsed.currentSession.access_token){
-          return parsed.currentSession;
-        }
-        if(parsed && parsed.access_token){
-          return parsed;
-        }
-      }catch(_err){}
-    }
-
-    return null;
-  }
-
   async function getReliableSession(){
     const result = await client.auth.getSession();
     const session = result && result.data ? result.data.session : null;
-    if(session && session.access_token) return session;
+    if(!session || !session.access_token) return null;
 
-    const fastSession = getFastSession();
-    const expiresAt = Number(fastSession && fastSession.expires_at ? fastSession.expires_at : 0) * 1000;
-    if(fastSession && fastSession.access_token && (!expiresAt || expiresAt > Date.now() + 30000)){
-      return fastSession;
+    const userResult = await client.auth.getUser();
+    if(!userResult.error && userResult.data && userResult.data.user){
+      session.user = userResult.data.user;
+      return session;
     }
 
-    return null;
+    const refreshResult = await client.auth.refreshSession();
+    return refreshResult && refreshResult.data ? refreshResult.data.session : null;
   }
 
   async function fetchOwnerStatus(){

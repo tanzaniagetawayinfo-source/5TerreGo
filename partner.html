@@ -1068,7 +1068,15 @@
 
       async function getFreshAccessToken() {
         var result = await partnerClient.auth.getSession();
-        return result && result.data && result.data.session && result.data.session.access_token ? result.data.session.access_token : "";
+        var session = result && result.data ? result.data.session : null;
+        if (!session || !session.access_token) return "";
+
+        var userResult = await partnerClient.auth.getUser();
+        if (!userResult.error && userResult.data && userResult.data.user) return session.access_token;
+
+        var refreshResult = await partnerClient.auth.refreshSession();
+        var refreshedSession = refreshResult && refreshResult.data ? refreshResult.data.session : null;
+        return refreshedSession && refreshedSession.access_token ? refreshedSession.access_token : "";
       }
 
       async function callBackend(body) {
