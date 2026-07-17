@@ -2814,7 +2814,7 @@
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
   var NORMAL_MAP_ZOOM = 9.5;
-  var NORMAL_MAP_PITCH = 38;
+  var NORMAL_MAP_PITCH = 0;
   var NORMAL_MAP_LIMITS = [[9.28, 43.75], [10.28, 44.48]];
   var ambientOrbitFrame = 0;
   var ambientOrbitActive = false;
@@ -6157,7 +6157,7 @@
     if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
     fallbackOrbitStarted = true;
     normalGyroTracking = false;
-    runAmbientOrbit({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, endZoom:NORMAL_MAP_ZOOM, pitch:48, endPitch:NORMAL_MAP_PITCH, startBearing:0, rotation:360, duration:12000 });
+    if (turnNavigationMap) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
   }
   function showOutsideMapFallback() {
     compassRecenterPending = false;
@@ -6242,13 +6242,16 @@
       style: {
         version: 8,
         sources: {
-          esri: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, attribution: 'Tiles © Esri' },
-          streets: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO' },
-          terrainDem: { type:'raster-dem', tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], tileSize:256, maxzoom:15, encoding:'terrarium', attribution:'Elevation © AWS Terrain Tiles' }
+          esri: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Tiles © Esri' },
+          streets: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],tileSize:256,maxzoom:20,attribution:'© OpenStreetMap © CARTO' },
+          labels: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],tileSize:256,maxzoom:20,attribution:'© OpenStreetMap © CARTO' },
+          openfreemap: { type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'© OpenStreetMap contributors' }
         },
         layers: [
           { id:'street-map',type:'raster',source:'streets',layout:{visibility:currentBaseMapMode === 'map' ? 'visible' : 'none'} },
-          { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} }
+          { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} },
+          { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:15.4,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],15.4,0,16,.82],'fill-extrusion-vertical-gradient':true} },
+          { id:'satellite-labels',type:'raster',source:'labels',minzoom:13,layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'},paint:{'raster-opacity':['interpolate',['linear'],['zoom'],13,0,14,0.72,16,1]} }
         ]
       },
       center: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
@@ -6256,15 +6259,16 @@
       pitch: navigationModeActive ? 25 : NORMAL_MAP_PITCH,
       bearing: 0,
       minZoom: 9.5,
+      maxZoom: 20,
       maxBounds: NORMAL_MAP_LIMITS,
       attributionControl: false,
       dragRotate: true,
-      touchPitch: true
+      touchPitch: true,
+      canvasContextAttributes: { antialias:window.innerWidth > 700 && window.devicePixelRatio <= 2, preserveDrawingBuffer:false, powerPreference:'high-performance' }
     });
     setupGodModeLongPress();
     turnNavigationMap.on('load', function() {
       turnNavigationMapLoaded = true;
-      turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.25 });
       turnNavigationMap.addSource('navigation-route', { type: 'geojson', data: getTurnNavigationGeoJSON() });
       turnNavigationMap.addSource('normal-trails', { type: 'geojson', data: getNormalTrailsGeoJSON() });
       turnNavigationMap.addSource('normal-ferries', { type: 'geojson', data: getNormalFerriesGeoJSON() });
@@ -7402,7 +7406,7 @@
     if (turnNavigationMap && turnNavigationMapLoaded) {
       turnNavigationMap.setLayoutProperty('satellite', 'visibility', currentBaseMapMode === 'satellite' ? 'visible' : 'none');
       turnNavigationMap.setLayoutProperty('street-map', 'visibility', currentBaseMapMode === 'map' ? 'visible' : 'none');
-      turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.25 });
+      turnNavigationMap.setLayoutProperty('satellite-labels', 'visibility', currentBaseMapMode === 'satellite' ? 'visible' : 'none');
     }
     scheduleSessionMapStateSave();
   }
@@ -7507,7 +7511,7 @@
     roadsLayer.setOpacity(0.42 * t);
     detailedRoadsLayer.setOpacity(0.78 * t);
     whiteLayer.setOpacity(0);
-    labelsLayer.setOpacity(0);
+    labelsLayer.setOpacity(Math.min(1, Math.max(0, (z - 13) / 1.5)));
   }
   function preloadImages() { places.forEach(function (place) { var img = new Image(); img.src = place.image; }); }
   function updatePlaceLabelVisibility() {
