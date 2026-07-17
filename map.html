@@ -1326,7 +1326,22 @@
     #poi-card.open .poi-content { opacity: 1; transform: translateY(0); }
     #poi-title { position: sticky; top: 0; z-index: 11; min-height: 66px; display: flex; align-items: flex-end; margin: 0 -16px 0; padding: 30px 58px 10px 20px; background: #fff; font-size: 25px; font-weight: 950; line-height: 1.02; letter-spacing: -0.06em; text-align: left; box-shadow: 0 1px 0 rgba(0,0,0,0.045), 0 12px 18px rgba(255,255,255,0.96); }
     .poi-action-row { display: flex; align-items: center; gap: 9px; margin: 12px 0 18px; overflow-x: auto; }
-    #poi-directions { border: 0; border-radius: 999px; padding: 12px 22px; background: #ff7200; color: #fff; font: inherit; font-size: 14px; font-weight: 950; cursor: pointer; box-shadow: 0 10px 24px rgba(255,114,0,.24); }
+    #poi-directions, #poi-edit { border: 0; border-radius: 999px; padding: 12px 22px; color: #fff; font: inherit; font-size: 14px; font-weight: 950; cursor: pointer; }
+    #poi-directions { background: #ff7200; box-shadow: 0 10px 24px rgba(255,114,0,.24); }
+    #poi-edit { display:none; background:#111827; box-shadow:0 10px 24px rgba(17,24,39,.18); }
+    body.god-mode-active #poi-edit { display:inline-flex; align-items:center; justify-content:center; }
+    #god-mode-badge { display:none; position:fixed; z-index:2210; right:14px; top:calc(var(--ftg-header-height, 98px) + 14px); border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:9px 13px; background:rgba(17,24,39,.92); color:#fff; box-shadow:0 12px 34px rgba(0,0,0,.24); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font:inherit; font-size:11px; font-weight:950; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; }
+    body.god-mode-active #god-mode-badge { display:block; }
+    #god-mode-add-prompt { display:none; position:fixed; z-index:4300; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); width:min(390px,calc(100vw - 28px)); transform:translateX(-50%); padding:15px; border-radius:22px; background:rgba(17,24,39,.97); color:#fff; box-shadow:0 24px 70px rgba(0,0,0,.34); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+    #god-mode-add-prompt.is-visible { display:block; }
+    .god-mode-add-title { font-size:17px; font-weight:950; letter-spacing:-.025em; }
+    .god-mode-add-meta { margin-top:4px; color:rgba(255,255,255,.62); font-size:12px; font-weight:750; }
+    .god-mode-add-actions { display:flex; gap:9px; margin-top:13px; }
+    .god-mode-add-actions button { flex:1; min-height:44px; border:0; border-radius:14px; font:inherit; font-size:14px; font-weight:950; cursor:pointer; }
+    #god-mode-add-confirm { background:#ff7200; color:#fff; }
+    #god-mode-add-cancel { background:rgba(255,255,255,.12); color:#fff; }
+    .god-mode-map-pin { width:34px; height:34px; display:grid; place-items:center; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:#ff7200; color:#fff; border:3px solid #fff; box-shadow:0 10px 26px rgba(0,0,0,.3); }
+    .god-mode-map-pin span { transform:rotate(45deg); font-size:16px; font-weight:950; }
     #navigation-planner { display: none; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 4100; max-width: 610px; margin: 0 auto; border-radius: 30px; background: rgba(255,255,255,.98); color: #111827; box-shadow: 0 24px 70px rgba(4,15,30,.32); border: 1px solid rgba(17,24,39,.08); overflow: hidden; opacity: 0; transform: translateY(24px); transition: opacity .22s ease, transform .28s cubic-bezier(.2,.9,.2,1); }
     #navigation-planner.open { opacity: 1; transform: translateY(0); }
     .navigation-head { display: grid; grid-template-columns: 46px minmax(0,1fr) 42px; gap: 10px; align-items: center; padding: 16px 16px 12px; }
@@ -1649,8 +1664,14 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button">Vai</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
+  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button">Vai</button><button id="poi-edit" type="button">Modifica</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
   <div id="poi-close">×</div>
+</div>
+<div id="god-mode-badge" aria-hidden="true">⚡ GOD MODE</div>
+<div id="god-mode-add-prompt" role="dialog" aria-modal="true" aria-labelledby="god-mode-add-title">
+  <div id="god-mode-add-title" class="god-mode-add-title">Aggiungere un POI qui?</div>
+  <div id="god-mode-add-meta" class="god-mode-add-meta"></div>
+  <div class="god-mode-add-actions"><button id="god-mode-add-cancel" type="button">Annulla</button><button id="god-mode-add-confirm" type="button">Aggiungi</button></div>
 </div>
 
 <section id="navigation-planner" aria-hidden="true" aria-label="Navigazione verso il POI">
@@ -1930,6 +1951,7 @@
 
       if (mounted) {
         notifyActionbarReady();
+        if (typeof window.FTG_SYNC_GOD_MODE === 'function') window.FTG_SYNC_GOD_MODE();
         requestAnimationFrame(function () {
           if (rootActionbar.childElementCount === 0) {
             setTimeout(function () { mountActionbar(true); }, 180);
@@ -2109,6 +2131,7 @@
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa';
+  var OWNER_CHECK_ENDPOINT = SUPABASE_URL + '/functions/v1/backend?action=me';
   var LOCAL_POI_KEY = '5terrego_pois_backup';
   var FTG_POI_HOT_CACHE_KEYS = ['ftg-pois-hot-v1', '5terrego-pois-hot-v1', 'ftg-map-pois-hot-v1'];
   var FTG_POI_HOT_CACHE_TS_KEY = 'ftg-pois-hot-ts-v1';
@@ -2494,6 +2517,11 @@
   var poiRelatedArticlesList = document.getElementById('poi-related-articles-list');
 
   var poiDirections = document.getElementById('poi-directions');
+  var poiEdit = document.getElementById('poi-edit');
+  var godModeAddPrompt = document.getElementById('god-mode-add-prompt');
+  var godModeAddMeta = document.getElementById('god-mode-add-meta');
+  var godModeAddConfirm = document.getElementById('god-mode-add-confirm');
+  var godModeAddCancel = document.getElementById('god-mode-add-cancel');
   var navigationPlanner = document.getElementById('navigation-planner');
   var navigationTitle = document.getElementById('navigation-title');
   var navigationClose = document.getElementById('navigation-close');
@@ -2579,6 +2607,13 @@
   var siteWeatherData = null;
   var ferryVehicleMarkers = [];
   var ferryAnimationFrameId = null;
+  var godModeAuthorized = false;
+  var godModeEnabled = false;
+  var godModeAuthorizationPending = null;
+  var godModePendingLatLng = null;
+  var godModePendingMarker = null;
+  var godModeLongPressTimer = 0;
+  var godModeLongPressStart = null;
   var ferryTimetableRefreshTimer = null;
   var currentIndex = -1;
   var currentDataset = 'places';
@@ -3693,8 +3728,106 @@
     }
   }
   function getUserDisplayName(user) { var meta; if (!user) return 'User'; meta = user.user_metadata || {}; if (meta.username) return meta.username; if (meta.name) return meta.name; if (user.email) return user.email.split('@')[0]; return 'User'; }
-  async function readCurrentUser() { var sessionResponse, session, userResponse; if (!supabaseClient) return null; sessionResponse = await supabaseClient.auth.getSession(); session = sessionResponse && sessionResponse.data ? sessionResponse.data.session : null; if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
-  async function checkUser() { var user = await readCurrentUser(); var menuName = document.getElementById('app-menu-username'); currentUser = user; window.FTG_CURRENT_USER = user || null; document.body.classList.toggle('user-logged-in', Boolean(user)); if (!user) { if (menuName) menuName.innerText = 'Ospite'; return false; } if (menuName) menuName.innerText = getUserDisplayName(user); return true; }
+  async function readCurrentSession() { var response; if (!supabaseClient) return null; response = await supabaseClient.auth.getSession(); return response && response.data ? response.data.session : null; }
+  async function readCurrentUser() { var session, userResponse; if (!supabaseClient) return null; session = await readCurrentSession(); if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
+  function clearGodModeLongPress() { if (godModeLongPressTimer) window.clearTimeout(godModeLongPressTimer); godModeLongPressTimer = 0; godModeLongPressStart = null; }
+  function clearGodModePendingPoint() { godModePendingLatLng = null; if (godModeAddPrompt) godModeAddPrompt.classList.remove('is-visible'); if (godModePendingMarker && map) map.removeLayer(godModePendingMarker); godModePendingMarker = null; }
+  function syncGodModeMenuItem() {
+    var menuList = document.querySelector('#ftg-global-actionbar-root .ftg-menu-list');
+    var item = document.getElementById('ftg-god-mode-item');
+    var legalTitle;
+    if (!godModeAuthorized) { if (item) item.remove(); return; }
+    if (!menuList) { window.setTimeout(syncGodModeMenuItem, 180); return; }
+    if (!item) {
+      item = document.createElement('button');
+      item.id = 'ftg-god-mode-item';
+      item.className = 'ftg-menu-item';
+      item.type = 'button';
+      item.addEventListener('click', function() {
+        var trigger;
+        setGodModeEnabled(!godModeEnabled);
+        trigger = document.getElementById('ftg-menu-trigger');
+        if (trigger) trigger.click();
+      });
+      legalTitle = menuList.querySelector('.ftg-menu-section-title');
+      menuList.insertBefore(item, legalTitle || null);
+    }
+    item.innerHTML = '<span class="ftg-menu-item-main"><span aria-hidden="true">⚡</span><span>GOD MODE</span></span><span>' + (godModeEnabled ? 'ON' : 'OFF') + '</span>';
+    item.setAttribute('aria-pressed', godModeEnabled ? 'true' : 'false');
+  }
+  window.FTG_SYNC_GOD_MODE = syncGodModeMenuItem;
+  function setGodModeEnabled(enabled, silent) {
+    godModeEnabled = Boolean(enabled && godModeAuthorized);
+    document.body.classList.toggle('god-mode-active', godModeEnabled);
+    if (!godModeEnabled) clearGodModePendingPoint();
+    try { sessionStorage.setItem('ftg-god-mode', godModeEnabled ? '1' : '0'); } catch (_error) {}
+    syncGodModeMenuItem();
+    if (!silent) showUserLocationToast(godModeEnabled ? 'GOD MODE attivo · tieni premuto sulla mappa per aggiungere un POI.' : 'GOD MODE disattivato.');
+  }
+  async function checkGodModeAuthorization() {
+    var session, response, payload, wanted = false;
+    if (godModeAuthorizationPending) return godModeAuthorizationPending;
+    godModeAuthorizationPending = (async function() {
+      try {
+        session = await readCurrentSession();
+        if (!session || !session.access_token) throw new Error('No session');
+        response = await fetch(OWNER_CHECK_ENDPOINT, { headers: { Authorization: 'Bearer ' + session.access_token } });
+        if (!response.ok) throw new Error('Access denied');
+        payload = await response.json();
+        godModeAuthorized = Boolean(payload && payload.isOwner === true);
+      } catch (_error) { godModeAuthorized = false; }
+      try { wanted = sessionStorage.getItem('ftg-god-mode') === '1'; } catch (_error) {}
+      godModeEnabled = Boolean(godModeAuthorized && wanted);
+      document.body.classList.toggle('god-mode-active', godModeEnabled);
+      if (!godModeAuthorized) clearGodModePendingPoint();
+      syncGodModeMenuItem();
+      godModeAuthorizationPending = null;
+      return godModeAuthorized;
+    })();
+    return godModeAuthorizationPending;
+  }
+  function getPOIEditorURL(poi) {
+    var params = new URLSearchParams();
+    if (poi && poi.id && String(poi.id).indexOf('local-') !== 0) params.set('poi', String(poi.id));
+    else if (poi && isValidCoords(poi.coords)) { params.set('lat', String(poi.coords[0])); params.set('lng', String(poi.coords[1])); params.set('new', '1'); }
+    params.set('source', 'map');
+    return 'poieditor.html?' + params.toString();
+  }
+  function openPOIEditor(poi) { if (!godModeAuthorized || !godModeEnabled) return; window.location.href = getPOIEditorURL(poi); }
+  function showGodModeAddPrompt(latlng) {
+    var icon;
+    if (!godModeAuthorized || !godModeEnabled || !map || !latlng) return;
+    clearGodModePendingPoint();
+    godModePendingLatLng = L.latLng(latlng.lat, latlng.lng);
+    if (godModeAddMeta) godModeAddMeta.textContent = godModePendingLatLng.lat.toFixed(6) + ', ' + godModePendingLatLng.lng.toFixed(6);
+    if (godModeAddPrompt) godModeAddPrompt.classList.add('is-visible');
+    icon = L.divIcon({ className:'', html:'<div class="god-mode-map-pin"><span>+</span></div>', iconSize:[34,34], iconAnchor:[8,32] });
+    godModePendingMarker = L.marker(godModePendingLatLng, { icon:icon, interactive:false, pane:'poiGroupPane' }).addTo(map);
+  }
+  function setupGodModeLongPress() {
+    var container;
+    if (!map || map._godModeLongPressReady) return;
+    map._godModeLongPressReady = true;
+    container = map.getContainer();
+    container.addEventListener('pointerdown', function(event) {
+      var point;
+      if (!godModeEnabled || !godModeAuthorized || event.button > 0 || (event.target.closest && event.target.closest('.leaflet-control,.leaflet-marker-icon,.leaflet-popup'))) return;
+      point = map.mouseEventToContainerPoint(event);
+      godModeLongPressStart = { x:event.clientX, y:event.clientY, point:point };
+      clearGodModeLongPress();
+      godModeLongPressStart = { x:event.clientX, y:event.clientY, point:point };
+      godModeLongPressTimer = window.setTimeout(function() {
+        var pending = godModeLongPressStart;
+        godModeLongPressTimer = 0;
+        godModeLongPressStart = null;
+        if (pending) showGodModeAddPrompt(map.containerPointToLatLng(pending.point));
+      }, 720);
+    }, { passive:true });
+    container.addEventListener('pointermove', function(event) { if (godModeLongPressStart && Math.hypot(event.clientX - godModeLongPressStart.x, event.clientY - godModeLongPressStart.y) > 12) clearGodModeLongPress(); }, { passive:true });
+    ['pointerup','pointercancel','pointerleave'].forEach(function(name) { container.addEventListener(name, clearGodModeLongPress, { passive:true }); });
+    map.on('contextmenu', function(event) { if (godModeEnabled && godModeAuthorized) showGodModeAddPrompt(event.latlng); });
+  }
+  async function checkUser() { var user = await readCurrentUser(); var menuName = document.getElementById('app-menu-username'); currentUser = user; window.FTG_CURRENT_USER = user || null; document.body.classList.toggle('user-logged-in', Boolean(user)); if (!user) { godModeAuthorized = false; setGodModeEnabled(false, true); if (menuName) menuName.innerText = 'Ospite'; return false; } if (menuName) menuName.innerText = getUserDisplayName(user); checkGodModeAuthorization(); return true; }
   function startUserPolling() { var tries = 0; if (userCheckTimer) { clearInterval(userCheckTimer); userCheckTimer = null; } userCheckTimer = setInterval(async function () { tries += 1; await checkUser(); if (currentUser || tries >= 12) { clearInterval(userCheckTimer); userCheckTimer = null; } }, 250); }
   function syncMapLibreUserMarker() {
     var dot;
@@ -6377,6 +6510,7 @@
       touchZoom: !isMapPreviewMode
     }).setView(initialState.center, initialState.zoom);
     setupManualMapRotation();
+    setupGodModeLongPress();
 
     map.createPane('trailPane');
     map.getPane('trailPane').style.zIndex = 640;
@@ -6592,6 +6726,15 @@
         beginNavigationMode(currentPOI, event);
       });
     }
+    if (poiEdit) poiEdit.addEventListener('click', function() { openPOIEditor(currentPOI); });
+    if (godModeAddCancel) godModeAddCancel.addEventListener('click', clearGodModePendingPoint);
+    if (godModeAddConfirm) godModeAddConfirm.addEventListener('click', function() {
+      var point = godModePendingLatLng;
+      var params;
+      if (!point || !godModeAuthorized || !godModeEnabled) return;
+      params = new URLSearchParams({ new:'1', lat:String(point.lat), lng:String(point.lng), source:'map' });
+      window.location.href = 'poieditor.html?' + params.toString();
+    });
 
     if (navigationOriginSelect) {
       navigationOriginSelect.addEventListener('change', function() {

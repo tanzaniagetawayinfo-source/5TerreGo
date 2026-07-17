@@ -976,8 +976,8 @@ button.delete{
 
     <div class="modal-section-card">
       <div class="modal-section-label">Attività e accesso sconti</div>
-      <input id="phone" placeholder="Telefono" />
-      <input id="emails" type="email" placeholder="Email responsabile sconti" />
+      <input id="phone" type="tel" placeholder="Telefono (opzionale)" autocomplete="tel" />
+      <input id="emails" type="email" placeholder="Email (opzionale)" autocomplete="email" />
       <div class="image-suggestion-credit">Questa email vedrà Gestione sconti e Scanner QR nel proprio menu. Potrà aggiungere altri operatori scanner dalla sua dashboard.</div>
     </div>
 
@@ -2110,6 +2110,35 @@ async function openModal(poi = null){
   }
 }
 
+async function handleEditorDeepLink(){
+  const params = new URLSearchParams(window.location.search || "");
+  const poiId = params.get("poi");
+  const lat = Number(params.get("lat"));
+  const lng = Number(params.get("lng"));
+
+  if(poiId){
+    const listPoi = pois.find((poi) => String(poi && poi.id) === String(poiId));
+    await openModal(listPoi || {
+      id: poiId,
+      name: "POI",
+      coords: "",
+      description: "",
+      importance: 50,
+      type: "chiesa",
+      emails: "",
+      _listOnly: true
+    });
+    return;
+  }
+
+  if(params.get("new") === "1" && Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180){
+    await openModal();
+    coordsEl.value = formatCoords(lat, lng);
+    syncMiniMapFromCoords();
+    window.setTimeout(() => nameEl.focus(), 180);
+  }
+}
+
 function closeModal(){
   modalEl.classList.remove("is-open");
   modalEl.setAttribute("aria-hidden", "true");
@@ -2296,7 +2325,7 @@ document.addEventListener("visibilitychange", () => {
 
 startHeroQuoteRotation();
 warmSession();
-loadPois();
+loadPois().then(handleEditorDeepLink).catch((err) => console.error("EDITOR DEEP LINK ERROR", err));
 </script>
 </body>
 </html>
