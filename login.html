@@ -595,13 +595,17 @@ select{appearance:none;-webkit-appearance:none;}
   }
 
   async function getReliableSession(){
+    const result = await client.auth.getSession();
+    const session = result && result.data ? result.data.session : null;
+    if(session && session.access_token) return session;
+
     const fastSession = getFastSession();
-    if(fastSession && fastSession.access_token){
+    const expiresAt = Number(fastSession && fastSession.expires_at ? fastSession.expires_at : 0) * 1000;
+    if(fastSession && fastSession.access_token && (!expiresAt || expiresAt > Date.now() + 30000)){
       return fastSession;
     }
 
-    const result = await client.auth.getSession();
-    return result && result.data ? result.data.session : null;
+    return null;
   }
 
   async function fetchOwnerStatus(){
@@ -820,19 +824,17 @@ select{appearance:none;-webkit-appearance:none;}
   }
 
   async function maybeAddPartnerDiscountButton(menuList){
-    const session = await getReliableSession();
-    const email = String(session && session.user && session.user.email ? session.user.email : '').trim().toLowerCase();
-    if(email === '5terrego.info@gmail.com') return;
     const access = await fetchPartnerAccess();
-    if(!access.hasAccess) return;
-    const logoutButton = document.getElementById('logout');
-    if(access.isManager && !document.getElementById('partner-discounts')){
+    if(!menuList.isConnected || !access.hasAccess) return;
+    const logoutButton = menuList.querySelector('#logout');
+    if(!logoutButton) return;
+    if(access.isManager && !menuList.querySelector('#partner-discounts')){
       menuList.insertBefore(createMenuButton({
-        id:'partner-discounts', label:'Gestione sconti', icon:'discounts',
+        id:'partner-discounts', label:'Manage your business', icon:'discounts',
         onClick:function(){ window.location.href = '/discounteditor.html'; }
       }), logoutButton);
     }
-    if(!document.getElementById('partner-qr')){
+    if(!menuList.querySelector('#partner-qr')){
       menuList.insertBefore(createMenuButton({
         id:'partner-qr', label:'Scanner QR', icon:'qr',
         onClick:function(){ window.location.href = '/partner.html'; }
@@ -842,38 +844,40 @@ select{appearance:none;-webkit-appearance:none;}
 
   async function maybeAddOwnerButton(menuList){
     const owner = await fetchOwnerStatus();
-    if(!owner) return;
+    if(!menuList.isConnected || !owner) return;
+    const logoutButton = menuList.querySelector('#logout');
+    if(!logoutButton) return;
 
-    if(!document.getElementById('poi-dashboard')){
+    if(!menuList.querySelector('#poi-dashboard')){
       const poiBtn = createMenuButton({
         id:'poi-dashboard', label:'Manage POIs', icon:'pois',
         onClick:function(){ window.location.href = '/poieditor.html'; }
       });
-      menuList.insertBefore(poiBtn, document.getElementById('logout'));
+      menuList.insertBefore(poiBtn, logoutButton);
     }
 
-    if(!document.getElementById('blog-dashboard')){
+    if(!menuList.querySelector('#blog-dashboard')){
       const blogBtn = createMenuButton({
         id:'blog-dashboard', label:'Manage blog', icon:'blog',
         onClick:function(){ window.location.href = '/blogeditor.html'; }
       });
-      menuList.insertBefore(blogBtn, document.getElementById('logout'));
+      menuList.insertBefore(blogBtn, logoutButton);
     }
 
-    if(!document.getElementById('trails-editor')){
+    if(!menuList.querySelector('#trails-editor')){
       const trailsBtn = createMenuButton({
         id:'trails-editor', label:'Trails editor', icon:'trails',
         onClick:function(){ window.location.href = '/trakeditor.html'; }
       });
-      menuList.insertBefore(trailsBtn, document.getElementById('logout'));
+      menuList.insertBefore(trailsBtn, logoutButton);
     }
 
-    if(!document.getElementById('visitors-dashboard')){
+    if(!menuList.querySelector('#visitors-dashboard')){
       const visitorsBtn = createMenuButton({
         id:'visitors-dashboard', label:'Visitors dashboard', icon:'visitors',
         onClick:function(){ window.location.href = '/visitors.html'; }
       });
-      menuList.insertBefore(visitorsBtn, document.getElementById('logout'));
+      menuList.insertBefore(visitorsBtn, logoutButton);
     }
   }
 
@@ -890,12 +894,6 @@ select{appearance:none;-webkit-appearance:none;}
   }
 
   async function checkUser(){
-    const fastSession = getFastSession();
-    if(fastSession && fastSession.user){
-      await renderAccount();
-      return;
-    }
-
     const session = await getReliableSession();
     const user = session && session.user ? session.user : null;
     if(!user){
