@@ -562,7 +562,6 @@
     .moving-ferry-icon.is-dimmed img {
       opacity: .72;
     }
-    .portovenere-bus-preview { width:28px; height:28px; display:grid; place-items:center; border:2px solid #fff; border-radius:999px; background:#38a852; color:#fff; font-size:17px; line-height:1; box-shadow:0 5px 14px rgba(0,0,0,.38); pointer-events:auto; }
     #turn-navigation-map{display:block;position:fixed;inset:0;z-index:1;background:#dce8ed}
     #map{display:none!important}
     #turn-navigation-close { display:none;position:fixed;right:14px;top:calc(14px + env(safe-area-inset-top));z-index:5200;width:52px;height:52px;border:0;border-radius:999px;background:#e3262e;color:#fff;font:inherit;font-size:28px;font-weight:900;line-height:1;box-shadow:0 12px 30px rgba(130,0,0,.34);cursor:pointer; }
@@ -2754,10 +2753,6 @@
   var glCityMarkers = [];
   var glTrailMarkers = [];
   var glFerryVehicleMarkers = [];
-  var portovenereBusPreviewMarker = null;
-  var portovenereBusPreviewFrame = null;
-  var portovenereBusPreviewRoute = [];
-  var portovenereBusPreviewStartedAt = 0;
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
   var NORMAL_MAP_ZOOM = 9.5;
@@ -5406,50 +5401,6 @@
     list.forEach(function(marker) { try { marker.remove(); } catch (error) {} });
     list.length = 0;
   }
-  function getPortovenereBusPreviewRoute() {
-    return poiMarkers.filter(function(entry) {
-      var poi = entry && entry.poi;
-      return poi && normalizePOIType(poi.type) === 'fermata bus' && isValidCoords(poi.coords) && Number(poi.coords[0]) >= 44.045 && Number(poi.coords[0]) <= 44.065 && Number(poi.coords[1]) >= 9.83 && Number(poi.coords[1]) <= 9.86;
-    }).sort(function(a, b) { return Number(a.poi.id || 0) - Number(b.poi.id || 0); }).map(function(entry) { return entry.poi.coords.slice(); });
-  }
-  function stopPortovenereBusPreview() {
-    if (portovenereBusPreviewFrame !== null) cancelAnimationFrame(portovenereBusPreviewFrame);
-    portovenereBusPreviewFrame = null;
-    if (portovenereBusPreviewMarker) portovenereBusPreviewMarker.remove();
-    portovenereBusPreviewMarker = null;
-    portovenereBusPreviewStartedAt = 0;
-  }
-  function animatePortovenereBusPreview(now) {
-    var elapsed, phase, reverse, progress, point;
-    if (!portovenereBusPreviewMarker || portovenereBusPreviewRoute.length < 2 || !turnNavigationMap || navigationModeActive) { stopPortovenereBusPreview(); return; }
-    elapsed = (now - portovenereBusPreviewStartedAt) % 36000;
-    phase = elapsed < 14000 ? elapsed / 14000 : (elapsed >= 18000 && elapsed < 32000 ? (elapsed - 18000) / 14000 : -1);
-    if (phase < 0) portovenereBusPreviewMarker.getElement().style.display = 'none';
-    else {
-      reverse = elapsed >= 18000;
-      progress = reverse ? 1 - phase : phase;
-      point = getPointAlongLatLngs(portovenereBusPreviewRoute, progress);
-      if (point) portovenereBusPreviewMarker.setLngLat([point[1], point[0]]);
-      portovenereBusPreviewMarker.getElement().style.display = '';
-      portovenereBusPreviewMarker.getElement().setAttribute('aria-label', reverse ? 'Minibus in arrivo da La Spezia' : 'Minibus in uscita verso La Spezia');
-    }
-    portovenereBusPreviewFrame = requestAnimationFrame(animatePortovenereBusPreview);
-  }
-  function syncPortovenereBusPreview() {
-    var element, popup;
-    if (!turnNavigationMap || !turnNavigationMapLoaded || !window.maplibregl || navigationModeActive) { stopPortovenereBusPreview(); return; }
-    portovenereBusPreviewRoute = getPortovenereBusPreviewRoute();
-    if (portovenereBusPreviewRoute.length < 2) { stopPortovenereBusPreview(); return; }
-    if (!portovenereBusPreviewMarker) {
-      element = document.createElement('button');
-      element.type = 'button';
-      element.className = 'portovenere-bus-preview';
-      element.innerHTML = '🚌';
-      popup = new window.maplibregl.Popup({ offset:16 }).setHTML('<div style="font-weight:900">Minibus Portovenere</div><div style="margin-top:4px">Animazione del percorso tra le fermate.</div><div style="margin-top:6px;font-size:10px;color:#667085">Non è una posizione in tempo reale.</div>');
-      portovenereBusPreviewMarker = new window.maplibregl.Marker({ element:element, anchor:'center' }).setLngLat([portovenereBusPreviewRoute[0][1], portovenereBusPreviewRoute[0][0]]).setPopup(popup).addTo(turnNavigationMap);
-    }
-    if (!portovenereBusPreviewStartedAt) { portovenereBusPreviewStartedAt = performance.now(); portovenereBusPreviewFrame = requestAnimationFrame(animatePortovenereBusPreview); }
-  }
   function syncMapLibreMarkers() {
     var zoom;
     var cityBoxes = [];
@@ -5518,7 +5469,6 @@
     glFerryVehicleMarkers.forEach(function(marker) {
       marker.getElement().style.display = !navigationModeActive && (currentMapFilter === 'all' || currentMapFilter === 'ferry') ? '' : 'none';
     });
-    syncPortovenereBusPreview();
     syncMapLibreUserMarker();
   }
   function updateTurnNavigationCamera(immediate) {
