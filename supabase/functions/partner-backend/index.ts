@@ -373,7 +373,10 @@ serve(async (req) => {
     }
 
     if (action === "get_partner_pois") {
-      const { data: pois, error } = await supabaseAdmin.from("pois").select("*").not("emails", "is", null);
+      const { data: pois, error } = await supabaseAdmin
+        .from("pois")
+        .select("id,name,type,coords,emails,discount,discount_info")
+        .not("emails", "is", null);
       if (error) throw new Error(error.message);
       const partnerPois = ((pois || []) as PoiRow[]).filter((poi) => isAuthorized(poi, userEmail));
       return jsonResponse({ ok: true, user_email: userEmail, pois: partnerPois });
