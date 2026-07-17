@@ -637,6 +637,9 @@ serve(async (req) => {
       const existingEmails = parseAuthorizedEmails(poi.emails);
       if (existingEmails.length === 0) return jsonResponse({ ok: false, error: "This POI has no authorized emails" }, 403);
       if (!existingEmails.includes(userEmail)) return jsonResponse({ ok: false, error: "You are not authorized for this POI" }, 403);
+      if (existingEmails[0] !== userEmail) {
+        return jsonResponse({ ok: false, error: "Only the business manager can change settings" }, 403);
+      }
 
       const patch: Record<string, unknown> = {};
 
@@ -654,6 +657,7 @@ serve(async (req) => {
           const toRemove = new Set(body.remove_emails.map(normalizeEmail));
           nextEmails = nextEmails.filter((email) => !toRemove.has(email));
         }
+        nextEmails = [existingEmails[0], ...nextEmails.filter((email) => email !== existingEmails[0])];
         patch.emails = emailsToStorageString(ensureValidEmailList(nextEmails));
       }
 
