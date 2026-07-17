@@ -1428,6 +1428,19 @@
     #poi-card.has-images #poi-images-preview { display: flex; }
     .poi-preview-img { flex: 0 0 152px; width: 152px; height: 152px; border-radius: 22px; object-fit: cover; display: block; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06); }
     #poi-desc { font-size: 15px; line-height: 1.52; color: rgba(0,0,0,0.68); margin: 0; white-space: pre-line; padding-bottom: 2px; }
+    #atc-transit-panel { display:none; margin-top:15px; padding:14px; border-radius:20px; background:#eef6ff; border:1px solid rgba(0,51,102,.10); color:#10233c; }
+    #atc-transit-panel.is-visible { display:block; }
+    .atc-transit-kicker { color:#075ea8; font-size:10px; font-weight:950; letter-spacing:.11em; text-transform:uppercase; }
+    .atc-transit-title { margin-top:5px; font-size:18px; line-height:1.14; font-weight:950; letter-spacing:-.035em; }
+    .atc-transit-meta { margin-top:6px; color:#40546d; font-size:12px; line-height:1.4; font-weight:800; }
+    .atc-transit-note { margin-top:8px; color:#64748b; font-size:10px; line-height:1.35; font-weight:750; }
+    .atc-transit-stops { display:grid; gap:7px; max-height:210px; margin-top:12px; overflow-y:auto; }
+    .atc-transit-stop { display:grid; grid-template-columns:28px minmax(0,1fr) auto; gap:8px; align-items:center; font-size:12px; font-weight:850; }
+    .atc-transit-stop-number,.atc-scheduled-stop-marker { display:grid; place-items:center; border-radius:999px; background:#ff7200; color:#fff; font-weight:950; box-shadow:0 4px 12px rgba(0,0,0,.24); }
+    .atc-transit-stop-number { width:28px; height:28px; font-size:11px; }
+    .atc-transit-stop-time { color:#52657c; font-variant-numeric:tabular-nums; }
+    .atc-scheduled-stop-marker { width:30px; height:30px; border:2px solid #fff; font-size:11px; pointer-events:none; }
+    .atc-scheduled-bus { width:34px; height:34px; display:grid; place-items:center; padding:0; border:0; background:transparent; font-size:27px; line-height:1; cursor:pointer; filter:drop-shadow(0 4px 5px rgba(0,0,0,.48)); }
     #poi-related-articles { display: none; margin-top: 16px; }
     #poi-related-articles.is-visible { display: block; }
     .poi-related-title { font-size: 12px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,.42); margin: 0 0 10px; }
@@ -1688,7 +1701,7 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button">Vai</button><button id="poi-edit" type="button">Modifica</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
+  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button">Vai</button><button id="poi-edit" type="button">Modifica</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><div id="atc-transit-panel" aria-live="polite"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
   <div id="poi-close">×</div>
 </div>
 <div id="god-mode-badge" aria-hidden="true">⚡ GOD MODE</div>
@@ -2558,6 +2571,7 @@
   var poiCard = document.getElementById('poi-card');
   var poiTitle = document.getElementById('poi-title');
   var poiDesc = document.getElementById('poi-desc');
+  var atcTransitPanel = document.getElementById('atc-transit-panel');
   var poiClose = document.getElementById('poi-close');
   var poiImagesPreview = document.getElementById('poi-images-preview');
   var poiRelatedArticles = document.getElementById('poi-related-articles');
@@ -2753,6 +2767,15 @@
   var glCityMarkers = [];
   var glTrailMarkers = [];
   var glFerryVehicleMarkers = [];
+  var atcScheduleData = null;
+  var atcSchedulePromise = null;
+  var atcTripsByStop = new Map();
+  var atcShapeCache = new Map();
+  var glScheduledBusMarkers = new Map();
+  var glScheduledStopMarkers = [];
+  var atcScheduledBusTimer = null;
+  var selectedATCScheduledTrip = null;
+  var ATC_SCHEDULED_BUS_MIN_ZOOM = 14.25;
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
   var NORMAL_MAP_ZOOM = 9.5;
@@ -4763,7 +4786,7 @@
     }
   }
   function destroyPoiMiniMap() { if (poiMiniMap) { try { poiMiniMap.remove(); } catch (error) {} poiMiniMap = null; } }
-  function closePOICard(immediate) { closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; updateSelectedPOIEmphasis(); if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); updateSelectedPOIEmphasis(); } }, 360); }
+  function closePOICard(immediate) { clearATCScheduledSelection(true); closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; updateSelectedPOIEmphasis(); if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); updateSelectedPOIEmphasis(); } }, 360); }
   function setPOISheetHeight(percent, animated) { if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = percent + 'dvh'; poiCard.classList.toggle('sheet-expanded', percent >= 88); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
   function getPOISheetPercentFromHeight(px) { var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); return (Number(px) / vh) * 100; }
   function setupPOISheetDrag() { var handle; var content; if (!poiCard || poiCard.getAttribute('data-sheet-ready') === '1') return; poiCard.setAttribute('data-sheet-ready', '1'); handle = document.getElementById('poi-sheet-handle'); content = poiCard.querySelector('.poi-content'); function beginPendingDrag(event, source) { if (!poiCard.classList.contains('open')) return; if (!event.touches || event.touches.length !== 1) return; poiSheetPendingDrag = true; poiSheetDragging = false; poiSheetDragSource = source || ''; poiSheetStartY = event.touches[0].clientY; poiSheetStartX = event.touches[0].clientX; poiSheetStartHeight = poiCard.getBoundingClientRect().height; poiSheetStartScrollTop = content ? content.scrollTop : 0; } function startRealDrag() { poiSheetPendingDrag = false; poiSheetDragging = true; poiCard.style.transition = 'none'; } function finishDrag() { var percent; poiSheetPendingDrag = false; if (!poiSheetDragging) return; poiSheetDragging = false; poiCard.style.transition = ''; percent = getPOISheetPercentFromHeight(poiCard.getBoundingClientRect().height); if (percent <= 40) { closePOICard(false); return; } if (percent >= 72) setPOISheetHeight(95, true); else setPOISheetHeight(50, true); } function handleMove(event) { var y; var delta; var nextHeight; var percent; var isExpanded; var scrollTop; if ((!poiSheetPendingDrag && !poiSheetDragging) || !event.touches || event.touches.length !== 1) return; y = event.touches[0].clientY; delta = poiSheetStartY - y; isExpanded = poiCard.classList.contains('sheet-expanded'); scrollTop = content ? content.scrollTop : 0; if (poiSheetPendingDrag) { if (Math.abs(delta) < 6) return; if (poiSheetDragSource === 'content' && event.target && event.target.closest && event.target.closest('#poi-images-preview')) { if (Math.abs(event.touches[0].clientX - poiSheetStartX) > Math.abs(delta)) { poiSheetPendingDrag = false; return; } } if (poiSheetDragSource === 'content' && isExpanded) { if (delta > 0) { poiSheetPendingDrag = false; return; } if (delta < 0 && scrollTop > 0) { poiSheetPendingDrag = false; return; } } startRealDrag(); } if (!poiSheetDragging) return; event.preventDefault(); nextHeight = poiSheetStartHeight + delta; percent = getPOISheetPercentFromHeight(nextHeight); setPOISheetHeight(percent, false); if (poiSheetDragSource === 'content' && delta > 0 && percent >= 95) { poiSheetDragging = false; poiSheetPendingDrag = false; poiCard.style.transition = ''; setPOISheetHeight(95, false); } } function cancelDrag() { poiSheetPendingDrag = false; poiSheetDragging = false; poiCard.style.transition = ''; } [handle, poiTitle].filter(Boolean).forEach(function(target) { target.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'header'); }, { passive: true }); target.addEventListener('touchmove', handleMove, { passive: false }); target.addEventListener('touchend', finishDrag); target.addEventListener('touchcancel', cancelDrag); }); if (content) { content.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'content'); }, { passive: true }); content.addEventListener('touchmove', handleMove, { passive: false }); content.addEventListener('touchend', finishDrag); content.addEventListener('touchcancel', cancelDrag); } }
@@ -4771,6 +4794,8 @@
   function renderPOIDescription(fullText) { var text = String(fullText || '').trim() || 'No description available'; if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } if (poiDesc) poiDesc.textContent = text; }
   function showPOICard(poi) { var fullText, lat, lng; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); poiCard.style.height = '50dvh'; poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi);
     renderPOIDescription(fullText);
+    if (normalizePOIType(poi.type) === 'fermata bus' || normalizePOIType(poi.type) === 'bus stop' || normalizePOIType(poi.type) === 'busstop') showNextATCBusFromStop(poi);
+    else clearATCScheduledSelection(true);
     renderRelatedArticlesForPOI(poi, blogPostsCache);
     renderDiscountCTA(poi);
     updateSelectedPOIEmphasis();
@@ -4884,6 +4909,413 @@
   }
   function getFerryRouteArc(fromPort, toPort) { var fromKey; var toKey; var existing; var arc; if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return []; fromKey = String(fromPort.id || fromPort.name); toKey = String(toPort.id || toPort.name); existing = ferryRouteArcs.find(function(route) { return String(route.from.id || route.from.name) === fromKey && String(route.to.id || route.to.name) === toKey; }); if (existing) return existing.arc; existing = ferryRouteArcs.find(function(route) { return String(route.from.id || route.from.name) === toKey && String(route.to.id || route.to.name) === fromKey; }); if (existing) return existing.arc.slice().reverse(); arc = createSeaArc(fromPort.coords, toPort.coords, 64, fromPort, toPort); ferryRouteArcs.push({ from: fromPort, to: toPort, arc: arc, dynamic: true }); if (ferryRoutesLayer) L.polyline(arc, { color: '#00e0ff', weight: 0.45, opacity: 0.58, dashArray: '5, 12', lineCap: 'round', lineJoin: 'round' }).addTo(ferryRoutesLayer); return arc; }
   function getPointAlongLatLngs(latLngs, progress) { var total = 0; var distances = []; var i; var target; var travelled = 0; var segmentDistance; var localT; var a; var b; if (!latLngs || latLngs.length < 2) return null; progress = Math.max(0, Math.min(1, Number(progress) || 0)); for (i = 1; i < latLngs.length; i += 1) { segmentDistance = distanceMeters(latLngs[i - 1], latLngs[i]); distances.push(segmentDistance); total += segmentDistance; } if (!total) return latLngs[0]; target = total * progress; for (i = 1; i < latLngs.length; i += 1) { segmentDistance = distances[i - 1]; if (travelled + segmentDistance >= target) { a = latLngs[i - 1]; b = latLngs[i]; localT = segmentDistance ? (target - travelled) / segmentDistance : 0; return [a[0] + (b[0] - a[0]) * localT, a[1] + (b[1] - a[1]) * localT]; } travelled += segmentDistance; } return latLngs[latLngs.length - 1]; }
+
+  function decodeATCPolyline(encoded) {
+    var points = [];
+    var index = 0;
+    var lat = 0;
+    var lng = 0;
+    function nextValue() {
+      var result = 0;
+      var shift = 0;
+      var byte;
+      do {
+        byte = encoded.charCodeAt(index++) - 63;
+        result |= (byte & 31) << shift;
+        shift += 5;
+      } while (byte >= 32 && index <= encoded.length);
+      return result & 1 ? ~(result >> 1) : result >> 1;
+    }
+    while (index < encoded.length) {
+      lat += nextValue();
+      lng += nextValue();
+      points.push([lat / 1e5, lng / 1e5]);
+    }
+    return points;
+  }
+
+  function getATCItalyClock(date) {
+    var parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/Rome', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23' }).formatToParts(date || new Date()).filter(function(part) { return part.type !== 'literal'; }).map(function(part) { return [part.type, part.value]; }));
+    return { key:parts.year + parts.month + parts.day, seconds:Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second) };
+  }
+
+  function shiftATCDateKey(key, days) {
+    var date = new Date(Date.UTC(Number(key.slice(0,4)), Number(key.slice(4,6)) - 1, Number(key.slice(6,8))) + Number(days || 0) * 86400000);
+    return String(date.getUTCFullYear()) + String(date.getUTCMonth() + 1).padStart(2, '0') + String(date.getUTCDate()).padStart(2, '0');
+  }
+
+  function getATCDayOffset(dateKey, originKey) {
+    var toTime = function(key) { return Date.UTC(Number(key.slice(0,4)), Number(key.slice(4,6)) - 1, Number(key.slice(6,8))); };
+    return Math.round((toTime(dateKey) - toTime(originKey)) / 86400000);
+  }
+
+  function formatATCTime(seconds) {
+    var value = ((Number(seconds) % 86400) + 86400) % 86400;
+    return String(Math.floor(value / 3600)).padStart(2, '0') + ':' + String(Math.floor((value % 3600) / 60)).padStart(2, '0');
+  }
+
+  function formatATCWait(seconds) {
+    var minutes = Math.max(0, Math.round(Number(seconds) / 60));
+    if (minutes <= 1) return 'in arrivo';
+    if (minutes < 60) return 'tra ' + minutes + ' min';
+    return 'tra ' + Math.floor(minutes / 60) + ' h ' + (minutes % 60) + ' min';
+  }
+
+  async function loadATCTransitSchedule() {
+    var response;
+    if (atcScheduleData) return atcScheduleData;
+    if (atcSchedulePromise) return atcSchedulePromise;
+    atcSchedulePromise = fetch('data/atc-transit-schedule.json', { cache:'no-cache' }).then(function(result) {
+      if (!result.ok) throw new Error('GTFS schedule returned ' + result.status);
+      return result.json();
+    }).then(function(data) {
+      atcScheduleData = data;
+      atcTripsByStop = new Map();
+      (data.trips || []).forEach(function(trip) {
+        (trip[6] || []).forEach(function(stopTime, stopIndex) {
+          if (!atcTripsByStop.has(stopTime[0])) atcTripsByStop.set(stopTime[0], []);
+          atcTripsByStop.get(stopTime[0]).push([trip, stopIndex]);
+        });
+      });
+      return data;
+    }).catch(function(error) {
+      atcSchedulePromise = null;
+      throw error;
+    });
+    return atcSchedulePromise;
+  }
+
+  function getATCShape(shapeId) {
+    var compact;
+    var coords;
+    var cumulative;
+    var total = 0;
+    var shape;
+    if (atcShapeCache.has(shapeId)) return atcShapeCache.get(shapeId);
+    compact = atcScheduleData && atcScheduleData.shapes ? atcScheduleData.shapes[shapeId] : null;
+    if (!compact) return null;
+    coords = decodeATCPolyline(compact[0] || '');
+    cumulative = [0];
+    for (var i = 1; i < coords.length; i += 1) {
+      total += distanceMeters(coords[i - 1], coords[i]);
+      cumulative.push(total);
+    }
+    shape = { coords:coords, cumulative:cumulative, totalMeters:total, sourceTotal:Number(compact[1] || 0) };
+    atcShapeCache.set(shapeId, shape);
+    return shape;
+  }
+
+  function pointAtATCShapeDistance(shapeId, sourceDistance) {
+    var shape = getATCShape(shapeId);
+    var ratio;
+    var target;
+    var low;
+    var high;
+    var mid;
+    var previous;
+    var span;
+    var local;
+    if (!shape || shape.coords.length < 2) return null;
+    ratio = shape.sourceTotal > 0 ? Math.max(0, Math.min(1, Number(sourceDistance || 0) / shape.sourceTotal)) : 0;
+    target = ratio * shape.totalMeters;
+    low = 1;
+    high = shape.cumulative.length - 1;
+    while (low < high) {
+      mid = Math.floor((low + high) / 2);
+      if (shape.cumulative[mid] < target) low = mid + 1;
+      else high = mid;
+    }
+    previous = Math.max(0, low - 1);
+    span = shape.cumulative[low] - shape.cumulative[previous];
+    local = span ? (target - shape.cumulative[previous]) / span : 0;
+    return [shape.coords[previous][0] + (shape.coords[low][0] - shape.coords[previous][0]) * local, shape.coords[previous][1] + (shape.coords[low][1] - shape.coords[previous][1]) * local];
+  }
+
+  function getATCBearing(from, to) {
+    var lat1 = Number(from[0]) * Math.PI / 180;
+    var lat2 = Number(to[0]) * Math.PI / 180;
+    var deltaLng = (Number(to[1]) - Number(from[1])) * Math.PI / 180;
+    var y = Math.sin(deltaLng) * Math.cos(lat2);
+    var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  function getATCShapePosition(shapeId, sourceDistance) {
+    var point = pointAtATCShapeDistance(shapeId, sourceDistance);
+    var ahead = pointAtATCShapeDistance(shapeId, Number(sourceDistance || 0) + 0.025);
+    var behind;
+    if (!point) return null;
+    if (!ahead || distanceMeters(point, ahead) < 1) {
+      behind = pointAtATCShapeDistance(shapeId, Math.max(0, Number(sourceDistance || 0) - 0.025));
+      return { point:point, bearing:behind ? getATCBearing(behind, point) : 0 };
+    }
+    return { point:point, bearing:getATCBearing(point, ahead) };
+  }
+
+  function sliceATCShape(shapeId, startDistance, endDistance) {
+    var shape = getATCShape(shapeId);
+    var startRatio;
+    var endRatio;
+    var startMeters;
+    var endMeters;
+    var result;
+    if (!shape || shape.coords.length < 2) return [];
+    startRatio = shape.sourceTotal ? Math.max(0, Math.min(1, Number(startDistance || 0) / shape.sourceTotal)) : 0;
+    endRatio = shape.sourceTotal ? Math.max(startRatio, Math.min(1, Number(endDistance || shape.sourceTotal) / shape.sourceTotal)) : 1;
+    startMeters = startRatio * shape.totalMeters;
+    endMeters = endRatio * shape.totalMeters;
+    result = [pointAtATCShapeDistance(shapeId, startDistance)];
+    shape.coords.forEach(function(point, index) {
+      if (shape.cumulative[index] > startMeters && shape.cumulative[index] < endMeters) result.push(point);
+    });
+    result.push(pointAtATCShapeDistance(shapeId, endDistance));
+    return result.filter(Boolean);
+  }
+
+  function isATCTripActiveOn(trip, dateKey) {
+    return Boolean(atcScheduleData && atcScheduleData.services && (atcScheduleData.services[trip[2]] || []).indexOf(dateKey) !== -1);
+  }
+
+  function estimateATCTripPosition(trip, timelineSeconds) {
+    var stops = trip[6] || [];
+    var first;
+    var last;
+    var i;
+    var from;
+    var to;
+    var progress;
+    var sourceDistance;
+    var shapePosition;
+    if (stops.length < 2) return null;
+    first = stops[0];
+    last = stops[stops.length - 1];
+    if (timelineSeconds < first[2] || timelineSeconds > last[1]) return null;
+    for (i = 0; i < stops.length; i += 1) {
+      if (timelineSeconds >= stops[i][1] && timelineSeconds <= stops[i][2]) {
+        shapePosition = getATCShapePosition(trip[3], stops[i][3]);
+        return shapePosition ? { trip:trip, point:shapePosition.point, bearing:shapePosition.bearing, sourceDistance:stops[i][3], nextStopIndex:Math.min(stops.length - 1, i + 1) } : null;
+      }
+      if (i >= stops.length - 1) continue;
+      from = stops[i];
+      to = stops[i + 1];
+      if (timelineSeconds >= from[2] && timelineSeconds <= to[1]) {
+        progress = (timelineSeconds - from[2]) / Math.max(1, to[1] - from[2]);
+        sourceDistance = Number(from[3]) + (Number(to[3]) - Number(from[3])) * progress;
+        shapePosition = getATCShapePosition(trip[3], sourceDistance);
+        return shapePosition ? { trip:trip, point:shapePosition.point, bearing:shapePosition.bearing, sourceDistance:sourceDistance, nextStopIndex:i + 1 } : null;
+      }
+    }
+    return null;
+  }
+
+  function getActiveATCScheduledBuses() {
+    var clock = getATCItalyClock(new Date());
+    var contexts = [{ key:clock.key, seconds:clock.seconds }, { key:shiftATCDateKey(clock.key, -1), seconds:clock.seconds + 86400 }];
+    var active = [];
+    if (!atcScheduleData) return active;
+    (atcScheduleData.trips || []).forEach(function(trip) {
+      contexts.forEach(function(context) {
+        var estimate;
+        if (!isATCTripActiveOn(trip, context.key)) return;
+        estimate = estimateATCTripPosition(trip, context.seconds);
+        if (estimate) {
+          estimate.key = trip[0] + ':' + context.key;
+          active.push(estimate);
+        }
+      });
+    });
+    return active;
+  }
+
+  function clearATCScheduledBusMarkers() {
+    glScheduledBusMarkers.forEach(function(entry) { try { entry.marker.remove(); } catch (_error) {} });
+    glScheduledBusMarkers.clear();
+    if (atcScheduledBusTimer) window.clearInterval(atcScheduledBusTimer);
+    atcScheduledBusTimer = null;
+  }
+
+  function getATCRouteLabel(trip) {
+    var route = atcScheduleData && atcScheduleData.routes ? atcScheduleData.routes[trip[1]] : null;
+    return String(route && (route[0] || route[1]) || trip[1] || '').trim();
+  }
+
+  function openATCScheduledBus(estimate) {
+    var trip = estimate.trip;
+    var label = getATCRouteLabel(trip);
+    var poi = { id:'atc-scheduled-bus:' + trip[0], name:'Bus ' + label + ' → ' + (trip[4] || 'capolinea'), coords:estimate.point.slice(), type:'scheduled bus', importance:100, description:'Posizione approssimata in base agli orari GTFS ufficiali. Non è una posizione GPS in tempo reale.' };
+    showPOICard(poi);
+    showATCTripSelection(trip, estimate.nextStopIndex, { startDistance:estimate.sourceDistance, context:'Bus in movimento stimato' });
+  }
+
+  function renderATCScheduledBusMarkers() {
+    var active;
+    var activeKeys = new Set();
+    if (!turnNavigationMap || !turnNavigationMapLoaded || navigationModeActive || turnNavigationMap.getZoom() < ATC_SCHEDULED_BUS_MIN_ZOOM || (searchTypeFilter !== 'all' && searchTypeFilter !== 'bus')) {
+      clearATCScheduledBusMarkers();
+      return;
+    }
+    active = getActiveATCScheduledBuses();
+    active.forEach(function(estimate) {
+      var entry = glScheduledBusMarkers.get(estimate.key);
+      var element;
+      var marker;
+      activeKeys.add(estimate.key);
+      if (!entry) {
+        element = document.createElement('button');
+        element.type = 'button';
+        element.className = 'atc-scheduled-bus';
+        element.textContent = '🚌';
+        element.setAttribute('aria-label', 'Bus ' + getATCRouteLabel(estimate.trip) + ' verso ' + (estimate.trip[4] || 'capolinea') + ', posizione stimata');
+        entry = { marker:null, estimate:estimate };
+        element.addEventListener('click', function(event) { event.stopPropagation(); openATCScheduledBus(entry.estimate); });
+        marker = new window.maplibregl.Marker({ element:element, anchor:'center', rotationAlignment:'map' }).setLngLat([estimate.point[1], estimate.point[0]]).addTo(turnNavigationMap);
+        entry.marker = marker;
+        glScheduledBusMarkers.set(estimate.key, entry);
+      }
+      entry.estimate = estimate;
+      entry.marker.setLngLat([estimate.point[1], estimate.point[0]]);
+      if (typeof entry.marker.setRotation === 'function') entry.marker.setRotation(estimate.bearing - 90);
+    });
+    glScheduledBusMarkers.forEach(function(entry, key) {
+      if (activeKeys.has(key)) return;
+      try { entry.marker.remove(); } catch (_error) {}
+      glScheduledBusMarkers.delete(key);
+    });
+  }
+
+  function syncATCScheduledBuses() {
+    if (!turnNavigationMap || !turnNavigationMapLoaded || turnNavigationMap.getZoom() < ATC_SCHEDULED_BUS_MIN_ZOOM) {
+      clearATCScheduledBusMarkers();
+      return;
+    }
+    if (!atcScheduleData) {
+      loadATCTransitSchedule().then(syncATCScheduledBuses).catch(function(error) { console.warn('ATC schedule load failed:', error.message); });
+      return;
+    }
+    renderATCScheduledBusMarkers();
+    if (!atcScheduledBusTimer) atcScheduledBusTimer = window.setInterval(renderATCScheduledBusMarkers, 1000);
+  }
+
+  function ensureATCScheduledRouteLayer() {
+    if (!turnNavigationMap || !turnNavigationMapLoaded) return null;
+    if (!turnNavigationMap.getSource('atc-scheduled-route')) {
+      turnNavigationMap.addSource('atc-scheduled-route', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
+      turnNavigationMap.addLayer({ id:'atc-scheduled-route-casing', type:'line', source:'atc-scheduled-route', paint:{ 'line-color':'#fff', 'line-width':9, 'line-opacity':.92 }, layout:{ 'line-cap':'round', 'line-join':'round' } });
+      turnNavigationMap.addLayer({ id:'atc-scheduled-route-line', type:'line', source:'atc-scheduled-route', paint:{ 'line-color':['get','color'], 'line-width':5, 'line-opacity':.96 }, layout:{ 'line-cap':'round', 'line-join':'round' } });
+    }
+    return turnNavigationMap.getSource('atc-scheduled-route');
+  }
+
+  function clearATCScheduledSelection(hidePanel) {
+    var source = turnNavigationMap && turnNavigationMapLoaded ? turnNavigationMap.getSource('atc-scheduled-route') : null;
+    glScheduledStopMarkers.forEach(function(marker) { try { marker.remove(); } catch (_error) {} });
+    glScheduledStopMarkers = [];
+    selectedATCScheduledTrip = null;
+    if (source) source.setData({ type:'FeatureCollection', features:[] });
+    if (hidePanel !== false && atcTransitPanel) {
+      atcTransitPanel.classList.remove('is-visible');
+      atcTransitPanel.innerHTML = '';
+    }
+  }
+
+  function renderATCTransitLoading() {
+    if (!atcTransitPanel) return;
+    atcTransitPanel.classList.add('is-visible');
+    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">ATC · orario programmato</div><div class="atc-transit-title">Cerco la prossima corsa…</div>';
+  }
+
+  function renderATCTransitDetails(trip, startIndex, options) {
+    var route = atcScheduleData.routes[trip[1]] || [];
+    var label = route[0] || route[1] || trip[1];
+    var stops = (trip[6] || []).slice(startIndex);
+    var title = options && options.departureDelta !== undefined ? ('Prossimo bus alle ' + formatATCTime(trip[6][startIndex][2]) + ' · ' + formatATCWait(options.departureDelta)) : (options && options.context || 'Bus programmato');
+    if (!atcTransitPanel) return;
+    atcTransitPanel.classList.add('is-visible');
+    atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">ATC · stima da orario</div><div class="atc-transit-title">' + escapeHTML(title) + '</div><div class="atc-transit-meta">Linea ' + escapeHTML(label) + ' → ' + escapeHTML(trip[4] || route[1] || 'capolinea') + '</div><div class="atc-transit-note">Posizioni e avanzamento sono approssimati usando stop_times.txt e shapes.txt; non sono dati GPS.</div><div class="atc-transit-stops">' + stops.map(function(stopTime, index) { var stop = atcScheduleData.stops[stopTime[0]] || [stopTime[0]]; return '<div class="atc-transit-stop"><span class="atc-transit-stop-number">' + (index + 1) + '</span><span>' + escapeHTML(stop[0]) + '</span><span class="atc-transit-stop-time">' + formatATCTime(stopTime[1]) + '</span></div>'; }).join('') + '</div>';
+  }
+
+  function showATCTripSelection(trip, startIndex, options) {
+    var stops;
+    var startDistance;
+    var endDistance;
+    var routePoints;
+    var source;
+    var route;
+    var color;
+    var bounds;
+    options = options || {};
+    if (!atcScheduleData || !turnNavigationMap || !turnNavigationMapLoaded || !trip || !(trip[6] || []).length) return;
+    clearATCScheduledSelection(false);
+    startIndex = Math.max(0, Math.min(trip[6].length - 1, Number(startIndex || 0)));
+    stops = trip[6].slice(startIndex);
+    startDistance = options.startDistance !== undefined ? Number(options.startDistance) : Number(stops[0][3]);
+    endDistance = Number(stops[stops.length - 1][3]);
+    routePoints = sliceATCShape(trip[3], startDistance, endDistance);
+    route = atcScheduleData.routes[trip[1]] || [];
+    color = /^[0-9a-f]{6}$/i.test(route[2] || '') ? '#' + route[2] : '#075ea8';
+    source = ensureATCScheduledRouteLayer();
+    if (source) source.setData({ type:'FeatureCollection', features:[{ type:'Feature', properties:{ color:color }, geometry:{ type:'LineString', coordinates:routePoints.map(function(point) { return [point[1], point[0]]; }) } }] });
+    stops.forEach(function(stopTime, index) {
+      var stop = atcScheduleData.stops[stopTime[0]];
+      var element;
+      var marker;
+      if (!stop) return;
+      element = document.createElement('div');
+      element.className = 'atc-scheduled-stop-marker';
+      element.textContent = String(index + 1);
+      element.setAttribute('aria-label', (index + 1) + '. ' + stop[0]);
+      marker = new window.maplibregl.Marker({ element:element, anchor:'center' }).setLngLat([stop[2], stop[1]]).addTo(turnNavigationMap);
+      glScheduledStopMarkers.push(marker);
+    });
+    selectedATCScheduledTrip = trip;
+    renderATCTransitDetails(trip, startIndex, options);
+    if (routePoints.length) {
+      bounds = routePoints.reduce(function(result, point) { return result.extend([point[1], point[0]]); }, new window.maplibregl.LngLatBounds([routePoints[0][1], routePoints[0][0]], [routePoints[0][1], routePoints[0][0]]));
+      turnNavigationMap.fitBounds(bounds, { padding:{ top:90, right:42, bottom:Math.min(390, Math.round(window.innerHeight * .48)), left:42 }, maxZoom:15.8, pitch:20, bearing:0, duration:800 });
+    }
+  }
+
+  function findNextATCTripAtStop(stopId) {
+    var clock = getATCItalyClock(new Date());
+    var best = null;
+    (atcTripsByStop.get(stopId) || []).forEach(function(reference) {
+      var trip = reference[0];
+      var stopIndex = reference[1];
+      var departure = Number(trip[6][stopIndex][2]);
+      var dates = atcScheduleData.services[trip[2]] || [];
+      dates.forEach(function(dateKey) {
+        var offset = getATCDayOffset(dateKey, clock.key);
+        var delta;
+        if (offset < -1 || offset > 2) return;
+        delta = offset * 86400 + departure - clock.seconds;
+        if (delta < -30 || delta > 172800) return;
+        if (!best || delta < best.delta) best = { trip:trip, stopIndex:stopIndex, delta:delta };
+      });
+    });
+    return best;
+  }
+
+  async function showNextATCBusFromStop(poi) {
+    var stopId = String(poi && poi.id || '').replace(/^atc-stop:/, '');
+    var next;
+    if (!stopId) return;
+    clearATCScheduledSelection(false);
+    renderATCTransitLoading();
+    try {
+      await loadATCTransitSchedule();
+      if (!currentPOI || String(currentPOI.id || '') !== String(poi.id || '')) return;
+      next = findNextATCTripAtStop(stopId);
+      if (!next) {
+        atcTransitPanel.classList.add('is-visible');
+        atcTransitPanel.innerHTML = '<div class="atc-transit-kicker">ATC · orario programmato</div><div class="atc-transit-title">Nessuna corsa successiva trovata</div><div class="atc-transit-note">Controlla eventuali variazioni sul sito ufficiale ATC.</div>';
+        return;
+      }
+      showATCTripSelection(next.trip, next.stopIndex, { departureDelta:next.delta });
+    } catch (error) {
+      if (atcTransitPanel) atcTransitPanel.innerHTML = '<div class="atc-transit-title">Orari temporaneamente non disponibili</div>';
+      console.warn('ATC next bus load failed:', error.message);
+    }
+  }
   function shouldReverseFerryIcon(fromPort, toPort) { if (!fromPort || !toPort || !isValidCoords(fromPort.coords) || !isValidCoords(toPort.coords)) return false; return Number(toPort.coords[1]) > Number(fromPort.coords[1]); }
   function getMovingFerryIconSize() { var zoom = map ? map.getZoom() : 12; var width; if (zoom >= 18) width = 82; else if (zoom >= 17) width = 76; else if (zoom >= 16) width = 68; else if (zoom >= 15) width = 58; else if (zoom >= 14) width = 48; else if (zoom >= 13) width = 42; else width = 36; return { width: width, height: Math.round(width * 0.56) }; }
   function createMovingFerryIcon(reverse, size) { size = size || getMovingFerryIconSize(); return L.divIcon({ className: 'moving-ferry-icon', html: '<div class="moving-ferry-label' + (reverse ? ' is-reversed' : '') + '" style="width:' + size.width + 'px;height:' + size.height + 'px;"><img src="' + getGithubAssetUrl('ferry.png') + '" alt="Ferry" style="width:' + size.width + 'px!important;max-width:' + size.width + 'px!important;min-width:' + size.width + 'px!important;max-height:' + size.height + 'px!important;"></div>', iconSize: [size.width, size.height], iconAnchor: [Math.round(size.width / 2), Math.round(size.height / 2)] }); }
@@ -5469,6 +5901,7 @@
     glFerryVehicleMarkers.forEach(function(marker) {
       marker.getElement().style.display = !navigationModeActive && (currentMapFilter === 'all' || currentMapFilter === 'ferry') ? '' : 'none';
     });
+    syncATCScheduledBuses();
     syncMapLibreUserMarker();
   }
   function updateTurnNavigationCamera(immediate) {

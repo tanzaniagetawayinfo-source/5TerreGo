@@ -7,6 +7,7 @@ import process from 'node:process';
 
 const CKAN_API = 'https://dati.regione.liguria.it/api/3/action/package_show?id=ds-640';
 const OUTPUT_PATH = path.resolve('data/atc-bus-stops.json');
+const SCHEDULE_OUTPUT_PATH = path.resolve('data/atc-transit-schedule.json');
 const args = new Set(process.argv.slice(2));
 
 function parseDate(value) {
@@ -21,6 +22,35 @@ function formatDate(date) {
 
 function addDays(date, days) {
   return new Date(date.getTime() + days * 86400000);
+}
+
+function parseGtfsTime(value) {
+  const match = String(value || '').match(/^(\d+):(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
+}
+
+function encodePolyline(points) {
+  let previousLat = 0;
+  let previousLon = 0;
+  let output = '';
+  function encodeNumber(number) {
+    let value = number < 0 ? ~(number << 1) : number << 1;
+    while (value >= 0x20) {
+      output += String.fromCharCode((0x20 | (value & 0x1f)) + 63);
+      value >>= 5;
+    }
+    output += String.fromCharCode(value + 63);
+  }
+  for (const point of points) {
+    const lat = Math.round(Number(point.shape_pt_lat) * 1e5);
+    const lon = Math.round(Number(point.shape_pt_lon) * 1e5);
+    encodeNumber(lat - previousLat);
+    encodeNumber(lon - previousLon);
+    previousLat = lat;
+    previousLon = lon;
+  }
+  return output;
 }
 
 function parseCsv(text) {
@@ -147,6 +177,7 @@ async function buildDataset() {
   const stopTimes = requireRows(entries, 'stop_times.txt');
   const trips = requireRows(entries, 'trips.txt');
   const routes = requireRows(entries, 'routes.txt');
+  const shapes = requireRows(entries, 'shapes.txt');
   const calendar = entries.has('calendar.txt') ? requireRows(entries, 'calendar.txt') : [];
   const calendarDates = entries.has('calendar_dates.txt') ? requireRows(entries, 'calendar_dates.txt') : [];
   const feedStart = parseDate(feedInfo.feed_start_date);
@@ -162,6 +193,7 @@ async function buildDataset() {
   const tripById = new Map(activeTrips.map((trip) => [trip.trip_id, trip]));
   const routeById = new Map(routes.map((route) => [route.route_id, route]));
   const stopUsage = new Map();
+  const stopTimesByTrip = new Map();
 
   for (const stopTime of stopTimes) {
     if (!activeTripIds.has(stopTime.trip_id)) continue;
@@ -169,6 +201,8 @@ async function buildDataset() {
     if (!stopUsage.has(stopTime.stop_id)) stopUsage.set(stopTime.stop_id, { routes: new Set(), services: new Set() });
     stopUsage.get(stopTime.stop_id).routes.add(trip.route_id);
     stopUsage.get(stopTime.stop_id).services.add(trip.service_id);
+    if (!stopTimesByTrip.has(stopTime.trip_id)) stopTimesByTrip.set(stopTime.trip_id, []);
+    stopTimesByTrip.get(stopTime.trip_id).push(stopTime);
   }
 
   const filteredStops = stops.filter((stop) => stopUsage.has(stop.stop_id)).map((stop) => {
@@ -191,7 +225,7 @@ async function buildDataset() {
     };
   });
 
-  return {
+  const stopsDataset = {
     source: 'Regione Liguria / ATC Esercizio',
     source_url: sourceUrl,
     generated_at: new Date().toISOString(),
@@ -207,6 +241,46 @@ async function buildDataset() {
     },
     stops: filteredStops
   };
+
+  const activeShapeIds = new Set(activeTrips.map((trip) => trip.shape_id).filter(Boolean));
+  const shapePoints = new Map();
+  for (const point of shapes) {
+    if (!activeShapeIds.has(point.shape_id)) continue;
+    if (!shapePoints.has(point.shape_id)) shapePoints.set(point.shape_id, []);
+    shapePoints.get(point.shape_id).push(point);
+  }
+  const compactShapes = {};
+  for (const [shapeId, points] of shapePoints) {
+    points.sort((a, b) => Number(a.shape_pt_sequence) - Number(b.shape_pt_sequence));
+    const last = points[points.length - 1] || {};
+    compactShapes[shapeId] = [encodePolyline(points), Number(last.shape_dist_traveled || 0)];
+  }
+  const compactTrips = activeTrips.map((trip) => {
+    const times = (stopTimesByTrip.get(trip.trip_id) || []).sort((a, b) => Number(a.stop_sequence) - Number(b.stop_sequence)).map((stopTime) => [
+      stopTime.stop_id,
+      parseGtfsTime(stopTime.arrival_time),
+      parseGtfsTime(stopTime.departure_time),
+      Number(stopTime.shape_dist_traveled || 0)
+    ]).filter((stopTime) => stopTime[1] !== null && stopTime[2] !== null);
+    return [trip.trip_id, trip.route_id, trip.service_id, trip.shape_id, trip.trip_headsign || '', Number(trip.direction_id || 0), times];
+  }).filter((trip) => trip[6].length >= 2 && compactShapes[trip[3]]);
+  const compactStops = Object.fromEntries(filteredStops.map((stop) => [stop.stop_id, [stop.stop_name, stop.stop_lat, stop.stop_lon]]));
+  const compactRoutes = Object.fromEntries(routes.filter((route) => compactTrips.some((trip) => trip[1] === route.route_id)).map((route) => [route.route_id, [route.route_short_name || '', route.route_long_name || '', route.route_color || '003366']]));
+  const compactServices = Object.fromEntries([...activeServices].map(([serviceId, dates]) => [serviceId, [...dates].sort().map((date) => date.replaceAll('-', ''))]));
+  const scheduleDataset = {
+    version: 1,
+    source: stopsDataset.source,
+    source_url: sourceUrl,
+    generated_at: stopsDataset.generated_at,
+    feed_end_date: stopsDataset.period_end,
+    stops: compactStops,
+    routes: compactRoutes,
+    services: compactServices,
+    trips: compactTrips,
+    shapes: compactShapes
+  };
+
+  return { stopsDataset, scheduleDataset };
 }
 
 async function upsertDataset(dataset) {
@@ -229,8 +303,9 @@ async function upsertDataset(dataset) {
   }
 }
 
-const dataset = await buildDataset();
+const { stopsDataset: dataset, scheduleDataset } = await buildDataset();
 await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
 await writeFile(OUTPUT_PATH, `${JSON.stringify(dataset)}\n`, 'utf8');
+await writeFile(SCHEDULE_OUTPUT_PATH, `${JSON.stringify(scheduleDataset)}\n`, 'utf8');
 if (args.has('--upsert')) await upsertDataset(dataset);
-console.log(JSON.stringify({ output: OUTPUT_PATH, upserted: args.has('--upsert'), ...dataset.counts, period_start: dataset.period_start, period_end: dataset.period_end }, null, 2));
+console.log(JSON.stringify({ output: OUTPUT_PATH, schedule_output: SCHEDULE_OUTPUT_PATH, schedule_trips: scheduleDataset.trips.length, schedule_shapes: Object.keys(scheduleDataset.shapes).length, upserted: args.has('--upsert'), ...dataset.counts, period_start: dataset.period_start, period_end: dataset.period_end }, null, 2));
