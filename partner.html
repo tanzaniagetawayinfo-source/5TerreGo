@@ -1073,12 +1073,6 @@
 
       async function callBackend(body) {
         var token = await getFreshAccessToken();
-
-        try {
-          var invokeResult = await partnerClient.functions.invoke(FUNCTION_NAME, { body: body });
-          if (!invokeResult.error && invokeResult.data && invokeResult.data.ok !== false) return invokeResult.data;
-        } catch (err) {}
-
         if (!token) throw new Error("You are not logged in. Please login again with the authorized email.");
 
         var res = await fetch(SUPABASE_URL + "/functions/v1/" + FUNCTION_NAME, {
