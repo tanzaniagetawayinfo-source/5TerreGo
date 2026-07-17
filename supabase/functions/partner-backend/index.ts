@@ -461,7 +461,9 @@ serve(async (req) => {
       const description = String(body.description || "").trim().slice(0, 5000);
       const phone = String(body.phone || "").trim().slice(0, 80);
       const images = Array.isArray(body.images)
-        ? body.images.map((value) => String(value || "").trim()).filter((value) => /^https:\/\//i.test(value)).slice(0, 10)
+        ? body.images.map((value) => String(value || "").trim()).filter((value) => {
+          return /^https:\/\//i.test(value) || (/^data:image\/(jpeg|png|webp);base64,/i.test(value) && value.length <= 2500000);
+        }).slice(0, 10)
         : [];
       const profile = body.partner_profile && typeof body.partner_profile === "object"
         ? body.partner_profile as JsonRecord
