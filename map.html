@@ -640,6 +640,7 @@
       justify-content: center;
       cursor: pointer;
       overflow: hidden;
+      display: none !important;
     }
     .map-style-btn-preview {
       position: relative;
@@ -1346,6 +1347,9 @@
     .god-mode-field select option { color:#111827; }
     .god-mode-field textarea { min-height:92px; resize:vertical; }
     .god-mode-field input:focus,.god-mode-field select:focus,.god-mode-field textarea:focus { border-color:#ff7200; box-shadow:0 0 0 3px rgba(255,114,0,.16); }
+    .god-mode-importance-row { display:flex; align-items:center; gap:10px; }
+    #god-mode-add-importance { flex:1; padding:0; accent-color:#ff7200; }
+    #god-mode-add-importance-value { min-width:42px; padding:7px 8px; border-radius:10px; background:rgba(255,255,255,.12); color:#fff; text-align:center; font-size:13px; font-weight:950; }
     .god-mode-photo-row { display:grid; grid-template-columns:minmax(0,1fr) 62px; gap:10px; align-items:center; }
     .god-mode-photo-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .god-mode-photo-actions button { min-height:42px; border:1px solid rgba(255,255,255,.16); border-radius:13px; background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:13px; font-weight:850; cursor:pointer; }
@@ -1700,6 +1704,9 @@
     </label>
     <label class="god-mode-field">Titolo<input id="god-mode-add-name" type="text" maxlength="140" placeholder="Inserisci titolo" required></label>
     <label class="god-mode-field">Testo<textarea id="god-mode-add-description" maxlength="3000" placeholder="Inserisci testo"></textarea></label>
+    <label class="god-mode-field">Importanza
+      <span class="god-mode-importance-row"><input id="god-mode-add-importance" type="range" min="0" max="100" step="1" value="50" aria-label="Importanza POI"><output id="god-mode-add-importance-value" for="god-mode-add-importance">50</output></span>
+    </label>
     <label class="god-mode-field">Foto
       <span class="god-mode-photo-row"><span class="god-mode-photo-actions"><button id="god-mode-camera-button" type="button">📷 Scatta foto</button><button id="god-mode-gallery-button" type="button">Scegli foto</button></span><img id="god-mode-photo-preview" alt="Anteprima foto"></span>
       <input id="god-mode-add-photo-camera" type="file" accept="image/*" capture="environment"><input id="god-mode-add-photo" type="file" accept="image/*">
@@ -2564,6 +2571,8 @@
   var godModeAddType = document.getElementById('god-mode-add-type');
   var godModeAddName = document.getElementById('god-mode-add-name');
   var godModeAddDescription = document.getElementById('god-mode-add-description');
+  var godModeAddImportance = document.getElementById('god-mode-add-importance');
+  var godModeAddImportanceValue = document.getElementById('god-mode-add-importance-value');
   var godModeAddPhoto = document.getElementById('god-mode-add-photo');
   var godModeAddPhotoCamera = document.getElementById('god-mode-add-photo-camera');
   var godModeCameraButton = document.getElementById('god-mode-camera-button');
@@ -3794,11 +3803,13 @@
   async function readCurrentUser() { var session, userResponse; if (!supabaseClient) return null; session = await readCurrentSession(); if (session && session.user) return session.user; userResponse = await supabaseClient.auth.getUser(); return userResponse && userResponse.data ? userResponse.data.user : null; }
   function clearGodModeLongPress() { if (godModeLongPressTimer) window.clearTimeout(godModeLongPressTimer); godModeLongPressTimer = 0; godModeLongPressStart = null; }
   function setGodModeAddStatus(message, isError) { if (!godModeAddStatus) return; godModeAddStatus.textContent = String(message || ''); godModeAddStatus.classList.toggle('is-error', Boolean(isError)); }
+  function setGodModeImportance(value) { var importance = Math.max(0, Math.min(100, Math.round(Number(value)))); if (!Number.isFinite(importance)) importance = 50; if (godModeAddImportance) godModeAddImportance.value = String(importance); if (godModeAddImportanceValue) godModeAddImportanceValue.textContent = String(importance); }
   function resetGodModeAddForm() {
     godModePhotoReadToken += 1;
     godModePhotoPending = false;
     if (godModeAddForm) godModeAddForm.reset();
     if (godModeAddType) godModeAddType.value = 'unknown spot';
+    setGodModeImportance(50);
     godModePendingImageData = '';
     if (godModePhotoPreview) { godModePhotoPreview.removeAttribute('src'); godModePhotoPreview.style.display = 'none'; }
     setGodModeAddStatus('', false);
@@ -3882,7 +3893,7 @@
         name: godModeAddName.value.trim(),
         coords: point.lat.toFixed(6) + ', ' + point.lng.toFixed(6),
         description: godModeAddDescription ? godModeAddDescription.value.trim() : '',
-        importance: 50,
+        importance: Number(godModeAddImportance && godModeAddImportance.value || 50),
         type: godModeAddType ? godModeAddType.value : 'unknown spot',
         phone: godModeAddPhone ? godModeAddPhone.value.trim() : '',
         emails: email,
@@ -3988,6 +3999,7 @@
     if (godModeAddType) godModeAddType.value = normalizePOIType(fullPoi.type || 'unknown spot');
     if (godModeAddName) godModeAddName.value = fullPoi.name || '';
     if (godModeAddDescription) godModeAddDescription.value = fullPoi.description || '';
+    setGodModeImportance(fullPoi.relevance);
     if (godModeAddPhone) godModeAddPhone.value = fullPoi.phone || '';
     if (godModeAddEmail) godModeAddEmail.value = String(fullPoi.emails || fullPoi.owner_email || '').split(',')[0].trim();
     image = getAllImageFields(fullPoi)[0] || '';
@@ -5616,7 +5628,8 @@
         version: 8,
         sources: {
           esri: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, attribution: 'Tiles © Esri' },
-          streets: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO' }
+          streets: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO' },
+          terrainDem: { type:'raster-dem', tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], tileSize:256, maxzoom:15, encoding:'terrarium', attribution:'Elevation © AWS Terrain Tiles' }
         },
         layers: [
           { id:'street-map',type:'raster',source:'streets',layout:{visibility:currentBaseMapMode === 'map' ? 'visible' : 'none'} },
@@ -5636,6 +5649,7 @@
     setupGodModeLongPress();
     turnNavigationMap.on('load', function() {
       turnNavigationMapLoaded = true;
+      turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.25 });
       turnNavigationMap.addSource('navigation-route', { type: 'geojson', data: getTurnNavigationGeoJSON() });
       turnNavigationMap.addSource('normal-trails', { type: 'geojson', data: getNormalTrailsGeoJSON() });
       turnNavigationMap.addSource('normal-ferries', { type: 'geojson', data: getNormalFerriesGeoJSON() });
@@ -6688,11 +6702,7 @@
   function isCardInteractiveTarget(target) { return Boolean(target && target.closest && target.closest('button, a, input, textarea, select, iframe, [data-start], #card-tour-play, #card-tour-panel, .card-action-btn')); }
   function setupCardSwipe(target) { if (!target) return; target.addEventListener('touchstart', function (event) { if (isCardInteractiveTarget(event.target)) return; if (event.touches.length !== 1) return; event.preventDefault(); startX = event.touches[0].clientX; startY = event.touches[0].clientY; currentX = startX; currentY = startY; isDragging = true; hasMoved = false; dragAxis = null; card.style.transition = 'none'; }, { passive: false }); target.addEventListener('touchmove', function (event) { var deltaX, deltaY, pullDown, blockedRight, blockedLeft; if (!isDragging || event.touches.length !== 1) return; event.preventDefault(); currentX = event.touches[0].clientX; currentY = event.touches[0].clientY; deltaX = currentX - startX; deltaY = currentY - startY; if (!dragAxis && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) dragAxis = Math.abs(deltaY) > Math.abs(deltaX) ? 'y' : 'x'; if (!dragAxis) return; hasMoved = true; if (dragAxis === 'y') { pullDown = Math.max(0, deltaY); card.style.transform = 'translateY(' + pullDown + 'px)'; card.style.opacity = String(Math.max(0.35, 1 - pullDown / 260)); return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (blockedRight || blockedLeft) deltaX = 0; card.style.transform = 'translateX(' + deltaX + 'px)'; }, { passive: false }); target.addEventListener('touchend', function (event) { var deltaX, deltaY, blockedRight, blockedLeft; if (!isDragging) return; if (event && event.changedTouches && event.changedTouches.length) { currentX = event.changedTouches[0].clientX; currentY = event.changedTouches[0].clientY; } deltaX = currentX - startX; deltaY = currentY - startY; isDragging = false; card.style.opacity = ''; if (dragAxis === 'y') { if (deltaY > 55) { hideCard(true); dragAxis = null; return; } card.style.transition = 'transform 0.22s ease, opacity 0.22s ease'; card.style.transform = 'translateY(0)'; dragAxis = null; return; } blockedRight = currentIndex === 0 && deltaX > 0; blockedLeft = currentIndex === places.length - 1 && deltaX < 0; if (!hasMoved || blockedRight || blockedLeft || Math.abs(deltaX) < 80) { card.style.transition = 'transform 0.2s ease'; card.style.transform = 'translateX(0)'; dragAxis = null; return; } if (deltaX < -80) { showCityByIndex(currentIndex + 1, true); dragAxis = null; return; } if (deltaX > 80) showCityByIndex(currentIndex - 1, true); dragAxis = null; }, { passive: false }); target.addEventListener('touchcancel', function (event) { if (event) event.preventDefault(); isDragging = false; dragAxis = null; card.style.opacity = ''; card.style.transition = 'transform 0.2s ease, opacity 0.2s ease'; card.style.transform = 'translateX(0) translateY(0)'; }, { passive: false }); }
   function getStoredMapMode() {
-    try {
-      return String(localStorage.getItem('ftg-map-style-mode') || '').trim().toLowerCase() === 'map' ? 'map' : 'satellite';
-    } catch (error) {
-      return 'satellite';
-    }
+    return 'satellite';
   }
   function setStoredMapMode(mode) {
     try {
@@ -6706,19 +6716,18 @@
     mapStyleBtn.title = currentBaseMapMode === 'satellite' ? 'Switch to map view' : 'Switch to satellite view';
   }
   function applyBaseMapMode(mode, skipPersist) {
-    currentBaseMapMode = mode === 'map' ? 'map' : 'satellite';
+    currentBaseMapMode = 'satellite';
     syncMapStyleButton();
     if (!skipPersist) setStoredMapMode(currentBaseMapMode);
     updateMapVisualByZoom();
     if (turnNavigationMap && turnNavigationMapLoaded) {
       turnNavigationMap.setLayoutProperty('satellite', 'visibility', currentBaseMapMode === 'satellite' ? 'visible' : 'none');
       turnNavigationMap.setLayoutProperty('street-map', 'visibility', currentBaseMapMode === 'map' ? 'visible' : 'none');
+      turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.25 });
     }
     scheduleSessionMapStateSave();
   }
-  function toggleBaseMapMode() {
-    applyBaseMapMode(currentBaseMapMode === 'satellite' ? 'map' : 'satellite');
-  }
+  function toggleBaseMapMode() { applyBaseMapMode('satellite'); }
   function getPlacesOverviewPadding() {
     var mobile = window.innerWidth <= 700;
     return mobile ? L.point(120, 250) : L.point(210, 150);
@@ -6992,6 +7001,7 @@
     if (poiEdit) poiEdit.addEventListener('click', function() { openPOIEditor(currentPOI); });
     if (godModeAddCancel) godModeAddCancel.addEventListener('click', clearGodModePendingPoint);
     if (godModeAddType) godModeAddType.addEventListener('change', syncGodModePendingMarkerType);
+    if (godModeAddImportance) godModeAddImportance.addEventListener('input', function() { setGodModeImportance(godModeAddImportance.value); });
     if (godModeCameraButton && godModeAddPhotoCamera) godModeCameraButton.addEventListener('click', function() { godModeAddPhotoCamera.click(); });
     if (godModeGalleryButton && godModeAddPhoto) godModeGalleryButton.addEventListener('click', function() { godModeAddPhoto.click(); });
     async function handleGodModePhotoChange(input) {
