@@ -1333,9 +1333,11 @@
     #god-mode-badge { display:none; position:fixed; z-index:2210; right:14px; top:calc(var(--ftg-header-height, 98px) + 14px); border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:9px 13px; background:rgba(17,24,39,.92); color:#fff; box-shadow:0 12px 34px rgba(0,0,0,.24); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font:inherit; font-size:11px; font-weight:950; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; }
     body.god-mode-active #god-mode-badge { display:block; }
     body.god-mode-active #map { -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
-    #god-mode-add-prompt { display:none; position:fixed; z-index:4300; left:50%; bottom:calc(12px + env(safe-area-inset-bottom)); width:min(430px,calc(100vw - 20px)); max-height:min(78vh,720px); transform:translateX(-50%); padding:17px; border-radius:26px; background:rgba(17,24,39,.98); color:#fff; box-shadow:0 24px 70px rgba(0,0,0,.38); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); overflow:auto; overscroll-behavior:contain; }
-    #god-mode-add-prompt.is-visible { display:block; animation:god-mode-sheet-in .2s ease-out; }
-    @keyframes god-mode-sheet-in { from { opacity:0; transform:translate(-50%,18px); } to { opacity:1; transform:translate(-50%,0); } }
+    #god-mode-add-prompt { display:none; position:fixed; z-index:4300; left:0; right:0; bottom:0; width:min(620px,100%); height:54dvh; max-height:95dvh; margin:0 auto; padding:0; border-radius:30px 30px 0 0; background:rgba(17,24,39,.98); color:#fff; box-shadow:0 -10px 44px rgba(0,0,0,.3); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); overflow:hidden; overscroll-behavior:contain; opacity:0; transform:translateY(24px); transition:opacity .22s ease,transform .28s cubic-bezier(.2,.9,.2,1),height .28s cubic-bezier(.2,.9,.2,1); }
+    #god-mode-add-prompt.is-visible { display:block; opacity:1; transform:translateY(0); }
+    #god-mode-sheet-handle { height:28px; display:flex; align-items:center; justify-content:center; touch-action:none; cursor:grab; background:rgba(255,255,255,.04); }
+    #god-mode-sheet-handle::before { content:''; width:42px; height:5px; border-radius:999px; background:rgba(255,255,255,.45); }
+    .god-mode-sheet-content { height:calc(100% - 28px); box-sizing:border-box; padding:0 17px calc(18px + env(safe-area-inset-bottom)); overflow-y:auto; touch-action:pan-y; overscroll-behavior:contain; }
     .god-mode-add-title { font-size:17px; font-weight:950; letter-spacing:-.025em; }
     .god-mode-add-meta { margin-top:4px; color:rgba(255,255,255,.62); font-size:12px; font-weight:750; }
     .god-mode-form { display:grid; gap:10px; margin-top:14px; }
@@ -1344,7 +1346,10 @@
     .god-mode-field select option { color:#111827; }
     .god-mode-field textarea { min-height:92px; resize:vertical; }
     .god-mode-field input:focus,.god-mode-field select:focus,.god-mode-field textarea:focus { border-color:#ff7200; box-shadow:0 0 0 3px rgba(255,114,0,.16); }
-    .god-mode-photo-row { display:grid; grid-template-columns:1fr 62px; gap:10px; align-items:center; }
+    .god-mode-photo-row { display:grid; grid-template-columns:minmax(0,1fr) 62px; gap:10px; align-items:center; }
+    .god-mode-photo-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .god-mode-photo-actions button { min-height:42px; border:1px solid rgba(255,255,255,.16); border-radius:13px; background:rgba(255,255,255,.09); color:#fff; font:inherit; font-size:13px; font-weight:850; cursor:pointer; }
+    #god-mode-add-photo,#god-mode-add-photo-camera { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
     #god-mode-photo-preview { width:62px; height:62px; border-radius:14px; object-fit:cover; background:rgba(255,255,255,.08); display:none; }
     #god-mode-add-status { min-height:16px; color:rgba(255,255,255,.68); font-size:12px; font-weight:750; }
     #god-mode-add-status.is-error { color:#ff9a92; }
@@ -1683,9 +1688,11 @@
 </div>
 <div id="god-mode-badge" aria-hidden="true">⚡ GOD MODE</div>
 <div id="god-mode-add-prompt" role="dialog" aria-modal="true" aria-labelledby="god-mode-add-title">
-  <div id="god-mode-add-title" class="god-mode-add-title">Nuovo punto sulla mappa</div>
-  <div id="god-mode-add-meta" class="god-mode-add-meta"></div>
-  <form id="god-mode-add-form" class="god-mode-form">
+  <div id="god-mode-sheet-handle" aria-label="Trascina per aprire o chiudere"></div>
+  <div class="god-mode-sheet-content">
+    <div id="god-mode-add-title" class="god-mode-add-title">Nuovo punto sulla mappa</div>
+    <div id="god-mode-add-meta" class="god-mode-add-meta"></div>
+    <form id="god-mode-add-form" class="god-mode-form">
     <label class="god-mode-field">Tipologia
       <select id="god-mode-add-type">
         <option value="unknown spot">POI classico</option><option value="chiesa">Chiesa</option><option value="monumento">Monumento</option><option value="sentiero">Sentiero</option><option value="spiaggia">Spiaggia</option><option value="stazione">Stazione</option><option value="ferry">Fermata traghetto</option><option value="ristorante">Ristorante</option><option value="bar">Bar</option><option value="punto panoramico">Punto panoramico</option><option value="curiosity">Curiosità</option><option value="castello">Castello</option><option value="fontana">Fontana</option><option value="bagno pubblico">Bagno pubblico</option><option value="parcheggio">Parcheggio</option><option value="farmacia">Farmacia</option><option value="ascensore pubblico">Ascensore pubblico</option><option value="fermata bus">Fermata bus</option><option value="atm">ATM</option><option value="piazza">Piazza</option>
@@ -1694,13 +1701,15 @@
     <label class="god-mode-field">Titolo<input id="god-mode-add-name" type="text" maxlength="140" placeholder="Inserisci titolo" required></label>
     <label class="god-mode-field">Testo<textarea id="god-mode-add-description" maxlength="3000" placeholder="Inserisci testo"></textarea></label>
     <label class="god-mode-field">Foto
-      <span class="god-mode-photo-row"><input id="god-mode-add-photo" type="file" accept="image/*"><img id="god-mode-photo-preview" alt="Anteprima foto"></span>
+      <span class="god-mode-photo-row"><span class="god-mode-photo-actions"><button id="god-mode-camera-button" type="button">📷 Scatta foto</button><button id="god-mode-gallery-button" type="button">Scegli foto</button></span><img id="god-mode-photo-preview" alt="Anteprima foto"></span>
+      <input id="god-mode-add-photo-camera" type="file" accept="image/*" capture="environment"><input id="god-mode-add-photo" type="file" accept="image/*">
     </label>
     <label class="god-mode-field">Numero di telefono<input id="god-mode-add-phone" type="tel" maxlength="80" placeholder="Inserisci numero di telefono" autocomplete="tel"></label>
     <label class="god-mode-field">Email<input id="god-mode-add-email" type="email" maxlength="180" placeholder="Inserisci email" autocomplete="email"></label>
     <div id="god-mode-add-status" role="status" aria-live="polite"></div>
     <div class="god-mode-add-actions"><button id="god-mode-add-cancel" type="button">Annulla</button><button id="god-mode-add-confirm" type="submit">Salva</button></div>
-  </form>
+    </form>
+  </div>
 </div>
 
 <section id="navigation-planner" aria-hidden="true" aria-label="Navigazione verso il POI">
@@ -2549,18 +2558,23 @@
   var poiDirections = document.getElementById('poi-directions');
   var poiEdit = document.getElementById('poi-edit');
   var godModeAddPrompt = document.getElementById('god-mode-add-prompt');
+  var godModeAddTitle = document.getElementById('god-mode-add-title');
   var godModeAddMeta = document.getElementById('god-mode-add-meta');
   var godModeAddForm = document.getElementById('god-mode-add-form');
   var godModeAddType = document.getElementById('god-mode-add-type');
   var godModeAddName = document.getElementById('god-mode-add-name');
   var godModeAddDescription = document.getElementById('god-mode-add-description');
   var godModeAddPhoto = document.getElementById('god-mode-add-photo');
+  var godModeAddPhotoCamera = document.getElementById('god-mode-add-photo-camera');
+  var godModeCameraButton = document.getElementById('god-mode-camera-button');
+  var godModeGalleryButton = document.getElementById('god-mode-gallery-button');
   var godModePhotoPreview = document.getElementById('god-mode-photo-preview');
   var godModeAddPhone = document.getElementById('god-mode-add-phone');
   var godModeAddEmail = document.getElementById('god-mode-add-email');
   var godModeAddStatus = document.getElementById('god-mode-add-status');
   var godModeAddConfirm = document.getElementById('god-mode-add-confirm');
   var godModeAddCancel = document.getElementById('god-mode-add-cancel');
+  var godModeSheetHandle = document.getElementById('god-mode-sheet-handle');
   var navigationPlanner = document.getElementById('navigation-planner');
   var navigationTitle = document.getElementById('navigation-title');
   var navigationClose = document.getElementById('navigation-close');
@@ -2653,11 +2667,15 @@
   var godModePendingMarker = null;
   var godModePendingGlMarker = null;
   var godModePendingImageData = '';
+  var godModeEditingPOI = null;
   var godModePhotoPending = false;
   var godModePhotoReadToken = 0;
   var godModeSavePending = false;
   var godModeLongPressTimer = 0;
   var godModeLongPressStart = null;
+  var godModeSheetDragging = false;
+  var godModeSheetStartY = 0;
+  var godModeSheetStartHeight = 0;
   var ferryTimetableRefreshTimer = null;
   var currentIndex = -1;
   var currentDataset = 'places';
@@ -3785,6 +3803,14 @@
     if (godModePhotoPreview) { godModePhotoPreview.removeAttribute('src'); godModePhotoPreview.style.display = 'none'; }
     setGodModeAddStatus('', false);
   }
+  function setGodModeSheetHeight(percent, animated) {
+    if (!godModeAddPrompt) return;
+    percent = Math.max(0, Math.min(95, Number(percent) || 54));
+    if (!animated) godModeAddPrompt.style.transition = 'none';
+    godModeAddPrompt.style.height = percent + 'dvh';
+    if (!animated) window.requestAnimationFrame(function() { if (godModeAddPrompt) godModeAddPrompt.style.transition = ''; });
+  }
+  function getGodModeSheetPercent(px) { return (Number(px) / Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1)) * 100; }
   function clearGodModePendingPoint() {
     godModePendingLatLng = null;
     if (godModeAddPrompt) godModeAddPrompt.classList.remove('is-visible');
@@ -3792,6 +3818,7 @@
     if (godModePendingGlMarker) godModePendingGlMarker.remove();
     godModePendingMarker = null;
     godModePendingGlMarker = null;
+    godModeEditingPOI = null;
     if (!godModeSavePending) resetGodModeAddForm();
   }
   function getGodModePendingMarkerIcon(type) {
@@ -3833,7 +3860,7 @@
     });
   }
   async function saveGodModePOI() {
-    var authorized, userResponse, verifiedUser, point, email, payload, response, savedPoi;
+    var authorized, userResponse, verifiedUser, point, email, payload, response, savedPoi, editingPoi, isEdit;
     if (godModeSavePending || !godModeAuthorized || !godModeEnabled || !godModePendingLatLng) return;
     if (godModePhotoPending) { setGodModeAddStatus('Attendi che la foto sia pronta.', true); return; }
     if (!godModeAddName || !godModeAddName.value.trim()) { setGodModeAddStatus('Inserisci il titolo.', true); godModeAddName.focus(); return; }
@@ -3848,6 +3875,8 @@
       verifiedUser = userResponse && userResponse.data ? userResponse.data.user : null;
       if (!verifiedUser) throw new Error('Sessione scaduta. Accedi di nuovo.');
       point = godModePendingLatLng;
+      editingPoi = godModeEditingPOI;
+      isEdit = Boolean(editingPoi && editingPoi.id && String(editingPoi.id).indexOf('local-') !== 0);
       email = godModeAddEmail ? godModeAddEmail.value.trim().toLowerCase() : '';
       payload = {
         name: godModeAddName.value.trim(),
@@ -3859,13 +3888,14 @@
         emails: email,
         images: godModePendingImageData ? [godModePendingImageData] : []
       };
-      response = await supabaseClient.from('pois').insert(payload).select();
+      response = isEdit ? await supabaseClient.from('pois').update(payload).eq('id', String(editingPoi.id)).select() : await supabaseClient.from('pois').insert(payload).select();
       if (response.error) throw response.error;
       savedPoi = Array.isArray(response.data) ? response.data[0] : null;
       if (!savedPoi) throw new Error('Il POI non è stato restituito dal server.');
       clearGodModePendingPoint();
       appendPOIRows([savedPoi], { replaceExisting:false, refresh:true, keepRichData:true });
-      showUserLocationToast('POI salvato sulla mappa.');
+      if (isEdit && currentPOI && String(currentPOI.id) === String(savedPoi.id)) showPOICard(normalizePOI(savedPoi));
+      showUserLocationToast(isEdit ? 'POI aggiornato.' : 'POI salvato sulla mappa.');
     } catch (error) {
       setGodModeAddStatus(error && error.message ? error.message : 'Errore durante il salvataggio.', true);
     } finally {
@@ -3942,14 +3972,39 @@
     params.set('source', 'map');
     return 'poieditor.html?' + params.toString();
   }
-  function openPOIEditor(poi) { if (!godModeAuthorized || !godModeEnabled) return; window.location.href = getPOIEditorURL(poi); }
+  async function openPOIEditor(poi) {
+    var response, fullPoi, image;
+    if (!godModeAuthorized || !godModeEnabled || !poi || !isValidCoords(poi.coords)) return;
+    fullPoi = poi;
+    if (supabaseClient && poi.id && String(poi.id).indexOf('local-') !== 0) {
+      try { response = await supabaseClient.from('pois').select('id,name,coords,description,importance,type,phone,emails,images').eq('id', String(poi.id)).maybeSingle(); if (!response.error && response.data) fullPoi = Object.assign({}, poi, response.data); } catch (_error) {}
+    }
+    fullPoi = normalizePOI(fullPoi);
+    clearGodModePendingPoint();
+    godModeEditingPOI = fullPoi;
+    godModePendingLatLng = L.latLng(fullPoi.coords[0], fullPoi.coords[1]);
+    if (godModeAddTitle) godModeAddTitle.textContent = 'Modifica POI';
+    if (godModeAddMeta) godModeAddMeta.textContent = godModePendingLatLng.lat.toFixed(6) + ', ' + godModePendingLatLng.lng.toFixed(6);
+    if (godModeAddType) godModeAddType.value = normalizePOIType(fullPoi.type || 'unknown spot');
+    if (godModeAddName) godModeAddName.value = fullPoi.name || '';
+    if (godModeAddDescription) godModeAddDescription.value = fullPoi.description || '';
+    if (godModeAddPhone) godModeAddPhone.value = fullPoi.phone || '';
+    if (godModeAddEmail) godModeAddEmail.value = String(fullPoi.emails || fullPoi.owner_email || '').split(',')[0].trim();
+    image = getAllImageFields(fullPoi)[0] || '';
+    godModePendingImageData = image;
+    if (godModePhotoPreview && image) { godModePhotoPreview.src = image; godModePhotoPreview.style.display = 'block'; }
+    if (godModeAddPrompt) godModeAddPrompt.classList.add('is-visible');
+    setGodModeSheetHeight(54, true);
+  }
   function showGodModeAddPrompt(latlng) {
     var markerElement;
     if (!godModeAuthorized || !godModeEnabled || !map || !latlng) return;
     clearGodModePendingPoint();
+    if (godModeAddTitle) godModeAddTitle.textContent = 'Nuovo punto sulla mappa';
     godModePendingLatLng = L.latLng(latlng.lat, latlng.lng);
     if (godModeAddMeta) godModeAddMeta.textContent = godModePendingLatLng.lat.toFixed(6) + ', ' + godModePendingLatLng.lng.toFixed(6);
     if (godModeAddPrompt) godModeAddPrompt.classList.add('is-visible');
+    setGodModeSheetHeight(54, true);
     if (turnNavigationMap && window.maplibregl) {
       markerElement = document.createElement('div');
       markerElement.innerHTML = getGodModePendingMarkerHTML('unknown spot');
@@ -3958,6 +4013,38 @@
     } else {
       godModePendingMarker = L.marker(godModePendingLatLng, { icon:getGodModePendingMarkerIcon('unknown spot'), interactive:false, pane:'poiGroupPane' }).addTo(map);
     }
+  }
+  function setupGodModeSheetDrag() {
+    if (!godModeSheetHandle || godModeSheetHandle.getAttribute('data-sheet-ready') === '1') return;
+    godModeSheetHandle.setAttribute('data-sheet-ready', '1');
+    function begin(event) {
+      var touch = event.touches && event.touches[0];
+      if (!touch || !godModeAddPrompt || !godModeAddPrompt.classList.contains('is-visible')) return;
+      godModeSheetDragging = true;
+      godModeSheetStartY = touch.clientY;
+      godModeSheetStartHeight = godModeAddPrompt.getBoundingClientRect().height;
+      godModeAddPrompt.style.transition = 'none';
+    }
+    function move(event) {
+      var touch = event.touches && event.touches[0], height;
+      if (!godModeSheetDragging || !touch) return;
+      event.preventDefault();
+      height = godModeSheetStartHeight + (godModeSheetStartY - touch.clientY);
+      setGodModeSheetHeight(getGodModeSheetPercent(height), false);
+    }
+    function finish() {
+      var percent;
+      if (!godModeSheetDragging || !godModeAddPrompt) return;
+      godModeSheetDragging = false;
+      godModeAddPrompt.style.transition = '';
+      percent = getGodModeSheetPercent(godModeAddPrompt.getBoundingClientRect().height);
+      if (percent <= 38) { clearGodModePendingPoint(); return; }
+      setGodModeSheetHeight(percent >= 72 ? 95 : 54, true);
+    }
+    godModeSheetHandle.addEventListener('touchstart', begin, { passive:true });
+    godModeSheetHandle.addEventListener('touchmove', move, { passive:false });
+    godModeSheetHandle.addEventListener('touchend', finish);
+    godModeSheetHandle.addEventListener('touchcancel', finish);
   }
   function setupGodModeLongPress() {
     function attachLongPress(container, toLatLng) {
@@ -5570,6 +5657,7 @@
       }
     });
     turnNavigationMap.on('dragstart', function() {
+      if (godModeAddPrompt && godModeAddPrompt.classList.contains('is-visible') && !godModeSavePending) clearGodModePendingPoint();
       turnNavigationFollowingUser = false;
       normalGyroPanActive = true;
       stopAmbientOrbit();
@@ -6904,10 +6992,12 @@
     if (poiEdit) poiEdit.addEventListener('click', function() { openPOIEditor(currentPOI); });
     if (godModeAddCancel) godModeAddCancel.addEventListener('click', clearGodModePendingPoint);
     if (godModeAddType) godModeAddType.addEventListener('change', syncGodModePendingMarkerType);
-    if (godModeAddPhoto) godModeAddPhoto.addEventListener('change', async function() {
-      var file = godModeAddPhoto.files && godModeAddPhoto.files[0];
+    if (godModeCameraButton && godModeAddPhotoCamera) godModeCameraButton.addEventListener('click', function() { godModeAddPhotoCamera.click(); });
+    if (godModeGalleryButton && godModeAddPhoto) godModeGalleryButton.addEventListener('click', function() { godModeAddPhoto.click(); });
+    async function handleGodModePhotoChange(input) {
+      var file = input && input.files && input.files[0];
       var readToken;
-      if (!file) { godModePendingImageData = ''; if (godModePhotoPreview) godModePhotoPreview.style.display = 'none'; return; }
+      if (!file) return;
       readToken = ++godModePhotoReadToken;
       godModePhotoPending = true;
       if (godModeAddConfirm) godModeAddConfirm.disabled = true;
@@ -6921,7 +7011,7 @@
       } catch (error) {
         if (readToken !== godModePhotoReadToken) return;
         godModePendingImageData = '';
-        godModeAddPhoto.value = '';
+        if (input) input.value = '';
         if (godModePhotoPreview) godModePhotoPreview.style.display = 'none';
         setGodModeAddStatus(error && error.message ? error.message : 'Impossibile preparare la foto.', true);
       } finally {
@@ -6930,7 +7020,9 @@
           if (godModeAddConfirm && !godModeSavePending) godModeAddConfirm.disabled = false;
         }
       }
-    });
+    }
+    if (godModeAddPhoto) godModeAddPhoto.addEventListener('change', function() { handleGodModePhotoChange(godModeAddPhoto); });
+    if (godModeAddPhotoCamera) godModeAddPhotoCamera.addEventListener('change', function() { handleGodModePhotoChange(godModeAddPhotoCamera); });
     if (godModeAddForm) godModeAddForm.addEventListener('submit', function(event) { event.preventDefault(); saveGodModePOI(); });
 
     if (navigationOriginSelect) {
@@ -7130,6 +7222,7 @@
 
         
     setupPOISheetDrag();
+    setupGodModeSheetDrag();
     setupTrailSheetDrag();
     setupBottomRailSheet();
   }
