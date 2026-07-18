@@ -4874,6 +4874,7 @@
   function flyToWithTopOffset(coords, zoom, duration) { var targetZoom; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); isProgrammaticMove = true; syncingMapCameras = true; map.setView(coords, targetZoom, { animate:false }); syncingMapCameras = false; flyMapLibre3D(coords, targetZoom, duration); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
   var requestedPOIFocused = false;
+  var requestedNavigationHydrated = false;
   function focusRequestedPOIFromURL() {
     var requestedId, requestedName, requestedCoords, item, synthetic, shouldNavigate;
     if (requestedPOIFocused) return false;
@@ -6966,6 +6967,10 @@
       if (renderRail) renderBottomRailCards();
       refreshMapLoadingState();
       focusRequestedPOIFromURL();
+      if (!requestedNavigationHydrated && urlParams.get('navigate') === '1' && navigationModeActive && navigationDestinationPOI && poiMarkers.length >= 90) {
+        requestedNavigationHydrated = true;
+        renderNavigationChoices();
+      }
     }
 
     function mergeCachedRows(list) {
@@ -7981,6 +7986,7 @@
       applyMapFilterUI(currentMapFilter);
       renderBottomRailCards();
       focusRequestedVillageFromURL(false);
+      focusRequestedPOIFromURL();
       scheduleSessionMapStateSave();
     }
     loadPOIs().then(async function() {
