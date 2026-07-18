@@ -381,8 +381,10 @@
 
     .custom-label { z-index: 1 !important; overflow: visible !important; }
     .custom-label .label { display: inline-block; transform: translateX(-50%); color: white; font-weight: 900; font-size: 14px; line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 6px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.9); white-space: nowrap; cursor: pointer; user-select: none; }
-    .poi-label { position: relative; min-width: 34px; min-height: 34px; display: grid; place-items: center; background: transparent; color: white; font-size: 26px; border: 0; box-shadow: none; overflow: visible; }
-    .poi-label img { width: 32px; height: 32px; display: block; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
+    .poi-label { position: relative; width: 30px; height: 30px; display: grid; place-items: center; background: var(--poi-color, #176b7a); border: 2px solid rgba(255,255,255,.96); border-radius: 50% 50% 50% 4px; box-shadow: 0 6px 14px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.22); overflow: visible; transform: rotate(-45deg); }
+    .poi-label::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.96); box-shadow: inset 0 1px 2px rgba(0,0,0,.16); transform: rotate(45deg); }
+    .poi-map-pin { width: 28px; height: 28px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.96); border-radius: 50% 50% 50% 4px; background: var(--poi-color, #176b7a); box-shadow: 0 5px 12px rgba(0,0,0,.34); transform: rotate(-45deg); }
+    .poi-map-pin::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.96); transform: rotate(45deg); }
     .custom-poi {
       transition: opacity .22s ease, transform .22s ease, filter .22s ease, margin-left .18s ease, margin-top .18s ease;
       will-change: margin-left, margin-top, transform, opacity;
@@ -407,12 +409,10 @@
       z-index: 12;
     }
     .custom-poi.custom-poi-dot.is-selected .poi-dot-label,
-    .custom-poi.is-selected .poi-label img,
     .custom-poi.is-selected .poi-label {
       transform: scale(1.12);
     }
     .custom-poi.custom-poi-dot.is-dimmed .poi-dot-label,
-    .custom-poi.is-dimmed .poi-label img,
     .custom-poi.is-dimmed .poi-label {
       opacity: .72;
     }
@@ -533,7 +533,7 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.16);
       pointer-events: none;
     }
-    .poi-dot-label { width: 10px; height: 10px; display: block; border-radius: 999px; background: rgba(255,255,255,1); border: 2px solid rgba(0,0,0,.62); box-shadow: 0 5px 12px rgba(0,0,0,.38); }
+    .poi-dot-label { width: 11px; height: 11px; display: block; border-radius: 999px; background: var(--poi-color, #176b7a); border: 2px solid rgba(255,255,255,.94); box-shadow: 0 4px 10px rgba(0,0,0,.32); }
     .poi-label.has-discount::after { content: '🔥'; position: absolute; top: -9px; right: -9px; width: 19px; height: 19px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,0.94); border: 1px solid rgba(255,138,29,0.45); box-shadow: 0 6px 14px rgba(0,0,0,0.24); font-size: 12px; }
     .trail-start-label { min-width: 38px; min-height: 38px; display: grid; place-items: center; background: transparent; border: 0; overflow: visible; }
     .trail-start-label img { width: 34px; height: 34px; display: block; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
@@ -2722,6 +2722,7 @@
   var poiOverlapGroups = [];
   var poiOverlapCycleTimer = null;
   var incrementalPOIRefreshFrame = 0;
+  var poiDeclutterFrame = 0;
   var mapRefreshFrame = 0;
   var mapRefreshNeedsRail = false;
   var mapRefreshNeedsAuto = false;
@@ -3094,7 +3095,7 @@
       });
     });
   }
-  function getPOIIconHTML(poi) {
+  function getLegacyPOIIconHTML(poi) {
     var symbol = poi && poi.symbol ? String(poi.symbol) : '📌';
     var type = normalizePOIType(poi && poi.type);
     if (type === 'chiesa' || type === 'church' || symbol === 'church.png') return buildPOIAssetImage('church.png', 'Church', '⛪');
@@ -3396,18 +3397,32 @@
   function createPOIDotIcon(poi) {
     return L.divIcon({
       className: 'custom-poi custom-poi-dot',
-      html: '<div class="poi-dot-label"></div>',
+      html: '<div class="poi-dot-label" style="--poi-color:' + getPOIColor(poi) + '"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
+  }
+  function getPOIColor(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    var colors = {
+      chiesa:'#8d5c71', church:'#8d5c71', monumento:'#936f45', monument:'#936f45', castello:'#786049',
+      sentiero:'#47885e', trail:'#47885e', spiaggia:'#168cac', beach:'#168cac', stazione:'#3668a7', station:'#3668a7',
+      'fermata bus':'#4a8395', 'bus stop':'#4a8395', ferry:'#237e98', fontana:'#3d96b6', fountain:'#3d96b6',
+      farmacia:'#45a171', pharmacy:'#45a171', atm:'#786bb2', ristorante:'#c26449', restaurant:'#c26449', bar:'#ae5b78',
+      'punto panoramico':'#d47731', viewpoint:'#d47731', curiosity:'#7859c8', 'ascensore pubblico':'#607481', parcheggio:'#65727d', 'bagni pubblici':'#537b91'
+    };
+    return colors[type] || '#176b7a';
+  }
+  function getPOIIconHTML(poi) {
+    return '<span class="poi-map-pin" style="--poi-color:' + getPOIColor(poi) + '" aria-hidden="true"></span>';
   }
   function createPOIFullIcon(poi) {
     var hasDiscount = isPOICampaignActive(poi);
     return L.divIcon({
       className: 'custom-poi',
-      html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>',
-      iconSize: [40, 40],
-      iconAnchor: [20, 34]
+      html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '" style="--poi-color:' + getPOIColor(poi) + '"></div>',
+      iconSize: [36, 36],
+      iconAnchor: [18, 32]
     });
   }
   function armPOIMarkerAppearance(entry) {
@@ -3667,6 +3682,7 @@
   }
   function applyPOIDeclutter() {
     var visible;
+    var viewport;
     var nodes;
     var visited;
     var groups = [];
@@ -3676,10 +3692,11 @@
     // At overview zoom every POI is a small dot: grouping them is expensive and
     // hides useful context. Only declutter the larger symbols shown close in.
     if (map.getZoom() < 13) return;
+    viewport = map.getBounds().pad(.12);
     forceSeparateAtMaxZoom = map.getZoom() >= (Number(map.getMaxZoom()) - 0.05);
     if ((currentPOI && poiCard && poiCard.getAttribute('aria-hidden') === 'false') || (currentTrail && trailCard && trailCard.getAttribute('aria-hidden') === 'false')) return;
     visible = poiMarkers.filter(function(entry) {
-      return entry && entry.poi && entry.marker && map.hasLayer(entry.marker) && entry.marker._icon && entry._displayMode === 'full' && isValidCoords(entry.poi.coords);
+      return entry && entry.poi && entry.marker && map.hasLayer(entry.marker) && entry.marker._icon && entry._displayMode === 'full' && isValidCoords(entry.poi.coords) && viewport.contains(entry.poi.coords);
     });
     if (visible.length < 2) return;
     nodes = visible.map(function(entry, index) {
@@ -3883,7 +3900,9 @@
   }
   function updatePOIVisibility() {
     updateMapSymbolVisibility();
-    window.requestAnimationFrame(function() {
+    if (poiDeclutterFrame) return;
+    poiDeclutterFrame = window.requestAnimationFrame(function() {
+      poiDeclutterFrame = 0;
       applyPOIDeclutter();
       updateSelectedPOIEmphasis();
     });
