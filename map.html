@@ -6952,11 +6952,20 @@
     var initialBounds = getInitialViewportPOIBounds();
     var deferredAppendGeneration = generation;
 
+    if (urlParams.get('preview') === 'poi') {
+      poiDataLoaded = true;
+      poiCoordsReady = true;
+      refreshMapLoadingState();
+      focusRequestedPOIFromURL();
+      return;
+    }
+
     function refreshPOIViews(renderRail) {
       updateExclusiveDiscountFilterVisibility();
       updatePOIVisibility();
       if (renderRail) renderBottomRailCards();
       refreshMapLoadingState();
+      focusRequestedPOIFromURL();
     }
 
     function mergeCachedRows(list) {
