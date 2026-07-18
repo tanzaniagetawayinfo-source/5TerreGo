@@ -5,6 +5,7 @@
   var excluded = 'script,style,noscript,svg,code,pre,textarea,select,option,[data-no-translate],#ftg-global-actionbar-root';
   var running = false;
   var originals = new WeakMap();
+  var dynamicTranslationTimer = 0;
   document.documentElement.setAttribute('data-ftg-original-language', original);
   function language() { try { return String(localStorage.getItem('ftg_language') || original).split('-')[0].toLowerCase(); } catch (_) { return original; } }
   function nodes() { var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), out = [], n; while ((n = w.nextNode())) if (n.nodeValue && n.nodeValue.trim() && n.parentElement && !n.parentElement.closest(excluded)) { if (!originals.has(n)) originals.set(n, n.nodeValue); out.push(n); } return out; }
@@ -51,6 +52,20 @@
   window.addEventListener('ftg:languagechange', function(e) { translate(String(e.detail && e.detail.language || original).split('-')[0].toLowerCase()); });
   window.addEventListener('ftg:translatecontent', function() { translate(language()); });
   window.FTGTranslatePage = function() { return translate(language()); };
-  window.addEventListener('DOMContentLoaded', function() { translate(language()); });
-  if (document.readyState !== 'loading') translate(language());
+  function scheduleDynamicTranslation() {
+    if (language() === original) return;
+    clearTimeout(dynamicTranslationTimer);
+    dynamicTranslationTimer = setTimeout(function() { translate(language()); }, 160);
+  }
+  function observeDynamicContent() {
+    if (!window.MutationObserver || !document.body) return;
+    new MutationObserver(function(records) {
+      if (running) return;
+      for (var i = 0; i < records.length; i += 1) {
+        if (records[i].addedNodes && records[i].addedNodes.length) { scheduleDynamicTranslation(); return; }
+      }
+    }).observe(document.body, { childList:true, subtree:true });
+  }
+  window.addEventListener('DOMContentLoaded', function() { translate(language()); observeDynamicContent(); });
+  if (document.readyState !== 'loading') { translate(language()); observeDynamicContent(); }
 }());
