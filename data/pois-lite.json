@@ -622,10 +622,10 @@
   {
     "id": 90,
     "name": "Drinking fountain",
-    "coords": "44.1000440, 9.7391100",
+    "coords": "44.100044, 9.739110",
     "description": "Drinking fountain",
     "importance": 50,
-    "type": "chiesa",
+    "type": "fontana",
     "discount": 0,
     "discount_info": null
   },
@@ -904,7 +904,7 @@
     "name": "Oratorio dei disciplinati",
     "coords": "44.1195870,9.7081214",
     "description": "It’s located over Largo Taragio square .\nBehind the building Going upstairs, there s a small pitch used by students and children. In summer this place turns into a dance floor during village fairs",
-    "importance": 50,
+    "importance": 74,
     "type": "chiesa",
     "discount": 0,
     "discount_info": null
@@ -1572,10 +1572,10 @@
   {
     "id": 223,
     "name": "Shelley’s Last Home Before the Shipwreck",
-    "coords": "44,0833438, 9,8997636",
+    "coords": "44.083344, 9.899764",
     "description": "Poets Percy Bysshe Shelley and Mary Shelley, the author of Frankenstein, lived here in 1822. Shortly afterwards, Percy drowned when his sailing boat sank while returning from Livorno.",
     "importance": 81,
-    "type": "chiesa",
+    "type": "curiosity",
     "discount": null,
     "discount_info": null
   },
@@ -1596,6 +1596,106 @@
     "description": "This small bay is home to Smart Bay Santa Teresa, a natural marine laboratory where researchers study the sea, aquaculture, new technologies and the effects of climate change on coastal ecosystems.",
     "importance": 83,
     "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 226,
+    "name": "Ristogang",
+    "coords": "44.043202, 9.846140",
+    "description": "Anradacsdbra",
+    "importance": 44,
+    "type": "ristorante",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 227,
+    "name": "Bus Stop",
+    "coords": "44.051983, 9.836313",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 228,
+    "name": "Bus Stop",
+    "coords": "44.054117, 9.837278",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 229,
+    "name": "Bus Stop",
+    "coords": "44.054998, 9.837050",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 230,
+    "name": "Bus Stop",
+    "coords": "44.057865, 9.837894",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 231,
+    "name": "Bus Stop",
+    "coords": "44.059316, 9.837515",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 232,
+    "name": "Bus Stop",
+    "coords": "44.058167, 9.840479",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 233,
+    "name": "Bus Stop",
+    "coords": "44.059390, 9.842107",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 234,
+    "name": "Bus Stop",
+    "coords": "44.060513, 9.844591",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 235,
+    "name": "Bus Stop",
+    "coords": "44.059082, 9.848447",
+    "description": "",
+    "importance": 50,
+    "type": "fermata bus",
     "discount": null,
     "discount_info": null
   }
