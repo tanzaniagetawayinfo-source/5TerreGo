@@ -508,6 +508,8 @@
   .ftg-ai-avatar-slot { position:relative; width:44px; height:44px; flex:0 0 44px; overflow:hidden; display:grid; place-items:center; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 4px 14px rgba(10,34,65,.2); }
   .ftg-ai-avatar-slot video { position:absolute; inset:0; z-index:1; width:100%; height:100%; display:block; object-fit:cover; object-position:center top; transform:translateY(4px) scale(.94); }
   .ftg-ai-avatar-fallback { position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-size:18px; font-weight:950; }
+  .ftg-ai-panel.open .ftg-ai-avatar-slot { animation:ftg-ai-avatar-arrive .3s cubic-bezier(.2,.9,.2,1); }
+  @keyframes ftg-ai-avatar-arrive { from { opacity:.2; transform:translate(22px,20px) scale(.58); } to { opacity:1; transform:none; } }
 
   .ftg-ai-close {
     width: 34px;
@@ -622,7 +624,7 @@
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
   .ftg-ai-sources { display:grid; gap:4px; margin-top:8px; font-size:12px; }
   .ftg-ai-sources a { color:#075ea8; word-break:break-word; }
-  @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video,.ftg-ai-avatar-slot video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } }
+  @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video,.ftg-ai-avatar-slot video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } .ftg-ai-panel.open .ftg-ai-avatar-slot { animation:none; } }
 
   @media (max-width: 760px) {
     :root {
@@ -1199,7 +1201,11 @@
     });
     aiFab.addEventListener("pointerup",finishFabDrag);
     aiFab.addEventListener("pointercancel",finishFabDrag);
-    window.addEventListener("resize",restoreFabPosition);
+    var aiFabResizeTimer = 0;
+    window.addEventListener("resize",function () {
+      window.clearTimeout(aiFabResizeTimer);
+      aiFabResizeTimer = window.setTimeout(restoreFabPosition,120);
+    });
 
     function bindPillEvents() {
       pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
