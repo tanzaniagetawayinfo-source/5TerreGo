@@ -17,7 +17,8 @@
     var endpoint = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + encodeURIComponent(fallbackLanguage(target)) + '&dt=t&q=' + encodeURIComponent(source);
     var response = await fetch(endpoint);
     if (!response.ok) throw new Error('Public translation fallback unavailable');
-    var payload = await response.json();
+    var raw = await response.text(), payload;
+    try { payload = JSON.parse(raw); } catch (_) { throw new Error('Public translation returned ' + response.status + ': ' + raw.slice(0, 80)); }
     if (!Array.isArray(payload) || !Array.isArray(payload[0])) throw new Error('Invalid public translation response');
     return payload[0].map(function(part) { return Array.isArray(part) ? String(part[0] || '') : ''; }).join('');
   }
