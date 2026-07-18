@@ -623,9 +623,8 @@
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
   .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
-  .ftg-ai-preview { position:relative; display:block; width:100%; min-height:118px; margin-top:9px; padding:0; overflow:hidden; border:0; border-radius:17px; background:#12345a; color:#fff; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.18); isolation:isolate; }
-  .ftg-ai-preview img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.58; transform:scale(1.02); transition:transform .28s ease; }
-  .ftg-ai-preview:hover img,.ftg-ai-preview:focus-visible img { transform:scale(1.08); }
+  .ftg-ai-preview { position:relative; display:block; width:100%; aspect-ratio:1/1; margin-top:9px; padding:0; overflow:hidden; border:0; border-radius:17px; background:#12345a; color:#fff; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.18); isolation:isolate; }
+  .ftg-ai-preview iframe { position:absolute; inset:0; width:200%; height:200%; border:0; background:#fff; pointer-events:none; transform:scale(.5); transform-origin:top left; }
   .ftg-ai-preview::after { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(5,18,38,.04),rgba(5,18,38,.9)); }
   .ftg-ai-preview-copy { position:absolute; z-index:2; left:14px; right:14px; bottom:12px; display:grid; gap:3px; }
   .ftg-ai-preview-copy strong { font-size:15px; line-height:1.15; }
@@ -634,6 +633,13 @@
   .ftg-ai-preview-flight.is-opening { left:0 !important; top:0 !important; width:100vw !important; height:100dvh !important; border-radius:0 !important; }
   .ftg-ai-sources { display:grid; gap:4px; margin-top:8px; font-size:12px; }
   .ftg-ai-sources a { color:#075ea8; word-break:break-word; }
+  .ftg-ai-poi-draft { display:grid; gap:8px; margin-top:10px; padding:12px; border:2px solid #ff7200; border-radius:16px; background:#fff; color:#111827; }
+  .ftg-ai-poi-draft strong { font-size:15px; }
+  .ftg-ai-poi-draft label { display:grid; gap:3px; color:#455268; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+  .ftg-ai-poi-draft input,.ftg-ai-poi-draft textarea { width:100%; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:9px; padding:8px; background:#fff; color:#111827; font:inherit; font-size:12px; }
+  .ftg-ai-poi-draft textarea { min-height:92px; resize:vertical; }
+  .ftg-ai-poi-publish { min-height:40px; border:0; border-radius:999px; background:#ff7200; color:#fff; font-weight:900; cursor:pointer; }
+  .ftg-ai-poi-publish:disabled { opacity:.55; cursor:wait; }
   @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video,.ftg-ai-avatar-slot video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } .ftg-ai-panel.open .ftg-ai-avatar-slot { animation:none; } }
 
   @media (max-width: 760px) {
@@ -972,6 +978,7 @@
     var aiBusy = false;
     var aiLocation = null;
     var aiLocationWatch = null;
+    var aiHistory = [];
     var aiFab = document.createElement("button");
     aiFab.id = "ftg-ai-fab";
     aiFab.className = "ftg-ai-fab";
@@ -1091,15 +1098,14 @@
       return "";
     }
 
-    function previewImageForAction(action) {
-      var type = String(action && action.type || "");
-      var page = String(action && action.page || "");
-      if (type === "open_map_poi" || page === "map") return "app.png";
-      if (type === "open_trail" || page === "sentieri") return "sentiero.png";
-      if (type === "search_transport" || page === "trains") return "station.png";
-      if (type === "open_discount" || page === "discounts") return "app.png";
-      if (type === "open_article" || page === "guide") return "seo.png";
-      return "gohome.png";
+    function getAIHeaders() {
+      var anonKey = String(config.aiAnonKey || "sb_publishable_e1G4u6PMDY39tyQW2U8xJQ_eQYetzIb");
+      var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
+      try {
+        var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
+        if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;
+      } catch (_error) {}
+      return headers;
     }
 
     function openAIActionPreview(button, action) {
@@ -1132,15 +1138,43 @@
       });
       (Array.isArray(result.actions) ? result.actions : []).slice(0, 2).forEach(function (action) {
         if (!message || !action || typeof action !== "object") return;
-        var button = document.createElement("button"); button.type = "button"; button.className = "ftg-ai-preview";
-        var image = document.createElement("img"); image.src = previewImageForAction(action); image.alt = ""; image.loading = "lazy";
+        var button = document.createElement("div"); button.className = "ftg-ai-preview"; button.setAttribute("role","button"); button.tabIndex = 0;
+        var href = getAIActionHref(action);
+        var frame = document.createElement("iframe"); if (href) frame.src = href; frame.title = "Preview: " + String(action.label || "5TerreGo"); frame.loading = "lazy"; frame.tabIndex = -1; frame.setAttribute("aria-hidden", "true");
         var copy = document.createElement("span"); copy.className = "ftg-ai-preview-copy";
         var title = document.createElement("strong"); title.textContent = String(action.label || "Open suggested page").slice(0,100);
-        var hint = document.createElement("span"); hint.textContent = "Tap to open";
-        copy.appendChild(title); copy.appendChild(hint); button.appendChild(image); button.appendChild(copy);
-        button.addEventListener("click",function () { openAIActionPreview(button,action); }); message.appendChild(button);
+        var hint = document.createElement("span"); hint.textContent = "Vista reale · Tocca per aprire";
+        copy.appendChild(title); copy.appendChild(hint); if (href) button.appendChild(frame); button.appendChild(copy);
+        button.addEventListener("click",function () { openAIActionPreview(button,action); });
+        button.addEventListener("keydown",function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openAIActionPreview(button,action); } }); message.appendChild(button);
       });
+      if (message && result.poi_draft && result.godmode) renderPoiDraft(message,result.poi_draft);
       if (aiMessages) aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function renderPoiDraft(message,draft) {
+      var card = document.createElement("div"); card.className = "ftg-ai-poi-draft";
+      var heading = document.createElement("strong"); heading.textContent = "Anteprima nuovo POI · God Mode"; card.appendChild(heading);
+      function field(label,key,multiline) {
+        var wrap = document.createElement("label"); wrap.textContent = label;
+        var control = document.createElement(multiline ? "textarea" : "input"); control.value = String(draft[key] == null ? "" : draft[key]); control.dataset.poiField = key;
+        wrap.appendChild(control); card.appendChild(wrap);
+      }
+      field("Nome","name",false); field("Coordinate (latitudine, longitudine)","coords",false); field("Tipo","type",false); field("Importanza 0–100","importance",false); field("Descrizione verificata","description",true);
+      var publish = document.createElement("button"); publish.type = "button"; publish.className = "ftg-ai-poi-publish"; publish.textContent = "Pubblica POI"; card.appendChild(publish); message.appendChild(card);
+      publish.addEventListener("click",async function () {
+        if (!window.confirm("Pubblicare questo POI nella mappa 5TerreGo?")) return;
+        var poi = { source_urls:Array.isArray(draft.source_urls) ? draft.source_urls : [] };
+        card.querySelectorAll("[data-poi-field]").forEach(function (control) { poi[control.dataset.poiField] = control.value; });
+        publish.disabled = true; publish.textContent = "Pubblicazione…";
+        try {
+          var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
+          var response = await fetch(endpoint,{ method:"POST", headers:getAIHeaders(), body:JSON.stringify({ operation:"create_poi", poi:poi }) });
+          var payload = await response.json().catch(function () { return {}; });
+          if (!response.ok) throw new Error(payload.error || "Pubblicazione fallita");
+          card.remove(); renderAIResult({ answer:"POI pubblicato. Il gabbiano ha fatto un lavoro vero, evento storico.", actions:[payload.action], sources:[] });
+        } catch (error) { publish.disabled = false; publish.textContent = "Pubblica POI"; addAIMessage(String(error && error.message || "Pubblicazione fallita."),false); }
+      });
     }
 
     function startAILocationWatch() {
@@ -1153,6 +1187,16 @@
           captured_at:new Date(position.timestamp || Date.now()).toISOString()
         };
       },function () { aiLocation = null; },{ enableHighAccuracy:true, maximumAge:15000, timeout:10000 });
+    }
+
+    function ensureAILocation() {
+      if (aiLocation || !navigator.geolocation) return Promise.resolve(aiLocation);
+      return new Promise(function (resolve) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          aiLocation = { latitude:Number(position.coords.latitude.toFixed(6)), longitude:Number(position.coords.longitude.toFixed(6)), accuracy:Math.round(Number(position.coords.accuracy || 0)), captured_at:new Date(position.timestamp || Date.now()).toISOString() };
+          resolve(aiLocation);
+        },function () { resolve(null); },{ enableHighAccuracy:true, maximumAge:15000, timeout:6000 });
+      });
     }
 
     function toggleAI(forceOpen) {
@@ -1186,15 +1230,13 @@
       aiBusy = true; aiSend.disabled = true; aiAbortController = new AbortController();
       addAIMessage("Captain Gull is checking 5TerreGo…", false);
       try {
+        if (!aiLocation && /(dove mi trovo|where am i|ma position|wo bin ich|我的位置)/i.test(text)) await ensureAILocation();
         var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
-        var anonKey = String(config.aiAnonKey || "sb_publishable_e1G4u6PMDY39tyQW2U8xJQ_eQYetzIb");
-        var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
-        var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
-        if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;
-        var response = await fetch(endpoint, { method:"POST", headers:headers, signal:aiAbortController.signal, body:JSON.stringify({ question:text, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || "") }) });
+        var response = await fetch(endpoint, { method:"POST", headers:getAIHeaders(), signal:aiAbortController.signal, body:JSON.stringify({ question:text, history:aiHistory, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || "") }) });
         var payload = await response.json().catch(function () { return {}; });
         if (!response.ok) throw new Error(payload.error || "Assistant temporarily unavailable.");
         if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
+        aiHistory.push({ role:"user", text:text },{ role:"assistant", text:String(payload.answer || "") }); aiHistory = aiHistory.slice(-8);
         renderAIResult(payload);
       } catch (error) {
         if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
