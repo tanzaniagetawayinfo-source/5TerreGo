@@ -608,6 +608,15 @@
     cursor: pointer;
   }
 
+  .ftg-ai-fab { position:fixed; right:max(16px,calc(16px + env(safe-area-inset-right))); bottom:max(16px,calc(16px + env(safe-area-inset-bottom))); z-index:10080; width:64px; height:64px; padding:0; overflow:hidden; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 10px 26px rgba(10,34,65,.32); cursor:pointer; }
+  .ftg-ai-fab:focus-visible,.ftg-ai-close:focus-visible,.ftg-ai-send:focus-visible { outline:3px solid #ff7200; outline-offset:3px; }
+  .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; display:block; }
+  .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
+  .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
+  .ftg-ai-sources { display:grid; gap:4px; margin-top:8px; font-size:12px; }
+  .ftg-ai-sources a { color:#075ea8; word-break:break-word; }
+  @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } }
+
   @media (max-width: 760px) {
     :root {
       --ftg-header-height: calc(98px + env(safe-area-inset-top));
@@ -679,9 +688,9 @@
     var activePage = config.activePage || "";
     var userName = config.userName || "Guest";
     var isLoggedIn = Boolean(config.isLoggedIn);
-    var aiTitle = config.aiTitle || "Ask 5TerreGo";
-    var aiSubtitle = config.aiSubtitle || "Fast travel helper";
-    var aiWelcome = config.aiWelcome || "Nuova actionbar a due righe attiva.";
+    var aiTitle = config.aiTitle || "Captain Gull";
+    var aiSubtitle = config.aiSubtitle || "Your 5TerreGo travel guide";
+    var aiWelcome = config.aiWelcome || "Hi, I am Captain Gull. Ask me about trails, places, transport or local discounts.";
     var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
     var currentLanguage = String(config.language || "en").toLowerCase();
     var androidAppHref = config.androidAppHref || "#";
@@ -919,6 +928,17 @@
     var aiSend = root.querySelector("#ftg-ai-send");
     var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
     var pillButtons = [];
+    var aiAbortController = null;
+    var aiBusy = false;
+    var aiFab = document.createElement("button");
+    aiFab.id = "ftg-ai-fab";
+    aiFab.className = "ftg-ai-fab";
+    aiFab.type = "button";
+    aiFab.setAttribute("aria-label", "Open travel assistant");
+    aiFab.setAttribute("aria-expanded", "false");
+    aiFab.setAttribute("aria-controls", "ftg-ai-panel");
+    aiFab.innerHTML = '<video autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"><source src="mascotterelax.mov.mp4" type="video/mp4"></video><span class="ftg-ai-fab-fallback" aria-hidden="true">✦</span>';
+    root.appendChild(aiFab);
 
     function syncActiveButtons(pageId) {
       activePage = normalizePageId(pageId) || "home";
@@ -996,25 +1016,75 @@
       aiMessages.scrollTop = aiMessages.scrollHeight;
     }
 
+    function isSafeSourceUrl(value) {
+      try { var url = new URL(String(value || ""), window.location.href); return url.protocol === "https:" || url.protocol === "http:"; } catch (_error) { return false; }
+    }
+
+    function runAIAction(action) {
+      if (!action || typeof action !== "object") return false;
+      var type = String(action.type || "");
+      var allowedPages = { home:"index.html", map:"map.html", guide:"guide.html", sentieri:"sentieri.html", discounts:"discounts.html", trains:"public-transport.html", weather:"weather.html" };
+      if (type === "navigate_to_page" && allowedPages[action.page]) { window.location.href = allowedPages[action.page] + (action.hash && /^#[a-z0-9_-]+$/i.test(action.hash) ? action.hash : ""); return true; }
+      if (type === "open_map_poi" && /^[a-z0-9_-]{1,120}$/i.test(String(action.poi_id || ""))) { window.location.href = "map.html?poi=" + encodeURIComponent(action.poi_id); return true; }
+      if (type === "open_trail" && /^[a-z0-9_-]{1,120}$/i.test(String(action.trail_id || ""))) { window.location.href = "sentieri.html?trail=" + encodeURIComponent(action.trail_id); return true; }
+      if (type === "set_language" && languages.some(function (lang) { return lang.code === action.language; })) { currentLanguage = action.language; applyTranslations(); window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } })); return true; }
+      if (type === "search_transport") { window.location.href = "public-transport.html"; return true; }
+      if (type === "open_login") { window.location.href = "login.html"; return true; }
+      return false;
+    }
+
+    function renderAIResult(result) {
+      addAIMessage(result.answer || "I could not prepare an answer.", false);
+      var message = aiMessages && aiMessages.lastElementChild;
+      (Array.isArray(result.sources) ? result.sources : []).slice(0, 4).forEach(function (source) {
+        if (!message || !isSafeSourceUrl(source && source.url)) return;
+        var sources = message.querySelector(".ftg-ai-sources") || document.createElement("div");
+        sources.className = "ftg-ai-sources";
+        var link = document.createElement("a"); link.href = source.url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = String(source.title || source.url);
+        sources.appendChild(link); message.appendChild(sources);
+      });
+      (Array.isArray(result.actions) ? result.actions : []).slice(0, 2).forEach(function (action) {
+        if (!message || !action || typeof action !== "object") return;
+        var button = document.createElement("button"); button.type = "button"; button.className = "ftg-ai-action"; button.textContent = String(action.label || "Open suggested page").slice(0, 100);
+        button.addEventListener("click", function () { if (!runAIAction(action)) addAIMessage("Suggested action is not available.", false); }); message.appendChild(button);
+      });
+      if (aiMessages) aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
     function toggleAI(forceOpen) {
       if (!aiPanel) return;
       var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
       aiPanel.classList.toggle("open", shouldOpen);
       aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+      aiFab.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
       if (shouldOpen && !welcomed) {
         welcomed = true;
         addAIMessage(aiWelcome, false);
       }
     }
 
-    function handleAISend(textFromButton) {
+    async function handleAISend(textFromButton) {
       var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
-      if (!text) return;
+      if (!text || aiBusy) return;
       addAIMessage(text, true);
       if (aiInput) aiInput.value = "";
-      window.setTimeout(function () {
-        addAIMessage("Active section: " + activePage + ". Questa topbar a due righe tiene brand e controlli sopra, pillole pagina sotto.", false);
-      }, 120);
+      aiBusy = true; aiSend.disabled = true; aiAbortController = new AbortController();
+      addAIMessage("Captain Gull is checking 5TerreGo…", false);
+      try {
+        var endpoint = String(config.aiEndpoint || "https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/ai");
+        var anonKey = String(config.supabaseAnonKey || window.FTG_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa");
+        var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
+        var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
+        if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;
+        var response = await fetch(endpoint, { method:"POST", headers:headers, signal:aiAbortController.signal, body:JSON.stringify({ question:text, page:{ id:activePage, url:window.location.href }, language:currentLanguage }) });
+        var payload = await response.json().catch(function () { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Assistant temporarily unavailable.");
+        if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
+        renderAIResult(payload);
+      } catch (error) {
+        if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
+        addAIMessage(error && error.name === "AbortError" ? "Request cancelled." : "Assistant unavailable. Please try again shortly.", false);
+      } finally { aiBusy = false; aiSend.disabled = false; aiAbortController = null; }
     }
 
     function bindPillEvents() {
@@ -1108,9 +1178,12 @@
 
     if (aiClose) {
       aiClose.addEventListener("click", function () {
+        if (aiAbortController) aiAbortController.abort();
         toggleAI(false);
       });
     }
+
+    aiFab.addEventListener("click", function () { toggleAI(); });
 
     if (aiSend) {
       aiSend.addEventListener("click", function () {
