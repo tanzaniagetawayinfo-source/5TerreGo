@@ -1072,7 +1072,8 @@
       addAIMessage("Captain Gull is checking 5TerreGo…", false);
       try {
         var endpoint = String(config.aiEndpoint || "https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/ai");
-        var headers = { "Content-Type":"application/json" };
+        var anonKey = String(config.supabaseAnonKey || window.FTG_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa");
+        var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
         var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
         if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;
         var response = await fetch(endpoint, { method:"POST", headers:headers, signal:aiAbortController.signal, body:JSON.stringify({ question:text, page:{ id:activePage, url:window.location.href }, language:currentLanguage }) });
