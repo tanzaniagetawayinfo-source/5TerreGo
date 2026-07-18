@@ -500,9 +500,14 @@
     gap: 12px;
   }
 
-  .ftg-ai-head-copy { min-width: 0; }
+  .ftg-ai-head-copy { min-width: 0; flex:1; }
   .ftg-ai-title { font-size: 15px; font-weight: 900; letter-spacing: -.03em; color: var(--ftg-text); }
   .ftg-ai-subtitle { margin-top: 3px; font-size: 12px; color: var(--ftg-text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .ftg-ai-back { display:none; width:38px; height:38px; flex:0 0 38px; padding:0; border:0; border-radius:999px; background:transparent; color:var(--ftg-text); font-size:28px; line-height:1; cursor:pointer; }
+  .ftg-ai-avatar-slot { position:relative; width:44px; height:44px; flex:0 0 44px; overflow:hidden; display:grid; place-items:center; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 4px 14px rgba(10,34,65,.2); }
+  .ftg-ai-avatar-slot video { position:absolute; inset:0; z-index:1; width:100%; height:100%; display:block; object-fit:cover; object-position:center top; transform:translateY(4px) scale(.94); }
+  .ftg-ai-avatar-fallback { position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-size:18px; font-weight:950; }
 
   .ftg-ai-close {
     width: 34px;
@@ -608,14 +613,16 @@
     cursor: pointer;
   }
 
-  .ftg-ai-fab { position:fixed; right:max(16px,calc(16px + env(safe-area-inset-right))); bottom:max(16px,calc(16px + env(safe-area-inset-bottom))); z-index:10080; width:64px; height:64px; padding:0; overflow:hidden; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 10px 26px rgba(10,34,65,.32); cursor:pointer; }
+  .ftg-ai-fab { position:fixed; right:max(16px,calc(16px + env(safe-area-inset-right))); bottom:max(16px,calc(16px + env(safe-area-inset-bottom))); z-index:10170; width:64px; height:64px; padding:0; overflow:hidden; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 10px 26px rgba(10,34,65,.32); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; transition:left .28s cubic-bezier(.2,.9,.2,1),right .28s cubic-bezier(.2,.9,.2,1),top .22s cubic-bezier(.2,.9,.2,1),transform .16s ease; }
+  .ftg-ai-fab.dragging { cursor:grabbing; transition:none; transform:scale(1.06); }
   .ftg-ai-fab:focus-visible,.ftg-ai-close:focus-visible,.ftg-ai-send:focus-visible { outline:3px solid #ff7200; outline-offset:3px; }
-  .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; display:block; }
+  .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; transform:translateY(6px) scale(.94); }
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
+  .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
   .ftg-ai-sources { display:grid; gap:4px; margin-top:8px; font-size:12px; }
   .ftg-ai-sources a { color:#075ea8; word-break:break-word; }
-  @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } }
+  @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video,.ftg-ai-avatar-slot video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } }
 
   @media (max-width: 760px) {
     :root {
@@ -672,10 +679,29 @@
     }
 
     .ftg-ai-panel {
-      left: 12px;
-      right: 12px;
-      width: auto;
+      inset:0;
+      width:100%;
+      height:100dvh;
+      max-height:none;
+      z-index:10160;
+      border:0;
+      border-radius:0;
+      background:#fff;
+      box-shadow:none;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
     }
+
+    .ftg-ai-head { min-height:68px; box-sizing:border-box; padding:calc(10px + env(safe-area-inset-top)) 12px 10px 6px; background:#fff; }
+    .ftg-ai-back { display:grid; place-items:center; }
+    .ftg-ai-close { display:none; }
+    .ftg-ai-title { font-size:16px; }
+    .ftg-ai-subtitle { font-size:12px; }
+    .ftg-ai-messages { padding:14px 12px; background:#f6f7f9; }
+    .ftg-ai-msg { max-width:86%; font-size:15px; line-height:1.42; }
+    .ftg-ai-suggestions { padding:8px 10px; background:#fff; }
+    .ftg-ai-input-row { padding:9px max(10px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)); }
+    body.ftg-ai-open { overflow:hidden !important; }
   }
 </style>
 
@@ -927,6 +953,8 @@
     var aiInput = root.querySelector("#ftg-ai-input");
     var aiSend = root.querySelector("#ftg-ai-send");
     var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
+    var aiHead = root.querySelector(".ftg-ai-head");
+    var aiHeadCopy = root.querySelector(".ftg-ai-head-copy");
     var pillButtons = [];
     var aiAbortController = null;
     var aiBusy = false;
@@ -939,6 +967,21 @@
     aiFab.setAttribute("aria-controls", "ftg-ai-panel");
     aiFab.innerHTML = '<video autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"><source src="mascotterelax.mov.mp4" type="video/mp4"></video><span class="ftg-ai-fab-fallback" aria-hidden="true">✦</span>';
     root.appendChild(aiFab);
+    var aiMascotVideo = aiFab.querySelector("video");
+    var aiFabFallback = aiFab.querySelector(".ftg-ai-fab-fallback");
+    var aiBack = document.createElement("button");
+    aiBack.type = "button";
+    aiBack.className = "ftg-ai-back";
+    aiBack.setAttribute("aria-label", "Back");
+    aiBack.textContent = "‹";
+    var aiAvatarSlot = document.createElement("span");
+    aiAvatarSlot.className = "ftg-ai-avatar-slot";
+    aiAvatarSlot.setAttribute("aria-hidden", "true");
+    aiAvatarSlot.innerHTML = '<span class="ftg-ai-avatar-fallback">G</span>';
+    if (aiHead && aiHeadCopy) {
+      aiHead.insertBefore(aiAvatarSlot, aiHeadCopy);
+      aiHead.insertBefore(aiBack, aiAvatarSlot);
+    }
 
     function syncActiveButtons(pageId) {
       activePage = normalizePageId(pageId) || "home";
@@ -1057,10 +1100,20 @@
       aiPanel.classList.toggle("open", shouldOpen);
       aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
       aiFab.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      aiFab.classList.toggle("is-panel-open", shouldOpen);
+      document.body.classList.toggle("ftg-ai-open", shouldOpen);
+      if (aiFabFallback) aiFabFallback.textContent = shouldOpen ? "×" : "✦";
+      if (aiMascotVideo) {
+        if (shouldOpen && aiAvatarSlot) aiAvatarSlot.insertBefore(aiMascotVideo, aiAvatarSlot.firstChild);
+        else if (!shouldOpen) aiFab.insertBefore(aiMascotVideo, aiFab.firstChild);
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) aiMascotVideo.pause();
+        else aiMascotVideo.play().catch(function () {});
+      }
       if (shouldOpen && !welcomed) {
         welcomed = true;
         addAIMessage(aiWelcome, false);
       }
+      if (shouldOpen && aiInput) window.setTimeout(function () { aiInput.focus(); }, 80);
     }
 
     async function handleAISend(textFromButton) {
@@ -1086,6 +1139,67 @@
         addAIMessage(error && error.name === "AbortError" ? "Request cancelled." : "Assistant unavailable. Please try again shortly.", false);
       } finally { aiBusy = false; aiSend.disabled = false; aiAbortController = null; }
     }
+
+    var aiFabDrag = null;
+    var aiFabWasDragged = false;
+
+    function getFabBounds() {
+      var size = aiFab.offsetWidth || 64;
+      var topbarBottom = topbar ? Math.max(0, topbar.getBoundingClientRect().bottom) : 0;
+      var minY = Math.max(topbarBottom + 10, 10 + (window.visualViewport ? window.visualViewport.offsetTop : 0));
+      return { size:size, minX:12, maxX:Math.max(12,window.innerWidth-size-12), minY:minY, maxY:Math.max(minY,window.innerHeight-size-16) };
+    }
+
+    function placeFab(x, y, animate) {
+      var bounds = getFabBounds();
+      var left = Math.max(bounds.minX,Math.min(bounds.maxX,Number(x)));
+      var top = Math.max(bounds.minY,Math.min(bounds.maxY,Number(y)));
+      if (!Number.isFinite(left)) left = bounds.maxX;
+      if (!Number.isFinite(top)) top = bounds.maxY;
+      aiFab.style.transition = animate ? "" : "none";
+      aiFab.style.left = left + "px"; aiFab.style.right = "auto";
+      aiFab.style.top = top + "px"; aiFab.style.bottom = "auto";
+      if (!animate) window.requestAnimationFrame(function () { aiFab.style.transition = ""; });
+      return { left:left, top:top, bounds:bounds };
+    }
+
+    function restoreFabPosition() {
+      var saved = null;
+      try { saved = JSON.parse(localStorage.getItem("ftg-ai-fab-position-v1") || "null"); } catch (_error) {}
+      var bounds = getFabBounds();
+      var side = saved && saved.side === "left" ? "left" : "right";
+      placeFab(side === "left" ? bounds.minX : bounds.maxX, saved && Number.isFinite(Number(saved.y)) ? Number(saved.y) : bounds.maxY, false);
+    }
+
+    function finishFabDrag(event) {
+      if (!aiFabDrag || event.pointerId !== aiFabDrag.pointerId) return;
+      var rect = aiFab.getBoundingClientRect();
+      var bounds = getFabBounds();
+      var side = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
+      var placed = placeFab(side === "left" ? bounds.minX : bounds.maxX,rect.top,true);
+      aiFab.classList.remove("dragging");
+      try { aiFab.releasePointerCapture(event.pointerId); } catch (_error) {}
+      try { localStorage.setItem("ftg-ai-fab-position-v1",JSON.stringify({ side:side, y:placed.top })); } catch (_error) {}
+      aiFabWasDragged = aiFabDrag.moved;
+      aiFabDrag = null;
+    }
+
+    aiFab.addEventListener("pointerdown",function (event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      var rect = aiFab.getBoundingClientRect();
+      aiFabDrag = { pointerId:event.pointerId, dx:event.clientX-rect.left, dy:event.clientY-rect.top, startX:event.clientX, startY:event.clientY, moved:false };
+      aiFab.setPointerCapture(event.pointerId);
+    });
+    aiFab.addEventListener("pointermove",function (event) {
+      if (!aiFabDrag || event.pointerId !== aiFabDrag.pointerId) return;
+      if (Math.hypot(event.clientX-aiFabDrag.startX,event.clientY-aiFabDrag.startY) > 5) aiFabDrag.moved = true;
+      if (!aiFabDrag.moved) return;
+      event.preventDefault(); aiFab.classList.add("dragging");
+      placeFab(event.clientX-aiFabDrag.dx,event.clientY-aiFabDrag.dy,false);
+    });
+    aiFab.addEventListener("pointerup",finishFabDrag);
+    aiFab.addEventListener("pointercancel",finishFabDrag);
+    window.addEventListener("resize",restoreFabPosition);
 
     function bindPillEvents() {
       pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
@@ -1183,7 +1297,15 @@
       });
     }
 
-    aiFab.addEventListener("click", function () { toggleAI(); });
+    aiBack.addEventListener("click",function () {
+      if (aiAbortController) aiAbortController.abort();
+      toggleAI(false);
+    });
+
+    aiFab.addEventListener("click",function (event) {
+      if (aiFabWasDragged) { aiFabWasDragged = false; event.preventDefault(); return; }
+      toggleAI();
+    });
 
     if (aiSend) {
       aiSend.addEventListener("click", function () {
@@ -1222,6 +1344,7 @@
     applyTranslations();
     syncMenuVisualState();
     maybeMarkScrolled();
+    restoreFabPosition();
 
     var api = {
       navigateToPage: function (pageId) {
