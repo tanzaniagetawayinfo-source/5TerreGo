@@ -2216,6 +2216,10 @@
 
   var urlParams = new URLSearchParams(window.location.search || '');
   var isMapPreviewMode = urlParams.get('preview') === 'hero' || urlParams.get('preview') === 'poi' || urlParams.get('embed') === 'hero' || urlParams.get('mode') === 'preview';
+  function hasRequestedPOIFromURL() {
+    var requestedCoords = parseCoords({ coords: urlParams.get('coords') || '' });
+    return Boolean(String(urlParams.get('poi') || '').trim() || String(urlParams.get('name') || '').trim() || (Number.isFinite(requestedCoords.lat) && Number.isFinite(requestedCoords.lng)));
+  }
   if (isMapPreviewMode) document.body.classList.add('map-preview-mode');
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
@@ -2248,6 +2252,12 @@
   var AUTO_CLOSE_ZOOM = 12;
   var AUTO_CLOSE_DISTANCE = 800;
   var HERO_PREVIEW_CYCLE_MS = 4800;
+  var TRAIN_STATION_VILLAGES = ['Monterosso', 'Vernazza', 'Corniglia', 'Manarola', 'Riomaggiore', 'La Spezia', 'Levanto'];
+
+  function villageHasTrainStation(village) {
+    var name = village && village.name ? village.name : String(village || '');
+    return TRAIN_STATION_VILLAGES.indexOf(name) !== -1;
+  }
 
   var SUPABASE_READY = Boolean(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.indexOf('YOUR_PROJECT') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_PUBLIC') === -1);
   var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
@@ -4256,7 +4266,8 @@
     if (userLocationFirstFix) {
       userLocationFirstFix = false;
       stopAmbientOrbit();
-      if (locationInsideMap) startUserLocationOrbit(false);
+      if (hasRequestedPOIFromURL() && !navigationModeActive) userOrbitPlayed = true;
+      else if (locationInsideMap) startUserLocationOrbit(false);
       else showOutsideMapFallback();
     }
   }
@@ -5847,6 +5858,7 @@
     var rows;
     var trains;
     var trainOption;
+    if (!villageHasTrainStation(fromVillage) || !villageHasTrainStation(toVillage)) return;
     url.searchParams.set('from', fromVillage.name);
     url.searchParams.set('to', toVillage.name);
     url.searchParams.set('date', dateTime.date);
@@ -5932,8 +5944,8 @@
       resolvePedestrianNavigationRoute(walkOption, navigationOriginCoords || origin.coords, true);
       return;
     }
-    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello o sentiero.';
-    navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
+    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello, autobus o sentiero.';
+    if (villageHasTrainStation(origin) && villageHasTrainStation(destination)) navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
     trailMatch = getNavigationTrail(origin, destination);
     if (trailMatch) navigationChoices.push({ mode: 'trail', icon: '🥾', title: trailMatch.entry.trail.name, time: formatTrailDuration(trailMatch.entry.trail.estimated_duration), meta: Number(trailMatch.entry.trail.distance_km || 0).toFixed(1) + ' km · ' + getDisplayDifficulty(trailMatch.entry.trail), trailMatch: trailMatch });
     ferries = getNextNavigationFerries(origin, destination);
@@ -5943,8 +5955,10 @@
     }
     renderNavigationOptions();
     if (ferryOption) resolveTransportAccessRoutes(ferryOption);
-    requestId = ++navigationTrainRequestId;
-    fetchNavigationTrainChoice(requestId, origin, destination);
+    if (villageHasTrainStation(origin) && villageHasTrainStation(destination)) {
+      requestId = ++navigationTrainRequestId;
+      fetchNavigationTrainChoice(requestId, origin, destination);
+    }
   }
   function clearNavigationRoute() {
     if (!navigationRouteLine || !map) return;
@@ -6181,7 +6195,7 @@
     ambientOrbitFrame = window.requestAnimationFrame(animateOrbit);
   }
   function startFallbackOrbit() {
-    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
+    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || hasRequestedPOIFromURL() || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
     fallbackOrbitStarted = true;
     normalGyroTracking = false;
     if (turnNavigationMap) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
@@ -6203,7 +6217,7 @@
     var targetBearing;
     var currentCenter;
     var startZoom;
-    if (!isCoordsInsideNormalMap(userLocationLatLng) || (userOrbitPlayed && !force)) return;
+    if ((!force && hasRequestedPOIFromURL() && !navigationModeActive) || !isCoordsInsideNormalMap(userLocationLatLng) || (userOrbitPlayed && !force)) return;
     if (!turnNavigationMap || !turnNavigationMapLoaded) { window.setTimeout(function() { startUserLocationOrbit(force); }, 160); return; }
     userOrbitPlayed = true;
     targetBearing = currentUserHeading === null ? 0 : currentUserHeading;
@@ -6256,7 +6270,7 @@
     var initial;
     if (!turnNavigationMapEl || !window.maplibregl) return;
     points = getNavigationRoutePoints(navigationSelectedOption);
-    initial = isValidCoords(userLocationLatLng) ? userLocationLatLng : (points[0] || navigationOriginCoords || (navigationDestinationPOI && navigationDestinationPOI.coords) || (map ? [map.getCenter().lat, map.getCenter().lng] : [44.105, 9.80]));
+    initial = hasRequestedPOIFromURL() && map ? [map.getCenter().lat, map.getCenter().lng] : (isValidCoords(userLocationLatLng) ? userLocationLatLng : (points[0] || navigationOriginCoords || (navigationDestinationPOI && navigationDestinationPOI.coords) || (map ? [map.getCenter().lat, map.getCenter().lng] : [44.105, 9.80])));
     if (turnNavigationMap) {
       turnNavigationMap.resize();
       updateTurnNavigationRoute();
@@ -6272,17 +6286,21 @@
           esri: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Tiles © Esri' },
           streets: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],tileSize:256,maxzoom:20,attribution:'© OpenStreetMap © CARTO' },
           labels: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],tileSize:256,maxzoom:20,attribution:'© OpenStreetMap © CARTO' },
-          openfreemap: { type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'© OpenStreetMap contributors' }
+          openfreemap: { type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'© OpenStreetMap contributors' },
+          terrainDem: { type:'raster-dem',url:'https://demotiles.maplibre.org/terrain-tiles/tiles.json',tileSize:256 },
+          terrainShade: { type:'raster-dem',url:'https://demotiles.maplibre.org/terrain-tiles/tiles.json',tileSize:256 }
         },
         layers: [
           { id:'street-map',type:'raster',source:'streets',layout:{visibility:currentBaseMapMode === 'map' ? 'visible' : 'none'} },
           { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} },
-          { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:15.4,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],15.4,0,16,.82],'fill-extrusion-vertical-gradient':true} },
+          { id:'terrain-hillshade',type:'hillshade',source:'terrainShade',minzoom:9,maxzoom:17,paint:{'hillshade-exaggeration':.38,'hillshade-shadow-color':'#3f352b','hillshade-highlight-color':'#fff4dc','hillshade-accent-color':'#75634e'} },
+          { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:16.2,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],16.2,0,16.8,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],16.2,0,16.8,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':.72,'fill-extrusion-vertical-gradient':true} },
           { id:'satellite-labels',type:'raster',source:'labels',minzoom:13,layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'},paint:{'raster-opacity':['interpolate',['linear'],['zoom'],13,0,14,0.72,16,1]} }
-        ]
+        ],
+        terrain:{source:'terrainDem',exaggeration:.72}
       },
-      center: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
-      zoom: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11),
+      center: !navigationModeActive && !hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
+      zoom: !navigationModeActive && !hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11),
       pitch: navigationModeActive ? 25 : NORMAL_MAP_PITCH,
       bearing: 0,
       minZoom: 9.5,
@@ -6311,7 +6329,7 @@
       if (navigationModeActive) fitTurnNavigationRoute();
       else {
         if (compassRecenterPending && isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
-        else if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
+        else if (!hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
         syncMapLibreMarkers();
         if (!compassRecenterPending && !isValidCoords(userLocationLatLng)) window.setTimeout(startFallbackOrbit, 650);
       }
@@ -7481,7 +7499,7 @@
     if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
 
     initialState = getInitialMapState();
-    if (getRequestedVillageIndexFromURL() < 0 && !navigationModeActive) {
+    if (!hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0 && !navigationModeActive) {
       initialState.center = [NORMAL_MAP_CENTER[1], NORMAL_MAP_CENTER[0]];
       initialState.zoom = NORMAL_MAP_ZOOM;
     }
