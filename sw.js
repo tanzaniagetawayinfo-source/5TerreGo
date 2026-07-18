@@ -1,4 +1,4 @@
-const VERSION = '5terrego-sw-v2';
+const VERSION = '5terrego-sw-v3';
 const STATIC_CACHE = `${VERSION}-static`;
 const TILE_CACHE = `${VERSION}-tiles`;
 const CORE_ASSETS = [

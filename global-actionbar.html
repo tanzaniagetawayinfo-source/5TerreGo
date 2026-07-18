@@ -628,7 +628,7 @@
   .ftg-ai-intro { position:fixed; inset:0; z-index:10220; display:none; overflow:hidden; align-items:center; justify-content:center; padding:0 22px; background:#0b4f86; color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
   .ftg-ai-intro.open { display:flex; opacity:1; }
   .ftg-ai-intro-mascot { position:absolute; inset:7% 0 15%; display:flex; align-items:center; justify-content:center; pointer-events:none; transition:filter .24s ease,transform .24s ease,opacity .24s ease; }
-  .ftg-ai-intro-mascot video { display:block; width:min(94vw,560px); height:100%; object-fit:contain; object-position:center bottom; }
+  .ftg-ai-intro-mascot video { display:block; width:min(94vw,560px); height:100%; object-fit:contain; object-position:center bottom; mix-blend-mode:screen; }
   .ftg-ai-intro h2 { position:absolute; z-index:2; top:15%; left:50%; width:min(88vw,480px); margin:0; padding:14px 18px; border-radius:22px; background:rgba(255,255,255,.96); color:#12345a; font-size:clamp(22px,6vw,34px); letter-spacing:-.04em; transform:translateX(-50%); box-shadow:0 12px 28px rgba(0,0,0,.14); }
   .ftg-ai-intro p { position:absolute; z-index:2; top:calc(15% + 78px); left:50%; width:min(78vw,390px); margin:0; padding:10px 14px; border-radius:16px; background:rgba(11,49,83,.76); color:#fff; font-size:15px; line-height:1.4; transform:translateX(-50%); }
   .ftg-ai-intro-input { position:absolute; z-index:3; left:50%; bottom:max(24px,calc(18px + env(safe-area-inset-bottom))); width:min(calc(100% - 44px),460px); display:flex; gap:8px; padding:6px; border:1px solid rgba(255,255,255,.28); border-radius:999px; background:#fff; box-shadow:0 14px 34px rgba(0,0,0,.18); transform:translateX(-50%); transition:bottom .22s ease; }
