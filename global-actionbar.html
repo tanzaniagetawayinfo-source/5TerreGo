@@ -626,10 +626,8 @@
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
   .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
-  .ftg-ai-preview { position:relative; display:block; width:100%; aspect-ratio:1/1; margin-top:9px; padding:0; overflow:hidden; border:0; border-radius:17px; background:#12345a; color:#fff; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.18); isolation:isolate; }
-  .ftg-ai-preview iframe { position:absolute; inset:0; width:200%; height:200%; border:0; background:#fff; pointer-events:none; transform:scale(.5); transform-origin:top left; }
-  .ftg-ai-preview::after { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(5,18,38,.04),rgba(5,18,38,.9)); }
-  .ftg-ai-preview-copy { position:absolute; z-index:2; left:14px; right:14px; bottom:12px; display:grid; gap:3px; }
+  .ftg-ai-preview { position:relative; display:block; width:100%; min-height:88px; margin-top:9px; padding:14px; overflow:hidden; border:1px solid #dfe4ec; border-radius:17px; background:#fff; color:#12345a; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.08); isolation:isolate; }
+  .ftg-ai-preview-copy { position:relative; z-index:2; display:grid; gap:3px; }
   .ftg-ai-preview-copy strong { font-size:15px; line-height:1.15; }
   .ftg-ai-preview-copy span { font-size:11px; font-weight:800; opacity:.88; }
   .ftg-ai-preview-flight { position:fixed !important; z-index:12000 !important; margin:0 !important; transition:left .32s cubic-bezier(.2,.9,.2,1),top .32s cubic-bezier(.2,.9,.2,1),width .32s cubic-bezier(.2,.9,.2,1),height .32s cubic-bezier(.2,.9,.2,1),border-radius .32s ease !important; }
@@ -749,6 +747,14 @@
     var welcomed = false;
 
     if (!root) return null;
+
+    if (!document.querySelector('script[data-ftg-translation]')) {
+      var translationScript = document.createElement('script');
+      translationScript.src = '/site-translation.js?v=1';
+      translationScript.defer = true;
+      translationScript.dataset.ftgTranslation = 'true';
+      document.head.appendChild(translationScript);
+    }
 
     root.innerHTML = "";
     document.body.classList.add("ftg-actionbar-enabled");
@@ -1082,9 +1088,13 @@
       if (!aiMessages) return;
       var div = document.createElement("div");
       div.className = "ftg-ai-msg " + (isUser ? "user" : "bot");
-      div.innerText = text;
+      div.innerText = sanitizeAIText(text);
       aiMessages.appendChild(div);
       aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function sanitizeAIText(value) {
+      return String(value || "").replace(/\b(?:dio\s+(?:cane|porco|boia)|porco\s+dio|madonna\s+(?:puttana|troia)|gesu\s+(?:cane|cristo\s+porco))\b/gi, "[contenuto rimosso]");
     }
 
     function isSafeSourceUrl(value) {
@@ -1098,7 +1108,7 @@
       if (type === "navigate_to_page" && allowedPages[action.page]) return allowedPages[action.page] + (action.section && /^[a-z0-9_-]{1,80}$/i.test(action.section) ? "#" + action.section : "");
       if (type === "open_map_poi" && /^[a-z0-9_-]{1,120}$/i.test(String(action.poi_id || ""))) return "map.html?poi=" + encodeURIComponent(action.poi_id);
       if (type === "open_trail" && /^[a-z0-9_-]{1,120}$/i.test(String(action.trail_id || ""))) return "sentieri.html?trail=" + encodeURIComponent(action.trail_id);
-      if (type === "open_article" && /^[a-z0-9_-]{1,160}$/i.test(String(action.article_id || ""))) return "guide.html?article=" + encodeURIComponent(action.article_id);
+      if (type === "open_article" && /^[a-z0-9_-]{1,160}$/i.test(String(action.article_id || ""))) return "blog.html#" + encodeURIComponent(action.article_id);
       if (type === "open_discount" && /^[a-z0-9_-]{1,120}$/i.test(String(action.discount_id || ""))) return "discounts.html?discount=" + encodeURIComponent(action.discount_id);
       if (type === "search_transport") return "public-transport.html";
       if (type === "open_login") return "login.html";
@@ -1119,7 +1129,7 @@
       var href = getAIActionHref(action);
       if (!href) {
         if (action.type === "set_language" && languages.some(function (lang) { return lang.code === action.language; })) {
-          currentLanguage = action.language; applyTranslations(); window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } })); return;
+          currentLanguage = action.language; persistLanguage(); applyTranslations(); window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } })); return;
         }
         addAIMessage("Suggested action is not available.", false); return;
       }
@@ -1136,22 +1146,13 @@
     function renderAIResult(result) {
       addAIMessage(result.answer || "I could not prepare an answer.", false);
       var message = aiMessages && aiMessages.lastElementChild;
-      (Array.isArray(result.sources) ? result.sources : []).slice(0, 4).forEach(function (source) {
-        if (!message || !isSafeSourceUrl(source && source.url)) return;
-        var sources = message.querySelector(".ftg-ai-sources") || document.createElement("div");
-        sources.className = "ftg-ai-sources";
-        var link = document.createElement("a"); link.href = source.url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = String(source.title || source.url);
-        sources.appendChild(link); message.appendChild(sources);
-      });
       (Array.isArray(result.actions) ? result.actions : []).slice(0, 2).forEach(function (action) {
         if (!message || !action || typeof action !== "object") return;
         var button = document.createElement("div"); button.className = "ftg-ai-preview"; button.setAttribute("role","button"); button.tabIndex = 0;
-        var href = getAIActionHref(action);
-        var frame = document.createElement("iframe"); if (href) frame.src = href; frame.title = "Preview: " + String(action.label || "5TerreGo"); frame.loading = "lazy"; frame.tabIndex = -1; frame.setAttribute("aria-hidden", "true");
         var copy = document.createElement("span"); copy.className = "ftg-ai-preview-copy";
         var title = document.createElement("strong"); title.textContent = String(action.label || "Open suggested page").slice(0,100);
         var hint = document.createElement("span"); hint.textContent = "Vista reale · Tocca per aprire";
-        copy.appendChild(title); copy.appendChild(hint); if (href) button.appendChild(frame); button.appendChild(copy);
+        copy.appendChild(title); copy.appendChild(hint); button.appendChild(copy);
         button.addEventListener("click",function () { openAIActionPreview(button,action); });
         button.addEventListener("keydown",function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openAIActionPreview(button,action); } }); message.appendChild(button);
       });
@@ -1375,13 +1376,20 @@
           event.preventDefault();
           event.stopPropagation();
           currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
+          persistLanguage();
           applyTranslations();
           closeLanguagePanel();
+          window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } }));
           if (typeof config.onLanguageChange === "function") {
             config.onLanguageChange(currentLanguage);
           }
         });
       });
+    }
+
+    function persistLanguage() {
+      try { localStorage.setItem("ftg_language", currentLanguage); localStorage.setItem("selectedLanguage", currentLanguage); } catch (_error) {}
+      document.documentElement.lang = currentLanguage;
     }
 
     function updateMenuDynamicItems() {

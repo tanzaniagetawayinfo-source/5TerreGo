@@ -5847,6 +5847,8 @@
     var rows;
     var trains;
     var trainOption;
+    var railStops = ['Monterosso', 'Vernazza', 'Corniglia', 'Manarola', 'Riomaggiore', 'La Spezia', 'Levanto'];
+    if (railStops.indexOf(fromVillage.name) === -1 || railStops.indexOf(toVillage.name) === -1) return;
     url.searchParams.set('from', fromVillage.name);
     url.searchParams.set('to', toVillage.name);
     url.searchParams.set('date', dateTime.date);
@@ -5916,6 +5918,7 @@
     var ferries;
     var ferryOption;
     var requestId;
+    var railStops = ['Monterosso', 'Vernazza', 'Corniglia', 'Manarola', 'Riomaggiore', 'La Spezia', 'Levanto'];
     if (!navigationModeActive || !navigationDestinationPOI || !origin || !destination) return;
     navigationOriginVillage = origin;
     sameVillage = origin.name === destination.name;
@@ -5932,8 +5935,8 @@
       resolvePedestrianNavigationRoute(walkOption, navigationOriginCoords || origin.coords, true);
       return;
     }
-    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello o sentiero.';
-    navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
+    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello, autobus o sentiero.';
+    if (railStops.indexOf(origin.name) !== -1 && railStops.indexOf(destination.name) !== -1) navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
     trailMatch = getNavigationTrail(origin, destination);
     if (trailMatch) navigationChoices.push({ mode: 'trail', icon: '🥾', title: trailMatch.entry.trail.name, time: formatTrailDuration(trailMatch.entry.trail.estimated_duration), meta: Number(trailMatch.entry.trail.distance_km || 0).toFixed(1) + ' km · ' + getDisplayDifficulty(trailMatch.entry.trail), trailMatch: trailMatch });
     ferries = getNextNavigationFerries(origin, destination);
@@ -5943,8 +5946,10 @@
     }
     renderNavigationOptions();
     if (ferryOption) resolveTransportAccessRoutes(ferryOption);
-    requestId = ++navigationTrainRequestId;
-    fetchNavigationTrainChoice(requestId, origin, destination);
+    if (railStops.indexOf(origin.name) !== -1 && railStops.indexOf(destination.name) !== -1) {
+      requestId = ++navigationTrainRequestId;
+      fetchNavigationTrainChoice(requestId, origin, destination);
+    }
   }
   function clearNavigationRoute() {
     if (!navigationRouteLine || !map) return;
@@ -6277,7 +6282,6 @@
         layers: [
           { id:'street-map',type:'raster',source:'streets',layout:{visibility:currentBaseMapMode === 'map' ? 'visible' : 'none'} },
           { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} },
-          { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:15.4,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],15.4,0,16,.82],'fill-extrusion-vertical-gradient':true} },
           { id:'satellite-labels',type:'raster',source:'labels',minzoom:13,layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'},paint:{'raster-opacity':['interpolate',['linear'],['zoom'],13,0,14,0.72,16,1]} }
         ]
       },
