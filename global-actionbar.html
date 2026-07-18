@@ -625,24 +625,24 @@
   .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; transform:translateY(6px) scale(.94); }
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
   .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
-  .ftg-ai-intro { position:fixed; top:calc(-1 * var(--ftg-ai-viewport-offset,0px)); left:0; z-index:10220; width:100%; height:var(--ftg-ai-intro-height,100dvh); display:none; overflow:hidden; align-items:center; justify-content:center; padding:0 22px; background:#0b4f86; color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
+  .ftg-ai-intro { position:fixed; top:calc(-1 * var(--ftg-ai-viewport-offset,0px)); left:0; z-index:10220; width:100%; height:var(--ftg-ai-intro-height,100dvh); display:none; overflow:hidden; align-items:center; justify-content:center; padding:0 22px; background:radial-gradient(ellipse at 50% 45%,#12619c 0%,#0d568e 44%,#0a4779 100%); color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
   .ftg-ai-intro.open { display:flex; opacity:1; }
-  .ftg-ai-intro-mascot { position:absolute; top:30%; left:50%; width:min(58vw,235px); height:47%; display:flex; align-items:center; justify-content:center; pointer-events:none; transform:translateX(-50%); transition:filter .24s ease,transform .24s ease,opacity .24s ease; }
+  .ftg-ai-intro-mascot { position:absolute; top:31.5%; left:50%; width:min(50vw,184px); height:48%; display:flex; align-items:center; justify-content:center; pointer-events:none; transform:translateX(-50%); transition:filter .24s ease,transform .24s ease,opacity .24s ease; }
   .ftg-ai-intro-mascot::after { content:''; position:absolute; right:-8px; bottom:1px; width:54px; height:23px; background:#0b4f86; }
   .ftg-ai-intro-mascot video { display:block; width:100%; height:100%; object-fit:contain; object-position:center bottom; clip-path:inset(0 0 8% 0); }
-  .ftg-ai-intro h2 { position:absolute; z-index:2; top:17%; left:25px; width:min(58vw,250px); min-height:0; margin:0; padding:18px 18px 20px; border-radius:18px; background:#fff; color:#174271; font-size:clamp(15px,4.4vw,20px); letter-spacing:-.03em; line-height:1.35; text-align:left; box-shadow:0 12px 28px rgba(0,0,0,.18); }
-  .ftg-ai-intro h2::after { content:''; position:absolute; right:20px; bottom:-17px; width:28px; height:25px; background:#fff; clip-path:polygon(0 0,100% 0,100% 100%); }
+  .ftg-ai-intro h2 { position:absolute; z-index:2; top:17.5%; left:24px; box-sizing:border-box; width:min(56vw,198px); min-height:0; margin:0; padding:17px 19px 15px; border-radius:18px; background:#fff; color:#174271; font-size:clamp(15px,4.25vw,17px); letter-spacing:-.03em; line-height:1.38; text-align:left; box-shadow:0 12px 28px rgba(0,0,0,.18); }
+  .ftg-ai-intro h2::after { content:''; position:absolute; left:58%; bottom:-17px; width:27px; height:24px; background:#fff; clip-path:polygon(0 0,100% 0,100% 100%); }
   .ftg-ai-intro p { display:none; }
-  .ftg-ai-intro-suggestions { position:absolute; z-index:2; bottom:102px; left:0; width:100%; display:flex; flex-wrap:nowrap; justify-content:flex-start; gap:10px; overflow-x:auto; padding:0 20px; scrollbar-width:none; transition:bottom .22s ease; }
+  .ftg-ai-intro-suggestions { position:absolute; z-index:2; bottom:84px; left:0; width:100%; display:flex; flex-wrap:nowrap; justify-content:flex-start; gap:10px; overflow-x:auto; padding:0 18px; scrollbar-width:none; transition:bottom .22s ease; }
   .ftg-ai-intro-suggestions::-webkit-scrollbar { display:none; }
   .ftg-ai-intro-suggestion { flex:0 0 auto; border:1px solid rgba(255,255,255,.72); border-radius:999px; padding:9px 13px; background:rgba(11,49,83,.80); color:#fff; font:700 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; cursor:pointer; }
-  .ftg-ai-intro-input { position:absolute; z-index:3; left:50%; bottom:max(24px,calc(18px + env(safe-area-inset-bottom))); width:min(calc(100% - 44px),460px); display:flex; gap:8px; padding:6px; border:1px solid rgba(255,255,255,.28); border-radius:999px; background:#fff; box-shadow:0 14px 34px rgba(0,0,0,.18); transform:translateX(-50%); transition:bottom .22s ease; }
+  .ftg-ai-intro-input { position:absolute; z-index:3; left:50%; bottom:max(12px,calc(10px + env(safe-area-inset-bottom))); width:min(calc(100% - 32px),460px); display:flex; gap:8px; padding:6px; border:1px solid rgba(255,255,255,.28); border-radius:999px; background:#fff; box-shadow:0 14px 34px rgba(0,0,0,.18); transform:translateX(-50%); transition:bottom .22s ease; }
   .ftg-ai-intro-input input { min-width:0; flex:1; border:0; outline:0; padding:0 12px; color:#12345a; font:inherit; font-size:16px; }
   .ftg-ai-intro-input button { width:44px; height:44px; border:0; border-radius:50%; background:#ff7200; color:#fff; font-size:22px; font-weight:900; cursor:pointer; }
-  .ftg-ai-intro-close { position:absolute; top:max(18px,env(safe-area-inset-top)); right:max(18px,env(safe-area-inset-right)); width:42px; height:42px; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:rgba(255,255,255,.12); color:#fff; font-size:26px; cursor:pointer; }
+  .ftg-ai-intro-close { position:absolute; top:max(20px,env(safe-area-inset-top)); right:max(12px,env(safe-area-inset-right)); width:42px; height:42px; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:rgba(255,255,255,.12); color:#fff; font-size:26px; cursor:pointer; }
   .ftg-ai-intro.is-keyboard .ftg-ai-intro-mascot { filter:blur(1.2px); transform:scale(.985); opacity:.78; }
-  .ftg-ai-intro.is-keyboard .ftg-ai-intro-input { bottom:calc(var(--ftg-ai-keyboard-offset,0px) + 18px); }
-  .ftg-ai-intro.is-keyboard .ftg-ai-intro-suggestions { bottom:calc(var(--ftg-ai-keyboard-offset,0px) + 94px); }
+  .ftg-ai-intro.is-keyboard .ftg-ai-intro-input { bottom:calc(var(--ftg-ai-keyboard-offset,0px) + 10px); }
+  .ftg-ai-intro.is-keyboard .ftg-ai-intro-suggestions { bottom:calc(var(--ftg-ai-keyboard-offset,0px) + 76px); }
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
   .ftg-ai-preview { position:relative; display:block; width:100%; min-height:88px; margin-top:9px; padding:14px; overflow:hidden; border:1px solid #dfe4ec; border-radius:17px; background:#fff; color:#12345a; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.08); isolation:isolate; }
   .ftg-ai-preview-copy { position:relative; z-index:2; display:grid; gap:3px; }
