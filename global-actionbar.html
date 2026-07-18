@@ -617,11 +617,21 @@
 
   .ftg-ai-fab { position:fixed; right:max(16px,calc(16px + env(safe-area-inset-right))); bottom:max(16px,calc(16px + env(safe-area-inset-bottom))); z-index:10170; width:64px; height:64px; padding:0; overflow:hidden; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 10px 26px rgba(10,34,65,.32); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; transition:left .28s cubic-bezier(.2,.9,.2,1),right .28s cubic-bezier(.2,.9,.2,1),top .22s cubic-bezier(.2,.9,.2,1),transform .16s ease; }
   .ftg-ai-fab.dragging { cursor:grabbing; transition:none; transform:scale(1.06); }
+  .ftg-ai-fab.is-panel-open { opacity:0; pointer-events:none; transform:scale(.72); }
   .ftg-ai-fab:focus-visible,.ftg-ai-close:focus-visible,.ftg-ai-send:focus-visible { outline:3px solid #ff7200; outline-offset:3px; }
   .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; transform:translateY(6px) scale(.94); }
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
   .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
+  .ftg-ai-preview { position:relative; display:block; width:100%; min-height:118px; margin-top:9px; padding:0; overflow:hidden; border:0; border-radius:17px; background:#12345a; color:#fff; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.18); isolation:isolate; }
+  .ftg-ai-preview img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.58; transform:scale(1.02); transition:transform .28s ease; }
+  .ftg-ai-preview:hover img,.ftg-ai-preview:focus-visible img { transform:scale(1.08); }
+  .ftg-ai-preview::after { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(5,18,38,.04),rgba(5,18,38,.9)); }
+  .ftg-ai-preview-copy { position:absolute; z-index:2; left:14px; right:14px; bottom:12px; display:grid; gap:3px; }
+  .ftg-ai-preview-copy strong { font-size:15px; line-height:1.15; }
+  .ftg-ai-preview-copy span { font-size:11px; font-weight:800; opacity:.88; }
+  .ftg-ai-preview-flight { position:fixed !important; z-index:12000 !important; margin:0 !important; transition:left .32s cubic-bezier(.2,.9,.2,1),top .32s cubic-bezier(.2,.9,.2,1),width .32s cubic-bezier(.2,.9,.2,1),height .32s cubic-bezier(.2,.9,.2,1),border-radius .32s ease !important; }
+  .ftg-ai-preview-flight.is-opening { left:0 !important; top:0 !important; width:100vw !important; height:100dvh !important; border-radius:0 !important; }
   .ftg-ai-sources { display:grid; gap:4px; margin-top:8px; font-size:12px; }
   .ftg-ai-sources a { color:#075ea8; word-break:break-word; }
   @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video,.ftg-ai-avatar-slot video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } .ftg-ai-panel.open .ftg-ai-avatar-slot { animation:none; } }
@@ -960,6 +970,8 @@
     var pillButtons = [];
     var aiAbortController = null;
     var aiBusy = false;
+    var aiLocation = null;
+    var aiLocationWatch = null;
     var aiFab = document.createElement("button");
     aiFab.id = "ftg-ai-fab";
     aiFab.className = "ftg-ai-fab";
@@ -1065,17 +1077,47 @@
       try { var url = new URL(String(value || ""), window.location.href); return url.protocol === "https:" || url.protocol === "http:"; } catch (_error) { return false; }
     }
 
-    function runAIAction(action) {
-      if (!action || typeof action !== "object") return false;
+    function getAIActionHref(action) {
+      if (!action || typeof action !== "object") return "";
       var type = String(action.type || "");
       var allowedPages = { home:"index.html", map:"map.html", guide:"guide.html", sentieri:"sentieri.html", discounts:"discounts.html", trains:"public-transport.html", weather:"weather.html" };
-      if (type === "navigate_to_page" && allowedPages[action.page]) { window.location.href = allowedPages[action.page] + (action.hash && /^#[a-z0-9_-]+$/i.test(action.hash) ? action.hash : ""); return true; }
-      if (type === "open_map_poi" && /^[a-z0-9_-]{1,120}$/i.test(String(action.poi_id || ""))) { window.location.href = "map.html?poi=" + encodeURIComponent(action.poi_id); return true; }
-      if (type === "open_trail" && /^[a-z0-9_-]{1,120}$/i.test(String(action.trail_id || ""))) { window.location.href = "sentieri.html?trail=" + encodeURIComponent(action.trail_id); return true; }
-      if (type === "set_language" && languages.some(function (lang) { return lang.code === action.language; })) { currentLanguage = action.language; applyTranslations(); window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } })); return true; }
-      if (type === "search_transport") { window.location.href = "public-transport.html"; return true; }
-      if (type === "open_login") { window.location.href = "login.html"; return true; }
-      return false;
+      if (type === "navigate_to_page" && allowedPages[action.page]) return allowedPages[action.page] + (action.section && /^[a-z0-9_-]{1,80}$/i.test(action.section) ? "#" + action.section : "");
+      if (type === "open_map_poi" && /^[a-z0-9_-]{1,120}$/i.test(String(action.poi_id || ""))) return "map.html?poi=" + encodeURIComponent(action.poi_id);
+      if (type === "open_trail" && /^[a-z0-9_-]{1,120}$/i.test(String(action.trail_id || ""))) return "sentieri.html?trail=" + encodeURIComponent(action.trail_id);
+      if (type === "open_article" && /^[a-z0-9_-]{1,160}$/i.test(String(action.article_id || ""))) return "guide.html?article=" + encodeURIComponent(action.article_id);
+      if (type === "open_discount" && /^[a-z0-9_-]{1,120}$/i.test(String(action.discount_id || ""))) return "discounts.html?discount=" + encodeURIComponent(action.discount_id);
+      if (type === "search_transport") return "public-transport.html";
+      if (type === "open_login") return "login.html";
+      return "";
+    }
+
+    function previewImageForAction(action) {
+      var type = String(action && action.type || "");
+      var page = String(action && action.page || "");
+      if (type === "open_map_poi" || page === "map") return "app.png";
+      if (type === "open_trail" || page === "sentieri") return "sentiero.png";
+      if (type === "search_transport" || page === "trains") return "station.png";
+      if (type === "open_discount" || page === "discounts") return "app.png";
+      if (type === "open_article" || page === "guide") return "seo.png";
+      return "gohome.png";
+    }
+
+    function openAIActionPreview(button, action) {
+      var href = getAIActionHref(action);
+      if (!href) {
+        if (action.type === "set_language" && languages.some(function (lang) { return lang.code === action.language; })) {
+          currentLanguage = action.language; applyTranslations(); window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } })); return;
+        }
+        addAIMessage("Suggested action is not available.", false); return;
+      }
+      var rect = button.getBoundingClientRect();
+      var flight = button.cloneNode(true);
+      flight.classList.add("ftg-ai-preview-flight");
+      flight.style.left = rect.left + "px"; flight.style.top = rect.top + "px";
+      flight.style.width = rect.width + "px"; flight.style.height = rect.height + "px";
+      document.body.appendChild(flight);
+      window.requestAnimationFrame(function () { window.requestAnimationFrame(function () { flight.classList.add("is-opening"); }); });
+      window.setTimeout(function () { window.location.href = href; }, 340);
     }
 
     function renderAIResult(result) {
@@ -1090,10 +1132,27 @@
       });
       (Array.isArray(result.actions) ? result.actions : []).slice(0, 2).forEach(function (action) {
         if (!message || !action || typeof action !== "object") return;
-        var button = document.createElement("button"); button.type = "button"; button.className = "ftg-ai-action"; button.textContent = String(action.label || "Open suggested page").slice(0, 100);
-        button.addEventListener("click", function () { if (!runAIAction(action)) addAIMessage("Suggested action is not available.", false); }); message.appendChild(button);
+        var button = document.createElement("button"); button.type = "button"; button.className = "ftg-ai-preview";
+        var image = document.createElement("img"); image.src = previewImageForAction(action); image.alt = ""; image.loading = "lazy";
+        var copy = document.createElement("span"); copy.className = "ftg-ai-preview-copy";
+        var title = document.createElement("strong"); title.textContent = String(action.label || "Open suggested page").slice(0,100);
+        var hint = document.createElement("span"); hint.textContent = "Tap to open";
+        copy.appendChild(title); copy.appendChild(hint); button.appendChild(image); button.appendChild(copy);
+        button.addEventListener("click",function () { openAIActionPreview(button,action); }); message.appendChild(button);
       });
       if (aiMessages) aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function startAILocationWatch() {
+      if (aiLocationWatch !== null || !navigator.geolocation) return;
+      aiLocationWatch = navigator.geolocation.watchPosition(function (position) {
+        aiLocation = {
+          latitude:Number(position.coords.latitude.toFixed(6)),
+          longitude:Number(position.coords.longitude.toFixed(6)),
+          accuracy:Math.round(Number(position.coords.accuracy || 0)),
+          captured_at:new Date(position.timestamp || Date.now()).toISOString()
+        };
+      },function () { aiLocation = null; },{ enableHighAccuracy:true, maximumAge:15000, timeout:10000 });
     }
 
     function toggleAI(forceOpen) {
@@ -1104,6 +1163,7 @@
       aiFab.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
       aiFab.classList.toggle("is-panel-open", shouldOpen);
       document.body.classList.toggle("ftg-ai-open", shouldOpen);
+      if (shouldOpen) startAILocationWatch();
       if (aiFabFallback) aiFabFallback.textContent = shouldOpen ? "×" : "✦";
       if (aiMascotVideo) {
         if (shouldOpen && aiAvatarSlot) aiAvatarSlot.insertBefore(aiMascotVideo, aiAvatarSlot.firstChild);
@@ -1131,7 +1191,7 @@
         var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
         var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
         if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;
-        var response = await fetch(endpoint, { method:"POST", headers:headers, signal:aiAbortController.signal, body:JSON.stringify({ question:text, page:{ id:activePage, url:window.location.href }, language:currentLanguage }) });
+        var response = await fetch(endpoint, { method:"POST", headers:headers, signal:aiAbortController.signal, body:JSON.stringify({ question:text, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || "") }) });
         var payload = await response.json().catch(function () { return {}; });
         if (!response.ok) throw new Error(payload.error || "Assistant temporarily unavailable.");
         if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
