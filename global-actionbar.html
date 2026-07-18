@@ -625,6 +625,16 @@
   .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; transform:translateY(6px) scale(.94); }
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
   .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
+  .ftg-ai-intro { position:fixed; inset:0; z-index:10220; display:none; flex-direction:column; align-items:center; justify-content:center; padding:32px 22px max(32px,env(safe-area-inset-bottom)); background:#0b4f86; color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
+  .ftg-ai-intro.open { display:flex; opacity:1; }
+  .ftg-ai-intro-mascot { width:min(62vw,320px); aspect-ratio:1; overflow:hidden; border-radius:50%; background:#12345a; box-shadow:0 22px 58px rgba(0,0,0,.26); }
+  .ftg-ai-intro-mascot video { display:block; width:100%; height:100%; object-fit:cover; object-position:center top; transform:translateY(5%) scale(.95); }
+  .ftg-ai-intro h2 { margin:24px 0 8px; font-size:clamp(26px,7vw,38px); letter-spacing:-.04em; }
+  .ftg-ai-intro p { max-width:390px; margin:0; color:rgba(255,255,255,.82); font-size:16px; line-height:1.45; }
+  .ftg-ai-intro-input { width:min(100%,460px); display:flex; gap:8px; margin-top:28px; padding:6px; border:1px solid rgba(255,255,255,.28); border-radius:999px; background:#fff; box-shadow:0 14px 34px rgba(0,0,0,.18); }
+  .ftg-ai-intro-input input { min-width:0; flex:1; border:0; outline:0; padding:0 12px; color:#12345a; font:inherit; }
+  .ftg-ai-intro-input button { width:44px; height:44px; border:0; border-radius:50%; background:#ff7200; color:#fff; font-size:22px; font-weight:900; cursor:pointer; }
+  .ftg-ai-intro-close { position:absolute; top:max(18px,env(safe-area-inset-top)); right:max(18px,env(safe-area-inset-right)); width:42px; height:42px; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:rgba(255,255,255,.12); color:#fff; font-size:26px; cursor:pointer; }
   .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
   .ftg-ai-preview { position:relative; display:block; width:100%; min-height:88px; margin-top:9px; padding:14px; overflow:hidden; border:1px solid #dfe4ec; border-radius:17px; background:#fff; color:#12345a; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.08); isolation:isolate; }
   .ftg-ai-preview-copy { position:relative; z-index:2; display:grid; gap:3px; }
@@ -961,6 +971,7 @@
 
     root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
 
+    root.insertAdjacentHTML("beforeend", '<section class="ftg-ai-intro" id="ftg-ai-intro" aria-hidden="true"><button class="ftg-ai-intro-close" id="ftg-ai-intro-close" type="button" aria-label="Close">×</button><div class="ftg-ai-intro-mascot"><video autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"><source src="mascotterelax.mov.mp4" type="video/mp4"></video></div><h2 id="ftg-ai-intro-title">Hi, I am Captain Gull.</h2><p id="ftg-ai-intro-copy">Your local 5TerreGo guide. Ask me anything.</p><div class="ftg-ai-intro-input"><input id="ftg-ai-intro-input" autocomplete="off"><button id="ftg-ai-intro-send" type="button" aria-label="Send">→</button></div></section>');
     var topbar = root.querySelector("#ftg-topbar");
     var pillScroller = root.querySelector("#ftg-pill-scroller");
     var accountBtn = root.querySelector("#ftg-account-btn");
@@ -977,6 +988,12 @@
     var androidAppLink = root.querySelector("#ftg-android-app-link");
     var androidAppLabel = root.querySelector("#ftg-android-app-label");
     var aiPanel = root.querySelector("#ftg-ai-panel");
+    var aiIntro = root.querySelector("#ftg-ai-intro");
+    var aiIntroTitle = root.querySelector("#ftg-ai-intro-title");
+    var aiIntroCopy = root.querySelector("#ftg-ai-intro-copy");
+    var aiIntroInput = root.querySelector("#ftg-ai-intro-input");
+    var aiIntroSend = root.querySelector("#ftg-ai-intro-send");
+    var aiIntroClose = root.querySelector("#ftg-ai-intro-close");
     var aiClose = root.querySelector("#ftg-ai-close");
     var aiMessages = root.querySelector("#ftg-ai-messages");
     var aiInput = root.querySelector("#ftg-ai-input");
@@ -1012,6 +1029,7 @@
     aiAvatarSlot.className = "ftg-ai-avatar-slot";
     aiAvatarSlot.setAttribute("aria-hidden", "true");
     aiAvatarSlot.innerHTML = '<span class="ftg-ai-avatar-fallback">G</span>';
+    if (aiMascotVideo) aiAvatarSlot.appendChild(aiMascotVideo.cloneNode(true));
     if (aiHead && aiHeadCopy) {
       aiHead.insertBefore(aiAvatarSlot, aiHeadCopy);
       aiHead.insertBefore(aiBack, aiAvatarSlot);
@@ -1243,7 +1261,7 @@
     }
     window.addEventListener("orientationchange", syncAIVisualViewport);
 
-    function toggleAI(forceOpen) {
+    function legacyToggleAI(forceOpen) {
       if (!aiPanel) return;
       var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
       aiPanel.classList.toggle("open", shouldOpen);
@@ -1266,9 +1284,19 @@
       if (shouldOpen && aiInput) window.setTimeout(function () { aiInput.focus(); }, 80);
     }
 
+    function getAIIntroGreeting() {
+      var code = String(currentLanguage || 'en').slice(0,2);
+      var copy = { it:['Ciao, sono Capitan Gull.','La tua guida locale di 5TerreGo. Chiedimi quello che vuoi.'], fr:['Bonjour, je suis Captain Gull.','Votre guide local 5TerreGo. Posez-moi votre question.'], de:['Hallo, ich bin Captain Gull.','Dein lokaler 5TerreGo Guide. Frag mich einfach.'], es:['Hola, soy Captain Gull.','Tu guia local de 5TerreGo. Preguntame lo que quieras.'], pt:['Ola, sou o Captain Gull.','O seu guia locale 5TerreGo. Pergunte o que quiser.'], zh:['Hello, I am Captain Gull.','Your local 5TerreGo guide. Ask me anything.'] };
+      return copy[code] || ['Hi, I am Captain Gull.','Your local 5TerreGo guide. Ask me anything.'];
+    }
+    function closeAI() { if (aiIntro) { aiIntro.classList.remove('open'); aiIntro.setAttribute('aria-hidden','true'); } if (aiPanel) { aiPanel.classList.remove('open'); aiPanel.setAttribute('aria-hidden','true'); } aiFab.setAttribute('aria-expanded','false'); aiFab.classList.remove('is-panel-open'); document.body.classList.remove('ftg-ai-open'); }
+    function openAIChat() { if (!aiPanel) return; if (aiIntro) { aiIntro.classList.remove('open'); aiIntro.setAttribute('aria-hidden','true'); } aiPanel.classList.add('open'); aiPanel.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); startAILocationWatch(); syncAIVisualViewport(); if (!welcomed) { welcomed = true; addAIMessage(aiWelcome, false); } if (aiInput) window.setTimeout(function () { aiInput.focus(); }, 80); }
+    function openAIIntro() { var greeting = getAIIntroGreeting(); var introVideo; if (!aiIntro) { openAIChat(); return; } if (aiIntroTitle) aiIntroTitle.textContent = greeting[0]; if (aiIntroCopy) aiIntroCopy.textContent = greeting[1]; aiIntro.classList.add('open'); aiIntro.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); introVideo = aiIntro.querySelector('video'); if (introVideo) introVideo.play().catch(function () {}); if (aiIntroInput) window.setTimeout(function(){ aiIntroInput.focus(); },160); }
+    function toggleAI(forceOpen) { var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !(aiPanel && aiPanel.classList.contains('open')) && !(aiIntro && aiIntro.classList.contains('open')); if (!shouldOpen) { closeAI(); return; } if (aiHistory.length) openAIChat(); else openAIIntro(); }
     async function handleAISend(textFromButton) {
       var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
       if (!text || aiBusy) return;
+      if (aiIntro && aiIntro.classList.contains('open')) openAIChat();
       addAIMessage(text, true);
       if (aiInput) aiInput.value = "";
       aiBusy = true; aiSend.disabled = true; aiAbortController = new AbortController();
@@ -1482,6 +1510,9 @@
         if (event.key === "Enter") handleAISend();
       });
     }
+    if (aiIntroSend) aiIntroSend.addEventListener('click', function () { handleAISend(aiIntroInput && aiIntroInput.value); });
+    if (aiIntroInput) aiIntroInput.addEventListener('keydown', function (event) { if (event.key === 'Enter') handleAISend(aiIntroInput.value); });
+    if (aiIntroClose) aiIntroClose.addEventListener('click', function () { closeAI(); });
 
     aiSuggestions.forEach(function (button) {
       button.addEventListener("click", function () {
