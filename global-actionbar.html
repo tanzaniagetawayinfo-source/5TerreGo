@@ -983,6 +983,8 @@
     var aiBusy = false;
     var aiLocation = null;
     var aiLocationWatch = null;
+    var aiLocationError = null;
+    var captainNavigationPromise = null;
     var aiHistory = [];
     var aiFab = document.createElement("button");
     aiFab.id = "ftg-ai-fab";
@@ -1198,10 +1200,28 @@
       if ((!forceFresh && aiLocation) || !navigator.geolocation) return Promise.resolve(aiLocation);
       return new Promise(function (resolve) {
         navigator.geolocation.getCurrentPosition(function (position) {
+          aiLocationError = null;
           aiLocation = { latitude:Number(position.coords.latitude.toFixed(6)), longitude:Number(position.coords.longitude.toFixed(6)), accuracy:Math.round(Number(position.coords.accuracy || 0)), captured_at:new Date(position.timestamp || Date.now()).toISOString() };
           resolve(aiLocation);
-        },function () { resolve(null); },{ enableHighAccuracy:true, maximumAge:15000, timeout:6000 });
+        },function (error) { aiLocationError = { code:Number(error && error.code || 0), message:String(error && error.message || "") }; resolve(null); },{ enableHighAccuracy:true, maximumAge:0, timeout:10000 });
       });
+    }
+
+    function loadCaptainNavigation() {
+      if (captainNavigationPromise) return captainNavigationPromise;
+      captainNavigationPromise = new Promise(function (resolve) {
+        function initialise() {
+          if (!window.FTG_CAPTAIN_NAVIGATION) { resolve(null); return; }
+          resolve(window.FTG_CAPTAIN_NAVIGATION.init({ messages:aiMessages, addMessage:addAIMessage, getLocation:ensureAILocation, getLocationError:function () { return aiLocationError; } }));
+        }
+        if (window.FTG_CAPTAIN_NAVIGATION) { initialise(); return; }
+        var script = document.createElement("script");
+        script.src = "/captain-gull-navigation.js?v=1";
+        script.onload = initialise;
+        script.onerror = function () { resolve(null); };
+        document.head.appendChild(script);
+      });
+      return captainNavigationPromise;
     }
 
     function syncAIVisualViewport() {
@@ -1254,6 +1274,11 @@
       addAIMessage("Captain Gull is checking 5TerreGo…", false);
       try {
         if (/(dove mi trovo|dove sono|posizione|where am i|my location|ma position|wo bin ich|我的位置)/i.test(text)) await ensureAILocation(true);
+        var captainNavigation = await loadCaptainNavigation();
+        if (captainNavigation && await captainNavigation.beforeSend(text)) {
+          if (aiMessages) Array.from(aiMessages.children).forEach(function (node) { if (/checking 5TerreGo/i.test(node.textContent || "")) node.remove(); });
+          return;
+        }
         var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
         var response = await fetch(endpoint, { method:"POST", headers:getAIHeaders(), signal:aiAbortController.signal, body:JSON.stringify({ question:text, history:aiHistory, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || "") }) });
         var payload = await response.json().catch(function () { return {}; });
