@@ -1495,6 +1495,7 @@
       .trail-info-grid { grid-template-columns:1fr; }
     }
 
+    body.map-preview-mode #ftg-global-actionbar-root,
     body.map-preview-mode .search-floating,
     body.map-preview-mode #bottom-rail,
     body.map-preview-mode #user-location-btn,
@@ -1831,7 +1832,7 @@
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v11';
+  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v12';
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -2214,7 +2215,7 @@
   'use strict';
 
   var urlParams = new URLSearchParams(window.location.search || '');
-  var isMapPreviewMode = urlParams.get('preview') === 'hero' || urlParams.get('embed') === 'hero' || urlParams.get('mode') === 'preview';
+  var isMapPreviewMode = urlParams.get('preview') === 'hero' || urlParams.get('preview') === 'poi' || urlParams.get('embed') === 'hero' || urlParams.get('mode') === 'preview';
   if (isMapPreviewMode) document.body.classList.add('map-preview-mode');
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
@@ -2380,8 +2381,13 @@
   function getInitialMapState() {
     var requestedIndex = getRequestedVillageIndexFromURL();
     var sessionState = readSessionMapState();
+    var requestedCoords = parseCoords({ coords: urlParams.get('coords') || '' });
     var index;
     var place;
+
+    if (Number.isFinite(requestedCoords.lat) && Number.isFinite(requestedCoords.lng)) {
+      return { index: 0, place: null, center: [requestedCoords.lat, requestedCoords.lng], zoom: 17 };
+    }
 
     if (requestedIndex >= 0) {
       place = places[requestedIndex] || places[0];
@@ -4867,6 +4873,26 @@
     window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); } }, 80); }
   function flyToWithTopOffset(coords, zoom, duration) { var targetZoom; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); isProgrammaticMove = true; syncingMapCameras = true; map.setView(coords, targetZoom, { animate:false }); syncingMapCameras = false; flyMapLibre3D(coords, targetZoom, duration); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
+  var requestedPOIFocused = false;
+  function focusRequestedPOIFromURL() {
+    var requestedId, requestedName, requestedCoords, item, synthetic, shouldNavigate;
+    if (requestedPOIFocused) return false;
+    requestedId = String(urlParams.get('poi') || '').trim();
+    requestedName = String(urlParams.get('name') || '').trim();
+    requestedCoords = parseCoords({ coords: urlParams.get('coords') || '' });
+    shouldNavigate = urlParams.get('navigate') === '1';
+    if (!requestedId && !requestedName && !Number.isFinite(requestedCoords.lat)) return false;
+    item = poiMarkers.find(function(entry) { return String(entry.poi && entry.poi.id || '') === requestedId; });
+    if (!item && requestedName) item = poiMarkers.find(function(entry) { return normalizeText(entry.poi && entry.poi.name || '') === normalizeText(requestedName); });
+    synthetic = item && item.poi;
+    if (!synthetic && Number.isFinite(requestedCoords.lat) && Number.isFinite(requestedCoords.lng)) synthetic = normalizePOI({ id: requestedId || 'route-destination', name: requestedName || 'Destinazione', type: urlParams.get('type') || 'unknown spot', coords: [requestedCoords.lat, requestedCoords.lng] });
+    if (!synthetic) return false;
+    requestedPOIFocused = true;
+    flyToWithTopOffset(synthetic.coords, 17, 0.55);
+    if (isMapPreviewMode) return true;
+    window.setTimeout(function() { if (shouldNavigate) beginNavigationMode(synthetic); else showPOICard(synthetic); }, 260);
+    return true;
+  }
   async function loadTrails() {
     var response, rows;
     if (!trailsLayer) return;
@@ -7949,6 +7975,7 @@
       scheduleSessionMapStateSave();
     }
     loadPOIs().then(async function() {
+      focusRequestedPOIFromURL();
       await loadATCBusStops();
       if (isMapPreviewMode && map && poiMarkers.length) {
         updatePOIVisibility();

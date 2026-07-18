@@ -1216,7 +1216,7 @@
         }
         if (window.FTG_CAPTAIN_NAVIGATION) { initialise(); return; }
         var script = document.createElement("script");
-        script.src = "/captain-gull-navigation.js?v=1";
+        script.src = "/captain-gull-navigation.js?v=2";
         script.onload = initialise;
         script.onerror = function () { resolve(null); };
         document.head.appendChild(script);
