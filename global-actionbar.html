@@ -1071,8 +1071,8 @@
       aiBusy = true; aiSend.disabled = true; aiAbortController = new AbortController();
       addAIMessage("Captain Gull is checking 5TerreGo…", false);
       try {
-        var endpoint = String(config.aiEndpoint || "https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/ai");
-        var anonKey = String(config.supabaseAnonKey || window.FTG_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa");
+        var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
+        var anonKey = String(config.aiAnonKey || "sb_publishable_e1G4u6PMDY39tyQW2U8xJQ_eQYetzIb");
         var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
         var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
         if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;

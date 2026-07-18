@@ -3,7 +3,9 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 type Source = { title: string; url: string; category: string; updated_at?: string; kind: "editorial" | "scheduled" | "live" };
 type Action = { type: "navigate_to_page" | "open_map_poi" | "open_trail" | "search_transport" | "set_language" | "open_login"; label: string; page?: string; poi_id?: string; trail_id?: string; language?: string };
-const PROJECT_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+const AI_PROJECT_URL = "https://baggohsrpxkcubhbzcpu.supabase.co";
+const CONTENT_PROJECT_URL = "https://jpflcbktcnhmlvaibzcw.supabase.co";
+const CONTENT_ANON_KEY = "sb_publishable_vWugAbu_xtetgvrCh6yKYw_iA8bAXBa";
 const MAX_QUESTION = 800;
 const corsHeaders = { "Access-Control-Allow-Origin": "https://www.5terrego.com", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS", "Content-Type": "application/json" };
 
@@ -43,17 +45,17 @@ serve(async (req) => {
   let godmode = false;
   if (/^Bearer\s+/i.test(bearer)) {
     try {
-      const access = await timeoutFetch(`${Deno.env.get("SUPABASE_URL") || PROJECT_URL}/functions/v1/partner-backend`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: bearer }, body: JSON.stringify({ action: "get_partner_pois" }) }, 5000);
+      const access = await timeoutFetch(`${CONTENT_PROJECT_URL}/functions/v1/partner-backend`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: bearer }, body: JSON.stringify({ action: "get_partner_pois" }) }, 5000);
       const payload = access.ok ? await access.json() : null;
       godmode = Boolean(payload && Array.isArray(payload.pois) && payload.pois.length > 0);
     } catch { godmode = false; }
   }
-  const supabase = createClient(Deno.env.get("SUPABASE_URL") || PROJECT_URL, Deno.env.get("SUPABASE_ANON_KEY") || "", { auth: { persistSession: false } });
+  const supabase = createClient(CONTENT_PROJECT_URL, CONTENT_ANON_KEY, { auth: { persistSession: false } });
   const train = /\b(train|treno|treni|zug|train[s]?|火车)\b/i.test(question) ? trainParams(question) : null;
   let trainContext = "";
   if (train && train.from && train.to) {
     try {
-      const endpoint = new URL(`${Deno.env.get("SUPABASE_URL") || PROJECT_URL}/functions/v1/trains-realtime`);
+      const endpoint = new URL(`${AI_PROJECT_URL}/functions/v1/trains-realtime`);
       endpoint.searchParams.set("from", train.from); endpoint.searchParams.set("to", train.to);
       const result = await timeoutFetch(endpoint.toString(), { headers: bearer ? { Authorization: bearer } : {} }, 7000);
       if (result.ok) trainContext = `LIVE TRAIN DATA (use only this for train times): ${text(await result.text(), 1800)}`;
