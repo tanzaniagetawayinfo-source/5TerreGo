@@ -1829,14 +1829,14 @@
   window.__ftgActionbarMountStarted = false;
 
   var ACTIONBAR_PARTIAL_CANDIDATES = [
-    'global-actionbar.html?v=20260718-1',
-    './global-actionbar.html?v=20260718-1',
-    '/global-actionbar.html?v=20260718-1',
+    'global-actionbar.html?v=20260718-2',
+    './global-actionbar.html?v=20260718-2',
+    '/global-actionbar.html?v=20260718-2',
     'global-actionbar.html',
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v13';
+  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v14';
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -6195,7 +6195,6 @@
       el.setAttribute('aria-label', poi.name || 'POI');
       el.innerHTML = getPOIIconHTML(poi);
       el.style.cssText = 'width:38px;height:38px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;font-size:24px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))';
-      Array.from(el.querySelectorAll('img')).forEach(function(img){img.style.cssText='width:34px;height:34px;object-fit:contain'});
       el.addEventListener('click', function(event) { event.stopPropagation(); openPOIWithMapMove(poi, null); });
       glPOIMarkers.push(new window.maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([poi.coords[1], poi.coords[0]]).addTo(turnNavigationMap));
     });

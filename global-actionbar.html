@@ -971,7 +971,7 @@
 
     root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
 
-    root.insertAdjacentHTML("beforeend", '<section class="ftg-ai-intro" id="ftg-ai-intro" aria-hidden="true"><button class="ftg-ai-intro-close" id="ftg-ai-intro-close" type="button" aria-label="Close">×</button><div class="ftg-ai-intro-mascot"><video autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"><source src="mascotterelax.mov.mp4" type="video/mp4"></video></div><h2 id="ftg-ai-intro-title">Hi, I am Captain Gull.</h2><p id="ftg-ai-intro-copy">Your local 5TerreGo guide. Ask me anything.</p><div class="ftg-ai-intro-input"><input id="ftg-ai-intro-input" autocomplete="off"><button id="ftg-ai-intro-send" type="button" aria-label="Send">→</button></div></section>');
+    root.insertAdjacentHTML("beforeend", '<section class="ftg-ai-intro" id="ftg-ai-intro" aria-hidden="true"><button class="ftg-ai-intro-close" id="ftg-ai-intro-close" type="button" aria-label="Close">×</button><div class="ftg-ai-intro-mascot"><video autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="mascotterelax.mov.mp4" type="video/mp4"></video></div><h2 id="ftg-ai-intro-title">Hi, I am Captain Gull.</h2><p id="ftg-ai-intro-copy">Your local 5TerreGo guide. Ask me anything.</p><div class="ftg-ai-intro-input"><input id="ftg-ai-intro-input" autocomplete="off"><button id="ftg-ai-intro-send" type="button" aria-label="Send">→</button></div></section>');
     var topbar = root.querySelector("#ftg-topbar");
     var pillScroller = root.querySelector("#ftg-pill-scroller");
     var accountBtn = root.querySelector("#ftg-account-btn");
@@ -1016,7 +1016,7 @@
     aiFab.setAttribute("aria-label", "Open travel assistant");
     aiFab.setAttribute("aria-expanded", "false");
     aiFab.setAttribute("aria-controls", "ftg-ai-panel");
-    aiFab.innerHTML = '<video autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"><source src="mascotterelax.mov.mp4" type="video/mp4"></video><span class="ftg-ai-fab-fallback" aria-hidden="true">✦</span>';
+    aiFab.innerHTML = '<video autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="mascotterelax.mov.mp4" type="video/mp4"></video><span class="ftg-ai-fab-fallback" aria-hidden="true">✦</span>';
     root.appendChild(aiFab);
     var aiMascotVideo = aiFab.querySelector("video");
     var aiFabFallback = aiFab.querySelector(".ftg-ai-fab-fallback");
@@ -1112,7 +1112,10 @@
     }
 
     function sanitizeAIText(value) {
-      return String(value || "").replace(/\b(?:dio\s+(?:cane|porco|boia)|porco\s+dio|madonna\s+(?:puttana|troia)|gesu\s+(?:cane|cristo\s+porco))\b/gi, "[contenuto rimosso]");
+      var text = String(value || "");
+      // Reject the whole abusive fragment, rather than exposing a censored version.
+      text = text.replace(/(?:^|[.!?]\s*)[^.!?]*(?:dio\s+(?:cane|porco|boia)|porco\s+dio|madonna\s+(?:puttana|troia)|gesu\s+(?:cane|cristo\s+porco))[^.!?]*[.!?]?/gi, " ");
+      return text.replace(/\s{2,}/g, " ").trim();
     }
 
     function isSafeSourceUrl(value) {
@@ -1309,7 +1312,7 @@
           return;
         }
         var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
-        var response = await fetch(endpoint, { method:"POST", headers:getAIHeaders(), signal:aiAbortController.signal, body:JSON.stringify({ question:text, history:aiHistory, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || "") }) });
+        var response = await fetch(endpoint, { method:"POST", headers:getAIHeaders(), signal:aiAbortController.signal, body:JSON.stringify({ question:text, history:aiHistory, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || ""), safety_instruction:"Never use profanity, insults, or blasphemous language. Keep every response family-friendly." }) });
         var payload = await response.json().catch(function () { return {}; });
         if (!response.ok) throw new Error(payload.error || "Assistant temporarily unavailable.");
         if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
