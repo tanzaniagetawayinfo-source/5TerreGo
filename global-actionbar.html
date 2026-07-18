@@ -492,6 +492,7 @@
   }
 
   .ftg-ai-head {
+    flex: 0 0 auto;
     padding: 14px;
     border-bottom: 1px solid var(--ftg-line);
     display: flex;
@@ -558,6 +559,7 @@
   }
 
   .ftg-ai-suggestions {
+    flex: 0 0 auto;
     display: flex;
     gap: 7px;
     overflow-x: auto;
@@ -584,6 +586,7 @@
   }
 
   .ftg-ai-input-row {
+    flex: 0 0 auto;
     display: flex;
     gap: 8px;
     padding: 10px;
@@ -697,9 +700,11 @@
     }
 
     .ftg-ai-panel {
-      inset:0;
-      width:100%;
-      height:100dvh;
+      inset:auto;
+      top:var(--ftg-ai-viewport-top,0px);
+      left:var(--ftg-ai-viewport-left,0px);
+      width:var(--ftg-ai-viewport-width,100vw);
+      height:var(--ftg-ai-viewport-height,100dvh);
       max-height:none;
       z-index:10160;
       border:0;
@@ -1189,8 +1194,8 @@
       },function () { aiLocation = null; },{ enableHighAccuracy:true, maximumAge:15000, timeout:10000 });
     }
 
-    function ensureAILocation() {
-      if (aiLocation || !navigator.geolocation) return Promise.resolve(aiLocation);
+    function ensureAILocation(forceFresh) {
+      if ((!forceFresh && aiLocation) || !navigator.geolocation) return Promise.resolve(aiLocation);
       return new Promise(function (resolve) {
         navigator.geolocation.getCurrentPosition(function (position) {
           aiLocation = { latitude:Number(position.coords.latitude.toFixed(6)), longitude:Number(position.coords.longitude.toFixed(6)), accuracy:Math.round(Number(position.coords.accuracy || 0)), captured_at:new Date(position.timestamp || Date.now()).toISOString() };
@@ -1198,6 +1203,24 @@
         },function () { resolve(null); },{ enableHighAccuracy:true, maximumAge:15000, timeout:6000 });
       });
     }
+
+    function syncAIVisualViewport() {
+      if (!aiPanel || window.innerWidth > 760) {
+        if (aiPanel) { aiPanel.style.removeProperty("--ftg-ai-viewport-top"); aiPanel.style.removeProperty("--ftg-ai-viewport-left"); aiPanel.style.removeProperty("--ftg-ai-viewport-width"); aiPanel.style.removeProperty("--ftg-ai-viewport-height"); }
+        return;
+      }
+      var viewport = window.visualViewport;
+      aiPanel.style.setProperty("--ftg-ai-viewport-top", (viewport ? viewport.offsetTop : 0) + "px");
+      aiPanel.style.setProperty("--ftg-ai-viewport-left", (viewport ? viewport.offsetLeft : 0) + "px");
+      aiPanel.style.setProperty("--ftg-ai-viewport-width", (viewport ? viewport.width : window.innerWidth) + "px");
+      aiPanel.style.setProperty("--ftg-ai-viewport-height", (viewport ? viewport.height : window.innerHeight) + "px");
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", syncAIVisualViewport);
+      window.visualViewport.addEventListener("scroll", syncAIVisualViewport);
+    }
+    window.addEventListener("orientationchange", syncAIVisualViewport);
 
     function toggleAI(forceOpen) {
       if (!aiPanel) return;
@@ -1207,7 +1230,7 @@
       aiFab.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
       aiFab.classList.toggle("is-panel-open", shouldOpen);
       document.body.classList.toggle("ftg-ai-open", shouldOpen);
-      if (shouldOpen) startAILocationWatch();
+      if (shouldOpen) { startAILocationWatch(); syncAIVisualViewport(); }
       if (aiFabFallback) aiFabFallback.textContent = shouldOpen ? "×" : "✦";
       if (aiMascotVideo) {
         if (shouldOpen && aiAvatarSlot) aiAvatarSlot.insertBefore(aiMascotVideo, aiAvatarSlot.firstChild);
@@ -1230,7 +1253,7 @@
       aiBusy = true; aiSend.disabled = true; aiAbortController = new AbortController();
       addAIMessage("Captain Gull is checking 5TerreGo…", false);
       try {
-        if (!aiLocation && /(dove mi trovo|where am i|ma position|wo bin ich|我的位置)/i.test(text)) await ensureAILocation();
+        if (/(dove mi trovo|dove sono|posizione|where am i|my location|ma position|wo bin ich|我的位置)/i.test(text)) await ensureAILocation(true);
         var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
         var response = await fetch(endpoint, { method:"POST", headers:getAIHeaders(), signal:aiAbortController.signal, body:JSON.stringify({ question:text, history:aiHistory, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || "") }) });
         var payload = await response.json().catch(function () { return {}; });
