@@ -7,7 +7,9 @@ const defaultImage = `${origin}/seo.png`;
 const privatePages = new Set([
   'blog.html', 'blogeditor.html', 'discounteditor.html',
   'login.html', 'offline.html', 'poieditor.html', 'stories/index.html',
-  'trails/index.html', 'trakeditor.html', 'visitors.html', 'partner.html', 'terms.html'
+  'trakeditor.html', 'visitors.html', 'partner.html', 'terms.html',
+  'business-analytics.html', 'business-campaign.html', 'business-menu.html',
+  'business-profile.html', 'business-staff.html'
 ]);
 const excludedDirs = new Set(['.git', 'vendor', 'node_modules']);
 

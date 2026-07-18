@@ -1037,6 +1037,9 @@
           currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
           applyTranslations();
           closeLanguagePanel();
+          try { localStorage.setItem("ftg_language", currentLanguage); } catch (_error) {}
+          document.documentElement.lang = currentLanguage;
+          window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail: { language: currentLanguage } }));
           if (typeof config.onLanguageChange === "function") {
             config.onLanguageChange(currentLanguage);
           }
@@ -1170,6 +1173,14 @@
   }
 
   window.FTG_MOUNT_GLOBAL_ACTIONBAR = mountGlobalActionbar;
+
+  if (!document.querySelector('script[data-ftg-site-translation]')) {
+    var translationScript = document.createElement('script');
+    translationScript.src = '/site-translation.js';
+    translationScript.defer = true;
+    translationScript.setAttribute('data-ftg-site-translation', '');
+    document.head.appendChild(translationScript);
+  }
 
   var standaloneRoot = document.getElementById("ftg-global-actionbar-root");
   if (standaloneRoot && !standaloneRoot.childElementCount) {

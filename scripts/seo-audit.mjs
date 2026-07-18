@@ -6,7 +6,9 @@ const ignoredDirs = new Set(['.git', 'vendor', 'node_modules']);
 const privatePages = new Set([
   'blogeditor.html', 'discounteditor.html', 'poieditor.html', 'trakeditor.html',
   'blog.html', 'login.html', 'global-actionbar.html', 'offline.html', 'visitors.html',
-  'stories/index.html', 'trails/index.html', 'partner.html', 'terms.html'
+  'stories/index.html', 'partner.html', 'terms.html', 'discounteditor.html',
+  'business-analytics.html', 'business-campaign.html', 'business-menu.html',
+  'business-profile.html', 'business-staff.html'
 ]);
 
 function walk(directory) {

@@ -4069,7 +4069,7 @@
     if (!godModeAuthorized || !godModeEnabled || !poi || !isValidCoords(poi.coords)) return;
     fullPoi = poi;
     if (supabaseClient && poi.id && String(poi.id).indexOf('local-') !== 0) {
-      try { response = await supabaseClient.from('pois').select('id,name,coords,description,importance,type,phone,emails,images').eq('id', String(poi.id)).maybeSingle(); if (!response.error && response.data) fullPoi = Object.assign({}, poi, response.data); } catch (_error) {}
+      try { response = await supabaseClient.from('pois').select('id,name,coords,description,importance,type,phone,images').eq('id', String(poi.id)).maybeSingle(); if (!response.error && response.data) fullPoi = Object.assign({}, poi, response.data); } catch (_error) {}
     }
     fullPoi = normalizePOI(fullPoi);
     clearGodModePendingPoint();
