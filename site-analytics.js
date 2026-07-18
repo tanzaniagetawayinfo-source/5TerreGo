@@ -2,7 +2,7 @@
   'use strict';
   if (!document.querySelector('script[data-ftg-translation]')) {
     var translationScript = document.createElement('script');
-    translationScript.src = '/site-translation.js?v=5';
+    translationScript.src = '/site-translation.js?v=6';
     translationScript.defer = true;
     translationScript.setAttribute('data-ftg-translation', '');
     document.head.appendChild(translationScript);
