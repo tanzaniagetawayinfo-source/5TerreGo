@@ -381,8 +381,8 @@
 
     .custom-label { z-index: 1 !important; overflow: visible !important; }
     .custom-label .label { display: inline-block; transform: translateX(-50%); color: white; font-weight: 900; font-size: 14px; line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 6px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.9); white-space: nowrap; cursor: pointer; user-select: none; }
-    .poi-label { position: relative; min-width: 34px; min-height: 34px; display: grid; place-items: center; background: transparent; color: white; font-size: 26px; border: 0; box-shadow: none; overflow: visible; }
-    .poi-label img { width: 32px; height: 32px; display: block; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
+    .poi-label { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.94); border-radius: 14px 14px 14px 4px; background: var(--poi-color, #1b5e6f); color: white; box-shadow: 0 7px 16px rgba(3,18,28,.34), inset 0 1px 0 rgba(255,255,255,.24); overflow: visible; transform: rotate(-45deg); }
+    .poi-label .poi-symbol { width: 19px; height: 19px; display: block; fill: none; stroke: currentColor; stroke-width: 2.15; stroke-linecap: round; stroke-linejoin: round; transform: rotate(45deg); pointer-events: none; }
     .custom-poi {
       transition: opacity .22s ease, transform .22s ease, filter .22s ease, margin-left .18s ease, margin-top .18s ease;
       will-change: margin-left, margin-top, transform, opacity;
@@ -407,12 +407,12 @@
       z-index: 12;
     }
     .custom-poi.custom-poi-dot.is-selected .poi-dot-label,
-    .custom-poi.is-selected .poi-label img,
+    .custom-poi.is-selected .poi-label .poi-symbol,
     .custom-poi.is-selected .poi-label {
       transform: scale(1.12);
     }
     .custom-poi.custom-poi-dot.is-dimmed .poi-dot-label,
-    .custom-poi.is-dimmed .poi-label img,
+    .custom-poi.is-dimmed .poi-label .poi-symbol,
     .custom-poi.is-dimmed .poi-label {
       opacity: .72;
     }
@@ -533,7 +533,7 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.16);
       pointer-events: none;
     }
-    .poi-dot-label { width: 10px; height: 10px; display: block; border-radius: 999px; background: rgba(255,255,255,1); border: 2px solid rgba(0,0,0,.62); box-shadow: 0 5px 12px rgba(0,0,0,.38); }
+    .poi-dot-label { width: 11px; height: 11px; display: block; border-radius: 999px; background: var(--poi-color, #1b5e6f); border: 2px solid rgba(255,255,255,.94); box-shadow: 0 5px 12px rgba(0,0,0,.38); }
     .poi-label.has-discount::after { content: '🔥'; position: absolute; top: -9px; right: -9px; width: 19px; height: 19px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,0.94); border: 1px solid rgba(255,138,29,0.45); box-shadow: 0 6px 14px rgba(0,0,0,0.24); font-size: 12px; }
     .trail-start-label { min-width: 38px; min-height: 38px; display: grid; place-items: center; background: transparent; border: 0; overflow: visible; }
     .trail-start-label img { width: 34px; height: 34px; display: block; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
@@ -2829,7 +2829,8 @@
   var atcScheduledBusLastFrame = 0;
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
-  var NORMAL_MAP_ZOOM = 9.5;
+  // Shows the complete coast at first glance, without making the villages feel distant.
+  var NORMAL_MAP_ZOOM = 10.25;
   var NORMAL_MAP_PITCH = 0;
   var NORMAL_MAP_LIMITS = [[9.28, 43.75], [10.28, 44.48]];
   var ambientOrbitFrame = 0;
@@ -3093,7 +3094,7 @@
       });
     });
   }
-  function getPOIIconHTML(poi) {
+  function getLegacyPOIIconHTML(poi) {
     var symbol = poi && poi.symbol ? String(poi.symbol) : '📌';
     var type = normalizePOIType(poi && poi.type);
     if (type === 'chiesa' || type === 'church' || symbol === 'church.png') return buildPOIAssetImage('church.png', 'Church', '⛪');
@@ -3114,6 +3115,22 @@
     if (type === 'bar') return '🍸';
     if (type === 'curiosity') return '✨';
     return escapeHTML(symbol || '📌');
+  }
+  function getPOIIconHTML(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    var icons = {
+      chiesa:'M12 3v18M8 7h8M5 21h14M8 21v-6h8v6', church:'M12 3v18M8 7h8M5 21h14M8 21v-6h8v6',
+      monumento:'M8 21h8M10 17h4M9 17l1-11h4l1 11M7 21h10', castello:'M4 21h16V9l-4 2V7l-4 2-4-2v4L4 9zM9 21v-5h6v5',
+      sentiero:'M5 19c4-7 8-7 14-14M6 6h5v5M13 18h5v-5', trail:'M5 19c4-7 8-7 14-14M6 6h5v5M13 18h5v-5',
+      spiaggia:'M4 17c2-2 4-2 6 0s4 2 6 0 4-2 4 0M6 13c2-2 4-2 6 0s4 2 6 0M12 4v7M8 7h8', beach:'M4 17c2-2 4-2 6 0s4 2 6 0 4-2 4 0M6 13c2-2 4-2 6 0s4 2 6 0M12 4v7M8 7h8',
+      stazione:'M6 4h12v16H6zM9 8h1M14 8h1M9 20v-4h6v4M4 20h16', station:'M6 4h12v16H6zM9 8h1M14 8h1M9 20v-4h6v4M4 20h16',
+      'fermata bus':'M5 6h14v12H5zM8 18a2 2 0 1 0 0 .1M16 18a2 2 0 1 0 0 .1M5 11h14', ferry:'M4 15h16l-2 5H6zM7 11h10v4H7zM12 4v7',
+      'punto panoramico':'M4 19l5-6 4 4 3-3 4 5M5 5h14v10', viewpoint:'M4 19l5-6 4 4 3-3 4 5M5 5h14v10', fontana:'M6 19h12M8 19c0-4 2-6 4-6s4 2 4 6M12 5v5M8 9h8', farmacia:'M12 5v14M5 12h14', atm:'M5 5h14v14H5zM8 9h8M8 14h5',
+      'ascensore pubblico':'M8 21V4h8v17M10 8h4M10 17h4M4 21h16', ristorante:'M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 3 7 0 8', bar:'M5 5h14l-6 7v7M8 21h8M7 5l5 7 5-7', curiosity:'M12 3a7 7 0 0 0-4 12c1.4 1.1 2 2.2 2 4h4c0-1.8.6-2.9 2-4A7 7 0 0 0 12 3zM10 22h4'
+    };
+    var colors = { curiosity:'#7756c8', 'punto panoramico':'#d56b30', spiaggia:'#1683a2', chiesa:'#7d596e', monumento:'#8b7048', castello:'#745d4a', sentiero:'#4f8b57', stazione:'#355f9a', 'fermata bus':'#3f7d88', ferry:'#237a91', fontana:'#3c8cb0', farmacia:'#4f9a70', atm:'#786c9e', ristorante:'#b45d45', bar:'#a95e72', 'ascensore pubblico':'#61737f' };
+    var path = icons[type] || 'M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12zM12 11a2 2 0 1 0 0 .1';
+    return '<span style="--poi-color:' + (colors[type] || '#1b5e6f') + '"><svg class="poi-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"></path></svg></span>';
   }
   function clampPOIZoomScore(value) { var n = Number(value); if (!Number.isFinite(n)) return null; return Math.max(1, Math.min(100, n)); }
   function getPOIZoomScoreFromRaw(raw) {
@@ -3377,18 +3394,22 @@
     showUserLocationToast(place.name + ' tour started from your current location.');
   }
   function createPOIDotIcon(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    var colors = { curiosity:'#7756c8', 'punto panoramico':'#d56b30', spiaggia:'#1683a2', chiesa:'#7d596e', monumento:'#8b7048', castello:'#745d4a', sentiero:'#4f8b57', stazione:'#355f9a', 'fermata bus':'#3f7d88', ferry:'#237a91' };
     return L.divIcon({
       className: 'custom-poi custom-poi-dot',
-      html: '<div class="poi-dot-label"></div>',
+      html: '<div class="poi-dot-label" style="--poi-color:' + (colors[type] || '#1b5e6f') + '"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
   }
   function createPOIFullIcon(poi) {
     var hasDiscount = isPOICampaignActive(poi);
+    var type = normalizePOIType(poi && poi.type);
+    var colors = { curiosity:'#7756c8', 'punto panoramico':'#d56b30', spiaggia:'#1683a2', chiesa:'#7d596e', monumento:'#8b7048', castello:'#745d4a', sentiero:'#4f8b57', stazione:'#355f9a', 'fermata bus':'#3f7d88', ferry:'#237a91', fontana:'#3c8cb0', farmacia:'#4f9a70', atm:'#786c9e', ristorante:'#b45d45', bar:'#a95e72', 'ascensore pubblico':'#61737f' };
     return L.divIcon({
       className: 'custom-poi',
-      html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>',
+      html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '" style="--poi-color:' + (colors[type] || '#1b5e6f') + '">' + getPOIIconHTML(poi) + '</div>',
       iconSize: [40, 40],
       iconAnchor: [20, 34]
     });
