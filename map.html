@@ -385,6 +385,7 @@
     .poi-label::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.96); box-shadow: inset 0 1px 2px rgba(0,0,0,.16); transform: rotate(45deg); }
     .poi-label.has-symbol::before { display: none; }
     .poi-pin-symbol { width: 18px; height: 18px; fill: none; stroke: rgba(255,255,255,.98); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transform: rotate(45deg); }
+    .poi-material-symbol { display: block; object-fit: contain; filter: brightness(0) invert(1); }
     .poi-map-pin { width: 28px; height: 28px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.96); border-radius: 50% 50% 50% 4px; background: var(--poi-color, #176b7a); box-shadow: 0 5px 12px rgba(0,0,0,.34); transform: rotate(-45deg); }
     .poi-map-pin::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.96); transform: rotate(45deg); }
     .poi-map-pin.has-symbol::after { display: none; }
@@ -3433,7 +3434,28 @@
     if (/parcheggio/.test(type)) return 'M7 21V4h6a5 5 0 0 1 0 10H7M11 8h2a1 1 0 0 1 0 2h-2z';
     return 'M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12zM12 11a2 2 0 1 0 0 .1';
   }
-  function getPOIPinSymbolHTML(poi) { return '<svg class="poi-pin-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="' + getPOISymbolPath(poi) + '"></path></svg>'; }
+  function getPOIIconAsset(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    if (/chiesa|church/.test(type)) return 'church';
+    if (/monumento|monument/.test(type)) return 'monument';
+    if (/castello|castle/.test(type)) return 'castle';
+    if (/sentiero|trail/.test(type)) return 'trail';
+    if (/spiaggia|beach/.test(type)) return 'beach';
+    if (/stazione|station/.test(type)) return 'train';
+    if (/fermata bus|bus stop|busstop/.test(type)) return 'bus';
+    if (/ferry/.test(type)) return 'ferry';
+    if (/fontana|fountain/.test(type)) return 'fountain';
+    if (/farmacia|pharmacy/.test(type)) return 'pharmacy';
+    if (/atm/.test(type)) return 'atm';
+    if (/ascensore|elevator/.test(type)) return 'elevator';
+    if (/ristorante|restaurant|food/.test(type)) return 'restaurant';
+    if (/bar/.test(type)) return 'bar';
+    if (/panoramico|viewpoint|unknown spot/.test(type)) return 'camera';
+    if (/curiosity/.test(type)) return 'curiosity';
+    if (/parcheggio/.test(type)) return 'parking';
+    return 'place';
+  }
+  function getPOIPinSymbolHTML(poi) { var icon = getPOIIconAsset(poi); return '<img class="poi-pin-symbol poi-material-symbol" src="assets/material/' + icon + '.svg" alt="" aria-hidden="true">'; }
   function getPOIIconHTML(poi) {
     return '<span class="poi-map-pin has-symbol" style="--poi-color:' + getPOIColor(poi) + '" aria-hidden="true">' + getPOIPinSymbolHTML(poi) + '</span>';
   }
