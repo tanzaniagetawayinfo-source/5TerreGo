@@ -23,6 +23,8 @@
     } catch (error) { console.warn('5TerreGo translation unavailable:', error.message); } finally { running = false; }
   }
   window.addEventListener('ftg:languagechange', function(e) { translate(String(e.detail && e.detail.language || original).split('-')[0].toLowerCase()); });
+  window.addEventListener('ftg:translatecontent', function() { translate(language()); });
+  window.FTGTranslatePage = function() { return translate(language()); };
   window.addEventListener('DOMContentLoaded', function() { translate(language()); });
   if (document.readyState !== 'loading') translate(language());
 }());

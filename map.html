@@ -1829,14 +1829,14 @@
   window.__ftgActionbarMountStarted = false;
 
   var ACTIONBAR_PARTIAL_CANDIDATES = [
-    'global-actionbar.html?v=20260718-5',
-    './global-actionbar.html?v=20260718-5',
-    '/global-actionbar.html?v=20260718-5',
+    'global-actionbar.html?v=20260718-6',
+    './global-actionbar.html?v=20260718-6',
+    '/global-actionbar.html?v=20260718-6',
     'global-actionbar.html',
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v17';
+  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v18';
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -4963,7 +4963,7 @@
     renderDiscountCTA(poi);
     refreshCurrentPOIPublicDetails(poi);
     updateSelectedPOIEmphasis();
-    window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); } }, 80); }
+    window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); try { window.dispatchEvent(new CustomEvent('ftg:translatecontent')); } catch (_error) {} } }, 80); }
   function flyToWithTopOffset(coords, zoom, duration) { var targetZoom; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); isProgrammaticMove = true; syncingMapCameras = true; map.setView(coords, targetZoom, { animate:false }); syncingMapCameras = false; flyMapLibre3D(coords, targetZoom, duration); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
   var requestedPOIFocused = false;

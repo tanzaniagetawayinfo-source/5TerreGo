@@ -625,12 +625,12 @@
   .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; transform:translateY(6px) scale(.94); }
   .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
   .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
-  .ftg-ai-intro { position:fixed; top:0; left:0; z-index:10220; width:100%; height:var(--ftg-ai-intro-height,100dvh); display:none; overflow:hidden; align-items:center; justify-content:center; padding:0 22px; background:#0b4f86; color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
+  .ftg-ai-intro { position:fixed; top:calc(-1 * var(--ftg-ai-viewport-offset,0px)); left:0; z-index:10220; width:100%; height:var(--ftg-ai-intro-height,100dvh); display:none; overflow:hidden; align-items:center; justify-content:center; padding:0 22px; background:#0b4f86; color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
   .ftg-ai-intro.open { display:flex; opacity:1; }
-  .ftg-ai-intro-mascot { position:absolute; inset:4% 0 15%; display:flex; align-items:center; justify-content:center; pointer-events:none; transition:filter .24s ease,transform .24s ease,opacity .24s ease; }
+  .ftg-ai-intro-mascot { position:absolute; inset:6% 0 13%; display:flex; align-items:center; justify-content:center; pointer-events:none; transition:filter .24s ease,transform .24s ease,opacity .24s ease; }
   .ftg-ai-intro-mascot::after { content:''; position:absolute; right:calc(50% - min(47vw,280px)); bottom:7%; width:72px; height:30px; background:#0b4f86; }
   .ftg-ai-intro-mascot video { display:block; width:min(94vw,560px); height:100%; object-fit:contain; object-position:center bottom; clip-path:inset(0 0 12% 0); }
-  .ftg-ai-intro h2 { position:absolute; z-index:2; top:48%; left:50%; width:min(88vw,480px); margin:0; padding:12px 18px; border-radius:20px; background:rgba(255,255,255,.96); color:#12345a; font-size:clamp(20px,5.4vw,30px); letter-spacing:-.035em; transform:translateX(-50%); box-shadow:0 12px 28px rgba(0,0,0,.14); }
+  .ftg-ai-intro h2 { position:absolute; z-index:2; top:49%; left:50%; width:min(88vw,480px); min-height:2.6em; margin:0; color:#fff; font-size:clamp(20px,5.4vw,30px); letter-spacing:-.035em; line-height:1.25; text-shadow:0 3px 12px rgba(0,0,0,.45); transform:translateX(-50%); }
   .ftg-ai-intro p { display:none; }
   .ftg-ai-intro-suggestions { position:absolute; z-index:2; bottom:100px; left:0; width:100%; display:flex; flex-wrap:nowrap; justify-content:flex-start; gap:8px; overflow-x:auto; padding:0 22px; scrollbar-width:none; transition:bottom .22s ease; }
   .ftg-ai-intro-suggestions::-webkit-scrollbar { display:none; }
@@ -767,7 +767,7 @@
 
     if (!document.querySelector('script[data-ftg-translation]')) {
       var translationScript = document.createElement('script');
-      translationScript.src = '/site-translation.js?v=1';
+      translationScript.src = '/site-translation.js?v=2';
       translationScript.defer = true;
       translationScript.dataset.ftgTranslation = 'true';
       document.head.appendChild(translationScript);
@@ -1256,7 +1256,7 @@
 
     function syncAIVisualViewport() {
       var viewport = window.visualViewport;
-      if (aiIntro) { var keyboardOffset = Math.max(0, (window.innerHeight || 0) - (viewport ? viewport.height : window.innerHeight)); aiIntro.classList.toggle('is-keyboard', keyboardOffset > 140); aiIntro.style.setProperty('--ftg-ai-keyboard-offset', keyboardOffset + 'px'); }
+      if (aiIntro) { var keyboardOffset = Math.max(0, (window.innerHeight || 0) - (viewport ? viewport.height : window.innerHeight)); aiIntro.classList.toggle('is-keyboard', keyboardOffset > 140); aiIntro.style.setProperty('--ftg-ai-keyboard-offset', keyboardOffset + 'px'); aiIntro.style.setProperty('--ftg-ai-viewport-offset', (viewport ? viewport.offsetTop : 0) + 'px'); }
       if (!aiPanel || window.innerWidth > 760) {
         if (aiPanel) { aiPanel.style.removeProperty("--ftg-ai-viewport-top"); aiPanel.style.removeProperty("--ftg-ai-viewport-left"); aiPanel.style.removeProperty("--ftg-ai-viewport-width"); aiPanel.style.removeProperty("--ftg-ai-viewport-height"); }
         return;
@@ -1302,13 +1302,14 @@
       return copy[code] || ['Hi, I am Captain Gull. Ask me anything.',''];
     }
     function getAIIntroSuggestions() {
-      var sets = { map:['Cosa vedere vicino a me?','Come arrivo in treno?','Quale sentiero scelgo?'], sentieri:['Quale sentiero e aperto?','Sentiero facile con panorama','Cosa porto nello zaino?'], 'public-transport':['Prossimo treno?','Treno o traghetto?','Come arrivo a Vernazza?'], discounts:['Dove trovo sconti?','Quali locali partecipano?','Come uso il QR?'], weather:['Che tempo fa oggi?','Mare calmo domani?','Quando fare trekking?'], guide:['Cosa vedere oggi?','Itinerario di un giorno','Dove mangio locale?'], home:['Organizza la mia giornata','Quale borgo scelgo?','Come mi muovo?'] };
+      var sets = { map:['Cosa vedere vicino a me?','Come arrivo in treno?','Quale sentiero scelgo?','Dove guardo il tramonto?','Spiaggia tranquilla?'], sentieri:['Quale sentiero e aperto?','Sentiero facile con panorama','Cosa porto nello zaino?','Quanto dura il percorso?','Dove inizia il trail?'], 'public-transport':['Prossimo treno?','Treno o traghetto?','Come arrivo a Vernazza?','Dove trovo il bus?','Quale stazione scegliere?'], discounts:['Dove trovo sconti?','Quali locali partecipano?','Come uso il QR?','Offerte vicino a me?','Sconto per oggi?'], weather:['Che tempo fa oggi?','Mare calmo domani?','Quando fare trekking?','Vento forte?','Tramonto di oggi?'], guide:['Cosa vedere oggi?','Itinerario di un giorno','Dove mangio locale?','Borgo meno affollato?','Cosa faccio se piove?'], home:['Organizza la mia giornata','Quale borgo scelgo?','Come mi muovo?','Dove dormo?','Cosa mangio locale?'] };
       return sets[activePage] || sets.home;
     }
     function renderAIIntroSuggestions() { if (!aiIntroSuggestions) return; aiIntroSuggestions.innerHTML = getAIIntroSuggestions().map(function(item) { return '<button class="ftg-ai-intro-suggestion" type="button">' + escapeHTML(item) + '</button>'; }).join(''); Array.from(aiIntroSuggestions.querySelectorAll('button')).forEach(function(button) { button.addEventListener('click', function(){ handleAISend(button.textContent); }); }); }
     function closeAI() { if (aiIntro) { aiIntro.classList.remove('open'); aiIntro.setAttribute('aria-hidden','true'); } if (aiPanel) { aiPanel.classList.remove('open'); aiPanel.setAttribute('aria-hidden','true'); } aiFab.setAttribute('aria-expanded','false'); aiFab.classList.remove('is-panel-open'); document.body.classList.remove('ftg-ai-open'); }
     function openAIChat() { if (!aiPanel) return; if (aiIntro) { aiIntro.classList.remove('open'); aiIntro.setAttribute('aria-hidden','true'); } aiPanel.classList.add('open'); aiPanel.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); startAILocationWatch(); syncAIVisualViewport(); if (!welcomed) { welcomed = true; addAIMessage(aiWelcome, false); } if (aiInput) window.setTimeout(function () { aiInput.focus(); }, 80); }
-    function openAIIntro() { var greeting = getAIIntroGreeting(); var introVideo; if (!aiIntro) { openAIChat(); return; } aiIntro.style.setProperty('--ftg-ai-intro-height', window.innerHeight + 'px'); if (aiIntroTitle) aiIntroTitle.textContent = greeting[0]; if (aiIntroCopy) aiIntroCopy.textContent = greeting[1]; renderAIIntroSuggestions(); aiIntro.classList.add('open'); aiIntro.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); introVideo = aiIntro.querySelector('video'); if (introVideo) introVideo.play().catch(function () {}); }
+    function typeAIIntroGreeting(value) { var index = 0; if (!aiIntroTitle) return; if (aiIntro._typeTimer) clearTimeout(aiIntro._typeTimer); aiIntroTitle.textContent = ''; function step() { aiIntroTitle.textContent = value.slice(0, index); index += 1; if (index <= value.length) aiIntro._typeTimer = window.setTimeout(step, 24); } step(); }
+    function openAIIntro() { var greeting = getAIIntroGreeting(); var introVideo; if (!aiIntro) { openAIChat(); return; } aiIntro.style.setProperty('--ftg-ai-intro-height', window.innerHeight + 'px'); typeAIIntroGreeting(greeting[0]); if (aiIntroCopy) aiIntroCopy.textContent = greeting[1]; renderAIIntroSuggestions(); aiIntro.classList.add('open'); aiIntro.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); introVideo = aiIntro.querySelector('video'); if (introVideo) introVideo.play().catch(function () {}); }
     function toggleAI(forceOpen) { var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !(aiPanel && aiPanel.classList.contains('open')) && !(aiIntro && aiIntro.classList.contains('open')); if (!shouldOpen) { closeAI(); return; } if (aiHistory.length) openAIChat(); else openAIIntro(); }
     async function handleAISend(textFromButton) {
       var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
