@@ -2958,13 +2958,12 @@
     mapPerspective = mode === '3d' ? '3d' : '2d';
     if (turnNavigationMap && turnNavigationMapLoaded && !navigationModeActive) {
       try {
-        turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none');
         if (mapPerspective === '3d') {
           turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.12 });
-          turnNavigationMap.easeTo({ pitch:58, duration:420 });
+          turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none');
         } else {
           turnNavigationMap.setTerrain(null);
-          turnNavigationMap.easeTo({ pitch:0, bearing:0, duration:420 });
+          turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'visible');
         }
       } catch (_error) {}
     }
