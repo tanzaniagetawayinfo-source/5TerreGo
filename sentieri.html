@@ -36,13 +36,298 @@
   <meta name="twitter:title" content="Sentieri delle Cinque Terre: difficoltà e durata | 5TerreGo">
   <meta name="twitter:description" content="Confronta i sentieri delle Cinque Terre per difficoltà, durata, dislivello e partenza, con schede pratiche e collegamenti alle fonti ufficiali.">
   <meta name="twitter:image" content="https://www.5terrego.com/seo.png">
+
+  <style id="sentieri-controls-v2">
+    .page{
+      padding-top:56px;
+    }
+
+    .controls-section{
+      margin-bottom:8px;
+    }
+
+    .search-wrap{
+      position:relative;
+      margin:0 0 18px;
+    }
+
+    .search-icon{
+      position:absolute;
+      z-index:2;
+      left:22px;
+      top:50%;
+      width:23px;
+      height:23px;
+      transform:translateY(-50%);
+      pointer-events:none;
+      color:#526078;
+      stroke:currentColor;
+      stroke-width:2.4;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .search{
+      display:block;
+      width:100%;
+      min-width:0;
+      height:66px;
+      padding:0 22px 0 60px;
+      border:1px solid rgba(255,255,255,.48);
+      border-radius:23px;
+      background:rgba(255,255,255,.72);
+      -webkit-backdrop-filter:blur(22px);
+      backdrop-filter:blur(22px);
+      color:var(--ink);
+      font-size:17px;
+      font-weight:700;
+      line-height:1;
+      letter-spacing:-.015em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      box-shadow:0 14px 34px rgba(8,21,45,.13),inset 0 1px 0 rgba(255,255,255,.72);
+    }
+
+    .search::placeholder{
+      color:#8490a5;
+      opacity:1;
+      font-weight:650;
+    }
+
+    .search:focus{
+      border-color:rgba(255,255,255,.9);
+      box-shadow:0 0 0 4px rgba(255,255,255,.2),0 16px 38px rgba(8,21,45,.16);
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      padding:0;
+      margin:0 0 10px;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      -webkit-backdrop-filter:none;
+      backdrop-filter:none;
+      box-shadow:none;
+    }
+
+    .field{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:7px;
+      min-width:0;
+      height:42px;
+      padding:0 34px 0 13px;
+      border:1px solid rgba(255,255,255,.42);
+      border-radius:14px;
+      background:rgba(255,255,255,.66);
+      -webkit-backdrop-filter:blur(16px);
+      backdrop-filter:blur(16px);
+      box-shadow:0 8px 20px rgba(8,21,45,.09),inset 0 1px 0 rgba(255,255,255,.65);
+    }
+
+    .field::after{
+      right:14px;
+      top:50%;
+      width:7px;
+      height:7px;
+      border-width:0 1.8px 1.8px 0;
+      border-style:solid;
+      border-color:#344054;
+      transform:translateY(-65%) rotate(45deg);
+    }
+
+    .field label{
+      position:static;
+      display:block;
+      flex:0 0 auto;
+      margin:0;
+      color:#7b879c;
+      font-size:9px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.09em;
+    }
+
+    .field select{
+      appearance:none;
+      -webkit-appearance:none;
+      width:auto;
+      min-width:0;
+      max-width:150px;
+      height:40px;
+      padding:0;
+      border:0;
+      background:transparent;
+      color:var(--ink);
+      font-size:13px;
+      font-weight:800;
+      line-height:40px;
+      outline:none;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      overflow:hidden;
+    }
+
+    .near-btn{
+      height:42px;
+      padding:0 15px;
+      border-radius:14px;
+      background:rgba(8,21,45,.94);
+      font-size:13px;
+      font-weight:850;
+      box-shadow:0 9px 22px rgba(8,21,45,.18);
+    }
+
+    .reset-btn{
+      width:42px;
+      height:42px;
+      flex:0 0 42px;
+      border-radius:14px;
+      background:rgba(255,255,255,.66);
+      box-shadow:0 8px 20px rgba(8,21,45,.09),inset 0 1px 0 rgba(255,255,255,.65);
+    }
+
+    .reset-btn::before{
+      left:12px;
+      top:10px;
+      width:13px;
+      height:13px;
+      border-width:2.5px;
+    }
+
+    .reset-btn::after{
+      left:25px;
+      top:25px;
+      width:8px;
+      height:2.5px;
+    }
+
+    .list-meta{
+      margin:9px 3px 14px;
+      color:rgba(16,24,40,.78);
+    }
+
+    .trail-card{
+      scroll-margin-top:110px;
+    }
+
+    @media(max-width:760px){
+      .page{
+        padding:36px 12px 70px;
+      }
+
+      .search-wrap{
+        margin-bottom:14px;
+      }
+
+      .search-icon{
+        left:18px;
+        width:21px;
+        height:21px;
+      }
+
+      .search{
+        height:58px;
+        padding:0 16px 0 50px;
+        border-radius:19px;
+        font-size:15px;
+      }
+
+      .toolbar{
+        gap:7px;
+        margin-bottom:8px;
+      }
+
+      .field{
+        flex:1 1 calc(50% - 4px);
+        height:40px;
+        padding-left:11px;
+        padding-right:29px;
+        border-radius:13px;
+      }
+
+      .field label{
+        display:none;
+      }
+
+      .field select{
+        width:100%;
+        max-width:none;
+        height:38px;
+        font-size:12px;
+        line-height:38px;
+      }
+
+      .near-btn{
+        flex:1 1 auto;
+        height:40px;
+        padding:0 13px;
+        border-radius:13px;
+        font-size:12px;
+      }
+
+      .reset-btn{
+        width:40px;
+        height:40px;
+        flex-basis:40px;
+        border-radius:13px;
+      }
+
+      .reset-btn::before{
+        left:11px;
+        top:9px;
+      }
+
+      .reset-btn::after{
+        left:24px;
+        top:24px;
+      }
+
+      .list-meta{
+        margin:8px 3px 12px;
+        font-size:12px;
+      }
+
+      .list-meta span:last-child{
+        display:none;
+      }
+
+      .trail-card{
+        scroll-margin-top:96px;
+      }
+    }
+
+    @media(max-width:370px){
+      .search{
+        font-size:14px;
+        padding-right:12px;
+      }
+
+      .near-btn{
+        width:calc(100% - 47px);
+      }
+    }
+  </style>
+
 </head>
 <body>
   <div class="page-bg" aria-hidden="true"></div>
   <div id="ftg-global-actionbar-root"></div>
   <main class="page">
-    <section aria-label="Ricerca e filtri sentieri">
-      <div class="search-wrap"><span class="search-icon" aria-hidden="true"></span><input id="trail-search" class="search" type="search" placeholder="Cerca sentiero, borgo o destinazione…" autocomplete="off"></div>
+    <section class="controls-section" aria-label="Ricerca e filtri sentieri">
+      <div class="search-wrap">
+        <svg class="search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+          <circle cx="10.8" cy="10.8" r="6.8"></circle>
+          <path d="M16 16l5 5"></path>
+        </svg>
+        <input id="trail-search" class="search" type="search" placeholder="Cerca sentiero o borgo…" aria-label="Cerca sentiero o borgo" autocomplete="off">
+      </div>
       <div class="toolbar">
         <div class="field"><label for="village-filter">Partenza</label><select id="village-filter"><option value="">Tutti i borghi</option></select></div>
         <div class="field"><label for="difficulty-filter">Difficoltà</label><select id="difficulty-filter"><option value="">Tutte</option><option value="easy">Facile</option><option value="medium">Media</option><option value="hard">Difficile</option><option value="expert">Esperti</option></select></div>
@@ -79,6 +364,24 @@
     function trailHref(t){return '/trails/'+encodeURIComponent(slugify(t.name))+'.html';}
     function buildVillages(){Array.from(new Set(trails.map(function(t){return String(t.start_name||'').trim();}).filter(Boolean))).sort().forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;el.village.appendChild(o);});}
     function matchesSearch(t,q){if(!q)return true;return [t.name,t.description,t.start_name,t.end_name,t.estimated_duration].join(' ').toLowerCase().indexOf(q)!==-1;}
+
+    function scrollToFirstResult(){
+      window.requestAnimationFrame(function(){
+        window.requestAnimationFrame(function(){
+          var firstCard=el.cards.querySelector('.trail-card');
+          if(!firstCard)return;
+          var actionbar=document.getElementById('ftg-global-actionbar-root');
+          var actionbarChild=actionbar&&actionbar.firstElementChild;
+          var actionbarHeight=0;
+          if(actionbar){
+            actionbarHeight=Math.max(actionbar.getBoundingClientRect().height,actionbarChild?actionbarChild.getBoundingClientRect().height:0);
+          }
+          var offset=Math.max(18,Math.min(actionbarHeight+14,130));
+          var top=firstCard.getBoundingClientRect().top+window.pageYOffset-offset;
+          window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+        });
+      });
+    }
     function renderPagination(totalPages){
       el.pagination.innerHTML='';
       if(totalPages<=1)return;
@@ -93,7 +396,7 @@
         button.addEventListener('click',function(){
           currentPage=page;
           render();
-          el.cards.scrollIntoView({behavior:'smooth',block:'start'});
+          scrollToFirstResult();
         });
         el.pagination.appendChild(button);
       }
