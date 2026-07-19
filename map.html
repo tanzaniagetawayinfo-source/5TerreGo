@@ -2961,9 +2961,12 @@
         if (mapPerspective === '3d') {
           turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.12 });
           turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none');
+          turnNavigationMap.setLayoutProperty('terrain-hillshade', 'visibility', 'visible');
+          turnNavigationMap.setPaintProperty('terrain-hillshade', 'hillshade-exaggeration', 1.18);
         } else {
           turnNavigationMap.setTerrain(null);
           turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'visible');
+          turnNavigationMap.setLayoutProperty('terrain-hillshade', 'visibility', 'none');
         }
       } catch (_error) {}
     }
@@ -6456,7 +6459,7 @@
         layers: [
           { id:'street-map',type:'raster',source:'streets',layout:{visibility:currentBaseMapMode === 'map' ? 'visible' : 'none'} },
           { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} },
-          { id:'terrain-hillshade',type:'hillshade',source:'terrainShade',minzoom:9,maxzoom:17,paint:{'hillshade-exaggeration':.38,'hillshade-shadow-color':'#3f352b','hillshade-highlight-color':'#fff4dc','hillshade-accent-color':'#75634e'} },
+          { id:'terrain-hillshade',type:'hillshade',source:'terrainShade',minzoom:9,maxzoom:17,layout:{visibility:'none'},paint:{'hillshade-exaggeration':1.18,'hillshade-shadow-color':'#1c1711','hillshade-highlight-color':'#fff7df','hillshade-accent-color':'#4e4438'} },
           { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:16.2,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],16.2,0,16.8,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],16.2,0,16.8,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':.72,'fill-extrusion-vertical-gradient':true} },
           { id:'satellite-labels',type:'raster',source:'labels',minzoom:13,layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'},paint:{'raster-opacity':['interpolate',['linear'],['zoom'],13,0,14,0.72,16,1]} }
         ],
