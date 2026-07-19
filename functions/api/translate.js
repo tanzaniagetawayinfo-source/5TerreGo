@@ -15,7 +15,6 @@ export async function onRequestPost(context) {
     const text = Array.isArray(body.text) ? body.text.map((item) => String(item || '')) : [];
     const total = text.reduce((sum, item) => sum + item.length, 0);
     if (!target || !text.length || text.length > MAX_ITEMS || total > MAX_CHARS) return json({ error: 'Invalid translation request.' }, 400);
-
     const upstream = await fetch('https://api.deepl.com/v2/translate', {
       method: 'POST',
       headers: { authorization: `DeepL-Auth-Key ${apiKey}`, 'content-type': 'application/json' },
@@ -30,6 +29,5 @@ export async function onRequestPost(context) {
     return json({ error: 'Translation failed.', details: error && error.message ? error.message : 'Unknown error' }, 502);
   }
 }
-
 function corsHeaders() { return { 'access-control-allow-origin': 'https://www.5terrego.com', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'Content-Type' }; }
 function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...corsHeaders() } }); }

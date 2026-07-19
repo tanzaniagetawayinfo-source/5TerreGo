@@ -1332,10 +1332,10 @@
   {
     "id": 199,
     "name": "BPER",
-    "coords": "44,1039644, 9,8217643",
+    "coords": "44.103964, 9.821764",
     "description": "",
     "importance": 50,
-    "type": "chiesa",
+    "type": "atm",
     "discount": null,
     "discount_info": null
   },
@@ -1614,7 +1614,7 @@
     "name": "Bus Stop",
     "coords": "44.051983, 9.836313",
     "description": "",
-    "importance": 50,
+    "importance": 21,
     "type": "fermata bus",
     "discount": null,
     "discount_info": null

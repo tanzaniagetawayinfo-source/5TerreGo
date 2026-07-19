@@ -492,6 +492,7 @@
   }
 
   .ftg-ai-head {
+    flex: 0 0 auto;
     padding: 14px;
     border-bottom: 1px solid var(--ftg-line);
     display: flex;
@@ -500,9 +501,16 @@
     gap: 12px;
   }
 
-  .ftg-ai-head-copy { min-width: 0; }
+  .ftg-ai-head-copy { min-width: 0; flex:1; }
   .ftg-ai-title { font-size: 15px; font-weight: 900; letter-spacing: -.03em; color: var(--ftg-text); }
   .ftg-ai-subtitle { margin-top: 3px; font-size: 12px; color: var(--ftg-text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .ftg-ai-back { display:none; width:38px; height:38px; flex:0 0 38px; padding:0; border:0; border-radius:999px; background:transparent; color:var(--ftg-text); font-size:28px; line-height:1; cursor:pointer; }
+  .ftg-ai-avatar-slot { position:relative; width:44px; height:44px; flex:0 0 44px; overflow:hidden; display:grid; place-items:center; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 4px 14px rgba(10,34,65,.2); }
+  .ftg-ai-avatar-slot video { position:absolute; inset:0; z-index:1; width:100%; height:100%; display:block; object-fit:cover; object-position:center top; transform:translateY(4px) scale(.94); }
+  .ftg-ai-avatar-fallback { position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-size:18px; font-weight:950; }
+  .ftg-ai-panel.open .ftg-ai-avatar-slot { animation:ftg-ai-avatar-arrive .3s cubic-bezier(.2,.9,.2,1); }
+  @keyframes ftg-ai-avatar-arrive { from { opacity:.2; transform:translate(22px,20px) scale(.58); } to { opacity:1; transform:none; } }
 
   .ftg-ai-close {
     width: 34px;
@@ -551,6 +559,7 @@
   }
 
   .ftg-ai-suggestions {
+    flex: 0 0 auto;
     display: flex;
     gap: 7px;
     overflow-x: auto;
@@ -577,6 +586,7 @@
   }
 
   .ftg-ai-input-row {
+    flex: 0 0 auto;
     display: flex;
     gap: 8px;
     padding: 10px;
@@ -607,6 +617,49 @@
     font-weight: 900;
     cursor: pointer;
   }
+
+  .ftg-ai-fab { position:fixed; right:max(16px,calc(16px + env(safe-area-inset-right))); bottom:max(16px,calc(16px + env(safe-area-inset-bottom))); z-index:10170; width:64px; height:64px; padding:0; overflow:hidden; border:2px solid #fff; border-radius:50%; background:#12345a; box-shadow:0 10px 26px rgba(10,34,65,.32); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; transition:left .28s cubic-bezier(.2,.9,.2,1),right .28s cubic-bezier(.2,.9,.2,1),top .22s cubic-bezier(.2,.9,.2,1),transform .16s ease; }
+  .ftg-ai-fab.dragging { cursor:grabbing; transition:none; transform:scale(1.06); }
+  .ftg-ai-fab.is-panel-open { opacity:0; pointer-events:none; transform:scale(.72); }
+  .ftg-ai-fab:focus-visible,.ftg-ai-close:focus-visible,.ftg-ai-send:focus-visible { outline:3px solid #ff7200; outline-offset:3px; }
+  .ftg-ai-fab video { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; transform:translateY(6px) scale(.94); }
+  .ftg-ai-fab-fallback { display:none; color:#fff; font-size:24px; font-weight:900; }
+  .ftg-ai-fab.is-panel-open .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; }
+  .ftg-ai-intro { position:fixed; top:calc(-1 * var(--ftg-ai-viewport-offset,0px)); left:0; z-index:10220; width:100%; height:var(--ftg-ai-intro-height,100dvh); display:none; overflow:hidden; align-items:center; justify-content:center; padding:0 22px; background:radial-gradient(ellipse at 50% 45%,#12619c 0%,#0d568e 44%,#0a4779 100%); color:#fff; text-align:center; opacity:0; transition:opacity .26s ease; }
+  .ftg-ai-intro.open { display:flex; opacity:1; }
+  .ftg-ai-intro-mascot { position:absolute; top:31.5%; left:50%; width:min(50vw,184px); height:48%; display:flex; align-items:center; justify-content:center; pointer-events:none; transform:translateX(-50%); transition:filter .24s ease,transform .24s ease,opacity .24s ease; }
+  .ftg-ai-intro-mascot::after { content:''; position:absolute; right:-8px; bottom:1px; width:54px; height:23px; background:#0b4f86; }
+  .ftg-ai-intro-mascot video { display:block; width:100%; height:100%; object-fit:contain; object-position:center bottom; clip-path:inset(0 0 8% 0); }
+  .ftg-ai-intro h2 { position:absolute; z-index:2; top:17.5%; left:24px; box-sizing:border-box; width:min(56vw,198px); min-height:0; margin:0; padding:17px 19px 15px; border-radius:18px; background:#fff; color:#174271; font-size:clamp(15px,4.25vw,17px); letter-spacing:-.03em; line-height:1.38; text-align:left; box-shadow:0 12px 28px rgba(0,0,0,.18); }
+  .ftg-ai-intro h2::after { content:''; position:absolute; left:58%; bottom:-17px; width:27px; height:24px; background:#fff; clip-path:polygon(0 0,100% 0,100% 100%); }
+  .ftg-ai-intro p { display:none; }
+  .ftg-ai-intro-suggestions { position:absolute; z-index:2; bottom:84px; left:0; width:100%; display:flex; flex-wrap:nowrap; justify-content:flex-start; gap:10px; overflow-x:auto; padding:0 18px; scrollbar-width:none; transition:bottom .22s ease; }
+  .ftg-ai-intro-suggestions::-webkit-scrollbar { display:none; }
+  .ftg-ai-intro-suggestion { flex:0 0 auto; border:1px solid rgba(255,255,255,.72); border-radius:999px; padding:9px 13px; background:rgba(11,49,83,.80); color:#fff; font:700 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; cursor:pointer; }
+  .ftg-ai-intro-input { position:absolute; z-index:3; left:50%; bottom:max(12px,calc(10px + env(safe-area-inset-bottom))); width:min(calc(100% - 32px),460px); display:flex; gap:8px; padding:6px; border:1px solid rgba(255,255,255,.28); border-radius:999px; background:#fff; box-shadow:0 14px 34px rgba(0,0,0,.18); transform:translateX(-50%); transition:bottom .22s ease; }
+  .ftg-ai-intro-input input { min-width:0; flex:1; border:0; outline:0; padding:0 12px; color:#12345a; font:inherit; font-size:16px; }
+  .ftg-ai-intro-input button { width:44px; height:44px; border:0; border-radius:50%; background:#ff7200; color:#fff; font-size:22px; font-weight:900; cursor:pointer; }
+  .ftg-ai-intro-close { position:absolute; top:max(20px,env(safe-area-inset-top)); right:max(12px,env(safe-area-inset-right)); width:42px; height:42px; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:rgba(255,255,255,.12); color:#fff; font-size:26px; cursor:pointer; }
+  .ftg-ai-intro.is-keyboard .ftg-ai-intro-mascot { filter:blur(1.2px); transform:scale(.985); opacity:.78; }
+  .ftg-ai-intro.is-keyboard .ftg-ai-intro-input { bottom:calc(var(--ftg-ai-keyboard-offset,0px) + 10px); }
+  .ftg-ai-intro.is-keyboard .ftg-ai-intro-suggestions { bottom:calc(var(--ftg-ai-keyboard-offset,0px) + 76px); }
+  .ftg-ai-action { display:block; width:100%; margin-top:7px; padding:7px 9px; border:1px solid #cbd7e6; border-radius:10px; background:#fff; color:#12345a; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
+  .ftg-ai-preview { position:relative; display:block; width:100%; min-height:88px; margin-top:9px; padding:14px; overflow:hidden; border:1px solid #dfe4ec; border-radius:17px; background:#fff; color:#12345a; text-align:left; cursor:pointer; box-shadow:0 8px 22px rgba(10,34,65,.08); isolation:isolate; }
+  .ftg-ai-preview-copy { position:relative; z-index:2; display:grid; gap:3px; }
+  .ftg-ai-preview-copy strong { font-size:15px; line-height:1.15; }
+  .ftg-ai-preview-copy span { font-size:11px; font-weight:800; opacity:.88; }
+  .ftg-ai-preview-flight { position:fixed !important; z-index:12000 !important; margin:0 !important; transition:left .32s cubic-bezier(.2,.9,.2,1),top .32s cubic-bezier(.2,.9,.2,1),width .32s cubic-bezier(.2,.9,.2,1),height .32s cubic-bezier(.2,.9,.2,1),border-radius .32s ease !important; }
+  .ftg-ai-preview-flight.is-opening { left:0 !important; top:0 !important; width:100vw !important; height:100dvh !important; border-radius:0 !important; }
+  .ftg-ai-sources { display:grid; gap:4px; margin-top:8px; font-size:12px; }
+  .ftg-ai-sources a { color:#075ea8; word-break:break-word; }
+  .ftg-ai-poi-draft { display:grid; gap:8px; margin-top:10px; padding:12px; border:2px solid #ff7200; border-radius:16px; background:#fff; color:#111827; }
+  .ftg-ai-poi-draft strong { font-size:15px; }
+  .ftg-ai-poi-draft label { display:grid; gap:3px; color:#455268; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+  .ftg-ai-poi-draft input,.ftg-ai-poi-draft textarea { width:100%; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:9px; padding:8px; background:#fff; color:#111827; font:inherit; font-size:12px; }
+  .ftg-ai-poi-draft textarea { min-height:92px; resize:vertical; }
+  .ftg-ai-poi-publish { min-height:40px; border:0; border-radius:999px; background:#ff7200; color:#fff; font-weight:900; cursor:pointer; }
+  .ftg-ai-poi-publish:disabled { opacity:.55; cursor:wait; }
+  @media (prefers-reduced-motion: reduce) { .ftg-ai-fab video,.ftg-ai-avatar-slot video { display:none; } .ftg-ai-fab-fallback { display:grid; place-items:center; width:100%; height:100%; } .ftg-ai-panel.open .ftg-ai-avatar-slot { animation:none; } }
 
   @media (max-width: 760px) {
     :root {
@@ -663,10 +716,31 @@
     }
 
     .ftg-ai-panel {
-      left: 12px;
-      right: 12px;
-      width: auto;
+      inset:auto;
+      top:var(--ftg-ai-viewport-top,0px);
+      left:var(--ftg-ai-viewport-left,0px);
+      width:var(--ftg-ai-viewport-width,100vw);
+      height:var(--ftg-ai-viewport-height,100dvh);
+      max-height:none;
+      z-index:10160;
+      border:0;
+      border-radius:0;
+      background:#fff;
+      box-shadow:none;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
     }
+
+    .ftg-ai-head { min-height:68px; box-sizing:border-box; padding:calc(10px + env(safe-area-inset-top)) 12px 10px 6px; background:#fff; }
+    .ftg-ai-back { display:grid; place-items:center; }
+    .ftg-ai-close { display:none; }
+    .ftg-ai-title { font-size:16px; }
+    .ftg-ai-subtitle { font-size:12px; }
+    .ftg-ai-messages { padding:14px 12px; background:#f6f7f9; }
+    .ftg-ai-msg { max-width:86%; font-size:15px; line-height:1.42; }
+    .ftg-ai-suggestions { padding:8px 10px; background:#fff; }
+    .ftg-ai-input-row { padding:9px max(10px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)); }
+    body.ftg-ai-open { overflow:hidden !important; }
   }
 </style>
 
@@ -679,9 +753,9 @@
     var activePage = config.activePage || "";
     var userName = config.userName || "Guest";
     var isLoggedIn = Boolean(config.isLoggedIn);
-    var aiTitle = config.aiTitle || "Ask 5TerreGo";
-    var aiSubtitle = config.aiSubtitle || "Fast travel helper";
-    var aiWelcome = config.aiWelcome || "Nuova actionbar a due righe attiva.";
+    var aiTitle = config.aiTitle || "Captain Gull";
+    var aiSubtitle = config.aiSubtitle || "Your 5TerreGo travel guide";
+    var aiWelcome = config.aiWelcome || "Hi, I am Captain Gull. Ask me about trails, places, transport or local discounts.";
     var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
     var currentLanguage = String(config.language || "en").toLowerCase();
     var androidAppHref = config.androidAppHref || "#";
@@ -689,8 +763,17 @@
     var termsHref = config.termsHref || "#terms";
     var root = targetRoot || document.getElementById("ftg-global-actionbar-root");
     var welcomed = false;
+    var aiIntroGreetingText = '';
 
     if (!root) return null;
+
+    if (!document.querySelector('script[data-ftg-translation]')) {
+      var translationScript = document.createElement('script');
+      translationScript.src = '/site-translation.js?v=6';
+      translationScript.defer = true;
+      translationScript.dataset.ftgTranslation = 'true';
+      document.head.appendChild(translationScript);
+    }
 
     root.innerHTML = "";
     document.body.classList.add("ftg-actionbar-enabled");
@@ -753,7 +836,7 @@
         terms: "Terms & Conditions",
         choose_language: "Choose language",
         nav_map: "Map",
-        nav_home: "Home",
+        nav_home: "首页",
         nav_guide: "Guide",
         nav_sentieri: "Trails",
         nav_discounts: "Local Discounts",
@@ -809,7 +892,7 @@
         terms: "条款与条件",
         choose_language: "选择语言",
         nav_map: "地图",
-        nav_home: "Home",
+        nav_home: "首页",
         nav_guide: "指南",
         nav_sentieri: "步道",
         nav_discounts: "本地优惠",
@@ -897,6 +980,7 @@
 
     root.innerHTML = '<header class="ftg-topbar" id="ftg-topbar"><div class="ftg-topbar-shell"><div class="ftg-topbar-row-1"><div class="ftg-brand"><div class="ftg-brand-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-topbar-actions"><button class="ftg-account-btn" type="button" id="ftg-account-btn" aria-label="Open login"><span class="ftg-profile-avatar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.5 20c1.8-3.7 5-5.5 7.5-5.5s5.7 1.8 7.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button><button class="ftg-icon-btn" type="button" id="ftg-menu-trigger" aria-label="Open menu"><span class="ftg-hamburger"><span></span><span></span><span></span></span></button></div></div><div class="ftg-topbar-row-2"><div class="ftg-pill-scroller" id="ftg-pill-scroller"></div></div></div></header><div class="ftg-menu-panel" id="ftg-menu-panel" aria-hidden="true"><div class="ftg-menu-panel-shell"><div class="ftg-menu-panel-head"><div class="ftg-menu-panel-title">5Terre<span class="go">Go</span><span class="dotcom">.com</span></div></div><div class="ftg-menu-main"><div class="ftg-menu-list"><button class="ftg-menu-item" type="button" id="ftg-language-menu-item"><span class="ftg-menu-item-main"><span class="ftg-menu-flag" id="ftg-language-menu-flag">🇬🇧</span><span id="ftg-language-menu-label">English</span></span></button><a class="ftg-menu-item" href="' + escapeHTML(androidAppHref) + '" id="ftg-android-app-link" style="display:none"><span class="ftg-menu-item-main"><span id="ftg-android-app-label">Scarica l app per Android</span></span></a><div class="ftg-menu-section-title" id="ftg-legal-title">Area legale</div><a class="ftg-menu-item" href="' + escapeHTML(privacyHref) + '"><span class="ftg-menu-item-main"><span id="ftg-privacy-label">Informativa sulla privacy</span></span></a><a class="ftg-menu-item" href="' + escapeHTML(termsHref) + '"><span class="ftg-menu-item-main"><span id="ftg-terms-label">Terms &amp; Conditions</span></span></a></div></div><div class="ftg-language-panel"><div class="ftg-menu-section-title" id="ftg-language-title">Choose language</div><div class="ftg-language-list" id="ftg-language-list"></div></div></div></div><div class="ftg-ai-panel" id="ftg-ai-panel" aria-hidden="true"><div class="ftg-ai-head"><div class="ftg-ai-head-copy"><div class="ftg-ai-title">' + escapeHTML(aiTitle) + '</div><div class="ftg-ai-subtitle">' + escapeHTML(aiSubtitle) + '</div></div><button class="ftg-ai-close" id="ftg-ai-close" type="button" aria-label="Close AI">×</button></div><div class="ftg-ai-messages" id="ftg-ai-messages"></div><div class="ftg-ai-suggestions"><button class="ftg-ai-suggestion" type="button">best village for one day</button><button class="ftg-ai-suggestion" type="button">which trail is open today</button><button class="ftg-ai-suggestion" type="button">how do I move by train</button></div><div class="ftg-ai-input-row"><input id="ftg-ai-input" class="ftg-ai-input" placeholder="Ask something fast..." autocomplete="off"><button id="ftg-ai-send" class="ftg-ai-send" type="button">→</button></div></div>';
 
+    root.insertAdjacentHTML("beforeend", '<section class="ftg-ai-intro" id="ftg-ai-intro" aria-hidden="true"><button class="ftg-ai-intro-close" id="ftg-ai-intro-close" type="button" aria-label="Close">×</button><div class="ftg-ai-intro-mascot"><video autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"></video></div><h2 id="ftg-ai-intro-title">Ciao, sono Capitan Gull. Chiedimi qualsiasi cosa.</h2><p id="ftg-ai-intro-copy"></p><div class="ftg-ai-intro-suggestions" id="ftg-ai-intro-suggestions"></div><div class="ftg-ai-intro-input"><input id="ftg-ai-intro-input" autocomplete="off" placeholder="Chiedi a Capitan Gull..."><button id="ftg-ai-intro-send" type="button" aria-label="Send">→</button></div></section>');
     var topbar = root.querySelector("#ftg-topbar");
     var pillScroller = root.querySelector("#ftg-pill-scroller");
     var accountBtn = root.querySelector("#ftg-account-btn");
@@ -913,12 +997,53 @@
     var androidAppLink = root.querySelector("#ftg-android-app-link");
     var androidAppLabel = root.querySelector("#ftg-android-app-label");
     var aiPanel = root.querySelector("#ftg-ai-panel");
+    var aiIntro = root.querySelector("#ftg-ai-intro");
+    var aiIntroTitle = root.querySelector("#ftg-ai-intro-title");
+    var aiIntroCopy = root.querySelector("#ftg-ai-intro-copy");
+    var aiIntroSuggestions = root.querySelector("#ftg-ai-intro-suggestions");
+    var aiIntroInput = root.querySelector("#ftg-ai-intro-input");
+    var aiIntroSend = root.querySelector("#ftg-ai-intro-send");
+    var aiIntroClose = root.querySelector("#ftg-ai-intro-close");
     var aiClose = root.querySelector("#ftg-ai-close");
     var aiMessages = root.querySelector("#ftg-ai-messages");
     var aiInput = root.querySelector("#ftg-ai-input");
     var aiSend = root.querySelector("#ftg-ai-send");
     var aiSuggestions = Array.prototype.slice.call(root.querySelectorAll(".ftg-ai-suggestion"));
+    var aiHead = root.querySelector(".ftg-ai-head");
+    var aiHeadCopy = root.querySelector(".ftg-ai-head-copy");
     var pillButtons = [];
+    var aiAbortController = null;
+    var aiBusy = false;
+    var aiLocation = null;
+    var aiLocationWatch = null;
+    var aiLocationError = null;
+    var captainNavigationPromise = null;
+    var aiHistory = [];
+    var aiFab = document.createElement("button");
+    aiFab.id = "ftg-ai-fab";
+    aiFab.className = "ftg-ai-fab";
+    aiFab.type = "button";
+    aiFab.setAttribute("aria-label", "Open travel assistant");
+    aiFab.setAttribute("aria-expanded", "false");
+    aiFab.setAttribute("aria-controls", "ftg-ai-panel");
+    aiFab.innerHTML = '<video autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="mascotterelax.webm" type="video/webm"></video><span class="ftg-ai-fab-fallback" aria-hidden="true">✦</span>';
+    root.appendChild(aiFab);
+    var aiMascotVideo = aiFab.querySelector("video");
+    var aiFabFallback = aiFab.querySelector(".ftg-ai-fab-fallback");
+    var aiBack = document.createElement("button");
+    aiBack.type = "button";
+    aiBack.className = "ftg-ai-back";
+    aiBack.setAttribute("aria-label", "Back");
+    aiBack.textContent = "‹";
+    var aiAvatarSlot = document.createElement("span");
+    aiAvatarSlot.className = "ftg-ai-avatar-slot";
+    aiAvatarSlot.setAttribute("aria-hidden", "true");
+    aiAvatarSlot.innerHTML = '<span class="ftg-ai-avatar-fallback">G</span>';
+    if (aiMascotVideo) aiAvatarSlot.appendChild(aiMascotVideo.cloneNode(true));
+    if (aiHead && aiHeadCopy) {
+      aiHead.insertBefore(aiAvatarSlot, aiHeadCopy);
+      aiHead.insertBefore(aiBack, aiAvatarSlot);
+    }
 
     function syncActiveButtons(pageId) {
       activePage = normalizePageId(pageId) || "home";
@@ -991,31 +1116,304 @@
       if (!aiMessages) return;
       var div = document.createElement("div");
       div.className = "ftg-ai-msg " + (isUser ? "user" : "bot");
-      div.innerText = text;
+      div.innerText = sanitizeAIText(text);
       aiMessages.appendChild(div);
       aiMessages.scrollTop = aiMessages.scrollHeight;
     }
 
-    function toggleAI(forceOpen) {
+    function sanitizeAIText(value) {
+      var text = String(value || "");
+      // Reject the whole abusive fragment, rather than exposing a censored version.
+      text = text.replace(/(?:^|[.!?]\s*)[^.!?]*(?:dio\s+(?:cane|porco|boia)|porco\s+dio|madonna\s+(?:puttana|troia)|gesu\s+(?:cane|cristo\s+porco))[^.!?]*[.!?]?/gi, " ");
+      return text.replace(/\s{2,}/g, " ").trim();
+    }
+
+    function isSafeSourceUrl(value) {
+      try { var url = new URL(String(value || ""), window.location.href); return url.protocol === "https:" || url.protocol === "http:"; } catch (_error) { return false; }
+    }
+
+    function getAIActionHref(action) {
+      if (!action || typeof action !== "object") return "";
+      var type = String(action.type || "");
+      var allowedPages = { home:"index.html", map:"map.html", guide:"guide.html", sentieri:"sentieri.html", discounts:"discounts.html", trains:"public-transport.html", weather:"weather.html" };
+      if (type === "navigate_to_page" && allowedPages[action.page]) return allowedPages[action.page] + (action.section && /^[a-z0-9_-]{1,80}$/i.test(action.section) ? "#" + action.section : "");
+      if (type === "open_map_poi" && /^[a-z0-9_-]{1,120}$/i.test(String(action.poi_id || ""))) return "map.html?poi=" + encodeURIComponent(action.poi_id);
+      if (type === "open_trail" && /^[a-z0-9_-]{1,120}$/i.test(String(action.trail_id || ""))) return "sentieri.html?trail=" + encodeURIComponent(action.trail_id);
+      if (type === "open_article" && /^[a-z0-9_-]{1,160}$/i.test(String(action.article_id || ""))) return "blog.html#" + encodeURIComponent(action.article_id);
+      if (type === "open_discount" && /^[a-z0-9_-]{1,120}$/i.test(String(action.discount_id || ""))) return "discounts.html?discount=" + encodeURIComponent(action.discount_id);
+      if (type === "search_transport") return "public-transport.html";
+      if (type === "open_login") return "login.html";
+      return "";
+    }
+
+    function getAIHeaders() {
+      var anonKey = String(config.aiAnonKey || "sb_publishable_e1G4u6PMDY39tyQW2U8xJQ_eQYetzIb");
+      var headers = { "Content-Type":"application/json", apikey:anonKey, Authorization:"Bearer " + anonKey };
+      try {
+        var stored = JSON.parse(localStorage.getItem("sb-jpflcbktcnhmlvaibzcw-auth-token") || "null");
+        if (stored && stored.access_token) headers.Authorization = "Bearer " + stored.access_token;
+      } catch (_error) {}
+      return headers;
+    }
+
+    function openAIActionPreview(button, action) {
+      var href = getAIActionHref(action);
+      if (!href) {
+        if (action.type === "set_language" && languages.some(function (lang) { return lang.code === action.language; })) {
+          currentLanguage = action.language; persistLanguage(); applyTranslations(); window.dispatchEvent(new CustomEvent("ftg:languagechange", { detail:{ language:currentLanguage } })); return;
+        }
+        addAIMessage("Suggested action is not available.", false); return;
+      }
+      var rect = button.getBoundingClientRect();
+      var flight = button.cloneNode(true);
+      flight.classList.add("ftg-ai-preview-flight");
+      flight.style.left = rect.left + "px"; flight.style.top = rect.top + "px";
+      flight.style.width = rect.width + "px"; flight.style.height = rect.height + "px";
+      document.body.appendChild(flight);
+      window.requestAnimationFrame(function () { window.requestAnimationFrame(function () { flight.classList.add("is-opening"); }); });
+      window.setTimeout(function () { window.location.href = href; }, 340);
+    }
+
+    function renderAIResult(result) {
+      addAIMessage(result.answer || "I could not prepare an answer.", false);
+      var message = aiMessages && aiMessages.lastElementChild;
+      (Array.isArray(result.actions) ? result.actions : []).slice(0, 2).forEach(function (action) {
+        if (!message || !action || typeof action !== "object") return;
+        var button = document.createElement("div"); button.className = "ftg-ai-preview"; button.setAttribute("role","button"); button.tabIndex = 0;
+        var copy = document.createElement("span"); copy.className = "ftg-ai-preview-copy";
+        var title = document.createElement("strong"); title.textContent = String(action.label || "Open suggested page").slice(0,100);
+        var hint = document.createElement("span"); hint.textContent = "Vista reale · Tocca per aprire";
+        copy.appendChild(title); copy.appendChild(hint); button.appendChild(copy);
+        button.addEventListener("click",function () { openAIActionPreview(button,action); });
+        button.addEventListener("keydown",function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openAIActionPreview(button,action); } }); message.appendChild(button);
+      });
+      if (message && result.poi_draft && result.godmode) renderPoiDraft(message,result.poi_draft);
+      if (aiMessages) aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function renderPoiDraft(message,draft) {
+      var card = document.createElement("div"); card.className = "ftg-ai-poi-draft";
+      var heading = document.createElement("strong"); heading.textContent = "Anteprima nuovo POI · God Mode"; card.appendChild(heading);
+      function field(label,key,multiline) {
+        var wrap = document.createElement("label"); wrap.textContent = label;
+        var control = document.createElement(multiline ? "textarea" : "input"); control.value = String(draft[key] == null ? "" : draft[key]); control.dataset.poiField = key;
+        wrap.appendChild(control); card.appendChild(wrap);
+      }
+      field("Nome","name",false); field("Coordinate (latitudine, longitudine)","coords",false); field("Tipo","type",false); field("Importanza 0–100","importance",false); field("Descrizione verificata","description",true);
+      var publish = document.createElement("button"); publish.type = "button"; publish.className = "ftg-ai-poi-publish"; publish.textContent = "Pubblica POI"; card.appendChild(publish); message.appendChild(card);
+      publish.addEventListener("click",async function () {
+        if (!window.confirm("Pubblicare questo POI nella mappa 5TerreGo?")) return;
+        var poi = { source_urls:Array.isArray(draft.source_urls) ? draft.source_urls : [] };
+        card.querySelectorAll("[data-poi-field]").forEach(function (control) { poi[control.dataset.poiField] = control.value; });
+        publish.disabled = true; publish.textContent = "Pubblicazione…";
+        try {
+          var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
+          var response = await fetch(endpoint,{ method:"POST", headers:getAIHeaders(), body:JSON.stringify({ operation:"create_poi", poi:poi }) });
+          var payload = await response.json().catch(function () { return {}; });
+          if (!response.ok) throw new Error(payload.error || "Pubblicazione fallita");
+          card.remove(); renderAIResult({ answer:"POI pubblicato. Il gabbiano ha fatto un lavoro vero, evento storico.", actions:[payload.action], sources:[] });
+        } catch (error) { publish.disabled = false; publish.textContent = "Pubblica POI"; addAIMessage(String(error && error.message || "Pubblicazione fallita."),false); }
+      });
+    }
+
+    function startAILocationWatch() {
+      if (aiLocationWatch !== null || !navigator.geolocation) return;
+      aiLocationWatch = navigator.geolocation.watchPosition(function (position) {
+        aiLocation = {
+          latitude:Number(position.coords.latitude.toFixed(6)),
+          longitude:Number(position.coords.longitude.toFixed(6)),
+          accuracy:Math.round(Number(position.coords.accuracy || 0)),
+          captured_at:new Date(position.timestamp || Date.now()).toISOString()
+        };
+      },function () { aiLocation = null; },{ enableHighAccuracy:true, maximumAge:15000, timeout:10000 });
+    }
+
+    function ensureAILocation(forceFresh) {
+      if ((!forceFresh && aiLocation) || !navigator.geolocation) return Promise.resolve(aiLocation);
+      return new Promise(function (resolve) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          aiLocationError = null;
+          aiLocation = { latitude:Number(position.coords.latitude.toFixed(6)), longitude:Number(position.coords.longitude.toFixed(6)), accuracy:Math.round(Number(position.coords.accuracy || 0)), captured_at:new Date(position.timestamp || Date.now()).toISOString() };
+          resolve(aiLocation);
+        },function (error) { aiLocationError = { code:Number(error && error.code || 0), message:String(error && error.message || "") }; resolve(null); },{ enableHighAccuracy:true, maximumAge:0, timeout:10000 });
+      });
+    }
+
+    function loadCaptainNavigation() {
+      if (captainNavigationPromise) return captainNavigationPromise;
+      captainNavigationPromise = new Promise(function (resolve) {
+        function initialise() {
+          if (!window.FTG_CAPTAIN_NAVIGATION) { resolve(null); return; }
+          resolve(window.FTG_CAPTAIN_NAVIGATION.init({ messages:aiMessages, addMessage:addAIMessage, getLocation:ensureAILocation, getLocationError:function () { return aiLocationError; } }));
+        }
+        if (window.FTG_CAPTAIN_NAVIGATION) { initialise(); return; }
+        var script = document.createElement("script");
+        script.src = "/captain-gull-navigation.js?v=2";
+        script.onload = initialise;
+        script.onerror = function () { resolve(null); };
+        document.head.appendChild(script);
+      });
+      return captainNavigationPromise;
+    }
+
+    function syncAIVisualViewport() {
+      var viewport = window.visualViewport;
+      if (aiIntro) { var keyboardOffset = Math.max(0, (window.innerHeight || 0) - (viewport ? viewport.height : window.innerHeight)); aiIntro.classList.toggle('is-keyboard', keyboardOffset > 140); aiIntro.style.setProperty('--ftg-ai-keyboard-offset', keyboardOffset + 'px'); aiIntro.style.setProperty('--ftg-ai-viewport-offset', (viewport ? viewport.offsetTop : 0) + 'px'); }
+      if (!aiPanel || window.innerWidth > 760) {
+        if (aiPanel) { aiPanel.style.removeProperty("--ftg-ai-viewport-top"); aiPanel.style.removeProperty("--ftg-ai-viewport-left"); aiPanel.style.removeProperty("--ftg-ai-viewport-width"); aiPanel.style.removeProperty("--ftg-ai-viewport-height"); }
+        return;
+      }
+      aiPanel.style.setProperty("--ftg-ai-viewport-top", (viewport ? viewport.offsetTop : 0) + "px");
+      aiPanel.style.setProperty("--ftg-ai-viewport-left", (viewport ? viewport.offsetLeft : 0) + "px");
+      aiPanel.style.setProperty("--ftg-ai-viewport-width", (viewport ? viewport.width : window.innerWidth) + "px");
+      aiPanel.style.setProperty("--ftg-ai-viewport-height", (viewport ? viewport.height : window.innerHeight) + "px");
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", syncAIVisualViewport);
+      window.visualViewport.addEventListener("scroll", syncAIVisualViewport);
+    }
+    window.addEventListener("orientationchange", syncAIVisualViewport);
+
+    function legacyToggleAI(forceOpen) {
       if (!aiPanel) return;
       var shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !aiPanel.classList.contains("open");
       aiPanel.classList.toggle("open", shouldOpen);
       aiPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+      aiFab.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      aiFab.classList.toggle("is-panel-open", shouldOpen);
+      document.body.classList.toggle("ftg-ai-open", shouldOpen);
+      if (shouldOpen) { startAILocationWatch(); syncAIVisualViewport(); }
+      if (aiFabFallback) aiFabFallback.textContent = shouldOpen ? "×" : "✦";
+      if (aiMascotVideo) {
+        if (shouldOpen && aiAvatarSlot) aiAvatarSlot.insertBefore(aiMascotVideo, aiAvatarSlot.firstChild);
+        else if (!shouldOpen) aiFab.insertBefore(aiMascotVideo, aiFab.firstChild);
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) aiMascotVideo.pause();
+        else aiMascotVideo.play().catch(function () {});
+      }
       if (shouldOpen && !welcomed) {
         welcomed = true;
         addAIMessage(aiWelcome, false);
       }
+      if (shouldOpen && aiInput) window.setTimeout(function () { aiInput.focus(); }, 80);
     }
 
-    function handleAISend(textFromButton) {
+    function getAIIntroGreeting() {
+      var code = String(currentLanguage || 'en').slice(0,2);
+      var copy = { it:['Ciao! Sono Capitan Gull. Come posso aiutarti?',''], fr:['Bonjour ! Je suis Captain Gull. Comment puis-je vous aider ?',''], de:['Hallo! Ich bin Captain Gull. Wie kann ich helfen?',''], es:['Hola! Soy Captain Gull. Como puedo ayudarte?',''], pt:['Ola! Sou Captain Gull. Como posso ajudar?',''], zh:['Hello! I am Captain Gull. How can I help?',''] };
+      return copy[code] || ['Hi! I am Captain Gull. How can I help?',''];
+    }
+    function getAIIntroSuggestions() {
+      var all = {
+        en:{ map:['What can I see near me?','How do I get there by train?','Which trail should I choose?'], sentieri:['Which trail is open?','An easy scenic trail','What should I pack?'], trains:['Next train?','Train or ferry?','How do I reach Vernazza?'], discounts:['Where can I find discounts?','Which places participate?','How do I use the QR code?'], weather:['What is the weather today?','Will the sea be calm tomorrow?','When should I hike?'], guide:['What should I see today?','A one-day itinerary','Where do locals eat?'], home:['Plan my day','Which village should I choose?','How do I get around?'] },
+        it:{ map:['Cosa vedere vicino a me?','Come arrivo in treno?','Quale sentiero scelgo?'], sentieri:['Quale sentiero è aperto?','Sentiero facile con panorama','Cosa porto nello zaino?'], trains:['Prossimo treno?','Treno o traghetto?','Come arrivo a Vernazza?'], discounts:['Dove trovo sconti?','Quali locali partecipano?','Come uso il QR?'], weather:['Che tempo fa oggi?','Mare calmo domani?','Quando fare trekking?'], guide:['Cosa vedere oggi?','Itinerario di un giorno','Dove mangio locale?'], home:['Organizza la mia giornata','Quale borgo scelgo?','Come mi muovo?'] },
+        fr:{ map:['Que voir près de moi ?','Comment y aller en train ?','Quel sentier choisir ?'], sentieri:['Quel sentier est ouvert ?','Un sentier facile avec vue','Que mettre dans mon sac ?'], trains:['Prochain train ?','Train ou ferry ?','Comment aller à Vernazza ?'], discounts:['Où trouver des réductions ?','Quels lieux participent ?','Comment utiliser le QR ?'], weather:['Quel temps fait-il aujourd’hui ?','La mer sera-t-elle calme demain ?','Quand faire une randonnée ?'], guide:['Que voir aujourd’hui ?','Itinéraire d’une journée','Où mangent les locaux ?'], home:['Organiser ma journée','Quel village choisir ?','Comment me déplacer ?'] },
+        de:{ map:['Was gibt es in meiner Nähe?','Wie komme ich mit dem Zug hin?','Welchen Weg soll ich wählen?'], sentieri:['Welcher Weg ist offen?','Leichter Weg mit Aussicht','Was packe ich ein?'], trains:['Nächster Zug?','Zug oder Fähre?','Wie komme ich nach Vernazza?'], discounts:['Wo finde ich Rabatte?','Welche Lokale nehmen teil?','Wie nutze ich den QR-Code?'], weather:['Wie wird das Wetter heute?','Ist das Meer morgen ruhig?','Wann sollte ich wandern?'], guide:['Was sollte ich heute sehen?','Route für einen Tag','Wo essen Einheimische?'], home:['Meinen Tag planen','Welches Dorf soll ich wählen?','Wie komme ich herum?'] },
+        zh:{ map:['我附近有什么可看？','怎么坐火车去？','该选哪条步道？'], sentieri:['哪条步道开放？','简单的观景步道','背包里带什么？'], trains:['下一班火车？','坐火车还是渡轮？','怎么去韦尔纳扎？'], discounts:['哪里有优惠？','哪些商家参加？','怎么使用二维码？'], weather:['今天天气怎么样？','明天海面平静吗？','什么时候徒步合适？'], guide:['今天看什么？','一日行程','当地人在哪里吃饭？'], home:['安排我的一天','选哪个村庄？','怎么出行？'] }
+      };
+      var languageSets = all[String(currentLanguage || 'en').slice(0,2)] || all.en;
+      return languageSets[activePage] || languageSets.home;
+    }
+    function getAIInputPlaceholder() { var copy = {it:'Chiedi a Capitan Gull...', fr:'Demandez à Captain Gull...', de:'Frag Captain Gull...', zh:'问问 Captain Gull…'}; return copy[String(currentLanguage || 'en').slice(0,2)] || 'Ask Captain Gull...'; }
+    function renderAIIntroSuggestions() { var items = getAIIntroSuggestions().slice(0,2); if (!aiIntroSuggestions) return; if (aiIntroInput) aiIntroInput.placeholder = getAIInputPlaceholder(); if (aiInput) aiInput.placeholder = getAIInputPlaceholder(); aiIntroSuggestions.innerHTML = items.map(function(item) { return '<button class="ftg-ai-intro-suggestion" type="button">' + escapeHTML(item) + '</button>'; }).join(''); aiSuggestions.forEach(function(button,index) { button.textContent = items[index] || ''; button.style.display = items[index] ? '' : 'none'; }); Array.from(aiIntroSuggestions.querySelectorAll('button')).forEach(function(button) { button.addEventListener('click', function(){ handleAISend(button.textContent); }); }); }
+    function closeAI() { if (aiIntro) { aiIntro.classList.remove('open'); aiIntro.setAttribute('aria-hidden','true'); } if (aiPanel) { aiPanel.classList.remove('open'); aiPanel.setAttribute('aria-hidden','true'); } aiFab.setAttribute('aria-expanded','false'); aiFab.classList.remove('is-panel-open'); document.body.classList.remove('ftg-ai-open'); }
+    function animateMascotToAvatar() { var from, to, flight; if (!aiIntro || !aiAvatarSlot) return; from = aiIntro.querySelector('.ftg-ai-intro-mascot'); to = aiAvatarSlot.getBoundingClientRect(); if (!from || !to.width) return; flight = from.cloneNode(true); flight.className = 'ftg-ai-intro-mascot'; flight.style.cssText = 'position:fixed;z-index:10300;left:' + from.getBoundingClientRect().left + 'px;top:' + from.getBoundingClientRect().top + 'px;width:' + from.getBoundingClientRect().width + 'px;height:' + from.getBoundingClientRect().height + 'px;transform:none;transition:left .42s cubic-bezier(.2,.9,.2,1),top .42s cubic-bezier(.2,.9,.2,1),width .42s ease,height .42s ease,opacity .42s ease;'; document.body.appendChild(flight); requestAnimationFrame(function(){ flight.style.left = to.left + 'px'; flight.style.top = to.top + 'px'; flight.style.width = to.width + 'px'; flight.style.height = to.height + 'px'; flight.style.opacity = '0'; }); window.setTimeout(function(){ flight.remove(); },460); }
+    function openAIChat(fromIntro) { if (!aiPanel) return; if (fromIntro) animateMascotToAvatar(); if (aiIntro) { aiIntro.classList.remove('open'); aiIntro.setAttribute('aria-hidden','true'); } aiPanel.classList.add('open'); aiPanel.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); startAILocationWatch(); syncAIVisualViewport(); if (!welcomed) { welcomed = true; addAIMessage(aiIntroGreetingText || aiWelcome, false); } if (aiInput) window.setTimeout(function () { aiInput.focus(); }, 80); }
+    function typeAIIntroGreeting(value) { var index = 0; if (!aiIntroTitle) return; if (aiIntro._typeTimer) clearTimeout(aiIntro._typeTimer); aiIntroTitle.textContent = ''; function step() { aiIntroTitle.textContent = value.slice(0, index); index += 1; if (index <= value.length) aiIntro._typeTimer = window.setTimeout(step, 24); } step(); }
+    function openAIIntro() { var greeting = getAIIntroGreeting(); var introVideo; if (!aiIntro) { openAIChat(); return; } aiIntroGreetingText = greeting[0]; aiIntro.style.setProperty('--ftg-ai-intro-height', window.innerHeight + 'px'); typeAIIntroGreeting(greeting[0]); if (aiIntroCopy) aiIntroCopy.textContent = greeting[1]; renderAIIntroSuggestions(); aiIntro.classList.add('open'); aiIntro.setAttribute('aria-hidden','false'); aiFab.setAttribute('aria-expanded','true'); aiFab.classList.add('is-panel-open'); document.body.classList.add('ftg-ai-open'); introVideo = aiIntro.querySelector('video'); if (introVideo) introVideo.play().catch(function () {}); }
+    function toggleAI(forceOpen) { var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !(aiPanel && aiPanel.classList.contains('open')) && !(aiIntro && aiIntro.classList.contains('open')); if (!shouldOpen) { closeAI(); return; } if (aiHistory.length) openAIChat(); else openAIIntro(); }
+    async function handleAISend(textFromButton) {
       var text = String(textFromButton || (aiInput && aiInput.value) || "").trim();
-      if (!text) return;
+      if (!text || aiBusy) return;
+      if (aiIntro && aiIntro.classList.contains('open')) openAIChat(true);
       addAIMessage(text, true);
       if (aiInput) aiInput.value = "";
-      window.setTimeout(function () {
-        addAIMessage("Active section: " + activePage + ". Questa topbar a due righe tiene brand e controlli sopra, pillole pagina sotto.", false);
-      }, 120);
+      aiBusy = true; aiSend.disabled = true; aiAbortController = new AbortController();
+      addAIMessage("Captain Gull is checking 5TerreGo…", false);
+      try {
+        if (/(dove mi trovo|dove sono|posizione|where am i|my location|ma position|wo bin ich|我的位置)/i.test(text)) await ensureAILocation(true);
+        var captainNavigation = await loadCaptainNavigation();
+        if (captainNavigation && await captainNavigation.beforeSend(text)) {
+          if (aiMessages) Array.from(aiMessages.children).forEach(function (node) { if (/checking 5TerreGo/i.test(node.textContent || "")) node.remove(); });
+          return;
+        }
+        var endpoint = String(config.aiEndpoint || "https://baggohsrpxkcubhbzcpu.supabase.co/functions/v1/ai");
+        var response = await fetch(endpoint, { method:"POST", headers:getAIHeaders(), signal:aiAbortController.signal, body:JSON.stringify({ question:text, history:aiHistory, page:{ id:activePage, url:window.location.href }, language:currentLanguage, location:aiLocation, local_time:new Date().toString(), timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone || ""), safety_instruction:"Never use profanity, insults, or blasphemous language. Keep every response family-friendly." }) });
+        var payload = await response.json().catch(function () { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Assistant temporarily unavailable.");
+        if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
+        aiHistory.push({ role:"user", text:text },{ role:"assistant", text:String(payload.answer || "") }); aiHistory = aiHistory.slice(-8);
+        renderAIResult(payload);
+      } catch (error) {
+        if (aiMessages && aiMessages.lastElementChild) aiMessages.removeChild(aiMessages.lastElementChild);
+        addAIMessage(error && error.name === "AbortError" ? "Request cancelled." : "Assistant unavailable. Please try again shortly.", false);
+      } finally { aiBusy = false; aiSend.disabled = false; aiAbortController = null; }
     }
+
+    var aiFabDrag = null;
+    var aiFabWasDragged = false;
+
+    function getFabBounds() {
+      var size = aiFab.offsetWidth || 64;
+      var topbarBottom = topbar ? Math.max(0, topbar.getBoundingClientRect().bottom) : 0;
+      var minY = Math.max(topbarBottom + 10, 10 + (window.visualViewport ? window.visualViewport.offsetTop : 0));
+      return { size:size, minX:12, maxX:Math.max(12,window.innerWidth-size-12), minY:minY, maxY:Math.max(minY,window.innerHeight-size-16) };
+    }
+
+    function placeFab(x, y, animate) {
+      var bounds = getFabBounds();
+      var left = Math.max(bounds.minX,Math.min(bounds.maxX,Number(x)));
+      var top = Math.max(bounds.minY,Math.min(bounds.maxY,Number(y)));
+      if (!Number.isFinite(left)) left = bounds.maxX;
+      if (!Number.isFinite(top)) top = bounds.maxY;
+      aiFab.style.transition = animate ? "" : "none";
+      aiFab.style.left = left + "px"; aiFab.style.right = "auto";
+      aiFab.style.top = top + "px"; aiFab.style.bottom = "auto";
+      if (!animate) window.requestAnimationFrame(function () { aiFab.style.transition = ""; });
+      return { left:left, top:top, bounds:bounds };
+    }
+
+    function restoreFabPosition() {
+      var saved = null;
+      try { saved = JSON.parse(localStorage.getItem("ftg-ai-fab-position-v1") || "null"); } catch (_error) {}
+      var bounds = getFabBounds();
+      var side = saved && saved.side === "left" ? "left" : "right";
+      placeFab(side === "left" ? bounds.minX : bounds.maxX, saved && Number.isFinite(Number(saved.y)) ? Number(saved.y) : bounds.maxY, false);
+    }
+
+    function finishFabDrag(event) {
+      if (!aiFabDrag || event.pointerId !== aiFabDrag.pointerId) return;
+      var rect = aiFab.getBoundingClientRect();
+      var bounds = getFabBounds();
+      var side = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
+      var placed = placeFab(side === "left" ? bounds.minX : bounds.maxX,rect.top,true);
+      aiFab.classList.remove("dragging");
+      try { aiFab.releasePointerCapture(event.pointerId); } catch (_error) {}
+      try { localStorage.setItem("ftg-ai-fab-position-v1",JSON.stringify({ side:side, y:placed.top })); } catch (_error) {}
+      aiFabWasDragged = aiFabDrag.moved;
+      aiFabDrag = null;
+    }
+
+    aiFab.addEventListener("pointerdown",function (event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      var rect = aiFab.getBoundingClientRect();
+      aiFabDrag = { pointerId:event.pointerId, dx:event.clientX-rect.left, dy:event.clientY-rect.top, startX:event.clientX, startY:event.clientY, moved:false };
+      aiFab.setPointerCapture(event.pointerId);
+    });
+    aiFab.addEventListener("pointermove",function (event) {
+      if (!aiFabDrag || event.pointerId !== aiFabDrag.pointerId) return;
+      if (Math.hypot(event.clientX-aiFabDrag.startX,event.clientY-aiFabDrag.startY) > 5) aiFabDrag.moved = true;
+      if (!aiFabDrag.moved) return;
+      event.preventDefault(); aiFab.classList.add("dragging");
+      placeFab(event.clientX-aiFabDrag.dx,event.clientY-aiFabDrag.dy,false);
+    });
+    aiFab.addEventListener("pointerup",finishFabDrag);
+    aiFab.addEventListener("pointercancel",finishFabDrag);
+    var aiFabResizeTimer = 0;
+    window.addEventListener("resize",function () {
+      window.clearTimeout(aiFabResizeTimer);
+      aiFabResizeTimer = window.setTimeout(restoreFabPosition,120);
+    });
 
     function bindPillEvents() {
       pillButtons = Array.prototype.slice.call(root.querySelectorAll("[data-page-target]"));
@@ -1035,6 +1433,7 @@
           event.preventDefault();
           event.stopPropagation();
           currentLanguage = String(button.getAttribute("data-language-code") || "en").toLowerCase();
+          persistLanguage();
           applyTranslations();
           closeLanguagePanel();
           try { localStorage.setItem("ftg_language", currentLanguage); } catch (_error) {}
@@ -1045,6 +1444,11 @@
           }
         });
       });
+    }
+
+    function persistLanguage() {
+      try { localStorage.setItem("ftg_language", currentLanguage); localStorage.setItem("selectedLanguage", currentLanguage); } catch (_error) {}
+      document.documentElement.lang = currentLanguage;
     }
 
     function updateMenuDynamicItems() {
@@ -1066,6 +1470,7 @@
       rebuildPills();
       rebuildLanguageList();
       updateMenuDynamicItems();
+      renderAIIntroSuggestions();
     }
 
     if (accountBtn) {
@@ -1111,9 +1516,20 @@
 
     if (aiClose) {
       aiClose.addEventListener("click", function () {
+        if (aiAbortController) aiAbortController.abort();
         toggleAI(false);
       });
     }
+
+    aiBack.addEventListener("click",function () {
+      if (aiAbortController) aiAbortController.abort();
+      toggleAI(false);
+    });
+
+    aiFab.addEventListener("click",function (event) {
+      if (aiFabWasDragged) { aiFabWasDragged = false; event.preventDefault(); return; }
+      toggleAI();
+    });
 
     if (aiSend) {
       aiSend.addEventListener("click", function () {
@@ -1126,6 +1542,10 @@
         if (event.key === "Enter") handleAISend();
       });
     }
+    if (aiIntroSend) aiIntroSend.addEventListener('click', function () { handleAISend(aiIntroInput && aiIntroInput.value); });
+    if (aiIntroInput) aiIntroInput.addEventListener('keydown', function (event) { if (event.key === 'Enter') handleAISend(aiIntroInput.value); });
+    if (aiIntroInput) aiIntroInput.addEventListener('focus', function () { if (aiIntro && aiIntro.classList.contains('open')) openAIChat(true); });
+    if (aiIntroClose) aiIntroClose.addEventListener('click', function () { closeAI(); });
 
     aiSuggestions.forEach(function (button) {
       button.addEventListener("click", function () {
@@ -1152,6 +1572,7 @@
     applyTranslations();
     syncMenuVisualState();
     maybeMarkScrolled();
+    restoreFabPosition();
 
     var api = {
       navigateToPage: function (pageId) {

@@ -381,8 +381,14 @@
 
     .custom-label { z-index: 1 !important; overflow: visible !important; }
     .custom-label .label { display: inline-block; transform: translateX(-50%); color: white; font-weight: 900; font-size: 14px; line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 6px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.9); white-space: nowrap; cursor: pointer; user-select: none; }
-    .poi-label { position: relative; min-width: 34px; min-height: 34px; display: grid; place-items: center; background: transparent; color: white; font-size: 26px; border: 0; box-shadow: none; overflow: visible; }
-    .poi-label img { width: 32px; height: 32px; display: block; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
+    .poi-label { position: relative; width: 34px; height: 40px; display: grid; place-items:center; background:var(--poi-color,#176b7a); clip-path:polygon(50% 100%,13% 57%,8% 38%,13% 20%,29% 7%,50% 3%,71% 7%,87% 20%,92% 38%,87% 57%); filter:drop-shadow(0 5px 8px rgba(0,0,0,.35)); overflow:visible; }
+    .poi-label::before { content:''; position:absolute; inset:2px; background:rgba(255,255,255,.96); clip-path:polygon(50% 100%,13% 57%,8% 38%,13% 20%,29% 7%,50% 3%,71% 7%,87% 20%,92% 38%,87% 57%); z-index:-1; }
+    .poi-label.has-symbol::before { display: none; }
+    .poi-pin-symbol { width:18px; height:18px; fill:none; stroke:rgba(255,255,255,.98); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+    .poi-material-symbol { display: block; object-fit: contain; filter: brightness(0) invert(1); }
+    .poi-map-pin { width:32px; height:38px; display:grid; place-items:center; background:var(--poi-color,#176b7a); clip-path:polygon(50% 100%,13% 57%,8% 38%,13% 20%,29% 7%,50% 3%,71% 7%,87% 20%,92% 38%,87% 57%); filter:drop-shadow(0 5px 8px rgba(0,0,0,.35)); }
+    .poi-map-pin::after { content:''; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.96); }
+    .poi-map-pin.has-symbol::after { display: none; }
     .custom-poi {
       transition: opacity .22s ease, transform .22s ease, filter .22s ease, margin-left .18s ease, margin-top .18s ease;
       will-change: margin-left, margin-top, transform, opacity;
@@ -407,12 +413,10 @@
       z-index: 12;
     }
     .custom-poi.custom-poi-dot.is-selected .poi-dot-label,
-    .custom-poi.is-selected .poi-label img,
     .custom-poi.is-selected .poi-label {
       transform: scale(1.12);
     }
     .custom-poi.custom-poi-dot.is-dimmed .poi-dot-label,
-    .custom-poi.is-dimmed .poi-label img,
     .custom-poi.is-dimmed .poi-label {
       opacity: .72;
     }
@@ -533,7 +537,7 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.16);
       pointer-events: none;
     }
-    .poi-dot-label { width: 10px; height: 10px; display: block; border-radius: 999px; background: rgba(255,255,255,1); border: 2px solid rgba(0,0,0,.62); box-shadow: 0 5px 12px rgba(0,0,0,.38); }
+    .poi-dot-label { width: 11px; height: 11px; display: block; border-radius: 999px; background: var(--poi-color, #176b7a); border: 2px solid rgba(255,255,255,.94); box-shadow: 0 4px 10px rgba(0,0,0,.32); }
     .poi-label.has-discount::after { content: '🔥'; position: absolute; top: -9px; right: -9px; width: 19px; height: 19px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,0.94); border: 1px solid rgba(255,138,29,0.45); box-shadow: 0 6px 14px rgba(0,0,0,0.24); font-size: 12px; }
     .trail-start-label { min-width: 38px; min-height: 38px; display: grid; place-items: center; background: transparent; border: 0; overflow: visible; }
     .trail-start-label img { width: 34px; height: 34px; display: block; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.36)); transition: transform .22s ease, opacity .22s ease, filter .22s ease; }
@@ -1498,6 +1502,7 @@
       .trail-info-grid { grid-template-columns:1fr; }
     }
 
+    body.map-preview-mode #ftg-global-actionbar-root,
     body.map-preview-mode .search-floating,
     body.map-preview-mode #bottom-rail,
     body.map-preview-mode #user-location-btn,
@@ -1828,14 +1833,14 @@
   window.__ftgActionbarMountStarted = false;
 
   var ACTIONBAR_PARTIAL_CANDIDATES = [
-    'global-actionbar.html?v=20260623-3',
-    './global-actionbar.html?v=20260623-3',
-    '/global-actionbar.html?v=20260623-3',
+    'global-actionbar.html?v=20260718-12',
+    './global-actionbar.html?v=20260718-12',
+    '/global-actionbar.html?v=20260718-12',
     'global-actionbar.html',
     './global-actionbar.html',
     '/global-actionbar.html'
   ];
-  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v3';
+  var ACTIONBAR_SESSION_HTML_KEY = 'ftg-global-actionbar-html-v25';
   var actionbarLoadPromise = null;
   var actionbarObserver = null;
   var actionbarMountScheduled = false;
@@ -2218,8 +2223,12 @@
   'use strict';
 
   var urlParams = new URLSearchParams(window.location.search || '');
-  var isMapPreviewMode = urlParams.get('preview') === 'hero' || urlParams.get('embed') === 'hero' || urlParams.get('mode') === 'preview';
+  var isMapPreviewMode = urlParams.get('preview') === 'hero' || urlParams.get('preview') === 'poi' || urlParams.get('embed') === 'hero' || urlParams.get('mode') === 'preview';
   var isTrailPreviewMode = urlParams.get('trailPreview') === '1';
+  function hasRequestedPOIFromURL() {
+    var requestedCoords = parseCoords({ coords: urlParams.get('coords') || '' });
+    return Boolean(String(urlParams.get('poi') || '').trim() || String(urlParams.get('name') || '').trim() || (Number.isFinite(requestedCoords.lat) && Number.isFinite(requestedCoords.lng)));
+  }
   if (isMapPreviewMode) document.body.classList.add('map-preview-mode');
 
   var SUPABASE_URL = 'https://jpflcbktcnhmlvaibzcw.supabase.co';
@@ -2252,6 +2261,12 @@
   var AUTO_CLOSE_ZOOM = 12;
   var AUTO_CLOSE_DISTANCE = 800;
   var HERO_PREVIEW_CYCLE_MS = 4800;
+  var TRAIN_STATION_VILLAGES = ['Monterosso', 'Vernazza', 'Corniglia', 'Manarola', 'Riomaggiore', 'La Spezia', 'Levanto'];
+
+  function villageHasTrainStation(village) {
+    var name = village && village.name ? village.name : String(village || '');
+    return TRAIN_STATION_VILLAGES.indexOf(name) !== -1;
+  }
 
   var SUPABASE_READY = Boolean(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.indexOf('YOUR_PROJECT') === -1 && SUPABASE_ANON_KEY.indexOf('YOUR_PUBLIC') === -1);
   var supabaseClient = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
@@ -2385,8 +2400,13 @@
   function getInitialMapState() {
     var requestedIndex = getRequestedVillageIndexFromURL();
     var sessionState = readSessionMapState();
+    var requestedCoords = parseCoords({ coords: urlParams.get('coords') || '' });
     var index;
     var place;
+
+    if (Number.isFinite(requestedCoords.lat) && Number.isFinite(requestedCoords.lng)) {
+      return { index: 0, place: null, center: [requestedCoords.lat, requestedCoords.lng], zoom: 17 };
+    }
 
     if (requestedIndex >= 0) {
       place = places[requestedIndex] || places[0];
@@ -2711,6 +2731,7 @@
   var poiOverlapGroups = [];
   var poiOverlapCycleTimer = null;
   var incrementalPOIRefreshFrame = 0;
+  var poiDeclutterFrame = 0;
   var mapRefreshFrame = 0;
   var mapRefreshNeedsRail = false;
   var mapRefreshNeedsAuto = false;
@@ -2818,6 +2839,7 @@
   var atcScheduledBusLastFrame = 0;
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
+  // Shows the complete coast at first glance, without making the villages feel distant.
   var NORMAL_MAP_ZOOM = 9.5;
   var NORMAL_MAP_PITCH = 0;
   var NORMAL_MAP_LIMITS = [[9.28, 43.75], [10.28, 44.48]];
@@ -3082,7 +3104,7 @@
       });
     });
   }
-  function getPOIIconHTML(poi) {
+  function getLegacyPOIIconHTML(poi) {
     var symbol = poi && poi.symbol ? String(poi.symbol) : '📌';
     var type = normalizePOIType(poi && poi.type);
     if (type === 'chiesa' || type === 'church' || symbol === 'church.png') return buildPOIAssetImage('church.png', 'Church', '⛪');
@@ -3103,6 +3125,22 @@
     if (type === 'bar') return '🍸';
     if (type === 'curiosity') return '✨';
     return escapeHTML(symbol || '📌');
+  }
+  function getVectorPOIIconHTML(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    var icons = {
+      chiesa:'M12 3v18M8 7h8M5 21h14M8 21v-6h8v6', church:'M12 3v18M8 7h8M5 21h14M8 21v-6h8v6',
+      monumento:'M8 21h8M10 17h4M9 17l1-11h4l1 11M7 21h10', castello:'M4 21h16V9l-4 2V7l-4 2-4-2v4L4 9zM9 21v-5h6v5',
+      sentiero:'M5 19c4-7 8-7 14-14M6 6h5v5M13 18h5v-5', trail:'M5 19c4-7 8-7 14-14M6 6h5v5M13 18h5v-5',
+      spiaggia:'M4 17c2-2 4-2 6 0s4 2 6 0 4-2 4 0M6 13c2-2 4-2 6 0s4 2 6 0M12 4v7M8 7h8', beach:'M4 17c2-2 4-2 6 0s4 2 6 0 4-2 4 0M6 13c2-2 4-2 6 0s4 2 6 0M12 4v7M8 7h8',
+      stazione:'M6 4h12v16H6zM9 8h1M14 8h1M9 20v-4h6v4M4 20h16', station:'M6 4h12v16H6zM9 8h1M14 8h1M9 20v-4h6v4M4 20h16',
+      'fermata bus':'M5 6h14v12H5zM8 18a2 2 0 1 0 0 .1M16 18a2 2 0 1 0 0 .1M5 11h14', ferry:'M4 15h16l-2 5H6zM7 11h10v4H7zM12 4v7',
+      'punto panoramico':'M4 19l5-6 4 4 3-3 4 5M5 5h14v10', viewpoint:'M4 19l5-6 4 4 3-3 4 5M5 5h14v10', fontana:'M6 19h12M8 19c0-4 2-6 4-6s4 2 4 6M12 5v5M8 9h8', farmacia:'M12 5v14M5 12h14', atm:'M5 5h14v14H5zM8 9h8M8 14h5',
+      'ascensore pubblico':'M8 21V4h8v17M10 8h4M10 17h4M4 21h16', ristorante:'M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 3 7 0 8', bar:'M5 5h14l-6 7v7M8 21h8M7 5l5 7 5-7', curiosity:'M12 3a7 7 0 0 0-4 12c1.4 1.1 2 2.2 2 4h4c0-1.8.6-2.9 2-4A7 7 0 0 0 12 3zM10 22h4'
+    };
+    var colors = { curiosity:'#7756c8', 'punto panoramico':'#d56b30', spiaggia:'#1683a2', chiesa:'#7d596e', monumento:'#8b7048', castello:'#745d4a', sentiero:'#4f8b57', stazione:'#355f9a', 'fermata bus':'#3f7d88', ferry:'#237a91', fontana:'#3c8cb0', farmacia:'#4f9a70', atm:'#786c9e', ristorante:'#b45d45', bar:'#a95e72', 'ascensore pubblico':'#61737f' };
+    var path = icons[type] || 'M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12zM12 11a2 2 0 1 0 0 .1';
+    return '<span style="--poi-color:' + (colors[type] || '#1b5e6f') + '"><svg class="poi-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"></path></svg></span>';
   }
   function clampPOIZoomScore(value) { var n = Number(value); if (!Number.isFinite(n)) return null; return Math.max(1, Math.min(100, n)); }
   function getPOIZoomScoreFromRaw(raw) {
@@ -3370,18 +3408,71 @@
   function createPOIDotIcon(poi) {
     return L.divIcon({
       className: 'custom-poi custom-poi-dot',
-      html: '<div class="poi-dot-label"></div>',
+      html: '<div class="poi-dot-label" style="--poi-color:' + getPOIColor(poi) + '"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
+  }
+  function getPOIColor(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    if (/stazione|station|bus|ferry|ascensore|parcheggio/.test(type)) return '#2c6f9f'; // transport
+    if (/chiesa|church|monumento|monument|castello|castle|piazza/.test(type)) return '#a3614d'; // culture
+    if (/sentiero|trail|spiaggia|beach|panoramico|viewpoint|fontana|fountain/.test(type)) return '#408865'; // nature
+    return '#7558aa'; // services, food and curiosities
+  }
+  function getPOISymbolPath(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    if (/chiesa|church/.test(type)) return 'M12 3v18M8 7h8M5 21h14M8 21v-6h8v6';
+    if (/monumento|monument/.test(type)) return 'M8 21h8M10 17h4M9 17l1-11h4l1 11M7 21h10';
+    if (/castello|castle/.test(type)) return 'M4 21h16V9l-4 2V7l-4 2-4-2v4L4 9zM9 21v-5h6v5';
+    if (/sentiero|trail/.test(type)) return 'M5 19c4-7 8-7 14-14M6 6h5v5M13 18h5v-5';
+    if (/spiaggia|beach/.test(type)) return 'M4 17c2-2 4-2 6 0s4 2 6 0 4-2 4 0M12 4v8M8 7h8';
+    if (/stazione|station/.test(type)) return 'M6 4h12v16H6zM9 8h1M14 8h1M9 20v-4h6v4M4 20h16';
+    if (/fermata bus|bus stop|busstop/.test(type)) return 'M5 6h14v12H5zM8 18a2 2 0 1 0 0 .1M16 18a2 2 0 1 0 0 .1M5 11h14';
+    if (/ferry/.test(type)) return 'M4 15h16l-2 5H6zM7 11h10v4H7zM12 4v7';
+    if (/fontana|fountain/.test(type)) return 'M6 19h12M8 19c0-4 2-6 4-6s4 2 4 6M12 5v5M8 9h8';
+    if (/farmacia|pharmacy/.test(type)) return 'M12 5v14M5 12h14';
+    if (/atm/.test(type)) return 'M5 5h14v14H5zM8 9h8M8 14h5';
+    if (/ascensore|elevator/.test(type)) return 'M8 21V4h8v17M10 8h4M10 17h4M4 21h16';
+    if (/ristorante|restaurant|food/.test(type)) return 'M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 3 7 0 8';
+    if (/bar/.test(type)) return 'M5 5h14l-6 7v7M8 21h8M7 5l5 7 5-7';
+    if (/panoramico|viewpoint/.test(type)) return 'M4 19l5-6 4 4 3-3 4 5M5 5h14v10';
+    if (/curiosity/.test(type)) return 'M12 3a7 7 0 0 0-4 12c1.4 1.1 2 2.2 2 4h4c0-1.8.6-2.9 2-4A7 7 0 0 0 12 3zM10 22h4';
+    if (/parcheggio/.test(type)) return 'M7 21V4h6a5 5 0 0 1 0 10H7M11 8h2a1 1 0 0 1 0 2h-2z';
+    return 'M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12zM12 11a2 2 0 1 0 0 .1';
+  }
+  function getPOIIconAsset(poi) {
+    var type = normalizePOIType(poi && poi.type);
+    if (/chiesa|church/.test(type)) return 'church';
+    if (/monumento|monument/.test(type)) return 'monument';
+    if (/castello|castle/.test(type)) return 'castle';
+    if (/sentiero|trail/.test(type)) return 'trail';
+    if (/spiaggia|beach/.test(type)) return 'beach';
+    if (/stazione|station/.test(type)) return 'train';
+    if (/fermata bus|bus stop|busstop/.test(type)) return 'bus';
+    if (/ferry/.test(type)) return 'ferry';
+    if (/fontana|fountain/.test(type)) return 'fountain';
+    if (/farmacia|pharmacy/.test(type)) return 'pharmacy';
+    if (/atm/.test(type)) return 'atm';
+    if (/ascensore|elevator/.test(type)) return 'elevator';
+    if (/ristorante|restaurant|food/.test(type)) return 'restaurant';
+    if (/bar/.test(type)) return 'bar';
+    if (/panoramico|viewpoint|unknown spot/.test(type)) return 'camera';
+    if (/curiosity/.test(type)) return 'curiosity';
+    if (/parcheggio/.test(type)) return 'parking';
+    return 'place';
+  }
+  function getPOIPinSymbolHTML(poi) { var icon = getPOIIconAsset(poi); return '<img class="poi-pin-symbol poi-material-symbol" src="assets/material/' + icon + '.svg" alt="" aria-hidden="true">'; }
+  function getPOIIconHTML(poi) {
+    return '<span class="poi-map-pin has-symbol" style="--poi-color:' + getPOIColor(poi) + '" aria-hidden="true">' + getPOIPinSymbolHTML(poi) + '</span>';
   }
   function createPOIFullIcon(poi) {
     var hasDiscount = isPOICampaignActive(poi);
     return L.divIcon({
       className: 'custom-poi',
-      html: '<div class="poi-label' + (hasDiscount ? ' has-discount' : '') + '">' + getPOIIconHTML(poi) + '</div>',
-      iconSize: [40, 40],
-      iconAnchor: [20, 34]
+      html: '<div class="poi-label has-symbol' + (hasDiscount ? ' has-discount' : '') + '" style="--poi-color:' + getPOIColor(poi) + '">' + getPOIPinSymbolHTML(poi) + '</div>',
+      iconSize: [36, 36],
+      iconAnchor: [18, 32]
     });
   }
   function armPOIMarkerAppearance(entry) {
@@ -3641,16 +3732,21 @@
   }
   function applyPOIDeclutter() {
     var visible;
+    var viewport;
     var nodes;
     var visited;
     var groups = [];
     var forceSeparateAtMaxZoom = false;
     if (!map) return;
     resetPOIGrouping();
+    // At overview zoom every POI is a small dot: grouping them is expensive and
+    // hides useful context. Only declutter the larger symbols shown close in.
+    if (map.getZoom() < 13) return;
+    viewport = map.getBounds().pad(.12);
     forceSeparateAtMaxZoom = map.getZoom() >= (Number(map.getMaxZoom()) - 0.05);
     if ((currentPOI && poiCard && poiCard.getAttribute('aria-hidden') === 'false') || (currentTrail && trailCard && trailCard.getAttribute('aria-hidden') === 'false')) return;
     visible = poiMarkers.filter(function(entry) {
-      return entry && entry.poi && entry.marker && map.hasLayer(entry.marker) && entry.marker._icon && entry._displayMode === 'full' && isValidCoords(entry.poi.coords);
+      return entry && entry.poi && entry.marker && map.hasLayer(entry.marker) && entry.marker._icon && entry._displayMode === 'full' && isValidCoords(entry.poi.coords) && viewport.contains(entry.poi.coords);
     });
     if (visible.length < 2) return;
     nodes = visible.map(function(entry, index) {
@@ -3854,7 +3950,9 @@
   }
   function updatePOIVisibility() {
     updateMapSymbolVisibility();
-    window.requestAnimationFrame(function() {
+    if (poiDeclutterFrame) return;
+    poiDeclutterFrame = window.requestAnimationFrame(function() {
+      poiDeclutterFrame = 0;
       applyPOIDeclutter();
       updateSelectedPOIEmphasis();
     });
@@ -4257,7 +4355,8 @@
     if (userLocationFirstFix) {
       userLocationFirstFix = false;
       stopAmbientOrbit();
-      if (locationInsideMap) startUserLocationOrbit(false);
+      if (hasRequestedPOIFromURL() && !navigationModeActive) userOrbitPlayed = true;
+      else if (locationInsideMap) startUserLocationOrbit(false);
       else showOutsideMapFallback();
     }
   }
@@ -4871,9 +4970,30 @@
     renderDiscountCTA(poi);
     refreshCurrentPOIPublicDetails(poi);
     updateSelectedPOIEmphasis();
-    window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); } }, 80); }
+    window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); try { window.dispatchEvent(new CustomEvent('ftg:translatecontent')); } catch (_error) {} } }, 80); }
   function flyToWithTopOffset(coords, zoom, duration) { var targetZoom; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); isProgrammaticMove = true; syncingMapCameras = true; map.setView(coords, targetZoom, { animate:false }); syncingMapCameras = false; flyMapLibre3D(coords, targetZoom, duration); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
+  var requestedPOIFocused = false;
+  var requestedNavigationHydrated = false;
+  function focusRequestedPOIFromURL() {
+    var requestedId, requestedName, requestedCoords, item, synthetic, shouldNavigate;
+    if (requestedPOIFocused) return false;
+    requestedId = String(urlParams.get('poi') || '').trim();
+    requestedName = String(urlParams.get('name') || '').trim();
+    requestedCoords = parseCoords({ coords: urlParams.get('coords') || '' });
+    shouldNavigate = urlParams.get('navigate') === '1';
+    if (!requestedId && !requestedName && !Number.isFinite(requestedCoords.lat)) return false;
+    item = poiMarkers.find(function(entry) { return String(entry.poi && entry.poi.id || '') === requestedId; });
+    if (!item && requestedName) item = poiMarkers.find(function(entry) { return normalizeText(entry.poi && entry.poi.name || '') === normalizeText(requestedName); });
+    synthetic = item && item.poi;
+    if (!synthetic && Number.isFinite(requestedCoords.lat) && Number.isFinite(requestedCoords.lng)) synthetic = normalizePOI({ id: requestedId || 'route-destination', name: requestedName || 'Destinazione', type: urlParams.get('type') || 'unknown spot', coords: [requestedCoords.lat, requestedCoords.lng] });
+    if (!synthetic) return false;
+    requestedPOIFocused = true;
+    flyToWithTopOffset(synthetic.coords, 17, 0.55);
+    if (isMapPreviewMode) return true;
+    window.setTimeout(function() { if (shouldNavigate) beginNavigationMode(synthetic); else showPOICard(synthetic); }, 260);
+    return true;
+  }
   async function loadTrails() {
     var response, rows;
     if (!trailsLayer) return;
@@ -5827,6 +5947,7 @@
     var rows;
     var trains;
     var trainOption;
+    if (!villageHasTrainStation(fromVillage) || !villageHasTrainStation(toVillage)) return;
     url.searchParams.set('from', fromVillage.name);
     url.searchParams.set('to', toVillage.name);
     url.searchParams.set('date', dateTime.date);
@@ -5912,8 +6033,8 @@
       resolvePedestrianNavigationRoute(walkOption, navigationOriginCoords || origin.coords, true);
       return;
     }
-    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello o sentiero.';
-    navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
+    if (navigationContext) navigationContext.textContent = origin.name + ' → ' + destination.name + ': scegli treno, battello, autobus o sentiero.';
+    if (villageHasTrainStation(origin) && villageHasTrainStation(destination)) navigationChoices.push({ mode: 'train-loading', icon: '🚆', title: 'Treno', time: 'Ricerca…', meta: 'Partenze reali in aggiornamento' });
     trailMatch = getNavigationTrail(origin, destination);
     if (trailMatch) navigationChoices.push({ mode: 'trail', icon: '🥾', title: trailMatch.entry.trail.name, time: formatTrailDuration(trailMatch.entry.trail.estimated_duration), meta: Number(trailMatch.entry.trail.distance_km || 0).toFixed(1) + ' km · ' + getDisplayDifficulty(trailMatch.entry.trail), trailMatch: trailMatch });
     ferries = getNextNavigationFerries(origin, destination);
@@ -5923,8 +6044,10 @@
     }
     renderNavigationOptions();
     if (ferryOption) resolveTransportAccessRoutes(ferryOption);
-    requestId = ++navigationTrainRequestId;
-    fetchNavigationTrainChoice(requestId, origin, destination);
+    if (villageHasTrainStation(origin) && villageHasTrainStation(destination)) {
+      requestId = ++navigationTrainRequestId;
+      fetchNavigationTrainChoice(requestId, origin, destination);
+    }
   }
   function clearNavigationRoute() {
     if (!navigationRouteLine || !map) return;
@@ -6079,7 +6202,6 @@
       el.setAttribute('aria-label', poi.name || 'POI');
       el.innerHTML = getPOIIconHTML(poi);
       el.style.cssText = 'width:38px;height:38px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;font-size:24px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))';
-      Array.from(el.querySelectorAll('img')).forEach(function(img){img.style.cssText='width:34px;height:34px;object-fit:contain'});
       el.addEventListener('click', function(event) { event.stopPropagation(); openPOIWithMapMove(poi, null); });
       glPOIMarkers.push(new window.maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([poi.coords[1], poi.coords[0]]).addTo(turnNavigationMap));
     });
@@ -6161,7 +6283,7 @@
     ambientOrbitFrame = window.requestAnimationFrame(animateOrbit);
   }
   function startFallbackOrbit() {
-    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
+    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || hasRequestedPOIFromURL() || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
     fallbackOrbitStarted = true;
     normalGyroTracking = false;
     if (turnNavigationMap) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
@@ -6183,7 +6305,7 @@
     var targetBearing;
     var currentCenter;
     var startZoom;
-    if (!isCoordsInsideNormalMap(userLocationLatLng) || (userOrbitPlayed && !force)) return;
+    if ((!force && hasRequestedPOIFromURL() && !navigationModeActive) || !isCoordsInsideNormalMap(userLocationLatLng) || (userOrbitPlayed && !force)) return;
     if (!turnNavigationMap || !turnNavigationMapLoaded) { window.setTimeout(function() { startUserLocationOrbit(force); }, 160); return; }
     userOrbitPlayed = true;
     targetBearing = currentUserHeading === null ? 0 : currentUserHeading;
@@ -6236,7 +6358,7 @@
     var initial;
     if (!turnNavigationMapEl || !window.maplibregl) return;
     points = getNavigationRoutePoints(navigationSelectedOption);
-    initial = isValidCoords(userLocationLatLng) ? userLocationLatLng : (points[0] || navigationOriginCoords || (navigationDestinationPOI && navigationDestinationPOI.coords) || (map ? [map.getCenter().lat, map.getCenter().lng] : [44.105, 9.80]));
+    initial = hasRequestedPOIFromURL() && map ? [map.getCenter().lat, map.getCenter().lng] : (isValidCoords(userLocationLatLng) ? userLocationLatLng : (points[0] || navigationOriginCoords || (navigationDestinationPOI && navigationDestinationPOI.coords) || (map ? [map.getCenter().lat, map.getCenter().lng] : [44.105, 9.80])));
     if (turnNavigationMap) {
       turnNavigationMap.resize();
       updateTurnNavigationRoute();
@@ -6252,17 +6374,21 @@
           esri: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Tiles © Esri' },
           streets: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],tileSize:256,maxzoom:20,attribution:'© OpenStreetMap © CARTO' },
           labels: { type:'raster',tiles:['https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],tileSize:256,maxzoom:20,attribution:'© OpenStreetMap © CARTO' },
-          openfreemap: { type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'© OpenStreetMap contributors' }
+          openfreemap: { type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'© OpenStreetMap contributors' },
+          terrainDem: { type:'raster-dem',url:'https://demotiles.maplibre.org/terrain-tiles/tiles.json',tileSize:256 },
+          terrainShade: { type:'raster-dem',url:'https://demotiles.maplibre.org/terrain-tiles/tiles.json',tileSize:256 }
         },
         layers: [
           { id:'street-map',type:'raster',source:'streets',layout:{visibility:currentBaseMapMode === 'map' ? 'visible' : 'none'} },
           { id:'satellite',type:'raster',source:'esri',layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'} },
-          { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:15.4,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],15.4,0,16,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':['interpolate',['linear'],['zoom'],15.4,0,16,.82],'fill-extrusion-vertical-gradient':true} },
+          { id:'terrain-hillshade',type:'hillshade',source:'terrainShade',minzoom:9,maxzoom:17,paint:{'hillshade-exaggeration':.38,'hillshade-shadow-color':'#3f352b','hillshade-highlight-color':'#fff4dc','hillshade-accent-color':'#75634e'} },
+          { id:'3d-buildings',type:'fill-extrusion',source:'openfreemap','source-layer':'building',minzoom:16.2,filter:['!=',['get','hide_3d'],true],paint:{'fill-extrusion-color':['case',['has','colour'],['to-color',['get','colour']],'#d8c7ad'],'fill-extrusion-height':['interpolate',['linear'],['zoom'],16.2,0,16.8,['coalesce',['get','render_height'],6]],'fill-extrusion-base':['interpolate',['linear'],['zoom'],16.2,0,16.8,['coalesce',['get','render_min_height'],0]],'fill-extrusion-opacity':.72,'fill-extrusion-vertical-gradient':true} },
           { id:'satellite-labels',type:'raster',source:'labels',minzoom:13,layout:{visibility:currentBaseMapMode === 'satellite' ? 'visible' : 'none'},paint:{'raster-opacity':['interpolate',['linear'],['zoom'],13,0,14,0.72,16,1]} }
-        ]
+        ],
+        terrain:{source:'terrainDem',exaggeration:.72}
       },
-      center: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
-      zoom: !navigationModeActive && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11),
+      center: !navigationModeActive && !hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_CENTER : [initial[1], initial[0]],
+      zoom: !navigationModeActive && !hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0 ? NORMAL_MAP_ZOOM : (map ? map.getZoom() : 11),
       pitch: navigationModeActive ? 25 : NORMAL_MAP_PITCH,
       bearing: 0,
       minZoom: 9.5,
@@ -6291,7 +6417,7 @@
       if (navigationModeActive) fitTurnNavigationRoute();
       else {
         if (compassRecenterPending && isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
-        else if (getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
+        else if (!hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
         syncMapLibreMarkers();
         if (!compassRecenterPending && !isValidCoords(userLocationLatLng)) window.setTimeout(startFallbackOrbit, 650);
       }
@@ -6934,11 +7060,24 @@
     var initialBounds = getInitialViewportPOIBounds();
     var deferredAppendGeneration = generation;
 
+    if (urlParams.get('preview') === 'poi') {
+      poiDataLoaded = true;
+      poiCoordsReady = true;
+      refreshMapLoadingState();
+      focusRequestedPOIFromURL();
+      return;
+    }
+
     function refreshPOIViews(renderRail) {
       updateExclusiveDiscountFilterVisibility();
       updatePOIVisibility();
       if (renderRail) renderBottomRailCards();
       refreshMapLoadingState();
+      focusRequestedPOIFromURL();
+      if (!requestedNavigationHydrated && urlParams.get('navigate') === '1' && navigationModeActive && navigationDestinationPOI && poiMarkers.length >= 90) {
+        requestedNavigationHydrated = true;
+        renderNavigationChoices();
+      }
     }
 
     function mergeCachedRows(list) {
@@ -7449,7 +7588,7 @@
     if (!window.L) throw new Error('Leaflet non caricato. Controlla la connessione o il CDN Leaflet.');
 
     initialState = getInitialMapState();
-    if (getRequestedVillageIndexFromURL() < 0 && !navigationModeActive) {
+    if (!hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0 && !navigationModeActive) {
       initialState.center = [NORMAL_MAP_CENTER[1], NORMAL_MAP_CENTER[0]];
       initialState.zoom = NORMAL_MAP_ZOOM;
     }
@@ -7954,9 +8093,11 @@
       applyMapFilterUI(currentMapFilter);
       renderBottomRailCards();
       focusRequestedVillageFromURL(false);
+      focusRequestedPOIFromURL();
       scheduleSessionMapStateSave();
     }
     loadPOIs().then(async function() {
+      focusRequestedPOIFromURL();
       await loadATCBusStops();
       if (isMapPreviewMode && map && poiMarkers.length) {
         updatePOIVisibility();

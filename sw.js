@@ -1,4 +1,4 @@
-const VERSION = '5terrego-sw-v2';
+const VERSION = '5terrego-sw-v4';
 const STATIC_CACHE = `${VERSION}-static`;
 const TILE_CACHE = `${VERSION}-tiles`;
 const CORE_ASSETS = [
@@ -80,7 +80,7 @@ async function cacheFirstTile(request) {
 }
 
 async function staleWhileRevalidate(request) {
-  const cached = await caches.match(request, { ignoreSearch: true });
+  const cached = await caches.match(request);
   const update = fetch(request).then(async response => {
     if (response && response.ok && response.type === 'basic') {
       const cache = await caches.open(STATIC_CACHE);
