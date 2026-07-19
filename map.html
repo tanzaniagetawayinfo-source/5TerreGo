@@ -2837,6 +2837,7 @@
   var selectedATCScheduledTrip = null;
   var ATC_SCHEDULED_BUS_MIN_ZOOM = 14.6;
   var ATC_SCHEDULED_BUS_MAX_VISIBLE = 36;
+  var ATC_SCHEDULED_BUS_ENABLED = false;
   var atcScheduledBusLastFrame = 0;
   var syncingMapCameras = false;
   var NORMAL_MAP_CENTER = [9.785, 44.125];
@@ -5399,7 +5400,7 @@
     var active;
     var activeKeys = new Set();
     var needsAnimation = false;
-    if (!turnNavigationMap || !turnNavigationMapLoaded || navigationModeActive || turnNavigationMap.getZoom() < ATC_SCHEDULED_BUS_MIN_ZOOM || (searchTypeFilter !== 'all' && searchTypeFilter !== 'bus')) {
+    if (!ATC_SCHEDULED_BUS_ENABLED || !turnNavigationMap || !turnNavigationMapLoaded || navigationModeActive || turnNavigationMap.getZoom() < ATC_SCHEDULED_BUS_MIN_ZOOM || (searchTypeFilter !== 'all' && searchTypeFilter !== 'bus')) {
       clearATCScheduledBusMarkers();
       return;
     }
@@ -5450,6 +5451,7 @@
   }
 
   function syncATCScheduledBuses() {
+    if (!ATC_SCHEDULED_BUS_ENABLED) { clearATCScheduledBusMarkers(); return; }
     if (!turnNavigationMap || !turnNavigationMapLoaded || turnNavigationMap.getZoom() < ATC_SCHEDULED_BUS_MIN_ZOOM) {
       clearATCScheduledBusMarkers();
       return;
@@ -6285,7 +6287,7 @@
     ambientOrbitFrame = window.requestAnimationFrame(animateOrbit);
   }
   function startFallbackOrbit() {
-    if (fallbackOrbitStarted || isMapPreviewMode || navigationModeActive || hasRequestedPOIFromURL() || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
+    if (fallbackOrbitStarted || isMapPreviewMode || isTrailPreviewMode || navigationModeActive || hasRequestedPOIFromURL() || getRequestedVillageIndexFromURL() >= 0 || isCoordsInsideNormalMap(userLocationLatLng)) return;
     fallbackOrbitStarted = true;
     normalGyroTracking = false;
     if (turnNavigationMap) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
@@ -6419,7 +6421,7 @@
       if (navigationModeActive) fitTurnNavigationRoute();
       else {
         if (compassRecenterPending && isValidCoords(userLocationLatLng)) settleUserCameraFromCompass();
-        else if (!hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
+        else if (!isTrailPreviewMode && !hasRequestedPOIFromURL() && getRequestedVillageIndexFromURL() < 0) turnNavigationMap.jumpTo({ center:NORMAL_MAP_CENTER, zoom:NORMAL_MAP_ZOOM, pitch:NORMAL_MAP_PITCH, bearing:0 });
         syncMapLibreMarkers();
         if (isTrailPreviewMode && currentTrail) window.setTimeout(function(){ focusTrailReliefView(getTrailLatLngs(currentTrail)); }, 80);
         else if (!compassRecenterPending && !isValidCoords(userLocationLatLng)) window.setTimeout(startFallbackOrbit, 650);
@@ -8044,7 +8046,7 @@
       var center;
       fitPlacesAtMinimumZoom();
       updatePlaceLabelVisibility();
-      if (!syncingMapCameras && turnNavigationMap && turnNavigationMapLoaded && !navigationModeActive) {
+      if (!syncingMapCameras && turnNavigationMap && turnNavigationMapLoaded && !navigationModeActive && !isTrailPreviewMode) {
         center = map.getCenter();
         syncingMapCameras = true;
         turnNavigationMap.jumpTo({ center:[center.lng,center.lat],zoom:map.getZoom(),bearing:turnNavigationMap.getBearing(),pitch:turnNavigationMap.getPitch() });
