@@ -1332,10 +1332,10 @@
   {
     "id": 199,
     "name": "BPER",
-    "coords": "44,1039644, 9,8217643",
+    "coords": "44.103964, 9.821764",
     "description": "",
     "importance": 50,
-    "type": "chiesa",
+    "type": "atm",
     "discount": null,
     "discount_info": null
   },
@@ -1614,7 +1614,7 @@
     "name": "Bus Stop",
     "coords": "44.051983, 9.836313",
     "description": "",
-    "importance": 50,
+    "importance": 21,
     "type": "fermata bus",
     "discount": null,
     "discount_info": null
@@ -1696,56 +1696,6 @@
     "description": "",
     "importance": 50,
     "type": "fermata bus",
-    "discount": null,
-    "discount_info": null
-  },
-  {
-    "id": 236,
-    "name": "The Nativity That Lights Up a Hill",
-    "coords": "44.10694, 9.72717",
-    "description": "Above Manarola, Mario Andreoli's illuminated Nativity turns the terraced hillside into a seasonal constellation. It has become one of the village's most recognisable winter traditions.",
-    "importance": 86,
-    "type": "curiosity",
-    "discount": null,
-    "discount_info": null
-  },
-  {
-    "id": 237,
-    "name": "Corniglia Is the Village Without a Harbour",
-    "coords": "44.11955, 9.70936",
-    "description": "Corniglia is the only one of the five villages that stands high above the sea rather than around a harbour. The long Lardarina staircase is its famous pedestrian link to the station below.",
-    "importance": 88,
-    "type": "curiosity",
-    "discount": null,
-    "discount_info": null
-  },
-  {
-    "id": 238,
-    "name": "Vernazza's Church Meets the Sea",
-    "coords": "44.13530, 9.68262",
-    "description": "Santa Margherita d'Antiochia stands directly on Vernazza's tiny harbour. Its octagonal bell tower has guided the village skyline for centuries.",
-    "importance": 84,
-    "type": "curiosity",
-    "discount": null,
-    "discount_info": null
-  },
-  {
-    "id": 239,
-    "name": "A Poet's Name in the Landscape",
-    "coords": "44.14618, 9.65400",
-    "description": "Monterosso's old town is closely associated with Eugenio Montale, the Nobel Prize-winning poet who spent many childhood summers here. The landscape appears throughout his work.",
-    "importance": 82,
-    "type": "curiosity",
-    "discount": null,
-    "discount_info": null
-  },
-  {
-    "id": 240,
-    "name": "Riomaggiore's Wine Presses Shaped the Hills",
-    "coords": "44.09962, 9.73892",
-    "description": "The steep dry-stone terraces above Riomaggiore were built over generations to grow vines on slopes that would otherwise be impossible to cultivate. They are the handmade structure behind the Cinque Terre landscape.",
-    "importance": 85,
-    "type": "curiosity",
     "discount": null,
     "discount_info": null
   }
