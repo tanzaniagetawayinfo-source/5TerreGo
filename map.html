@@ -2961,8 +2961,9 @@
         if (mapPerspective === '3d') {
           turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.25 });
           turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none');
-          turnNavigationMap.setLayoutProperty('terrain-hillshade', 'visibility', 'visible');
-          turnNavigationMap.setPaintProperty('terrain-hillshade', 'hillshade-exaggeration', 1);
+          // The DEM already shapes the satellite raster. A full-strength hillshade
+          // over it removes the natural colours and makes the map look grey.
+          turnNavigationMap.setLayoutProperty('terrain-hillshade', 'visibility', 'none');
         } else {
           turnNavigationMap.setTerrain(null);
           turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'visible');
@@ -3613,12 +3614,15 @@
   function getVisibleTrailMapItems(zoom) {
     var searchQuery = normalizeSearchText(getRailSearchQuery());
     var searchMode = Boolean(searchQuery);
-    if (!map || !isTrailMatchFilter(currentMapFilter)) return [];
+    var forcedTrailVisibility = searchTypeFilter === 'trail';
+    if (!map || (searchTypeFilter !== 'all' && !forcedTrailVisibility)) return [];
+    if (!forcedTrailVisibility && !isTrailMatchFilter(currentMapFilter)) return [];
     zoom = Number(zoom || map.getZoom());
     return trailItems.filter(function(item) {
       return item && item.trail && item.marker && item.latLngs && item.latLngs.length;
     }).filter(function(item) {
       if (searchMode) return trailMatchesActiveSearch(item.trail, searchQuery);
+      if (forcedTrailVisibility) return true;
       return zoom >= getMinZoomForTrailImportance(item.trail && item.trail.importance);
     }).map(function(item) {
       item.marker.setLatLng(item.latLngs[0]);
@@ -3816,6 +3820,9 @@
     var forceSeparateAtMaxZoom = false;
     if (!map) return;
     resetPOIGrouping();
+    // An explicit type selection means exactly that: show every matching item.
+    // Do not replace overlapping results with a rotating group.
+    if (hasForcedTypeFilterVisibility() || normalizeSearchText(getRailSearchQuery())) return;
     // At overview zoom every POI is a small dot: grouping them is expensive and
     // hides useful context. Only declutter the larger symbols shown close in.
     if (map.getZoom() < 13) return;
@@ -3949,7 +3956,7 @@
       if (!item || !item.poi || !isValidCoords(item.poi.coords)) return;
       shouldShow = navigationModeActive
         ? Boolean(navigationDestinationPOI && String(item.poi.id || item.poi.name || '') === String(navigationDestinationPOI.id || navigationDestinationPOI.name || ''))
-        : (!activeTour && isPOIMatchFilter(item.poi, currentMapFilter) && railTypeMatchesSearchType(item.poi && item.poi.type) && (!searchMode || poiMatchesActiveSearch(item.poi, searchQuery)));
+        : (!activeTour && (forcedTypeVisibility || isPOIMatchFilter(item.poi, currentMapFilter)) && railTypeMatchesSearchType(item.poi && item.poi.type) && (!searchMode || poiMatchesActiveSearch(item.poi, searchQuery)));
       minZoom = (searchMode || forcedTypeVisibility) ? -999 : getPOIIconMinZoom(item.poi, item.importance);
 
       if (item.marker) item.marker.setLatLng(item.poi.coords);
@@ -4034,7 +4041,7 @@
       updateSelectedPOIEmphasis();
     });
   }
-  function updateFerryVisibilityForFilter() { var showFerries = !navigationModeActive && (currentMapFilter === 'all' || currentMapFilter === 'ferry'); if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
+  function updateFerryVisibilityForFilter() { var showFerries = !navigationModeActive && (searchTypeFilter === 'all' || searchTypeFilter === 'ferry') && (currentMapFilter === 'all' || currentMapFilter === 'ferry' || searchTypeFilter === 'ferry'); if (!map) return; if (ferryRoutesLayer) { if (showFerries && !map.hasLayer(ferryRoutesLayer)) ferryRoutesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryRoutesLayer)) map.removeLayer(ferryRoutesLayer); } if (ferryVehiclesLayer) { if (showFerries && !map.hasLayer(ferryVehiclesLayer)) ferryVehiclesLayer.addTo(map); if (!showFerries && map.hasLayer(ferryVehiclesLayer)) map.removeLayer(ferryVehiclesLayer); } }
   function applyMapFilterUI(filter) { currentMapFilter = filter || 'all'; updateFerryVisibilityForFilter(); updatePOIVisibility(); updateTrailWidths(); syncMapLibreMarkers(); renderBottomRailCards(); scheduleSessionMapStateSave(); }
   function getSelectedLanguageCode() {
     var htmlLang = document.documentElement && document.documentElement.lang ? String(document.documentElement.lang).trim().toLowerCase() : '';
@@ -4507,7 +4514,7 @@
     return searchInput ? String(searchInput.value || '').trim() : '';
   }
   function hasForcedTypeFilterVisibility() {
-    return searchTypeFilter !== 'all' && searchTypeFilter !== 'trail';
+    return searchTypeFilter !== 'all';
   }
   function railTypeMatchesSearchType(type) {
     var normalized = normalizePOIType(type);
@@ -6223,9 +6230,15 @@
   }
   function syncMapLibreMarkers() {
     var zoom;
+    var searchQuery;
+    var searchMode;
+    var forcedTypeVisibility;
     var cityBoxes = [];
     if (!turnNavigationMap || !turnNavigationMapLoaded || !window.maplibregl) return;
     zoom = turnNavigationMap.getZoom();
+    searchQuery = normalizeSearchText(getRailSearchQuery());
+    searchMode = Boolean(searchQuery);
+    forcedTypeVisibility = hasForcedTypeFilterVisibility();
     clearMapLibreMarkers(glPOIMarkers);
     clearMapLibreMarkers(glCityMarkers);
     clearMapLibreMarkers(glTrailMarkers);
@@ -6251,12 +6264,13 @@
         glCityMarkers.push(new window.maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([place.coords[1], place.coords[0]]).addTo(turnNavigationMap));
       });
     }
-    if (!navigationModeActive && (currentMapFilter === 'all' || currentMapFilter === 'trails')) {
+    if (!navigationModeActive && (searchTypeFilter === 'trail' || (searchTypeFilter === 'all' && (currentMapFilter === 'all' || currentMapFilter === 'trails')))) {
       trailItems.forEach(function(entry) {
         var point = entry && entry.latLngs && entry.latLngs[0];
         var trail = entry && entry.trail;
         var el;
-        if (!trail || !point || zoom < Math.max(14.25, getMinZoomForTrailImportance(trail.importance))) return;
+        if (!trail || !point || (searchMode && !trailMatchesActiveSearch(trail, searchQuery))) return;
+        if (searchTypeFilter !== 'trail' && zoom < Math.max(14.25, getMinZoomForTrailImportance(trail.importance))) return;
         el = document.createElement('button');
         el.type = 'button';
         el.setAttribute('aria-label', trail.name || 'Trail');
@@ -6272,8 +6286,8 @@
       var el;
       if (!poi || !isValidCoords(poi.coords)) return;
       if (navigationModeActive && (!navigationDestinationPOI || String(poi.id || poi.name) !== String(navigationDestinationPOI.id || navigationDestinationPOI.name))) return;
-      if (!navigationModeActive && (!isPOIMatchFilter(poi, currentMapFilter) || !railTypeMatchesSearchType(poi.type))) return;
-      minZoom = getPOIIconMinZoom(poi, entry.importance);
+      if (!navigationModeActive && (!(forcedTypeVisibility || isPOIMatchFilter(poi, currentMapFilter)) || !railTypeMatchesSearchType(poi.type) || (searchMode && !poiMatchesActiveSearch(poi, searchQuery)))) return;
+      minZoom = (forcedTypeVisibility || searchMode) ? -999 : getPOIIconMinZoom(poi, entry.importance);
       if (zoom < minZoom) return;
       el = document.createElement('button');
       el.type = 'button';
@@ -6286,7 +6300,7 @@
     updateNormalMapLibreLines();
     syncMapLibreFerryVehicles();
     glFerryVehicleMarkers.forEach(function(marker) {
-      marker.getElement().style.display = !navigationModeActive && (currentMapFilter === 'all' || currentMapFilter === 'ferry') ? '' : 'none';
+      marker.getElement().style.display = !navigationModeActive && (searchTypeFilter === 'all' || searchTypeFilter === 'ferry') && (currentMapFilter === 'all' || currentMapFilter === 'ferry' || searchTypeFilter === 'ferry') ? '' : 'none';
     });
     syncATCScheduledBuses();
     syncMapLibreUserMarker();
@@ -8057,12 +8071,16 @@
           searchTypeFilter = button.getAttribute('data-search-type') || 'all';
           searchTypeButtons.forEach(function (item) { item.classList.toggle('is-active', item === button); });
           renderSearchSuggestions(searchInput.value);
+          updateFerryVisibilityForFilter();
+          updatePOIVisibility();
+          syncMapLibreMarkers();
           scheduleMapRefresh({ rail: true, auto: false });
         });
       });
       searchInput.addEventListener('input', function () {
         if (searchFloating && searchFloating.classList.contains('is-collapsed')) setSearchCollapsed(false);
         renderSearchSuggestions(searchInput.value);
+        syncMapLibreMarkers();
         scheduleMapRefresh({ rail: true, auto: false });
       });
 
