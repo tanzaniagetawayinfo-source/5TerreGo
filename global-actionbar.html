@@ -757,7 +757,11 @@
     var aiSubtitle = config.aiSubtitle || "Your 5TerreGo travel guide";
     var aiWelcome = config.aiWelcome || "Hi, I am Captain Gull. Ask me about trails, places, transport or local discounts.";
     var basePath = typeof config.basePath === "string" ? config.basePath.trim() : "";
-    var currentLanguage = String(config.language || "en").toLowerCase();
+    // The language is a site-wide preference.  Do not let an individual page's
+    // default (often English) overwrite the choice made in the menu.
+    var storedLanguage = "";
+    try { storedLanguage = localStorage.getItem("ftg_language") || localStorage.getItem("selectedLanguage") || ""; } catch (_error) {}
+    var currentLanguage = String(storedLanguage || config.language || document.documentElement.lang || "en").toLowerCase();
     var androidAppHref = config.androidAppHref || "#";
     var privacyHref = config.privacyHref || "#privacy";
     var termsHref = config.termsHref || "#terms";
@@ -836,7 +840,7 @@
         terms: "Terms & Conditions",
         choose_language: "Choose language",
         nav_map: "Map",
-        nav_home: "首页",
+        nav_home: "Home",
         nav_guide: "Guide",
         nav_sentieri: "Trails",
         nav_discounts: "Local Discounts",
@@ -864,7 +868,7 @@
         terms: "Conditions générales",
         choose_language: "Choisir la langue",
         nav_map: "Carte",
-        nav_home: "Home",
+        nav_home: "Accueil",
         nav_guide: "Guide",
         nav_sentieri: "Sentiers",
         nav_discounts: "Réductions locales",
@@ -878,7 +882,7 @@
         terms: "AGB",
         choose_language: "Sprache wählen",
         nav_map: "Karte",
-        nav_home: "Home",
+        nav_home: "Startseite",
         nav_guide: "Guide",
         nav_sentieri: "Wege",
         nav_discounts: "Lokale Rabatte",

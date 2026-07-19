@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ftg-original-language="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -616,7 +616,7 @@
     #user-location-btn {
       position: fixed;
       right: 18px;
-      bottom: calc(102px + env(safe-area-inset-bottom));
+      bottom: calc(154px + env(safe-area-inset-bottom));
       z-index: 1200;
       width: 44px;
       height: 44px;
@@ -629,6 +629,24 @@
       cursor: pointer;
       text-shadow: 0 8px 22px rgba(0,0,0,0.28);
     }
+    #map-dimension-btn {
+      position: fixed;
+      right: 18px;
+      bottom: calc(102px + env(safe-area-inset-bottom));
+      z-index: 1200;
+      min-width: 44px;
+      height: 44px;
+      padding: 0 10px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 14px;
+      background: rgba(8,12,16,.82);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(0,0,0,.26);
+      font: 900 13px/1 system-ui,sans-serif;
+      letter-spacing: .04em;
+      cursor: pointer;
+    }
+    #map-dimension-btn[data-view="3d"] { background:#ff7200; border-color:#ff9b4c; }
     #map-style-btn {
       position: fixed;
       right: 18px;
@@ -1720,6 +1738,7 @@
 </div>
 <button id="map-style-btn" type="button" aria-label="Switch map style" title="Switch map style" data-map-mode="satellite"><span class="map-style-btn-preview" aria-hidden="true"></span></button>
 <button id="user-location-btn" type="button" aria-label="Show my location" title="Show my location"></button>
+<button id="map-dimension-btn" type="button" data-no-translate data-view="2d" aria-label="Attiva la vista 3D" title="Attiva la vista 3D">3D</button>
 <div id="user-location-toast" aria-live="polite"></div>
 <div id="tour-nav" aria-hidden="true">
   <div class="tour-nav-kicker" id="tour-nav-kicker">Tour active</div>
@@ -1727,7 +1746,7 @@
   <div class="tour-nav-distance" id="tour-nav-distance">Move toward the next stop.</div>
   <div class="tour-nav-compass" id="tour-nav-compass" aria-hidden="true">
     <div class="tour-nav-compass-ring"><div class="tour-nav-compass-arrow" id="tour-nav-compass-arrow">▲</div></div>
-    <div class="tour-nav-compass-label">Follow the path</div>
+    <div class="tour-nav-compass-label" data-no-translate>Follow the path</div>
   </div>
   <div class="tour-nav-description" id="tour-nav-description">The stop description will appear here.</div>
   <div class="tour-nav-actions">
@@ -1738,7 +1757,7 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button">Vai</button><a id="poi-whatsapp" target="_blank" rel="noopener">WhatsApp</a><button id="poi-edit" type="button">Modifica</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><details id="poi-business-menu"><summary>Menu</summary><div id="poi-business-menu-content"></div></details><div id="atc-transit-panel" aria-live="polite"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button">Generate discount</button><div id="poi-discount-note"></div></div>
+  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button" data-no-translate>Vai</button><a id="poi-whatsapp" target="_blank" rel="noopener">WhatsApp</a><button id="poi-edit" type="button" data-no-translate>Modifica</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><details id="poi-business-menu"><summary>Menu</summary><div id="poi-business-menu-content"></div></details><div id="atc-transit-panel" aria-live="polite"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button" data-no-translate>Generate discount</button><div id="poi-discount-note"></div></div>
   <div id="poi-close">×</div>
 </div>
 <div id="god-mode-badge" aria-hidden="true">⚡ GOD MODE</div>
@@ -1774,19 +1793,19 @@
   <button id="navigation-sheet-toggle" type="button" aria-expanded="true"><strong>Prossimi passaggi</strong><span>Tocca per aprire o chiudere tutte le indicazioni</span></button>
   <div class="navigation-head">
     <div class="navigation-pin" aria-hidden="true">⌖</div>
-    <div><div class="navigation-kicker">Modalità Vai</div><div id="navigation-title">Destinazione</div></div>
+    <div><div class="navigation-kicker" data-no-translate>Modalità Vai</div><div id="navigation-title">Destinazione</div></div>
     <button id="navigation-close" type="button" aria-label="Chiudi navigazione">×</button>
   </div>
   <div class="navigation-origin">
     <select id="navigation-origin-select" aria-label="Villaggio di partenza"></select>
-    <button id="navigation-locate" type="button">⌖ Usa GPS</button>
+    <button id="navigation-locate" type="button" data-no-translate>⌖ Usa GPS</button>
   </div>
   <div id="navigation-context">Calcolo delle opzioni disponibili…</div>
   <div id="navigation-options" aria-live="polite"></div>
   <div id="navigation-steps" aria-live="polite"></div>
   <div class="navigation-actions">
-    <button id="navigation-start" type="button" disabled>Avvia percorso</button>
-    <button id="navigation-stop" type="button">Termina navigazione</button>
+    <button id="navigation-start" type="button" disabled data-no-translate>Avvia percorso</button>
+    <button id="navigation-stop" type="button" data-no-translate>Termina navigazione</button>
   </div>
 </section>
 <div id="turn-navigation-map" aria-hidden="true"></div>
@@ -2703,6 +2722,7 @@
   var trailElevationLegendEl = document.getElementById('trail-elevation-legend');
   var mapStyleBtn = document.getElementById('map-style-btn');
   var userLocationBtn = document.getElementById('user-location-btn');
+  var mapDimensionBtn = document.getElementById('map-dimension-btn');
   var userLocationToast = document.getElementById('user-location-toast');
   var tourNav = document.getElementById('tour-nav');
   var tourNavKicker = document.getElementById('tour-nav-kicker');
@@ -2888,6 +2908,7 @@
   var heroPreviewCycleTimer = null;
   var heroPreviewCycleIndex = 0;
   var currentBaseMapMode = 'satellite';
+  var mapPerspective = '2d';
   var bottomRailSheetMode = 'peek';
   var bottomRailSheetExpanded = false;
   var bottomRailSheetTranslateY = 0;
@@ -2899,6 +2920,57 @@
   var bottomRailSheetStartY = 0;
   var bottomRailSheetStartX = 0;
   var bottomRailSheetStartTranslateY = 0;
+
+  function getMapLanguage() {
+    var value = '';
+    try { value = localStorage.getItem('ftg_language') || localStorage.getItem('selectedLanguage') || ''; } catch (_error) {}
+    value = String(value || document.documentElement.lang || 'en').toLowerCase().split('-')[0];
+    return /^(it|en|fr|de|zh)$/.test(value) ? value : 'en';
+  }
+  function applyMapFixedCopy() {
+    var copy = {
+      en:{ go:'Go', edit:'Edit', discount:'Generate discount', mode:'Navigation mode', gps:'⌖ Use GPS', start:'Start route', stop:'Stop navigation', follow:'Follow the path', to3d:'Enable 3D terrain', to2d:'Switch to 2D map' },
+      it:{ go:'Vai', edit:'Modifica', discount:'Genera sconto', mode:'Modalità navigazione', gps:'⌖ Usa GPS', start:'Avvia percorso', stop:'Termina navigazione', follow:'Segui il percorso', to3d:'Attiva il rilievo 3D', to2d:'Passa alla mappa 2D' },
+      fr:{ go:'Itinéraire', edit:'Modifier', discount:'Générer une réduction', mode:'Mode navigation', gps:'⌖ Utiliser le GPS', start:'Démarrer l’itinéraire', stop:'Arrêter la navigation', follow:'Suivez le chemin', to3d:'Activer le relief 3D', to2d:'Passer à la carte 2D' },
+      de:{ go:'Route', edit:'Bearbeiten', discount:'Rabatt erstellen', mode:'Navigationsmodus', gps:'⌖ GPS verwenden', start:'Route starten', stop:'Navigation beenden', follow:'Dem Weg folgen', to3d:'3D-Gelände aktivieren', to2d:'Zur 2D-Karte wechseln' },
+      zh:{ go:'导航', edit:'编辑', discount:'生成折扣', mode:'导航模式', gps:'⌖ 使用 GPS', start:'开始路线', stop:'结束导航', follow:'沿路线前进', to3d:'开启 3D 地形', to2d:'切换到 2D 地图' }
+    };
+    var text = copy[getMapLanguage()] || copy.en;
+    if (poiDirections) poiDirections.textContent = text.go;
+    if (poiEdit) poiEdit.textContent = text.edit;
+    if (poiDiscountBtn) poiDiscountBtn.textContent = text.discount;
+    if (navigationLocate) navigationLocate.textContent = text.gps;
+    if (navigationStart) navigationStart.textContent = text.start;
+    if (navigationStop) navigationStop.textContent = text.stop;
+    var modeLabel = document.querySelector('.navigation-kicker');
+    var followLabel = document.querySelector('.tour-nav-compass-label');
+    if (modeLabel) modeLabel.textContent = text.mode;
+    if (followLabel) followLabel.textContent = text.follow;
+    if (mapDimensionBtn) {
+      var is3d = mapPerspective === '3d';
+      mapDimensionBtn.textContent = is3d ? '2D' : '3D';
+      mapDimensionBtn.setAttribute('data-view', mapPerspective);
+      mapDimensionBtn.setAttribute('aria-label', is3d ? text.to2d : text.to3d);
+      mapDimensionBtn.title = is3d ? text.to2d : text.to3d;
+    }
+  }
+  function applyMapPerspective(mode) {
+    mapPerspective = mode === '3d' ? '3d' : '2d';
+    if (turnNavigationMap && turnNavigationMapLoaded && !navigationModeActive) {
+      try {
+        turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none');
+        if (mapPerspective === '3d') {
+          turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.12 });
+          turnNavigationMap.easeTo({ pitch:58, duration:420 });
+        } else {
+          turnNavigationMap.setTerrain(null);
+          turnNavigationMap.easeTo({ pitch:0, bearing:0, duration:420 });
+        }
+      } catch (_error) {}
+    }
+    applyMapFixedCopy();
+  }
+  window.addEventListener('ftg:languagechange', applyMapFixedCopy);
 
   function distanceMeters(a, b) {
     var R = 6371000;
@@ -6406,6 +6478,7 @@
     setupGodModeLongPress();
     turnNavigationMap.on('load', function() {
       turnNavigationMapLoaded = true;
+      applyMapPerspective(mapPerspective);
       turnNavigationMap.addSource('navigation-route', { type: 'geojson', data: getTurnNavigationGeoJSON() });
       turnNavigationMap.addSource('normal-trails', { type: 'geojson', data: getNormalTrailsGeoJSON() });
       turnNavigationMap.addSource('normal-ferries', { type: 'geojson', data: getNormalFerriesGeoJSON() });
@@ -6689,7 +6762,7 @@
   async function startSelectedNavigation() {
     var option = navigationSelectedOption;
     if (!option) return;
-    if (isTrailPreviewMode && turnNavigationMap && turnNavigationMapLoaded) { try { turnNavigationMap.setTerrain(null); turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'visible'); turnNavigationMap.easeTo({ pitch:0, bearing:0, duration:350 }); } catch (error) {} }
+    if (isTrailPreviewMode && turnNavigationMap && turnNavigationMapLoaded) { try { turnNavigationMap.setTerrain(null); turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none'); turnNavigationMap.easeTo({ pitch:0, bearing:0, duration:350 }); } catch (error) {} }
     await enableNavigationOrientation();
     await waitForNavigationHeading(700);
     navigationFollowing = true;
@@ -7960,6 +8033,13 @@
       userLocationBtn.addEventListener('click', function (event) {
         activateUserCompass(event);
       });
+    }
+
+    if (mapDimensionBtn) {
+      mapDimensionBtn.addEventListener('click', function () {
+        applyMapPerspective(mapPerspective === '3d' ? '2d' : '3d');
+      });
+      applyMapFixedCopy();
     }
 
     if (searchToggleBtn) {
