@@ -1,11 +1,11 @@
 name: Fix trail 3D camera
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-    paths:
-      - .github/workflows/fix-trail-3d-camera.yml
+    types:
+      - opened
 
 permissions:
   contents: write
