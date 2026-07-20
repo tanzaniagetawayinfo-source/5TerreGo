@@ -1,0 +1,290 @@
+name: Fix trail 3D camera
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/fix-trail-3d-camera.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Apply trail camera fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("map.html")
+          source = path.read_text(encoding="utf-8")
+
+          camera_block = r'''  function stopTrailPreviewOrbit() { if (trailPreviewOrbitTimer) { window.clearInterval(trailPreviewOrbitTimer); trailPreviewOrbitTimer = null; } }
+  function getTrailCameraPadding() {
+    var mobile = window.innerWidth <= 700;
+    var top = mobile ? 84 : 96;
+    var right = mobile ? 24 : Math.min(520, Math.round(window.innerWidth * .42));
+    var bottom = mobile ? Math.round(window.innerHeight * .58) : 42;
+    var left = mobile ? 24 : 42;
+    var rect;
+    if (trailCard && trailCard.style.display !== 'none') {
+      rect = trailCard.getBoundingClientRect();
+      if (mobile && rect.top > 0 && rect.top < window.innerHeight) bottom = Math.max(120, Math.round(window.innerHeight - rect.top + 24));
+      if (!mobile && rect.left > window.innerWidth * .35 && rect.left < window.innerWidth) right = Math.max(160, Math.round(window.innerWidth - rect.left + 28));
+    }
+    return { top:top, right:right, bottom:bottom, left:left };
+  }
+  function getTrailTransverseBearing(latLngs) {
+    var step = Math.max(1, Math.floor(latLngs.length / 32));
+    var sample = latLngs.filter(function(_, index) { return index % step === 0; });
+    var last = latLngs[latLngs.length - 1];
+    var bestA = latLngs[0];
+    var bestB = last;
+    var bestDistance = distanceMeters(bestA, bestB);
+    var i;
+    var j;
+    if (sample[sample.length - 1] !== last) sample.push(last);
+    for (i = 0; i < sample.length - 1; i += 1) {
+      for (j = i + 1; j < sample.length; j += 1) {
+        var candidateDistance = distanceMeters(sample[i], sample[j]);
+        if (candidateDistance > bestDistance) {
+          bestDistance = candidateDistance;
+          bestA = sample[i];
+          bestB = sample[j];
+        }
+      }
+    }
+    return normalizeDegrees(getBearingDegrees(bestA, bestB) + 90);
+  }
+  function focusTrailReliefView(latLngs) {
+    var bounds;
+    var padding;
+    var transverseBearing;
+    var camera;
+    var mobile;
+    var targetPitch;
+    var targetZoom;
+    var targetCenter;
+    if (!latLngs || latLngs.length < 2 || !currentTrail) return;
+    if (!turnNavigationMap || !turnNavigationMapLoaded) {
+      startTurnNavigationMap();
+      window.setTimeout(function() {
+        if (currentTrail && trailCard && trailCard.classList.contains('open')) focusTrailReliefView(getTrailLatLngs(currentTrail));
+      }, 220);
+      return;
+    }
+    stopTrailPreviewOrbit();
+    stopAmbientOrbit();
+    normalGyroTracking = false;
+    normalGyroSuspendedByGesture = true;
+    mobile = window.innerWidth <= 700;
+    targetPitch = mobile ? 67 : 72;
+    padding = getTrailCameraPadding();
+    transverseBearing = getTrailTransverseBearing(latLngs);
+    bounds = new window.maplibregl.LngLatBounds();
+    latLngs.forEach(function(point) { bounds.extend([point[1], point[0]]); });
+    try {
+      mapPerspective = '3d';
+      applyMapFixedCopy();
+      turnNavigationMap.resize();
+      turnNavigationMap.setTerrain({ source:'terrainDem', exaggeration:1.55 });
+      turnNavigationMap.setLayoutProperty('3d-buildings', 'visibility', 'none');
+      turnNavigationMap.setLayoutProperty('terrain-hillshade', 'visibility', 'none');
+      updateNormalMapLibreLines();
+      camera = turnNavigationMap.cameraForBounds(bounds, { padding:padding, maxZoom:mobile ? 15.1 : 16 });
+      targetCenter = camera && camera.center ? camera.center : bounds.getCenter();
+      targetZoom = camera && Number.isFinite(camera.zoom) ? camera.zoom : 13;
+      targetZoom = Math.max(turnNavigationMap.getMinZoom(), targetZoom - (mobile ? .8 : .5));
+      turnNavigationMap.easeTo({ center:targetCenter, zoom:targetZoom, pitch:0, bearing:transverseBearing, duration:620 });
+    } catch (error) {
+      console.warn('Trail relief camera unavailable', error);
+      return;
+    }
+    window.setTimeout(function() {
+      if (!currentTrail || !trailCard || !trailCard.classList.contains('open') || !turnNavigationMap || !turnNavigationMapLoaded) return;
+      turnNavigationMap.easeTo({ center:targetCenter, zoom:targetZoom, pitch:targetPitch, bearing:transverseBearing, duration:820 });
+      window.setTimeout(function() {
+        if (!currentTrail || !trailCard || !trailCard.classList.contains('open')) return;
+        trailPreviewOrbitTimer = window.setInterval(function() {
+          if (!currentTrail || !trailCard.classList.contains('open') || !turnNavigationMap || !turnNavigationMapLoaded) {
+            stopTrailPreviewOrbit();
+            return;
+          }
+          turnNavigationMap.easeTo({
+            center:targetCenter,
+            zoom:targetZoom,
+            pitch:targetPitch,
+            bearing:turnNavigationMap.getBearing() + (mobile ? 2.4 : 3),
+            duration:1450,
+            easing:function(t) { return t; }
+          });
+        }, 1500);
+      }, 860);
+    }, 650);
+  }
+'''
+
+          source, count = re.subn(
+              r"  function stopTrailPreviewOrbit\(\) \{.*?\n  async function ensureTrailElevationProfile",
+              camera_block + "  async function ensureTrailElevationProfile",
+              source,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit("Could not replace trail camera block")
+
+          reveal_block = r'''  function revealTrailRouteOnMainMap(trail) {
+    var latLngs = getTrailLatLngs(trail);
+    var bounds;
+    var mobile;
+    if (!map || !latLngs || latLngs.length < 2) return;
+    clearSelectedTrailRoute();
+    selectedTrailRouteLine = L.polyline(latLngs, { pane:'trailPane', className:'selected-trail-route', color:getDisplayTrailColor(trail), weight:8, opacity:1, lineCap:'round', lineJoin:'round' }).addTo(map);
+    selectedTrailRouteLine.bringToFront();
+    bounds = selectedTrailRouteLine.getBounds();
+    if (!bounds || !bounds.isValid()) return;
+    mobile = window.innerWidth <= 700;
+    isProgrammaticMove = true;
+    if (!turnNavigationMap) {
+      map.fitBounds(bounds, mobile ? { paddingTopLeft:[24,84], paddingBottomRight:[24,Math.round(window.innerHeight * .58)], maxZoom:15.5, animate:true, duration:.75 } : { paddingTopLeft:[42,96], paddingBottomRight:[Math.min(520,Math.round(window.innerWidth * .42)),42], maxZoom:16, animate:true, duration:.75 });
+    }
+    window.setTimeout(function() { isProgrammaticMove = false; }, 980);
+    focusTrailReliefView(latLngs);
+  }
+'''
+          source, count = re.subn(
+              r"  function revealTrailRouteOnMainMap\(trail\) \{.*?\n  function setTrailSheetHeight",
+              reveal_block + "  function setTrailSheetHeight",
+              source,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit("Could not replace trail reveal block")
+
+          close_block = r'''  function closeTrailCard(immediate) {
+    if (!trailCard) return;
+    stopTrailPreviewOrbit();
+    trailCard.classList.remove('open');
+    trailCard.classList.remove('map-expanded');
+    trailCard.classList.remove('sheet-expanded');
+    trailCard.setAttribute('aria-hidden', 'true');
+    currentTrail = null;
+    clearSelectedTrailRoute();
+    updateNormalMapLibreLines();
+    syncMapLibreMarkers();
+    updateSelectedPOIEmphasis();
+    normalGyroSuspendedByGesture = false;
+    normalGyroTracking = navigationOrientationListening;
+    if (turnNavigationMap && turnNavigationMapLoaded) {
+      try {
+        applyMapPerspective('3d');
+        turnNavigationMap.easeTo({ pitch:NORMAL_MAP_PITCH, bearing:0, duration:420 });
+      } catch (error) {}
+    }
+    if (immediate) {
+      trailCard.style.display = 'none';
+      trailCard.style.height = '';
+      destroyTrailMiniMap();
+      updateSelectedPOIEmphasis();
+      return;
+    }
+    window.setTimeout(function() {
+      if (trailCard.getAttribute('aria-hidden') === 'true') {
+        trailCard.style.display = 'none';
+        trailCard.style.height = '';
+        destroyTrailMiniMap();
+        updateSelectedPOIEmphasis();
+      }
+    }, 340);
+  }
+'''
+          source, count = re.subn(
+              r"  function closeTrailCard\(immediate\) \{.*?\n  function sanitizeElevationValue",
+              close_block + "  function sanitizeElevationValue",
+              source,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit("Could not replace trail close block")
+
+          show_block = r'''  function showTrailCard(trail) {
+    var elevationText;
+    var slopeStats;
+    if (!trail || !trailCard) return;
+    closePOICard(true);
+    hideCard(false);
+    currentTrail = trail;
+    updateNormalMapLibreLines();
+    syncMapLibreMarkers();
+    updateSelectedPOIEmphasis();
+    trailTitle.innerText = trail.name || 'Trail';
+    trailDesc.innerText = trail.description || 'No description available';
+    if (trailSubtitle) trailSubtitle.innerText = (trail.start_name || '?') + ' → ' + (trail.end_name || '?');
+    if (trailDifficultyEl) trailDifficultyEl.innerText = getDisplayDifficulty(trail);
+    if (trailDistanceEl) trailDistanceEl.innerText = trail.distance_km ? (Number(trail.distance_km).toFixed(2) + ' km') : '—';
+    if (trailDurationEl) trailDurationEl.innerText = formatTrailDuration(trail.estimated_duration);
+    if (trailShoesEl) trailShoesEl.innerText = getReadableShoeType(trail.shoe_type);
+    if (trailPriceEl) trailPriceEl.innerText = formatTrailPrice(trail.price_amount, trail.is_free);
+    elevationText = formatTrailElevation(trail);
+    if (trailElevationTextEl) trailElevationTextEl.innerText = elevationText || '—';
+    slopeStats = getTrailSlopeStats(trail);
+    if (trailAverageSlopeEl) trailAverageSlopeEl.innerText = slopeStats.average ? slopeStats.average.toFixed(1) + '%' : '—';
+    if (trailMaxSlopeEl) trailMaxSlopeEl.innerText = slopeStats.maximum ? Math.round(slopeStats.maximum) + '%' : '—';
+    drawTrailElevationChart(trail);
+    trailCard.classList.remove('map-expanded');
+    trailCard.classList.remove('sheet-expanded');
+    trailCard.classList.toggle('trail-preview-mode', isTrailPreviewMode);
+    trailCard.style.display = 'block';
+    if (isTrailPreviewMode) trailCard.style.height = '50dvh';
+    else if (window.innerWidth <= 700) setTrailSheetHeight(54, false);
+    else trailCard.style.height = '100dvh';
+    trailCard.setAttribute('aria-hidden', 'false');
+    if (trailContent) trailContent.scrollTop = 0;
+    window.requestAnimationFrame(function() {
+      trailCard.classList.add('open');
+      if (turnNavigationMap) turnNavigationMap.resize();
+      revealTrailRouteOnMainMap(trail);
+      updateSelectedPOIEmphasis();
+    });
+    ensureTrailElevationProfile(trail);
+  }
+'''
+          source, count = re.subn(
+              r"  function showTrailCard\(trail\) \{.*?\n  function getPOIDiscountValue",
+              show_block + "  function getPOIDiscountValue",
+              source,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit("Could not replace trail card block")
+
+          old_layer = "      turnNavigationMap.addLayer({ id:'normal-trails-line',type:'line',source:'normal-trails',paint:{'line-color':['get','color'],'line-width':4,'line-opacity':.9},layout:{'line-cap':'round','line-join':'round'} });"
+          new_layer = '''      turnNavigationMap.addLayer({ id:'normal-trails-casing',type:'line',source:'normal-trails',paint:{'line-color':'#ffffff','line-width':11,'line-opacity':.9},layout:{'line-cap':'round','line-join':'round'} });
+      turnNavigationMap.addLayer({ id:'normal-trails-line',type:'line',source:'normal-trails',paint:{'line-color':['get','color'],'line-width':7,'line-opacity':1},layout:{'line-cap':'round','line-join':'round'} });'''
+          if old_layer not in source:
+              raise SystemExit("Could not find selected trail layer")
+          source = source.replace(old_layer, new_layer, 1)
+
+          path.write_text(source, encoding="utf-8")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add map.html
+          git rm .github/workflows/fix-trail-3d-camera.yml
+          git commit -m "Fix mobile trail 3D camera"
+          git push origin main
