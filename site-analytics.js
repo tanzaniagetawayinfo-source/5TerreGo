@@ -10,6 +10,22 @@
   if (window.__FTG_SITE_RUNTIME__) return;
   window.__FTG_SITE_RUNTIME__ = true;
 
+  function expandMapSearchByDefault() {
+    var searchFloating = document.getElementById('search-floating');
+    var searchToggleBtn = document.getElementById('search-toggle-btn');
+    if (!searchFloating || !searchToggleBtn) return;
+    searchFloating.classList.remove('is-collapsed');
+    searchToggleBtn.setAttribute('aria-expanded', 'true');
+    searchToggleBtn.setAttribute('aria-label', 'Close search');
+    searchToggleBtn.innerHTML = '<span>×</span>';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', expandMapSearchByDefault, { once: true });
+  } else {
+    expandMapSearchByDefault();
+  }
+
   var CONSENT_KEY = 'ftg_analytics_consent_v1';
   var TEST_OWNER_EMAIL = '5terrego.info@gmail.com';
   var ENDPOINT = 'https://jpflcbktcnhmlvaibzcw.supabase.co/functions/v1/site-visit';
