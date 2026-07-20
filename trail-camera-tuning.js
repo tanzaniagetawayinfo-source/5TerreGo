@@ -53,8 +53,8 @@
     var viewportHeight = container && container.clientHeight ? container.clientHeight : window.innerHeight;
     var card = document.getElementById('trail-card');
     var cardRect = card ? card.getBoundingClientRect() : null;
-    var visibleBottom = cardRect && cardRect.top > 150 && cardRect.top < viewportHeight ? cardRect.top : viewportHeight * 0.48;
-    var desiredTrailY = Math.max(112, Math.min(visibleBottom - 54, visibleBottom * 0.46));
+    var visibleBottom = cardRect && cardRect.top > 150 && cardRect.top < viewportHeight ? cardRect.top : viewportHeight * 0.52;
+    var desiredTrailY = Math.max(150, Math.min(visibleBottom - 64, visibleBottom * 0.62));
     return [0, Math.round(desiredTrailY - viewportHeight / 2)];
   }
 
@@ -131,8 +131,9 @@
 
   function startTunedCamera(map, options) {
     var state = stateFor(map);
-    var zoomAdjustment = window.innerWidth <= 700 ? 0.22 : 0.08;
-    var targetZoom = Math.max(map.getMinZoom ? map.getMinZoom() : 0, Number(options.zoom) - zoomAdjustment);
+    var zoomBoost = window.innerWidth <= 700 ? 0.38 : 0.16;
+    var maximumZoom = map.getMaxZoom ? map.getMaxZoom() : 24;
+    var targetZoom = Math.min(maximumZoom, Math.max(map.getMinZoom ? map.getMinZoom() : 0, Number(options.zoom) + zoomBoost));
     var key = centerKey(options.center, targetZoom, options.pitch);
 
     if (state.active && state.key === key) return map;
