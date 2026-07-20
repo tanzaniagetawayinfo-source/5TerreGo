@@ -371,3 +371,106 @@
     return source;
   };
 })();
+
+(function () {
+  'use strict';
+
+  if (window.__FTG_SEARCH_AUTO_COLLAPSE__) return;
+  window.__FTG_SEARCH_AUTO_COLLAPSE__ = true;
+
+  var DRAWER_SELECTOR = '#trail-card, #poi-card, #navigation-planner, #bottom-rail, #god-mode-add-prompt, #discount-modal';
+  var OPEN_CLASSES = ['open', 'is-open', 'sheet-expanded', 'steps-open', 'is-expanded', 'expanded', 'is-visible'];
+  var activeDrawer = null;
+  var touchStartY = 0;
+  var collapsedForGesture = false;
+
+  function collapseSearch() {
+    var searchFloating = document.getElementById('search-floating');
+    var searchToggleBtn = document.getElementById('search-toggle-btn');
+    var searchResults = document.getElementById('search-results');
+    var searchInput = document.getElementById('search');
+
+    if (!searchFloating || searchFloating.classList.contains('is-collapsed')) return false;
+
+    searchFloating.classList.add('is-collapsed');
+    if (searchToggleBtn) {
+      searchToggleBtn.setAttribute('aria-expanded', 'false');
+      searchToggleBtn.setAttribute('aria-label', 'Open search');
+      searchToggleBtn.innerHTML = '<span>⌕</span>';
+    }
+    if (searchResults) {
+      searchResults.style.display = 'none';
+      searchResults.innerHTML = '';
+    }
+    if (searchInput) searchInput.blur();
+    return true;
+  }
+
+  function hasOpenClass(element) {
+    return OPEN_CLASSES.some(function (className) {
+      return element.classList.contains(className);
+    });
+  }
+
+  function drawerIsOpen(element) {
+    if (!element) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    if (element.id === 'trail-card' || element.id === 'poi-card') return element.classList.contains('open');
+    if (element.id === 'navigation-planner') {
+      return element.classList.contains('steps-open') || document.body.classList.contains('navigation-active');
+    }
+    return hasOpenClass(element);
+  }
+
+  function inspectDrawer(element) {
+    if (drawerIsOpen(element)) collapseSearch();
+  }
+
+  function bindAutoCollapse() {
+    var drawers = Array.prototype.slice.call(document.querySelectorAll(DRAWER_SELECTOR));
+    var observer = new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        if (record.target === document.body) {
+          if (document.body.classList.contains('navigation-active')) collapseSearch();
+          return;
+        }
+        inspectDrawer(record.target);
+      });
+    });
+
+    drawers.forEach(function (drawer) {
+      observer.observe(drawer, { attributes: true, attributeFilter: ['class', 'aria-hidden', 'style'] });
+      inspectDrawer(drawer);
+    });
+    if (document.body) observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    document.addEventListener('touchstart', function (event) {
+      if (!event.touches || event.touches.length !== 1) return;
+      activeDrawer = event.target && event.target.closest ? event.target.closest(DRAWER_SELECTOR) : null;
+      if (!activeDrawer) return;
+      touchStartY = event.touches[0].clientY;
+      collapsedForGesture = false;
+    }, { passive: true, capture: true });
+
+    document.addEventListener('touchmove', function (event) {
+      if (!activeDrawer || collapsedForGesture || !event.touches || event.touches.length !== 1) return;
+      if (touchStartY - event.touches[0].clientY < 18) return;
+      collapsedForGesture = collapseSearch();
+    }, { passive: true, capture: true });
+
+    function endDrawerGesture() {
+      activeDrawer = null;
+      touchStartY = 0;
+      collapsedForGesture = false;
+    }
+
+    document.addEventListener('touchend', endDrawerGesture, { passive: true, capture: true });
+    document.addEventListener('touchcancel', endDrawerGesture, { passive: true, capture: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindAutoCollapse, { once: true });
+  } else {
+    bindAutoCollapse();
+  }
+})();
