@@ -122,6 +122,7 @@
 
   var MapPrototype = window.maplibregl.Map.prototype;
   var originalGetSource = MapPrototype.getSource;
+  var originalAddSource = MapPrototype.addSource;
   var mapStates = new WeakMap();
 
   if (typeof originalGetSource !== 'function') return;
@@ -129,19 +130,31 @@
   function stateFor(map) {
     var state = mapStates.get(map);
     if (!state) {
-      state = { orbitTimer: null, focusTimer: null, focusToken: 0, interactionBound: false };
+      state = {
+        orbitFrame: 0,
+        focusTimer: 0,
+        focusToken: 0,
+        interactionBound: false,
+        cardObserverBound: false,
+        trailKey: '',
+        coordinates: null
+      };
       mapStates.set(map, state);
     }
     return state;
   }
 
-  function stopTrailOrbit(map) {
+  function cancelCameraWork(map, keepTrail) {
     var state = stateFor(map);
-    if (state.orbitTimer) window.clearInterval(state.orbitTimer);
+    if (state.orbitFrame) window.cancelAnimationFrame(state.orbitFrame);
     if (state.focusTimer) window.clearTimeout(state.focusTimer);
-    state.orbitTimer = null;
-    state.focusTimer = null;
+    state.orbitFrame = 0;
+    state.focusTimer = 0;
     state.focusToken += 1;
+    if (!keepTrail) {
+      state.trailKey = '';
+      state.coordinates = null;
+    }
   }
 
   function normalizeDegrees(value) {
@@ -192,35 +205,36 @@
   }
 
   function cameraPadding() {
-    var card = document.getElementById('trail-card');
     var mobile = window.innerWidth <= 700;
-    var rectangle = card ? card.getBoundingClientRect() : null;
     if (mobile) {
       return {
-        top: 84,
-        right: 24,
-        bottom: rectangle && rectangle.top > 0 ? Math.max(150, Math.round(window.innerHeight - rectangle.top + 28)) : Math.round(window.innerHeight * 0.58),
-        left: 24
+        top: 78,
+        right: 20,
+        bottom: Math.max(190, Math.round(window.innerHeight * 0.56)),
+        left: 20
       };
     }
     return {
-      top: 96,
-      right: rectangle && rectangle.left > window.innerWidth * 0.35 ? Math.max(180, Math.round(window.innerWidth - rectangle.left + 30)) : Math.min(520, Math.round(window.innerWidth * 0.42)),
-      bottom: 44,
-      left: 44
+      top: 86,
+      right: Math.min(500, Math.round(window.innerWidth * 0.40)),
+      bottom: 40,
+      left: 40
     };
   }
 
   function ensureTrailRelief(map) {
     var terrain;
+    var mobile = window.innerWidth <= 700;
+    var mainWidth = mobile ? 3.2 : 3.8;
+    var casingWidth = mobile ? 5.2 : 5.8;
     var trailSource = originalGetSource.call(map, 'normal-trails');
     try {
       terrain = typeof map.getTerrain === 'function' ? map.getTerrain() : null;
-      if (!terrain || terrain.source !== 'terrainDem') map.setTerrain({ source: 'terrainDem', exaggeration: 1.55 });
+      if (!terrain || terrain.source !== 'terrainDem') map.setTerrain({ source: 'terrainDem', exaggeration: 1.45 });
       if (map.getLayer('3d-buildings')) map.setLayoutProperty('3d-buildings', 'visibility', 'none');
       if (map.getLayer('terrain-hillshade')) map.setLayoutProperty('terrain-hillshade', 'visibility', 'none');
       if (map.getLayer('normal-trails-line')) {
-        map.setPaintProperty('normal-trails-line', 'line-width', 7);
+        map.setPaintProperty('normal-trails-line', 'line-width', mainWidth);
         map.setPaintProperty('normal-trails-line', 'line-opacity', 1);
       }
       if (trailSource && map.getLayer('normal-trails-line') && !map.getLayer('normal-trails-casing')) {
@@ -228,9 +242,12 @@
           id: 'normal-trails-casing',
           type: 'line',
           source: 'normal-trails',
-          paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.92 },
+          paint: { 'line-color': '#ffffff', 'line-width': casingWidth, 'line-opacity': 0.78 },
           layout: { 'line-cap': 'round', 'line-join': 'round' }
         }, 'normal-trails-line');
+      } else if (map.getLayer('normal-trails-casing')) {
+        map.setPaintProperty('normal-trails-casing', 'line-width', casingWidth);
+        map.setPaintProperty('normal-trails-casing', 'line-opacity', 0.78);
       }
     } catch (error) {
       console.warn('Trail relief styling unavailable', error);
@@ -244,10 +261,42 @@
     state.interactionBound = true;
     try {
       canvas = map.getCanvasContainer();
-      canvas.addEventListener('pointerdown', function () { stopTrailOrbit(map); }, { passive: true });
-      canvas.addEventListener('touchstart', function () { stopTrailOrbit(map); }, { passive: true });
-      canvas.addEventListener('wheel', function () { stopTrailOrbit(map); }, { passive: true });
+      canvas.addEventListener('pointerdown', function () { cancelCameraWork(map, true); }, { passive: true });
+      canvas.addEventListener('touchstart', function () { cancelCameraWork(map, true); }, { passive: true });
+      canvas.addEventListener('wheel', function () { cancelCameraWork(map, true); }, { passive: true });
     } catch (error) {}
+  }
+
+  function startTrailOrbit(map, center, zoom, pitch, initialBearing, token) {
+    var state = stateFor(map);
+    var bearing = initialBearing;
+    var lastTime = window.performance && performance.now ? performance.now() : Date.now();
+    var lastStyleRefresh = lastTime;
+
+    function frame(now) {
+      var currentTime = Number(now || Date.now());
+      var elapsed;
+      if (token !== state.focusToken || !trailCardIsOpen()) {
+        cancelCameraWork(map, true);
+        return;
+      }
+      elapsed = Math.min(50, Math.max(0, currentTime - lastTime));
+      lastTime = currentTime;
+      bearing = normalizeDegrees(bearing + elapsed * 0.0042);
+      try {
+        map.jumpTo({ center: center, zoom: zoom, pitch: pitch, bearing: bearing });
+        if (currentTime - lastStyleRefresh > 1200) {
+          ensureTrailRelief(map);
+          lastStyleRefresh = currentTime;
+        }
+      } catch (error) {
+        cancelCameraWork(map, true);
+        return;
+      }
+      state.orbitFrame = window.requestAnimationFrame(frame);
+    }
+
+    state.orbitFrame = window.requestAnimationFrame(frame);
   }
 
   function focusTrail(map, coordinates, attempt, token) {
@@ -255,26 +304,22 @@
     var mobile;
     var pair;
     var transverseBearing;
+    var targetPitch;
     var bounds;
+    var camera;
     var targetCenter;
     var targetZoom;
-    var targetPitch;
-    var orbitBearing;
 
     if (token !== state.focusToken) return;
     if (!trailCardIsOpen()) {
-      if (attempt < 14) state.focusTimer = window.setTimeout(function () { focusTrail(map, coordinates, attempt + 1, token); }, 80);
-      return;
-    }
-    if (!map.loaded()) {
-      if (attempt < 14) state.focusTimer = window.setTimeout(function () { focusTrail(map, coordinates, attempt + 1, token); }, 100);
+      if (attempt < 90) state.focusTimer = window.setTimeout(function () { focusTrail(map, coordinates, attempt + 1, token); }, 16);
       return;
     }
 
     mobile = window.innerWidth <= 700;
     pair = farthestTrailPair(coordinates);
     transverseBearing = normalizeDegrees(bearingDegrees(pair[0], pair[1]) + 90);
-    targetPitch = mobile ? 67 : 72;
+    targetPitch = mobile ? 64 : 70;
     bounds = new window.maplibregl.LngLatBounds();
     coordinates.forEach(function (coordinate) { bounds.extend(coordinate); });
 
@@ -282,56 +327,50 @@
     ensureTrailRelief(map);
 
     try {
+      map.stop();
       map.resize();
-      map.fitBounds(bounds, {
+      camera = typeof map.cameraForBounds === 'function' ? map.cameraForBounds(bounds, {
         padding: cameraPadding(),
-        maxZoom: mobile ? 15.1 : 16,
         bearing: transverseBearing,
         pitch: 0,
-        duration: 680,
-        essential: true
+        maxZoom: mobile ? 15.0 : 15.8
+      }) : null;
+
+      if (camera && camera.center && Number.isFinite(Number(camera.zoom))) {
+        targetCenter = camera.center;
+        targetZoom = Math.max(map.getMinZoom(), Math.min(mobile ? 15.0 : 15.8, Number(camera.zoom) - (mobile ? 0.72 : 0.48)));
+      } else {
+        map.fitBounds(bounds, {
+          padding: cameraPadding(),
+          maxZoom: mobile ? 15.0 : 15.8,
+          bearing: transverseBearing,
+          pitch: 0,
+          duration: 0
+        });
+        targetCenter = map.getCenter();
+        targetZoom = Math.max(map.getMinZoom(), map.getZoom() - (mobile ? 0.72 : 0.48));
+      }
+
+      map.jumpTo({
+        center: targetCenter,
+        zoom: targetZoom,
+        pitch: targetPitch,
+        bearing: transverseBearing
       });
     } catch (error) {
-      console.warn('Trail fit unavailable', error);
+      if (attempt < 30) {
+        state.focusTimer = window.setTimeout(function () { focusTrail(map, coordinates, attempt + 1, token); }, 40);
+      } else {
+        console.warn('Trail focus unavailable', error);
+      }
       return;
     }
 
     state.focusTimer = window.setTimeout(function () {
       if (token !== state.focusToken || !trailCardIsOpen()) return;
       ensureTrailRelief(map);
-      targetCenter = map.getCenter();
-      targetZoom = Math.max(map.getMinZoom(), map.getZoom() - (mobile ? 1.05 : 0.72));
-      orbitBearing = transverseBearing;
-      map.easeTo({
-        center: targetCenter,
-        zoom: targetZoom,
-        pitch: targetPitch,
-        bearing: orbitBearing,
-        duration: 880,
-        essential: true
-      });
-
-      state.focusTimer = window.setTimeout(function () {
-        if (token !== state.focusToken || !trailCardIsOpen()) return;
-        state.orbitTimer = window.setInterval(function () {
-          if (token !== state.focusToken || !trailCardIsOpen()) {
-            stopTrailOrbit(map);
-            return;
-          }
-          ensureTrailRelief(map);
-          orbitBearing = normalizeDegrees(orbitBearing + (mobile ? 2.2 : 2.8));
-          map.easeTo({
-            center: targetCenter,
-            zoom: targetZoom,
-            pitch: targetPitch,
-            bearing: orbitBearing,
-            duration: 1450,
-            easing: function (time) { return time; },
-            essential: true
-          });
-        }, 1500);
-      }, 920);
-    }, 730);
+      startTrailOrbit(map, targetCenter, targetZoom, targetPitch, transverseBearing, token);
+    }, 240);
   }
 
   function selectedTrailCoordinates(data) {
@@ -344,13 +383,52 @@
     }).map(function (coordinate) { return [Number(coordinate[0]), Number(coordinate[1])]; }) : [];
   }
 
+  function trailKey(coordinates) {
+    var middle = coordinates[Math.floor(coordinates.length / 2)] || coordinates[0];
+    var first = coordinates[0];
+    var last = coordinates[coordinates.length - 1];
+    return [coordinates.length, first[0], first[1], middle[0], middle[1], last[0], last[1]].join('|');
+  }
+
+  function scheduleTrailFocus(map, coordinates, force) {
+    var state = stateFor(map);
+    var key = trailKey(coordinates);
+    var token;
+    if (!force && key === state.trailKey && (state.orbitFrame || state.focusTimer)) {
+      ensureTrailRelief(map);
+      return;
+    }
+    cancelCameraWork(map, true);
+    state.trailKey = key;
+    state.coordinates = coordinates;
+    token = state.focusToken;
+    state.focusTimer = window.setTimeout(function () { focusTrail(map, coordinates, 0, token); }, 0);
+  }
+
   function handleTrailData(map, data) {
     var state = stateFor(map);
     var coordinates = selectedTrailCoordinates(data);
-    stopTrailOrbit(map);
-    if (coordinates.length < 2) return;
-    state.focusToken += 1;
-    state.focusTimer = window.setTimeout(function () { focusTrail(map, coordinates, 0, state.focusToken); }, 40);
+    if (coordinates.length < 2) {
+      cancelCameraWork(map, false);
+      return;
+    }
+    scheduleTrailFocus(map, coordinates, false);
+    bindTrailCardObserver(map);
+    state.coordinates = coordinates;
+  }
+
+  function bindTrailCardObserver(map) {
+    var state = stateFor(map);
+    var card = document.getElementById('trail-card');
+    if (state.cardObserverBound || !card) return;
+    state.cardObserverBound = true;
+    new MutationObserver(function () {
+      if (trailCardIsOpen() && state.coordinates && state.coordinates.length >= 2 && !state.orbitFrame && !state.focusTimer) {
+        scheduleTrailFocus(map, state.coordinates, true);
+      } else if (!trailCardIsOpen() && (state.orbitFrame || state.focusTimer)) {
+        cancelCameraWork(map, true);
+      }
+    }).observe(card, { attributes: true, attributeFilter: ['class', 'aria-hidden'] });
   }
 
   function bindTrailSource(map, source) {
@@ -363,6 +441,7 @@
       handleTrailData(map, data);
       return result;
     };
+    bindTrailCardObserver(map);
   }
 
   MapPrototype.getSource = function (sourceId) {
@@ -370,6 +449,18 @@
     if (sourceId === 'normal-trails' && source) bindTrailSource(this, source);
     return source;
   };
+
+  if (typeof originalAddSource === 'function') {
+    MapPrototype.addSource = function (sourceId, sourceDefinition) {
+      var result = originalAddSource.apply(this, arguments);
+      if (sourceId === 'normal-trails') {
+        var source = originalGetSource.call(this, sourceId);
+        if (source) bindTrailSource(this, source);
+        if (sourceDefinition && sourceDefinition.data) handleTrailData(this, sourceDefinition.data);
+      }
+      return result;
+    };
+  }
 })();
 
 (function () {
