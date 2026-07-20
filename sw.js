@@ -1,4 +1,4 @@
-const VERSION = '5terrego-sw-v4';
+const VERSION = '5terrego-sw-v5';
 const STATIC_CACHE = `${VERSION}-static`;
 const TILE_CACHE = `${VERSION}-tiles`;
 const CORE_ASSETS = [
@@ -63,6 +63,20 @@ async function networkFirstNavigation(request) {
   }
 }
 
+async function networkFirstAsset(request) {
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (response && response.ok && response.type === 'basic') {
+      const cache = await caches.open(STATIC_CACHE);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    return (await caches.match(request)) ||
+      new Response('', { status: 504, statusText: 'Asset unavailable offline' });
+  }
+}
+
 async function cacheFirstTile(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -104,6 +118,11 @@ self.addEventListener('fetch', event => {
 
   if (isMapTile(url.href)) {
     event.respondWith(cacheFirstTile(request));
+    return;
+  }
+
+  if (url.origin === self.location.origin && /\/site-analytics\.js$/i.test(url.pathname)) {
+    event.respondWith(networkFirstAsset(request));
     return;
   }
 
