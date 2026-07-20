@@ -1,4 +1,4 @@
-const VERSION = '5terrego-sw-v5';
+const VERSION = '5terrego-sw-v6';
 const STATIC_CACHE = `${VERSION}-static`;
 const TILE_CACHE = `${VERSION}-tiles`;
 const CORE_ASSETS = [
@@ -9,8 +9,11 @@ const CORE_ASSETS = [
   './vendor/leaflet.css',
   './vendor/leaflet.js',
   './vendor/supabase.js',
-  './data/pois-lite.json'
+  './data/pois-lite.json',
+  './trail-camera-tuning.js'
 ];
+
+const TRAIL_TUNING_LOADER = "\n;(function(){if(document.querySelector('script[data-ftg-trail-camera-tuning]'))return;var script=document.createElement('script');script.src='/trail-camera-tuning.js?v=1';script.defer=true;script.setAttribute('data-ftg-trail-camera-tuning','');document.head.appendChild(script);}());\n";
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -77,6 +80,30 @@ async function networkFirstAsset(request) {
   }
 }
 
+async function networkFirstRuntime(request) {
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (!response || !response.ok || response.type !== 'basic') return response;
+
+    const source = await response.text();
+    const headers = new Headers(response.headers);
+    headers.set('Content-Type', 'application/javascript; charset=utf-8');
+    headers.delete('Content-Length');
+
+    const patchedResponse = new Response(source + TRAIL_TUNING_LOADER, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
+    const cache = await caches.open(STATIC_CACHE);
+    await cache.put(request, patchedResponse.clone());
+    return patchedResponse;
+  } catch (error) {
+    return (await caches.match(request)) ||
+      new Response('', { status: 504, statusText: 'Runtime unavailable offline' });
+  }
+}
+
 async function cacheFirstTile(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -122,6 +149,11 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.origin === self.location.origin && /\/site-analytics\.js$/i.test(url.pathname)) {
+    event.respondWith(networkFirstRuntime(request));
+    return;
+  }
+
+  if (url.origin === self.location.origin && /\/trail-camera-tuning\.js$/i.test(url.pathname)) {
     event.respondWith(networkFirstAsset(request));
     return;
   }
