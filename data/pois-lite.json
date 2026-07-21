@@ -1532,8 +1532,8 @@
   {
     "id": 219,
     "name": "The City Napoleon Wanted to Build",
-    "coords": "44,1021089, 9,8209130",
-    "description": "Napoleon understood the strategic importance of the Gulf of La Spezia and planned to build a major naval arsenal here. His empire collapsed before the project could begin, but decades later Cavour revived the idea.",
+    "coords": "44.102109, 9.820913",
+    "description": "Napoleon immediately recognised the extraordinary strategic value of the Gulf of La Spezia, whose deep, sheltered waters offered natural protection for an entire fleet. He reportedly described it as “the most beautiful gulf in the universe” and, in 1808, designated La Spezia as a military port, envisioning the construction of a major naval base.\n\nThe fall of the Napoleonic Empire prevented the project from becoming reality, but the idea was not forgotten. Almost fifty years later, Camillo Benso, Count of Cavour, revived Napoleon’s vision. In 1857, he secured funding for the new Military Arsenal and entrusted its design and construction to naval engineer Domenico Chiodo.\n\nThe Arsenal would completely transform La Spezia, turning a small fortified town into one of Italy’s most important naval centres. Even today, the city’s architecture, waterfront and maritime identity still reflect the ambitious vision first imagined by Napoleon and later brought to life by Cavour.",
     "importance": 85,
     "type": "curiosity",
     "discount": null,
@@ -1696,6 +1696,346 @@
     "description": "",
     "importance": 50,
     "type": "fermata bus",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 236,
+    "name": "Parking",
+    "coords": "44.107545, 9.807790",
+    "description": "",
+    "importance": 21,
+    "type": "parcheggio",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 237,
+    "name": "A Hillside Nativity Made of Light",
+    "coords": "44.107750, 9.728150",
+    "description": "Above Manarola, thousands of lights form a huge hillside Nativity scene during the Christmas season. The figures spread across the terraced slope, turning the vineyards into one of the village’s most distinctive night-time traditions.",
+    "importance": 84,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 238,
+    "name": "A Path Born from Railway Construction",
+    "coords": "44.102121, 9.733098",
+    "description": "The Via dell’Amore was created during railway works in the 1920s, when a practical route between the construction sites of Manarola and Riomaggiore gradually became a coastal link between the two communities.",
+    "importance": 91,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 239,
+    "name": "A Watchtower Built Against Sea Raids",
+    "coords": "44.134490, 9.682010",
+    "description": "Vernazza was already recorded as a fortified maritime settlement in the 11th century. The Doria Castle and its Belforte tower formed part of the defensive system used to watch the sea and protect the village from raids.",
+    "importance": 88,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 240,
+    "name": "One of Liguria’s Last Medieval Civic Loggias",
+    "coords": "44.167910, 9.612500",
+    "description": "Levanto’s late-medieval Loggia Comunale is one of the very few civic buildings of its kind still surviving in Liguria. Its five brick arches rest on local green-stone columns, and an old municipal archive once occupied a small room inside.",
+    "importance": 82,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 241,
+    "name": "Riomaggiore’s Castle Became a Cemetery",
+    "coords": "44.099880, 9.737530",
+    "description": "The hilltop castle of Riomaggiore began as a medieval defensive structure overlooking the coast. Over the centuries it changed function several times and was also adapted for use as the village cemetery before later restoration.",
+    "importance": 80,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 242,
+    "name": "The Village Reached by 377 Steps",
+    "coords": "44.120112, 9.710998",
+    "description": "Corniglia is the only Cinque Terre village set high above the sea rather than directly on the water. From the railway station, the famous brick staircase called the Lardarina climbs to the village in 377 steps.",
+    "importance": 86,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 243,
+    "name": "A Vineyard Village High Above Manarola",
+    "coords": "44.115574, 9.729983",
+    "description": "Volastra sits roughly 340 metres above the sea among terraced vineyards. Its elevated position made it an important farming settlement, and paths through the surrounding vines now offer a striking view of how agriculture shaped the steep Cinque Terre coast.",
+    "importance": 82,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 244,
+    "name": "The Island Inside the UNESCO Landscape",
+    "coords": "44.04284, 9.84387",
+    "description": "Palmaria is the largest island in the Gulf of La Spezia and forms part of the UNESCO site shared with Porto Venere and the Cinque Terre. Its trails, cliffs, Mediterranean vegetation and traces of military history create a landscape very different from the villages across the channel.",
+    "importance": 88,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 245,
+    "name": "The Staircase of More Than a Thousand Stone Steps",
+    "coords": "44.076667, 9.775278",
+    "description": "Monesteroli is reached by the historic Scala Grande, a very steep stone staircase with more than 1,100 steps. It descends through old vineyard terraces toward the tiny rural settlement above the sea, preserving the memory of generations who carried grapes along this route.",
+    "importance": 92,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 246,
+    "name": "The Dry-Stone Terraces of Campiglia",
+    "coords": "44.074160, 9.795780",
+    "description": "Around Campiglia, generations of farmers shaped the steep hillside with dry-stone walls and narrow terraces. The surviving landscape shows how small plots for vines, olives and other crops were created between the woods and the sea.",
+    "importance": 78,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 247,
+    "name": "A Castle Contested by Pisa and Genoa",
+    "coords": "44.072880, 9.907150",
+    "description": "Lerici Castle rises directly above the harbour. Its present form reflects centuries of rivalry between Pisa and Genoa, which repeatedly fought for control of this strategic entrance to the Gulf of La Spezia.",
+    "importance": 89,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 248,
+    "name": "A Church Built on the Edge of the Rock",
+    "coords": "44.048280, 9.832370",
+    "description": "The Church of San Pietro stands at the outer tip of Porto Venere, where an earlier Christian building and an ancient sacred site once occupied the promontory. Its black-and-white stone bands make it one of the coast’s most recognisable silhouettes.",
+    "importance": 92,
+    "type": "chiesa",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 249,
+    "name": "A Medieval Tower Between Old and New Monterosso",
+    "coords": "44.144910, 9.654350",
+    "description": "The Aurora Tower stands on the rocky promontory separating Monterosso’s historic centre from Fegina beach. Built as part of the coastal defence system, it is one of the surviving towers that once watched for raids from the sea.",
+    "importance": 84,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 250,
+    "name": "A Tiny Chapel at the End of the Headland",
+    "coords": "44.180430, 9.573940",
+    "description": "The Madonnina della Punta chapel sits at the end of a narrow headland west of Bonassola. Its small portico opens toward the sea, creating one of the most distinctive viewpoints along this stretch of the Ligurian coast.",
+    "importance": 80,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 251,
+    "name": "A Village Made of Five Separate Hamlets",
+    "coords": "44.208611, 9.554167",
+    "description": "Framura has no single compact centre. It is formed by five historic hamlets — Anzo, Ravecca, Setta, Costa and Castagnola — arranged at different heights between the shoreline and the wooded hills.",
+    "importance": 82,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 252,
+    "name": "An Island Lighthouse Above Monastery Ruins",
+    "coords": "44.026667, 9.849444",
+    "description": "The island of Tino is dominated by a lighthouse and preserves traces of a medieval monastery associated with Saint Venerius, the patron saint of lighthouse keepers. The island remains largely protected and separated from ordinary urban life.",
+    "importance": 87,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 253,
+    "name": "The Roman Villa at Bocca di Magra",
+    "coords": "44.045970, 9.984840",
+    "description": "The archaeological remains belong to a Roman seaside villa at Bocca di Magra, not to the urban site of ancient Luni. The residence stood on land near the river mouth and was connected to the wider territory and maritime routes of ancient Luna.",
+    "importance": 83,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 254,
+    "name": "The Railway That Became a Coastal Route",
+    "coords": "44.199820, 9.556890",
+    "description": "The old railway line between Levanto, Bonassola and Framura was moved inland and its seaside tunnels were reused as a walking and cycling route. The track now passes through rock galleries that suddenly open onto small coves and sea views.",
+    "importance": 88,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 255,
+    "name": "A Church Striped with Carrara Marble and Local Green Stone",
+    "coords": "44.166620, 9.611880",
+    "description": "Levanto's Church of Sant'Andrea pairs white Carrara marble with dark local green stone in its striped Ligurian-Gothic facade. Construction began in the 13th century, and the contrasting materials make the church instantly recognisable.",
+    "importance": 86,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 256,
+    "name": "Montale's Yellow Pagoda by the Sea",
+    "coords": "44.145181, 9.644169",
+    "description": "Eugenio Montale spent many summers in the family villa at Fegina, nicknamed the \"yellowish pagoda\". Monterosso's sea, lemons and dry-stone landscape became recurring images in the Nobel laureate's poetry.",
+    "importance": 90,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 257,
+    "name": "A Medieval Wine Name Linked to Vernazza",
+    "coords": "44.138800, 9.686400",
+    "description": "One traditional etymology links the medieval wine name Vernaccia to Vernaccia, the historic form of today’s Vernazza. The connection is not universally accepted, but wine growing unquestionably shaped the village economy and the terraced slopes above it.",
+    "importance": 89,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 258,
+    "name": "The Terrace Left by a Church Lost to the Sea",
+    "coords": "44.119500, 9.706790",
+    "description": "Corniglia's Santa Maria viewpoint preserves the memory of a small church that once stood near the cliff edge and was lost in the mid-19th century. The open terrace now offers a broad view over the Ligurian Sea.",
+    "importance": 86,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 259,
+    "name": "Boats Parked on the Village Street",
+    "coords": "44.106770, 9.727120",
+    "description": "Manarola's harbour is so small that traditional boats are hauled above the water and stored along the sloping main street, creating the unusual sight of fishing craft parked between the houses.",
+    "importance": 82,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 260,
+    "name": "A Main Street Built Over the Rio Maggiore",
+    "coords": "44.099980, 9.738920",
+    "description": "Riomaggiore developed along the narrow valley of the Rio Maggiore. The stream was later covered, and the village's main street now follows the watercourse hidden beneath the pavement.",
+    "importance": 85,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 261,
+    "name": "A Medieval Gate Behind the Waterfront Houses",
+    "coords": "44.051819, 9.834911",
+    "description": "Porto Venere's colourful waterfront forms a screen of tall tower-houses. The medieval Porta del Borgo opens through the fortified settlement into Via Capellini and the narrow lanes of the old town.",
+    "importance": 87,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 262,
+    "name": "The Black Marble Shot Through with Gold",
+    "coords": "44.034500, 9.845290",
+    "description": "Palmaria's historic quarries produced Portoro, a rare black limestone crossed by golden veins. Extraction on the island dates back to Roman times and left visible cuts in the rocky landscape.",
+    "importance": 88,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 263,
+    "name": "Futurist Mosaics Inside the Post Office Tower",
+    "coords": "44.106411, 9.825522",
+    "description": "La Spezia's 1933 main post office hides four large ceramic mosaics by Fillia and Enrico Prampolini. The Futurist works celebrate communication by land, sea, air, telephone and telegraph.",
+    "importance": 91,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 264,
+    "name": "A Golden Butterfly Made by Sunset",
+    "coords": "44.089830, 9.931760",
+    "description": "Near Monti di San Lorenzo, sunset light around the summer solstice passes through a natural stone opening and projects a butterfly-shaped glow. The phenomenon is real; interpretations of the stones' origin remain debated.",
+    "importance": 88,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 265,
+    "name": "A Church Balanced on a Rocky Sea Platform",
+    "coords": "44.057550, 9.929230",
+    "description": "Tellaro's Church of San Giorgio stands at the outer edge of the village on a rocky base projecting over the sea. Its rounded apse and bell tower rise directly above the waves.",
+    "importance": 85,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 266,
+    "name": "Here Mussels Are Called Muscoli",
+    "coords": "44.067200, 9.828600",
+    "description": "Mussel farming has shaped the Gulf of La Spezia since the late 19th century. Locals call the shellfish muscoli, and the floating farms remain part of the gulf's working landscape and cuisine.",
+    "importance": 88,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 267,
+    "name": "The Roman Villa at Varignano",
+    "coords": "44.063800, 9.841210",
+    "description": "The Roman villa of Varignano preserves the remains of a coastal estate built on land beside a sheltered inlet at Le Grazie. Its residential and agricultural structures show how the Gulf of La Spezia was used long before the medieval villages.",
+    "importance": 89,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 268,
+    "name": "Early Christian Ruins on a Half-Hectare Rock",
+    "coords": "44.023611, 9.851028",
+    "description": "Tinetto is barely half a hectare, yet it preserves remains of early Christian oratories and monks' cells. The tiny islet supported a small religious community from Late Antiquity into the Middle Ages.",
+    "importance": 90,
+    "type": "curiosity",
+    "discount": null,
+    "discount_info": null
+  },
+  {
+    "id": 269,
+    "name": "Europa Park",
+    "coords": "44.108039, 9.828325",
+    "description": "",
+    "importance": 22,
+    "type": "parcheggio",
     "discount": null,
     "discount_info": null
   }
