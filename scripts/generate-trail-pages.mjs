@@ -47,6 +47,10 @@ function imageMarkup(trail) {
   const alt = `Mappa e percorso del sentiero ${trail.name} nelle Cinque Terre`;
   return `<figure class="route-image"><a href="/map.html?trail=${encodeURIComponent(trail.id)}" aria-label="Apri ${escapeHTML(trail.name)} sulla mappa interattiva"><img src="/seo.png" width="1200" height="630" loading="eager" fetchpriority="high" alt="${escapeHTML(alt)}"></a><figcaption>Apri il percorso nella mappa interattiva 5TerreGo.</figcaption></figure>`;
 }
+function compactPageTitle(name) {
+  const full = `${name} | Sentiero Cinque Terre | 5TerreGo`;
+  return full.length > 86 ? `${String(name).slice(0, 55).replace(/\s+\S*$/, '')}… | Sentiero Cinque Terre` : full;
+}
 function page(trail) {
   const trailLevel = level(trail), accent = colors[trailLevel], title = escapeHTML(trail.name), description = escapeHTML(trail.description || `Sentiero da ${trail.start_name} a ${trail.end_name} nelle Cinque Terre.`), slug = slugify(trail.name);
   const canonical = `https://www.5terrego.com/trails/${slug}.html`;
@@ -63,7 +67,10 @@ function page(trail) {
 
 const output = path.join(root, 'trails');
 await mkdir(output, { recursive: true });
-await Promise.all(trails.map((trail) => writeFile(path.join(output, `${slugify(trail.name)}.html`), page(trail), 'utf8')));
+await Promise.all(trails.map((trail) => {
+  const html = page(trail).replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHTML(compactPageTitle(trail.name))}</title>`);
+  return writeFile(path.join(output, `${slugify(trail.name)}.html`), html, 'utf8');
+}));
 const indexLinks = trails.map((trail) => `<li><a href="/trails/${slugify(trail.name)}.html">${escapeHTML(trail.name)}</a> <a href="/map.html?trail=${encodeURIComponent(trail.id)}">Apri mappa</a></li>`).join('');
 await writeFile(path.join(output, 'index.html'), `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Archivio sentieri Cinque Terre | 5TerreGo</title><meta name="description" content="Archivio navigabile dei sentieri delle Cinque Terre, con schede e apertura diretta nella mappa interattiva."><link rel="canonical" href="https://www.5terrego.com/trails/"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:title" content="Archivio sentieri Cinque Terre | 5TerreGo"><meta property="og:description" content="Schede sentieri e apertura diretta nella mappa interattiva."><meta property="og:image" content="https://www.5terrego.com/seo.png"><meta name="twitter:card" content="summary_large_image"><style>body{font:16px system-ui;max-width:760px;margin:3rem auto;padding:0 1rem;line-height:1.6}li{margin:.7rem 0}a+a{margin-left:1rem}</style></head><body><main><h1>Archivio sentieri delle Cinque Terre</h1><p>Ogni scheda contiene dettagli del percorso e collegamento alla mappa interattiva.</p><ul>${indexLinks}</ul><p><a href="/sentieri.html">Esplora e filtra tutti i sentieri</a></p></main></body></html>`, 'utf8');
 
