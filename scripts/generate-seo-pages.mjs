@@ -26,6 +26,7 @@ const centers = [
   { name: 'Portovenere', slug: 'portovenere', lat: 44.0519, lng: 9.8353 },
   { name: 'Lerici', slug: 'lerici', lat: 44.0759, lng: 9.9116 }
 ];
+const mapBounds = { south: 43.75, north: 44.48, west: 9.28, east: 10.28 };
 
 const escapeHTML = (value = '') => String(value)
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -46,6 +47,11 @@ const typeLabel = (value = '') => ({
   castello: 'Castello', spiaggia: 'Spiaggia', curiosity: 'Storia e curiosità',
   'punto panoramico': 'Punto panoramico', ferry: 'Imbarco traghetti',
   'info point': 'Ufficio informazioni', piazza: 'Piazza',
+  fontana: 'Fontana', ristorante: 'Ristorante', sentiero: 'Sentiero',
+  'fermata bus': 'Fermata autobus', 'ascensore pubblico': 'Ascensore pubblico',
+  atm: 'Bancomat', 'bagni pubblici': 'Bagni pubblici',
+  parcheggio: 'Parcheggio', farmacia: 'Farmacia',
+  'unknown spot': 'Luogo utile',
   transport: 'Trasporti', guide: 'Guida', tips: 'Consigli', trails: 'Sentieri',
   villages: 'Borghi', food: 'Cibo e vino'
 }[String(value).toLowerCase()] || String(value || 'Luogo da visitare'));
@@ -76,8 +82,8 @@ function paragraphs(description) {
     .map((paragraph) => `<p>${escapeHTML(paragraph)}</p>`).join('');
 }
 
-const candidates = pois
-  .filter((poi) => poi.name && strip(poi.description).length >= 180 && Number(poi.importance || 0) >= 60)
+const mapPlaces = pois
+  .filter((poi) => poi.id !== null && poi.id !== undefined && poi.name)
   .map((poi) => {
     const coords = parseCoordinates(poi.coords);
     return {
@@ -88,14 +94,29 @@ const candidates = pois
       descriptionText: strip(poi.description)
     };
   })
+  .filter((poi) => poi.coords
+    && poi.coords.lat >= mapBounds.south && poi.coords.lat <= mapBounds.north
+    && poi.coords.lng >= mapBounds.west && poi.coords.lng <= mapBounds.east)
   .sort((left, right) => Number(right.importance || 0) - Number(left.importance || 0));
+const candidates = mapPlaces
+  .filter((poi) => poi.descriptionText.length >= 180 && Number(poi.importance || 0) >= 60);
 const detailPlaces = candidates.filter((poi) => poi.descriptionText.length >= 500);
 const detailIds = new Set(detailPlaces.map((poi) => String(poi.id)));
+
+function mapHref(poi) {
+  const params = new URLSearchParams({
+    poi: String(poi.id),
+    name: String(poi.name),
+    type: String(poi.type || 'unknown spot')
+  });
+  if (poi.coords) params.set('coords', `${poi.coords.lat},${poi.coords.lng}`);
+  return `/map.html?${params.toString()}`;
+}
 
 function placeHref(poi) {
   return detailIds.has(String(poi.id))
     ? `/places/${poi.slug}.html`
-    : `/map.html?poi=${encodeURIComponent(poi.id)}`;
+    : mapHref(poi);
 }
 
 function relatedPlaces(poi) {
@@ -106,7 +127,7 @@ function placePage(poi) {
   const canonical = `${origin}/places/${poi.slug}.html`;
   const title = truncate(`${poi.name}: cosa vedere a ${poi.location.name} | 5TerreGo`, 78);
   const description = truncate(`${poi.descriptionText} Informazioni, posizione e apertura sulla mappa interattiva 5TerreGo.`, 158);
-  const mapUrl = `/map.html?poi=${encodeURIComponent(poi.id)}`;
+  const mapUrl = mapHref(poi);
   const geo = poi.coords ? { '@type': 'GeoCoordinates', latitude: poi.coords.lat, longitude: poi.coords.lng } : undefined;
   const schema = JSON.stringify({
     '@context': 'https://schema.org',
@@ -160,10 +181,15 @@ function locationPage(location, items) {
   const canonical = `${origin}/places/${location.slug}.html`;
   const title = `Cosa vedere a ${location.name}: luoghi e attrazioni | 5TerreGo`;
   const description = `Scopri cosa vedere a ${location.name}: monumenti, chiese, punti panoramici, stazioni e curiosità con descrizioni e collegamenti alla mappa interattiva.`;
-  const cards = items.map((poi) => `<article class="card"><div><small>${escapeHTML(typeLabel(poi.type))}</small><h2><a href="${placeHref(poi)}">${escapeHTML(poi.name)}</a></h2><p>${escapeHTML(truncate(poi.descriptionText, 210))}</p></div><a class="map-link" href="/map.html?poi=${encodeURIComponent(poi.id)}">Apri sulla mappa →</a></article>`).join('');
+  const cards = items.map((poi) => {
+    const summary = poi.descriptionText
+      ? truncate(poi.descriptionText, 210)
+      : `Posizione, informazioni e indicazioni per ${poi.name}.`;
+    return `<article class="card"><div><small>${escapeHTML(typeLabel(poi.type))}</small><h2><a href="${placeHref(poi)}">${escapeHTML(poi.name)}</a></h2><p>${escapeHTML(summary)}</p></div><a class="map-link" href="${mapHref(poi)}">Apri sulla mappa →</a></article>`;
+  }).join('');
   const itemList = items.map((poi, index) => ({
     '@type': 'ListItem', position: index + 1, name: poi.name,
-    url: detailIds.has(String(poi.id)) ? `${origin}/places/${poi.slug}.html` : `${origin}/map.html?poi=${poi.id}`
+    url: detailIds.has(String(poi.id)) ? `${origin}/places/${poi.slug}.html` : `${origin}${mapHref(poi)}`
   }));
   const schema = JSON.stringify({
     '@context': 'https://schema.org', '@type': 'ItemList', name: `Luoghi da vedere a ${location.name}`,
@@ -189,7 +215,7 @@ await mkdir(placesDirectory, { recursive: true });
 await Promise.all(detailPlaces.map((poi) => writeFile(path.join(placesDirectory, `${poi.slug}.html`), placePage(poi), 'utf8')));
 const groups = centers.map((location) => ({
   location,
-  items: candidates.filter((poi) => poi.location.slug === location.slug)
+  items: mapPlaces.filter((poi) => poi.location.slug === location.slug)
 })).filter((group) => group.items.length);
 await Promise.all(groups.map((group) => writeFile(path.join(placesDirectory, `${group.location.slug}.html`), locationPage(group.location, group.items), 'utf8')));
 await writeFile(path.join(placesDirectory, 'index.html'), placesIndex(groups), 'utf8');

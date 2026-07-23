@@ -7006,12 +7006,15 @@
     var nearestVillage;
     var importance;
     var zoomScore;
+    var requestedId;
     if (!Number.isFinite(parsed.lat) || !Number.isFinite(parsed.lng)) return -Infinity;
     coords = [parsed.lat, parsed.lng];
     importance = Number(row && (row.importance || row.relevance || row.score || 0)) || 0;
     zoomScore = getPOIZoomScoreFromRaw(row || {});
     nearestVillage = getClosestPlaceNameForCoords(coords);
     score = importance;
+    requestedId = String(urlParams.get('poi') || '').trim();
+    if (requestedId && String(row && (row.id || row._id || '') || '').trim() === requestedId) score += 100000;
     if (priorityVillageName && nearestVillage === priorityVillageName) score += 5000;
     if (bounds && parsed.lat >= bounds.south && parsed.lat <= bounds.north && parsed.lng >= bounds.west && parsed.lng <= bounds.east) score += 2400;
     if (Number.isFinite(zoomScore)) score += (101 - zoomScore) * 7;
@@ -7150,6 +7153,7 @@
     var firstRemotePromise;
     var firstAvailable;
     var secondAvailable;
+    var requestedPOIId = String(urlParams.get('poi') || '').trim();
     var priorityVillageName = getBootPriorityVillageName();
     var initialBounds = getInitialViewportPOIBounds();
     var deferredAppendGeneration = generation;
@@ -7172,6 +7176,29 @@
         requestedNavigationHydrated = true;
         renderNavigationChoices();
       }
+    }
+
+    function hydrateRequestedPOIRow(row) {
+      var rowId;
+      var entry;
+      if (generation !== poiLoadGeneration || !row || !requestedPOIId) return false;
+      rowId = String(row.id || row._id || '').trim();
+      if (rowId !== requestedPOIId) return false;
+      appendPOIRows([row], {
+        replaceExisting: false,
+        refresh: false,
+        keepRichData: true,
+        incremental: false
+      });
+      entry = findPOIMarkerEntryById(requestedPOIId);
+      if (!entry || !entry.poi) return false;
+      poiCoordsReady = true;
+      refreshPOIViews(true);
+      if (requestedPOIFocused && currentPOI && getPOIEntryId(currentPOI) === requestedPOIId && currentPOI !== entry.poi) {
+        currentPOI = entry.poi;
+        showPOICard(entry.poi);
+      }
+      return true;
     }
 
     function mergeCachedRows(list) {
@@ -7255,11 +7282,32 @@
       localRows = readLocalPOIs();
       mergeCachedRows(localRows);
 
+      localAssetPromise = fetchLocalPOIsAsset().then(filterUsableCachedPOIRows).catch(function() { return []; });
+      if (requestedPOIId) {
+        localAssetPromise.then(function(list) {
+          var requestedRow = list.find(function(row) {
+            return String(row && (row.id || row._id || '') || '').trim() === requestedPOIId;
+          });
+          if (requestedRow) hydrateRequestedPOIRow(requestedRow);
+        }).catch(function() {});
+      }
+
       if (SUPABASE_READY && supabaseClient) {
-        localAssetPromise = fetchLocalPOIsAsset().then(filterUsableCachedPOIRows).catch(function() { return []; });
         firstRemotePromise = fetchRemotePOIPage(0, remotePageSize).catch(function(error) {
           return { data: [], error: error };
         });
+        if (requestedPOIId && /^[a-z0-9:_-]{1,120}$/i.test(requestedPOIId)) {
+          supabaseClient
+            .from('pois')
+            .select('id,created_at,name,coords,description,importance,type,phone,images,discount,discount_info,partner_profile')
+            .eq('id', requestedPOIId)
+            .maybeSingle()
+            .then(function(result) {
+              if (result && !result.error && result.data) hydrateRequestedPOIRow(result.data);
+              return result;
+            })
+            .catch(function() { return null; });
+        }
       }
 
       idbRows = await readFullPOICacheFromIDB();
@@ -7267,12 +7315,12 @@
       mergeCachedRows(idbRows);
 
       if (mergedCacheRows.length) {
-        applyPriorityRows(mergedCacheRows, 'cache', true);
+        applyPriorityRows(mergedCacheRows, 'cache', !poiMarkers.length);
       }
 
       if (!SUPABASE_READY || !supabaseClient) {
         if (!poiMarkers.length) {
-          localAssetRows = filterUsableCachedPOIRows(await fetchLocalPOIsAsset());
+          localAssetRows = await localAssetPromise;
           if (generation !== poiLoadGeneration) return;
           applyPriorityRows(localAssetRows, 'local', true);
         }
