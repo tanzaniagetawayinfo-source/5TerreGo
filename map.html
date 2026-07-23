@@ -1330,7 +1330,7 @@
       bottom: 0;
       z-index: 2998;
       height: 50dvh;
-      max-height: 95dvh;
+      max-height: calc(100dvh - var(--ftg-header-height, 98px));
       border-radius: 30px 30px 0 0;
       background: rgba(255,255,255,0.98);
       border: 1px solid rgba(0,0,0,0.06);
@@ -1344,10 +1344,10 @@
       transition: opacity .26s ease, transform .32s cubic-bezier(.2,.9,.2,1), height .28s cubic-bezier(.2,.9,.2,1);
     }
     #poi-card.open { opacity: 1; transform: translateY(0); }
-    #poi-card.sheet-expanded { height: 95dvh; }
+    #poi-card.sheet-expanded { height: calc(100dvh - var(--ftg-header-height, 98px)); }
     #poi-sheet-handle { position: absolute; left: 0; right: 0; top: 0; height: 26px; z-index: 14; display: flex; align-items: center; justify-content: center; touch-action: none; cursor: grab; background: #fff; border-radius: 30px 30px 0 0; }
     #poi-sheet-handle::before { content: ''; width: 42px; height: 5px; border-radius: 999px; background: rgba(0,0,0,0.20); }
-    .poi-content { position: relative; z-index: 3; height: 100%; padding: 0 16px calc(18px + env(safe-area-inset-bottom)); color: #111; text-align: left; opacity: 0; transform: translateY(6px); transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1); overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; }
+    .poi-content { position: relative; z-index: 3; height: 100%; padding: 0 16px calc(28px + env(safe-area-inset-bottom)); color: #111; text-align: left; opacity: 0; transform: translateY(6px); transition: opacity .32s ease, transform .32s cubic-bezier(.2,.9,.2,1); overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; scrollbar-gutter: stable; }
     #poi-card.sheet-expanded .poi-content { overflow-y: auto; }
     #poi-card.open .poi-content { opacity: 1; transform: translateY(0); }
     #poi-title { position: sticky; top: 0; z-index: 11; min-height: 66px; display: flex; align-items: flex-end; margin: 0 -16px 0; padding: 30px 58px 10px 20px; background: #fff; font-size: 25px; font-weight: 950; line-height: 1.02; letter-spacing: -0.06em; text-align: left; box-shadow: 0 1px 0 rgba(0,0,0,0.045), 0 12px 18px rgba(255,255,255,0.96); }
@@ -1454,7 +1454,17 @@
     #poi-images-preview { display: none; gap: 8px; margin: 0 0 14px; overflow-x: auto; }
     #poi-card.has-images #poi-images-preview { display: flex; }
     .poi-preview-img { flex: 0 0 152px; width: 152px; height: 152px; border-radius: 22px; object-fit: cover; display: block; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06); }
-    #poi-desc { font-size: 15px; line-height: 1.52; color: rgba(0,0,0,0.68); margin: 0; white-space: pre-line; padding-bottom: 2px; }
+    .poi-page-section { margin-top: 18px; }
+    .poi-page-section:first-of-type { margin-top: 0; }
+    .poi-section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 10px; }
+    .poi-section-title { font-size: 12px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,.44); }
+    .poi-section-link { flex:0 0 auto; border:1px solid rgba(0,0,0,.09); border-radius:999px; padding:8px 12px; background:#fff; color:#111827; text-decoration:none; font-size:12px; font-weight:950; }
+    #poi-overview { display:none; margin-top:0; }
+    #poi-overview.is-visible { display:block; }
+    #poi-overview-facts { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; }
+    .poi-fact { flex:0 0 auto; padding:10px 12px; border:1px solid rgba(17,24,39,.07); border-radius:14px; background:#f4f6f8; color:#4c5668; font-size:12px; font-weight:850; white-space:nowrap; }
+    .poi-fact strong { color:#111827; }
+    #poi-desc { font-size: 15px; line-height: 1.58; color: rgba(0,0,0,0.70); margin: 0; white-space: pre-line; padding-bottom: 2px; }
     #poi-business-menu { display:none; margin-top:16px; border-radius:20px; background:#f5f7f2; border:1px solid rgba(0,0,0,.07); overflow:hidden; }
     #poi-business-menu.is-visible { display:block; }
     #poi-business-menu summary { padding:15px; cursor:pointer; font-size:17px; font-weight:950; list-style:none; }
@@ -1495,9 +1505,15 @@
     .atc-scheduled-bus { width:var(--atc-bus-width,22px); height:var(--atc-bus-height,38px); display:grid; place-items:center; padding:0; border:0; background:transparent; line-height:1; cursor:pointer; filter:drop-shadow(0 3px 4px rgba(0,0,0,.38)); contain:layout style paint; will-change:transform; }
     .atc-scheduled-bus img { width:100%; height:100%; display:block; object-fit:contain; pointer-events:none; }
     @media (max-width:420px) { .atc-transit-query { grid-template-columns:1fr 1fr; } .atc-transit-query button { grid-column:1/-1; } }
-    #poi-related-articles { display: none; margin-top: 16px; }
+    #poi-nearby { display:none; }
+    #poi-nearby.is-visible { display:block; }
+    .poi-nearby-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .poi-nearby-card { min-width:0; min-height:92px; border:1px solid rgba(17,24,39,.07); border-radius:18px; padding:13px; background:#f4f6f8; color:#111827; text-align:left; font:inherit; cursor:pointer; }
+    .poi-nearby-card strong { display:block; font-size:14px; line-height:1.18; font-weight:950; letter-spacing:-.02em; }
+    .poi-nearby-card span { display:block; margin-top:7px; color:#687386; font-size:11px; font-weight:850; }
+    .poi-section-empty { padding:14px; border-radius:16px; background:#f4f6f8; color:#687386; font-size:13px; font-weight:750; line-height:1.4; }
+    #poi-related-articles { display: none; }
     #poi-related-articles.is-visible { display: block; }
-    .poi-related-title { font-size: 12px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,0,0,.42); margin: 0 0 10px; }
     .poi-related-list { display: flex; flex-direction: column; gap: 12px; }
     .poi-related-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: stretch; padding: 10px; border-radius: 18px; background: rgba(0,0,0,.045); border: 1px solid rgba(0,0,0,.06); text-decoration: none; color: #111; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
     .poi-related-card:active { transform: scale(.99); }
@@ -1507,6 +1523,10 @@
     .poi-related-card-title { font-size: 16px; font-weight: 950; line-height: 1.16; letter-spacing: -.03em; color: #111; }
     .poi-related-card-meta { margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(0,0,0,.48); }
     .poi-related-card-excerpt { margin-top: 7px; font-size: 13px; line-height: 1.42; color: rgba(0,0,0,.68); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    #poi-useful-links { padding:15px; border-radius:21px; background:#111827; color:#fff; }
+    #poi-useful-links .poi-section-title { color:rgba(255,255,255,.62); }
+    .poi-useful-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .poi-useful-grid a { display:flex; min-height:45px; align-items:center; justify-content:center; border-radius:14px; background:rgba(255,255,255,.11); color:#fff; text-decoration:none; text-align:center; font-size:12px; font-weight:900; }
     @media (max-width: 380px) {
       .mode-bar { gap: 7px; }
       .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; }
@@ -1757,7 +1777,19 @@
 
 <div id="poi-card" aria-hidden="true">
   <div id="poi-sheet-handle" aria-hidden="true"></div>
-  <div class="poi-content"><div id="poi-title"></div><div class="poi-action-row"><button id="poi-directions" type="button" data-no-translate>Vai</button><a id="poi-whatsapp" target="_blank" rel="noopener">WhatsApp</a><button id="poi-edit" type="button" data-no-translate>Modifica</button></div><div id="poi-images-preview" aria-label="POI image preview"></div><div id="poi-desc"></div><details id="poi-business-menu"><summary>Menu</summary><div id="poi-business-menu-content"></div></details><div id="atc-transit-panel" aria-live="polite"></div><div id="poi-related-articles"><div class="poi-related-title">Related articles</div><div id="poi-related-articles-list" class="poi-related-list"></div></div><button id="poi-discount-btn" type="button" data-no-translate>Generate discount</button><div id="poi-discount-note"></div></div>
+  <div class="poi-content">
+    <div id="poi-title"></div>
+    <div class="poi-action-row"><button id="poi-directions" type="button" data-no-translate>Vai</button><a id="poi-whatsapp" target="_blank" rel="noopener">WhatsApp</a><button id="poi-edit" type="button" data-no-translate>Modifica</button></div>
+    <div id="poi-images-preview" aria-label="POI image preview"></div>
+    <section id="poi-overview" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">In brief</div></div><div id="poi-overview-facts"></div></section>
+    <section class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">About this place</div></div><div id="poi-desc"></div></section>
+    <details id="poi-business-menu"><summary>Menu</summary><div id="poi-business-menu-content"></div></details>
+    <div id="atc-transit-panel" aria-live="polite"></div>
+    <section id="poi-nearby" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">Nearby, same category</div></div><div id="poi-nearby-list" class="poi-nearby-list"></div></section>
+    <section id="poi-related-articles" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">Related Stories</div><a class="poi-section-link" href="/guide.html">Go to Stories</a></div><div id="poi-related-articles-list" class="poi-related-list"></div></section>
+    <section id="poi-useful-links" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">Useful next</div></div><div class="poi-useful-grid"><a href="/places/">All places</a><a href="/sentieri.html">Trails</a><a href="/public-transport.html">Transport</a><a href="/guide.html">Stories</a></div></section>
+    <button id="poi-discount-btn" type="button" data-no-translate>Generate discount</button><div id="poi-discount-note"></div>
+  </div>
   <div id="poi-close">×</div>
 </div>
 <div id="god-mode-badge" aria-hidden="true">⚡ GOD MODE</div>
@@ -2647,6 +2679,10 @@
   var atcTransitPanel = document.getElementById('atc-transit-panel');
   var poiClose = document.getElementById('poi-close');
   var poiImagesPreview = document.getElementById('poi-images-preview');
+  var poiOverview = document.getElementById('poi-overview');
+  var poiOverviewFacts = document.getElementById('poi-overview-facts');
+  var poiNearby = document.getElementById('poi-nearby');
+  var poiNearbyList = document.getElementById('poi-nearby-list');
   var poiRelatedArticles = document.getElementById('poi-related-articles');
   var poiRelatedArticlesList = document.getElementById('poi-related-articles-list');
 
@@ -3010,15 +3046,33 @@
     lat = readValue(raw.lat, raw.latitude); lng = readValue(raw.lng, raw.longitude); if (lat !== undefined && lng !== undefined) return normalizeLatLngPair(lat, lng); if (raw.lon !== undefined || raw.long !== undefined) return normalizeLatLngPair(readValue(raw.lat, raw.latitude), readValue(raw.lon, raw.long)); return { lat: Number(lat), lng: Number(lng) }; }
   function getFirstImageField(raw) { var direct; var fromList; raw = raw || {}; direct = raw.cover_image || raw.coverImage || raw.image_url || raw.imageUrl || raw.thumbnail_url || raw.thumbnailUrl || raw.thumbnail || raw.image || raw.photo_url || raw.photoUrl || raw.img || ''; if (direct) return String(direct).trim(); fromList = normalizePOIImages(raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || []); return fromList.length ? fromList[0] : ''; }
   function getAllImageFields(raw) { var images = []; var main; raw = raw || {}; main = getFirstImageField(raw); if (main) images.push(main); images = images.concat(normalizePOIImages(raw.cover_images || raw.coverImages || raw.images || raw.gallery || raw.photos || raw.photo_urls || raw.photoUrls || [])); return images.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }); }
-  function normalizePOI(raw) { var parsed, symbol, mainImage, allImages, fallbackName, zoomScore; raw = raw || {}; parsed = parseCoords(raw); symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍'); mainImage = getFirstImageField(raw); allImages = getAllImageFields(raw); fallbackName = 'poi-' + String(raw.id || raw._id || Math.random().toString(16).slice(2)); zoomScore = getPOIZoomScoreFromRaw(raw); return { id: raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2), name: String(raw.name || raw.title || fallbackName), symbol: symbol, coords: [parsed.lat, parsed.lng], lat: parsed.lat, lng: parsed.lng, image: mainImage, cover_image: raw.cover_image || mainImage, images: allImages, description: raw.description || raw.descrizione || '', type: raw.type || raw.tipo || '', owner_email: raw.owner_email || raw.email || '', phone: raw.phone || raw.telephone || '', relevance: Number(raw.importance || raw.relevance || raw.score || 0), zoom_point: zoomScore, zoomPoint: zoomScore, discount: Number(raw.discount || 0), discount_info: raw.discount_info || raw.discount_text || raw.discount_description || '', partner_profile: raw.partner_profile && typeof raw.partner_profile === 'object' ? raw.partner_profile : {}, emails: raw.emails || '', active_codes: Array.isArray(raw.active_codes) ? raw.active_codes : [] }; }
+  var IMPORTANT_POI_DESCRIPTIONS = {
+    '188': "San Giorgio Castle stands on the Poggio hill above central La Spezia and now houses the Ubaldo Formentini Archaeological Museum. Its collections trace the territory from prehistory to the early Middle Ages, while the terraces open broad views across the city and gulf. The uphill approach is part of the visit; allow time for the museum and exterior viewpoints, and check the official museum page for current opening conditions.",
+    '190': "La Spezia Centrale is the city’s main railway station and the principal rail gateway for the Cinque Terre. Regional trains connect it with Riomaggiore, Manarola, Corniglia, Vernazza, Monterosso and Levanto, while the historic centre begins a short walk downhill. In busy months platforms and ticket areas can become crowded: check live departures, validate the correct ticket where required, and allow extra time before boarding.",
+    '194': "The Church of San Giovanni Battista is a local place of worship within La Spezia’s urban fabric. It is best understood as part of the everyday city beyond the seafront and main shopping streets, where parish churches still anchor neighbourhood life. Visitors should enter quietly when the doors are open, avoid services and private ceremonies, and remember that access can change without notice because this is an active religious building rather than a museum.",
+    '195': "Cristo Re Cathedral is one of modern La Spezia’s defining landmarks. Designed by Adalberto Libera with Cesare Galeazzi, its first stone was laid in 1969 and the cathedral was consecrated in 1975. The broad circular form, raised forecourt and interior create a striking contrast with the older Ligurian churches around the gulf. It stands above Piazza Europa; visit respectfully, and check locally before expecting access during services or events.",
+    '220': "In 1946, more than one thousand Holocaust survivors departed from the La Spezia area aboard the ships Fede and Fenice, heading toward Palestine. Local support for the refugees helped the city become known as Sha’ar Zion — the Gate of Zion. This is not simply a nickname: it recalls a specific post-war episode of solidarity, migration and recovery. Read the place together with the harbour landscape and the city’s wider twentieth-century history.",
+    '221': "This dramatic sea cave was once called Cala dell’Arpaia but later became associated with Lord Byron. Local tradition claims that the poet swam across the Gulf to visit the Shelleys, although the story has never been proven. The value of the stop lies equally in the exposed limestone coast and in the literary imagination attached to Porto Venere. Observe the cave from safe public viewpoints or the sea, since waves and slippery rock can make close access dangerous.",
+    '222': "After being wounded during the Battle of Aspromonte in 1862, Giuseppe Garibaldi was taken to Varignano. He remained here for around forty days under military and medical supervision, turning this sheltered corner of the gulf into an unexpected site of national history. The surrounding complex has long had military uses, so public access may be restricted. Treat the POI as historical context for Le Grazie and check permitted routes before approaching the site.",
+    '238': "The Via dell’Amore was created during railway works in the 1920s, when a practical route between the construction sites of Manarola and Riomaggiore gradually became a coastal link between the two communities. Its short distance hides a remarkable engineering landscape of cliffs, tunnels and sea views. Access rules can change after weather events or maintenance, so verify the official park information before setting out and do not rely on the map alone.",
+    '245': "Monesteroli is reached by the historic Scala Grande, a very steep stone staircase with more than 1,100 steps. It descends through old vineyard terraces toward the tiny rural settlement above the sea, preserving the memory of generations who carried grapes along this route. The descent is demanding and the return climb is harder: use suitable footwear, carry water, avoid the hottest hours, and turn back if rain or fatigue makes the exposed stone steps unsafe.",
+    '247': "Lerici Castle rises directly above the harbour. Its present form reflects centuries of rivalry between Pisa and Genoa, which repeatedly fought for control of this strategic entrance to the Gulf of La Spezia. From below, the fortress explains the shape of the waterfront; from the upper area, the harbour and gulf become part of the story. The approach includes a climb and interior access can vary, so check current opening information before planning a dedicated visit.",
+    '248': "The Church of San Pietro stands at the outer tip of Porto Venere, where an earlier Christian building and an ancient sacred site once occupied the promontory. Its black-and-white stone bands make it one of the coast’s most recognisable silhouettes. Walk around the exterior viewpoints to understand how the church sits between the village, Palmaria and the open sea. The promontory can be windy and crowded, while interior access may pause during worship or events.",
+    '256': "Eugenio Montale spent many summers in the family villa at Fegina, nicknamed the “yellowish pagoda”. Monterosso’s sea, lemons, walls and dry-stone landscape became recurring images in the Nobel laureate’s poetry. The POI is most rewarding as part of a slow walk through Fegina rather than as a conventional museum stop: compare the modern seaside district with the harsher coastal details that shaped Montale’s writing, and respect any private property around the villa.",
+    '257': "One traditional etymology links the medieval wine name Vernaccia to Vernaccia, the historic form of today’s Vernazza. The connection is not universally accepted, but wine growing unquestionably shaped the village economy and the terraced slopes above it. Treat the claim as a doorway into local history rather than a settled linguistic fact. The dry-stone walls, steep vineyard paths and historic trade routes offer firmer evidence of how closely the village and wine culture developed together.",
+    '263': "La Spezia’s 1933 main post office hides four large ceramic mosaics by Fillia and Enrico Prampolini. The Futurist works celebrate communication by land, sea, air, telephone and telegraph, turning a public-service building into a compact statement about speed and modern technology. The restrained exterior gives little warning of what is inside. Because the building remains in everyday use, look quietly, avoid obstructing customers and expect access to follow normal office conditions.",
+    '267': "The Roman villa of Varignano preserves the remains of a coastal estate built beside a sheltered inlet at Le Grazie. Its residential and agricultural structures show how the Gulf of La Spezia was organised and exploited long before the medieval villages. The archaeological remains are most useful when read together: living quarters, production areas and the protected harbour setting form one landscape. Check current access before travelling specifically for the site, as visiting arrangements can vary.",
+    '268': "Tinetto is barely half a hectare, yet it preserves remains of early Christian oratories and monks’ cells. The tiny islet supported a small religious community from Late Antiquity into the Middle Ages, despite its exposed position beyond Tino and Palmaria. Its scale is easiest to understand from the sea: a small rock carrying an unusually dense history. Landing and access may be limited, so view it responsibly by boat and do not assume the archaeological remains are freely reachable."
+  };
+  function getPreferredPOIDescription(id, value) { var current = String(value || '').trim(); var preferred = IMPORTANT_POI_DESCRIPTIONS[String(id || '')] || ''; return preferred.length > current.length ? preferred : current; }
+  function normalizePOI(raw) { var parsed, symbol, mainImage, allImages, fallbackName, zoomScore, poiId; raw = raw || {}; poiId = raw.id || raw._id || 'local-' + Date.now() + '-' + Math.random().toString(16).slice(2); parsed = parseCoords(raw); symbol = raw.symbol || getPOIEmoji(raw.type || raw.tipo, '📍'); mainImage = getFirstImageField(raw); allImages = getAllImageFields(raw); fallbackName = 'poi-' + String(poiId); zoomScore = getPOIZoomScoreFromRaw(raw); return { id: poiId, name: String(raw.name || raw.title || fallbackName), symbol: symbol, coords: [parsed.lat, parsed.lng], lat: parsed.lat, lng: parsed.lng, image: mainImage, cover_image: raw.cover_image || mainImage, images: allImages, description: getPreferredPOIDescription(poiId, raw.description || raw.descrizione || ''), type: raw.type || raw.tipo || '', owner_email: raw.owner_email || raw.email || '', phone: raw.phone || raw.telephone || '', relevance: Number(raw.importance || raw.relevance || raw.score || 0), zoom_point: zoomScore, zoomPoint: zoomScore, discount: Number(raw.discount || 0), discount_info: raw.discount_info || raw.discount_text || raw.discount_description || '', partner_profile: raw.partner_profile && typeof raw.partner_profile === 'object' ? raw.partner_profile : {}, emails: raw.emails || '', active_codes: Array.isArray(raw.active_codes) ? raw.active_codes : [] }; }
   function normalizePOIImages(value) { var parsed; if (!value) return []; if (Array.isArray(value)) return value.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean); if (typeof value === 'string') { value = value.trim(); if (!value) return []; try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean); } catch (error) {} if (value.indexOf(',') !== -1) return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); return [value]; } return []; }
-  function normalizeRelatedPois(value) { var parsed; if (Array.isArray(value)) return value.map(function(item) { return String(item).trim(); }).filter(Boolean); if (typeof value === 'string' && value.trim()) { try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.map(function(item) { return String(item).trim(); }).filter(Boolean); } catch (error) {} return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); } return []; }
-  function getPOIArticleUrl(post) { var slug = String(post && post.slug || '').trim(); if (slug) return '/blog/' + encodeURIComponent(slug); return '#'; }
+  function normalizeRelatedPois(value) { var parsed; function itemValue(item) { if (item && typeof item === 'object') return String(item.id || item.name || item.title || '').trim(); return String(item || '').trim(); } if (Array.isArray(value)) return value.map(itemValue).filter(Boolean); if (typeof value === 'string' && value.trim()) { try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.map(itemValue).filter(Boolean); } catch (error) {} return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); } return []; }
+  function getPOIArticleUrl(post) { var slug = String(post && post.slug || '').trim(); if (slug) return '/stories/' + encodeURIComponent(slug) + '.html'; return '/guide.html'; }
   function getPOIArticleDateLabel(value) { var date = value ? new Date(value) : null; if (!date || !Number.isFinite(date.getTime())) return ''; return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date); }
   function renderRelatedArticlesForPOI(poi, posts) {
     var id;
     var name;
-    var poiWords;
     var matches;
     if (!poiRelatedArticles || !poiRelatedArticlesList) return;
 
@@ -3028,31 +3082,31 @@
 
     id = String(poi.id || '').trim();
     name = normalizeText(poi.name || '');
-    poiWords = name.split(' ').filter(function(word) { return word && word.length > 2; });
-
-    matches = (posts || []).filter(function(post) {
+    matches = (posts || []).map(function(post) {
       var related = normalizeRelatedPois(post && post.related_pois);
       var status = String(post && post.status || '').toLowerCase();
       var titleText = normalizeText(post && post.title || '');
       var excerptText = normalizeText(post && post.excerpt || '');
-      var contentText = normalizeText(post && post.content || '');
       var relatedNormalized = related.map(function(item) { return normalizeText(item); });
-      var combined = [titleText, excerptText, contentText].join(' ');
-      var strongWordMatches = poiWords.filter(function(word) { return combined.indexOf(word) !== -1; }).length;
+      var score = 0;
+      if (status && status !== 'published') return null;
+      if (id && related.indexOf(id) !== -1) score = 100;
+      else if (name && relatedNormalized.indexOf(name) !== -1) score = 95;
+      else if (name.length >= 6 && titleText.indexOf(name) !== -1) score = 70;
+      else if (name.length >= 10 && excerptText.indexOf(name) !== -1) score = 50;
+      return score ? { post:post, score:score } : null;
+    }).filter(Boolean).sort(function(a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return new Date(b.post && (b.post.published_at || b.post.created_at) || 0).getTime() - new Date(a.post && (a.post.published_at || a.post.created_at) || 0).getTime();
+    }).slice(0, 3).map(function(item) {
+      return item.post;
+    });
 
-      if (status && status !== 'published' && status !== 'draft') return false;
-      if (id && related.indexOf(id) !== -1) return true;
-      if (relatedNormalized.indexOf(name) !== -1) return true;
-      if (name && (titleText.indexOf(name) !== -1 || excerptText.indexOf(name) !== -1 || contentText.indexOf(name) !== -1)) return true;
-      if (poiWords.length >= 2 && strongWordMatches >= 2) return true;
-      if (poiWords.length === 1 && strongWordMatches >= 1) return true;
-      return false;
-    }).sort(function(a, b) {
-      return new Date(b && (b.published_at || b.created_at) || 0).getTime() - new Date(a && (a.published_at || a.created_at) || 0).getTime();
-    }).slice(0, 6);
-
-    console.log('related articles for poi:', poi && poi.name, matches.length, matches);
-    if (!matches.length) return;
+    if (!matches.length) {
+      poiRelatedArticlesList.innerHTML = '<div class="poi-section-empty">No dedicated Story yet. Explore all travel stories.</div>';
+      poiRelatedArticles.classList.add('is-visible');
+      return;
+    }
 
     poiRelatedArticlesList.innerHTML = matches.map(function(post) {
       var title = escapeHTML(post.title || 'Article');
@@ -3064,6 +3118,81 @@
     }).join('');
 
     poiRelatedArticles.classList.add('is-visible');
+  }
+  function getPOICategoryKey(type) {
+    var value = normalizeText(type);
+    if (value === 'chiesa' || value === 'church' || value.indexOf('relig') !== -1) return 'church';
+    if (value === 'curiosita' || value === 'curiosity') return 'curiosity';
+    if (value.indexOf('panoram') !== -1 || value === 'viewpoint') return 'viewpoint';
+    if (value.indexOf('spiaggia') !== -1 || value === 'beach') return 'beach';
+    if (value.indexOf('castello') !== -1 || value === 'castle') return 'castle';
+    if (value.indexOf('monument') !== -1) return 'monument';
+    if (value.indexOf('sentier') !== -1 || value === 'trail') return 'trail';
+    if (value.indexOf('stazione') !== -1 || value.indexOf('station') !== -1) return 'station';
+    if (value.indexOf('fermata bus') !== -1 || value === 'bus stop' || value === 'busstop') return 'bus-stop';
+    if (value.indexOf('ristor') !== -1 || value === 'restaurant' || value === 'food') return 'restaurant';
+    if (value === 'bar') return 'bar';
+    return value;
+  }
+  function getPOICategoryLabel(poi) {
+    var raw = String(poi && poi.type || '').trim();
+    if (!raw) return 'Place';
+    return raw.split(/\s+/).map(function(word) { return word.charAt(0).toUpperCase() + word.slice(1); }).join(' ');
+  }
+  function formatPOIDistance(value) {
+    var meters = Number(value);
+    if (!Number.isFinite(meters)) return '';
+    if (meters < 1000) return Math.max(10, Math.round(meters / 10) * 10) + ' m';
+    return (meters / 1000).toFixed(meters < 10000 ? 1 : 0) + ' km';
+  }
+  function renderPOIOverview(poi) {
+    var facts = [];
+    var village;
+    var images;
+    if (!poiOverview || !poiOverviewFacts) return;
+    poiOverviewFacts.innerHTML = '';
+    poiOverview.classList.remove('is-visible');
+    if (!poi) return;
+    facts.push('<div class="poi-fact"><strong>' + escapeHTML(getPOICategoryLabel(poi)) + '</strong></div>');
+    village = getClosestPlaceNameForCoords(poi.coords);
+    if (village && normalizeText(village) !== normalizeText(poi.name)) facts.push('<div class="poi-fact">Near <strong>' + escapeHTML(village) + '</strong></div>');
+    images = getPOIImages(poi);
+    if (images.length) facts.push('<div class="poi-fact"><strong>' + images.length + '</strong> photos</div>');
+    poiOverviewFacts.innerHTML = facts.join('');
+    poiOverview.classList.toggle('is-visible', facts.length > 0);
+  }
+  function renderNearbyPOIs(poi) {
+    var key;
+    var matches;
+    if (!poiNearby || !poiNearbyList) return;
+    poiNearbyList.innerHTML = '';
+    poiNearby.classList.remove('is-visible');
+    if (!poi || !isValidPOI(poi)) return;
+    key = getPOICategoryKey(poi.type);
+    if (!key) return;
+    matches = poiMarkers.map(function(entry) {
+      var candidate = entry && entry.poi;
+      if (!candidate || String(candidate.id) === String(poi.id) || getPOICategoryKey(candidate.type) !== key) return null;
+      return { poi:candidate, distance:distanceMeters(poi.coords, candidate.coords) };
+    }).filter(function(item) {
+      return item && Number.isFinite(item.distance);
+    }).sort(function(a, b) {
+      return a.distance - b.distance;
+    }).slice(0, 6);
+    if (!matches.length) return;
+    poiNearbyList.innerHTML = matches.map(function(item) {
+      return '<button class="poi-nearby-card" type="button" data-related-poi-id="' + escapeHTML(item.poi.id) + '"><strong>' + escapeHTML(item.poi.name) + '</strong><span>' + escapeHTML(formatPOIDistance(item.distance)) + ' · ' + escapeHTML(getPOICategoryLabel(item.poi)) + '</span></button>';
+    }).join('');
+    poiNearby.classList.add('is-visible');
+  }
+  if (poiNearbyList) {
+    poiNearbyList.addEventListener('click', function(event) {
+      var button = event.target && event.target.closest ? event.target.closest('[data-related-poi-id]') : null;
+      var entry;
+      if (!button) return;
+      entry = poiMarkers.find(function(item) { return String(item && item.poi && item.poi.id || '') === String(button.getAttribute('data-related-poi-id') || ''); });
+      if (entry && entry.poi) openPOIWithMapMove(entry.poi, null);
+    });
   }
   function getPOIImages(poi) { var images = normalizePOIImages(poi && poi.images); var main = poi && (poi.cover_image || poi.coverImage || poi.image_url || poi.imageUrl || poi.thumbnail_url || poi.thumbnail || poi.image) ? String(poi.cover_image || poi.coverImage || poi.image_url || poi.imageUrl || poi.thumbnail_url || poi.thumbnail || poi.image).trim() : ''; if (main && images.indexOf(main) === -1) images.unshift(main); return images.filter(Boolean).filter(function(item, index, list) { return list.indexOf(item) === index; }).slice(0, 8); }
   function isValidPOI(poi) { return Boolean(poi && Number.isFinite(poi.lat) && Number.isFinite(poi.lng)); }
@@ -5033,8 +5162,9 @@
     }
   }
   function destroyPoiMiniMap() { if (poiMiniMap) { try { poiMiniMap.remove(); } catch (error) {} poiMiniMap = null; } }
-  function closePOICard(immediate) { clearATCScheduledSelection(true); closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; updateSelectedPOIEmphasis(); if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); updateSelectedPOIEmphasis(); } }, 360); }
-  function setPOISheetHeight(percent, animated) { if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = percent + 'dvh'; poiCard.classList.toggle('sheet-expanded', percent >= 88); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
+  function closePOICard(immediate) { clearATCScheduledSelection(true); closeTrailCard(true); if (poiTypeTimer) { clearTimeout(poiTypeTimer); poiTypeTimer = null; } poiCard.classList.remove('open'); poiCard.classList.remove('sheet-expanded'); poiCard.setAttribute('aria-hidden', 'true'); currentPOI = null; if (poiOverviewFacts) poiOverviewFacts.innerHTML = ''; if (poiOverview) poiOverview.classList.remove('is-visible'); if (poiNearbyList) poiNearbyList.innerHTML = ''; if (poiNearby) poiNearby.classList.remove('is-visible'); if (poiRelatedArticlesList) poiRelatedArticlesList.innerHTML = ''; if (poiRelatedArticles) poiRelatedArticles.classList.remove('is-visible'); window.currentFiveTerrePOI = null; updateSelectedPOIEmphasis(); if (immediate) { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); return; } window.setTimeout(function () { if (poiCard.getAttribute('aria-hidden') === 'true') { poiCard.style.display = 'none'; poiCard.style.height = ''; destroyPoiMiniMap(); updateSelectedPOIEmphasis(); } }, 360); }
+  function getPOISheetMaxHeightPx() { var viewport = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); var root = document.getElementById('ftg-global-actionbar-root'); var topbar = root && root.querySelector ? root.querySelector('.ftg-topbar') : null; var rect = root ? root.getBoundingClientRect() : null; var topbarRect = topbar ? topbar.getBoundingClientRect() : null; var headerBottom = Math.max(rect && Number.isFinite(rect.bottom) ? rect.bottom : 0, topbarRect && Number.isFinite(topbarRect.bottom) ? topbarRect.bottom : 0, 72); return Math.max(viewport * .5, viewport - Math.min(headerBottom, viewport * .5)); }
+  function setPOISheetHeight(percent, animated) { var viewport; var requestedHeight; var maxHeight; var height; if (!poiCard) return; percent = Math.max(0, Math.min(95, Number(percent) || 50)); viewport = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); requestedHeight = viewport * percent / 100; maxHeight = getPOISheetMaxHeightPx(); height = Math.min(requestedHeight, maxHeight); if (!animated) poiCard.style.transition = 'none'; poiCard.style.height = Math.round(height) + 'px'; poiCard.classList.toggle('sheet-expanded', requestedHeight >= maxHeight - 1); if (!animated) window.requestAnimationFrame(function(){ poiCard.style.transition = ''; }); }
   function getPOISheetPercentFromHeight(px) { var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1); return (Number(px) / vh) * 100; }
   function setupPOISheetDrag() { var handle; var content; if (!poiCard || poiCard.getAttribute('data-sheet-ready') === '1') return; poiCard.setAttribute('data-sheet-ready', '1'); handle = document.getElementById('poi-sheet-handle'); content = poiCard.querySelector('.poi-content'); function beginPendingDrag(event, source) { if (!poiCard.classList.contains('open')) return; if (!event.touches || event.touches.length !== 1) return; poiSheetPendingDrag = true; poiSheetDragging = false; poiSheetDragSource = source || ''; poiSheetStartY = event.touches[0].clientY; poiSheetStartX = event.touches[0].clientX; poiSheetStartHeight = poiCard.getBoundingClientRect().height; poiSheetStartScrollTop = content ? content.scrollTop : 0; } function startRealDrag() { poiSheetPendingDrag = false; poiSheetDragging = true; poiCard.style.transition = 'none'; } function finishDrag() { var percent; poiSheetPendingDrag = false; if (!poiSheetDragging) return; poiSheetDragging = false; poiCard.style.transition = ''; percent = getPOISheetPercentFromHeight(poiCard.getBoundingClientRect().height); if (percent <= 40) { closePOICard(false); return; } if (percent >= 72) setPOISheetHeight(95, true); else setPOISheetHeight(50, true); } function handleMove(event) { var y; var delta; var nextHeight; var percent; var isExpanded; var scrollTop; if ((!poiSheetPendingDrag && !poiSheetDragging) || !event.touches || event.touches.length !== 1) return; y = event.touches[0].clientY; delta = poiSheetStartY - y; isExpanded = poiCard.classList.contains('sheet-expanded'); scrollTop = content ? content.scrollTop : 0; if (poiSheetPendingDrag) { if (Math.abs(delta) < 6) return; if (poiSheetDragSource === 'content' && event.target && event.target.closest && event.target.closest('#poi-images-preview')) { if (Math.abs(event.touches[0].clientX - poiSheetStartX) > Math.abs(delta)) { poiSheetPendingDrag = false; return; } } if (poiSheetDragSource === 'content' && isExpanded) { if (delta > 0) { poiSheetPendingDrag = false; return; } if (delta < 0 && scrollTop > 0) { poiSheetPendingDrag = false; return; } } startRealDrag(); } if (!poiSheetDragging) return; event.preventDefault(); nextHeight = poiSheetStartHeight + delta; percent = getPOISheetPercentFromHeight(nextHeight); setPOISheetHeight(percent, false); if (poiSheetDragSource === 'content' && delta > 0 && percent >= 95) { poiSheetDragging = false; poiSheetPendingDrag = false; poiCard.style.transition = ''; setPOISheetHeight(95, false); } } function cancelDrag() { poiSheetPendingDrag = false; poiSheetDragging = false; poiCard.style.transition = ''; } [handle, poiTitle].filter(Boolean).forEach(function(target) { target.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'header'); }, { passive: true }); target.addEventListener('touchmove', handleMove, { passive: false }); target.addEventListener('touchend', finishDrag); target.addEventListener('touchcancel', cancelDrag); }); if (content) { content.addEventListener('touchstart', function(event) { beginPendingDrag(event, 'content'); }, { passive: true }); content.addEventListener('touchmove', handleMove, { passive: false }); content.addEventListener('touchend', finishDrag); content.addEventListener('touchcancel', cancelDrag); } }
   function renderPOIImagesPreview(poi) { var images = getPOIImages(poi); if (!poiImagesPreview || !poiCard) return; poiImagesPreview.innerHTML = ''; poiCard.classList.toggle('has-images', images.length > 0); images.forEach(function(src, index) { var img = document.createElement('img'); img.className = 'poi-preview-img'; img.src = src; img.alt = (poi && poi.name ? poi.name : 'POI') + ' image ' + (index + 1); img.loading = 'lazy'; poiImagesPreview.appendChild(img); }); }
@@ -5043,18 +5173,21 @@
   function trackPOIPartnerEvent(poi, eventType) { var marker, day; if (!supabaseClient || !poi || !poi.id || String(poi.id).indexOf('local-') === 0) return; if (eventType === 'profile_view') { day = new Date().toISOString().slice(0,10); marker = 'ftg-poi-view-' + poi.id + '-' + day; try { if (sessionStorage.getItem(marker)) return; sessionStorage.setItem(marker, '1'); } catch (_error) {} } supabaseClient.rpc('track_poi_partner_event', { target_poi_id:Number(poi.id), target_event_type:eventType, target_visitor_key:getPOIVisitorKey() }).then(function(){}).catch(function(){}); }
   function normalizeWhatsAppNumber(value) { var digits = String(value || '').replace(/\D/g, ''); if (digits.indexOf('00') === 0) digits = digits.slice(2); if (digits.length === 10 && digits.charAt(0) === '3') digits = '39' + digits; return digits; }
   function renderPOIBusinessProfile(poi) { var profile = poi && poi.partner_profile && typeof poi.partner_profile === 'object' ? poi.partner_profile : {}; var menu = profile.menu && typeof profile.menu === 'object' ? profile.menu : {}; var phone = normalizeWhatsAppNumber(poi && poi.phone); if (poiWhatsapp) { poiWhatsapp.classList.toggle('is-visible', Boolean(phone)); if (phone) poiWhatsapp.href = 'https://wa.me/' + encodeURIComponent(phone); } if (!poiBusinessMenu || !poiBusinessMenuContent) return; poiBusinessMenu.removeAttribute('open'); poiBusinessMenuContent.innerHTML = ''; poiBusinessMenu.classList.remove('is-visible'); if (menu.mode === 'file' && menu.file && /^https:\/\//i.test(String(menu.file.url || ''))) { poiBusinessMenuContent.innerHTML = '<a class="poi-menu-file" href="' + escapeHTML(menu.file.url) + '" target="_blank" rel="noopener">Apri ' + escapeHTML(menu.file.name || 'il menu') + '</a>'; poiBusinessMenu.classList.add('is-visible'); return; } var items = Array.isArray(menu.items) ? menu.items.filter(function(item){ return item && item.name; }) : []; if (!items.length) return; var lastCategory = null; var html = ''; items.forEach(function(item) { var category = String(item.category || 'Altro'); if (category !== lastCategory) { html += '<div class="poi-menu-group">' + escapeHTML(category) + '</div>'; lastCategory = category; } html += '<div class="poi-menu-item"><div><strong>' + escapeHTML(item.name) + '</strong>' + (item.description ? '<small>' + escapeHTML(item.description) + '</small>' : '') + '</div>' + (item.price ? '<div class="poi-menu-price">€ ' + escapeHTML(item.price) + '</div>' : '') + '</div>'; }); poiBusinessMenuContent.innerHTML = html; poiBusinessMenu.classList.add('is-visible'); }
-  function refreshCurrentPOIPublicDetails(poi) { if (!supabaseClient || !poi || !poi.id || String(poi.id).indexOf('local-') === 0) return; supabaseClient.from('pois').select('id,name,coords,description,importance,type,phone,images,discount,discount_info,partner_profile').eq('id', poi.id).maybeSingle().then(function(result) { var fresh; if (result.error || !result.data || !currentPOI || String(currentPOI.id) !== String(poi.id)) return; fresh = normalizePOI(result.data); currentPOI = Object.assign({}, currentPOI, fresh); window.currentFiveTerrePOI = currentPOI; renderPOIImagesPreview(currentPOI); renderPOIDescription(currentPOI.description); renderPOIBusinessProfile(currentPOI); renderDiscountCTA(currentPOI); }).catch(function(){}); }
-  function showPOICard(poi) { var fullText, lat, lng; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); poiCard.style.height = '50dvh'; poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi);
+  function refreshCurrentPOIPublicDetails(poi) { if (!supabaseClient || !poi || !poi.id || String(poi.id).indexOf('local-') === 0) return; supabaseClient.from('pois').select('id,name,coords,description,importance,type,phone,images,discount,discount_info,partner_profile').eq('id', poi.id).maybeSingle().then(function(result) { var fresh; if (result.error || !result.data || !currentPOI || String(currentPOI.id) !== String(poi.id)) return; fresh = normalizePOI(result.data); currentPOI = Object.assign({}, currentPOI, fresh); window.currentFiveTerrePOI = currentPOI; renderPOIImagesPreview(currentPOI); renderPOIOverview(currentPOI); renderNearbyPOIs(currentPOI); renderPOIDescription(currentPOI.description); renderPOIBusinessProfile(currentPOI); renderRelatedArticlesForPOI(currentPOI, blogPostsCache); renderDiscountCTA(currentPOI); }).catch(function(){}); }
+  function showPOICard(poi) { var fullText, lat, lng, content; if (!poi || !isValidPOI(poi)) return; if (!activeTour) hideCard(false); currentDataset = 'pois'; currentIndex = -1; currentPOI = poi; window.currentFiveTerrePOI = poi; poiCard.classList.remove('open'); poiCard.classList.remove('has-images'); poiCard.classList.remove('sheet-expanded'); setPOISheetHeight(50, false); poiCard.style.display = 'block'; poiCard.setAttribute('aria-hidden', 'false'); content = poiCard.querySelector('.poi-content'); if (content) content.scrollTop = 0; poiTitle.innerText = poi.name; fullText = poi.description && poi.description.trim().length > 0 ? poi.description : 'No description available'; destroyPoiMiniMap(); lat = poi.coords[0]; lng = poi.coords[1]; poiDirections.href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng; renderPOIImagesPreview(poi);
+    renderPOIOverview(poi);
     renderPOIDescription(fullText);
     renderPOIBusinessProfile(poi);
     trackPOIPartnerEvent(poi, 'profile_view');
     if (normalizePOIType(poi.type) === 'fermata bus' || normalizePOIType(poi.type) === 'bus stop' || normalizePOIType(poi.type) === 'busstop') showNextATCBusFromStop(poi);
     else clearATCScheduledSelection(true);
+    renderNearbyPOIs(poi);
     renderRelatedArticlesForPOI(poi, blogPostsCache);
     renderDiscountCTA(poi);
     refreshCurrentPOIPublicDetails(poi);
     updateSelectedPOIEmphasis();
-    window.setTimeout(function () { if (currentPOI === poi && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); try { window.dispatchEvent(new CustomEvent('ftg:translatecontent')); } catch (_error) {} } }, 80); }
+    window.setTimeout(function () { if (currentPOI && String(currentPOI.id) === String(poi.id) && poiCard.getAttribute('aria-hidden') === 'false') { poiCard.classList.add('open'); updateSelectedPOIEmphasis(); try { window.dispatchEvent(new CustomEvent('ftg:translatecontent')); } catch (_error) {} } }, 80); }
+  window.addEventListener('resize', function() { if (poiCard && poiCard.classList.contains('sheet-expanded')) setPOISheetHeight(95, false); });
   function flyToWithTopOffset(coords, zoom, duration) { var targetZoom; if (!map || !isValidCoords(coords)) return; targetZoom = Number(zoom || map.getZoom()); isProgrammaticMove = true; syncingMapCameras = true; map.setView(coords, targetZoom, { animate:false }); syncingMapCameras = false; flyMapLibre3D(coords, targetZoom, duration); window.setTimeout(function () { isProgrammaticMove = false; }, Math.round((Number(duration || 0.9) * 1000) + 220)); }
   function openPOIWithMapMove(poi, sourceEvent) { if (!poi || !isValidPOI(poi)) return; if (sourceEvent && sourceEvent.originalEvent) { L.DomEvent.stopPropagation(sourceEvent.originalEvent); L.DomEvent.preventDefault(sourceEvent.originalEvent); } if (activeTour) { showPOICard(poi); return; } flyToWithTopOffset(poi.coords, 17, isIOSDevice() ? 0.72 : 1.0); window.setTimeout(function () { showPOICard(poi); }, isIOSDevice() ? 240 : 340); }
   var requestedPOIFocused = false;
@@ -7170,6 +7303,7 @@
       updateExclusiveDiscountFilterVisibility();
       updatePOIVisibility();
       if (renderRail) renderBottomRailCards();
+      if (currentPOI) renderNearbyPOIs(currentPOI);
       refreshMapLoadingState();
       focusRequestedPOIFromURL();
       if (!requestedNavigationHydrated && urlParams.get('navigate') === '1' && navigationModeActive && navigationDestinationPOI && poiMarkers.length >= 90) {
