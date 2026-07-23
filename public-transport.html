@@ -982,7 +982,7 @@
         <button class="mode-pill" type="button" data-mode="bus" disabled>Bus <span class="soon-label">soon</span></button>
       </nav>
 
-      <p class="service-note">Ferries follow the <a href="https://navigazionegolfodeipoeti.it/pdf/orari/linea-02/b-linea-02-aprile-settembre.pdf" target="_blank" rel="noopener">official seasonal timetable</a> and depend on sea conditions. <a href="https://navigazionegolfodeipoeti.it/en/service-updates" target="_blank" rel="noopener">Check today’s service</a></p>
+      <p class="service-note">Future trains use the <a href="https://dati.regione.liguria.it/dataset/ds-637" target="_blank" rel="noopener">official Regione Liguria / Trenitalia timetable</a>. Ferries follow the <a href="https://navigazionegolfodeipoeti.it/pdf/orari/linea-02/b-linea-02-aprile-settembre.pdf" target="_blank" rel="noopener">official seasonal timetable</a> and depend on sea conditions. <a href="https://navigazionegolfodeipoeti.it/en/service-updates" target="_blank" rel="noopener">Check today’s service</a></p>
 
       <section class="loading-block" id="loadingBlock" aria-live="polite">
         <div class="loading-row">
@@ -1254,6 +1254,7 @@
       window.__TRAIN_RT_ENDPOINT,
       '/api/trains/realtime'
     ].filter(Boolean);
+    var TRAIN_SCHEDULE_URL = 'data/liguria-train-schedule.json?v=20260723';
     var ACTIVE_TRAIN_RT_ENDPOINT = '';
     var LAST_RT_ERROR = '';
     var REALTIME_REFRESH_MS = 30000;
@@ -1332,6 +1333,9 @@
     var viewYear = italianNow.year;
     var viewMonth = italianNow.monthIndex;
     var realtimeDepartures = [];
+    var scheduledTrainData = null;
+    var scheduledTrainPromise = null;
+    var noDeparturesMessage = '';
     var isLoadingDepartures = true;
     var refreshTimer = null;
     var liveState = {
@@ -1441,6 +1445,98 @@
         seen[key] = true;
         return true;
       });
+    }
+    function gtfsMinutes(value){
+      var parts = String(value || '').split(':');
+      var hours = parseInt(parts[0], 10);
+      var minutes = parseInt(parts[1], 10);
+      if (isNaN(hours) || isNaN(minutes)) return -1;
+      return (hours * 60) + minutes;
+    }
+    function displayGtfsTime(value){
+      var minutes = gtfsMinutes(value);
+      if (minutes < 0) return '—';
+      minutes %= 1440;
+      return pad(Math.floor(minutes / 60)) + ':' + pad(minutes % 60);
+    }
+    function scheduledDuration(departure, arrival){
+      var departureMinutes = gtfsMinutes(departure);
+      var arrivalMinutes = gtfsMinutes(arrival);
+      var duration = arrivalMinutes - departureMinutes;
+      if (departureMinutes < 0 || arrivalMinutes < 0 || duration <= 0) return '—';
+      return duration + ' min';
+    }
+    function tripRunsOnDate(data, trip, isoDate){
+      var calendar = data && data.calendars ? data.calendars[trip.calendar] : null;
+      return Array.isArray(calendar) && calendar.indexOf(isoDate) > -1;
+    }
+    function loadScheduledTrainData(){
+      if (scheduledTrainData) return Promise.resolve(scheduledTrainData);
+      if (!scheduledTrainPromise) {
+        scheduledTrainPromise = fetch(TRAIN_SCHEDULE_URL, { cache:'force-cache' })
+          .then(function(response){
+            if (!response.ok) throw new Error('HTTP ' + response.status + ' loading the official train timetable');
+            return response.json();
+          })
+          .then(function(data){
+            scheduledTrainData = data;
+            return data;
+          })
+          .catch(function(error){
+            scheduledTrainPromise = null;
+            throw error;
+          });
+      }
+      return scheduledTrainPromise;
+    }
+    function buildScheduledTrainDepartures(data){
+      var from = fromSelect.value.trim();
+      var to = toSelect.value.trim();
+      var selectedDate = currentSelection.date;
+      var previousDate = addDaysISO(selectedDate, -1);
+      var output = [];
+      if (!data || !Array.isArray(data.trips) || selectedDate < data.validFrom || selectedDate > data.validTo) return output;
+
+      data.trips.forEach(function(trip){
+        var stops = Array.isArray(trip.stops) ? trip.stops : [];
+        var fromIndex = -1;
+        var toIndex = -1;
+        var index = 0;
+        for (index = 0; index < stops.length; index += 1) {
+          if (fromIndex === -1 && stops[index].station === from) fromIndex = index;
+          if (fromIndex > -1 && index > fromIndex && stops[index].station === to) {
+            toIndex = index;
+            break;
+          }
+        }
+        if (fromIndex === -1 || toIndex === -1) return;
+
+        var fromStop = stops[fromIndex];
+        var toStop = stops[toIndex];
+        var rawDeparture = fromStop.departure || fromStop.arrival;
+        var rawArrival = toStop.arrival || toStop.departure;
+        var departureMinutes = gtfsMinutes(rawDeparture);
+        if (departureMinutes < 0) return;
+        var serviceDate = departureMinutes >= 1440 ? previousDate : selectedDate;
+        if (!tripRunsOnDate(data, trip, serviceDate)) return;
+
+        output.push({
+          id:'scheduled-' + trip.id + '-' + selectedDate,
+          mode:'train',
+          route:String((trip.route || 'REG') + ' ' + (trip.number || '')).trim(),
+          from:from,
+          to:to,
+          departure:displayGtfsTime(rawDeparture),
+          arrival:displayGtfsTime(rawArrival),
+          duration:scheduledDuration(rawDeparture, rawArrival),
+          status:'neutral',
+          statusLabel:'Scheduled',
+          meta:'Official Regione Liguria / Trenitalia timetable',
+          direct:'Direct'
+        });
+      });
+
+      return output;
     }
     function syncLiveNowSelection(){
       if (currentSelection.now) {
@@ -1811,6 +1907,10 @@
         liveDot.classList.add('is-live');
         liveTitle.textContent = 'Live trains connected';
         liveMeta.textContent = liveState.message || ('Updated ' + liveState.updatedAt + ' · refresh every 30s');
+      } else if (liveState.mode === 'scheduled') {
+        liveDot.classList.add('is-live');
+        liveTitle.textContent = 'Official scheduled trains';
+        liveMeta.textContent = liveState.message || 'Regione Liguria / Trenitalia timetable';
       } else if (liveState.mode === 'loading') {
         liveTitle.textContent = 'Connecting live trains';
         liveMeta.textContent = liveState.message || 'Looking for a realtime feed';
@@ -1850,6 +1950,7 @@
       var attemptedUrls = [];
       var i = 0;
       syncLiveNowSelection();
+      noDeparturesMessage = '';
 
       if (TRAIN_LOCATIONS.indexOf(fromSelect.value.trim()) === -1 || TRAIN_LOCATIONS.indexOf(toSelect.value.trim()) === -1) {
         realtimeDepartures = [];
@@ -1857,6 +1958,38 @@
         refreshLiveState('empty', '', 'This route is served by ferry, not train');
         render();
         return;
+      }
+
+      if (!isTodayISO(currentSelection.date)) {
+        if (!silent) {
+          isLoadingDepartures = true;
+          refreshLiveState('loading', '', 'Loading the official scheduled timetable');
+          render();
+        }
+        try {
+          var schedule = await loadScheduledTrainData();
+          realtimeDepartures = buildScheduledTrainDepartures(schedule);
+          isLoadingDepartures = false;
+          if (currentSelection.date < schedule.validFrom || currentSelection.date > schedule.validTo) {
+            noDeparturesMessage = 'The official imported timetable covers ' + formatReadableDate(schedule.validFrom) + ' to ' + formatReadableDate(schedule.validTo) + '.';
+            refreshLiveState('empty', '', 'Selected date is outside the imported official timetable');
+          } else if (realtimeDepartures.length) {
+            noDeparturesMessage = 'No more scheduled trains at or after the selected time.';
+            refreshLiveState('scheduled', '', 'Regione Liguria / Trenitalia timetable · valid through ' + formatReadableDate(schedule.validTo));
+          } else {
+            noDeparturesMessage = 'No scheduled trains were found for this route on the selected date.';
+            refreshLiveState('empty', '', 'No scheduled trains found for this route and date');
+          }
+          render();
+          return;
+        } catch (scheduleError) {
+          realtimeDepartures = [];
+          isLoadingDepartures = false;
+          noDeparturesMessage = 'The future timetable could not be loaded. Please try again or check Trenitalia.';
+          refreshLiveState('error', '', 'Unable to load the official future timetable', scheduleError && scheduleError.message);
+          render();
+          return;
+        }
       }
 
       endpoints = ACTIVE_TRAIN_RT_ENDPOINT
@@ -1935,7 +2068,13 @@
       updateBestCard(items);
       departuresList.innerHTML = items.map(cardTemplate).join('');
       if (!items.length) {
-        departuresList.innerHTML = '<article class="departure-card"><div class="time-col">—</div><div style="grid-column:span 3"><div class="route-title">No departures found</div><div class="route-line">Try another time or route. Ferries do not stop in Corniglia and may be suspended in bad sea conditions.</div></div><div></div></article>';
+        var emptyMessage = activeMode !== 'ferry' && noDeparturesMessage
+          ? noDeparturesMessage
+          : 'Try another time or route. Ferries do not stop in Corniglia and may be suspended in bad sea conditions.';
+        var officialLink = !isTodayISO(currentSelection.date) && activeMode !== 'ferry'
+          ? ' <a href="https://www.trenitalia.com/it.html" target="_blank" rel="noopener noreferrer">Check on Trenitalia</a>.'
+          : '';
+        departuresList.innerHTML = '<article class="departure-card"><div class="time-col">—</div><div style="grid-column:span 3"><div class="route-title">No departures found</div><div class="route-line">' + emptyMessage + officialLink + '</div></div><div></div></article>';
       }
     }
 
@@ -1971,15 +2110,17 @@
     applyBtn.addEventListener('click', function(){
       currentSelection = { date: draftSelection.date, time: draftSelection.time, now: draftSelection.now };
       closeSheet();
+      isLoadingDepartures = true;
       render();
       fetchRealtimeDepartures(false);
     });
-    fromSelect.addEventListener('change', function(){ render(); fetchRealtimeDepartures(false); });
-    toSelect.addEventListener('change', function(){ render(); fetchRealtimeDepartures(false); });
+    fromSelect.addEventListener('change', function(){ isLoadingDepartures = true; render(); fetchRealtimeDepartures(false); });
+    toSelect.addEventListener('change', function(){ isLoadingDepartures = true; render(); fetchRealtimeDepartures(false); });
     swapBtn.addEventListener('click', function(){
       var from = fromSelect.value;
       fromSelect.value = toSelect.value;
       toSelect.value = from;
+      isLoadingDepartures = true;
       render();
       fetchRealtimeDepartures(false);
     });
