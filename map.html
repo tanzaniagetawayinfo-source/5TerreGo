@@ -7169,7 +7169,8 @@
 
     response = await supabaseClient
       .from('blog_posts')
-      .select('id,title,slug,excerpt,cover_image,category,status,published_at,created_at,related_pois,content')
+      .select('id,title,slug,excerpt,cover_image,category,status,published_at,created_at,related_pois')
+      .eq('status', 'published')
       .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false });
 
