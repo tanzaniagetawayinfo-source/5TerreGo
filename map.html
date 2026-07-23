@@ -17,6 +17,7 @@
   <meta name="msapplication-TileColor" content="#0b1116" />
   <link id="dynamic-favicon" rel="icon" type="image/png" href="app.png" />
   <link id="dynamic-apple-icon" rel="apple-touch-icon" href="app.png" />
+  <link rel="preload" href="/data/stories-lite.json" as="fetch" crossorigin="anonymous" />
 
   <link rel="stylesheet" href="vendor/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.16.0/dist/maplibre-gl.css" />
@@ -1508,7 +1509,11 @@
     #poi-nearby { display:none; }
     #poi-nearby.is-visible { display:block; }
     .poi-nearby-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
-    .poi-nearby-card { min-width:0; min-height:92px; border:1px solid rgba(17,24,39,.07); border-radius:18px; padding:13px; background:#f4f6f8; color:#111827; text-align:left; font:inherit; cursor:pointer; }
+    .poi-nearby-card { min-width:0; border:1px solid rgba(17,24,39,.07); border-radius:18px; padding:8px 8px 12px; background:#f4f6f8; color:#111827; text-align:left; font:inherit; cursor:pointer; overflow:hidden; }
+    .poi-nearby-media { width:100%; aspect-ratio:1; display:grid; place-items:center; margin-bottom:10px; overflow:hidden; border-radius:13px; background:#e8ebef; }
+    .poi-nearby-media img { width:100%; height:100%; display:block; object-fit:cover; }
+    .poi-nearby-media.is-icon { background:#fff; }
+    .poi-nearby-media.is-icon img { width:58%; height:58%; object-fit:contain; }
     .poi-nearby-card strong { display:block; font-size:14px; line-height:1.18; font-weight:950; letter-spacing:-.02em; }
     .poi-nearby-card span { display:block; margin-top:7px; color:#687386; font-size:11px; font-weight:850; }
     .poi-section-empty { padding:14px; border-radius:16px; background:#f4f6f8; color:#687386; font-size:13px; font-weight:750; line-height:1.4; }
@@ -1523,10 +1528,6 @@
     .poi-related-card-title { font-size: 16px; font-weight: 950; line-height: 1.16; letter-spacing: -.03em; color: #111; }
     .poi-related-card-meta { margin-top: 4px; font-size: 12px; font-weight: 800; color: rgba(0,0,0,.48); }
     .poi-related-card-excerpt { margin-top: 7px; font-size: 13px; line-height: 1.42; color: rgba(0,0,0,.68); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    #poi-useful-links { padding:15px; border-radius:21px; background:#111827; color:#fff; }
-    #poi-useful-links .poi-section-title { color:rgba(255,255,255,.62); }
-    .poi-useful-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-    .poi-useful-grid a { display:flex; min-height:45px; align-items:center; justify-content:center; border-radius:14px; background:rgba(255,255,255,.11); color:#fff; text-decoration:none; text-align:center; font-size:12px; font-weight:900; }
     @media (max-width: 380px) {
       .mode-bar { gap: 7px; }
       .mode-btn { font-size: 10px; padding-left: 10px; padding-right: 10px; }
@@ -1787,7 +1788,6 @@
     <div id="atc-transit-panel" aria-live="polite"></div>
     <section id="poi-nearby" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">Nearby, same category</div></div><div id="poi-nearby-list" class="poi-nearby-list"></div></section>
     <section id="poi-related-articles" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">Related Stories</div><a class="poi-section-link" href="/guide.html">Go to Stories</a></div><div id="poi-related-articles-list" class="poi-related-list"></div></section>
-    <section id="poi-useful-links" class="poi-page-section"><div class="poi-section-head"><div class="poi-section-title">Useful next</div></div><div class="poi-useful-grid"><a href="/places/">All places</a><a href="/sentieri.html">Trails</a><a href="/public-transport.html">Transport</a><a href="/guide.html">Stories</a></div></section>
     <button id="poi-discount-btn" type="button" data-no-translate>Generate discount</button><div id="poi-discount-note"></div>
   </div>
   <div id="poi-close">×</div>
@@ -3070,10 +3070,38 @@
   function normalizeRelatedPois(value) { var parsed; function itemValue(item) { if (item && typeof item === 'object') return String(item.id || item.name || item.title || '').trim(); return String(item || '').trim(); } if (Array.isArray(value)) return value.map(itemValue).filter(Boolean); if (typeof value === 'string' && value.trim()) { try { parsed = JSON.parse(value); if (Array.isArray(parsed)) return parsed.map(itemValue).filter(Boolean); } catch (error) {} return value.split(',').map(function(item) { return item.trim(); }).filter(Boolean); } return []; }
   function getPOIArticleUrl(post) { var slug = String(post && post.slug || '').trim(); if (slug) return '/stories/' + encodeURIComponent(slug) + '.html'; return '/guide.html'; }
   function getPOIArticleDateLabel(value) { var date = value ? new Date(value) : null; if (!date || !Number.isFinite(date.getTime())) return ''; return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date); }
+  function getStoryCategoryAffinity(poiKey, category) {
+    category = normalizeText(category);
+    if (!poiKey || !category) return 0;
+    if ((poiKey === 'trail' || poiKey === 'viewpoint') && category === 'trails') return 1600;
+    if ((poiKey === 'restaurant' || poiKey === 'bar') && category === 'food') return 1600;
+    if ((poiKey === 'station' || poiKey === 'bus-stop') && category === 'transport') return 1600;
+    if (poiKey === 'curiosity' && (category === 'guide' || category === 'trails')) return 1100;
+    if (['church','castle','monument','beach'].indexOf(poiKey) !== -1 && category === 'guide') return 1100;
+    return category === 'guide' ? 350 : 0;
+  }
+  function getStoryNearbyScore(poi, related) {
+    var targetKey = getPOICategoryKey(poi && poi.type);
+    var best = 0;
+    related.forEach(function(value) {
+      var entry = findPOIMarkerEntryById(value);
+      var distance;
+      var sameCategory;
+      var score;
+      if (!entry || !entry.poi || !isValidPOI(entry.poi)) return;
+      distance = distanceMeters(poi.coords, entry.poi.coords);
+      if (!Number.isFinite(distance)) return;
+      sameCategory = targetKey && getPOICategoryKey(entry.poi.type) === targetKey;
+      score = (sameCategory ? 12000 : 8500) - Math.min(distance, 200000) / 20;
+      if (score > best) best = score;
+    });
+    return best;
+  }
   function renderRelatedArticlesForPOI(poi, posts) {
     var id;
     var name;
     var matches;
+    var seen = Object.create(null);
     if (!poiRelatedArticles || !poiRelatedArticlesList) return;
 
     poiRelatedArticlesList.innerHTML = '';
@@ -3088,22 +3116,26 @@
       var titleText = normalizeText(post && post.title || '');
       var excerptText = normalizeText(post && post.excerpt || '');
       var relatedNormalized = related.map(function(item) { return normalizeText(item); });
-      var score = 0;
+      var score = 100 + getStoryCategoryAffinity(getPOICategoryKey(poi.type), post && post.category);
       if (status && status !== 'published') return null;
-      if (id && related.indexOf(id) !== -1) score = 100;
-      else if (name && relatedNormalized.indexOf(name) !== -1) score = 95;
-      else if (name.length >= 6 && titleText.indexOf(name) !== -1) score = 70;
-      else if (name.length >= 10 && excerptText.indexOf(name) !== -1) score = 50;
-      return score ? { post:post, score:score } : null;
+      if (id && related.indexOf(id) !== -1) score = 20000;
+      else if (name && relatedNormalized.indexOf(name) !== -1) score = 19500;
+      else if (name.length >= 6 && titleText.indexOf(name) !== -1) score = 18500;
+      else if (name.length >= 10 && excerptText.indexOf(name) !== -1) score = 17500;
+      else score += getStoryNearbyScore(poi, related);
+      return { post:post, score:score };
     }).filter(Boolean).sort(function(a, b) {
       if (b.score !== a.score) return b.score - a.score;
       return new Date(b.post && (b.post.published_at || b.post.created_at) || 0).getTime() - new Date(a.post && (a.post.published_at || a.post.created_at) || 0).getTime();
-    }).slice(0, 3).map(function(item) {
-      return item.post;
-    });
+    }).map(function(item) { return item.post; }).filter(function(post) {
+      var key = String(post && (post.slug || post.id) || '').trim();
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    }).slice(0, 3);
 
     if (!matches.length) {
-      poiRelatedArticlesList.innerHTML = '<div class="poi-section-empty">No dedicated Story yet. Explore all travel stories.</div>';
+      poiRelatedArticlesList.innerHTML = '<div class="poi-section-empty">' + (blogPostsReady ? 'No Stories available right now.' : 'Loading Stories…') + '</div>';
       poiRelatedArticles.classList.add('is-visible');
       return;
     }
@@ -3161,6 +3193,17 @@
     poiOverviewFacts.innerHTML = facts.join('');
     poiOverview.classList.toggle('is-visible', facts.length > 0);
   }
+  function getPOINearbyMediaHTML(poi) {
+    var images = getPOIImages(poi);
+    var image = String(images[0] || '').trim();
+    var icon = String(getPOIEmoji(poi && poi.type, 'unknownspot.png') || '');
+    var iconFile = /\.png$/i.test(icon) ? icon : 'unknownspot.png';
+    var iconSrc = getLocalAssetUrl(iconFile);
+    if (image && /^(https?:\/\/|data:image\/|\/|\.\/)/i.test(image)) {
+      return '<div class="poi-nearby-media"><img src="' + escapeHTML(image) + '" data-alt-src="' + escapeHTML(iconSrc) + '" alt="' + escapeHTML(poi && poi.name || '') + '" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-icon\');window.__ftgImgFallback&&window.__ftgImgFallback(this,\'📍\')"></div>';
+    }
+    return '<div class="poi-nearby-media is-icon">' + buildPOIAssetImage(iconFile, poi && poi.name || '', '📍') + '</div>';
+  }
   function renderNearbyPOIs(poi) {
     var key;
     var matches;
@@ -3181,7 +3224,7 @@
     }).slice(0, 6);
     if (!matches.length) return;
     poiNearbyList.innerHTML = matches.map(function(item) {
-      return '<button class="poi-nearby-card" type="button" data-related-poi-id="' + escapeHTML(item.poi.id) + '"><strong>' + escapeHTML(item.poi.name) + '</strong><span>' + escapeHTML(formatPOIDistance(item.distance)) + ' · ' + escapeHTML(getPOICategoryLabel(item.poi)) + '</span></button>';
+      return '<button class="poi-nearby-card" type="button" data-related-poi-id="' + escapeHTML(item.poi.id) + '">' + getPOINearbyMediaHTML(item.poi) + '<strong>' + escapeHTML(item.poi.name) + '</strong><span>' + escapeHTML(formatPOIDistance(item.distance)) + ' · ' + escapeHTML(getPOICategoryLabel(item.poi)) + '</span></button>';
     }).join('');
     poiNearby.classList.add('is-visible');
   }
@@ -7159,31 +7202,61 @@
     });
   }
   var blogPostsCache = [];
-  async function loadBlogPosts() {
-    var response;
-    blogPostsCache = [];
-    if (!SUPABASE_READY || !supabaseClient) {
-      console.warn('blog_posts skipped: Supabase not ready');
-      return;
+  var blogPostsReady = false;
+  var blogPostsLoadPromise = null;
+  function applyBlogPosts(rows, source) {
+    if (!Array.isArray(rows) || !rows.length) return false;
+    blogPostsCache = rows;
+    blogPostsReady = true;
+    console.log('blog_posts loaded:', blogPostsCache.length, source || '');
+    if (currentPOI) {
+      renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+      try { window.dispatchEvent(new CustomEvent('ftg:translatecontent')); } catch (_error) {}
     }
-
-    response = await supabaseClient
-      .from('blog_posts')
-      .select('id,title,slug,excerpt,cover_image,category,status,published_at,created_at,related_pois')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false });
-
-    if (response.error) {
-      console.warn('Supabase blog_posts load failed:', response.error.message, response.error);
-      blogPostsCache = [];
-      if (currentPOI) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
-      return;
-    }
-
-    blogPostsCache = Array.isArray(response.data) ? response.data : [];
-    console.log('blog_posts loaded:', blogPostsCache.length);
-    if (currentPOI) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+    return true;
+  }
+  function loadBlogPosts() {
+    if (blogPostsLoadPromise) return blogPostsLoadPromise;
+    blogPostsLoadPromise = (async function() {
+      var localRows = [];
+      var response;
+      var coversBySlug = Object.create(null);
+      try {
+        response = await fetch('/data/stories-lite.json', { cache:'force-cache' });
+        if (response.ok) {
+          localRows = await response.json();
+          applyBlogPosts(localRows, 'local');
+        }
+      } catch (error) {
+        console.warn('Local Stories fallback failed:', error && error.message ? error.message : error);
+      }
+      if (!SUPABASE_READY || !supabaseClient) {
+        blogPostsReady = true;
+        if (currentPOI) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+        return blogPostsCache;
+      }
+      localRows.forEach(function(post) {
+        var key = String(post && post.slug || '').trim();
+        if (key && post.cover_image) coversBySlug[key] = post.cover_image;
+      });
+      response = await supabaseClient
+        .from('blog_posts')
+        .select('id,title,slug,excerpt,category,status,published_at,created_at,related_pois')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false });
+      if (response.error) {
+        console.warn('Supabase blog_posts load failed:', response.error.message, response.error);
+        blogPostsReady = true;
+        if (currentPOI) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+        return blogPostsCache;
+      }
+      applyBlogPosts((Array.isArray(response.data) ? response.data : []).map(function(post) {
+        return Object.assign({}, post, { cover_image:coversBySlug[String(post && post.slug || '').trim()] || '' });
+      }), 'remote');
+      return blogPostsCache;
+    })();
+    return blogPostsLoadPromise;
   }
   function getPOIEntryId(poi) {
     return String(poi && (poi.id || '') || '').trim();
@@ -7304,7 +7377,10 @@
       updateExclusiveDiscountFilterVisibility();
       updatePOIVisibility();
       if (renderRail) renderBottomRailCards();
-      if (currentPOI) renderNearbyPOIs(currentPOI);
+      if (currentPOI) {
+        renderNearbyPOIs(currentPOI);
+        if (blogPostsReady) renderRelatedArticlesForPOI(currentPOI, blogPostsCache);
+      }
       refreshMapLoadingState();
       focusRequestedPOIFromURL();
       if (!requestedNavigationHydrated && urlParams.get('navigate') === '1' && navigationModeActive && navigationDestinationPOI && poiMarkers.length >= 90) {
@@ -8360,6 +8436,7 @@
   function start() {
     if (window.__ftgSetBootMessage) window.__ftgSetBootMessage('Rendering map…');
     warmPOIAssets();
+    loadBlogPosts();
     initMap();
     applyBaseMapMode(getStoredMapMode(), true);
     createCityMarkers(!isMapPreviewMode);

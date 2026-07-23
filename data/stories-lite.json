@@ -1,0 +1,789 @@
+[
+  {
+    "id": "6f145a2b-b9b6-498f-9b16-43c932cf3e4c",
+    "title": "A Church Built on the Edge of the Rock",
+    "slug": "a-church-built-on-the-edge-of-the-rock",
+    "excerpt": "The Church of San Pietro stands at the outer tip of Porto Venere, where an earlier Christian building and an ancient sacred site once occupied the promontory. Its black-and-white stone bands make it one of the coast’s most recognisable silhouettes.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:18:39.517951+00:00",
+    "related_pois": [
+      "248"
+    ]
+  },
+  {
+    "id": "0b7c6d59-f367-4630-a512-b9a7fe0feae1",
+    "title": "The Staircase of More Than a Thousand Stone Steps",
+    "slug": "the-staircase-of-more-than-a-thousand-stone-steps",
+    "excerpt": "Monesteroli is reached by the historic Scala Grande, a very steep stone staircase with more than 1,100 steps. It descends through old vineyard terraces toward the tiny rural settlement above the sea, preserving the memory of generations who carried grapes along this route.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "245"
+    ]
+  },
+  {
+    "id": "01497dd7-6717-4f3a-a727-03178a4dc40d",
+    "title": "The Black Marble Shot Through with Gold",
+    "slug": "the-black-marble-shot-through-with-gold",
+    "excerpt": "Palmaria's historic quarries produced Portoro, a rare black limestone crossed by golden veins. Extraction on the island dates back to Roman times and left visible cuts in the rocky landscape.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "262"
+    ]
+  },
+  {
+    "id": "ffca37d5-a730-4db5-85bb-52925dfdf134",
+    "title": "A Medieval Tower Between Old and New Monterosso",
+    "slug": "a-medieval-tower-between-old-and-new-monterosso",
+    "excerpt": "The Aurora Tower stands on the rocky promontory separating Monterosso’s historic centre from Fegina beach. Built as part of the coastal defence system, it is one of the surviving towers that once watched for raids from the sea.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "249"
+    ]
+  },
+  {
+    "id": "18488407-7acc-4b78-aca9-b0c1923c6428",
+    "title": "The Village Saved by a Giant Octopus",
+    "slug": "the-village-saved-by-a-giant-octopus",
+    "excerpt": "According to local legend, a giant octopus climbed out of the sea during a nighttime pirate attack and rang the church bells with its tentacles. The sound woke the villagers and saved Tellaro.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "224"
+    ]
+  },
+  {
+    "id": "1f3d90fe-5df6-4c1e-9068-3fe05c9b6398",
+    "title": "The Dry-Stone Terraces of Campiglia",
+    "slug": "the-dry-stone-terraces-of-campiglia",
+    "excerpt": "Around Campiglia, generations of farmers shaped the steep hillside with dry-stone walls and narrow terraces. The surviving landscape shows how small plots for vines, olives and other crops were created between the woods and the sea.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "246"
+    ]
+  },
+  {
+    "id": "1841487e-c3c6-457f-a946-17cb67c9d8d6",
+    "title": "The Roman Villa at Varignano",
+    "slug": "the-roman-villa-at-varignano",
+    "excerpt": "The Roman villa of Varignano preserves the remains of a coastal estate built on land beside a sheltered inlet at Le Grazie. Its residential and agricultural structures show how the Gulf of La Spezia was used long before the medieval villages.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "267"
+    ]
+  },
+  {
+    "id": "e14ea12f-2226-41b5-961e-592325a85bdb",
+    "title": "A Castle Contested by Pisa and Genoa",
+    "slug": "a-castle-contested-by-pisa-and-genoa",
+    "excerpt": "Lerici Castle rises directly above the harbour. Its present form reflects centuries of rivalry between Pisa and Genoa, which repeatedly fought for control of this strategic entrance to the Gulf of La Spezia.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "247"
+    ]
+  },
+  {
+    "id": "c1bcd6b8-7e45-44c4-865f-255164cb09ea",
+    "title": "The Village Reached by 377 Steps",
+    "slug": "the-village-reached-by-377-steps",
+    "excerpt": "Corniglia is the only Cinque Terre village set high above the sea rather than directly on the water. From the railway station, the famous brick staircase called the Lardarina climbs to the village in 377 steps.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "242"
+    ]
+  },
+  {
+    "id": "6e8d32c3-14d9-446e-948d-32e7d145243c",
+    "title": "A Medieval Wine Name Linked to Vernazza",
+    "slug": "a-medieval-wine-name-linked-to-vernazza",
+    "excerpt": "One traditional etymology links the medieval wine name Vernaccia to Vernaccia, the historic form of today’s Vernazza. The connection is not universally accepted, but wine growing unquestionably shaped the village economy and the terraced slopes above it.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "257"
+    ]
+  },
+  {
+    "id": "1e93ea2f-ec9c-49d9-8938-1999a693b97d",
+    "title": "Garibaldi Was Imprisoned Here",
+    "slug": "garibaldi-was-imprisoned-here",
+    "excerpt": "After being wounded during the Battle of Aspromonte in 1862, Giuseppe Garibaldi was taken to Varignano. He remained here for around forty days under military and medical supervision.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "222"
+    ]
+  },
+  {
+    "id": "96056348-aba0-4876-9c70-c1b23bea256f",
+    "title": "A Hillside Nativity Made of Light",
+    "slug": "a-hillside-nativity-made-of-light",
+    "excerpt": "Above Manarola, thousands of lights form a huge hillside Nativity scene during the Christmas season. The figures spread across the terraced slope, turning the vineyards into one of the village’s most distinctive night-time traditions.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "237"
+    ]
+  },
+  {
+    "id": "5e7cfecd-2209-41f6-ac34-00f13223e746",
+    "title": "A Bay Used as a Climate Change Laboratory",
+    "slug": "a-bay-used-as-a-climate-change-laboratory",
+    "excerpt": "This small bay is home to Smart Bay Santa Teresa, a natural marine laboratory where researchers study the sea, aquaculture, new technologies and the effects of climate change on coastal ecosystems.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "225"
+    ]
+  },
+  {
+    "id": "b3643d3f-1379-4bd5-b6a2-9a64357996ec",
+    "title": "A Village Made of Five Separate Hamlets",
+    "slug": "a-village-made-of-five-separate-hamlets",
+    "excerpt": "Framura has no single compact centre. It is formed by five historic hamlets — Anzo, Ravecca, Setta, Costa and Castagnola — arranged at different heights between the shoreline and the wooded hills.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "251"
+    ]
+  },
+  {
+    "id": "36c5f77d-cef5-408e-b70f-b3d2b83770cc",
+    "title": "La Spezia Is Also Known as the “Gate of Zion”",
+    "slug": "la-spezia-is-also-known-as-the-gate-of-zion",
+    "excerpt": "In 1946, more than one thousand Holocaust survivors left this area aboard the ships Fede and Fenice, heading toward Palestine. Because local residents helped them, La Spezia became known as Sha’ar Zion — the Gate of Zion.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "220"
+    ]
+  },
+  {
+    "id": "a26e9d16-c3c9-4a31-9870-0bb433ecada5",
+    "title": "Boats Parked on the Village Street",
+    "slug": "boats-parked-on-the-village-street",
+    "excerpt": "Manarola's harbour is so small that traditional boats are hauled above the water and stored along the sloping main street, creating the unusual sight of fishing craft parked between the houses.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "259"
+    ]
+  },
+  {
+    "id": "4a2f20dd-4414-4325-a905-525954f3d9c4",
+    "title": "A Main Street Built Over the Rio Maggiore",
+    "slug": "a-main-street-built-over-the-rio-maggiore",
+    "excerpt": "Riomaggiore developed along the narrow valley of the Rio Maggiore. The stream was later covered, and the village's main street now follows the watercourse hidden beneath the pavement.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "260"
+    ]
+  },
+  {
+    "id": "934a5d33-ba2f-490e-a301-9bd73852be01",
+    "title": "One of Liguria’s Last Medieval Civic Loggias",
+    "slug": "one-of-liguria-s-last-medieval-civic-loggias",
+    "excerpt": "Levanto’s late-medieval Loggia Comunale is one of the very few civic buildings of its kind still surviving in Liguria. Its five brick arches rest on local green-stone columns, and an old municipal archive once occupied a small room inside.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "240"
+    ]
+  },
+  {
+    "id": "ebec2389-536f-4922-ac37-1aaea27cebe3",
+    "title": "Shelley’s Last Home Before the Shipwreck",
+    "slug": "shelley-s-last-home-before-the-shipwreck",
+    "excerpt": "Poets Percy Bysshe Shelley and Mary Shelley, the author of Frankenstein, lived here in 1822. Shortly afterwards, Percy drowned when his sailing boat sank while returning from Livorno.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "223"
+    ]
+  },
+  {
+    "id": "7deeddd7-405b-4a89-81dd-70249247cc37",
+    "title": "Futurist Mosaics Inside the Post Office Tower",
+    "slug": "futurist-mosaics-inside-the-post-office-tower",
+    "excerpt": "La Spezia's 1933 main post office hides four large ceramic mosaics by Fillia and Enrico Prampolini. The Futurist works celebrate communication by land, sea, air, telephone and telegraph.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "263"
+    ]
+  },
+  {
+    "id": "a9ccfe38-b335-456a-ac1a-8c56d2ff40b7",
+    "title": "A Golden Butterfly Made by Sunset",
+    "slug": "a-golden-butterfly-made-by-sunset",
+    "excerpt": "Near Monti di San Lorenzo, sunset light around the summer solstice passes through a natural stone opening and projects a butterfly-shaped glow. The phenomenon is real; interpretations of the stones' origin remain debated.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "264"
+    ]
+  },
+  {
+    "id": "da6545f1-f1e3-4b7f-a950-fd53dad4ccb3",
+    "title": "The Roman Villa at Bocca di Magra",
+    "slug": "the-roman-villa-at-bocca-di-magra",
+    "excerpt": "The archaeological remains belong to a Roman seaside villa at Bocca di Magra, not to the urban site of ancient Luni. The residence stood on land near the river mouth and was connected to the wider territory and maritime routes of ancient Luna.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "253"
+    ]
+  },
+  {
+    "id": "71e3009c-abfd-41ec-987e-60b90975f122",
+    "title": "Early Christian Ruins on a Half-Hectare Rock",
+    "slug": "early-christian-ruins-on-a-half-hectare-rock",
+    "excerpt": "Tinetto is barely half a hectare, yet it preserves remains of early Christian oratories and monks' cells. The tiny islet supported a small religious community from Late Antiquity into the Middle Ages.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "268"
+    ]
+  },
+  {
+    "id": "8ec1b599-9913-474c-a0f4-6246e7d4b113",
+    "title": "A Church Balanced on a Rocky Sea Platform",
+    "slug": "a-church-balanced-on-a-rocky-sea-platform",
+    "excerpt": "Tellaro's Church of San Giorgio stands at the outer edge of the village on a rocky base projecting over the sea. Its rounded apse and bell tower rise directly above the waves.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "265"
+    ]
+  },
+  {
+    "id": "5d5f9d7b-fdda-438a-bf19-fc2471ab2ee1",
+    "title": "Wagner Heard the Rhine Here",
+    "slug": "wagner-heard-the-rhine-here",
+    "excerpt": "In 1853, composer Richard Wagner stayed in this building. According to his own account, a dreamlike sound inspired the opening of Das Rheingold, the first opera of his famous Ring Cycle. A plaque on the building still remembers the moment.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "218"
+    ]
+  },
+  {
+    "id": "1aa8f4e6-6c2c-4abe-8a45-a6a2607d4c39",
+    "title": "A Path Born from Railway Construction",
+    "slug": "a-path-born-from-railway-construction",
+    "excerpt": "The Via dell’Amore was created during railway works in the 1920s, when a practical route between the construction sites of Manarola and Riomaggiore gradually became a coastal link between the two communities.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "238"
+    ]
+  },
+  {
+    "id": "23978b60-8f28-4c5f-ad2c-d5407559a223",
+    "title": "An Island Lighthouse Above Monastery Ruins",
+    "slug": "an-island-lighthouse-above-monastery-ruins",
+    "excerpt": "The island of Tino is dominated by a lighthouse and preserves traces of a medieval monastery associated with Saint Venerius, the patron saint of lighthouse keepers. The island remains largely protected and separated from ordinary urban life.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "252"
+    ]
+  },
+  {
+    "id": "333f312a-4e89-4d6a-95fe-613a5a484d19",
+    "title": "The Railway That Became a Coastal Route",
+    "slug": "the-railway-that-became-a-coastal-route",
+    "excerpt": "The old railway line between Levanto, Bonassola and Framura was moved inland and its seaside tunnels were reused as a walking and cycling route. The track now passes through rock galleries that suddenly open onto small coves and sea views.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "254"
+    ]
+  },
+  {
+    "id": "d4cbff32-6892-4b6e-a24a-99b40e058990",
+    "title": "A Church Striped with Carrara Marble and Local Green Stone",
+    "slug": "a-church-striped-with-carrara-marble-and-local-green-stone",
+    "excerpt": "Levanto's Church of Sant'Andrea pairs white Carrara marble with dark local green stone in its striped Ligurian-Gothic facade. Construction began in the 13th century, and the contrasting materials make the church instantly recognisable.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "255"
+    ]
+  },
+  {
+    "id": "7f7a7d4e-1c3b-4ee2-8e7c-4a8a4c3b643d",
+    "title": "Riomaggiore’s Castle Became a Cemetery",
+    "slug": "riomaggiore-s-castle-became-a-cemetery",
+    "excerpt": "The hilltop castle of Riomaggiore began as a medieval defensive structure overlooking the coast. Over the centuries it changed function several times and was also adapted for use as the village cemetery before later restoration.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "241"
+    ]
+  },
+  {
+    "id": "7f0da49d-61ba-4c1b-83a0-587a777697b2",
+    "title": "A Watchtower Built Against Sea Raids",
+    "slug": "a-watchtower-built-against-sea-raids",
+    "excerpt": "Vernazza was already recorded as a fortified maritime settlement in the 11th century. The Doria Castle and its Belforte tower formed part of the defensive system used to watch the sea and protect the village from raids.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "239"
+    ]
+  },
+  {
+    "id": "cd23c5cb-2978-4083-8e94-6644b6bfb5be",
+    "title": "A Vineyard Village High Above Manarola",
+    "slug": "a-vineyard-village-high-above-manarola",
+    "excerpt": "Volastra sits roughly 340 metres above the sea among terraced vineyards. Its elevated position made it an important farming settlement, and paths through the surrounding vines now offer a striking view of how agriculture shaped the steep Cinque Terre coast.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "243"
+    ]
+  },
+  {
+    "id": "feb831eb-50d4-4292-939f-f71d7fb0e882",
+    "title": "A Tiny Chapel at the End of the Headland",
+    "slug": "a-tiny-chapel-at-the-end-of-the-headland",
+    "excerpt": "The Madonnina della Punta chapel sits at the end of a narrow headland west of Bonassola. Its small portico opens toward the sea, creating one of the most distinctive viewpoints along this stretch of the Ligurian coast.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "250"
+    ]
+  },
+  {
+    "id": "0c52f34c-0e0f-4d05-bfb6-d5ce6581e918",
+    "title": "A Medieval Gate Behind the Waterfront Houses",
+    "slug": "a-medieval-gate-behind-the-waterfront-houses",
+    "excerpt": "Porto Venere's colourful waterfront forms a screen of tall tower-houses. The medieval Porta del Borgo opens through the fortified settlement into Via Capellini and the narrow lanes of the old town.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "261"
+    ]
+  },
+  {
+    "id": "9862c3b3-8e16-491b-bc1e-3d615671218a",
+    "title": "Il Gigante (Neptune Statue)",
+    "slug": "il-gigante-neptune-statue",
+    "excerpt": "At the far end of Fegina beach, perched on a rocky waves-defying outcrop , stands the imposing statue of The Giant (Il Gigante). This colossal 14-meter-tall figure, made of reinforced concrete and iron, represents Neptune, the god of the sea. Originally, he was depicted holding a massive seashell on his shoulders, which served as a panoramic terrace for the nearby Villa Pastine. Created in 1910 by sculptor Arrigo Min",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "21"
+    ]
+  },
+  {
+    "id": "06e736d3-4be7-4215-9654-9a2287401199",
+    "title": "The Poet’s Cave",
+    "slug": "the-poet-s-cave",
+    "excerpt": "This dramatic sea cave was once called Cala dell’Arpaia but later became associated with Lord Byron. Local tradition claims that the poet swam across the Gulf to visit the Shelleys, although the story has never been proven.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "221"
+    ]
+  },
+  {
+    "id": "5440e321-5a75-42ad-89ed-cf7135e522b6",
+    "title": "The Terrace Left by a Church Lost to the Sea",
+    "slug": "the-terrace-left-by-a-church-lost-to-the-sea",
+    "excerpt": "Corniglia's Santa Maria viewpoint preserves the memory of a small church that once stood near the cliff edge and was lost in the mid-19th century. The open terrace now offers a broad view over the Ligurian Sea.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "258"
+    ]
+  },
+  {
+    "id": "4451d4b7-2435-4ba3-960b-e86702193b70",
+    "title": "The Island Inside the UNESCO Landscape",
+    "slug": "the-island-inside-the-unesco-landscape",
+    "excerpt": "Palmaria is the largest island in the Gulf of La Spezia and forms part of the UNESCO site shared with Porto Venere and the Cinque Terre. Its trails, cliffs, Mediterranean vegetation and traces of military history create a landscape very different from the villages across the channel.",
+    "cover_image": "",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "244"
+    ]
+  },
+  {
+    "id": "75c0adbd-85f8-4bd6-a8f9-9b8d9f1ea9e3",
+    "title": "Montale's Yellow Pagoda by the Sea",
+    "slug": "montale-s-yellow-pagoda-by-the-sea",
+    "excerpt": "Eugenio Montale spent many summers in the family villa at Fegina, nicknamed the \"yellowish pagoda\". Monterosso's sea, lemons and dry-stone landscape became recurring images in the Nobel laureate's poetry.",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "256"
+    ]
+  },
+  {
+    "id": "96be562a-cbd6-49d4-9c88-dc8c73c92f3e",
+    "title": "Here Mussels Are Called Muscoli",
+    "slug": "here-mussels-are-called-muscoli",
+    "excerpt": "Mussel farming has shaped the Gulf of La Spezia since the late 19th century. Locals call the shellfish muscoli, and the floating farms remain part of the gulf's working landscape and cuisine.",
+    "cover_image": "",
+    "category": "food",
+    "status": "published",
+    "published_at": "2026-07-20T16:50:14.127435+00:00",
+    "created_at": "2026-07-20T14:16:41.80121+00:00",
+    "related_pois": [
+      "266"
+    ]
+  },
+  {
+    "id": "4b3579c8-542d-4767-ad27-e8c9277885d3",
+    "title": "Cinque Terre Card 2026: What It Includes and When It Is Worth It",
+    "slug": "cinque-terre-card-2026-what-it-includes",
+    "excerpt": "The 2026 Card is simpler, but choosing between Trekking and Treno still depends on how you plan to move. Here is the practical calculation.",
+    "cover_image": "https://images.pexels.com/photos/7611304/pexels-photo-7611304.jpeg",
+    "category": "transport",
+    "status": "published",
+    "published_at": "2026-07-15T05:00:00+00:00",
+    "created_at": "2026-07-15T14:08:27.42289+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "c4f5a430-d022-475e-a848-74f88240c665",
+    "title": "Hiking the Cinque Terre Without Treating the Trails Like a Theme Park",
+    "slug": "hiking-cinque-terre-responsible-trail-guide",
+    "excerpt": "The famous coastal paths are working infrastructure in a fragile landscape. A useful guide begins with terrain, weather and respect—not viewpoints.",
+    "cover_image": "https://images.pexels.com/photos/15570449/pexels-photo-15570449.jpeg",
+    "category": "trails",
+    "status": "published",
+    "published_at": "2026-07-14T05:00:00+00:00",
+    "created_at": "2026-07-15T14:08:50.056367+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "d767bad6-3f30-4d63-a245-5a38cb5bfc3f",
+    "title": "Where to Stay in the Cinque Terre: Five Villages, Five Different Trips",
+    "slug": "where-to-stay-cinque-terre-five-villages",
+    "excerpt": "Monterosso, Vernazza, Corniglia, Manarola or Riomaggiore? Choose your base by stairs, sea access and evening rhythm—not by a generic ranking.",
+    "cover_image": "https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-13T05:00:00+00:00",
+    "created_at": "2026-07-15T14:08:53.266672+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "ce9e5586-3bb2-4d9b-ad80-945daa100bde",
+    "title": "Three Days in the Cinque Terre: An Itinerary With Room to Breathe",
+    "slug": "three-days-cinque-terre-slow-itinerary",
+    "excerpt": "A realistic long weekend: one orientation afternoon, one day shaped by the trails, and one flexible day for the sea or a return visit.",
+    "cover_image": "https://images.pexels.com/photos/4254555/pexels-photo-4254555.jpeg",
+    "category": "guide",
+    "status": "published",
+    "published_at": "2026-07-12T05:00:00+00:00",
+    "created_at": "2026-07-15T14:08:56.437576+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "d0708c0e-0b63-47c2-bb3a-ee6d6f6ff8cc",
+    "title": "The Landscape Behind the Postcard: Why the Cinque Terre Terraces Matter",
+    "slug": "cinque-terre-terraces-unesco-cultural-landscape",
+    "excerpt": "The villages are famous for colour. Their real story is written in dry-stone walls, vines and a thousand years of work on impossible slopes.",
+    "cover_image": "https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg",
+    "category": "tips",
+    "status": "published",
+    "published_at": "2026-07-11T05:00:00+00:00",
+    "created_at": "2026-07-15T14:09:00.768524+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "0357da1a-66fc-4c00-b282-00428736404c",
+    "title": "What to Eat in the Cinque Terre Beyond Pesto",
+    "slug": "what-to-eat-cinque-terre-local-food-wine",
+    "excerpt": "Anchovies, focaccia, vegetable pies and Sciacchetrà tell a more useful story than a checklist of ‘typical dishes’.",
+    "cover_image": "https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg",
+    "category": "food",
+    "status": "published",
+    "published_at": "2026-07-10T05:00:00+00:00",
+    "created_at": "2026-07-15T14:09:04.718949+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "c9052daf-5324-45cc-9d06-96801bed605d",
+    "title": "The City Napoleon Wanted to Build",
+    "slug": "the-city-napoleon-wanted-to-build",
+    "excerpt": "",
+    "cover_image": "",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-07-20T11:17:48.274678+00:00",
+    "related_pois": [
+      "219"
+    ]
+  },
+  {
+    "id": "2f76282a-2d30-4ec6-97c2-183c4ecec832",
+    "title": "Wines from Cinque Terre are expensive …true or false?",
+    "slug": "wines-from-cinque-terre-are-expensive-true-or-false",
+    "excerpt": "One of the most common questions",
+    "cover_image": "https://images.pexels.com/photos/5257573/pexels-photo-5257573.jpeg?_gl=1*1ra6yno*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzU0NzckajU5JGwwJGgw",
+    "category": "food",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-05-26T21:46:36.921086+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "6ea16ffa-8b12-446a-b2a9-bb324d1bd799",
+    "title": "Pickpockets in the Cinque Terre!",
+    "slug": "pickpoters-in-the-cinque-terre",
+    "excerpt": "The level of thieves in the Cinque Terre didn’t increase recently,but… they still exist!",
+    "cover_image": "https://images.pexels.com/photos/13706810/pexels-photo-13706810.jpeg?_gl=1*1fsj5ek*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzYxNjUkajM2JGwwJGgw",
+    "category": "tips",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-05-26T21:44:38.949778+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "bed31a44-1273-46d8-9499-2945cc92af52",
+    "title": "What is the best month to visit Cinque Terre?",
+    "slug": "what-is-the-best-month-to-visit-cinque-terre",
+    "excerpt": "One of the biggest dilemmas for travelers",
+    "cover_image": "https://images.pexels.com/photos/36803734/pexels-photo-36803734.jpeg?_gl=1*vvo0j0*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzY1MjMkajE3JGwwJGgw",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-05-26T21:43:29.215462+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "9a9498b5-9933-464f-890a-b9eb227ed8c8",
+    "title": "The History of Riomaggiore",
+    "slug": "the-history-of-riomaggiore-the-village-born-in-a-narrow-valley-between-rock-and-sea",
+    "excerpt": "The narrow village between rocks and sea",
+    "cover_image": "https://images.pexels.com/photos/7611304/pexels-photo-7611304.jpeg?_gl=1*jj1pvm*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3ODAwMDIzNDUkbzIkZzEkdDE3ODAwMDM0MzgkajckbDAkaDA.",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-05-12T17:01:19.15138+00:00",
+    "related_pois": [
+      "38",
+      "9",
+      "7",
+      "47",
+      "93",
+      "27"
+    ]
+  },
+  {
+    "id": "c8022e00-853a-4744-ab4c-66890e758054",
+    "title": "Cinque Terre at Sunset: Best Villages Ranked",
+    "slug": "cinque-terre-at-sunset-best-villages-ranked",
+    "excerpt": "Sunset here is not only about the sun disappearing into the Ligurian Sea. It is about where you stand, what you see in front of you, and how the village around you absorbs the last light of the day.",
+    "cover_image": "https://images.pexels.com/photos/4254555/pexels-photo-4254555.jpeg?_gl=1*1wakpzz*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3ODAwMDIzNDUkbzIkZzEkdDE3ODAwMDMyNDIkajM4JGwwJGgw",
+    "category": "tips",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:53:57.666681+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "e33788fa-52e9-41c4-9050-92d928360b53",
+    "title": "Train vs Boat in the Cinque Terre",
+    "slug": "train-vs-boat-in-the-cinque-terre-which-is-better",
+    "excerpt": "Wich is better? Pros and cons",
+    "cover_image": "",
+    "category": "transport",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:53:30.655503+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "ea8d4db2-7cb1-4ab8-8e66-4efa65288aa1",
+    "title": "The History of Manarola",
+    "slug": "the-history-of-manarola",
+    "excerpt": "The second gem of the Cinque Terre",
+    "cover_image": "https://images.pexels.com/photos/1428586/pexels-photo-1428586.jpeg?_gl=1*6sgwng*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3ODAwMDIzNDUkbzIkZzEkdDE3ODAwMDI0NTMkajU5JGwwJGgw",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:51:30.645912+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "5c6a64e3-db78-4e08-822b-4888f47f60e4",
+    "title": "The History of Corniglia",
+    "slug": "the-history-of-corniglia",
+    "excerpt": "The land of Vernaccia white wine",
+    "cover_image": "https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg?_gl=1*8on44c*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3ODAwMDIzNDUkbzIkZzEkdDE3ODAwMDI2MDMkajU5JGwwJGgw",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:51:15.133854+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "765891bd-2020-40b4-92a8-920d594ac377",
+    "title": "The History of Vernazza",
+    "slug": "the-history-of-vernazza",
+    "excerpt": "From an ancient naval base to the wine production and tourism",
+    "cover_image": "https://images.pexels.com/photos/15570449/pexels-photo-15570449.jpeg?_gl=1*1u229ia*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3Nzk4MzQ5MjkkbzEkZzEkdDE3Nzk4MzY2MzUkajIzJGwwJGgw",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:51:00.49452+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "3aaf45ef-1902-4d38-b701-47326ec9488d",
+    "title": "The History of Monterosso al Mare",
+    "slug": "the-history-of-monterosso-al-mare",
+    "excerpt": "The insulation before tourism",
+    "cover_image": "https://images.pexels.com/photos/15570483/pexels-photo-15570483.jpeg?_gl=1*cp2817*_ga*MTMyNDg4ODk2MS4xNzc5ODM0OTMw*_ga_8JE65Q40S6*czE3ODAwMDY3MDAkbzMkZzEkdDE3ODAwMDY3ODgkajU5JGwwJGgw",
+    "category": "guide",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:50:43.580625+00:00",
+    "related_pois": []
+  },
+  {
+    "id": "cb0d5e1a-43eb-43c0-893e-d8d2962d1a9d",
+    "title": "What to Do in Corniglia in 1 Hour",
+    "slug": "what-to-do-in-corniglia-in-1-hour",
+    "excerpt": "What to Do in Corniglia in One Hour: A Quick but Unmissable Itinerary If you only have sixty minutes to explore Corniglia, don’t worry — this charming hilltop village in the Cinque Terre is compact enough for a relaxed and rewarding visit.",
+    "cover_image": "https://images.pexels.com/photos/164407/pexels-photo-164407.jpeg?_gl=1*1j2yvs0*_ga*MTAyMzk5Nzc2MS4xNzc3NTc5NDkz*_ga_8JE65Q40S6*czE3Nzc1Nzk0OTIkbzEkZzEkdDE3Nzc1Nzk1MzMkajE5JGwwJGgw",
+    "category": "tips",
+    "status": "published",
+    "published_at": null,
+    "created_at": "2026-04-29T22:47:17.954997+00:00",
+    "related_pois": [
+      "24"
+    ]
+  }
+]
