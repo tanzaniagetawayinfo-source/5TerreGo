@@ -1,0 +1,16 @@
+{
+  "urls": [
+    { "url": "https://www.5terrego.com/", "kind": "page", "language": "it" },
+    { "url": "https://www.5terrego.com/guide.html", "kind": "article", "language": "it" },
+    { "url": "https://www.5terrego.com/sentieri.html", "kind": "trail", "language": "it" },
+    { "url": "https://www.5terrego.com/discounts.html", "kind": "discount", "language": "it" },
+    { "url": "https://www.5terrego.com/public-transport.html", "kind": "transport_notice", "language": "it" },
+    { "url": "https://www.parconazionale5terre.it/meteo.php", "kind": "bus_schedule", "language": "it" },
+    { "url": "https://www.cinqueterre.it/come-arrivare-e-spostarsi/", "kind": "ferry_schedule", "language": "it" }
+  ],
+  "tables": [
+    { "table": "articles", "limit": 12 },
+    { "table": "discounts", "limit": 12 },
+    { "table": "trails", "limit": 12 }
+  ]
+}

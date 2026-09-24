@@ -1,0 +1,47 @@
+name: Refresh AI knowledge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  reindex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Index site, official schedules and Supabase content
+        env:
+          AI_REINDEX_URL: ${{ secrets.AI_REINDEX_URL }}
+          AI_ADMIN_TOKEN: ${{ secrets.AI_ADMIN_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          endpoint = os.environ.get('AI_REINDEX_URL', '').rstrip('/')
+          token = os.environ.get('AI_ADMIN_TOKEN', '')
+          if not endpoint or not token:
+              print('AI_REINDEX_URL and AI_ADMIN_TOKEN are required.', file=sys.stderr)
+              sys.exit(1)
+          with open('ai-sources.json', encoding='utf-8') as fh:
+              config = json.load(fh)
+          def post(payload):
+              result = subprocess.run([
+                  'curl','--fail-with-body','--silent','--show-error','-X','POST',endpoint,
+                  '-H',f'Authorization: Bearer {token}','-H','Content-Type: application/json',
+                  '--data',json.dumps(payload)
+              ], check=True, capture_output=True, text=True)
+              print(result.stdout)
+              return json.loads(result.stdout)
+          for source in config.get('urls', []):
+              post({'source':'url', **source})
+          for source in config.get('tables', []):
+              offset = 0
+              while True:
+                  data = post({'source':'table','offset':offset, **source})
+                  if data.get('next_offset') is None:
+                      break
+                  offset = data['next_offset']
+          PY
